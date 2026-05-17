@@ -1,0 +1,11 @@
+[
+  {
+    "id": "tip_forbidden_booking",
+    "city_id": "beijing",
+    "kicker": "Heads Up",
+    "headline": "Book the Forbidden City now.",
+    "body": "Timed-entry tickets sell out three weeks ahead during your travel dates. Required via the official WeChat mini-program.",
+    "link_label": "Booking instructions →",
+    "link_attraction_id": "beijing_forbidden_city"
+  }
+]

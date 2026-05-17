@@ -1,0 +1,80 @@
+[
+  {
+    "id": "beijing",
+    "name": "Beijing",
+    "chinese_name": "北京",
+    "emoji": "🏯",
+    "cover_image_path": null,
+    "description": "Imperial palaces, hutongs, and world-class museums.",
+    "best_for": ["History", "Culture", "Food"],
+    "season_note": "Cold winters (−5°C), hot summers (35°C)",
+    "best_time_to_visit": "Apr–May, Sep–Oct",
+    "avg_days_recommended": 4,
+    "attraction_count": 12
+  },
+  {
+    "id": "shanghai",
+    "name": "Shanghai",
+    "chinese_name": "上海",
+    "emoji": "🌆",
+    "cover_image_path": null,
+    "description": "Art deco Bund, futuristic skyline, and vibrant food scene.",
+    "best_for": ["Modern", "Food", "Nightlife"],
+    "season_note": "Humid summers, mild winters",
+    "best_time_to_visit": "Mar–May, Sep–Nov",
+    "avg_days_recommended": 3,
+    "attraction_count": 8
+  },
+  {
+    "id": "xian",
+    "name": "Xi'an",
+    "chinese_name": "西安",
+    "emoji": "🏺",
+    "cover_image_path": null,
+    "description": "Terracotta Warriors and ancient Silk Road heritage.",
+    "best_for": ["History", "Culture"],
+    "season_note": null,
+    "best_time_to_visit": "Mar–May, Sep–Oct",
+    "avg_days_recommended": 2,
+    "attraction_count": 6
+  },
+  {
+    "id": "chengdu",
+    "name": "Chengdu",
+    "chinese_name": "成都",
+    "emoji": "🐼",
+    "cover_image_path": null,
+    "description": "Pandas, spicy Sichuan cuisine, and tea houses.",
+    "best_for": ["Food", "Nature"],
+    "season_note": null,
+    "best_time_to_visit": "Mar–Jun, Sep–Nov",
+    "avg_days_recommended": 3,
+    "attraction_count": 5
+  },
+  {
+    "id": "suzhou",
+    "name": "Suzhou",
+    "chinese_name": "苏州",
+    "emoji": "🌸",
+    "cover_image_path": null,
+    "description": "Classical gardens and canal towns.",
+    "best_for": ["Culture", "Nature"],
+    "season_note": null,
+    "best_time_to_visit": "Mar–May",
+    "avg_days_recommended": 2,
+    "attraction_count": 5
+  },
+  {
+    "id": "hangzhou",
+    "name": "Hangzhou",
+    "chinese_name": "杭州",
+    "emoji": "🌊",
+    "cover_image_path": null,
+    "description": "West Lake scenery and Longjing tea culture.",
+    "best_for": ["Nature", "Culture"],
+    "season_note": null,
+    "best_time_to_visit": "Mar–May",
+    "avg_days_recommended": 2,
+    "attraction_count": 4
+  }
+]

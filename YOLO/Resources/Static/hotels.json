@@ -1,0 +1,41 @@
+[
+  {
+    "id": "hotel_beijing_hyatt",
+    "city_id": "beijing",
+    "name": "Grand Hyatt",
+    "chinese_name": "北京东方君悦大酒店",
+    "stars": 5,
+    "price_min_usd": 195,
+    "has_english_staff": true,
+    "english_staff_note": "24h English concierge",
+    "language_tip": null,
+    "location_note": "City centre · 0.8km from Day 1 activities",
+    "booking_platforms": ["Booking.com", "Trip.com", "Agoda"]
+  },
+  {
+    "id": "hotel_beijing_novotel",
+    "city_id": "beijing",
+    "name": "Novotel",
+    "chinese_name": "诺富特",
+    "stars": 4,
+    "price_min_usd": 120,
+    "has_english_staff": true,
+    "english_staff_note": "English-speaking front desk",
+    "language_tip": null,
+    "location_note": "City centre · 1.2km from main sights",
+    "booking_platforms": ["Booking.com", "Trip.com"]
+  },
+  {
+    "id": "hotel_beijing_ibis",
+    "city_id": "beijing",
+    "name": "Ibis",
+    "chinese_name": "宜必思",
+    "stars": 3,
+    "price_min_usd": 65,
+    "has_english_staff": false,
+    "english_staff_note": null,
+    "language_tip": "Save in Chinese to show your Didi driver: 宜必思酒店",
+    "location_note": "City centre",
+    "booking_platforms": ["Booking.com", "Trip.com"]
+  }
+]

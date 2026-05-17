@@ -1,0 +1,5 @@
+[
+  { "id": "shop_pain", "city_id": null, "title_en": "Pain relief (ibuprofen)", "note_en": "Brand names look unfamiliar in China — bring your own", "sort_order": 1 },
+  { "id": "shop_spf", "city_id": null, "title_en": "SPF 50+ sunscreen", "note_en": "Chinese formulas are very different — bring a trusted brand", "sort_order": 2 },
+  { "id": "shop_meds", "city_id": null, "title_en": "Antihistamine & diarrhea medicine", "note_en": "Food changes can surprise your stomach", "sort_order": 3 }
+]

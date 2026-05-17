@@ -1,0 +1,1459 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "›" : {
+
+    },
+    "\"%@\"" : {
+
+    },
+    "%@  %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@  %2$@"
+          }
+        }
+      }
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@ · 12 min" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · 12 分钟"
+          }
+        }
+      }
+    },
+    "%@ / %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@ Passport · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@ Passport · %3$@"
+          }
+        }
+      }
+    },
+    "%@ →" : {
+
+    },
+    "%@ preparation · %lld/%lld tasks done" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ preparation · %2$lld/%3$lld tasks done"
+          }
+        }
+      }
+    },
+    "%@: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld attractions · in your plan" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程内 %lld 个景点"
+          }
+        }
+      }
+    },
+    "%lld attractions →" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个景点 →"
+          }
+        }
+      }
+    },
+    "%lld days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 天"
+          }
+        }
+      }
+    },
+    "%lld min" : {
+
+    },
+    "%lld min free preview · Unlock full guide" : {
+
+    },
+    "%lld of %lld prepared" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已完成 %1$lld / %2$lld 项准备"
+          }
+        }
+      }
+    },
+    "%lld of %lld tasks done" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已完成 %1$lld / %2$lld 项"
+          }
+        }
+      }
+    },
+    "• %@" : {
+
+    },
+    "• All attraction guides\n• Unlimited AI planning\n• Offline download" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "• 全部景点导览\n• 无限 AI 规划\n• 离线下载"
+          }
+        }
+      }
+    },
+    "← Change city" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "← 更换城市"
+          }
+        }
+      }
+    },
+    "← Guide · Attractions" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "← 指南 · 景点"
+          }
+        }
+      }
+    },
+    "← Plan" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "← 行程"
+          }
+        }
+      }
+    },
+    "→" : {
+
+    },
+    "~40 minutes of setup remaining" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "约剩 40 分钟设置"
+          }
+        }
+      }
+    },
+    "★ %@" : {
+
+    },
+    "★ Best Value" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "★ 最划算"
+          }
+        }
+      }
+    },
+    "⚠" : {
+
+    },
+    "⚠️ No English-speaking staff" : {
+
+    },
+    "⚡ Quick Plan" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⚡ 快速规划"
+          }
+        }
+      }
+    },
+    "✅" : {
+
+    },
+    "✅ %@" : {
+
+    },
+    "✅ Registered for foreign guests" : {
+
+    },
+    "✅ Save to Plan" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ 保存到行程"
+          }
+        }
+      }
+    },
+    "✅ Showing foreigner-friendly hotels only" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✅ 仅显示对外宾友好的酒店"
+          }
+        }
+      }
+    },
+    "✦" : {
+
+    },
+    "✨ Active" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✨ 已激活"
+          }
+        }
+      }
+    },
+    "⬆ Share" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⬆ 分享"
+          }
+        }
+      }
+    },
+    "🎧" : {
+
+    },
+    "🎧 12min" : {
+
+    },
+    "🎧 Audio" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎧 语音"
+          }
+        }
+      }
+    },
+    "💬 General Help" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "💬 一般帮助"
+          }
+        }
+      }
+    },
+    "📅 %@\n❄️ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "📅 %1$@\n❄️ %2$@"
+          }
+        }
+      }
+    },
+    "📋 Copy Text" : {
+
+    },
+    "📍 %@" : {
+
+    },
+    "📍 Recommended stay: %lld–%lld days" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "📍 Recommended stay: %1$lld–%2$lld days"
+          }
+        }
+      }
+    },
+    "📚 Read Before You Go" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "📚 行前阅读"
+          }
+        }
+      }
+    },
+    "🔄 Redo" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔄 重做"
+          }
+        }
+      }
+    },
+    "🗺 Trip Planning" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🗺 行程规划"
+          }
+        }
+      }
+    },
+    "🗺 Your Trip Cities" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🗺 行程城市"
+          }
+        }
+      }
+    },
+    "🤖 Plan with AI Chat" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🤖 AI 对话规划"
+          }
+        }
+      }
+    },
+    "🛍 Pack Before You Go" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🛍 行前采购"
+          }
+        }
+      }
+    },
+    "$19.99/year · 3-day free trial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "$19.99/年 · 3 天免费试用"
+          }
+        }
+      }
+    },
+    "3 min free preview · Unlock full guide" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "免费试听 3 分钟 · 解锁完整导览"
+          }
+        }
+      }
+    },
+    "48 MB" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "48 MB"
+          }
+        }
+      }
+    },
+    "A" : {
+
+    },
+    "About" : {
+
+    },
+    "About ChinaGo" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于 ChinaGo"
+          }
+        }
+      }
+    },
+    "AI-generated, China-aware" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI 生成 · 适配中国"
+          }
+        }
+      }
+    },
+    "AI-powered · China booking rules built in" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI 驱动 · 内置中国预订规则"
+          }
+        }
+      }
+    },
+    "All Cities" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部城市"
+          }
+        }
+      }
+    },
+    "Ask a question..." : {
+
+    },
+    "Ask Assistant" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "问助手"
+          }
+        }
+      }
+    },
+    "Assistant" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "助手"
+          }
+        }
+      }
+    },
+    "Attractions" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "景点"
+          }
+        }
+      }
+    },
+    "Audio tours, 30+ sites" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "语音导览 · 30+ 景点"
+          }
+        }
+      }
+    },
+    "Buy This Guide · $1.99" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "购买本导览 · $1.99"
+          }
+        }
+      }
+    },
+    "Cache Cleared" : {
+
+    },
+    "Cancel" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
+      }
+    },
+    "Change passport country" : {
+
+    },
+    "Checklist" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清单"
+          }
+        }
+      }
+    },
+    "China" : {
+
+    },
+    "ChinaGo" : {
+
+    },
+    "ChinaGo Pro" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ChinaGo Pro"
+          }
+        }
+      }
+    },
+    "ChinaGo Pro (demo)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ChinaGo Pro（演示）"
+          }
+        }
+      }
+    },
+    "Cities" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "城市"
+          }
+        }
+      }
+    },
+    "Clear Cache" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除缓存"
+          }
+        }
+      }
+    },
+    "Close" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
+          }
+        }
+      }
+    },
+    "CMS 远程内容已开启" : {
+
+    },
+    "CMS 远程内容未开启（仍为内置 JSON）" : {
+
+    },
+    "Content Mode" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内容模式"
+          }
+        }
+      }
+    },
+    "Content: %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "内容：%@"
+          }
+        }
+      }
+    },
+    "Continue with %@ →" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续 · %@ →"
+          }
+        }
+      }
+    },
+    "Copied!" : {
+
+    },
+    "Crafting your itinerary..." : {
+
+    },
+    "Cultural Tips" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文化贴士"
+          }
+        }
+      }
+    },
+    "Cultural tips & audio attraction tours" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文化贴士与景点语音导览"
+          }
+        }
+      }
+    },
+    "Curated options, English staff noted" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精选推荐 · 标注英语服务"
+          }
+        }
+      }
+    },
+    "Day 1 Preview — %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 1 天预览 — %@"
+          }
+        }
+      }
+    },
+    "Days until departure" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "距离出发"
+          }
+        }
+      }
+    },
+    "Departure" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出发"
+          }
+        }
+      }
+    },
+    "Departure date" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出发日期"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完成"
+          }
+        }
+      }
+    },
+    "Done ✓" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已完成 ✓"
+          }
+        }
+      }
+    },
+    "Edit" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑"
+          }
+        }
+      }
+    },
+    "Edit Profile →" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑资料 →"
+          }
+        }
+      }
+    },
+    "Edit Trip" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑行程"
+          }
+        }
+      }
+    },
+    "Emergency" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "紧急求助"
+          }
+        }
+      }
+    },
+    "Emergency Numbers" : {
+
+    },
+    "Forbidden City tickets sell out 3 weeks in advance during your dates." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "故宫门票在你出行日期前约 3 周就会售罄。"
+          }
+        }
+      }
+    },
+    "Free" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "免费"
+          }
+        }
+      }
+    },
+    "From $%lld/night" : {
+
+    },
+    "Full list →" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完整列表 →"
+          }
+        }
+      }
+    },
+    "Generate Itinerary" : {
+
+    },
+    "Generate New Itinerary" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生成新行程"
+          }
+        }
+      }
+    },
+    "Go" : {
+
+    },
+    "Going to multiple cities? Tap to select more." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "去多个城市？点选以添加更多。"
+          }
+        }
+      }
+    },
+    "Guest" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "访客"
+          }
+        }
+      }
+    },
+    "Guide" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指南"
+          }
+        }
+      }
+    },
+    "Hello, world!" : {
+
+    },
+    "Home" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "首页"
+          }
+        }
+      }
+    },
+    "How to Book →" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如何预订 →"
+          }
+        }
+      }
+    },
+    "Introduction" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "简介"
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "语言"
+          }
+        }
+      }
+    },
+    "Live Services" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "真实服务"
+          }
+        }
+      }
+    },
+    "Manage →" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理 →"
+          }
+        }
+      }
+    },
+    "Meta (dates, style)" : {
+
+    },
+    "Mock 模式（未连接 Supabase）" : {
+
+    },
+    "My Saved Trip" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已保存行程"
+          }
+        }
+      }
+    },
+    "of %lld tasks complete" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共 %lld 项 · 已完成"
+          }
+        }
+      }
+    },
+    "OK" : {
+
+    },
+    "Or buy just this guide" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "或单独购买本导览"
+          }
+        }
+      }
+    },
+    "Pack Before You Go" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行前采购"
+          }
+        }
+      }
+    },
+    "Passport" : {
+
+    },
+    "Passport Country" : {
+
+    },
+    "Plan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程"
+          }
+        }
+      }
+    },
+    "Plan My Trip" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "规划我的行程"
+          }
+        }
+      }
+    },
+    "Plan Trip" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "规划行程"
+          }
+        }
+      }
+    },
+    "Planning:" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "规划中："
+          }
+        }
+      }
+    },
+    "Popular destinations" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "热门目的地"
+          }
+        }
+      }
+    },
+    "Prep Checklist" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行前清单"
+          }
+        }
+      }
+    },
+    "Prepare" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "准备"
+          }
+        }
+      }
+    },
+    "Profile" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个人资料"
+          }
+        }
+      }
+    },
+    "Quick Actions" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快捷入口"
+          }
+        }
+      }
+    },
+    "Quick Plan" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快速规划"
+          }
+        }
+      }
+    },
+    "Reading List" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "阅读清单"
+          }
+        }
+      }
+    },
+    "Real-time help" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "实时帮助"
+          }
+        }
+      }
+    },
+    "Real-time help · %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "实时帮助 · %@"
+          }
+        }
+      }
+    },
+    "Recommended Routes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "推荐路线"
+          }
+        }
+      }
+    },
+    "Refine your plan..." : {
+
+    },
+    "Refresh from CMS" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从 CMS 刷新"
+          }
+        }
+      }
+    },
+    "Restore Purchases" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复购买"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        }
+      }
+    },
+    "Search country..." : {
+
+    },
+    "Search foreigner-friendly hotels" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索对外宾友好的酒店"
+          }
+        }
+      }
+    },
+    "Select your passport country" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择您的护照国家"
+          }
+        }
+      }
+    },
+    "Send" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "发送"
+          }
+        }
+      }
+    },
+    "Send Feedback" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "发送反馈"
+          }
+        }
+      }
+    },
+    "Share" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享"
+          }
+        }
+      }
+    },
+    "Share Itinerary" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享行程"
+          }
+        }
+      }
+    },
+    "Start Free Trial →" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开始免费试用 →"
+          }
+        }
+      }
+    },
+    "Static Demo" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "静态演示"
+          }
+        }
+      }
+    },
+    "Syncing profile…" : {
+
+    },
+    "Tell us your dates, cities & style" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "告诉我们日期、城市与风格"
+          }
+        }
+      }
+    },
+    "Temporary files and network cache have been removed." : {
+
+    },
+    "Tips for Western Visitors" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "西方游客贴士"
+          }
+        }
+      }
+    },
+    "Title" : {
+
+    },
+    "Travel Assistant" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行助手"
+          }
+        }
+      }
+    },
+    "Travel style" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行风格"
+          }
+        }
+      }
+    },
+    "Trip length: %lld days" : {
+
+    },
+    "Unable to load" : {
+
+    },
+    "Unlock Full Audio Guide" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解锁完整语音导览"
+          }
+        }
+      }
+    },
+    "v1.0.0" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "v1.0.0"
+          }
+        }
+      }
+    },
+    "Version %@" : {
+
+    },
+    "View →" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看 →"
+          }
+        }
+      }
+    },
+    "View all →" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看全部 →"
+          }
+        }
+      }
+    },
+    "Visa-free" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "免签"
+          }
+        }
+      }
+    },
+    "We'll customise your preparation checklist." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我们将为你定制行前准备清单。"
+          }
+        }
+      }
+    },
+    "What's next?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接下来做什么？"
+          }
+        }
+      }
+    },
+    "Where are you going?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你要去哪些城市？"
+          }
+        }
+      }
+    },
+    "You're ready for China." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已经准备好出发。"
+          }
+        }
+      }
+    },
+    "Your Trip ★" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的行程 ★"
+          }
+        }
+      }
+    },
+    "密码" : {
+
+    },
+    "已登录：%@" : {
+
+    },
+    "当前为 Mock 模式，未连接 Supabase。请在 Secrets.xcconfig 中配置 SUPABASE_URL 与 SUPABASE_ANON_KEY。" : {
+
+    },
+    "注册" : {
+
+    },
+    "登录" : {
+
+    },
+    "登录 / 注册 →" : {
+
+    },
+    "退出登录" : {
+
+    },
+    "邮箱" : {
+
+    }
+  },
+  "version" : "1.0"
+}

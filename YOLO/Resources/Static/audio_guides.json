@@ -1,0 +1,18 @@
+[
+  {
+    "id": "ag_forbidden_main",
+    "attraction_id": "beijing_forbidden_city",
+    "title_en": "Literary Audio Tour",
+    "description": "Main palace walkthrough",
+    "duration_seconds": 754,
+    "audio_url": "",
+    "quote": "In the winter of 1420, as the last craftsmen cleared their scaffolding from the Hall of Supreme Harmony...",
+    "segments": [
+      { "id": "intro", "title": "Intro 0:00", "start_seconds": 0 },
+      { "id": "history", "title": "History 1:30", "start_seconds": 90 },
+      { "id": "halls", "title": "The Halls 5:00", "start_seconds": 300 },
+      { "id": "hidden", "title": "Hidden 9:30", "start_seconds": 570 }
+    ],
+    "is_main_guide": true
+  }
+]

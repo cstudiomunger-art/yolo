@@ -1,0 +1,42 @@
+[
+  {
+    "scenario_id": "payment",
+    "user_message": "My Alipay verification is taking too long. What are my options?",
+    "assistant_message": "Alipay verification typically takes 24–72 hours. In the meantime:\n\nPrimary backup — WeChat Pay accepts the same international cards and verification is often faster.\n\nSecondary backup — UnionPay cards are accepted at most hotels and larger establishments.\n\nCash — Carry ¥500–800 RMB. International chain hotels accept foreign cards directly."
+  },
+  {
+    "scenario_id": "emergency",
+    "user_message": "I need emergency help.",
+    "assistant_message": "Open the Emergency toolkit from the chip above for offline numbers. For police dial 110, ambulance 120. Your embassy can assist with lost passports."
+  },
+  {
+    "scenario_id": "food",
+    "user_message": "How do I order food without speaking Chinese?",
+    "assistant_message": "Scan the QR code on your table — most restaurants use mobile ordering. Use picture menus or translation app camera mode. Point at what others are eating!"
+  },
+  {
+    "scenario_id": "subway",
+    "user_message": "How do I use the Beijing subway?",
+    "assistant_message": "Buy a transit card or use Alipay/WeChat transit QR at station gates. Lines are colour-coded; station names appear in English on newer lines. Avoid rush hour 7:30–9:30 and 17:30–19:30 if possible."
+  },
+  {
+    "scenario_id": "didi",
+    "user_message": "How do I use Didi as a foreigner?",
+    "assistant_message": "Download Didi (滴滴出行) and link Alipay or WeChat Pay. Enable English in settings. You can paste your destination from a map app. Show the driver your hotel address in Chinese if needed."
+  },
+  {
+    "scenario_id": "etiquette",
+    "user_message": "What etiquette should I know in China?",
+    "assistant_message": "Greet with a slight nod; handshakes are fine in business. Avoid loud voices in temples and museums. Gift-giving is appreciated but not required. Tipping is not expected except at some high-end hotels."
+  },
+  {
+    "scenario_id": "great_wall",
+    "user_message": "Which Great Wall section is best for first-timers?",
+    "assistant_message": "Mutianyu balances scenery and crowds — cable car available. Badaling is closest to Beijing but busiest. Jinshanling is best for hiking if you have a full day. Book transport the night before."
+  },
+  {
+    "scenario_id": "passport",
+    "user_message": "I lost my passport. What should I do?",
+    "assistant_message": "File a police report (110) and get a report number. Contact your embassy immediately for an emergency travel document. Keep copies of your passport and visa separately from the original."
+  }
+]

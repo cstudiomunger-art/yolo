@@ -29,10 +29,18 @@ enum AppConfig {
         return key
     }
 
+    /// 遗留开关：未配置 Supabase 时等同强制静态模式。
     static var useMock: Bool {
         if plistBool(forKey: "USE_MOCK") == true { return true }
         if plistBool(forKey: "USE_MOCK") == false { return false }
         return !isSupabaseConfigured
+    }
+
+    /// 为 true 时忽略 Supabase `app_settings`，始终使用内置 JSON。
+    static var forceBundled: Bool {
+        if forceBundledPlist { return true }
+        if plistBool(forKey: "USE_MOCK") == true { return true }
+        return false
     }
 
     private static func plistString(forKey key: String) -> String? {
@@ -40,6 +48,10 @@ enum AppConfig {
         if let string = value as? String { return string }
         if let number = value as? NSNumber { return number.stringValue }
         return nil
+    }
+
+    static var forceBundledPlist: Bool {
+        plistBool(forKey: "FORCE_BUNDLED") == true
     }
 
     private static func plistBool(forKey key: String) -> Bool? {

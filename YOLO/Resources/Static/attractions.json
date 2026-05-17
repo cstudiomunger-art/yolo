@@ -1,0 +1,51 @@
+[
+  {
+    "id": "beijing_forbidden_city",
+    "city_id": "beijing",
+    "name": "Forbidden City",
+    "chinese_name": "故宫",
+    "category": "palace",
+    "cover_image_path": null,
+    "summary": "Imperial palace for 24 emperors across nearly five centuries.",
+    "introduction": "The Forbidden City served as the imperial palace for 24 emperors across nearly five centuries. Once forbidden to all commoners, today it receives more visitors than any museum on earth.\n\nConstruction began in 1406 under the Yongle Emperor and took fourteen years, employing over a million workers. The complex comprises 980 buildings and covers 180 acres — a city within a city.",
+    "priority": "P0",
+    "ticket_price": "¥60 (~$8)",
+    "recommended_duration": "3–4 hours",
+    "opening_hours": "8:30 AM – 5:00 PM",
+    "closed_days": "Mondays",
+    "requires_advance_booking": true,
+    "metro_access": "Line 1 · Tiananmen E/W",
+    "western_visitor_tips": [
+      "Arrive at 9 AM to avoid the midday crowds.",
+      "The ¥40 audio guide at the entrance is dry — ours covers the same ground with far more cultural depth.",
+      "Exit via the north gate to Jingshan Park for the best aerial view."
+    ],
+    "nearby_places": [
+      { "name": "Jingshan Park", "distance": "5 min walk" },
+      { "name": "Nanluogu Xiang", "distance": "20 min walk" }
+    ],
+    "audio_guide_count": 1,
+    "iap_product_id": "com.chinago.travel.attraction.beijing_forbidden_city"
+  },
+  {
+    "id": "beijing_temple_of_heaven",
+    "city_id": "beijing",
+    "name": "Temple of Heaven",
+    "chinese_name": "天坛",
+    "category": "temple",
+    "cover_image_path": null,
+    "summary": "Where emperors prayed for good harvests.",
+    "introduction": "A masterpiece of Ming architecture where emperors performed annual ceremonies to ensure good harvests.",
+    "priority": "P1",
+    "ticket_price": "¥35",
+    "recommended_duration": "2–3 hrs",
+    "opening_hours": "6:00 AM – 9:00 PM",
+    "closed_days": null,
+    "requires_advance_booking": false,
+    "metro_access": "Line 5",
+    "western_visitor_tips": [],
+    "nearby_places": [],
+    "audio_guide_count": 1,
+    "iap_product_id": null
+  }
+]

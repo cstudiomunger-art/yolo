@@ -1,0 +1,32 @@
+{
+  "rules": [
+    {
+      "country_code": "GB",
+      "country_name": "United Kingdom",
+      "flag": "🇬🇧",
+      "visa_free": true,
+      "stay_days": 30,
+      "headline": "Visa-free entry for 30 days",
+      "details": [
+        { "label": "Stay", "value": "30 days per visit" },
+        { "label": "Passport", "value": "6+ months validity" },
+        { "label": "Purpose", "value": "Tourism, business, transit" },
+        { "label": "Register", "value": "Hotel registers you automatically" }
+      ]
+    },
+    {
+      "country_code": "US",
+      "country_name": "United States",
+      "flag": "🇺🇸",
+      "visa_free": false,
+      "stay_days": null,
+      "headline": "Visa required before travel",
+      "details": [
+        { "label": "Type", "value": "L visa (tourism)" },
+        { "label": "Processing", "value": "Apply at Chinese embassy" },
+        { "label": "Stay", "value": "As stated on visa" },
+        { "label": "Tip", "value": "Allow 2–4 weeks processing" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "route_beijing_classic",
+    "city_id": "beijing",
+    "title": "Classic Beijing",
+    "days": 3,
+    "summary": "Forbidden City → Hutongs → Temple of Heaven. The essential first-timer route, manageable on foot and subway.",
+    "sort_order": 1
+  },
+  {
+    "id": "route_beijing_history",
+    "city_id": "beijing",
+    "title": "History Deep Dive",
+    "days": 5,
+    "summary": "Add a Great Wall day trip (Mutianyu), Summer Palace, and National Museum to the Classic route.",
+    "sort_order": 2
+  },
+  {
+    "id": "route_beijing_food",
+    "city_id": "beijing",
+    "title": "Food & Culture",
+    "days": 3,
+    "summary": "Focus on hutong neighbourhoods, Wangfujing night market, 798 Art Zone, and street food trails.",
+    "sort_order": 3
+  }
+]

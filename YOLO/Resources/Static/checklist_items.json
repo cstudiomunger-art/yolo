@@ -1,0 +1,10 @@
+[
+  { "id": "cl_vpn", "city_id": null, "phase": "before_departure", "group_title": "Essential — Before You Fly", "title_en": "Download a VPN app", "estimated_minutes": 15, "display_tags": [], "cultural_tip": null, "sort_order": 1 },
+  { "id": "cl_alipay", "city_id": null, "phase": "before_departure", "group_title": "Essential — Before You Fly", "title_en": "Set up Alipay International", "estimated_minutes": 20, "display_tags": [], "cultural_tip": null, "sort_order": 2 },
+  { "id": "cl_esim", "city_id": null, "phase": "before_departure", "group_title": "Essential — Before You Fly", "title_en": "Get a China eSIM", "estimated_minutes": 10, "display_tags": [], "cultural_tip": null, "sort_order": 3 },
+  { "id": "cl_amap", "city_id": null, "phase": "before_departure", "group_title": "Essential — Before You Fly", "title_en": "Download Amap (高德地图)", "estimated_minutes": 5, "display_tags": ["key"], "cultural_tip": null, "sort_order": 4 },
+  { "id": "cl_didi", "city_id": null, "phase": "before_departure", "group_title": "Essential — Before You Fly", "title_en": "Install and set up Didi", "estimated_minutes": 10, "display_tags": ["key"], "cultural_tip": null, "sort_order": 5 },
+  { "id": "cl_forbidden_tickets", "city_id": "beijing", "phase": "before_departure", "group_title": "Beijing — City Specific", "title_en": "Book Forbidden City tickets NOW", "estimated_minutes": null, "display_tags": ["urgent"], "cultural_tip": "The palace was forbidden to commoners for 500 years — you'll walk where only emperors walked.", "sort_order": 6 },
+  { "id": "cl_great_wall", "city_id": "beijing", "phase": "before_departure", "group_title": "Beijing — City Specific", "title_en": "Download the Great Wall shuttle schedule", "estimated_minutes": 5, "display_tags": [], "cultural_tip": null, "sort_order": 7 },
+  { "id": "cl_pleco", "city_id": null, "phase": "before_departure", "group_title": "Recommended", "title_en": "Download Pleco dictionary", "estimated_minutes": 5, "display_tags": [], "cultural_tip": null, "sort_order": 8 }
+]

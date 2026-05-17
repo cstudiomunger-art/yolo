@@ -8,5 +8,7 @@
 	<string>$(SUPABASE_ANON_KEY)</string>
 	<key>USE_MOCK</key>
 	<string>$(USE_MOCK)</string>
+	<key>FORCE_BUNDLED</key>
+	<string>$(FORCE_BUNDLED)</string>
 </dict>
 </plist>

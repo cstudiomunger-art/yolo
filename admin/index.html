@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChinaGo 内容管理</title>
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+  <body>
+  <div id="login-screen" class="login-wrap">
+    <div class="login-card">
+      <h1>ChinaGo <span style="color: var(--accent)">CMS</span></h1>
+      <p>使用 Supabase 管理员账号登录</p>
+      <div id="login-error" class="status-bar error hidden"></div>
+      <form id="login-form">
+        <label for="login-email">邮箱</label>
+        <input id="login-email" type="email" autocomplete="username" required />
+
+        <label for="login-password">密码</label>
+        <input id="login-password" type="password" autocomplete="current-password" required />
+
+        <button type="submit" class="btn" style="width: 100%; margin-top: 8px">登录</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app-screen" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand">China<span>Go</span> CMS</div>
+      <button type="button" class="nav-btn active" data-table="app_settings">应用配置</button>
+      <button type="button" class="nav-btn" data-table="cities">城市</button>
+      <button type="button" class="nav-btn" data-table="attractions">景点</button>
+      <button type="button" class="nav-btn" data-table="checklist_items">行前清单</button>
+      <button type="button" class="nav-btn" data-table="home_tips">首页提示</button>
+      <button type="button" class="nav-btn" data-table="city_routes">城市路线</button>
+      <button type="button" class="nav-btn" data-table="audio_guides">音频导览</button>
+      <button type="button" class="nav-btn" data-table="shopping_items">购物清单</button>
+      <button type="button" class="nav-btn" data-table="reading_list">阅读清单</button>
+      <button type="button" class="nav-btn" data-table="hotels">酒店</button>
+      <button type="button" class="nav-btn" data-table="passport_countries">护照国家</button>
+      <button type="button" class="nav-btn" data-table="visa_rules">签证规则</button>
+      <button type="button" class="nav-btn" data-table="culture_tips">文化贴士</button>
+      <button type="button" class="nav-btn" data-table="assistant_chips">助手芯片</button>
+      <button type="button" class="nav-btn" data-table="assistant_replies">助手回复</button>
+      <button type="button" class="nav-btn" data-table="emergency_config">紧急联系</button>
+      <button type="button" class="nav-btn" data-table="content_itineraries">行程模板</button>
+      <div class="sidebar-footer">
+        <div id="user-email"></div>
+        <button type="button" class="btn btn-secondary btn-sm" id="logout-btn" style="margin-top: 8px; width: 100%">
+          退出
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page-header">
+        <h2 id="page-title">应用开关</h2>
+        <button type="button" class="btn hidden" id="add-row-btn">+ 新建</button>
+      </div>
+      <div id="main-content"></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+  </body>
+</html>

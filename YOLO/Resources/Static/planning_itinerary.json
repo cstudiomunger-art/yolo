@@ -1,0 +1,31 @@
+{
+  "id": "plan_beijing_4d",
+  "title": "Your Beijing Plan · 4 days",
+  "meta": "Jun 15–18 · Mid budget · History + Food",
+  "route_summary": "Beijing",
+  "estimated_budget": "$320–480",
+  "days": [
+    {
+      "id": "pd1",
+      "day_index": 1,
+      "date_label": "Day 1 · Jun 15 · Beijing",
+      "city_name": "Beijing",
+      "cost_estimate": null,
+      "activities": [
+        { "id": "pa1", "time_slot": "AM", "name": "🏯 Forbidden City", "detail": "9:00 AM · 3–4 hrs · ¥60 · Book ahead", "attraction_id": "beijing_forbidden_city", "has_audio": true },
+        { "id": "pa2", "time_slot": "PM", "name": "🍜 Hutong lunch, Nanluogu Xiang", "detail": "1:00 PM · ¥60–100", "attraction_id": null, "has_audio": false },
+        { "id": "pa3", "time_slot": "EVE", "name": "🛕 Temple of Heaven", "detail": "3:30 PM · 2 hrs · ¥35", "attraction_id": "beijing_temple_of_heaven", "has_audio": true }
+      ]
+    },
+    {
+      "id": "pd2",
+      "day_index": 2,
+      "date_label": "Day 2 · Jun 16 · Beijing",
+      "city_name": "Beijing",
+      "cost_estimate": null,
+      "activities": [
+        { "id": "pa4", "time_slot": "AM", "name": "🏔 Great Wall — Mutianyu", "detail": "7:30 AM · Half day · ¥65", "attraction_id": null, "has_audio": false }
+      ]
+    }
+  ]
+}

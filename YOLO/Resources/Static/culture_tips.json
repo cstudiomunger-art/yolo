@@ -1,0 +1,37 @@
+[
+  {
+    "id": "culture_restaurant",
+    "emoji": "🍜",
+    "title": "Restaurant Etiquette",
+    "preview": "Scan QR codes at your table to order. Tipping is not expected and can sometimes cause confusion.",
+    "body": "Most restaurants use QR ordering at the table. Staff may not speak English — point at pictures or use translation apps. Tipping is not customary. Splitting bills is common among friends; as a visitor, offering to pay once is polite but not required."
+  },
+  {
+    "id": "culture_transport",
+    "emoji": "🚇",
+    "title": "Getting Around",
+    "preview": "Queue properly at subway entrances. Priority seats are taken seriously — offer yours to elderly passengers.",
+    "body": "Subway systems are extensive and signage is increasingly bilingual. Have your metro QR ready before the gate. Didi works like Uber — save your hotel address in Chinese for the driver."
+  },
+  {
+    "id": "culture_photo",
+    "emoji": "📸",
+    "title": "Photography & Social Rules",
+    "preview": "Military installations and some government buildings are strictly off-limits. Always ask before photographing people.",
+    "body": "Avoid photographing military sites, airports security areas, and police without permission. Many locals are happy to be in tourist photos if you ask first."
+  },
+  {
+    "id": "culture_shopping",
+    "emoji": "🛍",
+    "title": "Shopping & Bargaining",
+    "preview": "Markets like Silk Market expect negotiation. Fixed-price stores (malls, chain stores) do not. Start at 30% of the asking price.",
+    "body": "In tourist markets, bargaining is expected. In malls and supermarkets, prices are fixed. Mobile payment is preferred — cash is backup."
+  },
+  {
+    "id": "culture_gifts",
+    "emoji": "🎁",
+    "title": "Gifts & Hosting",
+    "preview": "Gifts are often not opened immediately. Avoid clocks (symbolise death) and green hats. Bring something from your home country.",
+    "body": "Small gifts from your home country are appreciated. Present with both hands. Avoid clocks, umbrellas, and green hats as gifts. White wrapping can imply funerals — red or gold is safer."
+  }
+]

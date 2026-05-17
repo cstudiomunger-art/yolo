@@ -1,0 +1,109 @@
+{
+  "id": "itin_sample_10day",
+  "title": "10-Day Beijing → Shanghai",
+  "meta": "Jun 15 – 25, 2026 · Couple · $900–$1,400 est.",
+  "route_summary": "Beijing 3d → Xi'an 2d → Shanghai 3d",
+  "estimated_budget": "$900–$1,400",
+  "days": [
+    {
+      "id": "day_1",
+      "day_index": 1,
+      "date_label": "Jun 15 · Monday",
+      "city_name": "Beijing",
+      "cost_estimate": "~$80–$130",
+      "activities": [
+        {
+          "id": "a1",
+          "time_slot": "AM",
+          "name": "Forbidden City",
+          "detail": "9:00 AM · 3–4 hrs · ¥60 · Book required",
+          "attraction_id": "beijing_forbidden_city",
+          "has_audio": true
+        },
+        {
+          "id": "a2",
+          "time_slot": "PM",
+          "name": "Tiananmen Square → Nanluogu Xiang",
+          "detail": "1:30 PM · 2 hrs · Free entry · Walk",
+          "attraction_id": null,
+          "has_audio": false
+        },
+        {
+          "id": "a3",
+          "time_slot": "EVE",
+          "name": "Hutong dinner, Nanluogu Xiang",
+          "detail": "¥80–150 per person",
+          "attraction_id": null,
+          "has_audio": false
+        }
+      ]
+    },
+    {
+      "id": "day_2",
+      "day_index": 2,
+      "date_label": "Jun 16 · Tuesday",
+      "city_name": "Beijing",
+      "cost_estimate": "~$60–$100",
+      "activities": [
+        {
+          "id": "a4",
+          "time_slot": "AM",
+          "name": "Temple of Heaven",
+          "detail": "8:00 AM · 2 hrs · ¥15 · Park walk",
+          "attraction_id": null,
+          "has_audio": false
+        },
+        {
+          "id": "a5",
+          "time_slot": "PM",
+          "name": "Summer Palace",
+          "detail": "2:00 PM · 3 hrs · ¥30 · Boat optional",
+          "attraction_id": null,
+          "has_audio": false
+        }
+      ]
+    },
+    {
+      "id": "day_3",
+      "day_index": 3,
+      "date_label": "Jun 17 · Wednesday",
+      "city_name": "Beijing",
+      "cost_estimate": "~$90–$150",
+      "activities": [
+        {
+          "id": "a6",
+          "time_slot": "AM",
+          "name": "Mutianyu Great Wall",
+          "detail": "7:30 AM · Full day · ¥45 + cable car",
+          "attraction_id": null,
+          "has_audio": false
+        }
+      ]
+    },
+    {
+      "id": "day_4",
+      "day_index": 4,
+      "date_label": "Jun 18 · Thursday",
+      "city_name": "Xi'an",
+      "cost_estimate": "~$70–$110",
+      "activities": [
+        {
+          "id": "a7",
+          "time_slot": "AM",
+          "name": "Terracotta Warriors",
+          "detail": "9:00 AM · 3 hrs · ¥120 · High-speed rail from Beijing",
+          "attraction_id": null,
+          "has_audio": false
+        },
+        {
+          "id": "a8",
+          "time_slot": "EVE",
+          "name": "Muslim Quarter street food",
+          "detail": "¥50–80 per person",
+          "attraction_id": null,
+          "has_audio": false
+        }
+      ]
+    }
+  ]
+}

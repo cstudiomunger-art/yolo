@@ -1,3 +1,6 @@
 xcuserdata/
 DerivedData/
 *.xcuserstate
+node_modules/
+Secrets.xcconfig
+admin/js/config.js

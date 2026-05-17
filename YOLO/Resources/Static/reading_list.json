@@ -1,0 +1,20 @@
+[
+  {
+    "id": "read_beijing_1",
+    "city_ids": ["beijing"],
+    "title": "The Last Days of Old Beijing",
+    "author": "Michael Meyer",
+    "genre": "Non-fiction",
+    "synopsis_en": "A firsthand account of hutong demolition and the changing face of Beijing before the 2008 Olympics.",
+    "sort_order": 1
+  },
+  {
+    "id": "read_beijing_2",
+    "city_ids": ["beijing"],
+    "title": "Oracle Bones",
+    "author": "Peter Hessler",
+    "genre": "Non-fiction",
+    "synopsis_en": "A journalist's exploration of China's rapid transformation, rooted in history and street-level observation.",
+    "sort_order": 2
+  }
+]
