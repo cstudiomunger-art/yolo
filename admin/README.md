@@ -1,6 +1,13 @@
 # ChinaGo 后台管理系统（HTML + Supabase）
 
-基于浏览器的 CMS，通过 **Supabase Auth** 登录，使用 **anon key** 读写数据库（需先配置管理员 RLS）。
+基于浏览器的可视化 CMS，通过 **Supabase Auth** 登录，使用 **anon key** 读写数据库（需先配置管理员 RLS）。
+
+## 推荐工作流
+
+1. 打开 **城市工作台** → 选择城市 → 进入工作台  
+2. **景点与解说** → 编辑书面解说（`introduction`）、西方游客贴士、周边推荐  
+3. 同一页面内管理 **语音导览**（引文、章节时间轴、上传 MP3）  
+4. 全局内容（签证、助手、行程模板等）使用侧栏扁平菜单  
 
 ## 1. 数据库准备
 
@@ -12,22 +19,19 @@
 4. `supabase/migrations/005_admin_policies.sql`
 5. `supabase/migrations/006_extended_content.sql`
 6. `supabase/migrations/007_extended_content_rls.sql`
-7. `supabase/migrations/009_align_content_columns.sql`（**若表已存在但缺列**，例如没有 `emoji`）
-8. `supabase/migrations/010_fix_text_primary_keys.sql`（**若 id 是 uuid**，seed 会报 `invalid input syntax for type uuid`）
-9. `supabase/migrations/008_seed_content.sql`（**初始数据**，来自 `YOLO/Resources/Static/*.json`）
-10. `supabase/migrations/011_app_branding_and_assistant_chips.sql`（应用文案 / 助手芯片）
-11. `supabase/migrations/012_audio_storage.sql`（音频 Storage 桶，供后台上传）
-12. `supabase/migrations/003_enable_remote_content.sql`（打开 App 远程内容）
+7. `supabase/migrations/009_align_content_columns.sql`（缺列时）
+8. `supabase/migrations/010_fix_text_primary_keys.sql`（id 为 uuid 时 **必跑**）
+9. `supabase/migrations/008_seed_content.sql`（初始数据）
+10. `supabase/migrations/011_app_branding_and_assistant_chips.sql`
+11. `supabase/migrations/012_audio_storage.sql`（音频 Storage 桶）
+12. `supabase/migrations/013_cover_images_storage.sql`（封面图 Storage 桶）
+13. `supabase/migrations/003_enable_remote_content.sql`（打开 App 远程内容）
 
 ## 2. 导入初始内容
 
 **方式 A — SQL（推荐）**
 
-在 SQL Editor 依次执行：
-
-1. `009_align_content_columns.sql`（缺列时）
-2. `010_fix_text_primary_keys.sql`（`city_routes` 等 id 为 uuid 时 **必跑**；会重建子表，保留 `cities` 数据）
-3. `008_seed_content.sql`（幂等，可重复执行）
+依次执行 `009` → `010` → `008`（幂等）。
 
 **方式 B — Node 脚本**
 
@@ -37,14 +41,6 @@ SUPABASE_URL=https://你的项目.supabase.co \
 SUPABASE_SERVICE_ROLE_KEY=你的_service_role_key \
 node scripts/seed-content.mjs
 ```
-
-**重新生成 SQL**（修改了 Static JSON 后）：
-
-```bash
-node scripts/generate-seed-sql.mjs
-```
-
-之后所有内容请在 **本后台** 或 Supabase Table Editor 中维护。
 
 ## 3. 创建管理员账号
 
@@ -74,25 +70,37 @@ cd admin && python3 -m http.server 8080
 
 打开 **http://localhost:8080**
 
-## CMS 菜单与数据表
+## 功能概览
 
-| 菜单 | 表 | App 用途 |
-|------|-----|----------|
-| 应用配置 | `app_settings` | 远程开关、关于页、内购文案、Plan 警告、反馈邮箱、试听时长 |
-| 助手芯片 | `assistant_chips` | Assistant 底部快捷按钮（关联 `assistant_replies`） |
-| 护照国家 | `passport_countries` | 引导 & Profile 选国 |
-| 签证规则 | `visa_rules` | Home 签证标签 |
-| 城市 / 景点 / 清单等 | 见侧栏 | 各 Tab 内容 |
-| 文化贴士 | `culture_tips` | Guide |
-| 助手回复 | `assistant_replies` | Assistant 场景回复 |
-| 紧急联系 | `emergency_config` | Assistant 紧急 Sheet |
-| 行程模板 | `content_itineraries` | Plan 样本 & Assistant 规划卡 |
+| 功能 | 说明 |
+|------|------|
+| 城市工作台 | 卡片列表、按城管理景点/音频/路线/酒店/清单 |
+| 可视化关联 | 城市、景点、国家、助手场景均为下拉选择，无需手写 ID |
+| 结构化编辑 | 贴士列表、周边地点、音频章节、行程天数、紧急联系人 |
+| 封面 / 音频上传 | Storage 桶 `cover-images`、`audio-guides`，自动写入公网 URL |
+| 应用配置 | Plan 深链城市/景点选择器、内购权益逐行编辑 |
 
-### 音频导览
+## Storage 桶
 
-1. 在 **音频导览** 中填写 `id` 与景点 `attraction_id`
-2. 使用编辑弹窗中的 **上传音频文件**（需已执行 `012_audio_storage.sql`）
-3. 保存后 `audio_url` 会写入 Supabase Storage 公网地址；App 在远程内容模式下即可播放
+| 桶 | 用途 | 写入列 |
+|----|------|--------|
+| `audio-guides` | 景点音频 MP3/M4A | `audio_guides.audio_url` |
+| `cover-images` | 城市/景点封面 | `cities.cover_image_path` / `attractions.cover_image_path` |
+
+App 播放音频需完整 HTTPS URL（含 scheme）。
+
+## 代码结构
+
+```
+admin/js/
+  core.js          # Supabase、工具函数、上传
+  ref-cache.js     # 城市/景点/国家/场景缓存
+  schema.js        # 表字段配置
+  field-types.js   # 可视化字段组件
+  crud.js          # 表格 CRUD、模态框
+  city-hub.js      # 城市工作台、景点解说编辑
+  admin.js         # 登录与导航
+```
 
 ## 安全说明
 

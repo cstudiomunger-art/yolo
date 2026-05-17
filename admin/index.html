@@ -27,23 +27,27 @@
   <div id="app-screen" class="app-shell hidden">
     <aside class="sidebar">
       <div class="sidebar-brand">China<span>Go</span> CMS</div>
-      <button type="button" class="nav-btn active" data-table="app_settings">应用配置</button>
-      <button type="button" class="nav-btn" data-table="cities">城市</button>
-      <button type="button" class="nav-btn" data-table="attractions">景点</button>
-      <button type="button" class="nav-btn" data-table="checklist_items">行前清单</button>
-      <button type="button" class="nav-btn" data-table="home_tips">首页提示</button>
-      <button type="button" class="nav-btn" data-table="city_routes">城市路线</button>
-      <button type="button" class="nav-btn" data-table="audio_guides">音频导览</button>
-      <button type="button" class="nav-btn" data-table="shopping_items">购物清单</button>
-      <button type="button" class="nav-btn" data-table="reading_list">阅读清单</button>
-      <button type="button" class="nav-btn" data-table="hotels">酒店</button>
+      <p class="nav-section-label">工作台</p>
+      <button type="button" class="nav-btn active" data-view="city_hub">城市工作台</button>
+      <p class="nav-section-label">全局配置</p>
+      <button type="button" class="nav-btn" data-table="app_settings">应用配置</button>
+      <button type="button" class="nav-btn" data-table="assistant_chips">助手芯片</button>
+      <button type="button" class="nav-btn" data-table="assistant_replies">助手回复</button>
       <button type="button" class="nav-btn" data-table="passport_countries">护照国家</button>
       <button type="button" class="nav-btn" data-table="visa_rules">签证规则</button>
       <button type="button" class="nav-btn" data-table="culture_tips">文化贴士</button>
-      <button type="button" class="nav-btn" data-table="assistant_chips">助手芯片</button>
-      <button type="button" class="nav-btn" data-table="assistant_replies">助手回复</button>
       <button type="button" class="nav-btn" data-table="emergency_config">紧急联系</button>
       <button type="button" class="nav-btn" data-table="content_itineraries">行程模板</button>
+      <p class="nav-section-label">内容（扁平列表）</p>
+      <button type="button" class="nav-btn" data-table="cities">城市</button>
+      <button type="button" class="nav-btn" data-table="attractions">景点</button>
+      <button type="button" class="nav-btn" data-table="audio_guides">音频导览</button>
+      <button type="button" class="nav-btn" data-table="city_routes">城市路线</button>
+      <button type="button" class="nav-btn" data-table="checklist_items">行前清单</button>
+      <button type="button" class="nav-btn" data-table="home_tips">首页提示</button>
+      <button type="button" class="nav-btn" data-table="shopping_items">购物清单</button>
+      <button type="button" class="nav-btn" data-table="reading_list">阅读清单</button>
+      <button type="button" class="nav-btn" data-table="hotels">酒店</button>
       <div class="sidebar-footer">
         <div id="user-email"></div>
         <button type="button" class="btn btn-secondary btn-sm" id="logout-btn" style="margin-top: 8px; width: 100%">
@@ -54,15 +58,21 @@
 
     <main class="main">
       <div class="page-header">
-        <h2 id="page-title">应用开关</h2>
-        <button type="button" class="btn hidden" id="add-row-btn">+ 新建</button>
+        <h2 id="page-title">城市工作台</h2>
+        <button type="button" class="btn" id="add-row-btn">+ 新建</button>
       </div>
       <div id="main-content"></div>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/config.js?v=2"></script>
+  <script src="js/core.js?v=2"></script>
+  <script src="js/ref-cache.js?v=2"></script>
+  <script src="js/schema.js?v=2"></script>
+  <script src="js/field-types.js?v=2"></script>
+  <script src="js/crud.js?v=2"></script>
+  <script src="js/city-hub.js?v=2"></script>
+  <script src="js/admin.js?v=2"></script>
   </body>
 </html>
