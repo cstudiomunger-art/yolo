@@ -4,3 +4,4 @@ DerivedData/
 node_modules/
 Secrets.xcconfig
 admin/js/config.js
+supabase/.temp/

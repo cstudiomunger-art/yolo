@@ -3,6 +3,7 @@ import Supabase
 
 struct RemoteContentRepository: ContentRepositoryProtocol {
     private var client: SupabaseClient { SupabaseManager.shared }
+    private let bundledFallback = BundledContentRepository()
 
     func fetchCities() async throws -> [City] {
         try await client
@@ -15,36 +16,45 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
     }
 
     func fetchCityRoutes(cityId: String) async throws -> [CityRoute] {
-        try await client
-            .from("city_routes")
-            .select()
-            .eq("city_id", value: cityId)
-            .order("sort_order", ascending: true)
-            .execute()
-            .value
+        []
     }
 
     func fetchAttractions(cityId: String) async throws -> [Attraction] {
-        try await client
-            .from("attractions")
-            .select()
-            .eq("city_id", value: cityId)
-            .eq("is_published", value: true)
-            .order("display_order", ascending: true)
-            .execute()
-            .value
+        let normalizedCityId = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        do {
+            let rows: [Attraction] = try await client
+                .from("attractions")
+                .select()
+                .eq("city_id", value: normalizedCityId)
+                .eq("is_published", value: true)
+                .order("display_order", ascending: true)
+                .execute()
+                .value
+            if !rows.isEmpty { return rows }
+        } catch {
+            let fallback = try await bundledFallback.fetchAttractions(cityId: normalizedCityId)
+            if !fallback.isEmpty { return fallback }
+            throw error
+        }
+        return try await bundledFallback.fetchAttractions(cityId: normalizedCityId)
     }
 
     func fetchAttraction(id: String) async throws -> Attraction? {
-        let rows: [Attraction] = try await client
-            .from("attractions")
-            .select()
-            .eq("id", value: id)
-            .eq("is_published", value: true)
-            .limit(1)
-            .execute()
-            .value
-        return rows.first
+        let normalizedId = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        do {
+            let rows: [Attraction] = try await client
+                .from("attractions")
+                .select()
+                .eq("id", value: normalizedId)
+                .eq("is_published", value: true)
+                .limit(1)
+                .execute()
+                .value
+            if let row = rows.first { return row }
+        } catch {
+            return try await bundledFallback.fetchAttraction(id: normalizedId)
+        }
+        return try await bundledFallback.fetchAttraction(id: normalizedId)
     }
 
     func fetchAudioGuides(attractionId: String) async throws -> [AudioGuide] {
@@ -58,7 +68,24 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
             .value
     }
 
-    func fetchChecklistItems(cityIds: [String]) async throws -> [ChecklistItem] {
+    func fetchAudioGuide(id: String) async throws -> AudioGuide? {
+        do {
+            let rows: [AudioGuide] = try await client
+                .from("audio_guides")
+                .select()
+                .eq("id", value: id)
+                .eq("is_active", value: true)
+                .limit(1)
+                .execute()
+                .value
+            if let row = rows.first { return row }
+        } catch {
+            return try await bundledFallback.fetchAudioGuide(id: id)
+        }
+        return try await bundledFallback.fetchAudioGuide(id: id)
+    }
+
+    func fetchChecklistItems(cityIds: [String], countryCode: String) async throws -> [ChecklistItem] {
         let all: [ChecklistItem] = try await client
             .from("checklist_items")
             .select()
@@ -66,10 +93,20 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
             .order("sort_order", ascending: true)
             .execute()
             .value
-        return all.filter { item in
-            guard let cityId = item.cityId else { return true }
-            return cityIds.contains(cityId)
-        }
+        return all
+            .filter { $0.matchesFilter(cityIds: cityIds, countryCode: countryCode) }
+            .sorted { $0.sortOrder < $1.sortOrder }
+    }
+
+    func fetchSubAreas(attractionId: String) async throws -> [SubArea] {
+        try await client
+            .from("sub_areas")
+            .select()
+            .eq("attraction_id", value: attractionId)
+            .eq("is_active", value: true)
+            .order("sort_order", ascending: true)
+            .execute()
+            .value
     }
 
     func fetchShoppingItems(cityIds: [String]) async throws -> [ShoppingItem] {
@@ -100,14 +137,22 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
     }
 
     func fetchHotels(cityId: String) async throws -> [Hotel] {
-        try await client
-            .from("hotels")
-            .select()
-            .eq("city_id", value: cityId)
-            .eq("is_active", value: true)
-            .order("sort_order", ascending: true)
-            .execute()
-            .value
+        let normalizedCityId = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        do {
+            let rows: [Hotel] = try await client
+                .from("hotels")
+                .select()
+                .eq("city_id", value: normalizedCityId)
+                .eq("is_active", value: true)
+                .order("sort_order", ascending: true)
+                .execute()
+                .value
+            return rows.filter(\.acceptsForeigners)
+        } catch {
+            let fallback = try await bundledFallback.fetchHotels(cityId: normalizedCityId)
+            if !fallback.isEmpty { return fallback }
+            throw error
+        }
     }
 
     func fetchHomeTips(cityIds: [String]) async throws -> [HomeTip] {
@@ -125,13 +170,19 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
     }
 
     func fetchCultureTips() async throws -> [CultureTip] {
-        try await client
-            .from("culture_tips")
-            .select()
-            .eq("is_active", value: true)
-            .order("sort_order", ascending: true)
-            .execute()
-            .value
+        do {
+            let rows: [CultureTip] = try await client
+                .from("culture_tips")
+                .select()
+                .eq("is_active", value: true)
+                .order("sort_order", ascending: true)
+                .execute()
+                .value
+            if !rows.isEmpty { return rows }
+        } catch {
+            return try await bundledFallback.fetchCultureTips()
+        }
+        return try await bundledFallback.fetchCultureTips()
     }
 
     func fetchSampleItinerary() async throws -> SampleItinerary {

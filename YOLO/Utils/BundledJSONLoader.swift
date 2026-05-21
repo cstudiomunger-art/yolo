@@ -9,7 +9,7 @@ enum BundledJSONLoader {
             let data = try Data(contentsOf: url)
             return try JSONCoding.makeDecoder().decode(T.self, from: data)
         } catch {
-            fatalError("Failed to decode \(resource).json: \(error)")
+            fatalError("Failed to decode \(resource).json: \(JSONCoding.describe(error))")
         }
     }
 

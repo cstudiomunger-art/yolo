@@ -3,20 +3,13 @@ import SwiftUI
 struct PrepareView: View {
     @Environment(AppEnvironment.self) private var appEnv
 
-    @State private var phase: PreparePhase = .citySelect
     @State private var cities: [City] = []
-    @State private var draftCityIds: Set<String> = []
     @State private var checklist: [ChecklistItem] = []
     @State private var shopping: [ShoppingItem] = []
     @State private var reading: [ReadingItem] = []
     @State private var panel: PreparePanel = .checklist
     @State private var showShoppingList = false
     @State private var showReadingList = false
-
-    enum PreparePhase {
-        case citySelect
-        case main
-    }
 
     enum PreparePanel {
         case checklist
@@ -28,15 +21,8 @@ struct PrepareView: View {
     }
 
     var body: some View {
-        Group {
-            switch phase {
-            case .citySelect:
-                citySelectView
-            case .main:
-                mainView
-            }
-        }
-        .background(Theme.ColorToken.background)
+        mainView
+            .background(Theme.ColorToken.background)
         .task {
             await bootstrap()
         }
@@ -51,79 +37,18 @@ struct PrepareView: View {
         }
     }
 
-    private var citySelectView: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Where are you going?")
-                    .font(Theme.FontToken.playfair(22, weight: .semibold))
-                Text("We'll customise your preparation checklist.")
-                    .font(Theme.FontToken.inter(12))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-                    .padding(.top, 4)
-                    .padding(.bottom, 18)
-
-                Text("Popular destinations")
-                    .sectionTitleStyle()
-                    .padding(.bottom, 10)
-
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                    ForEach(cities) { city in
-                        CityChipView(
-                            city: city,
-                            isSelected: draftCityIds.contains(city.id)
-                        ) {
-                            if draftCityIds.contains(city.id) {
-                                draftCityIds.remove(city.id)
-                            } else {
-                                draftCityIds.insert(city.id)
-                            }
-                        }
-                    }
-                }
-
-                Text("Going to multiple cities? Tap to select more.")
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-                    .padding(.top, 16)
-                    .padding(.bottom, 14)
-
-                Button {
-                    guard !draftCityIds.isEmpty else { return }
-                    appEnv.preferences.selectedCityIds = Array(draftCityIds)
-                    phase = .main
-                    Task {
-                        await loadContent()
-                        await appEnv.profileSync.pushToRemote()
-                    }
-                } label: {
-                    Text("Continue with \(primaryCityName) →")
-                        .font(Theme.FontToken.inter(11, weight: .medium))
-                        .foregroundStyle(.white)
-                        .textCase(.uppercase)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 15)
-                        .background(Theme.ColorToken.textPrimary)
-                }
-                .buttonStyle(.plain)
-                .disabled(draftCityIds.isEmpty)
-            }
-            .padding(.horizontal, Theme.screenPadding)
-            .padding(.top, 24)
-            .padding(.bottom, 32)
-        }
-    }
-
-    private var primaryCityName: String {
-        cities.first { draftCityIds.contains($0.id) }?.name ?? "Trip"
+    private var primarySelectedCityName: String {
+        cities.first { appEnv.preferences.selectedCityIds.contains($0.id) }?.name ?? "China"
     }
 
     private var mainView: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 4) {
                 Button {
-                    phase = .citySelect
+                    appEnv.navigation.dismissModal()
+                    appEnv.navigation.openTab(.home)
                 } label: {
-                    Text("← Change city")
+                    Text("← Home")
                         .font(Theme.FontToken.inter(11))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                 }
@@ -184,33 +109,20 @@ struct PrepareView: View {
             VStack(alignment: .leading, spacing: 0) {
                 progressSummary
 
-                let groups = Dictionary(grouping: checklist, by: \.groupTitle)
-                ForEach(groups.keys.sorted(), id: \.self) { group in
-                    Text(group)
+                ForEach(checklistSections, id: \.title) { section in
+                    Text(section.title)
                         .font(Theme.FontToken.inter(10, weight: .medium))
                         .foregroundStyle(Theme.ColorToken.textDisabled)
                         .textCase(.uppercase)
                         .padding(.top, 16)
                         .padding(.bottom, 8)
 
-                    ForEach(groups[group] ?? []) { item in
+                    ForEach(section.items) { item in
                         ChecklistRowView(
                             item: item,
                             isDone: appEnv.preferences.completedChecklistIds.contains(item.id)
                         ) {
                             appEnv.preferences.toggleChecklistItem(item.id)
-                        }
-
-                        if let tip = item.culturalTip, !tip.isEmpty {
-                            Text("\"\(tip)\"")
-                                .font(Theme.FontToken.inter(10))
-                                .foregroundStyle(Theme.ColorToken.textMuted)
-                                .padding(10)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Theme.ColorToken.backgroundSubtle)
-                                .overlay(alignment: .leading) {
-                                    Rectangle().fill(Theme.ColorToken.accent).frame(width: 2)
-                                }
                         }
                     }
                 }
@@ -222,6 +134,29 @@ struct PrepareView: View {
             .padding(.top, 16)
             .padding(.bottom, 24)
         }
+    }
+
+    private struct ChecklistSection {
+        let title: String
+        let items: [ChecklistItem]
+    }
+
+    private var checklistSections: [ChecklistSection] {
+        let entry = checklist.filter { $0.type == .entry }
+        let universal = checklist.filter { $0.type == .universal }
+        let cityItems = checklist.filter { $0.type == .city }
+        var sections: [ChecklistSection] = []
+        if !entry.isEmpty {
+            sections.append(ChecklistSection(title: "Entry Requirements", items: entry))
+        }
+        if !universal.isEmpty {
+            sections.append(ChecklistSection(title: "Essentials for Any Trip", items: universal))
+        }
+        let cityGroups = Dictionary(grouping: cityItems, by: \.groupTitle)
+        for key in cityGroups.keys.sorted() {
+            sections.append(ChecklistSection(title: key, items: cityGroups[key] ?? []))
+        }
+        return sections
     }
 
     private var progressSummary: some View {
@@ -283,9 +218,7 @@ struct PrepareView: View {
                         Text(item.titleEn)
                             .font(Theme.FontToken.inter(12))
                         if let note = item.noteEn {
-                            Text(note)
-                                .font(Theme.FontToken.inter(11))
-                                .foregroundStyle(Theme.ColorToken.textMuted)
+                            HTMLContentView(content: note, fontSize: 11, foregroundColor: Theme.ColorToken.textMuted)
                         }
                     }
                 }
@@ -318,10 +251,7 @@ struct PrepareView: View {
                     Text("\(item.author) · \(item.genre)")
                         .font(Theme.FontToken.inter(11))
                         .foregroundStyle(Theme.ColorToken.textMuted)
-                    Text(item.synopsisEn)
-                        .font(Theme.FontToken.inter(12))
-                        .foregroundStyle(Theme.ColorToken.textSecondary)
-                        .lineSpacing(3)
+                    HTMLContentView(content: item.synopsisEn, fontSize: 12, lineSpacing: 3)
                 }
                 .padding(.vertical, 8)
             }
@@ -358,14 +288,15 @@ struct PrepareView: View {
                     .padding(.top, 24)
                     .padding(.bottom, 12)
 
-                completionAction(icon: "🗺", title: "Plan my Beijing trip", sub: "Build your itinerary with AI") {
-                    appEnv.navigation.openAssistantPlanning()
+                completionAction(icon: "🗺", title: "Plan my \(primarySelectedCityName) trip", sub: "Build your itinerary with AI") {
+                    appEnv.navigation.openPlanGenerator()
                 }
                 completionAction(icon: "🏨", title: "Find foreigner-friendly hotels", sub: "Curated list, English staff noted") {
                     appEnv.navigation.openPlanGenerator()
                 }
-                completionAction(icon: "📖", title: "Explore Beijing audio guides", sub: "Prepare your tour experience") {
-                    appEnv.navigation.openGuide(attractionId: "beijing_forbidden_city", cityId: "beijing")
+                completionAction(icon: "📖", title: "Explore \(primarySelectedCityName) audio guides", sub: "Prepare your tour experience") {
+                    let cityId = appEnv.preferences.selectedCityIds.first ?? "beijing"
+                    appEnv.navigation.openGuide(attractionId: "\(cityId)_forbidden_city", cityId: cityId)
                 }
             }
             .padding(.horizontal, Theme.screenPadding)
@@ -396,12 +327,11 @@ struct PrepareView: View {
     }
 
     private func bootstrap() async {
-        draftCityIds = Set(appEnv.preferences.selectedCityIds)
         await loadCities()
-        if !appEnv.preferences.selectedCityIds.isEmpty {
-            phase = .main
-            await loadContent()
+        if appEnv.preferences.selectedCityIds.isEmpty {
+            appEnv.preferences.selectedCityIds = [cities.first?.id ?? "beijing"]
         }
+        await loadContent()
     }
 
     private func loadCities() async {
@@ -410,36 +340,12 @@ struct PrepareView: View {
 
     private func loadContent() async {
         let ids = appEnv.preferences.selectedCityIds
-        checklist = (try? await appEnv.content.fetchChecklistItems(cityIds: ids)) ?? []
+        checklist = (try? await appEnv.content.fetchChecklistItems(
+            cityIds: ids,
+            countryCode: appEnv.preferences.countryCode
+        )) ?? []
         shopping = (try? await appEnv.content.fetchShoppingItems(cityIds: ids)) ?? []
         reading = (try? await appEnv.content.fetchReadingItems(cityIds: ids)) ?? []
-    }
-}
-
-struct CityChipView: View {
-    let city: City
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 2) {
-                if let emoji = city.emoji {
-                    Text(emoji).font(.system(size: 18))
-                }
-                Text(city.name)
-                    .font(Theme.FontToken.playfair(13, weight: .semibold))
-                    .foregroundStyle(isSelected ? .white : Theme.ColorToken.textPrimary)
-                Text(city.chineseName)
-                    .font(Theme.FontToken.inter(10))
-                    .foregroundStyle(isSelected ? .white.opacity(0.6) : Theme.ColorToken.textMuted)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
-            .background(isSelected ? Theme.ColorToken.textPrimary : Theme.ColorToken.background)
-            .overlay(Rectangle().stroke(isSelected ? Theme.ColorToken.textPrimary : Theme.ColorToken.border, lineWidth: 1))
-        }
-        .buttonStyle(.plain)
     }
 }
 
@@ -447,41 +353,98 @@ struct ChecklistRowView: View {
     let item: ChecklistItem
     let isDone: Bool
     let onToggle: () -> Void
+    @State private var isExpanded = false
 
     var body: some View {
-        Button(action: onToggle) {
-            HStack(spacing: 12) {
-                ZStack {
-                    Rectangle()
-                        .stroke(Theme.ColorToken.border, lineWidth: 1)
-                        .frame(width: 14, height: 14)
-                    if isDone {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 9, weight: .bold))
+        VStack(alignment: .leading, spacing: 0) {
+            Button(action: onToggle) {
+                HStack(spacing: 12) {
+                    ZStack {
+                        Rectangle()
+                            .stroke(Theme.ColorToken.border, lineWidth: 1)
+                            .frame(width: 14, height: 14)
+                        if isDone {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 9, weight: .bold))
+                        }
+                    }
+                    Text(item.titleEn)
+                        .font(Theme.FontToken.inter(14))
+                        .foregroundStyle(isDone ? Theme.ColorToken.textMuted : Theme.ColorToken.textPrimary)
+                        .strikethrough(isDone)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack(spacing: 6) {
+                        ForEach(item.displayTags, id: \.self) { tag in
+                            tagView(tag)
+                        }
+                        if let mins = item.estimatedMinutes {
+                            Text("\(mins) min")
+                                .font(Theme.FontToken.inter(11))
+                                .foregroundStyle(Theme.ColorToken.textMuted)
+                        }
                     }
                 }
-                Text(item.titleEn)
-                    .font(Theme.FontToken.inter(14))
-                    .foregroundStyle(isDone ? Theme.ColorToken.textMuted : Theme.ColorToken.textPrimary)
-                    .strikethrough(isDone)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                HStack(spacing: 6) {
-                    ForEach(item.displayTags, id: \.self) { tag in
-                        tagView(tag)
-                    }
-                    if let mins = item.estimatedMinutes {
-                        Text("\(mins) min")
-                            .font(Theme.FontToken.inter(11))
-                            .foregroundStyle(Theme.ColorToken.textMuted)
-                    }
+                .padding(.vertical, 11)
+            }
+            .buttonStyle(.plain)
+
+            if hasDetail {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
+                } label: {
+                    Text(isExpanded ? "Hide details" : "Why this matters")
+                        .font(Theme.FontToken.inter(10, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.accent)
+                }
+                .buttonStyle(.plain)
+                .padding(.bottom, 6)
+
+                if isExpanded {
+                    detailBlock
+                        .padding(.bottom, 10)
                 }
             }
-            .padding(.vertical, 11)
+
+            if let tip = item.culturalTip, !tip.isEmpty {
+                HTMLContentView(content: tip, fontSize: 10, foregroundColor: Theme.ColorToken.textMuted)
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.ColorToken.backgroundSubtle)
+                    .overlay(alignment: .leading) {
+                        Rectangle().fill(Theme.ColorToken.accent).frame(width: 2)
+                    }
+                    .padding(.bottom, 8)
+            }
         }
-        .buttonStyle(.plain)
         .overlay(alignment: .bottom) {
             Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
         }
+    }
+
+    private var hasDetail: Bool {
+        item.whyImportant != nil || item.howToComplete != nil || !item.externalLinks.isEmpty
+    }
+
+    @ViewBuilder
+    private var detailBlock: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let why = item.whyImportant, !why.isEmpty {
+                HTMLContentView(content: why, fontSize: 12)
+            }
+            if let how = item.howToComplete, !how.isEmpty {
+                HTMLContentView(content: how, fontSize: 12, foregroundColor: Theme.ColorToken.textMuted)
+            }
+            ForEach(item.externalLinks, id: \.url) { link in
+                if let url = URL(string: link.url) {
+                    Link(link.label, destination: url)
+                        .font(Theme.FontToken.inter(11, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.accent)
+                }
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.ColorToken.backgroundSubtle)
     }
 
     @ViewBuilder
@@ -509,7 +472,7 @@ struct ShoppingListView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.titleEn)
                     if let note = item.noteEn {
-                        Text(note).font(.caption).foregroundStyle(.secondary)
+                        HTMLContentView(content: note, fontSize: 12, foregroundColor: Theme.ColorToken.textMuted)
                     }
                 }
             }

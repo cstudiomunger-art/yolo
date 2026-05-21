@@ -26,6 +26,32 @@ final class AppEnvironment {
         self.profileSync = profileSync ?? ProfileSyncService()
         self.content = BundledContentRepository()
         self.profileSync.bind(preferences: preferences, auth: auth)
+        preferences.onSyncableChange = { [weak self] in
+            guard let self else { return }
+            Task { await self.profileSync.schedulePush() }
+        }
+        preferences.onChecklistToggled = { [weak self] itemId, isDone in
+            guard let self else { return }
+            Task { await self.profileSync.syncChecklistToggle(itemId: itemId, isDone: isDone) }
+        }
+        preferences.onItineraryDeleted = { [weak self] tripId in
+            guard let self else { return }
+            Task { await self.profileSync.syncItineraryDeleted(id: tripId) }
+        }
+        preferences.onItinerarySaved = { [weak self] in
+            guard let self else { return }
+            Task { await self.profileSync.pushItinerariesNow() }
+        }
+    }
+
+    func signOutAndReset() async {
+        await profileSync.pushToRemote()
+        try? await auth.signOut()
+        preferences.resetAll()
+        contentMode.clearCachedSettings()
+        await invalidateOfflineCaches()
+        navigation.reset()
+        await refreshContentMode(clearSettingsCache: false)
     }
 
     func reloadRepositories() {
@@ -33,20 +59,32 @@ final class AppEnvironment {
         case .bundled:
             content = BundledContentRepository()
         case .remote:
-            content = RemoteContentRepository()
+            content = CachingContentRepository()
         }
     }
 
     func refreshContentMode(clearSettingsCache: Bool = false) async {
         if clearSettingsCache {
             contentMode.clearCachedSettings()
+            await invalidateOfflineCaches()
         }
+        let previousBackend = contentMode.backend
         await contentMode.refreshFromRemote()
         reloadRepositories()
         await contentMode.refreshBranding(from: content)
-        contentRevision += 1
+        // Only remount tab roots when bundled ↔ remote switches (avoids breaking TextField focus).
+        if contentMode.backend != previousBackend {
+            await invalidateOfflineCaches()
+            contentRevision += 1
+        }
         await refreshVisaRule()
         await seedDefaultItineraryIfNeeded()
+    }
+
+    func invalidateOfflineCaches() async {
+        await ContentCacheStore.shared.removeAll()
+        await ImageCacheService.shared.removeAll()
+        OfflineCacheLocations.clearPersistentURLCache()
     }
 
     func refreshVisaRule() async {
@@ -60,6 +98,7 @@ final class AppEnvironment {
     }
 
     private func seedDefaultItineraryIfNeeded() async {
+        guard auth.isAuthenticated || AppConfig.useMock else { return }
         guard preferences.savedItineraries.isEmpty else { return }
         if let sample = try? await content.fetchSampleItinerary() {
             preferences.saveItinerary(sample)

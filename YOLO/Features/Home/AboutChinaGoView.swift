@@ -16,10 +16,7 @@ struct AboutChinaGoView: View {
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textMuted)
 
-                    Text(branding.aboutBody)
-                        .font(Theme.FontToken.inter(13))
-                        .foregroundStyle(Theme.ColorToken.textSecondary)
-                        .lineSpacing(4)
+                    HTMLContentView(content: branding.aboutBody, fontSize: 13, lineSpacing: 4)
 
                     VStack(alignment: .leading, spacing: 8) {
                         aboutRow("Prepare", "City-aware checklists and cultural tips")

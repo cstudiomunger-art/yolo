@@ -8,8 +8,8 @@ struct ProfileSheetView: View {
     @State private var showLanguagePicker = false
     @State private var showCountryPicker = false
     @State private var showAbout = false
-    @State private var cacheSizeLabel = CacheService.formattedCacheSize()
-    @State private var showCacheCleared = false
+    @State private var cacheSizeLabel = CacheService.formattedCacheSizeSync()
+    @State private var cacheClearedMessage: String?
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -61,12 +61,18 @@ struct ProfileSheetView: View {
                 }
             }
             .task {
-                cacheSizeLabel = CacheService.formattedCacheSize()
+                await refreshCacheSizeLabel()
             }
-            .alert("Cache Cleared", isPresented: $showCacheCleared) {
-                Button("OK", role: .cancel) {}
+            .alert(
+                "Cache Cleared",
+                isPresented: Binding(
+                    get: { cacheClearedMessage != nil },
+                    set: { if !$0 { cacheClearedMessage = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { cacheClearedMessage = nil }
             } message: {
-                Text("Temporary files and network cache have been removed.")
+                Text(cacheClearedMessage ?? "")
             }
         }
     }
@@ -96,7 +102,7 @@ struct ProfileSheetView: View {
                 showCountryPicker = true
             } label: {
                 HStack {
-                    Text("Change passport country")
+                    Text("Change nationality")
                         .font(Theme.FontToken.inter(11, weight: .medium))
                     Spacer()
                     Text("›")
@@ -108,14 +114,11 @@ struct ProfileSheetView: View {
 
             if appEnv.auth.isAuthenticated {
                 Button("退出登录") {
-                    Task {
-                        await appEnv.profileSync.pushToRemote()
-                        try? await appEnv.auth.signOut()
-                    }
+                    Task { await appEnv.signOutAndReset() }
                 }
                 .font(Theme.FontToken.inter(11, weight: .medium))
                 .foregroundStyle(.red)
-            } else {
+            } else if !AppConfig.useMock {
                 Button("登录 / 注册 →") {
                     showLogin = true
                 }
@@ -183,14 +186,39 @@ struct ProfileSheetView: View {
             }
             .buttonStyle(.plain)
 
-            Button {
-                CacheService.clearCache()
-                cacheSizeLabel = CacheService.formattedCacheSize()
-                showCacheCleared = true
-            } label: {
-                settingsRow("Clear Cache", value: cacheSizeLabel)
+            settingsRow("Cache Size", value: cacheSizeLabel)
+
+            cacheClearButton(
+                "Clear Temporary Cache",
+                detail: "Session temp files and HTTP cache"
+            ) {
+                await CacheService.clear(.temporary)
+                cacheClearedMessage = "Temporary files and HTTP cache have been removed. Offline content is unchanged."
             }
-            .buttonStyle(.plain)
+
+            cacheClearButton(
+                "Clear Offline Content",
+                detail: "Cached cities, attractions, tips"
+            ) {
+                await CacheService.clear(.offlineContent)
+                cacheClearedMessage = "Offline CMS content cache has been removed."
+            }
+
+            cacheClearButton(
+                "Clear Cover Images",
+                detail: "Cached guide cover photos"
+            ) {
+                await CacheService.clear(.coverImages)
+                cacheClearedMessage = "Cached cover images have been removed."
+            }
+
+            cacheClearButton(
+                "Clear Downloaded Audio",
+                detail: "Offline audio guides"
+            ) {
+                await CacheService.clear(.downloadedAudio)
+                cacheClearedMessage = "Downloaded audio files have been removed."
+            }
 
             Button {
                 openFeedbackEmail()
@@ -230,6 +258,38 @@ struct ProfileSheetView: View {
                     .padding(.horizontal, Theme.screenPadding)
             }
         }
+    }
+
+    private func cacheClearButton(
+        _ label: String,
+        detail: String,
+        action: @escaping () async -> Void
+    ) -> some View {
+        Button {
+            Task {
+                await action()
+                await refreshCacheSizeLabel()
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(Theme.FontToken.inter(14))
+                Text(detail)
+                    .font(Theme.FontToken.inter(10))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 12)
+            .padding(.horizontal, Theme.screenPadding)
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func refreshCacheSizeLabel() async {
+        cacheSizeLabel = await CacheService.formattedCacheSize()
     }
 
     private func settingsRow(_ label: String, value: String?) -> some View {

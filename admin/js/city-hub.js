@@ -85,7 +85,6 @@
         <button type="button" class="hub-tab active" data-tab="overview">概览</button>
         <button type="button" class="hub-tab" data-tab="attractions">景点与解说</button>
         <button type="button" class="hub-tab" data-tab="audio">音频导览</button>
-        <button type="button" class="hub-tab" data-tab="routes">路线</button>
         <button type="button" class="hub-tab" data-tab="hotels">酒店</button>
         <button type="button" class="hub-tab" data-tab="checklist">行前清单</button>
       </nav>
@@ -97,7 +96,6 @@
       if (tab === "overview") await App.renderCityOverview(cityId, panel);
       else if (tab === "attractions") await App.renderCityAttractionsList(cityId, panel);
       else if (tab === "audio") await App.renderCityAudioHub(cityId, panel);
-      else if (tab === "routes") await App.renderCitySubTable(cityId, panel, "city_routes");
       else if (tab === "hotels") await App.renderCitySubTable(cityId, panel, "hotels");
       else if (tab === "checklist") await App.renderCityChecklist(cityId, panel);
     };
@@ -122,7 +120,7 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       try {
-        const payload = await App.collectFormPayload(form, meta, city, false);
+        const payload = await App.collectFormPayload(form, meta, city, false, { table: "cities" });
         const { error: err } = await App.client.from("cities").update(payload).eq("id", cityId);
         if (err) throw err;
         App.showToast("城市信息已保存");
@@ -167,6 +165,7 @@
   App.openAttractionEditor = async function openAttractionEditor(attractionId, cityId) {
     App.attractionEditId = attractionId;
     App.currentView = "attraction_edit";
+    await App.loadRefCache();
     const isNew = !attractionId;
     let row = { city_id: cityId };
     if (!isNew) {
@@ -191,11 +190,15 @@
         <section class="editor-section"><h3>书面解说</h3><div id="attr-intro"></div></section>
         <section class="editor-section"><h3>西方游客贴士</h3><div id="attr-tips"></div></section>
         <section class="editor-section"><h3>周边推荐</h3><div id="attr-nearby"></div></section>
+        <section class="editor-section"><h3>子区域 / 展区</h3><div id="attr-subareas-list"></div>
+          <button type="button" class="btn btn-sm btn-secondary" id="add-sub-area">+ 添加子区域</button>
+        </section>
         <section class="editor-section"><h3>语音导览</h3><div id="attr-audio-list"></div>
           <button type="button" class="btn btn-sm btn-secondary" id="add-audio-guide">+ 添加音频导览</button>
         </section>
         <div class="editor-actions">
           <button type="button" class="btn btn-secondary" id="cancel-attr-edit">取消</button>
+          ${isNew ? "" : '<button type="button" class="btn btn-danger" id="delete-attr-edit">删除景点</button>'}
           <button type="submit" class="btn">保存景点</button>
         </div>
       </form>`;
@@ -214,17 +217,215 @@
     fieldsHost.innerHTML = App.buildFormFieldsHtml(meta, row, editorCtx);
     App.mountFieldInteractions(form, meta, editorCtx);
 
+    const saMeta = App.TABLES.sub_areas;
+    let guideById = {};
+    const guidesForPicker = () =>
+      Object.values(guideById).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    editorCtx.fixedAttractionId = attractionId || "";
+    editorCtx.includeInactiveAudioGuides = true;
+    editorCtx.getAudioGuides = guidesForPicker;
+
+    const refreshAttractionGuides = async function refreshAttractionGuides() {
+      if (!attractionId) {
+        guideById = {};
+        return [];
+      }
+      const { data, error } = await App.client
+        .from("audio_guides")
+        .select("*")
+        .eq("attraction_id", attractionId)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      const guides = data || [];
+      guideById = Object.fromEntries(guides.map((g) => [g.id, g]));
+      App.attractionGuidesCache = App.attractionGuidesCache || {};
+      App.attractionGuidesCache[attractionId] = guides;
+      await App.loadRefCache(true);
+      return guides;
+    };
+
+    const mountSubAreaForm = (container, area, areaIsNew) => {
+      const hydrated = App.hydrateSubAreaRowForForm(area);
+      const saForm = document.createElement("div");
+      saForm.className = "sub-area-inline-form";
+      if (attractionId) saForm.dataset.attractionId = attractionId;
+      const saCtx = {
+        isNew: areaIsNew,
+        pk: "id",
+        fixedAttractionId: attractionId,
+        formEl: saForm,
+      };
+      saForm.innerHTML =
+        App.renderHiddenContextFields(saCtx, saMeta) +
+        saMeta.fields
+          .filter((f) => f.key !== "attraction_id" && f.key !== "id" && f.type !== "section")
+          .map((f) => {
+            let raw = hydrated[f.key];
+            if (f.key === "body" && !raw && Array.isArray(hydrated.content_blocks) && hydrated.content_blocks.length) {
+              raw = App.contentBlocksToHtml(hydrated.content_blocks);
+            }
+            return App.renderFieldBlock(f, App.fieldToFormValue(f, raw), saCtx);
+          })
+          .join("") +
+        (hydrated.id ? `<input type="hidden" name="id" value="${App.escapeHtml(hydrated.id)}" />` : "");
+      container.appendChild(saForm);
+      App.mountFieldInteractions(saForm, saMeta, saCtx);
+      App.bindDeferredQuillHosts(saForm);
+      App.setupSubAreaAudioControls(saForm, { row: hydrated, fixedAttractionId: attractionId });
+
+      const actions = document.createElement("div");
+      actions.className = "inline-form-actions";
+      const saveBtn = document.createElement("button");
+      saveBtn.type = "button";
+      saveBtn.className = "btn btn-sm";
+      saveBtn.textContent = areaIsNew ? "创建子区域" : "保存子区域";
+      saveBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const prevLabel = saveBtn.textContent;
+        saveBtn.disabled = true;
+        saveBtn.textContent = "保存中…";
+        try {
+          if (saForm.dataset.audioUploading === "1") {
+            throw new Error("音频仍在上传中，请稍候再保存");
+          }
+          const payload = await App.collectFormPayload(saForm, saMeta, area || {}, areaIsNew, {
+            table: "sub_areas",
+            fixedAttractionId: attractionId,
+          });
+          if (!payload.id) payload.id = App.slugify(payload.name_en || "area", "area");
+          if (!payload.name_en?.trim()) throw new Error("请填写子区域英文名");
+          payload.attraction_id = attractionId;
+          const imageField = saMeta.fields.find((f) => f.type === "image_upload");
+          if (imageField) {
+            const fileInput = App.formFileInput(saForm, imageField.key);
+            if (fileInput?.files?.[0]) {
+              payload.cover_image_path = await App.uploadCoverImage(
+                fileInput.files[0],
+                imageField.uploadFolder || "attractions",
+                payload.id
+              );
+            }
+          }
+          const audioUp = App.formFileInput(saForm, "_sa_audio_upload");
+          if (audioUp?.files?.[0]) {
+            payload.audio_url = await App.uploadSubAreaAudioFile(audioUp.files[0], payload.id);
+            saForm.dataset.pendingAudioUrl = payload.audio_url;
+          } else {
+            const resolved = App.resolveSubAreaAudioUrl(saForm, area);
+            if (resolved !== undefined) payload.audio_url = resolved;
+          }
+          App.fillTableDefaults(payload, "sub_areas");
+          payload.content_blocks = [];
+          for (const key of Object.keys(payload)) {
+            if (key.startsWith("_")) delete payload[key];
+          }
+          const rowPayload = App.sanitizePayloadForTable(payload, "sub_areas", {
+            omitId: !areaIsNew,
+          });
+          const saveSubArea = async (data) => {
+            if (areaIsNew) return App.client.from("sub_areas").insert(data);
+            return App.client.from("sub_areas").update(data).eq("id", area.id);
+          };
+          let { error: err } = await saveSubArea(rowPayload);
+          if (err && /body/i.test(err.message || "") && /column/i.test(err.message || "")) {
+            const withoutBody = { ...rowPayload };
+            delete withoutBody.body;
+            ({ error: err } = await saveSubArea(withoutBody));
+            if (!err) {
+              App.showToast("已保存（正文列未就绪：请在 Supabase 执行 032_sub_area_body.sql）", "error");
+            }
+          }
+          if (err && /audio_url/i.test(err.message || "") && /column/i.test(err.message || "")) {
+            const withoutAudio = { ...rowPayload };
+            delete withoutAudio.audio_url;
+            ({ error: err } = await saveSubArea(withoutAudio));
+            if (!err) {
+              App.showToast("已保存（音频列未就绪：请在 Supabase 执行 033_sub_area_audio_url.sql）", "error");
+            }
+          }
+          if (err) throw new Error(err.message || "保存失败");
+          delete saForm.dataset.pendingAudioUrl;
+          App.showToast("子区域已保存");
+          await renderSubAreasSection();
+        } catch (ex) {
+          App.showToast(ex?.message || String(ex), "error");
+          console.error("子区域保存失败", ex);
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = prevLabel;
+        }
+      });
+      if (!areaIsNew && area.id) {
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "btn btn-sm btn-danger";
+        delBtn.textContent = "删除";
+        delBtn.addEventListener("click", async () => {
+          if (!confirm("确定删除该子区域？")) return;
+          const { error: err } = await App.client.from("sub_areas").delete().eq("id", area.id);
+          if (err) App.showToast(err.message, "error");
+          else {
+            App.showToast("已删除");
+            await renderSubAreasSection();
+          }
+        });
+        actions.appendChild(delBtn);
+      }
+      actions.appendChild(saveBtn);
+      container.appendChild(actions);
+    };
+
+    const renderSubAreasSection = async () => {
+      const listEl = App.$("#attr-subareas-list");
+      if (isNew) {
+        listEl.innerHTML = `<p class="muted">请先保存景点，再添加子区域。</p>`;
+        return;
+      }
+      try {
+        await refreshAttractionGuides();
+      } catch (ex) {
+        listEl.innerHTML = `<div class="status-bar error">${App.escapeHtml(ex.message)}</div>`;
+        return;
+      }
+      const { data: areas, error } = await App.client
+        .from("sub_areas")
+        .select("*")
+        .eq("attraction_id", attractionId)
+        .order("sort_order", { ascending: true });
+      if (error) {
+        listEl.innerHTML = `<div class="status-bar error">${App.escapeHtml(error.message)}</div>`;
+        return;
+      }
+      App.destroyQuillInRoot(listEl);
+      listEl.innerHTML = "";
+      if (!(areas || []).length) {
+        listEl.innerHTML = `<p class="muted">暂无子区域。可点击下方「+ 添加子区域」。</p>`;
+      } else {
+        (areas || []).forEach((area) => {
+          const block = document.createElement("details");
+          block.className = "sub-area-block";
+          block.open = true;
+          block.innerHTML = `<summary>${App.escapeHtml(area.name_zh || area.name_en)}${area.is_active === false ? " (停用)" : ""}</summary><div class="sub-area-fields"></div>`;
+          mountSubAreaForm(block.querySelector(".sub-area-fields"), area, false);
+          listEl.appendChild(block);
+        });
+      }
+    };
+
     const renderAudioSection = async () => {
       const listEl = App.$("#attr-audio-list");
       if (isNew) {
         listEl.innerHTML = `<p class="muted">请先保存景点，再添加音频导览。</p>`;
         return;
       }
-      const { data: guides } = await App.client
-        .from("audio_guides")
-        .select("*")
-        .eq("attraction_id", attractionId)
-        .order("sort_order", { ascending: true });
+      let guides;
+      try {
+        guides = await refreshAttractionGuides();
+      } catch (ex) {
+        listEl.innerHTML = `<div class="status-bar error">${App.escapeHtml(ex.message)}</div>`;
+        return;
+      }
       let html = "";
       (guides || []).forEach((g) => {
         html += `<details class="audio-guide-block" open>
@@ -267,10 +468,14 @@
             if (audioUp?.files?.[0]) {
               payload.audio_url = await App.uploadAudioGuideFile(audioUp.files[0], g.id);
             }
+            App.fillTableDefaults(payload, "audio_guides");
             const { error: err } = await App.client.from("audio_guides").update(payload).eq("id", g.id);
             if (err) throw err;
+            await App.syncAttractionAudioGuideCount(attractionId);
+            await App.loadRefCache(true);
             App.showToast("音频导览已保存");
             await renderAudioSection();
+            await renderSubAreasSection();
           } catch (ex) {
             App.showToast(ex.message, "error");
           }
@@ -279,10 +484,36 @@
       }
     };
 
+    await renderSubAreasSection();
     await renderAudioSection();
 
     App.$("#hub-back-attr")?.addEventListener("click", () => App.openCityHub(cityId));
     App.$("#cancel-attr-edit")?.addEventListener("click", () => App.openCityHub(cityId));
+    App.$("#delete-attr-edit")?.addEventListener("click", async () => {
+      if (!attractionId || !confirm("确定删除该景点？关联子区域与音频需已手动处理或将被级联删除。")) return;
+      const { error: err } = await App.client.from("attractions").delete().eq("id", attractionId);
+      if (err) {
+        App.showToast(err.message, "error");
+        return;
+      }
+      App.showToast("景点已删除");
+      await App.loadRefCache(true);
+      App.openCityHub(cityId);
+    });
+    App.$("#add-sub-area")?.addEventListener("click", () => {
+      if (isNew) {
+        App.showToast("请先保存景点", "error");
+        return;
+      }
+      const listEl = App.$("#attr-subareas-list");
+      listEl.querySelector(".muted")?.remove();
+      const block = document.createElement("details");
+      block.className = "sub-area-block sub-area-block--new";
+      block.open = true;
+      block.innerHTML = `<summary>新建子区域</summary><div class="sub-area-fields"></div>`;
+      mountSubAreaForm(block.querySelector(".sub-area-fields"), { body: "", is_active: true, sort_order: 0 }, true);
+      listEl.prepend(block);
+    });
     App.$("#add-audio-guide")?.addEventListener("click", () => {
       if (isNew) {
         App.showToast("请先保存景点", "error");
@@ -291,14 +522,21 @@
       App.openModal({ attraction_id: attractionId }, "audio_guides", {
         fixedCityId: cityId,
         fixedAttractionId: attractionId,
-        onSaved: () => renderAudioSection(),
+        onSaved: async () => {
+          await App.loadRefCache(true);
+          await renderAudioSection();
+          await renderSubAreasSection();
+        },
       });
     });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       try {
-        const payload = await App.collectFormPayload(form, meta, row, isNew, editorCtx);
+        const payload = await App.collectFormPayload(form, meta, row, isNew, {
+          ...editorCtx,
+          table: "attractions",
+        });
         let err;
         if (isNew) {
           ({ error: err } = await App.client.from("attractions").insert(payload));
@@ -306,10 +544,15 @@
           ({ error: err } = await App.client.from("attractions").update(payload).eq("id", attractionId));
         }
         if (err) throw err;
+        const savedId = payload.id || attractionId;
+        await App.syncAttractionAudioGuideCount(savedId);
         App.showToast("景点已保存");
         await App.loadRefCache(true);
         if (isNew && payload.id) App.openAttractionEditor(payload.id, cityId);
-        else await renderAudioSection();
+        else {
+          await renderSubAreasSection();
+          await renderAudioSection();
+        }
       } catch (ex) {
         App.showToast(ex.message, "error");
       }
@@ -351,6 +594,7 @@
     panel.innerHTML = html;
     App.$("#new-audio", panel)?.addEventListener("click", () => {
       App.openModal(null, "audio_guides", {
+        fixedCityId: cityId,
         onSaved: () => App.renderCityAudioHub(cityId, panel),
       });
     });
@@ -409,30 +653,70 @@
   };
 
   App.renderCityChecklist = async function renderCityChecklist(cityId, panel) {
-    panel.innerHTML = `<div class="hub-toolbar"><button type="button" class="btn" id="hub-new-cl">+ 新建清单项</button></div><p class="muted">显示本城市专属项 + 全局项</p><div id="hub-cl-host"></div>`;
+    const meta = App.TABLES.checklist_items;
+    panel.innerHTML = `<div class="hub-toolbar">
+      <button type="button" class="btn" id="hub-new-cl">+ 新建清单项</button>
+      <select id="hub-cl-type-filter" class="search-input">
+        <option value="">全部类型</option>
+        ${(meta.fields.find((f) => f.key === "type")?.options || [])
+          .map((o) => `<option value="${App.escapeHtml(o.value)}">${App.escapeHtml(o.label)}</option>`)
+          .join("")}
+      </select>
+    </div>
+    <p class="muted">显示：入境/通用项 + 本城市相关项（含 target_cities）</p>
+    <div id="hub-cl-host"></div>`;
+
     App.$("#hub-new-cl", panel).addEventListener("click", () => {
-      App.openModal({ city_id: cityId }, "checklist_items", {
+      App.openModal(App.getChecklistCreateDefaults({ fixedCityId: cityId }), "checklist_items", {
+        fixedCityId: cityId,
         onSaved: () => App.renderCityChecklist(cityId, panel),
       });
     });
+
     const { data, error } = await App.client.from("checklist_items").select("*").order("sort_order");
     if (error) {
       App.$("#hub-cl-host", panel).innerHTML = `<div class="status-bar error">${error.message}</div>`;
       return;
     }
-    const rows = (data || []).filter((r) => !r.city_id || r.city_id === cityId);
-    let html = `<div class="table-wrap"><table><thead><tr><th>标题</th><th>城市</th><th>阶段</th><th></th></tr></thead><tbody>`;
-    rows.forEach((row) => {
-      html += `<tr><td>${App.escapeHtml(row.title_en)}</td><td>${row.city_id ? App.cityLabel(row.city_id) : "全局"}</td><td>${App.escapeHtml(row.phase)}</td>
-        <td><button class="btn btn-sm btn-secondary" data-edit-cl="${App.escapeHtml(row.id)}">编辑</button></td></tr>`;
-    });
-    html += `</tbody></table></div>`;
-    App.$("#hub-cl-host", panel).innerHTML = html;
-    panel.querySelectorAll("[data-edit-cl]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const { data: row } = await App.client.from("checklist_items").select("*").eq("id", btn.dataset.editCl).single();
-        App.openModal(row, "checklist_items", { onSaved: () => App.renderCityChecklist(cityId, panel) });
+
+    const host = App.$("#hub-cl-host", panel);
+    const typeFilterEl = App.$("#hub-cl-type-filter", panel);
+    let typeFilter = "";
+
+    const paint = () => {
+      let rows = App.filterChecklistRowsByCity(data || [], cityId);
+      rows = App.filterChecklistRowsByType(rows, typeFilter);
+      host.innerHTML = App.renderTableBody("checklist_items", rows);
+      host.querySelectorAll("[data-edit-id]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const { data: row } = await App.client
+            .from("checklist_items")
+            .select("*")
+            .eq("id", btn.dataset.editId)
+            .single();
+          App.openModal(row, "checklist_items", {
+            fixedCityId: cityId,
+            onSaved: () => App.renderCityChecklist(cityId, panel),
+          });
+        });
       });
+      host.querySelectorAll("[data-del]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!confirm("确定删除该清单项？")) return;
+          const { error: err } = await App.client.from("checklist_items").delete().eq("id", btn.dataset.del);
+          if (err) App.showToast(err.message, "error");
+          else {
+            App.showToast("已删除");
+            await App.renderCityChecklist(cityId, panel);
+          }
+        });
+      });
+    };
+
+    typeFilterEl?.addEventListener("change", (e) => {
+      typeFilter = e.target.value;
+      paint();
     });
+    paint();
   };
 })();

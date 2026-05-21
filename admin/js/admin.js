@@ -21,6 +21,10 @@
       }
       App.showApp(App.session.user.email);
       await App.loadRefCache();
+      const storageProbe = await App.probeStorageAccess();
+      if (!storageProbe.ok) {
+        App.showToast(`Storage 不可达：${storageProbe.message}`, "error");
+      }
       await App.loadCurrentSection();
     } catch (err) {
       const box = App.$("#login-error");
@@ -68,7 +72,7 @@
       if (App.currentView === "city_hub") {
         App.openModal(null, "cities", { onSaved: () => App.renderCityHubList() });
       } else if (App.currentTable) {
-        App.openModal(null, App.currentTable);
+        App.openModal(null, App.currentTable, App.getTableCreateContext(App.currentTable));
       }
     });
   }
@@ -94,14 +98,23 @@
     const meta = App.TABLES[App.currentTable];
     if (!meta) return;
 
+    App.tableListCtx.search = "";
+    App.tableListCtx.typeFilter = "";
+    const storedCity = sessionStorage.getItem(App.tableFilterStorageKey(App.currentTable));
+    App.tableListCtx.cityId = storedCity || "";
+    const storedType = sessionStorage.getItem(App.tableTypeFilterStorageKey(App.currentTable));
+    App.tableListCtx.typeFilter = storedType || "";
+
     App.$("#page-title").textContent = meta.label;
-    addBtn.classList.toggle("hidden", !!meta.single);
+    addBtn.classList.toggle("hidden", !!meta.single || !!meta.noCreate);
     addBtn.textContent = "+ 新建";
 
     if (App.currentTable === "app_settings") {
       await App.renderAppSettings();
     } else if (App.currentTable === "emergency_config") {
       await App.renderEmergencyConfig();
+    } else if (App.currentTable === "checklist_settings") {
+      await App.renderChecklistSettings();
     } else {
       await App.renderTable(App.currentTable);
     }
@@ -131,6 +144,10 @@
         }
         App.showApp(App.session.user.email);
         await App.loadRefCache();
+        const storageProbe = await App.probeStorageAccess();
+        if (!storageProbe.ok) {
+          App.showToast(`Storage 不可达：${storageProbe.message}`, "error");
+        }
         App.currentView = "city_hub";
         setActiveNav(App.$('.nav-btn[data-view="city_hub"]'));
         await App.loadCurrentSection();

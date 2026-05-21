@@ -1,136 +1,8 @@
 import SwiftUI
 
 enum PlanRoute: Hashable {
-    case cityOverview(City)
-    case generator
-    case itineraryDetail(SampleItinerary)
-}
-
-// MARK: - City Overview
-
-struct CityOverviewView: View {
-    @Environment(AppEnvironment.self) private var appEnv
-    @Environment(\.dismiss) private var dismiss
-
-    let city: City
-    var onOpenGenerator: () -> Void = {}
-    @State private var routes: [CityRoute] = []
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                coverHeader
-                infoSection
-                routesSection
-                actionButtons
-            }
-        }
-        .background(Theme.ColorToken.background)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button("← Plan") { dismiss() }
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-            }
-        }
-        .task {
-            routes = (try? await appEnv.content.fetchCityRoutes(cityId: city.id)) ?? []
-        }
-    }
-
-    private var coverHeader: some View {
-        ZStack(alignment: .bottomLeading) {
-            Rectangle()
-                .fill(Theme.ColorToken.backgroundSubtle)
-                .frame(height: 160)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(city.name)
-                    .font(Theme.FontToken.playfair(28, weight: .semibold))
-                Text(city.chineseName)
-                    .font(Theme.FontToken.inter(14))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-            }
-            .padding(Theme.screenPadding)
-        }
-    }
-
-    private var infoSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            FlowLayoutTags(tags: city.bestFor)
-            if let note = city.seasonNote {
-                Text("📅 \(city.bestTimeToVisit ?? "")\n❄️ \(note)")
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textSecondary)
-                    .lineSpacing(4)
-            }
-            if let days = city.avgDaysRecommended {
-                Text("📍 Recommended stay: \(days)–\(days + 2) days")
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textSecondary)
-            }
-        }
-        .padding(Theme.screenPadding)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.ColorToken.border).frame(height: 1)
-        }
-    }
-
-    private var routesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Recommended Routes")
-                .sectionTitleStyle()
-            ForEach(routes) { route in
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("\(route.days) days")
-                        .font(Theme.FontToken.inter(10, weight: .medium))
-                        .foregroundStyle(Theme.ColorToken.accent)
-                    Text(route.title)
-                        .font(Theme.FontToken.playfair(15, weight: .semibold))
-                    Text(route.summary)
-                        .font(Theme.FontToken.inter(12))
-                        .foregroundStyle(Theme.ColorToken.textMuted)
-                        .lineSpacing(3)
-                }
-                .padding(14)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
-            }
-        }
-        .padding(Theme.screenPadding)
-    }
-
-    private var actionButtons: some View {
-        HStack(spacing: 10) {
-            Button {
-                appEnv.navigation.openAssistantPlanning()
-                dismiss()
-            } label: {
-                Text("🤖 Plan with AI Chat")
-                    .font(Theme.FontToken.inter(11, weight: .medium))
-                    .foregroundStyle(.white)
-                    .textCase(.uppercase)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                    .background(Theme.ColorToken.textPrimary)
-            }
-            .buttonStyle(.plain)
-
-            Button {
-                onOpenGenerator()
-            } label: {
-                Text("⚡ Quick Plan")
-                    .font(Theme.FontToken.inter(11, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.textPrimary)
-                    .textCase(.uppercase)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                    .overlay(Rectangle().stroke(Theme.ColorToken.textPrimary, lineWidth: 1))
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(Theme.screenPadding)
-    }
+    case create
+    case detail(SampleItinerary)
 }
 
 struct FlowLayoutTags: View {
@@ -150,171 +22,6 @@ struct FlowLayoutTags: View {
     }
 }
 
-// MARK: - Generator
-
-struct ItineraryGeneratorView: View {
-    @Environment(AppEnvironment.self) private var appEnv
-
-    var onGenerated: (SampleItinerary) -> Void = { _ in }
-
-    @State private var selectedCities: Set<String> = []
-    @State private var tripDays = 10
-    @State private var styles: Set<String> = ["History", "Food"]
-    @State private var isGenerating = false
-    @State private var cities: [City] = []
-
-    private let styleOptions = ["History", "Culture", "Food", "Nature", "Nightlife"]
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Quick Plan")
-                    .font(Theme.FontToken.playfair(22, weight: .semibold))
-
-                Text("Cities")
-                    .sectionTitleStyle()
-                ForEach(cities) { city in
-                    Button {
-                        toggleCity(city.id)
-                    } label: {
-                        HStack {
-                            Text("\(city.emoji ?? "") \(city.name)")
-                            Spacer()
-                            if selectedCities.contains(city.id) {
-                                Image(systemName: "checkmark").foregroundStyle(Theme.ColorToken.accent)
-                            }
-                        }
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                Stepper("Trip length: \(tripDays) days", value: $tripDays, in: 3...21)
-
-                Text("Travel style")
-                    .sectionTitleStyle()
-                WrapStyleChips(options: styleOptions, selection: $styles)
-
-                Button {
-                    generate()
-                } label: {
-                    HStack {
-                        if isGenerating {
-                            ProgressView().tint(.white)
-                        }
-                        Text(isGenerating ? "Crafting your itinerary..." : "Generate Itinerary")
-                    }
-                    .font(Theme.FontToken.inter(12, weight: .medium))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 15)
-                    .background(Theme.ColorToken.textPrimary)
-                }
-                .buttonStyle(.plain)
-                .disabled(isGenerating || selectedCities.isEmpty)
-            }
-            .padding(Theme.screenPadding)
-        }
-        .task {
-            cities = (try? await appEnv.content.fetchCities()) ?? []
-            selectedCities = Set(appEnv.preferences.selectedCityIds)
-        }
-    }
-
-    private func toggleCity(_ id: String) {
-        if selectedCities.contains(id) {
-            selectedCities.remove(id)
-        } else {
-            selectedCities.insert(id)
-        }
-    }
-
-    private func generate() {
-        isGenerating = true
-        Task {
-            try? await Task.sleep(for: .seconds(1.2))
-            let style = styles.sorted().joined(separator: ", ")
-            if let trip = try? await AIService.generateItinerary(
-                content: appEnv.content,
-                cities: Array(selectedCities),
-                days: tripDays,
-                style: style
-            ) {
-                appEnv.preferences.selectedCityIds = Array(selectedCities)
-                appEnv.preferences.saveItinerary(trip)
-                onGenerated(trip)
-                Task { await appEnv.profileSync.pushToRemote() }
-            }
-            isGenerating = false
-        }
-    }
-}
-
-struct WrapStyleChips: View {
-    let options: [String]
-    @Binding var selection: Set<String>
-
-    var body: some View {
-        FlowLayout(spacing: 8) {
-            ForEach(options, id: \.self) { option in
-                Button {
-                    if selection.contains(option) {
-                        selection.remove(option)
-                    } else {
-                        selection.insert(option)
-                    }
-                } label: {
-                    Text(option)
-                        .font(Theme.FontToken.inter(11))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(selection.contains(option) ? Theme.ColorToken.textPrimary : Theme.ColorToken.background)
-                        .foregroundStyle(selection.contains(option) ? .white : Theme.ColorToken.textPrimary)
-                        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-}
-
-/// Simple flow layout for chips
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = arrange(proposal: proposal, subviews: subviews)
-        return result.size
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = arrange(proposal: proposal, subviews: subviews)
-        for (index, frame) in result.frames.enumerated() {
-            subviews[index].place(at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY), proposal: .unspecified)
-        }
-    }
-
-    private func arrange(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, frames: [CGRect]) {
-        let maxWidth = proposal.width ?? 0
-        var x: CGFloat = 0
-        var y: CGFloat = 0
-        var rowHeight: CGFloat = 0
-        var frames: [CGRect] = []
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            if x + size.width > maxWidth, x > 0 {
-                x = 0
-                y += rowHeight + spacing
-                rowHeight = 0
-            }
-            frames.append(CGRect(origin: CGPoint(x: x, y: y), size: size))
-            rowHeight = max(rowHeight, size.height)
-            x += size.width + spacing
-        }
-        return (CGSize(width: maxWidth, height: y + rowHeight), frames)
-    }
-}
-
 // MARK: - Detail
 
 struct ItineraryDetailView: View {
@@ -325,6 +32,11 @@ struct ItineraryDetailView: View {
     @State private var segment: DetailSegment = .itinerary
     @State private var showShare = false
     @State private var showEdit = false
+    @State private var editableDays: [ItineraryDay] = []
+    @State private var editMode: EditMode = .inactive
+    @State private var attractionCache: [String: Attraction] = [:]
+    @State private var cities: [City] = []
+    @State private var addAttractionContext: PlanAddAttractionContext?
 
     enum DetailSegment { case itinerary, book }
 
@@ -355,6 +67,9 @@ struct ItineraryDetailView: View {
                 Text(itinerary.meta)
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
+                Text(String(format: String(localized: "%lld days total"), currentItinerary.days.count))
+                    .font(Theme.FontToken.inter(11, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, Theme.screenPadding)
@@ -371,15 +86,93 @@ struct ItineraryDetailView: View {
             if segment == .itinerary {
                 itineraryScroll
             } else {
-                BookYourTripView(itinerary: itinerary)
+                BookYourTripView(itinerary: currentItinerary)
             }
         }
         .background(Theme.ColorToken.background)
         .sheet(isPresented: $showShare) {
-            ShareItinerarySheet(itinerary: itinerary)
+            ShareItinerarySheet(itinerary: currentItinerary)
         }
         .sheet(isPresented: $showEdit) {
-            ItineraryEditSheet(itinerary: itinerary)
+            ItineraryEditorView(itinerary: currentItinerary) { updated in
+                editableDays = updated.days
+            }
+        }
+        .onAppear {
+            editableDays = itinerary.days
+        }
+        .task(id: itinerary.id) {
+            cities = (try? await appEnv.content.fetchCities()) ?? []
+            await loadAttractionCache()
+        }
+        .onChange(of: editableDays) { _, _ in
+            Task { await loadAttractionCache() }
+        }
+        .sheet(item: $addAttractionContext) { ctx in
+            PlanAttractionPickerSheet(cityIds: ctx.cityIds, dayIndex: ctx.dayIndex) { attraction in
+                appendAttraction(attraction, dayIndex: ctx.dayIndex)
+                addAttractionContext = nil
+            }
+        }
+    }
+
+    private func loadAttractionCache() async {
+        var cache: [String: Attraction] = [:]
+        let ids = Set(currentItinerary.days.flatMap(\.activities).compactMap(\.attractionId))
+        for id in ids {
+            if let a = try? await appEnv.content.fetchAttraction(id: id) {
+                cache[id] = a
+            }
+        }
+        attractionCache = cache
+    }
+
+    private var tripCityIds: [String] {
+        PlanTripCities.cityIds(
+            itinerary: currentItinerary,
+            selectedCityIds: appEnv.preferences.selectedCityIds,
+            attractionCache: attractionCache
+        )
+    }
+
+    private var cityNameById: [String: String] {
+        Dictionary(uniqueKeysWithValues: cities.map { ($0.id, $0.name) })
+    }
+
+    private func appendAttraction(_ attraction: Attraction, dayIndex: Int) {
+        guard editableDays.indices.contains(dayIndex) else { return }
+        let activity = ItineraryActivity(
+            id: UUID().uuidString,
+            name: attraction.name,
+            detail: HTMLContentView.plainText(from: attraction.summary ?? attraction.shortDescription ?? ""),
+            attractionId: attraction.id,
+            cityId: attraction.cityId,
+            hasAudio: attraction.audioGuideCount > 0
+        )
+        var day = editableDays[dayIndex]
+        day = day.withActivities(day.activities + [activity])
+        editableDays[dayIndex] = day
+        attractionCache[attraction.id] = attraction
+        persistItineraryOrder()
+    }
+
+    private var currentItinerary: SampleItinerary {
+        SampleItinerary(
+            id: itinerary.id,
+            title: itinerary.title,
+            meta: itinerary.meta,
+            routeSummary: itinerary.routeSummary,
+            estimatedBudget: itinerary.estimatedBudget,
+            days: editableDays.isEmpty ? itinerary.days : editableDays
+        )
+    }
+
+    private var addAttractionButtonLabel: some View {
+        HStack(spacing: 3) {
+            Image(systemName: "plus")
+                .font(.system(size: 7, weight: .medium))
+            Text(String(localized: "Add attraction"))
+                .font(Theme.FontToken.inter(9, weight: .medium))
         }
     }
 
@@ -398,102 +191,262 @@ struct ItineraryDetailView: View {
     }
 
     private var itineraryScroll: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                ForEach(itinerary.days) { day in
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text(day.dateLabel)
-                                .font(Theme.FontToken.playfair(14, weight: .semibold))
-                            Spacer()
-                            if let cost = day.costEstimate {
-                                Text(cost)
-                                    .font(Theme.FontToken.inter(11))
-                                    .foregroundStyle(Theme.ColorToken.textMuted)
+        VStack(spacing: 0) {
+            Text("Drag to reorder days and activities. Tap Done when finished.")
+                .font(Theme.FontToken.inter(11))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, Theme.screenPadding)
+                .padding(.vertical, 10)
+                .background(Theme.ColorToken.backgroundSubtle)
+
+            List {
+                ForEach(editableDays.indices, id: \.self) { dayIndex in
+                    let day = editableDays[dayIndex]
+                    Section {
+                        daySectionHeader(day)
+
+                        if day.isExperienceSuggestions {
+                            ExperienceSuggestionsDayCard(
+                                day: day,
+                                cityDisplayName: experienceCityDisplayName(day)
+                            ) {
+                                askAssistantForExperience(day: day)
                             }
-                        }
-                        ForEach(day.activities) { activity in
-                            HStack(alignment: .top, spacing: 10) {
-                                Text(activity.timeSlot)
-                                    .font(Theme.FontToken.inter(10, weight: .medium))
-                                    .foregroundStyle(Theme.ColorToken.textDisabled)
-                                    .frame(width: 28, alignment: .leading)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(activity.name)
-                                        .font(Theme.FontToken.inter(13))
-                                    Text(activity.detail)
-                                        .font(Theme.FontToken.inter(11))
-                                        .foregroundStyle(Theme.ColorToken.textMuted)
-                                }
-                                if activity.hasAudio, let aid = activity.attractionId {
-                                    Button("🎧") {
-                                        appEnv.navigation.openGuide(attractionId: aid, cityId: nil)
-                                    }
-                                    .font(Theme.FontToken.inter(10))
-                                }
+                            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Theme.ColorToken.background)
+                        } else {
+                            ForEach(day.activities.indices, id: \.self) { actIndex in
+                                activityRow(day.activities[actIndex], dayIndex: dayIndex)
                             }
+                            .onMove { source, destination in
+                                moveActivities(dayIndex: dayIndex, from: source, to: destination)
+                            }
+                            .onDelete { offsets in
+                                deleteActivities(dayIndex: dayIndex, at: offsets)
+                            }
+
+                            Button {
+                                addAttractionContext = PlanAddAttractionContext(
+                                    dayIndex: dayIndex,
+                                    cityIds: tripCityIds
+                                )
+                            } label: {
+                                addAttractionButtonLabel
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Theme.ColorToken.accent)
+                            .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 6, trailing: 16))
                         }
                     }
-                    .padding(.bottom, 8)
-                    Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
+                }
+                .onMove(perform: moveDays)
+            }
+            .listStyle(.plain)
+            .environment(\.editMode, $editMode)
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if editMode.isEditing {
+                    Button("Done") {
+                        editMode = .inactive
+                        persistItineraryOrder()
+                    }
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                } else {
+                    Button("Reorder") {
+                        editMode = .active
+                    }
+                    .font(Theme.FontToken.inter(12, weight: .medium))
                 }
             }
-            .padding(Theme.screenPadding)
         }
     }
-}
 
-struct ItineraryEditSheet: View {
-    @Environment(AppEnvironment.self) private var appEnv
-    @Environment(\.dismiss) private var dismiss
+    private func experienceCityDisplayName(_ day: ItineraryDay) -> String {
+        guard let cid = day.experienceCityId else { return "" }
+        return cityNameById[cid] ?? cid.capitalized
+    }
 
-    let itinerary: SampleItinerary
-    @State private var title: String = ""
-    @State private var meta: String = ""
+    private func askAssistantForExperience(day: ItineraryDay) {
+        let city = experienceCityDisplayName(day)
+        let topics = day.experienceItems.prefix(5).joined(separator: ", ")
+        let prefill = city.isEmpty
+            ? "Tell me more about these local experience ideas: \(topics)"
+            : "Tell me more about local experiences in \(city): \(topics)"
+        appEnv.navigation.presentAssistant(prefill: prefill)
+    }
 
-    var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Title", text: $title)
-                TextField("Meta (dates, style)", text: $meta)
-            }
-            .navigationTitle("Edit Trip")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+    private func daySectionHeader(_ day: ItineraryDay) -> some View {
+        let visited = day.isExperienceSuggestions
+            ? experienceCityDisplayName(day)
+            : PlanTripCities.visitedCityNames(
+                day: day,
+                cityNameById: cityNameById,
+                attractionCache: attractionCache
+            )
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text("Day \(day.dayIndex) · \(day.dateLabel)")
+                    .font(Theme.FontToken.playfair(14, weight: .semibold))
+                Spacer()
+                if let cost = day.costEstimate {
+                    Text(cost)
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        let updated = SampleItinerary(
-                            id: itinerary.id,
-                            title: title,
-                            meta: meta,
-                            routeSummary: itinerary.routeSummary,
-                            estimatedBudget: itinerary.estimatedBudget,
-                            days: itinerary.days
-                        )
-                        appEnv.preferences.saveItinerary(updated)
-                        dismiss()
+            }
+            if !visited.isEmpty {
+                Text(visited)
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+        }
+        .padding(.vertical, 8)
+        .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 4, trailing: 16))
+        .listRowSeparator(.hidden, edges: .top)
+        .listRowBackground(Theme.ColorToken.background)
+    }
+
+    private func activityRow(_ activity: ItineraryActivity, dayIndex: Int) -> some View {
+        let activityCityId = activity.cityId ?? activity.attractionId.flatMap { attractionCache[$0]?.cityId }
+        let showCity = tripCityIds.count > 1
+        let cityLabel = activityCityId.flatMap { cityNameById[$0] }
+
+        return Button {
+            if let aid = activity.attractionId {
+                appEnv.navigation.openGuide(
+                    attractionId: aid,
+                    cityId: activityCityId,
+                    presentation: .planDay(dayIndex: dayIndex)
+                )
+            }
+        } label: {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.ColorToken.textGhost)
+                    .opacity(editMode.isEditing ? 1 : 0)
+
+                activityCoverThumbnail(activity)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    if showCity, let cityLabel {
+                        Text(cityLabel)
+                            .font(Theme.FontToken.inter(10, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.textDisabled)
                     }
+                    Text(activity.name)
+                        .font(Theme.FontToken.inter(13, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.textPrimary)
+                    Text(activity.detail)
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                        .lineLimit(3)
+                }
+
+                Spacer(minLength: 0)
+
+                if activity.hasAudio {
+                    Text("🎧")
+                        .font(Theme.FontToken.inter(10))
                 }
             }
-            .onAppear {
-                title = itinerary.title
-                meta = itinerary.meta
+            .padding(.vertical, 4)
+        }
+        .buttonStyle(.plain)
+        .disabled(activity.attractionId == nil && !editMode.isEditing)
+    }
+
+    private func activityCoverThumbnail(_ activity: ItineraryActivity) -> some View {
+        let path: String? = {
+            guard let aid = activity.attractionId else { return nil }
+            let attraction = attractionCache[aid]
+            return attraction?.coverImagePath ?? attraction?.coverImages.first
+        }()
+        return CoverImageView(path: path, height: 56, cornerRadius: 4)
+            .frame(width: 56, height: 56)
+            .fixedSize()
+    }
+
+    private func deleteActivities(dayIndex: Int, at offsets: IndexSet) {
+        guard editableDays.indices.contains(dayIndex) else { return }
+        var activities = editableDays[dayIndex].activities
+        activities.remove(atOffsets: offsets)
+        editableDays[dayIndex] = editableDays[dayIndex].withActivities(activities)
+        persistItineraryOrder()
+    }
+
+    private func moveDays(from source: IndexSet, to destination: Int) {
+        editableDays.move(fromOffsets: source, toOffset: destination)
+        editableDays = editableDays.enumerated().map { index, day in
+            day.withDayIndex(index + 1)
+        }
+    }
+
+    private func moveActivities(dayIndex: Int, from source: IndexSet, to destination: Int) {
+        guard editableDays.indices.contains(dayIndex) else { return }
+        var activities = editableDays[dayIndex].activities
+        activities.move(fromOffsets: source, toOffset: destination)
+        editableDays[dayIndex] = editableDays[dayIndex].withActivities(activities)
+    }
+
+    private func persistItineraryOrder() {
+        editableDays = normalizeDays(editableDays)
+        let updated = currentItinerary
+        appEnv.preferences.saveItinerary(updated)
+    }
+
+    private func normalizeDays(_ days: [ItineraryDay]) -> [ItineraryDay] {
+        days.map { day in
+            if day.isExperienceSuggestions {
+                return ItineraryDay(
+                    id: day.id,
+                    dayIndex: day.dayIndex,
+                    dateLabel: day.dateLabel,
+                    cityName: "",
+                    costEstimate: day.costEstimate,
+                    activities: [],
+                    dayKind: .experienceSuggestions,
+                    experienceItems: day.experienceItems,
+                    experienceCityId: day.experienceCityId
+                )
             }
+            return ItineraryDay(
+                id: day.id,
+                dayIndex: day.dayIndex,
+                dateLabel: day.dateLabel,
+                cityName: "",
+                costEstimate: day.costEstimate,
+                activities: day.activities.map { act in
+                    let resolvedCityId = act.cityId ?? act.attractionId.flatMap { attractionCache[$0]?.cityId }
+                    return ItineraryActivity(
+                        id: act.id,
+                        name: act.name,
+                        detail: act.detail,
+                        attractionId: act.attractionId,
+                        cityId: resolvedCityId,
+                        hasAudio: act.hasAudio
+                    )
+                }
+            )
         }
     }
 }
 
 // MARK: - Book
 
+private struct HotelSheetCity: Identifiable {
+    let id: String
+    let displayName: String
+}
+
 struct BookYourTripView: View {
     @Environment(AppEnvironment.self) private var appEnv
 
     let itinerary: SampleItinerary
-    @State private var hotels: [Hotel] = []
-    @State private var hotelCity: String?
-    @State private var showHotels = false
+    @State private var hotelSheetCity: HotelSheetCity?
 
     var body: some View {
         ScrollView {
@@ -504,11 +457,8 @@ struct BookYourTripView: View {
                 ForEach(appEnv.preferences.selectedCityIds, id: \.self) { cityId in
                     bookBlock(title: "🏨 \(cityId.capitalized)", subtitle: "Foreigner-friendly hotels") {
                         Button {
-                            hotelCity = cityId
-                            Task {
-                                hotels = (try? await appEnv.content.fetchHotels(cityId: cityId)) ?? []
-                                showHotels = true
-                            }
+                            let normalized = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                            hotelSheetCity = HotelSheetCity(id: normalized, displayName: cityId.capitalized)
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
@@ -530,32 +480,25 @@ struct BookYourTripView: View {
             }
             .padding(Theme.screenPadding)
         }
-        .sheet(isPresented: $showHotels) {
-            if let hotelCity {
-                HotelSearchView(cityName: hotelCity.capitalized, hotels: hotels)
-            }
+        .sheet(item: $hotelSheetCity) { city in
+            HotelSearchSheet(cityId: city.id, cityName: city.displayName)
         }
     }
 
     private var flightButtons: some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                flightLink("Skyscanner")
-                flightLink("Google Flights")
-            }
-            HStack(spacing: 8) {
-                flightLink("Trip.com")
-                flightLink("Kayak")
+        let platforms = appEnv.contentMode.branding.flightPlatforms
+        let columns = [GridItem(.flexible()), GridItem(.flexible())]
+        return LazyVGrid(columns: columns, spacing: 8) {
+            ForEach(platforms) { platform in
+                if let url = URL(string: platform.urlTemplate) {
+                    Link("\(platform.label) →", destination: url)
+                        .font(Theme.FontToken.inter(11, weight: .medium))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                }
             }
         }
-    }
-
-    private func flightLink(_ name: String) -> some View {
-        Link("\(name) →", destination: URL(string: "https://www.google.com/travel/flights")!)
-            .font(Theme.FontToken.inter(11, weight: .medium))
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
     }
 
     private func bookBlock<Content: View>(title: String, subtitle: String, @ViewBuilder content: () -> Content) -> some View {
@@ -570,9 +513,50 @@ struct BookYourTripView: View {
     }
 }
 
+/// Loads hotels when the sheet opens (avoids empty/stale list from sheet timing).
+private struct HotelSearchSheet: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    let cityId: String
+    let cityName: String
+
+    @State private var hotels: [Hotel] = []
+    @State private var isLoading = true
+    @State private var loadError: String?
+
+    var body: some View {
+        HotelSearchView(
+            cityName: cityName,
+            hotels: hotels,
+            isLoading: isLoading,
+            loadError: loadError,
+            usesLiveContent: appEnv.contentMode.useRemoteContent
+        )
+        .task(id: cityId) {
+            await loadHotels()
+        }
+    }
+
+    private func loadHotels() async {
+        isLoading = true
+        loadError = nil
+        await ContentCacheStore.shared.remove(key: ContentCacheKey.hotels(cityId: cityId))
+        do {
+            hotels = try await appEnv.content.fetchHotels(cityId: cityId)
+            loadError = nil
+        } catch {
+            hotels = []
+            loadError = JSONCoding.describe(error)
+        }
+        isLoading = false
+    }
+}
+
 struct HotelSearchView: View {
     let cityName: String
     let hotels: [Hotel]
+    var isLoading: Bool = false
+    var loadError: String? = nil
+    var usesLiveContent: Bool = true
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -585,8 +569,36 @@ struct HotelSearchView: View {
                         .padding(14)
                         .background(Theme.ColorToken.backgroundSubtle)
 
-                    ForEach(hotels) { hotel in
-                        HotelCardView(hotel: hotel)
+                    if isLoading {
+                        ProgressView()
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 32)
+                    } else if let loadError {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Could not load hotels")
+                                .font(Theme.FontToken.inter(13, weight: .medium))
+                            Text(loadError)
+                                .font(Theme.FontToken.inter(11))
+                                .foregroundStyle(Theme.ColorToken.textMuted)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 24)
+                    } else if hotels.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("No hotels found for this city.")
+                                .font(Theme.FontToken.inter(13, weight: .medium))
+                            Text(usesLiveContent
+                                ? "Check the admin: city, 启用, and 接待外国客人 must match this trip."
+                                : "Turn on Live content in app settings (远程内容) to load hotels from the CMS.")
+                                .font(Theme.FontToken.inter(11))
+                                .foregroundStyle(Theme.ColorToken.textMuted)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 24)
+                    } else {
+                        ForEach(hotels) { hotel in
+                            HotelCardView(hotel: hotel)
+                        }
                     }
                 }
                 .padding(.horizontal, Theme.screenPadding)
@@ -606,37 +618,91 @@ struct HotelCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            CoverImageView(path: hotel.coverImagePath, height: 140, cornerRadius: 6)
+
             Text(hotel.name)
                 .font(Theme.FontToken.playfair(16, weight: .semibold))
-            Text(String(repeating: "★", count: hotel.stars))
+            if hotel.chineseName != hotel.name {
+                Text(hotel.chineseName)
+                    .font(Theme.FontToken.inter(12))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            Text(String(repeating: "★", count: max(hotel.stars, 1)))
                 .font(Theme.FontToken.inter(11))
-            if let note = hotel.englishStaffNote {
-                Text("✅ \(note)")
-                    .font(Theme.FontToken.inter(11))
+            if let note = hotel.englishStaffNote, !note.isEmpty {
+                HStack(alignment: .top, spacing: 4) {
+                    Text("✅")
+                        .font(Theme.FontToken.inter(11))
+                    Text(HTMLContentView.plainText(from: note))
+                        .font(Theme.FontToken.inter(11))
+                }
             } else if !hotel.hasEnglishStaff {
                 Text("⚠️ No English-speaking staff")
                     .font(Theme.FontToken.inter(11))
             }
             Text("✅ Registered for foreign guests")
                 .font(Theme.FontToken.inter(11))
-            if let loc = hotel.locationNote {
-                Text("📍 \(loc)")
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
+            if let address = hotel.displayAddressLine, hotel.canOpenInMaps {
+                Button {
+                    MapNavigation.open(
+                        name: hotel.name,
+                        addressZh: hotel.addressZh,
+                        addressEn: hotel.addressEn,
+                        latitude: hotel.latitude,
+                        longitude: hotel.longitude
+                    )
+                } label: {
+                    HStack(alignment: .top, spacing: 4) {
+                        Text("📍")
+                            .font(Theme.FontToken.inter(11))
+                        Text(address)
+                            .font(Theme.FontToken.inter(11))
+                            .foregroundStyle(Theme.ColorToken.accent)
+                            .multilineTextAlignment(.leading)
+                        Spacer(minLength: 0)
+                        Text("Maps →")
+                            .font(Theme.FontToken.inter(10, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.accent)
+                    }
+                }
+                .buttonStyle(.plain)
+            } else if let address = hotel.displayAddressLine {
+                HStack(alignment: .top, spacing: 4) {
+                    Text("📍")
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                    Text(address)
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                }
+            }
+            if let loc = hotel.locationNote, !loc.isEmpty {
+                HStack(alignment: .top, spacing: 4) {
+                    Text("📍")
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                    Text(HTMLContentView.plainText(from: loc))
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                }
             }
             Text("From $\(hotel.priceMinUsd)/night")
                 .font(Theme.FontToken.inter(12, weight: .medium))
-            HStack {
-                ForEach(hotel.bookingPlatforms, id: \.self) { platform in
-                    Link(platform, destination: URL(string: "https://www.booking.com")!)
-                        .font(Theme.FontToken.inter(10, weight: .medium))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
-                        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+            if !hotel.bookingLinks.isEmpty {
+                HStack(spacing: 8) {
+                    ForEach(hotel.bookingLinks) { link in
+                        if let url = URL(string: link.url) {
+                            Link(link.label, destination: url)
+                                .font(Theme.FontToken.inter(10, weight: .medium))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 6)
+                                .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                        }
+                    }
                 }
             }
-            if let tip = hotel.languageTip {
-                Text(tip)
+            if let tip = hotel.languageTip, !tip.isEmpty {
+                Text(HTMLContentView.plainText(from: tip))
                     .font(Theme.FontToken.inter(10))
                     .foregroundStyle(Theme.ColorToken.textMuted)
                     .padding(.top, 4)

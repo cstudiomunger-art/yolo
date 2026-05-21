@@ -4,10 +4,10 @@
     "" : {
 
     },
-    "›" : {
+    "· %@" : {
 
     },
-    "\"%@\"" : {
+    "›" : {
 
     },
     "%@  %@" : {
@@ -97,7 +97,24 @@
     "%lld" : {
 
     },
+    "%lld / %lld %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld / %2$lld %3$@"
+          }
+        }
+      }
+    },
+    "%lld activity days" : {
+
+    },
+    "%lld attractions" : {
+
+    },
     "%lld attractions · in your plan" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -127,13 +144,17 @@
         }
       }
     },
+    "%lld days total" : {
+
+    },
+    "%lld items left" : {
+
+    },
     "%lld min" : {
 
     },
-    "%lld min free preview · Unlock full guide" : {
-
-    },
     "%lld of %lld prepared" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -154,6 +175,19 @@
         }
       }
     },
+    "%lld-day stay permitted" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许停留 %lld 天"
+          }
+        }
+      }
+    },
+    "•" : {
+
+    },
     "• %@" : {
 
     },
@@ -168,7 +202,11 @@
         }
       }
     },
+    "← %@" : {
+
+    },
     "← Change city" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -179,6 +217,7 @@
       }
     },
     "← Guide · Attractions" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -187,6 +226,9 @@
           }
         }
       }
+    },
+    "← Home" : {
+
     },
     "← Plan" : {
       "localizations" : {
@@ -201,6 +243,9 @@
     "→" : {
 
     },
+    "+ Add to Day %lld" : {
+
+    },
     "~40 minutes of setup remaining" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -211,6 +256,18 @@
           }
         }
       }
+    },
+    "⏸ Pause" : {
+
+    },
+    "⏸ Pause preview" : {
+
+    },
+    "▶ Play" : {
+
+    },
+    "▶ Preview (%lld min free)" : {
+
     },
     "★ %@" : {
 
@@ -225,13 +282,11 @@
         }
       }
     },
-    "⚠" : {
-
-    },
     "⚠️ No English-speaking staff" : {
 
     },
     "⚡ Quick Plan" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -244,13 +299,11 @@
     "✅" : {
 
     },
-    "✅ %@" : {
-
-    },
     "✅ Registered for foreign guests" : {
 
     },
     "✅ Save to Plan" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -270,7 +323,13 @@
         }
       }
     },
+    "✓ Downloaded" : {
+
+    },
     "✦" : {
+
+    },
+    "✨" : {
 
     },
     "✨ Active" : {
@@ -293,13 +352,20 @@
         }
       }
     },
+    "⬇ Download for offline" : {
+
+    },
     "🎧" : {
 
     },
-    "🎧 12min" : {
+    "🎧 %@" : {
+
+    },
+    "🎧 Area Audio" : {
 
     },
     "🎧 Audio" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -308,6 +374,18 @@
           }
         }
       }
+    },
+    "🎧 Audio Guide" : {
+
+    },
+    "🎧 Audio Guide available" : {
+
+    },
+    "🎧 Audio guide unlocked!" : {
+
+    },
+    "💡" : {
+
     },
     "💬 General Help" : {
       "extractionState" : "stale",
@@ -320,31 +398,14 @@
         }
       }
     },
-    "📅 %@\n❄️ %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "📅 %1$@\n❄️ %2$@"
-          }
-        }
-      }
-    },
     "📋 Copy Text" : {
+
+    },
+    "📍" : {
 
     },
     "📍 %@" : {
 
-    },
-    "📍 Recommended stay: %lld–%lld days" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "📍 Recommended stay: %1$lld–%2$lld days"
-          }
-        }
-      }
     },
     "📚 Read Before You Go" : {
       "localizations" : {
@@ -357,6 +418,7 @@
       }
     },
     "🔄 Redo" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -365,6 +427,15 @@
           }
         }
       }
+    },
+    "🔒" : {
+
+    },
+    "🔒 Full guide locked" : {
+
+    },
+    "🔔" : {
+
     },
     "🗺 Trip Planning" : {
       "extractionState" : "stale",
@@ -378,6 +449,7 @@
       }
     },
     "🗺 Your Trip Cities" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -388,6 +460,7 @@
       }
     },
     "🤖 Plan with AI Chat" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -440,6 +513,9 @@
         }
       }
     },
+    "110 · 120 · Offline" : {
+
+    },
     "A" : {
 
     },
@@ -457,6 +533,24 @@
         }
       }
     },
+    "ACTIVE" : {
+
+    },
+    "Activity name" : {
+
+    },
+    "Add activity" : {
+
+    },
+    "Add attraction" : {
+
+    },
+    "Add day" : {
+
+    },
+    "Added to Day %lld" : {
+
+    },
     "AI-generated, China-aware" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -469,6 +563,7 @@
       }
     },
     "AI-powered · China booking rules built in" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -478,7 +573,11 @@
         }
       }
     },
+    "All cities" : {
+
+    },
     "All Cities" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -488,7 +587,13 @@
         }
       }
     },
-    "Ask a question..." : {
+    "Almost ready…" : {
+
+    },
+    "Arrival date" : {
+
+    },
+    "Ask anything about traveling in China..." : {
 
     },
     "Ask Assistant" : {
@@ -502,8 +607,13 @@
         }
       }
     },
+    "Ask Assistant →" : {
+
+    },
+    "Ask me anything about China…" : {
+
+    },
     "Assistant" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -535,6 +645,9 @@
         }
       }
     },
+    "Back to dates" : {
+
+    },
     "Buy This Guide · $1.99" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -559,7 +672,17 @@
         }
       }
     },
-    "Change passport country" : {
+    "Change nationality" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更改国籍"
+          }
+        }
+      }
+    },
+    "Check the admin: city, 启用, and 接待外国客人 must match this trip." : {
 
     },
     "Checklist" : {
@@ -600,7 +723,14 @@
         }
       }
     },
+    "Choose cities" : {
+
+    },
+    "Choose cities and dates — AI builds a day-by-day itinerary you can edit." : {
+
+    },
     "Cities" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -609,6 +739,9 @@
           }
         }
       }
+    },
+    "City not found" : {
+
     },
     "Clear Cache" : {
       "extractionState" : "stale",
@@ -637,6 +770,18 @@
     "CMS 远程内容未开启（仍为内置 JSON）" : {
 
     },
+    "Coming soon — we're adding content for %@" : {
+
+    },
+    "complete" : {
+
+    },
+    "Content coming soon for this area" : {
+
+    },
+    "Content coming soon for this attraction" : {
+
+    },
     "Content Mode" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -658,7 +803,18 @@
         }
       }
     },
+    "Continue" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续"
+          }
+        }
+      }
+    },
     "Continue with %@ →" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -671,11 +827,19 @@
     "Copied!" : {
 
     },
-    "Crafting your itinerary..." : {
+    "Cost estimate" : {
+
+    },
+    "Could not generate your itinerary." : {
+
+    },
+    "Could not load hotels" : {
+
+    },
+    "Creating trip" : {
 
     },
     "Cultural Tips" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -705,7 +869,34 @@
         }
       }
     },
+    "Daily schedule" : {
+
+    },
+    "Date label" : {
+
+    },
+    "Dates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期"
+          }
+        }
+      }
+    },
+    "Day %lld · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Day %1$lld · %2$@"
+          }
+        }
+      }
+    },
     "Day 1 Preview — %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -724,6 +915,12 @@
           }
         }
       }
+    },
+    "Delete" : {
+
+    },
+    "Delete this trip?" : {
+
     },
     "Departure" : {
       "localizations" : {
@@ -745,6 +942,12 @@
         }
       }
     },
+    "Details" : {
+
+    },
+    "Don't miss important reminders" : {
+
+    },
     "Done" : {
       "localizations" : {
         "zh-Hans" : {
@@ -765,6 +968,25 @@
           }
         }
       }
+    },
+    "Done reorder" : {
+
+    },
+    "Double tap to change departure date" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "双击可修改出发日期"
+          }
+        }
+      }
+    },
+    "Drag days" : {
+
+    },
+    "Drag to reorder days and activities. Tap Done when finished." : {
+
     },
     "Edit" : {
       "localizations" : {
@@ -810,6 +1032,35 @@
     "Emergency Numbers" : {
 
     },
+    "Enable Notifications" : {
+
+    },
+    "End date" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "结束日期"
+          }
+        }
+      }
+    },
+    "Estimated budget" : {
+
+    },
+    "Excludes arrival and departure days" : {
+
+    },
+    "Explore All Cities" : {
+
+    },
+    "Explore by Area" : {
+
+    },
+    "Food, transport, temples & more" : {
+
+    },
     "Forbidden City tickets sell out 3 weeks in advance during your dates." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -844,10 +1095,11 @@
         }
       }
     },
-    "Generate Itinerary" : {
+    "Generate itinerary" : {
 
     },
     "Generate New Itinerary" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -857,10 +1109,14 @@
         }
       }
     },
+    "Get Started" : {
+
+    },
     "Go" : {
 
     },
     "Going to multiple cities? Tap to select more." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -869,6 +1125,15 @@
           }
         }
       }
+    },
+    "Good afternoon," : {
+
+    },
+    "Good evening," : {
+
+    },
+    "Good morning," : {
+
     },
     "Guest" : {
       "localizations" : {
@@ -890,7 +1155,16 @@
         }
       }
     },
+    "Has audio guide" : {
+
+    },
     "Hello, world!" : {
+
+    },
+    "Helpful Phrases" : {
+
+    },
+    "Hide details" : {
 
     },
     "Home" : {
@@ -915,6 +1189,9 @@
         }
       }
     },
+    "Included with %@ audio guide" : {
+
+    },
     "Introduction" : {
       "localizations" : {
         "zh-Hans" : {
@@ -935,7 +1212,11 @@
         }
       }
     },
+    "Live · AI" : {
+
+    },
     "Live Services" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -944,6 +1225,12 @@
           }
         }
       }
+    },
+    "Loading audio…" : {
+
+    },
+    "Local Experiences to Try" : {
+
     },
     "Manage →" : {
       "localizations" : {
@@ -955,13 +1242,23 @@
         }
       }
     },
-    "Meta (dates, style)" : {
+    "Maps →" : {
+
+    },
+    "Matching attractions…" : {
+
+    },
+    "Max 10" : {
+
+    },
+    "Maybe Later" : {
 
     },
     "Mock 模式（未连接 Supabase）" : {
 
     },
     "My Saved Trip" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -970,6 +1267,22 @@
           }
         }
       }
+    },
+    "Nationality" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "国籍"
+          }
+        }
+      }
+    },
+    "Next" : {
+
+    },
+    "No hotels found for this city." : {
+
     },
     "of %lld tasks complete" : {
       "localizations" : {
@@ -984,7 +1297,11 @@
     "OK" : {
 
     },
+    "Open checklist" : {
+
+    },
     "Or buy just this guide" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1004,14 +1321,10 @@
         }
       }
     },
-    "Passport" : {
-
-    },
-    "Passport Country" : {
+    "Pick arrival and departure. Activity days exclude both travel days." : {
 
     },
     "Plan" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1021,7 +1334,17 @@
         }
       }
     },
+    "Plan a trip to see cities" : {
+
+    },
+    "Plan a trip to see your destination highlighted here →" : {
+
+    },
+    "Plan My First Trip" : {
+
+    },
     "Plan My Trip" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1042,7 +1365,14 @@
         }
       }
     },
+    "Plan your China trip" : {
+
+    },
+    "Planning your days…" : {
+
+    },
     "Planning:" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1052,7 +1382,11 @@
         }
       }
     },
+    "Popular" : {
+
+    },
     "Popular destinations" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1062,8 +1396,10 @@
         }
       }
     },
+    "Practical Info" : {
+
+    },
     "Prep Checklist" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1072,6 +1408,12 @@
           }
         }
       }
+    },
+    "Prep List →" : {
+
+    },
+    "Preparation" : {
+
     },
     "Prepare" : {
       "localizations" : {
@@ -1083,6 +1425,12 @@
         }
       }
     },
+    "Preview" : {
+
+    },
+    "Preview mode — upload MP3 in CMS to enable streaming." : {
+
+    },
     "Profile" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1093,7 +1441,11 @@
         }
       }
     },
+    "Quick Access" : {
+
+    },
     "Quick Actions" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1104,6 +1456,7 @@
       }
     },
     "Quick Plan" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1112,6 +1465,12 @@
           }
         }
       }
+    },
+    "Read less ▲" : {
+
+    },
+    "Read more ▼" : {
+
     },
     "Reading List" : {
       "localizations" : {
@@ -1135,6 +1494,7 @@
       }
     },
     "Real-time help · %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1145,6 +1505,7 @@
       }
     },
     "Recommended Routes" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1153,9 +1514,6 @@
           }
         }
       }
-    },
-    "Refine your plan..." : {
-
     },
     "Refresh from CMS" : {
       "localizations" : {
@@ -1167,6 +1525,18 @@
         }
       }
     },
+    "Remove" : {
+
+    },
+    "Remove activity" : {
+
+    },
+    "Remove this day" : {
+
+    },
+    "Reorder" : {
+
+    },
     "Restore Purchases" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1176,6 +1546,12 @@
           }
         }
       }
+    },
+    "Retry" : {
+
+    },
+    "Route summary" : {
+
     },
     "Save" : {
       "localizations" : {
@@ -1187,8 +1563,27 @@
         }
       }
     },
-    "Search country..." : {
+    "Save trip" : {
 
+    },
+    "Saved trips · %lld" : {
+
+    },
+    "Search attractions" : {
+
+    },
+    "Search cities" : {
+
+    },
+    "Search country..." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索国家或地区…"
+          }
+        }
+      }
     },
     "Search foreigner-friendly hotels" : {
       "localizations" : {
@@ -1200,7 +1595,21 @@
         }
       }
     },
+    "Select one or more cities for your trip." : {
+
+    },
+    "Select your nationality" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择您的国籍"
+          }
+        }
+      }
+    },
     "Select your passport country" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1231,7 +1640,18 @@
         }
       }
     },
+    "Set your nationality in Profile" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在个人资料中设置国籍"
+          }
+        }
+      }
+    },
     "Share" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1251,7 +1671,17 @@
         }
       }
     },
+    "Sign in to plan your China trip" : {
+
+    },
+    "Skip" : {
+
+    },
+    "Something went wrong" : {
+
+    },
     "Start Free Trial →" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1260,6 +1690,9 @@
           }
         }
       }
+    },
+    "Static · AI" : {
+
     },
     "Static Demo" : {
       "localizations" : {
@@ -1274,7 +1707,19 @@
     "Syncing profile…" : {
 
     },
+    "Tell us your dates and cities" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "告诉我们日期与城市"
+          }
+        }
+      }
+    },
     "Tell us your dates, cities & style" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1284,10 +1729,17 @@
         }
       }
     },
-    "Temporary files and network cache have been removed." : {
+    "These are experience ideas — no specific venues. Ask Assistant for details." : {
+
+    },
+    "Thinking…" : {
+
+    },
+    "This cannot be undone." : {
 
     },
     "Tips for Western Visitors" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1301,6 +1753,7 @@
 
     },
     "Travel Assistant" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1310,7 +1763,18 @@
         }
       }
     },
+    "Travel dates" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旅行日期"
+          }
+        }
+      }
+    },
     "Travel style" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1320,13 +1784,32 @@
         }
       }
     },
-    "Trip length: %lld days" : {
+    "Traveler" : {
+
+    },
+    "Trip overview" : {
+
+    },
+    "Try again" : {
+
+    },
+    "Turn on Live content in app settings (远程内容) to load hotels from the CMS." : {
 
     },
     "Unable to load" : {
 
     },
+    "Unable to load attractions. Check your connection." : {
+
+    },
+    "Unable to load content. Pull to refresh." : {
+
+    },
+    "Unlock Audio Guide" : {
+
+    },
     "Unlock Full Audio Guide" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1351,6 +1834,7 @@
 
     },
     "View →" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1370,6 +1854,22 @@
         }
       }
     },
+    "View in Guide →" : {
+
+    },
+    "View Itinerary" : {
+
+    },
+    "Visa required" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需签证"
+          }
+        }
+      }
+    },
     "Visa-free" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1380,12 +1880,29 @@
         }
       }
     },
+    "Visitor Tips" : {
+
+    },
     "We'll customise your preparation checklist." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "我们将为你定制行前准备清单。"
+          }
+        }
+      }
+    },
+    "We'll remind you when your trip is approaching and key prep items are overdue." : {
+
+    },
+    "We'll show visa rules and travel tips for your country" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我们将根据您的国籍展示签证政策与出行建议"
           }
         }
       }
@@ -1401,6 +1918,7 @@
       }
     },
     "Where are you going?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1409,6 +1927,9 @@
           }
         }
       }
+    },
+    "Why this matters" : {
+
     },
     "You're ready for China." : {
       "localizations" : {
@@ -1420,7 +1941,17 @@
         }
       }
     },
+    "Your China adventure starts here" : {
+
+    },
+    "Your in-China helper" : {
+
+    },
+    "Your itinerary" : {
+
+    },
     "Your Trip ★" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1429,6 +1960,9 @@
           }
         }
       }
+    },
+    "Your Trip Destinations" : {
+
     },
     "密码" : {
 

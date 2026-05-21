@@ -4,34 +4,69 @@
     "emoji": "🍜",
     "title": "Restaurant Etiquette",
     "preview": "Scan QR codes at your table to order. Tipping is not expected and can sometimes cause confusion.",
-    "body": "Most restaurants use QR ordering at the table. Staff may not speak English — point at pictures or use translation apps. Tipping is not customary. Splitting bills is common among friends; as a visitor, offering to pay once is polite but not required."
+    "body": "Most restaurants use QR ordering at the table. Staff may not speak English — point at pictures or use translation apps. Tipping is not customary. Splitting bills is common among friends; as a visitor, offering to pay once is polite but not required.",
+    "category": "food",
+    "do_text": "Use translation apps or picture menus when ordering.",
+    "dont_text": "Do not leave a large tip — it can cause confusion."
   },
   {
     "id": "culture_transport",
     "emoji": "🚇",
     "title": "Getting Around",
     "preview": "Queue properly at subway entrances. Priority seats are taken seriously — offer yours to elderly passengers.",
-    "body": "Subway systems are extensive and signage is increasingly bilingual. Have your metro QR ready before the gate. Didi works like Uber — save your hotel address in Chinese for the driver."
+    "body": "Subway systems are extensive and signage is increasingly bilingual. Have your metro QR ready before the gate. Didi works like Uber — save your hotel address in Chinese for the driver.",
+    "category": "transport",
+    "do_text": "Offer priority seats to elderly, pregnant, or disabled passengers.",
+    "dont_text": "Do not eat or drink on the subway."
   },
   {
     "id": "culture_photo",
     "emoji": "📸",
     "title": "Photography & Social Rules",
     "preview": "Military installations and some government buildings are strictly off-limits. Always ask before photographing people.",
-    "body": "Avoid photographing military sites, airports security areas, and police without permission. Many locals are happy to be in tourist photos if you ask first."
+    "body": "Avoid photographing military sites, airports security areas, and police without permission. Many locals are happy to be in tourist photos if you ask first.",
+    "category": "social",
+    "do_text": "Ask permission before photographing people.",
+    "dont_text": "Do not photograph military or government security areas."
   },
   {
     "id": "culture_shopping",
     "emoji": "🛍",
     "title": "Shopping & Bargaining",
     "preview": "Markets like Silk Market expect negotiation. Fixed-price stores (malls, chain stores) do not. Start at 30% of the asking price.",
-    "body": "In tourist markets, bargaining is expected. In malls and supermarkets, prices are fixed. Mobile payment is preferred — cash is backup."
+    "body": "In tourist markets, bargaining is expected. In malls and supermarkets, prices are fixed. Mobile payment is preferred — cash is backup.",
+    "category": "payments",
+    "do_text": "Use mobile pay (Alipay/WeChat) when possible.",
+    "dont_text": "Do not bargain in chain stores or supermarkets."
   },
   {
     "id": "culture_gifts",
     "emoji": "🎁",
     "title": "Gifts & Hosting",
     "preview": "Gifts are often not opened immediately. Avoid clocks (symbolise death) and green hats. Bring something from your home country.",
-    "body": "Small gifts from your home country are appreciated. Present with both hands. Avoid clocks, umbrellas, and green hats as gifts. White wrapping can imply funerals — red or gold is safer."
+    "body": "Small gifts from your home country are appreciated. Present with both hands. Avoid clocks, umbrellas, and green hats as gifts. White wrapping can imply funerals — red or gold is safer.",
+    "category": "social",
+    "do_text": "Present gifts with both hands.",
+    "dont_text": "Avoid clocks, green hats, and white wrapping paper."
+  },
+  {
+    "id": "culture_temple",
+    "emoji": "🏯",
+    "title": "Temple & Sacred Sites",
+    "preview": "Dress modestly and speak quietly. Photography may be restricted in prayer halls.",
+    "body": "Remove hats in main halls when requested. Walk clockwise around stupas when locals do. Do not touch statues or monks without permission.",
+    "category": "temple",
+    "do_text": "Bow slightly when entering main halls.",
+    "dont_text": "Do not point feet toward Buddha images."
+  },
+  {
+    "id": "culture_festivals",
+    "emoji": "🎆",
+    "title": "Festivals & Holidays",
+    "preview": "National holidays mean crowded transport and higher hotel prices — book early.",
+    "body": "Golden Week (early May) and Lunar New Year see mass travel. Many small shops close during Spring Festival. Temple fairs are lively but crowded.",
+    "category": "festivals",
+    "do_text": "Book trains and hotels weeks ahead for Golden Week.",
+    "dont_text": "Do not assume restaurants stay open during Lunar New Year."
   }
 ]

@@ -4,17 +4,22 @@ struct RootView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.scenePhase) private var scenePhase
 
+    @State private var showSplash = true
+
     var body: some View {
         Group {
-            if appEnv.preferences.hasCompletedOnboarding {
-                MainTabView()
+            if showSplash && !AppConfig.useMock {
+                SplashView { showSplash = false }
             } else {
-                CountryPickerView()
+                mainFlow
             }
         }
         .environment(\.locale, appEnv.preferences.appLanguage.locale)
         .task {
             await appEnv.refreshContentMode(clearSettingsCache: true)
+            if appEnv.auth.isAuthenticated {
+                await appEnv.profileSync.syncAfterSignIn()
+            }
         }
         .onChange(of: appEnv.preferences.countryCode) { _, _ in
             Task { await appEnv.refreshVisaRule() }
@@ -28,6 +33,34 @@ struct RootView: View {
             if isAuthenticated {
                 Task { await appEnv.profileSync.syncAfterSignIn() }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var mainFlow: some View {
+        if AppConfig.useMock {
+            mockFlow
+        } else if !appEnv.auth.isAuthenticated {
+            AuthLandingView()
+        } else if appEnv.preferences.needsIntroOnboarding {
+            OnboardingPagerView()
+        } else if appEnv.preferences.needsNationalityOnboarding {
+            CountryPickerView()
+        } else if appEnv.preferences.needsNotificationOnboarding {
+            NotificationPermissionView()
+        } else {
+            MainTabView()
+        }
+    }
+
+    @ViewBuilder
+    private var mockFlow: some View {
+        if appEnv.preferences.needsIntroOnboarding {
+            OnboardingPagerView()
+        } else if appEnv.preferences.needsNationalityOnboarding {
+            CountryPickerView()
+        } else {
+            MainTabView()
         }
     }
 }

@@ -4,26 +4,47 @@
   const App = window.ChinaGoAdmin;
 
   App.fieldToFormValue = function fieldToFormValue(field, value) {
-    if (field.type === "bool") return !!value;
+    if (field.type === "bool") {
+      if (value === null || value === undefined || value === "") {
+        return field.defaultTrue === true;
+      }
+      return !!value;
+    }
     if (field.type === "tags" || field.type === "features_list") {
       if (Array.isArray(value)) return value.join("\n");
       if (typeof value === "string" && value.includes("\n")) return value;
       return value || "";
     }
-    if (field.type === "ref_cities_multi") {
+    if (field.type === "ref_cities_multi" || field.type === "ref_countries_multi" || field.type === "enum_multi") {
       return Array.isArray(value) ? value : [];
+    }
+    if (field.type === "home_cards_list") {
+      const presets = App.HOME_CARD_OPTIONS || [];
+      const saved = Array.isArray(value) ? value : [];
+      return presets.map((p) => {
+        const hit = saved.find((x) => x.id === p.id);
+        return { id: p.id, enabled: hit ? hit.enabled !== false : false };
+      });
     }
     if (
       field.type === "json" ||
       field.type === "string_list" ||
+      field.type === "image_url_list" ||
       field.type === "place_list" ||
       field.type === "segment_list" ||
       field.type === "visa_detail_list" ||
+      field.type === "practical_info_list" ||
       field.type === "contact_list" ||
+      field.type === "link_list" ||
+      field.type === "content_blocks_list" ||
+      field.type === "flight_platform_list" ||
+      field.type === "help_phrase_list" ||
       field.type === "itinerary_builder"
     ) {
       if (value === null || value === undefined) {
-        if (field.type === "string_list") return [];
+        if (field.type === "string_list" || field.type === "image_url_list" || field.type === "practical_info_list") {
+          return [];
+        }
         if (field.type === "contact_list") return [];
         return field.type === "itinerary_builder" ? [] : [];
       }
@@ -43,6 +64,13 @@
   };
 
   App.renderFieldBlock = function renderFieldBlock(field, value, ctx) {
+    if (field.type === "section") {
+      const hint = field.hint
+        ? `<p class="field-hint section-hint">${App.escapeHtml(field.hint)}</p>`
+        : "";
+      return `<div class="form-section"><h3 class="form-section-title">${App.escapeHtml(field.label || "")}</h3>${hint}</div>`;
+    }
+
     const label = field.label || field.key;
     const name = field.key;
     const ro = field.readonly || (!ctx.isNew && field.key === ctx.pk) ? "readonly" : "";
@@ -57,11 +85,16 @@
         </label>`;
         break;
       case "textarea":
+        inner = `<textarea name="${name}" ${ro}>${App.escapeHtml(String(value))}</textarea>`;
+        break;
       case "richtext":
-        inner = `<textarea name="${name}" class="${field.type === "richtext" ? "richtext-area" : ""}" ${ro}>${App.escapeHtml(String(value))}</textarea>`;
-        if (field.type === "richtext") {
-          inner += `<div class="char-count" data-for="${name}">${String(value).length} 字</div>`;
-        }
+        inner = App.renderRichTextHost(name, String(value ?? ""), {
+          uploadFolder: field.uploadFolder,
+          uploadEntityField: field.uploadEntityField,
+          uploadSlugSource: field.uploadSlugSource,
+          uploadSlugPrefix: field.uploadSlugPrefix,
+          uploadSlugPrefixField: field.uploadSlugPrefixField,
+        });
         break;
       case "number":
         inner = `<input name="${name}" type="number" value="${App.escapeHtml(String(value))}" ${ro} />`;
@@ -82,13 +115,37 @@
         inner = App.renderRefAttractionSelect(name, value, field, ctx);
         break;
       case "ref_scenario":
-        inner = App.renderRefScenarioSelect(name, value);
+        inner = App.renderRefScenarioSelect(name, value, field);
         break;
       case "ref_country":
         inner = App.renderRefCountrySelect(name, value);
         break;
       case "ref_cities_multi":
         inner = App.renderRefCitiesMulti(name, value);
+        break;
+      case "ref_countries_multi":
+        inner = App.renderRefCountriesMulti(name, value);
+        break;
+      case "enum_multi":
+        inner = App.renderEnumMulti(name, value, field);
+        break;
+      case "ref_audio_guide":
+        inner = App.renderRefAudioGuideSelect(name, value, field, ctx);
+        break;
+      case "link_list":
+        inner = App.renderLinkList(name, value);
+        break;
+      case "content_blocks_list":
+        inner = App.renderContentBlocksList(name, value, field);
+        break;
+      case "flight_platform_list":
+        inner = App.renderFlightPlatformList(name, value);
+        break;
+      case "home_cards_list":
+        inner = App.renderHomeCardsList(name, value);
+        break;
+      case "help_phrase_list":
+        inner = App.renderHelpPhraseList(name, value);
         break;
       case "slug":
         inner = `<input name="${name}" type="text" value="${App.escapeHtml(String(value))}" ${ctx.isNew ? "" : "readonly"} class="slug-input" data-slug-source="${field.slugSource || ""}" data-slug-prefix="${field.slugPrefix || ""}" data-slug-prefix-field="${field.slugPrefixField || ""}" />`;
@@ -103,6 +160,9 @@
       case "string_list":
         inner = App.renderStringList(name, value);
         break;
+      case "image_url_list":
+        inner = App.renderImageUrlList(name, value, field);
+        break;
       case "place_list":
         inner = App.renderPlaceList(name, value);
         break;
@@ -111,6 +171,9 @@
         break;
       case "visa_detail_list":
         inner = App.renderVisaDetailList(name, value);
+        break;
+      case "practical_info_list":
+        inner = App.renderPracticalInfoList(name, value, field);
         break;
       case "contact_list":
         inner = App.renderContactList(name, value);
@@ -125,10 +188,24 @@
         inner = App.renderAudioPreview(name, value);
         break;
       case "image_upload":
-        inner = `<input type="file" name="${name}" accept="image/jpeg,image/png,image/webp" data-upload-folder="${field.uploadFolder || ""}" data-upload-target="${field.uploadTarget || ""}" />`;
+        inner = `<div class="image-upload-wrap">
+          <label class="btn btn-sm btn-secondary image-file-label">选择本地图片
+            <input type="file" name="${name}" class="image-upload-input" accept="image/jpeg,image/png,image/webp" data-upload-folder="${field.uploadFolder || ""}" data-upload-target="${field.uploadTarget || ""}" hidden />
+          </label>
+          <span class="image-upload-filename muted"></span>
+          <div class="image-upload-preview" hidden></div>
+          <p class="field-hint">保存表单时自动上传到 Storage</p>
+        </div>`;
         break;
       case "audio_upload":
-        inner = `<input type="file" name="${name}" accept="audio/*,.mp3,.m4a,.wav" />`;
+        inner = `<div class="audio-upload-wrap">
+          <label class="btn btn-sm btn-secondary audio-file-label">选择本地音频
+            <input type="file" name="${name}" class="audio-upload-input" accept="audio/*,.mp3,.m4a,.wav,.aac,.mpeg" hidden />
+          </label>
+          <span class="audio-upload-status muted"></span>
+          <div class="audio-upload-preview media-preview" hidden></div>
+          <p class="field-hint">${field.subAreaDirect ? "选择后自动上传至 Storage；需先填写子区域英文名" : "选择后自动上传；成功后会更新「当前音频」"}</p>
+        </div>`;
         break;
       case "json":
         inner = `<textarea name="${name}" class="json-area">${App.escapeHtml(typeof value === "string" ? value : JSON.stringify(value, null, 2))}</textarea>`;
@@ -137,10 +214,13 @@
         inner = `<input name="${name}" type="text" value="${App.escapeHtml(String(value))}" ${ro} ${field.autoFromCountry ? 'data-auto-country="1"' : ""} />`;
     }
 
+    const hintHtml = field.hint
+      ? `<p class="field-hint">${App.escapeHtml(field.hint)}</p>`
+      : "";
     if (field.type === "bool") {
-      return `<div class="field-block field-block--bool"${advanced}><span class="field-label">${App.escapeHtml(label)}</span>${inner}</div>`;
+      return `<div class="field-block field-block--bool" data-field-key="${App.escapeHtml(name)}"${advanced}><span class="field-label">${App.escapeHtml(label)}</span>${inner}${hintHtml}</div>`;
     }
-    return `<div class="field-block"${advanced}><label>${App.escapeHtml(label)}</label>${inner}</div>`;
+    return `<div class="field-block" data-field-key="${App.escapeHtml(name)}"${advanced}><label>${App.escapeHtml(label)}</label>${inner}${hintHtml}</div>`;
   };
 
   App.renderRefCitySelect = function renderRefCitySelect(name, value, field) {
@@ -168,13 +248,22 @@
     return html;
   };
 
-  App.renderRefScenarioSelect = function renderRefScenarioSelect(name, value) {
-    let html = `<select name="${name}"><option value="">— 选择场景 —</option>`;
-    App.refCache.scenarios.forEach((s) => {
-      const label = App.scenarioLabel(s.scenario_id);
-      html += `<option value="${App.escapeHtml(s.scenario_id)}" ${value === s.scenario_id ? "selected" : ""}>${App.escapeHtml(label)}</option>`;
+  App.renderRefScenarioSelect = function renderRefScenarioSelect(name, value, field) {
+    let html = `<select name="${name}" data-ref-scenario="1"><option value="">${field?.allowEmpty ? "— 不关联 —" : "— 选择场景 —"}</option>`;
+    App.refCache.scenarios
+      .filter((s) => s.is_active !== false)
+      .forEach((s) => {
+        html += `<option value="${App.escapeHtml(s.id)}" ${value === s.id ? "selected" : ""}>${App.escapeHtml(s.label || s.id)}</option>`;
+      });
+    html += `<option value="__new__">+ 新建场景…</option></select>`;
+    return html;
+  };
+
+  App.renderAttractionSelectOptions = function renderAttractionSelectOptions(cityId, selectedId) {
+    let html = `<option value="">— 无景点 —</option>`;
+    App.attractionsForCity(cityId || null).forEach((a) => {
+      html += `<option value="${App.escapeHtml(a.id)}" ${selectedId === a.id ? "selected" : ""}>${App.escapeHtml(a.chinese_name || a.name)}</option>`;
     });
-    html += `</select>`;
     return html;
   };
 
@@ -198,6 +287,113 @@
     return html;
   };
 
+  App.renderEnumMulti = function renderEnumMulti(name, selected, field) {
+    const ids = Array.isArray(selected) ? selected : [];
+    const opts = App.normalizeEnumOptions(field.options || []);
+    let html = `<div class="checkbox-grid" data-name="${name}">`;
+    opts.forEach((o) => {
+      const checked = ids.includes(o.value) ? "checked" : "";
+      html += `<label class="checkbox-chip"><input type="checkbox" value="${App.escapeHtml(o.value)}" ${checked} /> ${App.escapeHtml(o.label)}</label>`;
+    });
+    html += `</div>`;
+    return html;
+  };
+
+  App.renderRefCountriesMulti = function renderRefCountriesMulti(name, selectedCodes) {
+    const codes = Array.isArray(selectedCodes) ? selectedCodes : [];
+    let html = `<div class="checkbox-grid" data-name="${name}">`;
+    App.refCache.countries.forEach((c) => {
+      const checked = codes.includes(c.code) ? "checked" : "";
+      html += `<label class="checkbox-chip"><input type="checkbox" value="${App.escapeHtml(c.code)}" ${checked} /> ${App.escapeHtml(`${c.flag || ""} ${c.name}`.trim())}</label>`;
+    });
+    html += `</div>`;
+    return html;
+  };
+
+  App.resolveAudioGuideAttractionId = function resolveAudioGuideAttractionId(ctx, filterField = "attraction_id") {
+    const host = ctx.formEl?.classList?.contains?.("sub-area-inline-form")
+      ? ctx.formEl
+      : ctx.formEl?.closest?.(".sub-area-inline-form");
+    let attractionId =
+      ctx.fixedAttractionId || host?.dataset?.attractionId || ctx.formEl?.dataset?.attractionId || "";
+    if (!attractionId && ctx.formEl?.elements?.[filterField]) {
+      attractionId = ctx.formEl.elements[filterField].value || attractionId;
+    }
+    if (!attractionId && ctx.formEl?.querySelector?.(`[name="${filterField}"]`)) {
+      attractionId = ctx.formEl.querySelector(`[name="${filterField}"]`).value || attractionId;
+    }
+    return attractionId;
+  };
+
+  App.renderRefAudioGuideSelect = function renderRefAudioGuideSelect(name, value, field, ctx) {
+    const filterField = field.filterByAttractionField || "attraction_id";
+    const attractionId = App.resolveAudioGuideAttractionId(ctx, filterField);
+    const list = App.listAudioGuidesForPicker(attractionId, ctx);
+    let html = `<select name="${name}" data-ref-audio-guide="1" data-filter-attraction-field="${filterField}" data-attraction-id="${App.escapeHtml(attractionId)}"><option value="">${field.allowEmpty ? "— 不关联音频 —" : "— 选择音频导览 —"}</option>`;
+    list.forEach((g) => {
+      html += `<option value="${App.escapeHtml(g.id)}" ${value === g.id ? "selected" : ""}>${App.escapeHtml(g.title_en || g.id)}</option>`;
+    });
+    if (value && !list.some((g) => g.id === value)) {
+      html += `<option value="${App.escapeHtml(value)}" selected>${App.escapeHtml(App.audioGuideLabel(value))}</option>`;
+    }
+    if (attractionId && !list.length) {
+      html += `<option value="" disabled>请先在下方「语音导览」或侧栏「音频导览」中添加</option>`;
+    }
+    html += `</select>`;
+    const countHint =
+      list.length > 0
+        ? ` (${list.length} 条可选)`
+        : attractionId
+          ? " (暂无导览)"
+          : " (请先选择所属景点)";
+    html += `<span class="field-hint audio-guide-picker-hint">${App.escapeHtml(countHint)}</span>`;
+    return html;
+  };
+
+  App.refreshAudioGuideSelects = function refreshAudioGuideSelects(form, meta, ctx) {
+    const root = ctx.scopeRoot || form;
+    const field = meta.fields.find((f) => f.key === "audio_guide_id");
+    if (!field) return;
+    root.querySelectorAll('[name="audio_guide_id"]').forEach((sel) => {
+      const inlineForm = sel.closest(".sub-area-inline-form");
+      const pickCtx = inlineForm
+        ? {
+            ...ctx,
+            formEl: inlineForm,
+            fixedAttractionId:
+              ctx.fixedAttractionId ||
+              inlineForm.dataset.attractionId ||
+              sel.dataset.attractionId ||
+              "",
+            includeInactiveAudioGuides: true,
+            getAudioGuides: ctx.getAudioGuides,
+          }
+        : { ...ctx, formEl: ctx.formEl || form };
+      const attractionId = App.resolveAudioGuideAttractionId(
+        pickCtx,
+        field.filterByAttractionField
+      );
+      const guides = App.listAudioGuidesForPicker(attractionId, pickCtx);
+      const current =
+        inlineForm?.dataset?.pendingAudioGuideId?.trim() || sel.value;
+      App.populateAudioGuideSelect(sel, guides, {
+        value: current,
+        allowEmpty: field.allowEmpty,
+        emptyLabel: field.allowEmpty ? "— 不关联音频 —" : "— 选择音频导览 —",
+        attractionId,
+      });
+      const hint = sel.parentElement?.querySelector(".audio-guide-picker-hint");
+      if (hint) {
+        hint.textContent =
+          guides.length > 0
+            ? ` (${guides.length} 条可选)`
+            : attractionId
+              ? " (暂无导览)"
+              : " (请先选择所属景点)";
+      }
+    });
+  };
+
   App.renderStringList = function renderStringList(name, items) {
     const arr = Array.isArray(items) ? items : [];
     let html = `<div class="list-builder" data-list-type="string" data-name="${name}">`;
@@ -206,6 +402,72 @@
     });
     html += `<button type="button" class="btn btn-sm btn-secondary list-add">+ 添加一条</button></div>`;
     return html;
+  };
+
+  App.renderImageUrlRow = function renderImageUrlRow(url, i, opts = {}) {
+    const showUrl = opts.showUrl !== false;
+    const thumb = url
+      ? `<img src="${App.escapeHtml(url)}" alt="" class="image-url-thumb" />`
+      : `<span class="image-url-placeholder">预览</span>`;
+    const urlInput = showUrl
+      ? `<input type="text" class="image-url-input" value="${App.escapeHtml(String(url || ""))}" placeholder="图片 URL（上传后自动填入）" data-idx="${i}" />`
+      : `<input type="hidden" class="image-url-input" value="${App.escapeHtml(String(url || ""))}" data-idx="${i}" />`;
+    const uploadBtn = showUrl
+      ? `<label class="btn btn-sm btn-secondary image-file-label">本地上传
+        <input type="file" class="image-file-input" accept="image/jpeg,image/png,image/webp" hidden />
+      </label>`
+      : `<input type="file" class="image-file-input" accept="image/jpeg,image/png,image/webp" hidden />`;
+    return `<div class="list-row list-row--image${showUrl ? "" : " list-row--image-pending"}">
+      <div class="image-url-thumb-wrap">${thumb}</div>
+      ${urlInput}
+      ${uploadBtn}
+      <button type="button" class="btn btn-sm btn-danger list-rm">删</button>
+    </div>`;
+  };
+
+  App.renderImageUrlList = function renderImageUrlList(name, items, field) {
+    const arr = Array.isArray(items) ? items : [];
+    const folder = field.uploadFolder || "misc";
+    const uploadPrimary = field.uploadPrimary === true;
+    let html = `<div class="list-builder list-builder--images" data-list-type="image_url" data-name="${name}" data-upload-folder="${App.escapeHtml(folder)}"${uploadPrimary ? ' data-upload-primary="1"' : ""}>`;
+    arr.forEach((item, i) => {
+      html += App.renderImageUrlRow(item, i, { showUrl: !uploadPrimary || Boolean(item) });
+    });
+    if (uploadPrimary) {
+      html += `<div class="image-list-toolbar">
+        <label class="btn btn-sm btn-secondary image-file-label">+ 本地上传
+          <input type="file" class="image-bulk-input" accept="image/jpeg,image/png,image/webp" multiple hidden />
+        </label>
+        <button type="button" class="btn btn-sm btn-secondary list-add-url">+ 粘贴 URL</button>
+      </div>`;
+    } else {
+      html += `<button type="button" class="btn btn-sm btn-secondary list-add">+ 添加图片</button>`;
+    }
+    html += `</div>`;
+    return html;
+  };
+
+  App.addImageUrlRowWithFile = function addImageUrlRowWithFile(box, file, showUrl) {
+    const anchor = box.querySelector(".image-list-toolbar, .list-add");
+    const i = box.querySelectorAll(".list-row--image").length;
+    const tmp = document.createElement("div");
+    tmp.innerHTML = App.renderImageUrlRow("", i, { showUrl: showUrl !== false });
+    const row = tmp.firstChild;
+    if (anchor) anchor.insertAdjacentElement("beforebegin", row);
+    else box.appendChild(row);
+    const fileInput = App.$(".image-file-input", row);
+    if (file && fileInput) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      App.bindImageFileInput(fileInput, { row });
+      const thumbWrap = row.querySelector(".image-url-thumb-wrap");
+      if (thumbWrap) {
+        const objectUrl = URL.createObjectURL(file);
+        thumbWrap.innerHTML = `<img src="${objectUrl}" alt="" class="image-url-thumb" />`;
+      }
+    }
+    return row;
   };
 
   App.renderPlaceList = function renderPlaceList(name, items) {
@@ -220,11 +482,39 @@
 
   App.renderSegmentList = function renderSegmentList(name, items) {
     const arr = Array.isArray(items) ? items : [];
-    let html = `<div class="list-builder" data-list-type="segment" data-name="${name}"><div class="list-header"><span>章节 ID</span><span>标题</span><span>开始秒</span><span></span></div>`;
+    let html = `<div class="list-builder" data-list-type="segment" data-name="${name}"><div class="list-header"><span>章节标题</span><span>开始秒</span><span></span></div>`;
     arr.forEach((item, i) => {
-      html += `<div class="list-row"><input type="text" value="${App.escapeHtml(item.id || "")}" data-field="id" data-idx="${i}" placeholder="id" /><input type="text" value="${App.escapeHtml(item.title || "")}" data-field="title" data-idx="${i}" /><input type="number" value="${item.start_seconds ?? 0}" data-field="start_seconds" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
+      html += `<div class="list-row"><input type="text" value="${App.escapeHtml(item.title || "")}" data-field="title" data-idx="${i}" placeholder="如 Intro / History" /><input type="number" value="${item.start_seconds ?? 0}" data-field="start_seconds" data-idx="${i}" min="0" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
     });
     html += `<button type="button" class="btn btn-sm btn-secondary list-add">+ 添加章节</button></div>`;
+    return html;
+  };
+
+  App.renderPracticalInfoRow = function renderPracticalInfoRow(item, i) {
+    return `<div class="list-row">
+      <input type="text" class="practical-icon-input" placeholder="图标" value="${App.escapeHtml(item.icon || "")}" data-field="icon" data-idx="${i}" maxlength="4" />
+      <input type="text" placeholder="标签（如 Ticket）" value="${App.escapeHtml(item.label || "")}" data-field="label" data-idx="${i}" />
+      <input type="text" placeholder="内容" value="${App.escapeHtml(item.value || "")}" data-field="value" data-idx="${i}" />
+      <button type="button" class="btn btn-sm btn-danger list-rm">删</button>
+    </div>`;
+  };
+
+  App.renderPracticalInfoList = function renderPracticalInfoList(name, items, field) {
+    const arr = Array.isArray(items) ? items : [];
+    const presets = field.presets || App.PRACTICAL_INFO_PRESETS || [];
+    let html = `<div class="list-builder list-builder--practical" data-list-type="practical_info" data-name="${name}">`;
+    html += `<div class="list-header list-header--practical"><span>图标</span><span>标签</span><span>内容</span><span></span></div>`;
+    arr.forEach((item, i) => {
+      html += App.renderPracticalInfoRow(item, i);
+    });
+    if (presets.length) {
+      html += `<div class="practical-presets">`;
+      presets.forEach((p) => {
+        html += `<button type="button" class="btn btn-sm btn-secondary list-preset" data-preset-icon="${App.escapeHtml(p.icon || "")}" data-preset-label="${App.escapeHtml(p.label || "")}">+ ${App.escapeHtml(p.label || "")}</button>`;
+      });
+      html += `</div>`;
+    }
+    html += `<button type="button" class="btn btn-sm btn-secondary list-add">+ 添加条目</button></div>`;
     return html;
   };
 
@@ -248,6 +538,98 @@
     return html;
   };
 
+  App.renderLinkList = function renderLinkList(name, items) {
+    const arr = Array.isArray(items) ? items : [];
+    let html = `<div class="list-builder" data-list-type="link" data-name="${name}"><div class="list-header"><span>按钮文案</span><span>链接 URL</span><span></span></div>`;
+    arr.forEach((item, i) => {
+      html += `<div class="list-row"><input type="text" placeholder="如 Booking.com" value="${App.escapeHtml(item.label || "")}" data-field="label" data-idx="${i}" /><input type="url" placeholder="https://..." value="${App.escapeHtml(item.url || item.url_template || "")}" data-field="url" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
+    });
+    html += `<button type="button" class="btn btn-sm btn-secondary list-add">+ 添加链接</button></div>`;
+    return html;
+  };
+
+  App.renderContentBlockRow = function renderContentBlockRow(item, i) {
+    const blockType = App.inferContentBlockType(item);
+    const imagePath =
+      item.imagePath || item.image_path || (blockType === "image" ? item.body || "" : "");
+    const thumb = imagePath
+      ? `<img src="${App.escapeHtml(imagePath)}" alt="" class="image-url-thumb" />`
+      : `<span class="image-url-placeholder">预览</span>`;
+    const typeOpts = [
+      { value: "heading", label: "标题" },
+      { value: "paragraph", label: "正文" },
+      { value: "image", label: "图片" },
+    ]
+      .map(
+        (o) =>
+          `<option value="${o.value}" ${blockType === o.value ? "selected" : ""}>${o.label}</option>`
+      )
+      .join("");
+    return `<div class="list-row list-row--content-block" data-block-type="${blockType}">
+      <select data-field="block_type" class="content-block-type">${typeOpts}</select>
+      <div class="content-block-fields content-block-fields--heading" ${blockType !== "heading" ? "hidden" : ""}>
+        <input type="text" placeholder="标题文字" value="${App.escapeHtml(blockType === "heading" ? item.title || "" : "")}" data-field="title" data-idx="${i}" />
+      </div>
+      <div class="content-block-fields content-block-fields--paragraph" ${blockType !== "paragraph" ? "hidden" : ""}>
+        <div class="rich-text-host rich-text-host--compact content-block-body-host" data-field="body">
+          <div class="rich-text-editor">${blockType === "paragraph" ? App.plainTextToHtml(item.body || "") : ""}</div>
+        </div>
+      </div>
+      <div class="content-block-fields content-block-fields--image" ${blockType !== "image" ? "hidden" : ""}>
+        <div class="image-url-thumb-wrap block-image-thumb">${thumb}</div>
+        <input type="hidden" data-field="image_path" value="${App.escapeHtml(imagePath)}" />
+        <input type="text" placeholder="图片说明（可选）" value="${App.escapeHtml(blockType === "image" ? item.title || "" : "")}" data-field="title" data-idx="${i}" />
+        <label class="btn btn-sm btn-secondary image-file-label">本地上传
+          <input type="file" class="block-image-file image-file-input" accept="image/jpeg,image/png,image/webp" hidden />
+        </label>
+      </div>
+      <button type="button" class="btn btn-sm btn-danger list-rm">删</button>
+    </div>`;
+  };
+
+  App.renderContentBlocksList = function renderContentBlocksList(name, items, field) {
+    const arr = Array.isArray(items) ? items : [];
+    const folder = field?.uploadFolder || "sub-areas";
+    let html = `<div class="list-builder list-builder--blocks" data-list-type="content_block" data-name="${name}" data-upload-folder="${App.escapeHtml(folder)}">`;
+    arr.forEach((item, i) => {
+      html += App.renderContentBlockRow(item, i);
+    });
+    html += `<button type="button" class="btn btn-sm btn-secondary list-add">+ 添加内容块</button></div>`;
+    return html;
+  };
+
+  App.renderFlightPlatformList = function renderFlightPlatformList(name, items) {
+    const arr = Array.isArray(items) ? items : [];
+    let html = `<div class="list-builder" data-list-type="flight_platform" data-name="${name}"><div class="list-header"><span>平台 ID</span><span>显示名</span><span>链接</span><span></span></div>`;
+    arr.forEach((item, i) => {
+      html += `<div class="list-row"><input type="text" placeholder="skyscanner" value="${App.escapeHtml(item.id || "")}" data-field="id" data-idx="${i}" /><input type="text" placeholder="Skyscanner" value="${App.escapeHtml(item.label || "")}" data-field="label" data-idx="${i}" /><input type="url" placeholder="https://..." value="${App.escapeHtml(item.url_template || item.url || "")}" data-field="url_template" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
+    });
+    html += `<button type="button" class="btn btn-sm btn-secondary list-add">+ 添加平台</button></div>`;
+    return html;
+  };
+
+  App.renderHomeCardsList = function renderHomeCardsList(name, cards) {
+    const arr = Array.isArray(cards) ? cards : [];
+    let html = `<div class="home-cards-editor" data-name="${name}">`;
+    (App.HOME_CARD_OPTIONS || []).forEach((preset) => {
+      const hit = arr.find((x) => x.id === preset.id);
+      const enabled = hit ? hit.enabled !== false : false;
+      html += `<label class="checkbox-chip home-card-chip"><input type="checkbox" data-card-id="${App.escapeHtml(preset.id)}" ${enabled ? "checked" : ""} /> ${App.escapeHtml(preset.label)}</label>`;
+    });
+    html += `</div>`;
+    return html;
+  };
+
+  App.renderHelpPhraseList = function renderHelpPhraseList(name, items) {
+    const arr = Array.isArray(items) ? items : [];
+    let html = `<div class="list-builder" data-list-type="help_phrase" data-name="${name}"><div class="list-header"><span>中文</span><span>拼音</span><span>英文</span><span></span></div>`;
+    arr.forEach((item, i) => {
+      html += `<div class="list-row"><input type="text" value="${App.escapeHtml(item.chinese || "")}" data-field="chinese" data-idx="${i}" /><input type="text" value="${App.escapeHtml(item.pinyin || "")}" data-field="pinyin" data-idx="${i}" /><input type="text" value="${App.escapeHtml(item.english || "")}" data-field="english" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
+    });
+    html += `<button type="button" class="btn btn-sm btn-secondary list-add">+ 添加短语</button></div>`;
+    return html;
+  };
+
   App.renderItineraryBuilder = function renderItineraryBuilder(name, days) {
     const arr = Array.isArray(days) ? days : [];
     let html = `<div class="itinerary-builder" data-name="${name}">`;
@@ -260,29 +642,35 @@
 
   App.renderItineraryDay = function renderItineraryDay(day, di) {
     const activities = day.activities || [];
-    let html = `<div class="itin-day" data-day-idx="${di}" data-day-id="${App.escapeHtml(day.id || `day_${di + 1}`)}">
+    const cityId = day.city_id || App.cityIdFromName(day.city_name) || "";
+    let cityOpts = `<option value="">— 选择城市 —</option>`;
+    App.refCache.cities.forEach((c) => {
+      cityOpts += `<option value="${App.escapeHtml(c.id)}" ${cityId === c.id ? "selected" : ""}>${App.escapeHtml(`${c.emoji || ""} ${c.chinese_name || c.name}`.trim())}</option>`;
+    });
+    let html = `<div class="itin-day" data-day-idx="${di}" data-day-id="${App.escapeHtml(day.id || `day_${di + 1}`)}" data-day-city-id="${App.escapeHtml(cityId)}">
       <div class="itin-day-head"><strong>第 ${di + 1} 天</strong>
+        <span class="itin-day-moves">
+          <button type="button" class="btn btn-sm btn-secondary itin-move-day-up" data-day="${di}" ${di === 0 ? "disabled" : ""}>↑</button>
+          <button type="button" class="btn btn-sm btn-secondary itin-move-day-down" data-day="${di}">↓</button>
+        </span>
         <button type="button" class="btn btn-sm btn-danger itin-rm-day">删除天</button>
       </div>
       <label>日期标签</label><input type="text" data-day-field="date_label" value="${App.escapeHtml(day.date_label || "")}" />
-      <label>城市名</label><input type="text" data-day-field="city_name" value="${App.escapeHtml(day.city_name || "")}" />
+      <label>城市</label><select class="itin-city-select" data-day-field="city_id">${cityOpts}</select>
       <label>费用估算</label><input type="text" data-day-field="cost_estimate" value="${App.escapeHtml(day.cost_estimate || "")}" />
       <div class="itin-activities">`;
     activities.forEach((act, ai) => {
-      html += App.renderItineraryActivity(act, di, ai);
+      html += App.renderItineraryActivity(act, di, ai, cityId);
     });
     html += `</div><button type="button" class="btn btn-sm btn-secondary itin-add-act" data-day="${di}">+ 添加活动</button></div>`;
     return html;
   };
 
-  App.renderItineraryActivity = function renderItineraryActivity(act, di, ai) {
+  App.renderItineraryActivity = function renderItineraryActivity(act, di, ai, cityId) {
     const slots = App.TIME_SLOT_OPTIONS;
     let slotOpts = slots.map((s) => `<option value="${s}" ${act.time_slot === s ? "selected" : ""}>${s}</option>`).join("");
-    let attrOpts = `<option value="">— 无景点 —</option>`;
-    App.refCache.attractions.forEach((a) => {
-      attrOpts += `<option value="${App.escapeHtml(a.id)}" ${act.attraction_id === a.id ? "selected" : ""}>${App.escapeHtml(a.chinese_name || a.name)}</option>`;
-    });
-    return `<div class="itin-act" data-day="${di}" data-act="${ai}" data-act-id="${App.escapeHtml(act.id || `a${ai + 1}`)}">
+    const attrOpts = App.renderAttractionSelectOptions(cityId, act.attraction_id);
+    return `<div class="itin-act" data-day="${di}" data-act="${ai}">
       <select data-act-field="time_slot">${slotOpts}</select>
       <input type="text" data-act-field="name" placeholder="活动名称" value="${App.escapeHtml(act.name || "")}" />
       <input type="text" data-act-field="detail" placeholder="详情" value="${App.escapeHtml(act.detail || "")}" />
@@ -292,25 +680,109 @@
     </div>`;
   };
 
+  App.refreshItineraryDayAttractions = function refreshItineraryDayAttractions(dayEl) {
+    const cityId = App.$(".itin-city-select", dayEl)?.value || "";
+    dayEl.dataset.dayCityId = cityId;
+    App.$$(".itin-act", dayEl).forEach((actEl) => {
+      const sel = App.$('[data-act-field="attraction_id"]', actEl);
+      if (!sel) return;
+      const current = sel.value;
+      sel.innerHTML = App.renderAttractionSelectOptions(cityId, current);
+    });
+  };
+
   App.renderImagePreview = function renderImagePreview(name, url) {
     if (!url) return `<div class="media-preview empty">暂无封面图</div><input type="hidden" name="${name}" value="" />`;
     return `<div class="media-preview"><img src="${App.escapeHtml(url)}" alt="" /><input type="hidden" name="${name}" value="${App.escapeHtml(url)}" /></div>`;
   };
 
   App.renderAudioPreview = function renderAudioPreview(name, url) {
-    if (!url) return `<div class="media-preview empty">暂无音频</div><input type="hidden" name="${name}" value="" />`;
-    return `<div class="media-preview"><audio controls src="${App.escapeHtml(url)}"></audio><input type="hidden" name="${name}" value="${App.escapeHtml(url)}" /></div>`;
+    if (!url) {
+      return `<div class="media-preview empty" data-audio-preview-field="${App.escapeHtml(name)}">暂无音频</div><input type="hidden" name="${name}" value="" />`;
+    }
+    return `<div class="media-preview" data-audio-preview-field="${App.escapeHtml(name)}"><audio controls src="${App.escapeHtml(url)}"></audio><input type="hidden" name="${name}" value="${App.escapeHtml(url)}" /></div>`;
+  };
+
+  App.bindAudioUploadInput = function bindAudioUploadInput(input, opts = {}) {
+    if (!input || input.dataset.audioBound === "1") return;
+    input.dataset.audioBound = "1";
+
+    input.addEventListener("change", async () => {
+      const file = input.files?.[0];
+      const wrap = input.closest(".audio-upload-wrap");
+      const statusEl = wrap?.querySelector(".audio-upload-status");
+      const previewEl = wrap?.querySelector(".audio-upload-preview");
+      if (!file) {
+        if (statusEl) statusEl.textContent = "";
+        if (previewEl) {
+          previewEl.hidden = true;
+          previewEl.innerHTML = "";
+        }
+        return;
+      }
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      if (statusEl) statusEl.textContent = `正在上传 ${file.name} (${sizeMb} MB)…`;
+
+      if (typeof opts.onUpload === "function") {
+        try {
+          input.disabled = true;
+          if (opts.form) opts.form.dataset.audioUploading = "1";
+          const result = await opts.onUpload(file, { wrap, input });
+          if (previewEl && result?.audioUrl) {
+            previewEl.hidden = false;
+            previewEl.innerHTML = "";
+            const a = document.createElement("audio");
+            a.controls = true;
+            a.src = result.audioUrl;
+            previewEl.appendChild(a);
+          }
+          if (opts.form && opts.previewFieldKey && result?.audioUrl) {
+            App.setAudioPreviewField(opts.form, opts.previewFieldKey, result.audioUrl);
+          }
+          if (statusEl) {
+            statusEl.textContent = result?.guideId
+              ? `✓ 已上传并关联导览 ${result.guideId}`
+              : `✓ 已上传 ${file.name}`;
+          }
+          input.value = "";
+        } catch (ex) {
+          const detail = App.formatClientError
+            ? App.formatClientError(ex, "音频上传")
+            : ex.message || "上传失败";
+          App.showToast(detail, "error");
+          if (statusEl) statusEl.textContent = `上传失败：${detail}`;
+          console.error("音频上传失败", ex);
+        } finally {
+          input.disabled = false;
+          if (opts.form) delete opts.form.dataset.audioUploading;
+        }
+        return;
+      }
+
+      if (previewEl) {
+        previewEl.hidden = false;
+        previewEl.innerHTML = `<audio controls src="${URL.createObjectURL(file)}"></audio>`;
+      }
+      App.showToast("已选择音频，保存表单后上传");
+    });
+  };
+
+  App.formFieldEl = function formFieldEl(root, key) {
+    if (root?.elements && root.elements[key] !== undefined) return root.elements[key];
+    return root?.querySelector(`[name="${key}"]`);
   };
 
   App.readFieldValue = function readFieldValue(field, form) {
-    const el = form.elements[field.key];
+    const el = App.formFieldEl(form, field.key);
     switch (field.type) {
       case "bool":
         return el ? el.checked : false;
       case "number": {
         const v = el?.value?.trim();
-        if (v === "" || v === undefined) return null;
-        return Number(v);
+        if (v === "" || v === undefined) return field.allowNull ? null : undefined;
+        const n = Number(v);
+        if (Number.isNaN(n)) return field.allowNull ? null : undefined;
+        return n;
       }
       case "tags": {
         const raw = el?.value?.trim() || "";
@@ -322,16 +794,31 @@
         if (!raw) return "";
         return raw.split("\n").map((s) => s.trim()).filter(Boolean).join("\n");
       }
-      case "ref_cities_multi": {
+      case "ref_cities_multi":
+      case "ref_countries_multi":
+      case "enum_multi": {
         const box = form.querySelector(`[data-name="${field.key}"]`);
         if (!box) return [];
         return App.$$(`input:checked`, box).map((inp) => inp.value);
+      }
+      case "home_cards_list": {
+        const box = form.querySelector(`[data-name="${field.key}"]`);
+        if (!box) return [];
+        return (App.HOME_CARD_OPTIONS || []).map((preset) => {
+          const inp = box.querySelector(`[data-card-id="${preset.id}"]`);
+          return { id: preset.id, enabled: inp ? inp.checked : false };
+        });
       }
       case "string_list":
       case "place_list":
       case "segment_list":
       case "visa_detail_list":
+      case "practical_info_list":
       case "contact_list":
+      case "link_list":
+      case "content_blocks_list":
+      case "flight_platform_list":
+      case "help_phrase_list":
         return App.readListBuilder(form, field);
       case "itinerary_builder":
         return App.readItineraryBuilder(form, field.key);
@@ -340,11 +827,15 @@
         return el?.value?.trim() || null;
       case "image_upload":
       case "audio_upload":
+      case "image_url_list":
+      case "content_blocks_list":
         return undefined;
       case "json": {
         const raw = el?.value?.trim() || "[]";
         return JSON.parse(raw);
       }
+      case "richtext":
+        return App.readRichTextValue(form, field.key) || null;
       default:
         return el?.value?.trim() === "" ? null : el?.value?.trim();
     }
@@ -368,11 +859,15 @@
         .filter((p) => p.name);
     }
     if (type === "segment") {
-      return rows.map((r) => ({
-        id: App.$('[data-field="id"]', r)?.value?.trim() || "",
-        title: App.$('[data-field="title"]', r)?.value?.trim() || "",
-        start_seconds: Number(App.$('[data-field="start_seconds"]', r)?.value || 0),
-      }));
+      return rows
+        .map((r, idx) => {
+          const title = App.$('[data-field="title"]', r)?.value?.trim() || "";
+          const start_seconds = Number(App.$('[data-field="start_seconds"]', r)?.value || 0);
+          if (!title) return null;
+          const slug = App.slugify(title, "seg");
+          return { id: slug || `seg_${idx + 1}`, title, start_seconds };
+        })
+        .filter(Boolean);
     }
     if (type === "visa_detail") {
       return rows.map((r) => ({
@@ -380,12 +875,72 @@
         value: App.$('[data-field="value"]', r)?.value?.trim() || "",
       }));
     }
+    if (type === "practical_info") {
+      return rows
+        .map((r) => {
+          const label = App.$('[data-field="label"]', r)?.value?.trim() || "";
+          const value = App.$('[data-field="value"]', r)?.value?.trim() || "";
+          if (!label || !value) return null;
+          const icon = App.$('[data-field="icon"]', r)?.value?.trim() || "";
+          const item = { label, value };
+          if (icon) item.icon = icon;
+          return item;
+        })
+        .filter(Boolean);
+    }
     if (type === "contact") {
       return rows.map((r) => ({
         label: App.$('[data-field="label"]', r)?.value?.trim() || "",
         number: App.$('[data-field="number"]', r)?.value?.trim() || "",
         note: App.$('[data-field="note"]', r)?.value?.trim() || null,
       }));
+    }
+    if (type === "link") {
+      return rows
+        .map((r) => ({
+          label: App.$('[data-field="label"]', r)?.value?.trim() || "",
+          url: App.$('[data-field="url"]', r)?.value?.trim() || "",
+        }))
+        .filter((x) => x.label && x.url);
+    }
+    if (type === "content_block") {
+      return rows
+        .map((r) => {
+          const blockType = App.$('[data-field="block_type"]', r)?.value || "paragraph";
+          if (blockType === "heading") {
+            const title = App.$('[data-field="title"]', r)?.value?.trim() || "";
+            return title ? { type: "heading", title } : null;
+          }
+          if (blockType === "image") {
+            const imagePath = App.$('[data-field="image_path"]', r)?.value?.trim() || "";
+            if (!imagePath) return null;
+            const title = App.$('[data-field="title"]', r)?.value?.trim() || "";
+            const block = { type: "image", imagePath };
+            if (title) block.title = title;
+            return block;
+          }
+          const body = App.readContentBlockBody(r);
+          return body ? { type: "paragraph", body } : null;
+        })
+        .filter(Boolean);
+    }
+    if (type === "flight_platform") {
+      return rows
+        .map((r) => ({
+          id: App.$('[data-field="id"]', r)?.value?.trim() || "",
+          label: App.$('[data-field="label"]', r)?.value?.trim() || "",
+          url_template: App.$('[data-field="url_template"]', r)?.value?.trim() || "",
+        }))
+        .filter((x) => x.id && x.label);
+    }
+    if (type === "help_phrase") {
+      return rows
+        .map((r) => ({
+          chinese: App.$('[data-field="chinese"]', r)?.value?.trim() || "",
+          pinyin: App.$('[data-field="pinyin"]', r)?.value?.trim() || "",
+          english: App.$('[data-field="english"]', r)?.value?.trim() || "",
+        }))
+        .filter((x) => x.chinese);
     }
     return [];
   };
@@ -399,13 +954,15 @@
         id: dayEl.dataset.dayId || `day_${di + 1}`,
         day_index: di + 1,
         date_label: App.$('[data-day-field="date_label"]', dayEl)?.value?.trim() || "",
-        city_name: App.$('[data-day-field="city_name"]', dayEl)?.value?.trim() || "",
         cost_estimate: App.$('[data-day-field="cost_estimate"]', dayEl)?.value?.trim() || "",
         activities: [],
       };
+      const cityId = App.$('[data-day-field="city_id"]', dayEl)?.value?.trim() || "";
+      day.city_name = cityId ? App.cityLabel(cityId) : "";
+      if (cityId) day.city_id = cityId;
       App.$$(".itin-act", dayEl).forEach((actEl, ai) => {
         day.activities.push({
-          id: actEl.dataset.actId || `a${ai + 1}`,
+          id: `a${ai + 1}`,
           time_slot: App.$('[data-act-field="time_slot"]', actEl)?.value || "AM",
           name: App.$('[data-act-field="name"]', actEl)?.value?.trim() || "",
           detail: App.$('[data-act-field="detail"]', actEl)?.value?.trim() || "",
@@ -418,8 +975,8 @@
     return days;
   };
 
-  App.appendListRow = function appendListRow(box, type) {
-    const addBtn = box.querySelector(".list-add");
+  App.appendListRow = function appendListRow(box, type, opts = {}) {
+    const addBtn = box.querySelector(".list-add, .list-add-url");
     const i = box.querySelectorAll(".list-row").length;
     let row = "";
     if (type === "string") {
@@ -427,27 +984,134 @@
     } else if (type === "place") {
       row = `<div class="list-row"><input type="text" placeholder="名称" data-field="name" data-idx="${i}" /><input type="text" placeholder="距离" data-field="distance" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
     } else if (type === "segment") {
-      row = `<div class="list-row"><input type="text" data-field="id" data-idx="${i}" placeholder="id" /><input type="text" data-field="title" data-idx="${i}" /><input type="number" value="0" data-field="start_seconds" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
+      row = `<div class="list-row"><input type="text" data-field="title" data-idx="${i}" placeholder="如 Intro / History" /><input type="number" value="0" data-field="start_seconds" data-idx="${i}" min="0" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
     } else if (type === "visa_detail") {
       row = `<div class="list-row"><input type="text" data-field="label" data-idx="${i}" /><input type="text" data-field="value" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
+    } else if (type === "practical_info") {
+      row = App.renderPracticalInfoRow({ icon: opts.presetIcon || "", label: opts.presetLabel || "", value: "" }, i);
     } else if (type === "contact") {
       row = `<div class="list-row"><input type="text" data-field="label" data-idx="${i}" /><input type="text" data-field="number" data-idx="${i}" /><input type="text" data-field="note" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
+    } else if (type === "link") {
+      row = `<div class="list-row"><input type="text" placeholder="按钮文案" data-field="label" data-idx="${i}" /><input type="url" placeholder="https://..." data-field="url" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
+    } else if (type === "image_url") {
+      row = App.renderImageUrlRow("", i, { showUrl: opts.showUrl !== false });
+    } else if (type === "content_block") {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = App.renderContentBlockRow({}, i);
+      addBtn.insertAdjacentElement("beforebegin", tmp.firstChild);
+      App.bindContentBlockRow(tmp.firstChild);
+      return;
+    } else if (type === "flight_platform") {
+      row = `<div class="list-row"><input type="text" placeholder="skyscanner" data-field="id" data-idx="${i}" /><input type="text" placeholder="Skyscanner" data-field="label" data-idx="${i}" /><input type="url" placeholder="https://..." data-field="url_template" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
+    } else if (type === "help_phrase") {
+      row = `<div class="list-row"><input type="text" data-field="chinese" data-idx="${i}" /><input type="text" data-field="pinyin" data-idx="${i}" /><input type="text" data-field="english" data-idx="${i}" /><button type="button" class="btn btn-sm btn-danger list-rm">删</button></div>`;
     }
-    if (row) addBtn.insertAdjacentHTML("beforebegin", row);
+    if (row) {
+      addBtn.insertAdjacentHTML("beforebegin", row);
+      if (type === "image_url") {
+        const newRow = addBtn.previousElementSibling;
+        App.bindImageFileInput(App.$(".image-file-input", newRow), { row: newRow });
+      }
+    }
+  };
+
+  App.bindImageFileInput = function bindImageFileInput(input, opts = {}) {
+    if (!input || input.dataset.imageBound) return;
+    input.dataset.imageBound = "1";
+    input.addEventListener("change", () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const row = opts.row || input.closest(".list-row--image, .list-row--content-block");
+      const thumbWrap =
+        opts.thumbWrap || row?.querySelector(".image-url-thumb-wrap, .block-image-thumb");
+      const filenameEl =
+        opts.filenameEl || input.closest(".image-upload-wrap")?.querySelector(".image-upload-filename");
+      const previewEl = input.closest(".image-upload-wrap")?.querySelector(".image-upload-preview");
+      if (filenameEl) filenameEl.textContent = file.name;
+      const objectUrl = URL.createObjectURL(file);
+      if (thumbWrap) {
+        thumbWrap.innerHTML = `<img src="${objectUrl}" alt="" class="image-url-thumb" />`;
+      }
+      if (previewEl) {
+        previewEl.hidden = false;
+        previewEl.innerHTML = `<img src="${objectUrl}" alt="" class="image-url-thumb" />`;
+      }
+    });
+  };
+
+  App.toggleContentBlockFields = function toggleContentBlockFields(row, blockType) {
+    if (!row) return;
+    row.dataset.blockType = blockType;
+    const heading = row.querySelector(".content-block-fields--heading");
+    const paragraph = row.querySelector(".content-block-fields--paragraph");
+    const image = row.querySelector(".content-block-fields--image");
+    if (heading) heading.hidden = blockType !== "heading";
+    if (paragraph) paragraph.hidden = blockType !== "paragraph";
+    if (image) image.hidden = blockType !== "image";
+    if (blockType === "paragraph") {
+      const host = row.querySelector(".content-block-body-host");
+      App.initRichTextHost(host, { compact: true });
+    }
+  };
+
+  App.bindContentBlockRow = function bindContentBlockRow(row) {
+    if (!row) return;
+    const typeSel = row.querySelector('[data-field="block_type"]');
+    if (typeSel && !typeSel.dataset.blockBound) {
+      typeSel.dataset.blockBound = "1";
+      typeSel.addEventListener("change", () => App.toggleContentBlockFields(row, typeSel.value));
+    }
+    const fileInput = row.querySelector(".block-image-file");
+    App.bindImageFileInput(fileInput, { row });
+    const blockType = typeSel?.value || row.dataset.blockType || "paragraph";
+    if (blockType === "paragraph") {
+      const host = row.querySelector(".content-block-body-host");
+      App.initRichTextHost(host, { compact: true });
+    }
   };
 
   App.mountFieldInteractions = function mountFieldInteractions(form, meta, ctx) {
     App.$$(".list-builder", form).forEach((box) => {
       const type = box.dataset.listType;
       box.addEventListener("click", (e) => {
+        const presetBtn = e.target.closest(".list-preset");
+        if (presetBtn) {
+          App.appendListRow(box, type, {
+            presetIcon: presetBtn.dataset.presetIcon || "",
+            presetLabel: presetBtn.dataset.presetLabel || "",
+          });
+          return;
+        }
         if (e.target.classList.contains("list-add")) {
           App.appendListRow(box, type);
+        }
+        if (e.target.classList.contains("list-add-url")) {
+          App.appendListRow(box, type, { showUrl: true });
         }
         if (e.target.classList.contains("list-rm")) {
           e.target.closest(".list-row")?.remove();
         }
       });
     });
+
+    form.querySelectorAll('[data-list-type="image_url"]').forEach((box) => {
+      if (box.dataset.imageListBound) return;
+      box.dataset.imageListBound = "1";
+      const bulk = box.querySelector(".image-bulk-input");
+      if (bulk) {
+        bulk.addEventListener("change", () => {
+          const files = [...(bulk.files || [])];
+          files.forEach((file) => App.addImageUrlRowWithFile(box, file, false));
+          bulk.value = "";
+        });
+      }
+    });
+
+    form.querySelectorAll(".list-row--content-block").forEach((row) => App.bindContentBlockRow(row));
+    form.querySelectorAll(".list-row--image .image-file-input").forEach((input) => {
+      App.bindImageFileInput(input, { row: input.closest(".list-row--image") });
+    });
+    form.querySelectorAll(".image-upload-input").forEach((input) => App.bindImageFileInput(input));
 
     const itinRoot = form.querySelector(".itinerary-builder");
     if (itinRoot && !itinRoot.dataset.mounted) {
@@ -462,6 +1126,32 @@
           itinRoot.replaceWith(tmp.firstChild);
           App.mountFieldInteractions(form, meta, ctx);
         }
+        if (e.target.classList.contains("itin-move-day-up")) {
+          const di = Number(e.target.dataset.day);
+          const days = App.readItineraryBuilder(form, field.key);
+          if (di > 0) {
+            const t = days[di];
+            days[di] = days[di - 1];
+            days[di - 1] = t;
+            const tmp = document.createElement("div");
+            tmp.innerHTML = App.renderItineraryBuilder(field.key, days);
+            itinRoot.replaceWith(tmp.firstChild);
+            App.mountFieldInteractions(form, meta, ctx);
+          }
+        }
+        if (e.target.classList.contains("itin-move-day-down")) {
+          const di = Number(e.target.dataset.day);
+          const days = App.readItineraryBuilder(form, field.key);
+          if (di < days.length - 1) {
+            const t = days[di];
+            days[di] = days[di + 1];
+            days[di + 1] = t;
+            const tmp = document.createElement("div");
+            tmp.innerHTML = App.renderItineraryBuilder(field.key, days);
+            itinRoot.replaceWith(tmp.firstChild);
+            App.mountFieldInteractions(form, meta, ctx);
+          }
+        }
         if (e.target.classList.contains("itin-rm-day")) e.target.closest(".itin-day")?.remove();
         if (e.target.classList.contains("itin-add-act")) {
           const dayIdx = Number(e.target.dataset.day);
@@ -469,12 +1159,54 @@
           const acts = dayEl?.querySelector(".itin-activities");
           if (acts) {
             const ai = acts.querySelectorAll(".itin-act").length;
-            acts.insertAdjacentHTML("beforeend", App.renderItineraryActivity({ time_slot: "AM", name: "", detail: "", attraction_id: null, has_audio: false }, dayIdx, ai));
+            const cityId = App.$(".itin-city-select", dayEl)?.value || "";
+            acts.insertAdjacentHTML(
+              "beforeend",
+              App.renderItineraryActivity({ time_slot: "AM", name: "", detail: "", attraction_id: null, has_audio: false }, dayIdx, ai, cityId)
+            );
           }
         }
         if (e.target.classList.contains("itin-rm-act")) e.target.closest(".itin-act")?.remove();
       });
     }
+
+    if (!form.dataset.itinCityBound) {
+      form.dataset.itinCityBound = "1";
+      form.addEventListener("change", (e) => {
+        if (e.target.classList?.contains("itin-city-select")) {
+          App.refreshItineraryDayAttractions(e.target.closest(".itin-day"));
+        }
+      });
+    }
+
+    form.querySelectorAll("[data-ref-scenario]").forEach((sel) => {
+      if (sel.dataset.scenarioBound) return;
+      sel.dataset.scenarioBound = "1";
+      sel.addEventListener("change", async () => {
+        if (sel.value !== "__new__") return;
+        const prev = sel.dataset.prevValue || "";
+        const label = window.prompt("场景显示名称（如「🚗 租车」）");
+        if (!label?.trim()) {
+          sel.value = prev;
+          return;
+        }
+        try {
+          const id = await App.createScenarioQuick(label.trim());
+          const field = meta.fields.find((f) => f.key === sel.name);
+          const tmp = document.createElement("div");
+          tmp.innerHTML = App.renderRefScenarioSelect(sel.name, id, field);
+          const next = tmp.firstChild;
+          sel.replaceWith(next);
+          App.mountFieldInteractions(form, meta, ctx);
+        } catch (ex) {
+          App.showToast(ex.message, "error");
+          sel.value = prev;
+        }
+      });
+      sel.addEventListener("focus", () => {
+        sel.dataset.prevValue = sel.value === "__new__" ? "" : sel.value;
+      });
+    });
 
     form.querySelectorAll("[data-ref-country]").forEach((sel) => {
       sel.addEventListener("change", () => {
@@ -501,6 +1233,28 @@
       citySel?.addEventListener("change", refresh);
     });
 
+    form.querySelectorAll("[data-ref-attraction]").forEach((sel) => {
+      if (sel.dataset.audioRefreshBound) return;
+      sel.dataset.audioRefreshBound = "1";
+      sel.addEventListener("change", async () => {
+        const attId = sel.value?.trim() || "";
+        if (attId) {
+          try {
+            await App.fetchAudioGuidesForAttraction(attId, { force: true });
+          } catch (ex) {
+            App.showToast(ex.message, "error");
+            return;
+          }
+        }
+        App.refreshAudioGuideSelects(form, meta, {
+          ...ctx,
+          formEl: form,
+          scopeRoot: form,
+          fixedAttractionId: attId || ctx.fixedAttractionId,
+        });
+      });
+    });
+
     if (ctx.isNew) {
       const slugInput = form.querySelector(".slug-input");
       if (slugInput) {
@@ -521,21 +1275,45 @@
       }
     }
 
-    form.querySelectorAll(".richtext-area").forEach((ta) => {
-      const counter = form.querySelector(`[data-for="${ta.name}"]`);
-      ta.addEventListener("input", () => {
-        if (counter) counter.textContent = `${ta.value.length} 字`;
+    const subAreaUpload = form.querySelector('[name="_sa_audio_upload"]');
+    if (subAreaUpload && !subAreaUpload.closest(".sub-area-inline-form")) {
+      App.setupSubAreaAudioControls(form, {
+        ...ctx,
+        row: ctx.subAreaRow,
+        fixedAttractionId: ctx.fixedAttractionId,
       });
-    });
+    } else {
+      form.querySelectorAll(".audio-upload-input").forEach((input) => {
+        if (input.closest(".sub-area-inline-form")) return;
+        App.bindAudioUploadInput(input);
+      });
+    }
+
+    App.initRichTextHosts(form);
+    App.bindDeferredQuillHosts(form);
   };
 
   App.formatListCell = function formatListCell(col, row) {
     const key = typeof col === "string" ? col : col.key;
     let v = row[key];
+    if (typeof col === "object" && col.format === "checklist_type") {
+      return App.escapeHtml(App.CHECKLIST_TYPE_LABELS?.[v] || v || "—");
+    }
+    if (typeof col === "object" && col.format === "checklist_phase") {
+      return App.escapeHtml(App.CHECKLIST_PHASE_LABELS?.[v] || v || "—");
+    }
+    if (typeof col === "object" && col.format === "checklist_priority") {
+      return App.escapeHtml(App.CHECKLIST_PRIORITY_LABELS?.[v] || v || "—");
+    }
     if (typeof col === "object" && col.ref === "city") return App.cityLabel(v);
     if (typeof col === "object" && col.ref === "attraction") return App.attractionLabel(v);
     if (typeof col === "object" && col.ref === "scenario") return App.scenarioLabel(v);
     if (typeof col === "object" && col.ref === "country") return App.countryLabel(v);
+    if (typeof col === "object" && col.type === "image_thumb") {
+      if (!v) return "—";
+      const src = String(v);
+      return `<img class="list-thumb" src="${App.escapeHtml(src)}" alt="" loading="lazy" />`;
+    }
     if (typeof v === "boolean") {
       return `<span class="tag ${v ? "on" : "off"}">${v ? "是" : "否"}</span>`;
     }

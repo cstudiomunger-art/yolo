@@ -12,6 +12,7 @@ struct UserProfileRow: Codable, Sendable {
     var completedChecklistIds: [String]
     var purchasedAttractionIds: [String]
     var isPro: Bool
+    /// Legacy JSON column; new trips use `user_itineraries`. App no longer reads/writes trip payloads here.
     var savedItineraries: [SampleItinerary]
     var activeItineraryId: String?
 }

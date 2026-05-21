@@ -9,6 +9,10 @@ import SwiftUI
 struct YOLOApp: App {
     @State private var appEnv = AppEnvironment()
 
+    init() {
+        OfflineCacheLocations.bootstrap()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

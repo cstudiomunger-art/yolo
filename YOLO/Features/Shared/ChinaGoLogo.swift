@@ -1,11 +1,13 @@
 import SwiftUI
 
 struct ChinaGoLogo: View {
+    var lightOnDark: Bool = false
+
     var body: some View {
         HStack(spacing: 0) {
             Text("China")
                 .font(Theme.FontToken.playfair(20, weight: .bold))
-                .foregroundStyle(Theme.ColorToken.textPrimary)
+                .foregroundStyle(lightOnDark ? .white : Theme.ColorToken.textPrimary)
             Text("Go")
                 .font(Theme.FontToken.playfair(20, weight: .bold))
                 .foregroundStyle(Theme.ColorToken.accent)

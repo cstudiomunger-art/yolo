@@ -1,31 +1,33 @@
 import SwiftUI
 
+private enum TabBarMotion {
+    static let selection = Animation.spring(response: 0.38, dampingFraction: 0.82)
+}
+
 enum AppTab: String, CaseIterable, Identifiable {
     case home
-    case prepare
     case plan
-    case assistant
     case guide
 
     var id: String { rawValue }
 
+    var index: Int {
+        Self.allCases.firstIndex(of: self) ?? 0
+    }
+
     var title: String {
         switch self {
         case .home: "Home"
-        case .prepare: "Prepare"
         case .plan: "Plan"
-        case .assistant: "Assistant"
         case .guide: "Guide"
         }
     }
 
     var icon: String {
         switch self {
-        case .home: "house"
-        case .prepare: "circle"
-        case .plan: "square"
-        case .assistant: "diamond"
-        case .guide: "line.3.horizontal"
+        case .home: "house.fill"
+        case .plan: "calendar"
+        case .guide: "safari"
         }
     }
 }
@@ -36,62 +38,136 @@ struct MainTabView: View {
     private var selectedTab: Binding<AppTab> {
         Binding(
             get: { appEnv.navigation.selectedTab },
-            set: { appEnv.navigation.selectedTab = $0 }
+            set: { newTab in
+                guard newTab != appEnv.navigation.selectedTab else { return }
+                withAnimation(TabBarMotion.selection) {
+                    appEnv.navigation.selectedTab = newTab
+                }
+            }
         )
     }
 
+    /// Tab bar only on each tab’s root screen (Home always).
+    private var showsTabBar: Bool {
+        switch appEnv.navigation.selectedTab {
+        case .home: true
+        case .guide: appEnv.navigation.guidePathCount == 0
+        case .plan: appEnv.navigation.planPathCount == 0
+        }
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            Group {
-                switch appEnv.navigation.selectedTab {
-                case .home: HomeView()
-                case .prepare: PrepareView()
-                case .plan: PlanView()
-                case .assistant: AssistantView()
-                case .guide: GuideView()
+        ZStack(alignment: .bottom) {
+            GeometryReader { geometry in
+                HStack(spacing: 0) {
+                    tabPage(HomeView(), width: geometry.size.width, height: geometry.size.height)
+                    tabPage(PlanView(), width: geometry.size.width, height: geometry.size.height)
+                    tabPage(GuideView(), width: geometry.size.width, height: geometry.size.height)
+                }
+                .offset(x: -CGFloat(appEnv.navigation.selectedTab.index) * geometry.size.width)
+                .animation(TabBarMotion.selection, value: appEnv.navigation.selectedTab)
+            }
+            .id(appEnv.contentRevision)
+            .clipped()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if showsTabBar {
+                    Color.clear.frame(height: Theme.tabBarHeight + 12)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .id(appEnv.contentRevision)
 
-            ChinaGoTabBar(selectedTab: selectedTab)
+            if showsTabBar {
+                ChinaGoTabBar(selectedTab: selectedTab)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
+            }
         }
         .background(Theme.ColorToken.background)
+        .onAppear {
+            if appEnv.navigation.consumeLandOnPlan() {
+                appEnv.navigation.openPlanGenerator()
+            }
+        }
+        .fullScreenCover(item: Binding(
+            get: { appEnv.navigation.presentedModal },
+            set: { appEnv.navigation.presentedModal = $0 }
+        )) { modal in
+            switch modal {
+            case .prepare:
+                NavigationStack { PrepareView() }
+            case .assistant(let prefill, let scenarioId):
+                NavigationStack {
+                    AssistantView(initialPrefill: prefill, initialScenarioId: scenarioId)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Close") { appEnv.navigation.dismissModal() }
+                            }
+                        }
+                }
+            case .emergency:
+                EmergencyView()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func tabPage<Content: View>(_ content: Content, width: CGFloat, height: CGFloat) -> some View {
+        content
+            .frame(width: width, height: height, alignment: .top)
     }
 }
 
 struct ChinaGoTabBar: View {
     @Binding var selectedTab: AppTab
 
-    var body: some View {
-        VStack(spacing: 0) {
-            Rectangle()
-                .fill(Theme.ColorToken.border)
-                .frame(height: 1)
+    private let pillInset: CGFloat = 2
+    private let pillCornerRadius: CGFloat = 30
+    private let barCornerRadius: CGFloat = 32
 
-            HStack {
-                ForEach(AppTab.allCases) { tab in
-                    Button {
-                        selectedTab = tab
-                    } label: {
-                        VStack(spacing: 4) {
-                            Image(systemName: tab.icon)
-                                .font(.system(size: 17))
-                            Text(tab.title)
-                                .font(Theme.FontToken.inter(9, weight: .medium))
-                                .textCase(.uppercase)
-                                .kerning(0.5)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .foregroundStyle(selectedTab == tab ? Theme.ColorToken.textPrimary : Theme.ColorToken.textDisabled)
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(AppTab.allCases) { tab in
+                Button {
+                    selectedTab = tab
+                } label: {
+                    let isSelected = selectedTab == tab
+                    VStack(spacing: 4) {
+                        Image(systemName: tab.icon)
+                            .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
+                        Text(tab.title)
+                            .font(Theme.FontToken.inter(10, weight: .medium))
                     }
-                    .buttonStyle(.plain)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .foregroundStyle(isSelected ? Theme.ColorToken.textPrimary : Theme.ColorToken.textMuted)
+                    .scaleEffect(isSelected ? 1 : 0.96)
                 }
+                .buttonStyle(.plain)
             }
-            .padding(.top, 10)
-            .padding(.bottom, 8)
         }
-        .frame(height: Theme.tabBarHeight)
-        .background(Theme.ColorToken.background)
+        .padding(6)
+        .background {
+            GeometryReader { geometry in
+                let tabCount = CGFloat(AppTab.allCases.count)
+                let tabWidth = geometry.size.width / tabCount
+
+                RoundedRectangle(cornerRadius: pillCornerRadius, style: .continuous)
+                    .fill(Color.white.opacity(0.55))
+                    .frame(width: tabWidth - pillInset * 2, height: geometry.size.height)
+                    .offset(x: CGFloat(selectedTab.index) * tabWidth + pillInset)
+                    .animation(TabBarMotion.selection, value: selectedTab)
+            }
+        }
+        .background {
+            RoundedRectangle(cornerRadius: barCornerRadius, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .shadow(color: .black.opacity(0.08), radius: 16, y: 4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: barCornerRadius, style: .continuous)
+                        .stroke(Color.white.opacity(0.7), lineWidth: 1)
+                )
+        }
+        .animation(TabBarMotion.selection, value: selectedTab)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }

@@ -3,16 +3,16 @@ import SwiftUI
 struct AssistantView: View {
     @Environment(AppEnvironment.self) private var appEnv
 
-    @State private var mode: AssistantMode = .general
+    var initialPrefill: String? = nil
+    var initialScenarioId: String? = nil
+
     @State private var input = ""
     @State private var messages: [ChatMessage] = []
-    @State private var planningCard: SampleItinerary?
     @State private var showEmergency = false
-
-    enum AssistantMode {
-        case planning
-        case general
-    }
+    @State private var chips: [AssistantChip] = []
+    @State private var isThinking = false
+    @State private var didApplyPrefill = false
+    @State private var didApplyScenario = false
 
     struct ChatMessage: Identifiable {
         let id = UUID()
@@ -20,17 +20,11 @@ struct AssistantView: View {
         let text: String
     }
 
-    @State private var chips: [AssistantChip] = []
-
     var body: some View {
         VStack(spacing: 0) {
             header
-            segmentControl
-
-            if mode == .general {
+            if messages.count <= 1 {
                 chipRow
-            } else {
-                planningBanner
             }
 
             ScrollView {
@@ -38,20 +32,22 @@ struct AssistantView: View {
                     ForEach(messages) { message in
                         chatBubble(message)
                     }
-                    if let card = planningCard, mode == .planning {
-                        ItineraryCardView(itinerary: card) {
-                            appEnv.preferences.saveItinerary(card)
-                            appEnv.navigation.openTab(.plan)
-                        } onRedo: {
-                            planningCard = nil
-                            messages.append(ChatMessage(isUser: false, text: "Tell me what you'd like to change."))
+                    if isThinking {
+                        HStack {
+                            ProgressView()
+                            Text("Thinking…")
+                                .font(Theme.FontToken.inter(12))
+                                .foregroundStyle(Theme.ColorToken.textMuted)
+                            Spacer()
                         }
                     }
                 }
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.vertical, 16)
             }
-
+            .scrollDismissesKeyboard(.interactively)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             inputBar
         }
         .background(Theme.ColorToken.background)
@@ -67,44 +63,20 @@ struct AssistantView: View {
             if messages.isEmpty {
                 messages.append(ChatMessage(isUser: false, text: greeting))
             }
-            if appEnv.navigation.assistantStartInPlanning {
-                mode = .planning
-                appEnv.navigation.assistantStartInPlanning = false
-            }
+            applyPrefillIfNeeded()
+            applyScenarioIfNeeded()
         }
     }
 
     private var greeting: String {
-        let branding = appEnv.contentMode.branding
-        return mode == .planning
-            ? branding.assistantGreetingPlanning
-            : branding.assistantGreetingGeneral
-    }
-
-    private var planningBanner: some View {
-        HStack(spacing: 4) {
-            Text("Planning:")
-                .font(Theme.FontToken.inter(10, weight: .medium))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-                .textCase(.uppercase)
-            Text(appEnv.preferences.selectedCityIds.first?.capitalized ?? "Beijing")
-                .font(Theme.FontToken.inter(10, weight: .medium))
-                .textCase(.uppercase)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, Theme.screenPadding)
-        .padding(.vertical, 10)
-        .background(Theme.ColorToken.backgroundSubtle)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.ColorToken.border).frame(height: 1)
-        }
+        appEnv.contentMode.branding.assistantGreetingGeneral
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Travel Assistant")
+            Text("Assistant")
                 .font(Theme.FontToken.playfair(22, weight: .semibold))
-            Text("Real-time help · \(appEnv.contentMode.contentModeLabel)")
+            Text("Your in-China helper")
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
         }
@@ -112,40 +84,6 @@ struct AssistantView: View {
         .padding(.horizontal, Theme.screenPadding)
         .padding(.top, 20)
         .padding(.bottom, 12)
-    }
-
-    private var segmentControl: some View {
-        HStack(spacing: 0) {
-            segmentButton("🗺 Trip Planning", mode == .planning) {
-                mode = .planning
-                messages = [ChatMessage(isUser: false, text: greeting)]
-                planningCard = nil
-            }
-            segmentButton("💬 General Help", mode == .general) {
-                mode = .general
-                messages = [ChatMessage(isUser: false, text: greeting)]
-                planningCard = nil
-            }
-        }
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.ColorToken.border).frame(height: 1)
-        }
-    }
-
-    private func segmentButton(_ title: String, _ active: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(Theme.FontToken.inter(11, weight: .medium))
-                .foregroundStyle(active ? Theme.ColorToken.textPrimary : Theme.ColorToken.textDisabled)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .overlay(alignment: .bottom) {
-                    if active {
-                        Rectangle().fill(Theme.ColorToken.textPrimary).frame(height: 1)
-                    }
-                }
-        }
-        .buttonStyle(.plain)
     }
 
     private var chipRow: some View {
@@ -186,17 +124,33 @@ struct AssistantView: View {
 
     private var inputBar: some View {
         HStack(spacing: 12) {
-            TextField(mode == .planning ? "Refine your plan..." : "Ask a question...", text: $input)
+            TextField("Ask anything about traveling in China...", text: $input)
                 .font(Theme.FontToken.inter(14))
+                .textFieldStyle(.plain)
             Button("Send") { sendMessage() }
                 .font(Theme.FontToken.inter(11, weight: .medium))
                 .foregroundStyle(Theme.ColorToken.accent)
+                .disabled(isThinking || input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
         .padding(.horizontal, Theme.screenPadding)
         .padding(.vertical, 12)
+        .background(Theme.ColorToken.background)
         .overlay(alignment: .top) {
             Rectangle().fill(Theme.ColorToken.border).frame(height: 1)
         }
+    }
+
+    private func applyPrefillIfNeeded() {
+        guard !didApplyPrefill, let prefill = initialPrefill?.trimmingCharacters(in: .whitespacesAndNewlines), !prefill.isEmpty else { return }
+        didApplyPrefill = true
+        input = prefill
+        sendMessage()
+    }
+
+    private func applyScenarioIfNeeded() {
+        guard !didApplyScenario, let scenarioId = initialScenarioId, !scenarioId.isEmpty else { return }
+        didApplyScenario = true
+        handleChip(scenarioId)
     }
 
     private func handleChip(_ scenarioId: String) {
@@ -213,6 +167,10 @@ struct AssistantView: View {
         }
     }
 
+    private func formatAssistantText(_ raw: String) -> String {
+        raw.replacingOccurrences(of: "\\n", with: "\n")
+    }
+
     private func sendMessage(scenarioId: String? = nil) {
         let text = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
@@ -222,79 +180,34 @@ struct AssistantView: View {
     }
 
     private func respond(scenarioId: String?) async {
-        if appEnv.contentMode.useRemoteAI {
-            messages.append(ChatMessage(
-                isUser: false,
-                text: "远程 AI 尚未连接。请在 CMS 关闭「真实 AI」，或配置 Edge Function 后重试。"
-            ))
+        if scenarioId == "emergency" {
+            showEmergency = true
             return
         }
 
-        if mode == .planning {
-            if planningCard == nil {
-                messages.append(ChatMessage(isUser: false, text: "Perfect. Here's a rough structure — review the card below:"))
-                planningCard = try? await AIService.planningItineraryCard(content: appEnv.content)
-            } else {
-                messages.append(ChatMessage(isUser: false, text: "Got it. I've noted your preferences. Tap Redo on the card to regenerate."))
+        if appEnv.contentMode.effectiveUseRemoteAI {
+            isThinking = true
+            defer { isThinking = false }
+
+            let userText = messages.last(where: \.isUser)?.text ?? ""
+            let history = messages.dropLast().suffix(12).map { msg in
+                (role: msg.isUser ? "user" : "assistant", content: msg.text)
             }
+            let reply = await AIService.chatAssistant(
+                message: userText,
+                history: Array(history),
+                scenarioId: scenarioId
+            )
+            messages.append(ChatMessage(isUser: false, text: formatAssistantText(reply)))
             return
         }
 
-        let sid = scenarioId ?? "payment"
-        if let reply = try? await appEnv.content.fetchAssistantReply(scenarioId: sid) {
-            messages.append(ChatMessage(isUser: false, text: reply.assistantMessage))
+        if let sid = scenarioId,
+           let reply = try? await appEnv.content.fetchAssistantReply(scenarioId: sid) {
+            messages.append(ChatMessage(isUser: false, text: formatAssistantText(reply.assistantMessage)))
         } else {
             messages.append(ChatMessage(isUser: false, text: "I'm here to help with your China trip."))
         }
-    }
-}
-
-struct ItineraryCardView: View {
-    let itinerary: SampleItinerary
-    let onSave: () -> Void
-    let onRedo: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(itinerary.title)
-                .font(Theme.FontToken.playfair(16, weight: .semibold))
-            Text(itinerary.meta)
-                .font(Theme.FontToken.inter(11))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-
-            ForEach(itinerary.days.prefix(2)) { day in
-                Text(day.dateLabel)
-                    .font(Theme.FontToken.inter(11, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-                ForEach(day.activities.prefix(3)) { act in
-                    HStack(alignment: .top, spacing: 8) {
-                        Text(act.timeSlot)
-                            .font(Theme.FontToken.inter(10))
-                            .foregroundStyle(Theme.ColorToken.textDisabled)
-                            .frame(width: 28, alignment: .leading)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(act.name).font(Theme.FontToken.inter(12))
-                            Text(act.detail).font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
-                        }
-                    }
-                }
-            }
-
-            HStack {
-                Text(itinerary.estimatedBudget)
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-                Spacer()
-                Button("🔄 Redo", action: onRedo)
-                    .font(Theme.FontToken.inter(11))
-                Button("✅ Save to Plan", action: onSave)
-                    .font(Theme.FontToken.inter(11, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.accent)
-            }
-        }
-        .padding(14)
-        .background(Theme.ColorToken.backgroundSubtle)
-        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
     }
 }
 
@@ -320,9 +233,25 @@ struct EmergencyView: View {
                                 }
                             }
                         }
+                        if !data.helpPhrases.isEmpty {
+                            Section("Helpful Phrases") {
+                                ForEach(data.helpPhrases) { phrase in
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(phrase.chinese)
+                                            .font(Theme.FontToken.playfair(16, weight: .semibold))
+                                        Text(phrase.pinyin)
+                                            .font(Theme.FontToken.inter(11))
+                                            .foregroundStyle(Theme.ColorToken.textMuted)
+                                        Text(phrase.english)
+                                            .font(Theme.FontToken.inter(12))
+                                            .foregroundStyle(Theme.ColorToken.textSecondary)
+                                    }
+                                    .padding(.vertical, 4)
+                                }
+                            }
+                        }
                         Section {
-                            Text(data.embassyNote)
-                                .font(Theme.FontToken.inter(12))
+                            HTMLContentView(content: data.embassyNote, fontSize: 12)
                         }
                     }
                 } else if let loadError {

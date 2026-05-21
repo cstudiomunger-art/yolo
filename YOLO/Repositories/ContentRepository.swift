@@ -6,7 +6,9 @@ protocol ContentRepositoryProtocol: Sendable {
     func fetchAttractions(cityId: String) async throws -> [Attraction]
     func fetchAttraction(id: String) async throws -> Attraction?
     func fetchAudioGuides(attractionId: String) async throws -> [AudioGuide]
-    func fetchChecklistItems(cityIds: [String]) async throws -> [ChecklistItem]
+    func fetchAudioGuide(id: String) async throws -> AudioGuide?
+    func fetchChecklistItems(cityIds: [String], countryCode: String) async throws -> [ChecklistItem]
+    func fetchSubAreas(attractionId: String) async throws -> [SubArea]
     func fetchShoppingItems(cityIds: [String]) async throws -> [ShoppingItem]
     func fetchReadingItems(cityIds: [String]) async throws -> [ReadingItem]
     func fetchHotels(cityId: String) async throws -> [Hotel]
@@ -69,7 +71,9 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     }
 
     func fetchAttractions(cityId: String) async throws -> [Attraction] {
-        attractions.filter { $0.cityId == cityId }
+        attractions
+            .filter { $0.cityId == cityId }
+            .sorted { $0.displayOrder < $1.displayOrder }
     }
 
     func fetchAttraction(id: String) async throws -> Attraction? {
@@ -80,13 +84,17 @@ struct BundledContentRepository: ContentRepositoryProtocol {
         audioGuides.filter { $0.attractionId == attractionId }
     }
 
-    func fetchChecklistItems(cityIds: [String]) async throws -> [ChecklistItem] {
-        checklist.filter { item in
-            guard let cityId = item.cityId else { return true }
-            return cityIds.contains(cityId)
-        }
-        .sorted { $0.sortOrder < $1.sortOrder }
+    func fetchAudioGuide(id: String) async throws -> AudioGuide? {
+        audioGuides.first { $0.id == id }
     }
+
+    func fetchChecklistItems(cityIds: [String], countryCode: String) async throws -> [ChecklistItem] {
+        checklist
+            .filter { $0.matchesFilter(cityIds: cityIds, countryCode: countryCode) }
+            .sorted { $0.sortOrder < $1.sortOrder }
+    }
+
+    func fetchSubAreas(attractionId: String) async throws -> [SubArea] { [] }
 
     func fetchShoppingItems(cityIds: [String]) async throws -> [ShoppingItem] {
         shopping.filter { item in
@@ -104,7 +112,8 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     }
 
     func fetchHotels(cityId: String) async throws -> [Hotel] {
-        hotels.filter { $0.cityId == cityId }
+        let normalized = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return hotels.filter { $0.cityId.lowercased() == normalized && $0.acceptsForeigners }
     }
 
     func fetchHomeTips(cityIds: [String]) async throws -> [HomeTip] {

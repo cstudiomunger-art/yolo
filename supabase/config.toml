@@ -1,0 +1,9 @@
+# Supabase project: edwvrriuwzaaqznklrgi (ChinaGo)
+# Deploy: supabase functions deploy ai-complete
+# See admin/README.md → 远程 AI
+
+project_id = "edwvrriuwzaaqznklrgi"
+
+[functions.ai-complete]
+# App 助手可在未登录时使用；鉴权依赖 anon key + 服务端 Secrets
+verify_jwt = false
