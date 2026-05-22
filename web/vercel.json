@@ -1,3 +1,3 @@
 {
-  "rewrites": [{ "source": "/i/:slug", "destination": "/i/index.html" }]
+  "rewrites": [{ "source": "/i/:slug", "destination": "/share.html" }]
 }
