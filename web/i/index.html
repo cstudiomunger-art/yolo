@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shared trip · YOLO HAPPY</title>
+  <style>
+    :root { --bg: #faf9f7; --text: #1a1a1a; --muted: #6b6b6b; --accent: #c45c26; --card: #fff; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 24px 16px 48px; line-height: 1.5; }
+    .wrap { max-width: 520px; margin: 0 auto; }
+    h1 { font-size: 1.35rem; font-weight: 600; margin: 0 0 4px; }
+    .badge { font-size: 0.75rem; color: var(--muted); margin-bottom: 20px; }
+    .meta { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; }
+    .day { background: var(--card); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .day h2 { font-size: 0.8rem; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+    .day ul { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; }
+    .cta { display: block; margin-top: 28px; text-align: center; background: var(--accent); color: #fff; text-decoration: none; padding: 14px 20px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
+    .err { color: #b00020; font-size: 0.9rem; }
+    .loading { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="badge">YOLO HAPPY · read-only shared trip</p>
+    <div id="root"><p class="loading">Loading…</p></div>
+    <a id="cta" class="cta" href="#" style="display:none">Open in YOLO HAPPY app</a>
+  </div>
+  <script src="/config.js"></script>
+  <script>
+    (function () {
+      const cfg = window.YOLO_WEB_CONFIG;
+      const root = document.getElementById("root");
+      const cta = document.getElementById("cta");
+
+      function slugFromPath() {
+        const parts = location.pathname.split("/").filter(Boolean);
+        const i = parts.indexOf("i");
+        if (i >= 0 && parts[i + 1]) return parts[i + 1];
+        return null;
+      }
+
+      function esc(s) {
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function renderTrip(row) {
+        const trip = row.payload || {};
+        const title = row.title || trip.title || "Shared trip";
+        const meta = trip.meta || "";
+        let html = "<h1>" + esc(title) + "</h1>";
+        if (meta) html += '<p class="meta">' + esc(meta) + "</p>";
+        const days = trip.days || [];
+        for (const day of days) {
+          html += '<section class="day"><h2>' + esc(day.dateLabel || "") + "</h2><ul>";
+          for (const act of day.activities || []) {
+            html += "<li>" + esc(act.name || "") + "</li>";
+          }
+          html += "</ul></section>";
+        }
+        root.innerHTML = html;
+        const slug = slugFromPath();
+        if (slug) {
+          const base = (cfg.shareWebBaseUrl || location.origin).replace(/\/$/, "");
+          cta.href = base + "/i/" + encodeURIComponent(slug);
+          cta.style.display = "block";
+        }
+      }
+
+      async function load() {
+        const slug = slugFromPath();
+        if (!slug) {
+          root.innerHTML = '<p class="err">Invalid share link.</p>';
+          return;
+        }
+        if (!cfg || !cfg.supabaseUrl || !cfg.supabaseAnonKey || cfg.supabaseAnonKey.includes("YOUR_")) {
+          root.innerHTML = '<p class="err">Site config missing. Copy web/config.example.js to web/config.js.</p>';
+          return;
+        }
+        const url = cfg.supabaseUrl.replace(/\/$/, "") +
+          "/rest/v1/user_itineraries?share_slug=eq." + encodeURIComponent(slug) +
+          "&is_shared=eq.true&is_deleted=eq.false&select=title,payload";
+        try {
+          const res = await fetch(url, {
+            headers: {
+              apikey: cfg.supabaseAnonKey,
+              Authorization: "Bearer " + cfg.supabaseAnonKey,
+            },
+          });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const rows = await res.json();
+          if (!rows.length) {
+            root.innerHTML = '<p class="err">This trip is not shared or the link has expired.</p>';
+            return;
+          }
+          renderTrip(rows[0]);
+        } catch (e) {
+          root.innerHTML = '<p class="err">Could not load trip. ' + esc(String(e.message || e)) + "</p>";
+        }
+      }
+
+      load();
+    })();
+  </script>
+</body>
+</html>

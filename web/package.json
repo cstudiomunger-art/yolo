@@ -1,0 +1,7 @@
+{
+  "name": "yolo-happy-web",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-config.mjs"
+  }
+}
