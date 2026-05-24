@@ -54,6 +54,12 @@ struct CachingContentRepository: ContentRepositoryProtocol {
         }
     }
 
+    func fetchChecklistSettings() async throws -> ChecklistSettings {
+        try await cached(key: "checklist_settings") {
+            try await upstream.fetchChecklistSettings()
+        }
+    }
+
     func fetchSubAreas(attractionId: String) async throws -> [SubArea] {
         let key = ContentCacheKey.subAreas(attractionId: attractionId)
         return try await cached(key: key) {

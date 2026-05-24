@@ -14,6 +14,8 @@ struct AudioGuideSection: View {
     @State private var isDownloading = false
     @State private var downloadError: String?
     @State private var showUnlockedToast = false
+    @State private var scrubProgress: Double = 0
+    @State private var isScrubbing = false
 
     private var freeTrialSeconds: Double {
         Double(appEnv.contentMode.branding.freeAudioPreviewSeconds)
@@ -27,6 +29,10 @@ struct AudioGuideSection: View {
 
     private var isDownloaded: Bool {
         AudioDownloadService.shared.isDownloaded(guideId: guide.id)
+    }
+
+    private var previewCapSeconds: Int {
+        Int(playback.previewMaxSeconds.rounded())
     }
 
     var body: some View {
@@ -47,6 +53,12 @@ struct AudioGuideSection: View {
                     .foregroundStyle(Theme.ColorToken.textMuted)
             }
 
+            if !hasFullAccess, allowsPreview {
+                Text(String(localized: "3 min free preview · Unlock full guide"))
+                    .font(Theme.FontToken.inter(10))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+
             if let quote = guide.quote {
                 HTMLContentView(content: quote, fontSize: 12)
             }
@@ -58,10 +70,12 @@ struct AudioGuideSection: View {
             } else {
                 lockedControls
             }
+
+            if guide.segments.count > 1 {
+                chapterList
+            }
         }
-        .padding(14)
-        .background(Theme.ColorToken.backgroundSubtle)
-        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+        .guideContentCardStyle()
         .sheet(isPresented: $showPurchase) {
             PurchaseOptionsView(attraction: attraction, guide: guide) {
                 playback.updateAccess(hasFullAccess: true, freeTrialSeconds: freeTrialSeconds)
@@ -77,15 +91,25 @@ struct AudioGuideSection: View {
                 guide: guide,
                 hasFullAccess: hasFullAccess,
                 freeTrialSeconds: allowsPreview ? freeTrialSeconds : 0,
+                nowPlayingTitle: guide.titleEn,
+                nowPlayingArtist: attraction.name,
                 onTrialEnded: { showPurchase = true }
             )
+            scrubProgress = playback.progress
+        }
+        .onChange(of: playback.progress) { _, newValue in
+            if !isScrubbing {
+                scrubProgress = newValue
+            }
         }
         .onDisappear {
-            playback.teardown()
+            if !playback.isPlaying {
+                playback.teardown()
+            }
         }
         .overlay(alignment: .bottom) {
             if showUnlockedToast {
-                Text("🎧 Audio guide unlocked!")
+                Text(String(localized: "🎧 Audio guide unlocked!"))
                     .font(Theme.FontToken.inter(11, weight: .medium))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 14)
@@ -111,23 +135,41 @@ struct AudioGuideSection: View {
             Button {
                 playback.togglePlay()
             } label: {
-                Text(playback.isPlaying ? "⏸ Pause preview" : "▶ Preview (\(previewMinutes) min free)")
-                    .font(Theme.FontToken.inter(12, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                if playback.isPlaying {
+                    Text(String(localized: "⏸ Pause preview"))
+                } else {
+                    Text(String(format: String(localized: "▶ Preview (%lld min free)"), previewMinutes))
+                }
             }
+            .font(Theme.FontToken.inter(12, weight: .medium))
+            .foregroundStyle(playback.canPlay ? Theme.ColorToken.textPrimary : Theme.ColorToken.textMuted)
             .buttonStyle(.plain)
+            .disabled(!playback.canPlay)
         }
 
-        progressBar
+        scrubSlider(maxSeconds: previewCapSeconds)
+
+        Text("\(formatTime(Int(scrubProgress))) / \(formatTime(previewCapSeconds))")
+            .font(Theme.FontToken.inter(10))
+            .foregroundStyle(Theme.ColorToken.textMuted)
+
+        if allowsPreview, playback.isPlaying, playback.canPlay, playback.remainingPreviewSeconds > 0 {
+            Text(String(
+                format: String(localized: "%lld sec left in preview"),
+                Int(playback.remainingPreviewSeconds.rounded())
+            ))
+                .font(Theme.FontToken.inter(10))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+        }
 
         HStack {
-            Text("🔒 Full guide locked")
+            Text(String(localized: "🔒 Full guide locked"))
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
             Spacer()
         }
 
-        Button("Unlock Audio Guide") {
+        Button(String(localized: "Unlock Audio Guide")) {
             showPurchase = true
         }
         .font(Theme.FontToken.inter(12, weight: .medium))
@@ -144,20 +186,45 @@ struct AudioGuideSection: View {
             Button {
                 playback.togglePlay()
             } label: {
-                Text(playback.isPlaying ? "⏸ Pause" : "▶ Play")
+                Text(playback.isPlaying ? String(localized: "⏸ Pause") : String(localized: "▶ Play"))
                     .font(Theme.FontToken.inter(12, weight: .medium))
             }
             .buttonStyle(.plain)
-            .disabled(playback.mode == .loading)
+            .disabled(playback.mode == .loading || !playback.canPlay)
 
-            progressBar
+            scrubSlider(maxSeconds: playback.durationSeconds)
         }
 
-        Text("\(formatTime(Int(playback.progress))) / \(formatTime(playback.durationSeconds))")
+        Text("\(formatTime(Int(scrubProgress))) / \(formatTime(playback.durationSeconds))")
             .font(Theme.FontToken.inter(10))
             .foregroundStyle(Theme.ColorToken.textMuted)
 
         downloadRow
+    }
+
+    @ViewBuilder
+    private func scrubSlider(maxSeconds: Int) -> some View {
+        let maxValue = max(Double(maxSeconds), 1)
+        Slider(
+            value: Binding(
+                get: { min(scrubProgress, maxValue) },
+                set: { newValue in
+                    scrubProgress = newValue
+                    if !isScrubbing {
+                        playback.seek(to: newValue)
+                    }
+                }
+            ),
+            in: 0...maxValue,
+            onEditingChanged: { editing in
+                isScrubbing = editing
+                if !editing {
+                    playback.seek(to: scrubProgress)
+                }
+            }
+        )
+        .tint(Theme.ColorToken.accent)
+        .disabled(!playback.canPlay && maxSeconds > 0)
     }
 
     @ViewBuilder
@@ -167,16 +234,18 @@ struct AudioGuideSection: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         } else if isDownloaded {
             HStack {
-                Text("✓ Downloaded")
+                Text(String(localized: "✓ Downloaded"))
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.accent)
                 Spacer()
-                Button("Remove") {
+                Button(String(localized: "Remove")) {
                     AudioDownloadService.shared.removeDownload(guideId: guide.id)
                     playback.reconfigureIfNeeded(
                         guide: guide,
                         hasFullAccess: hasFullAccess,
-                        freeTrialSeconds: allowsPreview ? freeTrialSeconds : 0
+                        freeTrialSeconds: allowsPreview ? freeTrialSeconds : 0,
+                        nowPlayingTitle: guide.titleEn,
+                        nowPlayingArtist: attraction.name
                     )
                     accessRefresh = UUID()
                 }
@@ -187,11 +256,12 @@ struct AudioGuideSection: View {
             Button {
                 Task { await downloadAudio() }
             } label: {
-                Text("⬇ Download for offline")
+                Text(String(localized: "⬇ Download for offline"))
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
             }
             .buttonStyle(.plain)
+            .disabled(!playback.canPlay)
         }
         if let downloadError {
             Text(downloadError)
@@ -200,29 +270,13 @@ struct AudioGuideSection: View {
         }
     }
 
-    private var progressBar: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Rectangle().fill(Theme.ColorToken.border).frame(height: 2)
-                Rectangle()
-                    .fill(Theme.ColorToken.accent)
-                    .frame(width: geo.size.width * progressRatio, height: 2)
-            }
-        }
-        .frame(height: 2)
-    }
-
     @ViewBuilder
     private var statusLine: some View {
         switch playback.mode {
         case .loading:
-            Text("Loading audio…")
+            Text(String(localized: "Loading audio…"))
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(Theme.ColorToken.textMuted)
-        case .simulation:
-            Text("Preview mode — upload MP3 in CMS to enable streaming.")
-                .font(Theme.FontToken.inter(10))
-                .foregroundStyle(Theme.ColorToken.warning)
         case .unavailable(let message):
             Text(message)
                 .font(Theme.FontToken.inter(10))
@@ -232,9 +286,32 @@ struct AudioGuideSection: View {
         }
     }
 
-    private var progressRatio: CGFloat {
-        let total = max(playback.durationSeconds, 1)
-        return min(CGFloat(playback.progress / Double(total)), 1)
+    @ViewBuilder
+    private var chapterList: some View {
+        let segments = guide.segments.sorted { $0.startSeconds < $1.startSeconds }
+        VStack(alignment: .leading, spacing: 6) {
+            Text(String(localized: "Chapters"))
+                .font(Theme.FontToken.inter(11, weight: .medium))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+            ForEach(Array(segments.enumerated()), id: \.element.id) { index, segment in
+                let isActive = playback.activeSegmentIndex(in: segments) == index
+                Button {
+                    playback.seek(to: Double(segment.startSeconds))
+                } label: {
+                    HStack {
+                        Text(segment.title)
+                            .font(Theme.FontToken.inter(12, weight: isActive ? .semibold : .regular))
+                            .foregroundStyle(isActive ? Theme.ColorToken.textPrimary : Theme.ColorToken.textSecondary)
+                        Spacer()
+                        Text(formatTime(segment.startSeconds))
+                            .font(Theme.FontToken.inter(10))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    }
+                }
+                .buttonStyle(.plain)
+                .disabled(!playback.canPlay)
+            }
+        }
     }
 
     private func formatTime(_ seconds: Int) -> String {
@@ -253,7 +330,9 @@ struct AudioGuideSection: View {
             playback.reconfigureIfNeeded(
                 guide: guide,
                 hasFullAccess: hasFullAccess,
-                freeTrialSeconds: trialSeconds
+                freeTrialSeconds: trialSeconds,
+                nowPlayingTitle: guide.titleEn,
+                nowPlayingArtist: attraction.name
             )
             accessRefresh = UUID()
         } catch {

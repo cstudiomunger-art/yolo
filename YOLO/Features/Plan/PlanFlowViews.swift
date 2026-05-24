@@ -106,6 +106,11 @@ struct ItineraryDetailView: View {
             await loadAttractionCache()
         }
         .onChange(of: editableDays) { _, _ in
+            guard !editMode.isEditing else { return }
+            Task { await loadAttractionCache() }
+        }
+        .onChange(of: editMode) { _, mode in
+            guard !mode.isEditing else { return }
             Task { await loadAttractionCache() }
         }
         .sheet(item: $addAttractionContext) { ctx in
@@ -201,8 +206,7 @@ struct ItineraryDetailView: View {
                 .background(Theme.ColorToken.backgroundSubtle)
 
             List {
-                ForEach(editableDays.indices, id: \.self) { dayIndex in
-                    let day = editableDays[dayIndex]
+                ForEach(editableDays) { day in
                     Section {
                         daySectionHeader(day)
 
@@ -216,18 +220,20 @@ struct ItineraryDetailView: View {
                             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
+                            .moveDisabled(true)
                         } else {
-                            ForEach(day.activities.indices, id: \.self) { actIndex in
-                                activityRow(day.activities[actIndex], dayIndex: dayIndex)
+                            ForEach(day.activities) { activity in
+                                activityRow(activity, dayId: day.id)
                             }
                             .onMove { source, destination in
-                                moveActivities(dayIndex: dayIndex, from: source, to: destination)
+                                moveActivities(dayId: day.id, from: source, to: destination)
                             }
                             .onDelete { offsets in
-                                deleteActivities(dayIndex: dayIndex, at: offsets)
+                                deleteActivities(dayId: day.id, at: offsets)
                             }
 
                             Button {
+                                guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
                                 addAttractionContext = PlanAddAttractionContext(
                                     dayIndex: dayIndex,
                                     cityIds: tripCityIds
@@ -238,12 +244,16 @@ struct ItineraryDetailView: View {
                             .buttonStyle(.plain)
                             .foregroundStyle(Theme.ColorToken.accent)
                             .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 6, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Theme.ColorToken.background)
+                            .moveDisabled(true)
                         }
                     }
                 }
                 .onMove(perform: moveDays)
             }
             .listStyle(.plain)
+            .scrollContentBackground(.hidden)
             .environment(\.editMode, $editMode)
         }
         .toolbar {
@@ -251,6 +261,7 @@ struct ItineraryDetailView: View {
                 if editMode.isEditing {
                     Button("Done") {
                         editMode = .inactive
+                        reindexDayNumbers()
                         persistItineraryOrder()
                     }
                     .font(Theme.FontToken.inter(12, weight: .medium))
@@ -307,56 +318,66 @@ struct ItineraryDetailView: View {
         .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 4, trailing: 16))
         .listRowSeparator(.hidden, edges: .top)
         .listRowBackground(Theme.ColorToken.background)
+        .moveDisabled(true)
     }
 
-    private func activityRow(_ activity: ItineraryActivity, dayIndex: Int) -> some View {
+    private func activityRow(_ activity: ItineraryActivity, dayId: String) -> some View {
+        let dayIndex = editableDays.firstIndex(where: { $0.id == dayId }) ?? 0
         let activityCityId = activity.cityId ?? activity.attractionId.flatMap { attractionCache[$0]?.cityId }
         let showCity = tripCityIds.count > 1
         let cityLabel = activityCityId.flatMap { cityNameById[$0] }
+        let isEditing = editMode.isEditing
 
-        return Button {
-            if let aid = activity.attractionId {
-                appEnv.navigation.openGuide(
-                    attractionId: aid,
-                    cityId: activityCityId,
-                    presentation: .planDay(dayIndex: dayIndex)
-                )
-            }
-        } label: {
-            HStack(alignment: .top, spacing: 10) {
-                Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.ColorToken.textGhost)
-                    .opacity(editMode.isEditing ? 1 : 0)
-
+        let rowContent = HStack(alignment: .top, spacing: 10) {
+            if !isEditing {
                 activityCoverThumbnail(activity)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    if showCity, let cityLabel {
-                        Text(cityLabel)
-                            .font(Theme.FontToken.inter(10, weight: .medium))
-                            .foregroundStyle(Theme.ColorToken.textDisabled)
-                    }
-                    Text(activity.name)
-                        .font(Theme.FontToken.inter(13, weight: .medium))
-                        .foregroundStyle(Theme.ColorToken.textPrimary)
-                    Text(activity.detail)
-                        .font(Theme.FontToken.inter(11))
-                        .foregroundStyle(Theme.ColorToken.textMuted)
-                        .lineLimit(3)
-                }
-
-                Spacer(minLength: 0)
-
-                if activity.hasAudio {
-                    Text("🎧")
-                        .font(Theme.FontToken.inter(10))
-                }
             }
-            .padding(.vertical, 4)
+
+            VStack(alignment: .leading, spacing: 4) {
+                if showCity, let cityLabel {
+                    Text(cityLabel)
+                        .font(Theme.FontToken.inter(10, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.textDisabled)
+                }
+                Text(activity.name)
+                    .font(Theme.FontToken.inter(13, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                Text(HTMLContentView.plainText(from: activity.detail))
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+                    .lineLimit(isEditing ? 2 : 3)
+            }
+
+            Spacer(minLength: 0)
+
+            if activity.hasAudio {
+                Text("🎧")
+                    .font(Theme.FontToken.inter(10))
+            }
         }
-        .buttonStyle(.plain)
-        .disabled(activity.attractionId == nil && !editMode.isEditing)
+        .padding(.vertical, 4)
+
+        return Group {
+            if isEditing {
+                rowContent
+            } else if let aid = activity.attractionId {
+                Button {
+                    appEnv.navigation.openGuide(
+                        attractionId: aid,
+                        cityId: activityCityId,
+                        presentation: .planDay(dayIndex: dayIndex)
+                    )
+                } label: {
+                    rowContent
+                }
+                .buttonStyle(.plain)
+            } else {
+                rowContent
+            }
+        }
+        .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 6, trailing: 16))
+        .listRowSeparator(.hidden)
+        .listRowBackground(Theme.ColorToken.background)
     }
 
     private func activityCoverThumbnail(_ activity: ItineraryActivity) -> some View {
@@ -370,8 +391,8 @@ struct ItineraryDetailView: View {
             .fixedSize()
     }
 
-    private func deleteActivities(dayIndex: Int, at offsets: IndexSet) {
-        guard editableDays.indices.contains(dayIndex) else { return }
+    private func deleteActivities(dayId: String, at offsets: IndexSet) {
+        guard let dayIndex = editableDays.firstIndex(where: { $0.id == dayId }) else { return }
         var activities = editableDays[dayIndex].activities
         activities.remove(atOffsets: offsets)
         editableDays[dayIndex] = editableDays[dayIndex].withActivities(activities)
@@ -380,13 +401,16 @@ struct ItineraryDetailView: View {
 
     private func moveDays(from source: IndexSet, to destination: Int) {
         editableDays.move(fromOffsets: source, toOffset: destination)
+    }
+
+    private func reindexDayNumbers() {
         editableDays = editableDays.enumerated().map { index, day in
             day.withDayIndex(index + 1)
         }
     }
 
-    private func moveActivities(dayIndex: Int, from source: IndexSet, to destination: Int) {
-        guard editableDays.indices.contains(dayIndex) else { return }
+    private func moveActivities(dayId: String, from source: IndexSet, to destination: Int) {
+        guard let dayIndex = editableDays.firstIndex(where: { $0.id == dayId }) else { return }
         var activities = editableDays[dayIndex].activities
         activities.move(fromOffsets: source, toOffset: destination)
         editableDays[dayIndex] = editableDays[dayIndex].withActivities(activities)
@@ -720,57 +744,84 @@ struct HotelCardView: View {
 struct ShareItinerarySheet: View {
     let itinerary: SampleItinerary
     @Environment(\.dismiss) private var dismiss
-    @State private var copied = false
+    @State private var shareImage: UIImage?
+    @State private var showSystemShare = false
+    @State private var renderError: String?
 
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Share Itinerary")
+                Text(String(localized: "Share Itinerary"))
                     .font(Theme.FontToken.playfair(18, weight: .semibold))
-                Text(itinerary.title)
+                Text(String(localized: "Save or send your trip as an image."))
                     .font(Theme.FontToken.inter(12))
                     .foregroundStyle(Theme.ColorToken.textMuted)
 
-                ScrollView {
-                    Text(shareText)
-                        .font(Theme.FontToken.inter(12))
-                        .foregroundStyle(Theme.ColorToken.textSecondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(12)
-                        .background(Theme.ColorToken.backgroundSubtle)
-                }
+                if let shareImage {
+                    ScrollView {
+                        Image(uiImage: shareImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
+                    }
+                    .frame(maxHeight: 420)
 
-                Button {
-                    UIPasteboard.general.string = shareText
-                    copied = true
-                } label: {
-                    Text(copied ? "Copied!" : "📋 Copy Text")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Theme.ColorToken.textPrimary)
-                        .foregroundStyle(.white)
+                    Button {
+                        showSystemShare = true
+                        TelemetryService.shared.logEvent("itinerary_share_image")
+                    } label: {
+                        Text(String(localized: "Share Image"))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Theme.ColorToken.accent)
+                            .foregroundStyle(.white)
+                    }
+                    .buttonStyle(.plain)
+                } else if let renderError {
+                    Text(renderError)
+                        .font(Theme.FontToken.inter(12))
+                        .foregroundStyle(.red)
+                    Button(String(localized: "Try Again")) {
+                        Task { await generateImage() }
+                    }
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.accent)
+                } else {
+                    ProgressView(String(localized: "Creating image…"))
+                        .frame(maxWidth: .infinity, minHeight: 200)
                 }
-                .buttonStyle(.plain)
             }
             .padding(Theme.screenPadding)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button(String(localized: "Done")) { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showSystemShare) {
+                if let shareImage {
+                    ShareSheet(items: shareItems(image: shareImage))
+                }
+            }
+            .task {
+                await generateImage()
             }
         }
     }
 
-    private var shareText: String {
-        var lines = ["🇨🇳 \(itinerary.title)", "──────────────────"]
-        for day in itinerary.days {
-            lines.append(day.dateLabel)
-            for act in day.activities {
-                lines.append("  • \(act.name)")
-            }
+    private func shareItems(image: UIImage) -> [Any] {
+        [image]
+    }
+
+    private func generateImage() async {
+        renderError = nil
+        shareImage = nil
+        await Task.yield()
+        guard let image = ItineraryShareImageRenderer.render(itinerary: itinerary) else {
+            renderError = String(localized: "Could not create share image. Please try again.")
+            return
         }
-        lines.append("──────────────────")
-        lines.append("Made with ChinaGo app")
-        return lines.joined(separator: "\n")
+        shareImage = image
     }
 }

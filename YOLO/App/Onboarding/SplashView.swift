@@ -8,7 +8,7 @@ struct SplashView: View {
             Color(hex: 0x1A1614).ignoresSafeArea()
             VStack(spacing: 12) {
                 ChinaGoLogo(lightOnDark: true)
-                Text("ChinaGo")
+                Text(String(localized: "YOLO HAPPY"))
                     .font(Theme.FontToken.playfair(28, weight: .semibold))
                     .foregroundStyle(.white)
             }

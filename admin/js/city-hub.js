@@ -144,10 +144,19 @@
     let html = `<div class="hub-toolbar"><button type="button" class="btn" id="new-attraction">+ 新建景点</button></div><div class="attraction-cards">`;
     (data || []).forEach((a) => {
       const intro = (a.introduction || "").slice(0, 120);
+      const agCount = a.audio_guide_count ?? 0;
+      const iapTag = a.iap_product_id?.trim()
+        ? '<span class="tag on" title="已配置 App Store Product ID">IAP</span>'
+        : '<span class="tag off" title="未配置 Product ID（App 本地模拟单购仍可用）">无 IAP ID</span>';
+      const audioTag =
+        agCount > 0
+          ? `<span class="tag on">🎧 ${agCount} 条导览</span>`
+          : '<span class="tag off">无导览</span>';
       html += `<article class="attraction-card">
         <h4>${App.escapeHtml(a.chinese_name || a.name)}</h4>
         <p class="muted">${App.escapeHtml(a.summary || "")}</p>
         <p class="intro-preview">${App.escapeHtml(intro)}${(a.introduction || "").length > 120 ? "…" : ""}</p>
+        <p class="attraction-card-tags">${audioTag} ${iapTag}</p>
         <span class="tag ${a.is_published ? "on" : "off"}">${a.priority || "—"} · ${a.is_published ? "已发布" : "草稿"}</span>
         <button type="button" class="btn btn-sm" data-edit-attr="${App.escapeHtml(a.id)}">编辑解说</button>
       </article>`;
@@ -437,10 +446,19 @@
       for (const g of guides || []) {
         const box = listEl.querySelector(`[data-guide-id="${g.id}"]`);
         const agMeta = App.TABLES.audio_guides;
+        box.className = "audio-guide-fields audio-guide-inline-form";
+        box.dataset.audioGuideId = g.id;
         box.innerHTML = agMeta.fields
           .filter((f) => f.type !== "ref_attraction")
           .map((f) => App.renderFieldBlock(f, App.fieldToFormValue(f, g[f.key]), { isNew: false, pk: "id" }))
           .join("");
+        App.mountFieldInteractions(box, agMeta, {
+          isNew: false,
+          pk: "id",
+          fixedAttractionId: attractionId,
+          formEl: box,
+        });
+        App.setupAudioGuideControls(box, g.id, { fixedAttractionId: attractionId });
         const saveBtn = document.createElement("button");
         saveBtn.type = "button";
         saveBtn.className = "btn btn-sm";
@@ -464,10 +482,17 @@
               }
               if (v !== undefined) payload[f.key] = v;
             }
-            const audioUp = box.querySelector('[name="_audio_upload"]');
-            if (audioUp?.files?.[0]) {
-              payload.audio_url = await App.uploadAudioGuideFile(audioUp.files[0], g.id);
+            const pendingUrl = box.dataset.pendingAudioUrl?.trim();
+            if (pendingUrl) {
+              payload.audio_url = pendingUrl;
+            } else {
+              const audioUp = box.querySelector('[name="_audio_upload"]');
+              if (audioUp?.files?.[0]) {
+                payload.audio_url = await App.uploadAudioGuideFile(audioUp.files[0], g.id);
+              }
             }
+            const audioUrlHidden = box.querySelector('[name="audio_url"]')?.value?.trim();
+            if (audioUrlHidden) payload.audio_url = audioUrlHidden;
             App.fillTableDefaults(payload, "audio_guides");
             const { error: err } = await App.client.from("audio_guides").update(payload).eq("id", g.id);
             if (err) throw err;
@@ -585,7 +610,16 @@
     attrs.forEach((a) => {
       html += `<h4 class="audio-group-title">${App.escapeHtml(a.chinese_name || a.name)}</h4><ul class="audio-group-list">`;
       (byAttr[a.id] || []).forEach((g) => {
-        html += `<li>${App.escapeHtml(g.title_en)} · ${g.duration_seconds || 0}s
+        const hasAudio = !!(g.audio_url || "").trim();
+        const dur = Number(g.duration_seconds) || 0;
+        const durLabel =
+          dur > 0
+            ? `${Math.floor(dur / 60)}:${String(dur % 60).padStart(2, "0")}`
+            : "—";
+        const audioBadge = hasAudio
+          ? '<span class="tag on">有音频</span>'
+          : '<span class="tag off">无音频</span>';
+        html += `<li>${audioBadge} ${App.escapeHtml(g.title_en)} · ${durLabel}
           <button type="button" class="btn btn-sm btn-secondary" data-edit-audio="${App.escapeHtml(g.id)}">编辑</button></li>`;
       });
       if (!(byAttr[a.id] || []).length) html += `<li class="muted">暂无导览</li>`;
@@ -663,7 +697,7 @@
           .join("")}
       </select>
     </div>
-    <p class="muted">显示：入境/通用项 + 本城市相关项（含 target_cities）</p>
+    <p class="muted">本页显示：全部 <strong>入境 entry</strong> 与 <strong>通用 universal</strong>（与行程无关）+ <strong>target_cities</strong> 含本城市的 city 项。用户未保存行程时 App 不展示任何 city 项。</p>
     <div id="hub-cl-host"></div>`;
 
     App.$("#hub-new-cl", panel).addEventListener("click", () => {

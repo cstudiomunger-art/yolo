@@ -3,7 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AppEnvironment.self) private var appEnv
 
-    @State private var checklist: [ChecklistItem] = []
+    @State private var prepItems: [ChecklistItem] = []
     @State private var cities: [City] = []
     @State private var showProfile = false
     @State private var showDatePicker = false
@@ -20,11 +20,15 @@ struct HomeView: View {
         return [active] + all.filter { $0.id != activeId }
     }
 
-    private var completedCount: Int {
-        checklist.filter { appEnv.preferences.completedChecklistIds.contains($0.id) }.count
+    private func prepItemStatus(_ item: ChecklistItem) -> ChecklistItemStatus {
+        appEnv.preferences.checklistStatus(for: item.id, type: item.type)
     }
 
-    private var prepTotal: Int { max(checklist.count, 1) }
+    private var processedPrepCount: Int {
+        PrepProgressMetrics.processedCount(items: prepItems, status: prepItemStatus)
+    }
+
+    private var prepTotal: Int { max(prepItems.count, 1) }
 
     private var citiesLine: String {
         let names = cities
@@ -63,7 +67,7 @@ struct HomeView: View {
                 HomeTripHeroPanel(
                     trips: trips,
                     citiesLine: citiesLine,
-                    prepCompleted: completedCount,
+                    prepCompleted: processedPrepCount,
                     prepTotal: prepTotal,
                     daysUntilDeparture: appEnv.preferences.daysUntilDeparture,
                     departureDate: appEnv.preferences.departureDate,
@@ -74,7 +78,7 @@ struct HomeView: View {
                     onOpenPrepare: { appEnv.navigation.presentPrepare() }
                 )
                 HomeQuickAccessGrid(
-                    prepCompleted: completedCount,
+                    prepCompleted: processedPrepCount,
                     prepTotal: prepTotal,
                     onOpenPrepare: { appEnv.navigation.presentPrepare() },
                     onOpenEmergency: { appEnv.navigation.presentEmergency() }
@@ -146,11 +150,11 @@ struct HomeView: View {
             Button {
                 submitAI()
             } label: {
-                Image(systemName: "arrow.up")
+                Image(systemName: "arrow.right")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Theme.ColorToken.textPrimary.opacity(0.3))
                     .frame(width: 36, height: 36)
-                    .background(Color(hex: 0x6070D0))
+                    .background(Theme.ColorToken.border.opacity(0.5))
                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
             .disabled(aiInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -158,8 +162,8 @@ struct HomeView: View {
         .padding(14)
         .background(Theme.ColorToken.background)
         .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(Color(hex: 0x6070D0), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 40, style: .continuous)
+                .stroke(Theme.ColorToken.textPrimary.opacity(0.3), lineWidth: 1)
         )
         .padding(.horizontal, Theme.screenPadding)
         .padding(.top, 16)
@@ -175,14 +179,24 @@ struct HomeView: View {
     private func reload() {
         Task {
             let repo = appEnv.content
-            let cityIds = appEnv.preferences.selectedCityIds
+            let ctx = PrepChecklistContext(
+                countryCode: appEnv.preferences.countryCode,
+                activeItinerary: appEnv.preferences.activeItinerary
+            )
+            let cityIds = ctx.hasSavedItinerary ? ctx.itineraryCityIds : []
             async let checklistTask = repo.fetchChecklistItems(
                 cityIds: cityIds,
                 countryCode: appEnv.preferences.countryCode
             )
             async let citiesTask = repo.fetchCities()
-            checklist = (try? await checklistTask) ?? []
+            let allItems = (try? await checklistTask) ?? []
             cities = (try? await citiesTask) ?? []
+            let result = PrepChecklistAssembler.assemble(
+                allItems: allItems,
+                context: ctx,
+                cities: cities
+            )
+            prepItems = result.allItems
         }
     }
 }

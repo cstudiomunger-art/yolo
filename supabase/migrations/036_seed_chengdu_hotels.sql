@@ -1,0 +1,321 @@
+-- Chengdu hotels seed (24) from Chengdu_Hotel_Recommendations_EN.md (2026-05-20)
+-- city_id: chengdu | sort_order: T1 0–7, T2 10–17, T3 20–27
+-- price_min_usd ≈ peak-season RMB floor ÷ 7
+
+INSERT INTO hotels (
+  id, city_id, name, chinese_name, stars, price_min_usd,
+  has_english_staff, english_staff_note, language_tip, location_note,
+  address_zh, address_en, booking_platforms, booking_links,
+  accepts_foreigners, sort_order, is_active
+) VALUES
+-- ========== Category 1: Experience-First (T1) ==========
+(
+  'hotel_chengdu_temple_house', 'chengdu', 'The Temple House Chengdu', '成都博舍酒店',
+  5, 214, TRUE,
+  'Full English — concierge, front desk, and restaurant',
+  NULL,
+  'Taikoo Li · Daci Temple · 8-min walk to Chunxi Road Metro (Lines 1/4)',
+  '四川省成都市锦江区毕升路81号',
+  '81 Bitieshi Street, Jinjiang District, Chengdu 610021',
+  ARRAY['Official', 'Booking.com'],
+  '[{"label":"Official","url":"https://www.capellahotels.com/en/capella-chengdu"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/bo-she.html"}]'::jsonb,
+  TRUE, 0, TRUE
+),
+(
+  'hotel_chengdu_niccolo', 'chengdu', 'Niccolo Chengdu', '成都尼依格罗酒店',
+  5, 171, TRUE,
+  'Full English; Wharf Hotels international service standards',
+  NULL,
+  'Inside Chengdu IFS · 7-min walk to Chunxi Road Metro (Lines 1/4) · 10-min walk to Tianfu Square',
+  '四川省成都市锦江区红星路三段1号成都IFS 3号塔楼',
+  'Tower 3, Chengdu IFS, No.1 Section 3 Hongxing Road, Jinjiang District, Chengdu 610021',
+  ARRAY['Official', 'Booking.com'],
+  '[{"label":"Official","url":"https://www.niccolohotels.com/en/niccolo-chengdu"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/niccolo-chengdu.html"}]'::jsonb,
+  TRUE, 1, TRUE
+),
+(
+  'hotel_chengdu_wanda_reign', 'chengdu', 'Wanda Reign Chengdu', '成都万达瑞华酒店',
+  5, 114, TRUE,
+  'Wanda international brand — English reception',
+  NULL,
+  'Jinjiang riverside · 15-min drive to Tianfu Square · 20-min walk to Kuanzhai Alley',
+  '四川省成都市锦江区滨江中路9号',
+  'No. 9 Binjiang Middle Road, Jinjiang District, Chengdu 610020',
+  ARRAY['Official', 'Booking.com'],
+  '[{"label":"Official","url":"https://www.wandareignchengdu.com/en/"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/cheng-du-mo-da-rui-hua.html"}]'::jsonb,
+  TRUE, 2, TRUE
+),
+(
+  'hotel_chengdu_jw_marriott', 'chengdu', 'JW Marriott Hotel Chengdu', '成都JW万豪酒店',
+  5, 114, TRUE,
+  'Full English; JW Marriott flagship service',
+  NULL,
+  '6-min walk to Tianfu Square · 8-min walk to Chunxi Road · 5-min walk to Tianfu Square Metro (Line 1)',
+  '四川省成都市锦江区东御街19号',
+  'No. 19 Dongyu Street, Jinjiang District, Chengdu 610020',
+  ARRAY['Marriott', 'Booking.com'],
+  '[{"label":"Marriott","url":"https://www.marriott.com/en-us/hotels/ctumj-jw-marriott-hotel-chengdu/overview/"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/jw-marriott-chengdu.html"}]'::jsonb,
+  TRUE, 3, TRUE
+),
+(
+  'hotel_chengdu_shangri_la', 'chengdu', 'Shangri-La Hotel Chengdu', '成都香格里拉大酒店',
+  5, 114, TRUE,
+  'Full Chinese/English bilingual service',
+  NULL,
+  'Jinjiang riverside · 10-min taxi to Chunxi Road · 10-min drive to Kuanzhai Alley',
+  '四川省成都市锦江区滨江东路9号',
+  'No. 9 Binjiang East Road, Jinjiang District, Chengdu 610021',
+  ARRAY['Official', 'Booking.com'],
+  '[{"label":"Official","url":"https://www.shangri-la.com/chengdu/shangrila/"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/shangri-la-chengdu.html"}]'::jsonb,
+  TRUE, 4, TRUE
+),
+(
+  'hotel_chengdu_palm_springs', 'chengdu', 'Palm Springs Hotel Chengdu, Vignette Collection', '洲至奢选成都棕榈泉酒店',
+  5, 100, TRUE,
+  'IHG international standard; multilingual service',
+  NULL,
+  'Hi-Tech District · Metro Line 1 · 20-min drive to Tianfu Square',
+  '四川省成都市高新区天府大道中段269号',
+  'No. 269 Tianfu Middle Avenue, Hi-Tech District, Chengdu 610041',
+  ARRAY['IHG', 'Trip.com'],
+  '[{"label":"IHG","url":"https://www.ihg.com/vignettecollection/hotels/gb/en/chengdu/ctups/hoteldetail"},{"label":"Trip.com","url":"https://hk.trip.com/hotels/chengdu-hotel-detail-6434054/palm-springs-hotel-chengdu-vignette-collection/"}]'::jsonb,
+  TRUE, 5, TRUE
+),
+(
+  'hotel_chengdu_intercontinental_century_city', 'chengdu', 'InterContinental Century City Chengdu', '成都世纪城洲际酒店',
+  5, 100, TRUE,
+  'Chinese/English/French/German — outstanding multilingual',
+  NULL,
+  'Century City · 5-min walk to Century City Metro (Line 1) · 20-min drive to Chunxi Road',
+  '四川省成都市世纪城路88号',
+  'No. 88 Century City Boulevard, Chengdu 610041',
+  ARRAY['IHG', 'Booking.com'],
+  '[{"label":"IHG","url":"https://www.ihg.com/intercontinental/hotels/us/en/chengdu/ctuha/hoteldetail"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/intercontinental-century-city-chengdu.html"}]'::jsonb,
+  TRUE, 6, TRUE
+),
+(
+  'hotel_chengdu_hanshi_wuhou', 'chengdu', 'Hanshi Hotel – Chengdu Jinli Wuhou Temple Branch', '汉式主题精品酒店（成都锦里武侯祠店）',
+  4, 57, TRUE,
+  'Partial English (basic communication)',
+  'Translation app recommended for detailed requests',
+  '13-min walk to Wuhouci · 5-min walk to Jinli · 12-min walk to Gaoshengqiao Metro (Line 3)',
+  '四川省成都市武侯区武侯祠大街180-28号',
+  'No. 180-28 Wuhouci Temple Street, Wuhou District, Chengdu 610041',
+  ARRAY['Booking.com', 'Trip.com'],
+  '[{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/yi-shi-zhong-shi-chuang-ta-bo-wu-jiu-dian.html"}]'::jsonb,
+  TRUE, 7, TRUE
+),
+
+-- ========== Category 2: Value-for-Money (T2) ==========
+(
+  'hotel_chengdu_holiday_inn_express_gulou', 'chengdu', 'Holiday Inn Express Chengdu Gulou', '成都鼓楼智选假日酒店',
+  3, 50, TRUE,
+  'Fluent English at front desk; IHG global standard',
+  NULL,
+  '3-min walk to Taisheng South Road Metro (Line 4) · 19-min walk to Chunxi Road',
+  '四川省成都市锦江区太升南路（太升南路地铁站D口附近）',
+  'Near Taisheng South Road, Jinjiang District, Chengdu (Metro Line 4, Exit D)',
+  ARRAY['IHG', 'Booking.com'],
+  '[{"label":"IHG","url":"https://www.ihg.com/holidayinnexpress/hotels/us/en/chengdu/ctugl/hoteldetail"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/holiday-inn-express-chengdu-tianfu-square-an-ihg.html"}]'::jsonb,
+  TRUE, 10, TRUE
+),
+(
+  'hotel_chengdu_hampton_chunxi', 'chengdu', 'Hampton by Hilton Chengdu Chunxi Road', '成都春熙路汉普顿酒店',
+  4, 64, TRUE,
+  'English-speaking front desk; Hilton chain standard',
+  NULL,
+  'Heart of Chunxi Road · Taikoo Li · 2-min walk to Lines 1/4 interchange',
+  '四川省成都市锦江区春熙路商圈',
+  'Chunxi Road Area, Jinjiang District, Chengdu',
+  ARRAY['Hilton', 'Trip.com'],
+  '[{"label":"Hilton","url":"https://www.hilton.com/en/hotels/ctuhzhx-hampton-chengdu-chunxi-road/"},{"label":"Trip.com","url":"https://hk.trip.com/hotels/chengdu-hotel-detail-66929189/hampton-by-hilton-chengdu-chunxi-road/"}]'::jsonb,
+  TRUE, 11, TRUE
+),
+(
+  'hotel_chengdu_hilton_garden_kuanzhai', 'chengdu', 'Hilton Garden Inn Chengdu Kuanzhai Alley', '成都宽窄巷子希尔顿花园酒店',
+  4, 71, TRUE,
+  'English front desk service',
+  NULL,
+  '10-min walk to Kuanzhai Alley · 5-min walk to Tonghuimen Metro (Line 2) · 21-min walk to Renmin Park',
+  '四川省成都市金牛区西安南路63号',
+  'No. 63 Xi''an South Road, Jinniu District, Chengdu',
+  ARRAY['Hilton', 'Booking.com'],
+  '[{"label":"Hilton","url":"https://www.hilton.com/en/hotels/ctukzgi-hilton-garden-inn-chengdu-kuanzhai-alley/"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/hilton-garden-inn-chengdu-kuanzhai-alley.html"}]'::jsonb,
+  TRUE, 12, TRUE
+),
+(
+  'hotel_chengdu_atour_taikoo_li', 'chengdu', 'Atour Hotel Chengdu Taikoo Li Chunxi Road', '成都太古里春熙路步行街亚朵酒店',
+  3, 50, FALSE,
+  NULL,
+  'Basic English with translation tools; international cards accepted',
+  'Adjacent to Chunxi Road · Taikoo Li · 4-min walk to Chunxi Road Metro (Lines 2/3)',
+  '四川省成都市锦江区复兴街30号',
+  'No. 30 Fuxing Street, Jinjiang District, Chengdu',
+  ARRAY['Atour', 'Booking.com'],
+  '[{"label":"Atour","url":"https://www.hotelatour.cn/en"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/atour-chengdu-taikoo-li-chunxi-road-pedestrian.html"}]'::jsonb,
+  TRUE, 13, TRUE
+),
+(
+  'hotel_chengdu_ji_kuanzhai', 'chengdu', 'Ji Hotel Chengdu Kuanzhai Alley', '全季成都宽窄巷子酒店',
+  3, 40, FALSE,
+  NULL,
+  'Basic English with translation tools; international cards accepted',
+  '10-min walk to Kuanzhai Alley · 20-min walk to Du Fu Thatched Cottage · 10-min walk to Kuanzhai Alley Metro (Line 4)',
+  '四川省成都市青羊区青江东街186号',
+  'No. 186 Qingjiang East Road, Qingyang District, Chengdu',
+  ARRAY['Agoda', 'Trip.com'],
+  '[{"label":"Agoda","url":"https://www.agoda.com/zh-cn/ji-hotel-chengdu-west-kuanzhai-alley/hotel/chengdu-cn.html"},{"label":"Trip.com","url":"https://hk.trip.com/hotels/chengdu-hotel-detail-77389013/ji-hotel/"}]'::jsonb,
+  TRUE, 14, TRUE
+),
+(
+  'hotel_chengdu_mercure_downtown', 'chengdu', 'Mercure Chengdu Downtown', '成都市中心美居酒店（宽窄巷）',
+  4, 43, TRUE,
+  'Accor international chain English service',
+  NULL,
+  '3-min walk to Tonghuimen Metro (Line 2) · 10-min walk to Kuanzhai Alley',
+  '四川省成都市青羊区通惠门路3号',
+  'No. 3 Tonghuimen Road, Qingyang District, Chengdu 610015',
+  ARRAY['Accor', 'Trip.com'],
+  '[{"label":"Accor","url":"https://all.accor.com/hotel/B0Y9/index.en.shtml"},{"label":"Trip.com","url":"https://hk.trip.com/hotels/chengdu-hotel-detail-11020316/mercure-chengdu-downtown-hotel/"}]'::jsonb,
+  TRUE, 15, TRUE
+),
+(
+  'hotel_chengdu_novotel_chunxi', 'chengdu', 'Novotel Chengdu Chunxi Road', '成都春熙路诺富特酒店',
+  4, 57, TRUE,
+  'Accor chain standard; multilingual capability',
+  NULL,
+  'Chunxi Road core · 21-min walk to Chunxi Road Metro (Lines 1/4)',
+  '四川省成都市锦江区金星路41号7-13层',
+  'Floors 7-13, No. 41 Jinxing Road, Jinjiang District, Chengdu 610020',
+  ARRAY['Accor', 'Booking.com'],
+  '[{"label":"Accor","url":"https://all.accor.com/hotel/C5B5/index.en.shtml"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/novotel-chengdu-chunxi-road.html"}]'::jsonb,
+  TRUE, 16, TRUE
+),
+(
+  'hotel_chengdu_courtyard_south', 'chengdu', 'Courtyard by Marriott Chengdu South', '成都天府南万怡酒店',
+  4, 57, TRUE,
+  'Marriott chain standard English service',
+  NULL,
+  'Tianfu New Area Expo City · Metro Line 1 · 25-min drive to Chunxi Road',
+  '四川省成都市天府新区博览城路288号',
+  'No. 288 Expo City Road, Tianfu New Area, Chengdu 610218',
+  ARRAY['Marriott'],
+  '[{"label":"Marriott","url":"https://www.marriott.com/en-us/hotels/ctucs-courtyard-chengdu-south/overview/"}]'::jsonb,
+  TRUE, 17, TRUE
+),
+
+-- ========== Category 3: Foreigner-Friendly Hostels (T3) ==========
+(
+  'hotel_chengdu_mix_hostel', 'chengdu', 'Chengdu Mix Hostel (Poshpacker)', '成都驴友记青年旅舍',
+  2, 11, TRUE,
+  'Full English — primary working language',
+  NULL,
+  '10-min walk to Wenshu Monastery Metro (Line 4) · 12-min walk to Wenxiufang',
+  '四川省成都市金牛区兴辉路23号西段',
+  'No. 23 West Xinghui Road, Jinniu District, Chengdu 610084',
+  ARRAY['Hostelworld', 'Booking.com'],
+  '[{"label":"Hostelworld","url":"https://www.hostelworld.com/hostels/p/11625/poshpacker-chengdu-mix-hostel/"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/chengdu-mix-hostel.html"}]'::jsonb,
+  TRUE, 20, TRUE
+),
+(
+  'hotel_chengdu_flipflop_hostel', 'chengdu', 'Flipflop Hostel Chengdu (Poshpacker)', '成都拖板鞋青年旅舍',
+  2, 12, TRUE,
+  'Full English; designed for foreign travelers',
+  NULL,
+  '13-min walk to Chunxi Road Metro (Lines 1/4) · 10-min walk to Taikoo Li',
+  '四川省成都市锦江区红星路四段东升街96号',
+  'No. 96 Dongsheng Street, Section 4 Hongxing Road, Jinjiang District, Chengdu',
+  ARRAY['Agoda', 'Booking.com'],
+  '[{"label":"Agoda","url":"https://www.agoda.com/chengdu-flipflop-lounge-hostel/hotel/chengdu-cn.html"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/chengdu-tuo-ban-xie-qing-nian-lv-she.zh-cn.html"}]'::jsonb,
+  TRUE, 21, TRUE
+),
+(
+  'hotel_chengdu_mrs_panda_hostel', 'chengdu', 'Mrs Panda Hostel Chengdu', '成都Mrs熊猫青年旅舍',
+  2, 14, TRUE,
+  'English service; extensive foreign guest experience',
+  NULL,
+  '5-min walk to Jiuyanqiao Bar Street · 10-min walk to Jinjiang Hotel Metro (Line 3)',
+  '四川省成都市武侯区临江路中段6号',
+  'No. 6 Middle Linjiang Road, Wuhou District, Chengdu 610000',
+  ARRAY['Booking.com', 'KAYAK'],
+  '[{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/chengdu-mrs-panda-hostel.html"},{"label":"KAYAK","url":"https://www.kayak.com/Chengdu-Hotels-Chengdu-Mrs-Panda-Hostel.2226512.ksp"}]'::jsonb,
+  TRUE, 22, TRUE
+),
+(
+  'hotel_chengdu_lazybones_hostel', 'chengdu', 'Sonderia Lazybones Hostel', '成都Sonderia懒骨头青年旅舍',
+  2, 11, TRUE,
+  'Full English; English-language travel desk',
+  NULL,
+  '16-min walk to Wenshu Monastery · 10-min walk to Wenshu Monastery Metro (Line 4) · same street as Mix Hostel',
+  '四川省成都市金牛区兴辉路2-9号西段（文殊院旁）',
+  'No. 2-9 West Xinghui Road, Jinniu District, Chengdu (near Wenshu Monastery)',
+  ARRAY['Hostelworld', 'Booking.com'],
+  '[{"label":"Hostelworld","url":"https://www.hostelworld.com/hostels/p/307845/sonderia-hostel-and-bar-lazybones-hostel/"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/chengdu-lazybones-hostel-templeside-poshpacker.en-gb.html"}]'::jsonb,
+  TRUE, 23, TRUE
+),
+(
+  'hotel_chengdu_dreams_travel_hostel', 'chengdu', 'Dreams Travel International Youth Hostel', '成都梦之旅国际青年旅舍',
+  2, 6, TRUE,
+  'English service; HI member hostel',
+  NULL,
+  'Directly opposite Wuhouci main gate · 5-min walk to Jinli · 11-min walk to Gaoshengqiao Metro (Line 3)',
+  '四川省成都市武侯区武侯祠大街242-244号',
+  'No. 242-244 Wuhouci Street, Wuhou District, Chengdu 610041',
+  ARRAY['HI Hostels'],
+  '[{"label":"HI Hostels","url":"https://hihostels.com/hostels/chengdu-dreams-travel/"}]'::jsonb,
+  TRUE, 24, TRUE
+),
+(
+  'hotel_chengdu_desti_hostel_taikoo_li', 'chengdu', 'Desti Youth Park Hostel – Taikoo Li', '成都贝宝时年青年旅舍（太古里店）',
+  2, 13, TRUE,
+  'English service; social activities in English',
+  NULL,
+  '4-min walk to Chunxi Road Metro (Lines 1/4) · 5-min walk to Taikoo Li · 7-min walk to Daci Temple',
+  '四川省成都市锦江区（春熙路/太古里附近，预订时确认门牌）',
+  'Jinjiang District, Chengdu (near Chunxi Road Metro Station, 4-minute walk)',
+  ARRAY['Hostelworld', 'Booking.com'],
+  '[{"label":"Hostelworld","url":"https://www.hostelworld.com/hostels/p/323723/chengdu-desti-youth-park-hostel-taikoo-li/"},{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/cheng-du-bei-bao-shi-nian-qing-nian-lu-she-tai-gu-li-dian.html"}]'::jsonb,
+  TRUE, 25, TRUE
+),
+(
+  'hotel_chengdu_loft_hostel', 'chengdu', 'The Loft Design Hostel Chengdu', '成都阁楼设计青年旅舍',
+  2, 11, TRUE,
+  'English reception',
+  NULL,
+  '550m to Kuanzhai Alley Metro (Line 4) · 5-min walk to Kuanzhai Alley · 21-min walk to Renmin Park',
+  '四川省成都市青羊区中通仁路小通巷4号',
+  'No. 4 Xiaotongxiang, Zhongtongren Road, Qingyang District, Chengdu',
+  ARRAY['TripAdvisor', 'Booking.com'],
+  '[{"label":"TripAdvisor","url":"https://www.tripadvisor.com/Hotel_Review-g297463-d1203463-Reviews-The_Loft_Design_Hostel-Chengdu_Sichuan.html"}]'::jsonb,
+  TRUE, 26, TRUE
+),
+(
+  'hotel_chengdu_atour_light_taikoo_li', 'chengdu', 'Atour Light Hotel Taikoo Li Chengdu', '成都太古里春熙路地铁站亚朵轻居酒店',
+  3, 21, FALSE,
+  NULL,
+  'Basic English with translation tools; all private rooms with ensuite',
+  '8-min walk to Chunxi Road Metro (Lines 1/4) · 5-min walk to IFS and Taikoo Li',
+  '四川省成都市锦江区城守街88号',
+  'No. 88 Chengshou Street, Jinjiang District, Chengdu 610021',
+  ARRAY['Booking.com', 'KAYAK'],
+  '[{"label":"Booking.com","url":"https://www.booking.com/hotel/cn/atour-light-chengdu-taikoo-li.html"},{"label":"KAYAK","url":"https://www.kayak.com/Chengdu-Hotels-Zhengxi-E-Hotel.669996.ksp"}]'::jsonb,
+  TRUE, 27, TRUE
+)
+ON CONFLICT (id) DO UPDATE SET
+  city_id = EXCLUDED.city_id,
+  name = EXCLUDED.name,
+  chinese_name = EXCLUDED.chinese_name,
+  stars = EXCLUDED.stars,
+  price_min_usd = EXCLUDED.price_min_usd,
+  has_english_staff = EXCLUDED.has_english_staff,
+  english_staff_note = EXCLUDED.english_staff_note,
+  language_tip = EXCLUDED.language_tip,
+  location_note = EXCLUDED.location_note,
+  address_zh = EXCLUDED.address_zh,
+  address_en = EXCLUDED.address_en,
+  booking_platforms = EXCLUDED.booking_platforms,
+  booking_links = EXCLUDED.booking_links,
+  accepts_foreigners = EXCLUDED.accepts_foreigners,
+  sort_order = EXCLUDED.sort_order,
+  is_active = EXCLUDED.is_active,
+  updated_at = NOW();

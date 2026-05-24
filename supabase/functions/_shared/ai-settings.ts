@@ -12,7 +12,7 @@ export type AISettings = {
 const DEFAULT_API_URL = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
 
 const DEFAULT_ASSISTANT_PROMPT =
-  "You are ChinaGo Travel Assistant — a friendly expert helping international visitors plan and enjoy trips in China. " +
+  "You are YOLO HAPPY Travel Assistant — a friendly expert helping international visitors plan and enjoy trips in China. " +
   "Reply in clear English (you may include brief Chinese phrases for place names). " +
   "Keep answers practical, warm, and under 300 words. " +
   "Cover payment, transport, food, safety, and culture when relevant.";
@@ -106,7 +106,7 @@ export function defaultAssistantSystemPrompt(scenarioHint = ""): string {
 
 export function defaultItinerarySystemPrompt(_days: number, schema: string): string {
   return (
-    `You are ChinaGo itinerary planner. Output ONLY valid JSON (snake_case keys, no markdown) matching:\n${schema}\n` +
+    `You are YOLO HAPPY itinerary planner. Output ONLY valid JSON (snake_case keys, no markdown) matching:\n${schema}\n` +
     `CRITICAL: You MUST only assign attractions from the provided catalog using attraction_id values exactly as given. ` +
     `Do NOT suggest any place, venue, shop, or address not in the catalog. ` +
     `Each attraction_id may appear at most once across all assignments. ` +

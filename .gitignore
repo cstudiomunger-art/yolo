@@ -4,6 +4,7 @@ DerivedData/
 node_modules/
 Secrets.xcconfig
 admin/js/config.js
+web/config.js
 supabase/.temp/
 
 # wrangler files

@@ -15,7 +15,12 @@
       if (typeof value === "string" && value.includes("\n")) return value;
       return value || "";
     }
-    if (field.type === "ref_cities_multi" || field.type === "ref_countries_multi" || field.type === "enum_multi") {
+    if (
+      field.type === "ref_cities_multi" ||
+      field.type === "ref_countries_multi" ||
+      field.type === "ref_attractions_multi" ||
+      field.type === "enum_multi"
+    ) {
       return Array.isArray(value) ? value : [];
     }
     if (field.type === "home_cards_list") {
@@ -122,6 +127,9 @@
         break;
       case "ref_cities_multi":
         inner = App.renderRefCitiesMulti(name, value);
+        break;
+      case "ref_attractions_multi":
+        inner = App.renderRefAttractionsMulti(name, value);
         break;
       case "ref_countries_multi":
         inner = App.renderRefCountriesMulti(name, value);
@@ -283,6 +291,32 @@
       const checked = ids.includes(c.id) ? "checked" : "";
       html += `<label class="checkbox-chip"><input type="checkbox" value="${App.escapeHtml(c.id)}" ${checked} /> ${App.escapeHtml(`${c.emoji || ""} ${c.chinese_name || c.name}`)}</label>`;
     });
+    html += `</div>`;
+    return html;
+  };
+
+  App.renderRefAttractionsMulti = function renderRefAttractionsMulti(name, selectedIds) {
+    const ids = Array.isArray(selectedIds) ? selectedIds : [];
+    let html = `<div class="checkbox-grid checkbox-grid--attractions" data-name="${name}">`;
+    const byCity = {};
+    (App.refCache.attractions || []).forEach((a) => {
+      const cid = a.city_id || "_";
+      if (!byCity[cid]) byCity[cid] = [];
+      byCity[cid].push(a);
+    });
+    Object.keys(byCity)
+      .sort((a, b) => App.cityLabel(a).localeCompare(App.cityLabel(b), "zh"))
+      .forEach((cityId) => {
+        html += `<div class="checkbox-group"><span class="checkbox-group-label">${App.escapeHtml(App.cityLabel(cityId))}</span>`;
+        byCity[cityId].forEach((a) => {
+          const checked = ids.includes(a.id) ? "checked" : "";
+          html += `<label class="checkbox-chip"><input type="checkbox" value="${App.escapeHtml(a.id)}" ${checked} /> ${App.escapeHtml(a.chinese_name || a.name)}</label>`;
+        });
+        html += `</div>`;
+      });
+    if (!App.refCache.attractions?.length) {
+      html += `<p class="muted">暂无景点数据，请先加载城市内容。</p>`;
+    }
     html += `</div>`;
     return html;
   };
@@ -796,6 +830,7 @@
       }
       case "ref_cities_multi":
       case "ref_countries_multi":
+      case "ref_attractions_multi":
       case "enum_multi": {
         const box = form.querySelector(`[data-name="${field.key}"]`);
         if (!box) return [];
@@ -1283,10 +1318,18 @@
         fixedAttractionId: ctx.fixedAttractionId,
       });
     } else {
-      form.querySelectorAll(".audio-upload-input").forEach((input) => {
-        if (input.closest(".sub-area-inline-form")) return;
-        App.bindAudioUploadInput(input);
-      });
+      const guideId =
+        form.querySelector('[name="id"]')?.value?.trim() ||
+        form.dataset.audioGuideId?.trim() ||
+        "";
+      if (guideId && form.querySelector('[name="_audio_upload"]')) {
+        App.setupAudioGuideControls(form, guideId, ctx);
+      } else {
+        form.querySelectorAll(".audio-upload-input").forEach((input) => {
+          if (input.closest(".sub-area-inline-form")) return;
+          App.bindAudioUploadInput(input);
+        });
+      }
     }
 
     App.initRichTextHosts(form);
@@ -1306,6 +1349,43 @@
       return App.escapeHtml(App.CHECKLIST_PRIORITY_LABELS?.[v] || v || "—");
     }
     if (typeof col === "object" && col.ref === "city") return App.cityLabel(v);
+    if (typeof col === "object" && col.ref === "countries") {
+      const ids = Array.isArray(v) ? v : [];
+      if (!ids.length) return '<span class="muted">全部</span>';
+      return App.escapeHtml(ids.map((id) => App.countryLabel(id)).join(", "));
+    }
+    if (typeof col === "object" && col.ref === "cities") {
+      const ids = Array.isArray(v) ? v : [];
+      if (!ids.length) return '<span class="muted">—</span>';
+      return App.escapeHtml(ids.map((id) => App.cityLabel(id)).join(", "));
+    }
+    if (typeof col === "object" && col.format === "has_audio") {
+      const url = (v || "").trim();
+      return url
+        ? '<span class="tag on">有音频</span>'
+        : '<span class="tag off">无音频</span>';
+    }
+    if (typeof col === "object" && col.format === "user_email") {
+      return App.escapeHtml(App.profileEmail(v));
+    }
+    if (typeof col === "object" && col.format === "is_pro") {
+      return v
+        ? '<span class="tag on">Pro</span>'
+        : '<span class="tag off">—</span>';
+    }
+    if (typeof col === "object" && col.format === "purchased_count") {
+      const n = Array.isArray(v) ? v.length : 0;
+      return n > 0
+        ? `<span class="tag on">${n}</span>`
+        : '<span class="tag off">0</span>';
+    }
+    if (typeof col === "object" && col.format === "duration_mmss") {
+      const sec = Number(v);
+      if (!Number.isFinite(sec) || sec <= 0) return "—";
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return App.escapeHtml(`${m}:${String(s).padStart(2, "0")}`);
+    }
     if (typeof col === "object" && col.ref === "attraction") return App.attractionLabel(v);
     if (typeof col === "object" && col.ref === "scenario") return App.scenarioLabel(v);
     if (typeof col === "object" && col.ref === "country") return App.countryLabel(v);

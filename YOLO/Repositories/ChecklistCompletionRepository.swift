@@ -47,4 +47,13 @@ struct ChecklistCompletionRepository: Sendable {
             .upsert(row, onConflict: "user_id,checklist_item_id,itinerary_id")
             .execute()
     }
+
+    func deleteForItinerary(userId: UUID, itineraryId: String) async throws {
+        try await client
+            .from("checklist_completion")
+            .delete()
+            .eq("user_id", value: userId.uuidString)
+            .eq("itinerary_id", value: itineraryId)
+            .execute()
+    }
 }

@@ -56,10 +56,16 @@ App.filterChecklistRowsByType = function filterChecklistRowsByType(rows, typeFil
 
 App.sanitizeChecklistPayload = function sanitizeChecklistPayload(payload, ctx = {}) {
   const type = payload.type || "city";
-  if (type === "entry" || type === "universal") {
+  if (type === "entry") {
     payload.city_id = null;
     payload.target_cities = [];
+    if (!Array.isArray(payload.target_nationalities)) payload.target_nationalities = [];
+  } else if (type === "universal") {
+    payload.city_id = null;
+    payload.target_cities = [];
+    payload.target_nationalities = [];
   } else if (type === "city") {
+    payload.target_nationalities = [];
     const targets = Array.isArray(payload.target_cities) ? payload.target_cities.filter(Boolean) : [];
     payload.target_cities = targets;
     if (ctx.fixedCityId && !targets.length) {
@@ -79,13 +85,35 @@ App.sanitizeChecklistPayload = function sanitizeChecklistPayload(payload, ctx = 
 };
 
 App.getChecklistCreateDefaults = function getChecklistCreateDefaults(ctx = {}) {
-  const row = { type: "universal", phase: "before_departure", priority: "recommended", is_active: true };
+  const row = {
+    type: "universal",
+    phase: "before_departure",
+    priority: "recommended",
+    is_active: true,
+    group_title: "Essential Prep",
+    target_nationalities: [],
+    target_cities: [],
+  };
   if (ctx.fixedCityId) {
+    const city = App.refCache.cities.find((c) => c.id === ctx.fixedCityId);
     row.type = "city";
     row.city_id = ctx.fixedCityId;
     row.target_cities = [ctx.fixedCityId];
+    row.group_title = city?.name || ctx.fixedCityId;
+    row.target_nationalities = [];
   }
   return row;
+};
+
+/** Intro banner for global checklist_items list (three-tier rules). */
+App.checklistArchitectureBannerHtml = function checklistArchitectureBannerHtml() {
+  return `<div class="status-bar info checklist-arch-banner">
+    <strong>三类清单</strong>：
+    <em>入境 entry</em> — 按 <code>target_nationalities</code> 与护照匹配，无需行程；
+    <em>通用 universal</em> — 全员可见；
+    <em>城市 city</em> — 用户保存行程后，<code>target_cities</code> 与行程城市交集才展示。
+    完成度：勾选或 Skip 均计入。城市完成态按行程隔离。
+  </div>`;
 };
 
 App.$ = function $(sel, root) {
@@ -459,6 +487,81 @@ App.hydrateSubAreaRowForForm = function hydrateSubAreaRowForForm(row) {
   return out;
 };
 
+/** Read duration from a local File or remote URL (seconds, rounded). */
+App.probeAudioDurationSeconds = function probeAudioDurationSeconds(source) {
+  return new Promise((resolve, reject) => {
+    const audio = document.createElement("audio");
+    audio.preload = "metadata";
+    const cleanup = () => {
+      if (source instanceof File) URL.revokeObjectURL(audio.src);
+    };
+    audio.addEventListener("loadedmetadata", () => {
+      const d = audio.duration;
+      cleanup();
+      if (!Number.isFinite(d) || d <= 0) {
+        reject(new Error("无法读取音频时长"));
+        return;
+      }
+      resolve(Math.max(1, Math.round(d)));
+    });
+    audio.addEventListener("error", () => {
+      cleanup();
+      reject(new Error("无法读取音频元数据"));
+    });
+    if (source instanceof File) {
+      audio.src = URL.createObjectURL(source);
+    } else if (typeof source === "string" && source.trim()) {
+      audio.crossOrigin = "anonymous";
+      audio.src = source.trim();
+    } else {
+      reject(new Error("无效的音频源"));
+    }
+  });
+};
+
+/** Apply duration_seconds to a form if the field exists and is empty or force. */
+App.applyAudioDurationToForm = function applyAudioDurationToForm(form, seconds, opts = {}) {
+  if (!form || !Number.isFinite(seconds)) return;
+  const inp = form.querySelector('[name="duration_seconds"]');
+  if (!inp) return;
+  const current = Number(inp.value);
+  if (!opts.force && inp.value?.trim() !== "" && Number.isFinite(current) && current > 0) return;
+  inp.value = String(Math.max(1, Math.round(seconds)));
+};
+
+/** Bind audio_guides upload — immediate upload + preview refresh (city-hub inline & modals). */
+App.setupAudioGuideControls = function setupAudioGuideControls(form, guideId, ctx = {}) {
+  const audioInput = App.formFileInput(form, "_audio_upload");
+  if (!audioInput || audioInput.dataset.audioGuideSetup === "1") return;
+  audioInput.dataset.audioGuideSetup = "1";
+  const gid = (guideId || form.querySelector('[name="id"]')?.value || "").trim();
+  if (!gid) return;
+
+  App.bindAudioUploadInput(audioInput, {
+    form,
+    previewFieldKey: "audio_url",
+    onUpload: async (file) => {
+      const audioUrl = await App.uploadAudioGuideFile(file, gid);
+      form.dataset.pendingAudioUrl = audioUrl;
+      App.setAudioPreviewField(form, "audio_url", audioUrl);
+      try {
+        const seconds = await App.probeAudioDurationSeconds(file);
+        App.applyAudioDurationToForm(form, seconds);
+      } catch (_) {
+        /* duration optional */
+      }
+      const saveHint = form.classList.contains("audio-guide-inline-form")
+        ? "音频已上传，请点击「保存此导览」"
+        : "音频已上传，请点击「保存」";
+      App.showToast(saveHint);
+      if (typeof ctx.onUploaded === "function") {
+        ctx.onUploaded({ audioUrl, guideId: gid });
+      }
+      return { audioUrl, guideId: gid };
+    },
+  });
+};
+
 /** Bind sub-area direct audio upload (modal and city-hub inline forms). */
 App.setupSubAreaAudioControls = function setupSubAreaAudioControls(form, ctx = {}) {
   const saAudioInput = App.formFileInput(form, "_sa_audio_upload");
@@ -482,6 +585,12 @@ App.setupSubAreaAudioControls = function setupSubAreaAudioControls(form, ctx = {
       const audioUrl = await App.uploadSubAreaAudioFile(file, subAreaId);
       form.dataset.pendingAudioUrl = audioUrl;
       App.setAudioPreviewField(form, "audio_url", audioUrl);
+      try {
+        const seconds = await App.probeAudioDurationSeconds(file);
+        App.applyAudioDurationToForm(form, seconds);
+      } catch (_) {
+        /* duration on sub_areas N/A — guides table only */
+      }
       const saveHint = form.classList.contains("sub-area-inline-form")
         ? "音频已上传，请点击「保存子区域」"
         : "音频已上传，请点击「保存」";

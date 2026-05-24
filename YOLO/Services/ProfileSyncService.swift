@@ -151,6 +151,7 @@ final class ProfileSyncService {
         guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else { return }
         do {
             try await itineraryRepository.markDeleted(id: id, userId: userId)
+            try await checklistRepository.deleteForItinerary(userId: userId, itineraryId: id)
         } catch {
             lastSyncError = error.localizedDescription
         }
@@ -160,39 +161,56 @@ final class ProfileSyncService {
 
     private func pullChecklistCompletion(userId: UUID, preferences: UserPreferencesStore) async throws {
         let rows = try await checklistRepository.fetchAll(userId: userId)
-        let itineraryKey = preferences.activeItineraryId
-        let doneIds = rows.filter { row in
-            guard row.status == "done" else { return false }
-            guard let tripId = row.itineraryId, !tripId.isEmpty else { return true }
-            guard let active = itineraryKey else { return true }
-            return tripId == active
-        }.map(\.checklistItemId)
-        if !doneIds.isEmpty {
-            preferences.completedChecklistIds.formUnion(doneIds)
+        let activeId = preferences.activeItineraryId
+        var map = preferences.checklistStatuses
+
+        for row in rows {
+            guard row.status == "done" || row.status == "skipped" else { continue }
+            guard let status = ChecklistItemStatus(rawValue: row.status) else { continue }
+
+            if let tripId = row.itineraryId, !tripId.isEmpty {
+                let key = UserPreferencesStore.storageKey(
+                    itemId: row.checklistItemId,
+                    type: .city,
+                    itineraryId: tripId
+                )
+                map[key] = ChecklistStatusEntry(status: status, type: .city)
+            } else {
+                let key = row.checklistItemId
+                let existingType = map[key]?.type ?? .entry
+                map[key] = ChecklistStatusEntry(status: status, type: existingType)
+            }
         }
+        preferences.applyRemoteChecklistStatuses(map)
     }
 
     private func pushChecklistCompletion(userId: UUID, preferences: UserPreferencesStore) async throws {
-        let itineraryId = preferences.activeItineraryId
-        for itemId in preferences.completedChecklistIds {
+        for (storageKey, entry) in preferences.checklistStatuses {
+            let itemId = UserPreferencesStore.itemId(fromStorageKey: storageKey)
+            let itineraryId: String?
+            if entry.type == .city {
+                itineraryId = storageKey.split(separator: "#", maxSplits: 1).dropFirst().first.map(String.init)
+            } else {
+                itineraryId = nil
+            }
             try await checklistRepository.setStatus(
                 userId: userId,
                 checklistItemId: itemId,
                 itineraryId: itineraryId,
-                status: "done"
+                status: entry.status.rawValue
             )
         }
     }
 
-    func syncChecklistToggle(itemId: String, isDone: Bool) async {
+    func syncChecklistStatus(itemId: String, type: ChecklistItemType, status: ChecklistItemStatus) async {
         guard let preferences, let auth, auth.isAuthenticated, let userId = auth.userId else { return }
         guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else { return }
         do {
             try await checklistRepository.setStatus(
                 userId: userId,
                 checklistItemId: itemId,
-                itineraryId: preferences.activeItineraryId,
-                status: isDone ? "done" : "pending"
+                itineraryId: preferences.itineraryIdForCompletion(type: type),
+                status: status == .pending ? "pending" : status.rawValue
             )
         } catch {
             lastSyncError = error.localizedDescription

@@ -186,14 +186,17 @@ struct AttractionDetailView: View {
         let body = detailBody
         Text("Introduction")
             .sectionTitleStyle()
-        HTMLContentView(content: body, lineSpacing: 5, lineLimit: introExpanded ? nil : 3)
-        if HTMLContentView.plainText(from: body).count > 120 {
-            Button(introExpanded ? "Read less ▲" : "Read more ▼") {
-                introExpanded.toggle()
+        VStack(alignment: .leading, spacing: 8) {
+            HTMLContentView(content: body, lineSpacing: 5, lineLimit: introExpanded ? nil : 3)
+            if HTMLContentView.plainText(from: body).count > 120 {
+                Button(introExpanded ? "Read less ▲" : "Read more ▼") {
+                    introExpanded.toggle()
+                }
+                .font(Theme.FontToken.inter(11, weight: .medium))
+                .foregroundStyle(Theme.ColorToken.accent)
             }
-            .font(Theme.FontToken.inter(11, weight: .medium))
-            .foregroundStyle(Theme.ColorToken.accent)
         }
+        .guideContentCardStyle()
         }
     }
 

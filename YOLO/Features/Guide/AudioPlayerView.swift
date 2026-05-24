@@ -1,6 +1,7 @@
 import AVFoundation
 import Combine
 import SwiftUI
+import UIKit
 
 @MainActor
 final class AudioPlaybackController: ObservableObject {
@@ -8,7 +9,6 @@ final class AudioPlaybackController: ObservableObject {
         case idle
         case loading
         case streaming
-        case simulation
         case unavailable(String)
     }
 
@@ -22,18 +22,36 @@ final class AudioPlaybackController: ObservableObject {
     private var timeObserver: Any?
     private var statusObservation: NSKeyValueObservation?
     private var endObserver: NSObjectProtocol?
-    private var usesSimulation = false
     private var hasFullAccess = true
     private var freeTrialSeconds: Double = 180
     private var onTrialEnded: (() -> Void)?
     private var configuredGuideId: String?
     private var configuredGuide: AudioGuide?
     private var preferLocalPlayback = true
+    private var nowPlayingTitle = ""
+    private var nowPlayingArtist = ""
+
+    var canPlay: Bool {
+        switch mode {
+        case .streaming, .idle:
+            return player != nil || playerItem != nil
+        case .loading, .unavailable:
+            return false
+        }
+    }
+
+    var previewMaxSeconds: Double { effectiveMaxTime }
+
+    var remainingPreviewSeconds: Double {
+        max(0, effectiveMaxTime - progress)
+    }
 
     func configure(
         guide: AudioGuide,
         hasFullAccess: Bool,
         freeTrialSeconds: Double,
+        nowPlayingTitle: String,
+        nowPlayingArtist: String,
         onTrialEnded: @escaping () -> Void
     ) {
         teardown()
@@ -43,14 +61,21 @@ final class AudioPlaybackController: ObservableObject {
         self.hasFullAccess = hasFullAccess
         self.freeTrialSeconds = hasFullAccess ? .greatestFiniteMagnitude : freeTrialSeconds
         self.onTrialEnded = onTrialEnded
+        self.nowPlayingTitle = nowPlayingTitle
+        self.nowPlayingArtist = nowPlayingArtist
         durationSeconds = max(guide.durationSeconds, 1)
 
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
 
+        AudioNowPlayingService.configureRemoteCommands(
+            play: { [weak self] in self?.resumeIfPaused() },
+            pause: { [weak self] in self?.pauseIfPlaying() },
+            toggle: { [weak self] in self?.togglePlay() }
+        )
+
         guard let url = MediaURLResolver.playbackURL(for: guide, preferLocal: preferLocalPlayback) else {
-            usesSimulation = true
-            mode = .simulation
+            markUnavailable()
             return
         }
 
@@ -60,7 +85,6 @@ final class AudioPlaybackController: ObservableObject {
     private func startStreaming(url: URL) {
         clearPlayerObservers()
 
-        usesSimulation = false
         mode = .loading
         let item = AVPlayerItem(url: url)
         playerItem = item
@@ -90,7 +114,13 @@ final class AudioPlaybackController: ObservableObject {
         self.freeTrialSeconds = hasFullAccess ? .greatestFiniteMagnitude : freeTrialSeconds
     }
 
-    func reconfigureIfNeeded(guide: AudioGuide, hasFullAccess: Bool, freeTrialSeconds: Double) {
+    func reconfigureIfNeeded(
+        guide: AudioGuide,
+        hasFullAccess: Bool,
+        freeTrialSeconds: Double,
+        nowPlayingTitle: String,
+        nowPlayingArtist: String
+    ) {
         guard guide.id == configuredGuideId else { return }
         let savedProgress = progress
         let wasPlaying = isPlaying
@@ -98,26 +128,35 @@ final class AudioPlaybackController: ObservableObject {
             guide: guide,
             hasFullAccess: hasFullAccess,
             freeTrialSeconds: freeTrialSeconds,
+            nowPlayingTitle: nowPlayingTitle,
+            nowPlayingArtist: nowPlayingArtist,
             onTrialEnded: onTrialEnded ?? {}
         )
         seek(to: savedProgress)
-        if wasPlaying { togglePlay() }
+        if wasPlaying, canPlay { togglePlay() }
+    }
+
+    func activeSegmentIndex(in segments: [AudioSegment]) -> Int? {
+        guard !segments.isEmpty else { return nil }
+        let seconds = Int(progress.rounded())
+        return segments.enumerated().last(where: { $0.element.startSeconds <= seconds })?.offset
+    }
+
+    private func resumeIfPaused() {
+        guard canPlay, !isPlaying else { return }
+        togglePlay()
+    }
+
+    private func pauseIfPlaying() {
+        guard isPlaying else { return }
+        togglePlay()
     }
 
     func togglePlay() {
+        guard canPlay else { return }
+
         if !hasFullAccess && progress >= effectiveMaxTime {
             onTrialEnded?()
-            return
-        }
-
-        if usesSimulation {
-            isPlaying.toggle()
-            if isPlaying {
-                startSimulation()
-            } else {
-                simulationTimer?.invalidate()
-                simulationTimer = nil
-            }
             return
         }
 
@@ -128,12 +167,14 @@ final class AudioPlaybackController: ObservableObject {
             if isPlaying {
                 player.pause()
                 isPlaying = false
+                syncNowPlaying()
             } else {
                 player.play()
                 isPlaying = true
+                syncNowPlaying()
             }
         case .failed:
-            fallbackToSimulation()
+            fallbackAfterStreamFailure()
         default:
             mode = .loading
         }
@@ -142,13 +183,12 @@ final class AudioPlaybackController: ObservableObject {
     func seek(to seconds: Double) {
         let capped = cappedTime(seconds)
         progress = capped
-        if usesSimulation { return }
+        guard canPlay else { return }
         player?.seek(to: CMTime(seconds: capped, preferredTimescale: 600))
+        syncNowPlaying()
     }
 
     func teardown() {
-        simulationTimer?.invalidate()
-        simulationTimer = nil
         clearPlayerObservers()
         player?.pause()
         player = nil
@@ -156,10 +196,21 @@ final class AudioPlaybackController: ObservableObject {
         isPlaying = false
         progress = 0
         mode = .idle
-        usesSimulation = false
         configuredGuideId = nil
         configuredGuide = nil
         preferLocalPlayback = true
+        AudioNowPlayingService.clear()
+    }
+
+    private func syncNowPlaying() {
+        guard !nowPlayingTitle.isEmpty else { return }
+        AudioNowPlayingService.update(
+            title: nowPlayingTitle,
+            artist: nowPlayingArtist,
+            duration: TimeInterval(durationSeconds),
+            elapsed: progress,
+            isPlaying: isPlaying
+        )
     }
 
     private func clearPlayerObservers() {
@@ -174,8 +225,6 @@ final class AudioPlaybackController: ObservableObject {
         }
         timeObserver = nil
     }
-
-    private var simulationTimer: Timer?
 
     private var effectiveMaxTime: Double {
         if hasFullAccess { return Double(durationSeconds) }
@@ -194,8 +243,9 @@ final class AudioPlaybackController: ObservableObject {
                 durationSeconds = Int(actual.rounded())
             }
             mode = .streaming
+            syncNowPlaying()
         case .failed:
-            fallbackToSimulation()
+            fallbackAfterStreamFailure()
         case .unknown:
             mode = .loading
         @unknown default:
@@ -203,7 +253,7 @@ final class AudioPlaybackController: ObservableObject {
         }
     }
 
-    private func fallbackToSimulation() {
+    private func fallbackAfterStreamFailure() {
         if preferLocalPlayback,
            let guide = configuredGuide,
            MediaURLResolver.audioURL(from: guide.audioUrl) != nil {
@@ -214,7 +264,7 @@ final class AudioPlaybackController: ObservableObject {
             if let remote = MediaURLResolver.playbackURL(for: guide, preferLocal: false) {
                 startStreaming(url: remote)
                 seek(to: savedProgress)
-                if wasPlaying { togglePlay() }
+                if wasPlaying, canPlay { togglePlay() }
                 return
             }
         }
@@ -223,17 +273,25 @@ final class AudioPlaybackController: ObservableObject {
         player?.pause()
         player = nil
         playerItem = nil
-        usesSimulation = true
         isPlaying = false
         progress = min(progress, effectiveMaxTime)
-        mode = .simulation
+        markUnavailable()
+    }
+
+    private func markUnavailable() {
+        clearPlayerObservers()
+        player?.pause()
+        player = nil
+        playerItem = nil
+        isPlaying = false
+        mode = .unavailable(String(localized: "Audio not available yet."))
     }
 
     private func handlePlaybackEnded(notifyTrial: Bool = true) {
         isPlaying = false
         progress = effectiveMaxTime
         player?.pause()
-        if notifyTrial, !hasFullAccess, freeTrialSeconds > 0, progress >= freeTrialSeconds - 0.5 {
+        if notifyTrial, !hasFullAccess, freeTrialSeconds < .greatestFiniteMagnitude, progress >= freeTrialSeconds - 0.5 {
             onTrialEnded?()
         }
     }
@@ -244,32 +302,13 @@ final class AudioPlaybackController: ObservableObject {
         timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             guard let self else { return }
             Task { @MainActor in
-                guard !self.usesSimulation else { return }
                 let seconds = time.seconds
                 guard seconds.isFinite else { return }
                 self.progress = seconds
+                self.syncNowPlaying()
 
                 if seconds >= self.effectiveMaxTime {
                     self.handlePlaybackEnded()
-                }
-            }
-        }
-    }
-
-    private func startSimulation() {
-        simulationTimer?.invalidate()
-        simulationTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            Task { @MainActor in
-                guard self.isPlaying else { return }
-                self.progress += 1
-                if self.progress >= self.effectiveMaxTime {
-                    self.isPlaying = false
-                    self.progress = self.effectiveMaxTime
-                    self.simulationTimer?.invalidate()
-                    if !self.hasFullAccess {
-                        self.onTrialEnded?()
-                    }
                 }
             }
         }
@@ -446,7 +485,7 @@ struct PurchaseOptionsView: View {
         let guides = appEnv.preferences.purchasedAttractionIds.count
         if pro || guides > 0 {
             var parts: [String] = []
-            if pro { parts.append("ChinaGo Pro") }
+            if pro { parts.append("YOLO HAPPY Pro") }
             if guides > 0 { parts.append("\(guides) individual guide(s)") }
             restoreMessage = "Restored \(parts.joined(separator: " and ")) from this device."
             onPurchaseComplete?()

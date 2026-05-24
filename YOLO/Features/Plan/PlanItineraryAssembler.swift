@@ -144,7 +144,7 @@ enum PlanItineraryAssembler {
             detailParts.append(duration)
         }
         if let summary = row.summary, !summary.isEmpty {
-            detailParts.append(summary)
+            detailParts.append(HTMLContentView.plainText(from: summary))
         } else if let price = row.ticketPriceText, !price.isEmpty {
             detailParts.append(price)
         }

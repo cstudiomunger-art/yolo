@@ -9,9 +9,7 @@ enum ContentBackend: Equatable {
 
 @Observable
 final class ContentModeService {
-    private enum Keys {
-        static let cachedSettings = "chinago.cachedAppSettings.v5"
-    }
+    private typealias Keys = UserDefaultsKeys
 
     private(set) var backend: ContentBackend = .bundled
     private(set) var useRemoteContent = false
@@ -112,7 +110,9 @@ final class ContentModeService {
 
     func clearCachedSettings() {
         for key in [
-            Keys.cachedSettings,
+            Keys.cachedAppSettings,
+            "yolohappy.cachedAppSettings.v5",
+            "chinago.cachedAppSettings.v5",
             "chinago.cachedAppSettings.v4",
             "chinago.cachedAppSettings.v2",
             "chinago.cachedAppSettings",
@@ -127,7 +127,7 @@ final class ContentModeService {
             apply(remote: cached)
             return
         }
-        if let data = UserDefaults.standard.data(forKey: Keys.cachedSettings),
+        if let data = UserDefaults.standard.data(forKey: Keys.cachedAppSettings),
            let cached = try? JSONCoding.makeDecoder().decode(AppSettingsRemote.self, from: data) {
             apply(remote: cached)
             saveSettingsToDisk(cached)
@@ -139,7 +139,7 @@ final class ContentModeService {
 
     private func cacheSettings(_ settings: AppSettingsRemote) {
         if let data = try? JSONCoding.makeEncoder().encode(settings) {
-            UserDefaults.standard.set(data, forKey: Keys.cachedSettings)
+            UserDefaults.standard.set(data, forKey: Keys.cachedAppSettings)
         }
         saveSettingsToDisk(settings)
     }

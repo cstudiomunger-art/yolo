@@ -34,6 +34,7 @@ enum AppTab: String, CaseIterable, Identifiable {
 
 struct MainTabView: View {
     @Environment(AppEnvironment.self) private var appEnv
+    @State private var sharedTripLink: SharedTripLink?
 
     private var selectedTab: Binding<AppTab> {
         Binding(
@@ -87,6 +88,17 @@ struct MainTabView: View {
             if appEnv.navigation.consumeLandOnPlan() {
                 appEnv.navigation.openPlanGenerator()
             }
+            presentPendingShareIfNeeded()
+        }
+        .onChange(of: appEnv.navigation.pendingShareSlug) { _, _ in
+            presentPendingShareIfNeeded()
+        }
+        .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+            if isAuthenticated { presentPendingShareIfNeeded() }
+        }
+        .sheet(item: $sharedTripLink) { link in
+            SharedItineraryView(slug: link.slug)
+                .environment(appEnv)
         }
         .fullScreenCover(item: Binding(
             get: { appEnv.navigation.presentedModal },
@@ -115,6 +127,17 @@ struct MainTabView: View {
         content
             .frame(width: width, height: height, alignment: .top)
     }
+
+    private func presentPendingShareIfNeeded() {
+        if let slug = appEnv.navigation.consumePendingShareSlug() {
+            sharedTripLink = SharedTripLink(slug: slug)
+        }
+    }
+}
+
+private struct SharedTripLink: Identifiable {
+    let slug: String
+    var id: String { slug }
 }
 
 struct ChinaGoTabBar: View {

@@ -4,11 +4,11 @@ struct ChinaGoLogo: View {
     var lightOnDark: Bool = false
 
     var body: some View {
-        HStack(spacing: 0) {
-            Text("China")
+        HStack(spacing: 4) {
+            Text("YOLO")
                 .font(Theme.FontToken.playfair(20, weight: .bold))
                 .foregroundStyle(lightOnDark ? .white : Theme.ColorToken.textPrimary)
-            Text("Go")
+            Text("HAPPY")
                 .font(Theme.FontToken.playfair(20, weight: .bold))
                 .foregroundStyle(Theme.ColorToken.accent)
         }

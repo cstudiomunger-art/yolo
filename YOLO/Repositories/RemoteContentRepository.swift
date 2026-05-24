@@ -251,6 +251,17 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
             .value
     }
 
+    func fetchChecklistSettings() async throws -> ChecklistSettings {
+        let rows: [ChecklistSettings] = try await client
+            .from("checklist_settings")
+            .select()
+            .eq("id", value: "global")
+            .limit(1)
+            .execute()
+            .value
+        return rows.first ?? .fallback
+    }
+
     func fetchAppBranding() async throws -> AppBranding {
         let rows: [AppSettingsRow] = try await client
             .from("app_settings")

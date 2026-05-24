@@ -194,10 +194,27 @@ function cityDisplayName(cityId: string): string {
   return cityId.charAt(0).toUpperCase() + cityId.slice(1).replace(/_/g, " ");
 }
 
+function stripHtmlToPlainText(content: string): string {
+  const trimmed = content.trim();
+  if (!/<[a-z][\s\S]*?>/i.test(trimmed)) return trimmed;
+  return trimmed
+    .replace(/<(br|hr)\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function activityDetail(row: AttractionRow): string {
   const parts: string[] = [];
   if (row.recommended_duration) parts.push(row.recommended_duration);
-  if (row.summary) parts.push(row.summary);
+  if (row.summary) parts.push(stripHtmlToPlainText(row.summary));
   else if (row.ticket_price) parts.push(row.ticket_price);
   return parts.join(" · ") || "Explore at your own pace";
 }

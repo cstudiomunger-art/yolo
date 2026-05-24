@@ -4,10 +4,22 @@
     "" : {
 
     },
+    "  +%lld more" : {
+
+    },
+    " · %lld days" : {
+
+    },
+    " and " : {
+
+    },
     "· %@" : {
 
     },
     "›" : {
+
+    },
+    "/ %lld done" : {
 
     },
     "%@  %@" : {
@@ -20,12 +32,32 @@
         }
       }
     },
+    "%@ — %lld days planned. Open YOLO HAPPY to review." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ — %2$lld days planned. Open YOLO HAPPY to review."
+          }
+        }
+      }
+    },
     "%@ · %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@ · %lld days" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$lld days"
           }
         }
       }
@@ -74,16 +106,6 @@
     "%@ →" : {
 
     },
-    "%@ preparation · %lld/%lld tasks done" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ preparation · %2$lld/%3$lld tasks done"
-          }
-        }
-      }
-    },
     "%@: %@" : {
       "localizations" : {
         "en" : {
@@ -111,6 +133,9 @@
 
     },
     "%lld attractions" : {
+
+    },
+    "%lld attractions " : {
 
     },
     "%lld attractions · in your plan" : {
@@ -175,12 +200,32 @@
         }
       }
     },
+    "%lld sec left in preview" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试听剩余 %lld 秒"
+          }
+        }
+      }
+    },
     "%lld-day stay permitted" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "允许停留 %lld 天"
+          }
+        }
+      }
+    },
+    "%lld/%lld prep complete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld prep complete"
           }
         }
       }
@@ -240,10 +285,19 @@
         }
       }
     },
+    "← Prepare" : {
+
+    },
     "→" : {
 
     },
     "+ Add to Day %lld" : {
+
+    },
+    "+%lld more days" : {
+
+    },
+    ">" : {
 
     },
     "~40 minutes of setup remaining" : {
@@ -258,16 +312,44 @@
       }
     },
     "⏸ Pause" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏸ 暂停"
+          }
+        }
+      }
     },
     "⏸ Pause preview" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⏸ 暂停试听"
+          }
+        }
+      }
     },
     "▶ Play" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "▶ 播放"
+          }
+        }
+      }
     },
     "▶ Preview (%lld min free)" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "▶ 免费试听 %lld 分钟"
+          }
+        }
+      }
     },
     "★ %@" : {
 
@@ -295,6 +377,9 @@
           }
         }
       }
+    },
+    "🇨🇳 %@" : {
+
     },
     "✅" : {
 
@@ -324,7 +409,14 @@
       }
     },
     "✓ Downloaded" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✓ 已下载"
+          }
+        }
+      }
     },
     "✦" : {
 
@@ -353,12 +445,19 @@
       }
     },
     "⬇ Download for offline" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "⬇ 离线下载"
+          }
+        }
+      }
+    },
+    "🎉 You're all set!" : {
 
     },
     "🎧" : {
-
-    },
-    "🎧 %@" : {
 
     },
     "🎧 Area Audio" : {
@@ -382,7 +481,14 @@
 
     },
     "🎧 Audio guide unlocked!" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎧 语音导览已解锁！"
+          }
+        }
+      }
     },
     "💡" : {
 
@@ -397,9 +503,6 @@
           }
         }
       }
-    },
-    "📋 Copy Text" : {
-
     },
     "📍" : {
 
@@ -432,9 +535,19 @@
 
     },
     "🔒 Full guide locked" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🔒 完整导览已锁定"
+          }
+        }
+      }
     },
     "🔔" : {
+
+    },
+    "🗺" : {
 
     },
     "🗺 Trip Planning" : {
@@ -471,6 +584,7 @@
       }
     },
     "🛍 Pack Before You Go" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -492,7 +606,6 @@
       }
     },
     "3 min free preview · Unlock full guide" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -533,6 +646,19 @@
         }
       }
     },
+    "About YOLO HAPPY" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关于 YOLO HAPPY"
+          }
+        }
+      }
+    },
+    "Account deletion is not available in this build." : {
+
+    },
     "ACTIVE" : {
 
     },
@@ -546,6 +672,9 @@
 
     },
     "Add day" : {
+
+    },
+    "Add your destination to see city-specific prep" : {
 
     },
     "Added to Day %lld" : {
@@ -590,9 +719,6 @@
     "Almost ready…" : {
 
     },
-    "Arrival date" : {
-
-    },
     "Ask anything about traveling in China..." : {
 
     },
@@ -630,6 +756,19 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "景点"
+          }
+        }
+      }
+    },
+    "Audio attraction tours" : {
+
+    },
+    "Audio not available yet." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音频暂不可用，请稍后再试。"
           }
         }
       }
@@ -682,7 +821,16 @@
         }
       }
     },
+    "Chapters" : {
+
+    },
     "Check the admin: city, 启用, and 接待外国客人 must match this trip." : {
+
+    },
+    "Check today's plan in YOLO HAPPY" : {
+
+    },
+    "Check your email for a password reset link." : {
 
     },
     "Checklist" : {
@@ -696,10 +844,7 @@
         }
       }
     },
-    "China" : {
-
-    },
-    "ChinaGo" : {
+    "China travel companion" : {
 
     },
     "ChinaGo Pro" : {
@@ -714,6 +859,7 @@
       }
     },
     "ChinaGo Pro (demo)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -722,6 +868,9 @@
           }
         }
       }
+    },
+    "Choose a new password for your account." : {
+
     },
     "Choose cities" : {
 
@@ -776,6 +925,12 @@
     "complete" : {
 
     },
+    "Confirm password" : {
+
+    },
+    "Connect to the internet to open shared trips." : {
+
+    },
     "Content coming soon for this area" : {
 
     },
@@ -824,16 +979,22 @@
         }
       }
     },
-    "Copied!" : {
+    "Cost estimate" : {
 
     },
-    "Cost estimate" : {
+    "Could not create share image. Please try again." : {
+
+    },
+    "Could not delete account. Please try again." : {
 
     },
     "Could not generate your itinerary." : {
 
     },
     "Could not load hotels" : {
+
+    },
+    "Creating image…" : {
 
     },
     "Creating trip" : {
@@ -850,6 +1011,7 @@
       }
     },
     "Cultural tips & audio attraction tours" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -917,6 +1079,12 @@
       }
     },
     "Delete" : {
+
+    },
+    "Delete account" : {
+
+    },
+    "Delete account?" : {
 
     },
     "Delete this trip?" : {
@@ -1019,6 +1187,9 @@
         }
       }
     },
+    "Email" : {
+
+    },
     "Emergency" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1036,7 +1207,6 @@
 
     },
     "End date" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1046,19 +1216,26 @@
         }
       }
     },
+    "Enter your account email. We will send a link to reset your password." : {
+
+    },
     "Estimated budget" : {
 
     },
-    "Excludes arrival and departure days" : {
-
+    "Excludes start and end days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不含开始日与结束日"
+          }
+        }
+      }
     },
     "Explore All Cities" : {
 
     },
     "Explore by Area" : {
-
-    },
-    "Food, transport, temples & more" : {
 
     },
     "Forbidden City tickets sell out 3 weeks in advance during your dates." : {
@@ -1071,6 +1248,12 @@
           }
         }
       }
+    },
+    "Forgot password" : {
+
+    },
+    "Forgot password?" : {
+
     },
     "Free" : {
       "localizations" : {
@@ -1110,9 +1293,6 @@
       }
     },
     "Get Started" : {
-
-    },
-    "Go" : {
 
     },
     "Going to multiple cities? Tap to select more." : {
@@ -1155,6 +1335,9 @@
         }
       }
     },
+    "HAPPY" : {
+
+    },
     "Has audio guide" : {
 
     },
@@ -1162,9 +1345,6 @@
 
     },
     "Helpful Phrases" : {
-
-    },
-    "Hide details" : {
 
     },
     "Home" : {
@@ -1189,8 +1369,21 @@
         }
       }
     },
-    "Included with %@ audio guide" : {
+    "I agree to the " : {
 
+    },
+    "In your trip" : {
+
+    },
+    "Included with %@ audio guide" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "包含在 %@ 语音导览中"
+          }
+        }
+      }
     },
     "Introduction" : {
       "localizations" : {
@@ -1227,10 +1420,30 @@
       }
     },
     "Loading audio…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在加载音频…"
+          }
+        }
+      }
+    },
+    "Loading trip…" : {
 
     },
     "Local Experiences to Try" : {
 
+    },
+    "Made with YOLO HAPPY app" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 YOLO HAPPY 制作"
+          }
+        }
+      }
     },
     "Manage →" : {
       "localizations" : {
@@ -1243,6 +1456,15 @@
       }
     },
     "Maps →" : {
+
+    },
+    "Mark as Done" : {
+
+    },
+    "Mark as Skipped" : {
+
+    },
+    "Marked as Done" : {
 
     },
     "Matching attractions…" : {
@@ -1278,13 +1500,20 @@
         }
       }
     },
+    "New password" : {
+
+    },
     "Next" : {
 
     },
     "No hotels found for this city." : {
 
     },
+    "No shared itinerary matches this link." : {
+
+    },
     "of %lld tasks complete" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1295,6 +1524,9 @@
       }
     },
     "OK" : {
+
+    },
+    "Open →" : {
 
     },
     "Open checklist" : {
@@ -1312,6 +1544,7 @@
       }
     },
     "Pack Before You Go" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1321,8 +1554,15 @@
         }
       }
     },
-    "Pick arrival and departure. Activity days exclude both travel days." : {
-
+    "Pick your trip start and end dates. Activity days exclude both travel days." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择行程开始与结束日期。活动天数不含首尾两天。"
+          }
+        }
+      }
     },
     "Plan" : {
       "localizations" : {
@@ -1334,10 +1574,10 @@
         }
       }
     },
-    "Plan a trip to see cities" : {
+    "Plan a Trip →" : {
 
     },
-    "Plan a trip to see your destination highlighted here →" : {
+    "Plan a trip to see cities" : {
 
     },
     "Plan My First Trip" : {
@@ -1409,6 +1649,12 @@
         }
       }
     },
+    "Prep checklist alerts before departure" : {
+
+    },
+    "Prep Complete" : {
+
+    },
     "Prep List →" : {
 
     },
@@ -1428,7 +1674,7 @@
     "Preview" : {
 
     },
-    "Preview mode — upload MP3 in CMS to enable streaming." : {
+    "Privacy Policy" : {
 
     },
     "Profile" : {
@@ -1470,6 +1716,9 @@
 
     },
     "Read more ▼" : {
+
+    },
+    "Read-only · shared with YOLO HAPPY" : {
 
     },
     "Reading List" : {
@@ -1526,7 +1775,14 @@
       }
     },
     "Remove" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移除"
+          }
+        }
+      }
     },
     "Remove activity" : {
 
@@ -1535,6 +1791,9 @@
 
     },
     "Reorder" : {
+
+    },
+    "Restore" : {
 
     },
     "Restore Purchases" : {
@@ -1546,6 +1805,9 @@
           }
         }
       }
+    },
+    "Restore this item?" : {
+
     },
     "Retry" : {
 
@@ -1562,6 +1824,9 @@
           }
         }
       }
+    },
+    "Save or send your trip as an image." : {
+
     },
     "Save trip" : {
 
@@ -1640,6 +1905,9 @@
         }
       }
     },
+    "Send reset link" : {
+
+    },
     "Set your nationality in Profile" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1661,6 +1929,9 @@
         }
       }
     },
+    "Share Image" : {
+
+    },
     "Share Itinerary" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1671,14 +1942,30 @@
         }
       }
     },
+    "Shared trip" : {
+
+    },
     "Sign in to plan your China trip" : {
 
     },
     "Skip" : {
 
     },
+    "Skipped" : {
+
+    },
     "Something went wrong" : {
 
+    },
+    "Start date" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开始日期"
+          }
+        }
+      }
     },
     "Start Free Trial →" : {
       "extractionState" : "stale",
@@ -1690,6 +1977,9 @@
           }
         }
       }
+    },
+    "Start your prep checklist before you go" : {
+
     },
     "Static · AI" : {
 
@@ -1729,6 +2019,12 @@
         }
       }
     },
+    "Terms" : {
+
+    },
+    "Terms of Service" : {
+
+    },
     "These are experience ideas — no specific venues. Ask Assistant for details." : {
 
     },
@@ -1736,6 +2032,12 @@
 
     },
     "This cannot be undone." : {
+
+    },
+    "This link may have expired or sharing was turned off." : {
+
+    },
+    "This permanently removes your account and cloud trips. This cannot be undone." : {
 
     },
     "Tips for Western Visitors" : {
@@ -1787,10 +2089,22 @@
     "Traveler" : {
 
     },
+    "Trip not found" : {
+
+    },
     "Trip overview" : {
 
     },
+    "Trip reminders" : {
+
+    },
+    "Trip saved" : {
+
+    },
     "Try again" : {
+
+    },
+    "Try Again" : {
 
     },
     "Turn on Live content in app settings (远程内容) to load hotels from the CMS." : {
@@ -1806,7 +2120,14 @@
 
     },
     "Unlock Audio Guide" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解锁语音导览"
+          }
+        }
+      }
     },
     "Unlock Full Audio Guide" : {
       "extractionState" : "stale",
@@ -1818,6 +2139,9 @@
           }
         }
       }
+    },
+    "Update password" : {
+
     },
     "v1.0.0" : {
       "extractionState" : "stale",
@@ -1845,6 +2169,7 @@
       }
     },
     "View all →" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1908,6 +2233,7 @@
       }
     },
     "What's next?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1928,10 +2254,53 @@
         }
       }
     },
-    "Why this matters" : {
+    "YOLO" : {
 
     },
+    "YOLO HAPPY" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YOLO HAPPY"
+          }
+        }
+      }
+    },
+    "YOLO HAPPY Feedback" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YOLO HAPPY 反馈"
+          }
+        }
+      }
+    },
+    "YOLO HAPPY Pro" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YOLO HAPPY Pro"
+          }
+        }
+      }
+    },
+    "YOLO HAPPY Pro (demo)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "YOLO HAPPY Pro（演示）"
+          }
+        }
+      }
+    },
     "You're ready for China." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1950,6 +2319,9 @@
     "Your itinerary" : {
 
     },
+    "Your Trip" : {
+
+    },
     "Your Trip ★" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1962,6 +2334,12 @@
       }
     },
     "Your Trip Destinations" : {
+
+    },
+    "Your trip starts in %lld days. Enjoy China!" : {
+
+    },
+    "Your trip starts tomorrow" : {
 
     },
     "密码" : {

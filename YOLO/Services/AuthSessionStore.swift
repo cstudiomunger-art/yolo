@@ -7,6 +7,7 @@ import Supabase
 @MainActor
 final class AuthSessionStore {
     private(set) var session: Session?
+    private(set) var passwordRecoveryPending = false
 
     var userEmail: String? { session?.user.email }
     var userId: UUID? { session?.user.id }
@@ -21,11 +22,22 @@ final class AuthSessionStore {
                 switch event {
                 case .initialSession, .signedIn, .signedOut, .tokenRefreshed, .userUpdated:
                     self.session = session
+                case .passwordRecovery:
+                    self.session = session
+                    self.passwordRecoveryPending = true
                 default:
                     break
                 }
             }
         }
+    }
+
+    func markPasswordRecoveryPending() {
+        passwordRecoveryPending = true
+    }
+
+    func clearPasswordRecoveryPending() {
+        passwordRecoveryPending = false
     }
 
     deinit {

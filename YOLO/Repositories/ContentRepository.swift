@@ -8,6 +8,7 @@ protocol ContentRepositoryProtocol: Sendable {
     func fetchAudioGuides(attractionId: String) async throws -> [AudioGuide]
     func fetchAudioGuide(id: String) async throws -> AudioGuide?
     func fetchChecklistItems(cityIds: [String], countryCode: String) async throws -> [ChecklistItem]
+    func fetchChecklistSettings() async throws -> ChecklistSettings
     func fetchSubAreas(attractionId: String) async throws -> [SubArea]
     func fetchShoppingItems(cityIds: [String]) async throws -> [ShoppingItem]
     func fetchReadingItems(cityIds: [String]) async throws -> [ReadingItem]
@@ -92,6 +93,10 @@ struct BundledContentRepository: ContentRepositoryProtocol {
         checklist
             .filter { $0.matchesFilter(cityIds: cityIds, countryCode: countryCode) }
             .sorted { $0.sortOrder < $1.sortOrder }
+    }
+
+    func fetchChecklistSettings() async throws -> ChecklistSettings {
+        .fallback
     }
 
     func fetchSubAreas(attractionId: String) async throws -> [SubArea] { [] }

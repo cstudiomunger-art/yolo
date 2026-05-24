@@ -10,6 +10,10 @@ struct ProfileSheetView: View {
     @State private var showAbout = false
     @State private var cacheSizeLabel = CacheService.formattedCacheSizeSync()
     @State private var cacheClearedMessage: String?
+    @State private var showDeleteAccountConfirm = false
+    @State private var isDeletingAccount = false
+    @State private var deleteAccountError: String?
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -62,6 +66,17 @@ struct ProfileSheetView: View {
             }
             .task {
                 await refreshCacheSizeLabel()
+            }
+            .alert(
+                String(localized: "Delete account?"),
+                isPresented: $showDeleteAccountConfirm
+            ) {
+                Button(String(localized: "Cancel"), role: .cancel) {}
+                Button(String(localized: "Delete"), role: .destructive) {
+                    Task { await deleteAccount() }
+                }
+            } message: {
+                Text(String(localized: "This permanently removes your account and cloud trips. This cannot be undone."))
             }
             .alert(
                 "Cache Cleared",
@@ -118,6 +133,13 @@ struct ProfileSheetView: View {
                 }
                 .font(Theme.FontToken.inter(11, weight: .medium))
                 .foregroundStyle(.red)
+
+                Button(String(localized: "Delete account")) {
+                    showDeleteAccountConfirm = true
+                }
+                .font(Theme.FontToken.inter(11, weight: .medium))
+                .foregroundStyle(.red)
+                .disabled(isDeletingAccount)
             } else if !AppConfig.useMock {
                 Button("登录 / 注册 →") {
                     showLogin = true
@@ -150,7 +172,9 @@ struct ProfileSheetView: View {
                         .font(Theme.FontToken.inter(9, weight: .medium))
                         .foregroundStyle(Theme.ColorToken.accent)
                 }
-                Text(appEnv.preferences.simulateProPurchase ? "ChinaGo Pro (demo)" : "Free")
+                Text(appEnv.preferences.simulateProPurchase
+                    ? String(localized: "YOLO HAPPY Pro (demo)")
+                    : String(localized: "Free"))
                     .font(Theme.FontToken.inter(14, weight: .medium))
                 Text("Content: \(appEnv.contentMode.contentModeLabel)")
                     .font(Theme.FontToken.inter(11))
@@ -179,6 +203,20 @@ struct ProfileSheetView: View {
 
     private var settingsSection: some View {
         VStack(spacing: 0) {
+            Toggle(isOn: tripRemindersBinding) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Trip reminders")
+                        .font(Theme.FontToken.inter(13))
+                    Text("Prep checklist alerts before departure")
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                }
+            }
+            .padding(.vertical, 12)
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
+            }
+
             Button {
                 showLanguagePicker = true
             } label: {
@@ -220,6 +258,18 @@ struct ProfileSheetView: View {
                 cacheClearedMessage = "Downloaded audio files have been removed."
             }
 
+            NavigationLink {
+                LegalDocumentView(kind: .privacy)
+            } label: {
+                settingsRow(String(localized: "Privacy Policy"), value: nil)
+            }
+
+            NavigationLink {
+                LegalDocumentView(kind: .terms)
+            } label: {
+                settingsRow(String(localized: "Terms of Service"), value: nil)
+            }
+
             Button {
                 openFeedbackEmail()
             } label: {
@@ -230,7 +280,7 @@ struct ProfileSheetView: View {
             Button {
                 showAbout = true
             } label: {
-                settingsRow("About ChinaGo", value: "v\(appEnv.contentMode.branding.aboutVersion)")
+                settingsRow(String(localized: "About YOLO HAPPY"), value: "v\(appEnv.contentMode.branding.aboutVersion)")
             }
             .buttonStyle(.plain)
 
@@ -257,6 +307,25 @@ struct ProfileSheetView: View {
                     .foregroundStyle(.red)
                     .padding(.horizontal, Theme.screenPadding)
             }
+
+            if let deleteAccountError {
+                Text(deleteAccountError)
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, Theme.screenPadding)
+            }
+        }
+    }
+
+    private func deleteAccount() async {
+        isDeletingAccount = true
+        deleteAccountError = nil
+        defer { isDeletingAccount = false }
+        do {
+            try await appEnv.deleteAccount()
+            dismiss()
+        } catch {
+            deleteAccountError = error.localizedDescription
         }
     }
 
@@ -312,9 +381,24 @@ struct ProfileSheetView: View {
         }
     }
 
+    private var tripRemindersBinding: Binding<Bool> {
+        Binding(
+            get: { PrepReminderService.tripRemindersEnabled },
+            set: { enabled in
+                PrepReminderService.tripRemindersEnabled = enabled
+                if !enabled {
+                    PrepReminderService.cancelReminder()
+                    Task { await TripReminderService.cancelAll() }
+                } else {
+                    Task { await appEnv.rescheduleTripReminders() }
+                }
+            }
+        )
+    }
+
     private func openFeedbackEmail() {
         let branding = appEnv.contentMode.branding
-        let subject = "ChinaGo Feedback"
+        let subject = "YOLO HAPPY Feedback"
         let body = "App version \(branding.aboutVersion)\n\n"
         var components = URLComponents()
         components.scheme = "mailto"

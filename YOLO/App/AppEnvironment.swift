@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import Supabase
 
 @Observable
 @MainActor
@@ -30,9 +31,9 @@ final class AppEnvironment {
             guard let self else { return }
             Task { await self.profileSync.schedulePush() }
         }
-        preferences.onChecklistToggled = { [weak self] itemId, isDone in
+        preferences.onChecklistStatusChanged = { [weak self] itemId, type, status in
             guard let self else { return }
-            Task { await self.profileSync.syncChecklistToggle(itemId: itemId, isDone: isDone) }
+            Task { await self.profileSync.syncChecklistStatus(itemId: itemId, type: type, status: status) }
         }
         preferences.onItineraryDeleted = { [weak self] tripId in
             guard let self else { return }
@@ -40,7 +41,40 @@ final class AppEnvironment {
         }
         preferences.onItinerarySaved = { [weak self] in
             guard let self else { return }
-            Task { await self.profileSync.pushItinerariesNow() }
+            Task {
+                await self.profileSync.pushItinerariesNow()
+                await self.rescheduleTripReminders()
+            }
+        }
+    }
+
+    func deleteAccount() async throws {
+        try await AccountDeletionService.deleteCurrentAccount()
+        TelemetryService.shared.logEvent("account_deleted")
+        await signOutAndReset()
+    }
+
+    func rescheduleTripReminders() async {
+        let active = preferences.activeItinerary
+        await TripReminderService.reschedule(
+            itinerary: active,
+            departureDate: preferences.departureDate,
+            remindersEnabled: PrepReminderService.tripRemindersEnabled
+        )
+    }
+
+    func handleIncomingURL(_ url: URL) async {
+        guard let action = DeepLinkHandler.action(for: url) else { return }
+        switch action {
+        case .openSharedItinerary(let slug):
+            navigation.openSharedItinerary(slug: slug)
+        case .passwordRecovery:
+            do {
+                _ = try await SupabaseManager.shared.auth.session(from: url)
+                auth.markPasswordRecoveryPending()
+            } catch {
+                TelemetryService.shared.recordError(error, context: "password_recovery_link")
+            }
         }
     }
 
@@ -78,7 +112,6 @@ final class AppEnvironment {
             contentRevision += 1
         }
         await refreshVisaRule()
-        await seedDefaultItineraryIfNeeded()
     }
 
     func invalidateOfflineCaches() async {
@@ -95,13 +128,5 @@ final class AppEnvironment {
         preferences.cachedVisaRule = try? await content.fetchVisaRule(
             countryCode: preferences.countryCode
         )
-    }
-
-    private func seedDefaultItineraryIfNeeded() async {
-        guard auth.isAuthenticated || AppConfig.useMock else { return }
-        guard preferences.savedItineraries.isEmpty else { return }
-        if let sample = try? await content.fetchSampleItinerary() {
-            preferences.saveItinerary(sample)
-        }
     }
 }

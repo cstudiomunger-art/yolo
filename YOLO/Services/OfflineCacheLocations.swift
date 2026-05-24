@@ -2,7 +2,7 @@ import Foundation
 
 /// Central paths for offline data that must survive app relaunch (not `Caches/`).
 enum OfflineCacheLocations {
-    private static let migrationFlagKey = "chinago.offlineCacheMigratedToAppSupport.v1"
+    private static let migrationFlagKey = UserDefaultsKeys.offlineCacheMigrated
 
     static var applicationSupport: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!

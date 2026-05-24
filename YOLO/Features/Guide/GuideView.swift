@@ -13,9 +13,6 @@ struct GuideView: View {
                 cities: cities,
                 onSelectCity: { city in
                     path.append(GuideRoute.city(city.id))
-                },
-                onCultureTips: {
-                    path.append(GuideRoute.cultureTips)
                 }
             )
             .navigationBarHidden(true)

@@ -52,6 +52,7 @@
         App.currentTable = null;
         App.cityHubCityId = null;
         App.attractionEditId = null;
+        App.usersHubUserId = null;
         App.loadCurrentSection();
       });
     });
@@ -63,6 +64,7 @@
         App.currentTable = btn.dataset.table;
         App.cityHubCityId = null;
         App.attractionEditId = null;
+        App.usersHubUserId = null;
         App.loadCurrentSection();
       });
     });
@@ -82,6 +84,11 @@
 
     if (App.currentView === "city_hub") {
       await App.renderCityHubList();
+      return;
+    }
+
+    if (App.currentView === "users_hub") {
+      await App.renderUsersHub();
       return;
     }
 

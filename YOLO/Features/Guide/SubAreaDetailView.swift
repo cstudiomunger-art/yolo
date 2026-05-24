@@ -11,13 +11,6 @@ struct SubAreaDetailView: View {
     @State private var audioGuide: AudioGuide?
     @State private var isLoading = true
     @State private var fullScreenImagePath: String?
-    @State private var showPurchase = false
-
-    private var hasFullAccess: Bool {
-        guard let attraction else { return false }
-        return appEnv.preferences.hasAccessToAttraction(attraction.id, iapProductId: attraction.iapProductId)
-            || !appEnv.contentMode.useRemoteIAP
-    }
 
     var body: some View {
         Group {
@@ -56,11 +49,6 @@ struct SubAreaDetailView: View {
                 GuideFullScreenImage(path: path)
             }
         }
-        .sheet(isPresented: $showPurchase) {
-            if let attraction {
-                PurchaseOptionsView(attraction: attraction, guide: audioGuide) {}
-            }
-        }
     }
 
     @ViewBuilder
@@ -87,59 +75,33 @@ struct SubAreaDetailView: View {
                 if let guide = audioGuide, let attraction {
                     Text("🎧 Area Audio")
                         .sectionTitleStyle()
-                    if hasFullAccess {
-                        AudioGuideSection(
-                            attraction: attraction,
-                            guide: guide,
-                            includedWithLabel: "Included with \(route.attractionName) audio guide",
-                            allowsPreview: false
-                        )
-                    } else {
-                        lockedAudioBlock(attraction: attraction, guide: guide)
-                    }
+                    AudioGuideSection(
+                        attraction: attraction,
+                        guide: guide,
+                        includedWithLabel: String(
+                            format: String(localized: "Included with %@ audio guide"),
+                            route.attractionName
+                        ),
+                        allowsPreview: true
+                    )
                 }
 
                 if let body = area.body?.trimmingCharacters(in: .whitespacesAndNewlines), !body.isEmpty {
                     HTMLContentView(content: body)
+                        .guideContentCardStyle()
                 } else if !area.contentBlocks.isEmpty {
-                    ForEach(area.contentBlocks, id: \.self) { block in
-                        SubAreaContentBlockView(block: block) { path in
-                            fullScreenImagePath = path
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(area.contentBlocks, id: \.self) { block in
+                            SubAreaContentBlockView(block: block) { path in
+                                fullScreenImagePath = path
+                            }
                         }
                     }
+                    .guideContentCardStyle()
                 }
             }
             .padding(Theme.screenPadding)
         }
-    }
-
-    private func lockedAudioBlock(attraction: Attraction, guide: AudioGuide) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("🎧 \(guide.titleEn)")
-                .font(Theme.FontToken.inter(14, weight: .medium))
-            Text("Included with \(route.attractionName) audio guide")
-                .font(Theme.FontToken.inter(10))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-            HStack {
-                Text("🔒 Full guide locked")
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-                Spacer()
-                Text("🔒")
-            }
-            Button("Unlock Audio Guide") {
-                showPurchase = true
-            }
-            .font(Theme.FontToken.inter(12, weight: .medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(Theme.ColorToken.accent)
-            .buttonStyle(.plain)
-        }
-        .padding(14)
-        .background(Theme.ColorToken.backgroundSubtle)
-        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
     }
 
     private func load() async {

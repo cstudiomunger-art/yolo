@@ -399,27 +399,10 @@ struct ChecklistItem: Identifiable, Codable, Hashable {
         return .universal
     }
 
-    func matchesFilter(cityIds: [String], countryCode: String) -> Bool {
-        if !targetNationalities.isEmpty, !countryCode.isEmpty,
-           !targetNationalities.contains(countryCode) {
-            return false
-        }
-        switch type {
-        case .entry, .universal:
-            return true
-        case .city:
-            if !targetCities.isEmpty {
-                return !Set(targetCities).isDisjoint(with: cityIds)
-            }
-            if let cityId { return cityIds.contains(cityId) }
-            return true
-        }
-    }
-
     var sectionTitle: String {
         switch type {
         case .entry: "Entry Requirements"
-        case .universal: "Essentials for Any Trip"
+        case .universal: "Essential Prep"
         case .city: groupTitle
         }
     }
@@ -544,7 +527,7 @@ struct PaywallCopy: Codable, Equatable, Hashable {
     static let fallback = PaywallCopy(
         titleTemplate: "Unlock {attraction_name} Audio Guide",
         previewLineTemplate: "{duration} min · Literary narrative",
-        proTitle: "ChinaGo Pro",
+        proTitle: "YOLO HAPPY Pro",
         proSubtitle: "Unlock ALL audio guides",
         proPriceHint: "Billed annually · Cancel anytime",
         proCta: "Start Pro",
@@ -784,6 +767,44 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
     let routeSummary: String
     let estimatedBudget: String
     let days: [ItineraryDay]
+    var shareSlug: String?
+    var isShared: Bool
+
+    init(
+        id: String,
+        title: String,
+        meta: String,
+        routeSummary: String,
+        estimatedBudget: String,
+        days: [ItineraryDay],
+        shareSlug: String? = nil,
+        isShared: Bool = false
+    ) {
+        self.id = id
+        self.title = title
+        self.meta = meta
+        self.routeSummary = routeSummary
+        self.estimatedBudget = estimatedBudget
+        self.days = days
+        self.shareSlug = shareSlug
+        self.isShared = isShared
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        meta = try c.decode(String.self, forKey: .meta)
+        routeSummary = try c.decode(String.self, forKey: .routeSummary)
+        estimatedBudget = try c.decode(String.self, forKey: .estimatedBudget)
+        days = try c.decode([ItineraryDay].self, forKey: .days)
+        shareSlug = try c.decodeIfPresent(String.self, forKey: .shareSlug)
+        isShared = try c.decodeIfPresent(Bool.self, forKey: .isShared) ?? false
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, title, meta, routeSummary, estimatedBudget, days, shareSlug, isShared
+    }
 }
 
 enum ItineraryDayKind: String, Codable, Hashable {
@@ -1004,11 +1025,11 @@ struct ContentItineraryRow: Codable {
 
 struct AppBranding: Codable, Equatable {
     static let fallback = AppBranding(
-        supportEmail: "support@chinago.app",
-        aboutTitle: "ChinaGo",
+        supportEmail: "support@yolohappy.app",
+        aboutTitle: "YOLO HAPPY",
         aboutVersion: "1.0.0",
         aboutBody: "Your companion for planning and experiencing travel in China.",
-        iapProTitle: "ChinaGo Pro",
+        iapProTitle: "YOLO HAPPY Pro",
         iapProPrice: "$19.99/year",
         iapProTrialText: "3-day free trial",
         iapProFeatures: "All attraction guides\nUnlimited AI planning\nOffline download",
@@ -1026,7 +1047,10 @@ struct AppBranding: Codable, Equatable {
             FlightPlatform(id: "google_flights", label: "Google Flights", urlTemplate: "https://www.google.com/travel/flights"),
             FlightPlatform(id: "trip", label: "Trip.com", urlTemplate: "https://www.trip.com/flights/"),
             FlightPlatform(id: "kayak", label: "Kayak", urlTemplate: "https://www.kayak.com/flights/"),
-        ]
+        ],
+        privacyPolicyBody: "",
+        termsOfServiceBody: "",
+        shareWebBaseURL: "https://yolo.cstudiomunger.workers.dev"
     )
 
     let supportEmail: String
@@ -1047,6 +1071,9 @@ struct AppBranding: Codable, Equatable {
     let freeAudioPreviewSeconds: Int
     let paywall: PaywallCopy
     let flightPlatforms: [FlightPlatform]
+    let privacyPolicyBody: String
+    let termsOfServiceBody: String
+    let shareWebBaseURL: String
 
     init(
         supportEmail: String,
@@ -1066,7 +1093,10 @@ struct AppBranding: Codable, Equatable {
         planAlertLinkLabel: String,
         freeAudioPreviewSeconds: Int,
         paywall: PaywallCopy = .fallback,
-        flightPlatforms: [FlightPlatform] = AppBranding.fallback.flightPlatforms
+        flightPlatforms: [FlightPlatform] = AppBranding.fallback.flightPlatforms,
+        privacyPolicyBody: String = "",
+        termsOfServiceBody: String = "",
+        shareWebBaseURL: String = "https://yolo.cstudiomunger.workers.dev"
     ) {
         self.supportEmail = supportEmail
         self.aboutTitle = aboutTitle
@@ -1086,6 +1116,9 @@ struct AppBranding: Codable, Equatable {
         self.freeAudioPreviewSeconds = freeAudioPreviewSeconds
         self.paywall = paywall
         self.flightPlatforms = flightPlatforms
+        self.privacyPolicyBody = privacyPolicyBody
+        self.termsOfServiceBody = termsOfServiceBody
+        self.shareWebBaseURL = shareWebBaseURL
     }
 
     init(from decoder: Decoder) throws {
@@ -1108,6 +1141,9 @@ struct AppBranding: Codable, Equatable {
         freeAudioPreviewSeconds = try c.decodeIfPresent(Int.self, forKey: .freeAudioPreviewSeconds) ?? 180
         paywall = (try? c.decode(PaywallCopy.self, forKey: .paywall)) ?? .fallback
         flightPlatforms = (try? c.decode([FlightPlatform].self, forKey: .flightPlatforms)) ?? Self.fallback.flightPlatforms
+        privacyPolicyBody = try c.decodeIfPresent(String.self, forKey: .privacyPolicyBody) ?? ""
+        termsOfServiceBody = try c.decodeIfPresent(String.self, forKey: .termsOfServiceBody) ?? ""
+        shareWebBaseURL = try c.decodeIfPresent(String.self, forKey: .shareWebBaseURL) ?? Self.fallback.shareWebBaseURL
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -1116,6 +1152,7 @@ struct AppBranding: Codable, Equatable {
         case assistantGreetingGeneral, assistantGreetingPlanning
         case planAlertMessage, planAlertLinkAttractionId, planAlertLinkCityId, planAlertLinkLabel
         case freeAudioPreviewSeconds, paywall, flightPlatforms
+        case privacyPolicyBody, termsOfServiceBody, shareWebBaseURL
     }
 
     var iapProFeatureLines: [String] {
@@ -1227,6 +1264,9 @@ struct AppSettingsRow: Decodable {
     let paywallRestore: String?
     let paywallFootnote: String?
     let flightPlatforms: [FlightPlatform]?
+    let privacyPolicyBody: String?
+    let termsOfServiceBody: String?
+    let shareWebBaseURL: String?
 
     // Keys are camelCase; JSONDecoder.convertFromSnakeCase maps use_remote_ai → useRemoteAI.
     enum CodingKeys: String, CodingKey {
@@ -1271,6 +1311,9 @@ struct AppSettingsRow: Decodable {
         case paywallRestore
         case paywallFootnote
         case flightPlatforms
+        case privacyPolicyBody
+        case termsOfServiceBody
+        case shareWebBaseURL
     }
 
     init(from decoder: Decoder) throws {
@@ -1316,6 +1359,9 @@ struct AppSettingsRow: Decodable {
         paywallRestore = try container.decodeIfPresent(String.self, forKey: .paywallRestore)
         paywallFootnote = try container.decodeIfPresent(String.self, forKey: .paywallFootnote)
         flightPlatforms = try container.decodeIfPresent([FlightPlatform].self, forKey: .flightPlatforms)
+        privacyPolicyBody = try container.decodeIfPresent(String.self, forKey: .privacyPolicyBody)
+        termsOfServiceBody = try container.decodeIfPresent(String.self, forKey: .termsOfServiceBody)
+        shareWebBaseURL = try container.decodeIfPresent(String.self, forKey: .shareWebBaseURL)
     }
 
     private static func decodeBool(
@@ -1382,7 +1428,10 @@ struct AppSettingsRow: Decodable {
             planAlertLinkLabel: planAlertLinkLabel ?? defaults.planAlertLinkLabel,
             freeAudioPreviewSeconds: freeAudioPreviewSeconds ?? defaults.freeAudioPreviewSeconds,
             paywall: paywall,
-            flightPlatforms: flightPlatforms ?? defaults.flightPlatforms
+            flightPlatforms: flightPlatforms ?? defaults.flightPlatforms,
+            privacyPolicyBody: privacyPolicyBody ?? defaults.privacyPolicyBody,
+            termsOfServiceBody: termsOfServiceBody ?? defaults.termsOfServiceBody,
+            shareWebBaseURL: shareWebBaseURL ?? defaults.shareWebBaseURL
         )
         let aiDefaults = AISettings.fallback
         let ai = AISettings(

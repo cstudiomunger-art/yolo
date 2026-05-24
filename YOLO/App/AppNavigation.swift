@@ -37,6 +37,9 @@ final class AppNavigation {
     /// After full onboarding, open Plan tab once.
     var landOnPlanAfterOnboarding = false
 
+    /// Universal link / custom URL share slug pending presentation.
+    var pendingShareSlug: String?
+
     /// Set when opening attraction from Plan itinerary editor preview.
     var guideAddToItineraryHandler: ((Attraction) -> Void)?
 
@@ -61,6 +64,17 @@ final class AppNavigation {
     func openPlanGenerator() {
         planShowGenerator = true
         selectedTab = .plan
+    }
+
+    func openSharedItinerary(slug: String) {
+        pendingShareSlug = slug
+        selectedTab = .plan
+    }
+
+    func consumePendingShareSlug() -> String? {
+        let slug = pendingShareSlug
+        pendingShareSlug = nil
+        return slug
     }
 
     func presentPrepare() {
@@ -111,5 +125,6 @@ final class AppNavigation {
         planPathCount = 0
         presentedModal = nil
         landOnPlanAfterOnboarding = false
+        pendingShareSlug = nil
     }
 }

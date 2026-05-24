@@ -123,7 +123,7 @@ struct PlanCreateFlowView: View {
         .task { await loadCities() }
         .sheet(isPresented: $showArrivalPicker) {
             planDateSheet(
-                title: String(localized: "Arrival date"),
+                title: String(localized: "Start date"),
                 selection: $arrivalDate,
                 range: Date()...
             ) {
@@ -133,7 +133,7 @@ struct PlanCreateFlowView: View {
         }
         .sheet(isPresented: $showDeparturePicker) {
             planDateSheet(
-                title: String(localized: "Departure date"),
+                title: String(localized: "End date"),
                 selection: $departureDate,
                 range: PlanTripDateMath.departureRange(forArrival: arrivalDate)
             ) {
@@ -249,20 +249,20 @@ struct PlanCreateFlowView: View {
     private var datesStep: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Pick arrival and departure. Activity days exclude both travel days.")
+                Text("Pick your trip start and end dates. Activity days exclude both travel days.")
                     .font(Theme.FontToken.inter(12))
                     .foregroundStyle(Theme.ColorToken.textMuted)
 
-                dateRow(label: String(localized: "Arrival date"), date: arrivalDate) {
+                dateRow(label: String(localized: "Start date"), date: arrivalDate) {
                     showArrivalPicker = true
                 }
-                dateRow(label: String(localized: "Departure date"), date: departureDate) {
+                dateRow(label: String(localized: "End date"), date: departureDate) {
                     showDeparturePicker = true
                 }
 
                 Text(String(format: String(localized: "%lld activity days"), activityDays))
                     .font(Theme.FontToken.inter(12, weight: .medium))
-                Text(String(localized: "Excludes arrival and departure days"))
+                Text(String(localized: "Excludes start and end days"))
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
 
@@ -443,7 +443,7 @@ struct PlanCreateFlowView: View {
                         Text(activity.name)
                             .font(Theme.FontToken.inter(13, weight: .medium))
                             .foregroundStyle(Theme.ColorToken.textPrimary)
-                        Text(activity.detail)
+                        Text(HTMLContentView.plainText(from: activity.detail))
                             .font(Theme.FontToken.inter(11))
                             .foregroundStyle(Theme.ColorToken.textMuted)
                             .lineLimit(3)
@@ -475,7 +475,7 @@ struct PlanCreateFlowView: View {
     private func loadCities() async {
         cities = (try? await appEnv.content.fetchCities()) ?? []
         selectedCityIds = Set(appEnv.preferences.selectedCityIds)
-        arrivalDate = appEnv.preferences.departureDate
+        departureDate = appEnv.preferences.departureDate
         departureDate = PlanTripDateMath.clampDeparture(departureDate, arrival: arrivalDate)
     }
 
@@ -628,7 +628,7 @@ struct PlanCreateFlowView: View {
     private func saveDraft() {
         guard let trip = draftItinerary else { return }
         appEnv.preferences.selectedCityIds = Array(selectedCityIds)
-        appEnv.preferences.departureDate = arrivalDate
+        appEnv.preferences.departureDate = departureDate
         appEnv.preferences.saveItinerary(trip)
         onSaved(trip)
         dismiss()

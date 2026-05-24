@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ChinaGo 内容管理</title>
+    <title>YOLO HAPPY 内容管理</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" />
     <link rel="stylesheet" href="css/admin.css" />
   </head>
   <body>
   <div id="login-screen" class="login-wrap">
     <div class="login-card">
-      <h1>ChinaGo <span style="color: var(--accent)">CMS</span></h1>
+      <h1>YOLO HAPPY <span style="color: var(--accent)">CMS</span></h1>
       <p>使用 Supabase 管理员账号登录</p>
       <div id="login-error" class="status-bar error hidden"></div>
       <form id="login-form">
@@ -30,6 +30,9 @@
       <div class="sidebar-brand">China<span>Go</span> CMS</div>
       <p class="nav-section-label">工作台</p>
       <button type="button" class="nav-btn active" data-view="city_hub">城市工作台</button>
+      <p class="nav-section-label">用户</p>
+      <button type="button" class="nav-btn" data-view="users_hub">用户与购买</button>
+
       <p class="nav-section-label">全局配置</p>
       <button type="button" class="nav-btn" data-table="app_settings">应用配置</button>
       <button type="button" class="nav-btn" data-table="emergency_config">紧急联系</button>
@@ -76,14 +79,15 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-  <script src="js/config.js?v=21"></script>
-  <script src="js/core.js?v=21"></script>
-  <script src="js/ref-cache.js?v=21"></script>
-  <script src="js/schema.js?v=21"></script>
-  <script src="js/rich-text.js?v=21"></script>
-  <script src="js/field-types.js?v=21"></script>
-  <script src="js/crud.js?v=21"></script>
-  <script src="js/city-hub.js?v=21"></script>
-  <script src="js/admin.js?v=21"></script>
+  <script src="js/config.js?v=23"></script>
+  <script src="js/core.js?v=23"></script>
+  <script src="js/ref-cache.js?v=23"></script>
+  <script src="js/schema.js?v=23"></script>
+  <script src="js/rich-text.js?v=23"></script>
+  <script src="js/field-types.js?v=23"></script>
+  <script src="js/crud.js?v=23"></script>
+  <script src="js/city-hub.js?v=23"></script>
+  <script src="js/users-hub.js?v=23"></script>
+  <script src="js/admin.js?v=23"></script>
   </body>
 </html>

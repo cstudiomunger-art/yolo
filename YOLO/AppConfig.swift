@@ -54,6 +54,11 @@ enum AppConfig {
         plistBool(forKey: "FORCE_BUNDLED") == true
     }
 
+    /// Password reset redirect (must match Supabase Auth redirect allow list).
+    static var authRedirectURL: URL {
+        URL(string: "yoloapp://auth/reset-password")!
+    }
+
     private static func plistBool(forKey key: String) -> Bool? {
         guard let value = Bundle.main.object(forInfoDictionaryKey: key) else { return nil }
         if let bool = value as? Bool { return bool }

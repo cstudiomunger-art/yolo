@@ -5,7 +5,7 @@ struct PlanView: View {
 
     @State private var path = NavigationPath()
     @State private var tripToDelete: SampleItinerary?
-    @State private var showDeleteConfirm = false
+    @State private var prepItems: [ChecklistItem] = []
 
     private var savedTrips: [SampleItinerary] {
         let all = appEnv.preferences.savedItineraries
@@ -17,60 +17,123 @@ struct PlanView: View {
     }
 
     var body: some View {
-        NavigationStack(path: $path) {
-            Group {
-                if savedTrips.isEmpty {
-                    emptyState
-                } else {
-                    tripList
-                }
+        navigationStack
+            .onAppear { consumePlanGeneratorDeepLink() }
+            .task { await appEnv.profileSync.refreshItinerariesFromRemote() }
+            .onChange(of: appEnv.navigation.planShowGenerator) { _, shouldOpen in
+                if shouldOpen { consumePlanGeneratorDeepLink() }
             }
-            .background(Theme.ColorToken.background)
-            .navigationTitle(String(localized: "Plan"))
-            .navigationBarTitleDisplayMode(.large)
-            .navigationDestination(for: PlanRoute.self) { route in
-                switch route {
-                case .create:
-                    PlanCreateFlowView { _ in
-                        path = NavigationPath()
-                    }
-                case .detail(let trip):
-                    ItineraryDetailView(itinerary: trip)
-                }
+            .onChange(of: path.count) { _, count in
+                appEnv.navigation.planPathCount = count
             }
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    newTripButton
-                }
+            .onChange(of: appEnv.preferences.showPrepareGuideAfterSave) { _, show in
+                if show { Task { await reloadPrepProgress() } }
             }
+            .task { await reloadPrepProgress() }
+    }
+
+    private var showPrepGuideBanner: Bool {
+        appEnv.preferences.showPrepareGuideAfterSave && path.isEmpty
+    }
+
+    private var prepGuideBanner: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Trip saved")
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                Text("Start your prep checklist before you go")
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            Spacer()
+            Button("Open →") {
+                appEnv.preferences.showPrepareGuideAfterSave = false
+                appEnv.navigation.presentPrepare()
+            }
+            .font(Theme.FontToken.inter(11, weight: .medium))
+            .foregroundStyle(Theme.ColorToken.accent)
         }
-        .confirmationDialog(
+        .padding(14)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .overlay(alignment: .leading) {
+            Rectangle().fill(Theme.ColorToken.accent).frame(width: 2)
+        }
+        .padding(.horizontal, Theme.screenPadding)
+        .padding(.vertical, 8)
+    }
+
+    private var navigationStack: some View {
+        NavigationStack(path: $path) {
+            planRootContent
+        }
+        .alert(
             String(localized: "Delete this trip?"),
-            isPresented: $showDeleteConfirm,
-            titleVisibility: .visible,
+            isPresented: showDeleteAlert,
             presenting: tripToDelete
         ) { trip in
-            Button(String(localized: "Delete"), role: .destructive) {
-                appEnv.preferences.deleteItinerary(id: trip.id)
-            }
-            Button(String(localized: "Cancel"), role: .cancel) {
-                tripToDelete = nil
-            }
+            deleteAlertActions(for: trip)
         } message: { _ in
-            Text(String(localized: "This cannot be undone."))
+            deleteAlertMessage
         }
-        .onAppear {
-            consumePlanGeneratorDeepLink()
+    }
+
+    private var planRootContent: some View {
+        Group {
+            if savedTrips.isEmpty {
+                emptyState
+            } else {
+                tripList
+            }
         }
-        .task {
-            await appEnv.profileSync.refreshItinerariesFromRemote()
+        .background(Theme.ColorToken.background)
+        .navigationTitle(String(localized: "Plan"))
+        .navigationBarTitleDisplayMode(.large)
+        .navigationDestination(for: PlanRoute.self) { route in
+            planDestination(for: route)
         }
-        .onChange(of: appEnv.navigation.planShowGenerator) { _, shouldOpen in
-            if shouldOpen { consumePlanGeneratorDeepLink() }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                newTripButton
+            }
         }
-        .onChange(of: path.count) { _, count in
-            appEnv.navigation.planPathCount = count
+    }
+
+    private var showDeleteAlert: Binding<Bool> {
+        Binding(
+            get: { tripToDelete != nil },
+            set: { if !$0 { tripToDelete = nil } }
+        )
+    }
+
+    private var deleteAlertMessage: Text {
+        Text(String(localized: "This cannot be undone."))
+    }
+
+    @ViewBuilder
+    private func planDestination(for route: PlanRoute) -> some View {
+        switch route {
+        case .create:
+            PlanCreateFlowView { _ in
+                path = NavigationPath()
+            }
+        case .detail(let trip):
+            ItineraryDetailView(itinerary: trip)
         }
+    }
+
+    @ViewBuilder
+    private func deleteAlertActions(for trip: SampleItinerary) -> some View {
+        Button(String(localized: "Delete"), role: .destructive) {
+            deleteTrip(trip)
+        }
+        Button(String(localized: "Cancel"), role: .cancel) {
+            tripToDelete = nil
+        }
+    }
+
+    private func deleteTrip(_ trip: SampleItinerary) {
+        appEnv.preferences.deleteItinerary(id: trip.id)
+        tripToDelete = nil
     }
 
     // MARK: - 4.1 Empty
@@ -98,6 +161,14 @@ struct PlanView: View {
 
     private var tripList: some View {
         List {
+            if showPrepGuideBanner {
+                Section {
+                    prepGuideBanner
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
+            }
             Section {
                 ForEach(savedTrips) { trip in
                     tripRow(trip)
@@ -108,7 +179,6 @@ struct PlanView: View {
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
                                 tripToDelete = trip
-                                showDeleteConfirm = true
                             } label: {
                                 Label(String(localized: "Delete"), systemImage: "trash")
                             }
@@ -151,8 +221,30 @@ struct PlanView: View {
             Text(String(format: String(localized: "%lld days"), trip.days.count))
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(Theme.ColorToken.textDisabled)
+            if !prepItems.isEmpty {
+                let done = PrepProgressMetrics.processedCount(items: prepItems) { item in
+                    appEnv.preferences.checklistStatus(for: item.id, type: item.type)
+                }
+                Text("\(done)/\(prepItems.count) prep complete")
+                    .font(Theme.FontToken.inter(10))
+                    .foregroundStyle(done == prepItems.count ? Theme.ColorToken.success : Theme.ColorToken.textMuted)
+            }
         }
         .padding(.vertical, 6)
+    }
+
+    private func reloadPrepProgress() async {
+        let ctx = PrepChecklistContext(
+            countryCode: appEnv.preferences.countryCode,
+            activeItinerary: appEnv.preferences.activeItinerary
+        )
+        let cityIds = ctx.hasSavedItinerary ? ctx.itineraryCityIds : []
+        let all = (try? await appEnv.content.fetchChecklistItems(
+            cityIds: cityIds,
+            countryCode: appEnv.preferences.countryCode
+        )) ?? []
+        let cities = (try? await appEnv.content.fetchCities()) ?? []
+        prepItems = PrepChecklistAssembler.assemble(allItems: all, context: ctx, cities: cities).allItems
     }
 
     private var newTripButton: some View {

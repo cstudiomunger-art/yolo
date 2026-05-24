@@ -4,7 +4,7 @@ import Foundation
 final class AudioDownloadService {
     static let shared = AudioDownloadService()
 
-    private let defaultsKey = "chinago.downloadedAudioGuideIds"
+    private let defaultsKey = UserDefaultsKeys.downloadedAudioGuideIds
 
     private(set) var downloadedGuideIds: Set<String> = []
 

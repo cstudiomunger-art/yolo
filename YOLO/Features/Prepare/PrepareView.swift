@@ -4,232 +4,267 @@ struct PrepareView: View {
     @Environment(AppEnvironment.self) private var appEnv
 
     @State private var cities: [City] = []
-    @State private var checklist: [ChecklistItem] = []
-    @State private var shopping: [ShoppingItem] = []
+    @State private var allChecklistItems: [ChecklistItem] = []
+    @State private var prepResult = PrepChecklistResult(
+        entryItems: [],
+        universalItems: [],
+        citySections: [],
+        showsCityPlaceholder: true
+    )
     @State private var reading: [ReadingItem] = []
-    @State private var panel: PreparePanel = .checklist
-    @State private var showShoppingList = false
     @State private var showReadingList = false
+    @State private var selectedDetailItem: ChecklistItem?
+    @State private var restoreConfirmItem: ChecklistItem?
+    @State private var checklistSettings = ChecklistSettings.fallback
 
-    enum PreparePanel {
-        case checklist
-        case done
+    private var context: PrepChecklistContext {
+        PrepChecklistContext(
+            countryCode: appEnv.preferences.countryCode,
+            activeItinerary: appEnv.preferences.activeItinerary
+        )
     }
 
-    private var completedCount: Int {
-        checklist.filter { appEnv.preferences.completedChecklistIds.contains($0.id) }.count
+    private var items: [ChecklistItem] { prepResult.allItems }
+
+    private func itemStatus(_ item: ChecklistItem) -> ChecklistItemStatus {
+        appEnv.preferences.checklistStatus(for: item.id, type: item.type)
+    }
+
+    private var processedCount: Int {
+        PrepProgressMetrics.processedCount(items: items, status: itemStatus)
+    }
+
+    private var isPrepComplete: Bool {
+        PrepProgressMetrics.isComplete(items: items, status: itemStatus)
     }
 
     var body: some View {
-        mainView
-            .background(Theme.ColorToken.background)
-        .task {
-            await bootstrap()
+        NavigationStack {
+            mainScroll
+                .background(Theme.ColorToken.background)
+                .navigationDestination(item: $selectedDetailItem) { item in
+                    ChecklistItemDetailView(item: item)
+                }
         }
-        .onChange(of: appEnv.contentRevision) { _, _ in
-            Task { await bootstrap() }
-        }
-        .sheet(isPresented: $showShoppingList) {
-            ShoppingListView(items: shopping)
-        }
+        .task { await bootstrap() }
+        .onChange(of: appEnv.contentRevision) { _, _ in Task { await reloadContent() } }
+        .onChange(of: appEnv.preferences.activeItineraryId) { _, _ in Task { await reloadContent() } }
+        .onChange(of: appEnv.preferences.savedItineraries.count) { _, _ in Task { await reloadContent() } }
         .sheet(isPresented: $showReadingList) {
             ReadingListView(items: reading)
         }
-    }
-
-    private var primarySelectedCityName: String {
-        cities.first { appEnv.preferences.selectedCityIds.contains($0.id) }?.name ?? "China"
-    }
-
-    private var mainView: some View {
-        VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                Button {
-                    appEnv.navigation.dismissModal()
-                    appEnv.navigation.openTab(.home)
-                } label: {
-                    Text("← Home")
-                        .font(Theme.FontToken.inter(11))
-                        .foregroundStyle(Theme.ColorToken.textMuted)
-                }
-                .buttonStyle(.plain)
-
-                Text("Prepare")
-                    .font(Theme.FontToken.playfair(22, weight: .semibold))
-                    .padding(.top, 2)
-
-                Text(subtitleLine)
-                    .font(Theme.FontToken.inter(12))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
+        .alert("Restore this item?", isPresented: showRestoreAlert, presenting: restoreConfirmItem) { item in
+            Button("Restore") {
+                appEnv.preferences.restoreChecklistItem(item.id, type: item.type)
+                restoreConfirmItem = nil
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, Theme.screenPadding)
-            .padding(.top, 16)
-            .padding(.bottom, 12)
-
-            HStack(spacing: 0) {
-                prepNavButton("Checklist", panel == .checklist) { panel = .checklist }
-                prepNavButton("Done ✓", panel == .done) { panel = .done }
-            }
-            .overlay(alignment: .bottom) {
-                Rectangle().fill(Theme.ColorToken.border).frame(height: 1)
-            }
-
-            if panel == .checklist {
-                checklistPanel
-            } else {
-                donePanel
-            }
+            Button("Cancel", role: .cancel) { restoreConfirmItem = nil }
         }
     }
 
-    private var subtitleLine: String {
-        let names = cities.filter { appEnv.preferences.selectedCityIds.contains($0.id) }.map(\.name).joined(separator: " · ")
-        return "\(names)  ·  \(appEnv.preferences.daysUntilDeparture) days to departure"
+    private var showRestoreAlert: Binding<Bool> {
+        Binding(get: { restoreConfirmItem != nil }, set: { if !$0 { restoreConfirmItem = nil } })
     }
 
-    private func prepNavButton(_ title: String, _ active: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(Theme.FontToken.inter(11, weight: .medium))
-                .foregroundStyle(active ? Theme.ColorToken.textPrimary : Theme.ColorToken.textDisabled)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .overlay(alignment: .bottom) {
-                    if active {
-                        Rectangle().fill(Theme.ColorToken.textPrimary).frame(height: 1)
-                    }
-                }
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var checklistPanel: some View {
+    private var mainScroll: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                progressSummary
-
-                ForEach(checklistSections, id: \.title) { section in
-                    Text(section.title)
-                        .font(Theme.FontToken.inter(10, weight: .medium))
-                        .foregroundStyle(Theme.ColorToken.textDisabled)
-                        .textCase(.uppercase)
-                        .padding(.top, 16)
-                        .padding(.bottom, 8)
-
-                    ForEach(section.items) { item in
-                        ChecklistRowView(
-                            item: item,
-                            isDone: appEnv.preferences.completedChecklistIds.contains(item.id)
-                        ) {
-                            appEnv.preferences.toggleChecklistItem(item.id)
-                        }
-                    }
+                header
+                if let banner = reminderBannerText {
+                    reminderBanner(banner)
                 }
-
-                embeddedShopping
+                if isPrepComplete, !items.isEmpty {
+                    completionBanner
+                }
+                progressSummary
+                if appEnv.preferences.savedItineraries.count > 1 {
+                    itineraryPicker
+                }
+                checklistSections
+                if prepResult.showsCityPlaceholder {
+                    cityPlaceholderCard
+                }
                 embeddedReading
             }
             .padding(.horizontal, Theme.screenPadding)
-            .padding(.top, 16)
             .padding(.bottom, 24)
         }
     }
 
-    private struct ChecklistSection {
-        let title: String
-        let items: [ChecklistItem]
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Button {
+                appEnv.navigation.dismissModal()
+                appEnv.navigation.openTab(.home)
+            } label: {
+                Text("← Home")
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            .buttonStyle(.plain)
+
+            Text("Prepare")
+                .font(Theme.FontToken.playfair(22, weight: .semibold))
+                .padding(.top, 2)
+
+            Text(subtitleLine)
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 16)
+        .padding(.bottom, 12)
     }
 
-    private var checklistSections: [ChecklistSection] {
-        let entry = checklist.filter { $0.type == .entry }
-        let universal = checklist.filter { $0.type == .universal }
-        let cityItems = checklist.filter { $0.type == .city }
-        var sections: [ChecklistSection] = []
-        if !entry.isEmpty {
-            sections.append(ChecklistSection(title: "Entry Requirements", items: entry))
+    private var subtitleLine: String {
+        if let trip = context.activeItinerary {
+            let names = context.itineraryCityIds.compactMap { id in cities.first { $0.id == id }?.name }
+            let cityLine = names.isEmpty ? trip.routeSummary : names.joined(separator: " · ")
+            return "Based on your \(cityLine) trip · \(appEnv.preferences.daysUntilDeparture) days"
         }
-        if !universal.isEmpty {
-            sections.append(ChecklistSection(title: "Essentials for Any Trip", items: universal))
+        return "Entry & essential prep · \(appEnv.preferences.daysUntilDeparture) days to departure"
+    }
+
+    private var completionBanner: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("🎉 You're all set!")
+                .font(Theme.FontToken.playfair(18, weight: .semibold))
+            Text("Prep Complete")
+                .font(Theme.FontToken.inter(10, weight: .medium))
+                .foregroundStyle(Theme.ColorToken.success)
+            Text("Your trip starts in \(appEnv.preferences.daysUntilDeparture) days. Enjoy China!")
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(Theme.ColorToken.textMuted)
         }
-        let cityGroups = Dictionary(grouping: cityItems, by: \.groupTitle)
-        for key in cityGroups.keys.sorted() {
-            sections.append(ChecklistSection(title: key, items: cityGroups[key] ?? []))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Theme.ColorToken.success).frame(height: 2)
         }
-        return sections
+        .padding(.bottom, 12)
     }
 
     private var progressSummary: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text("\(completedCount)")
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("\(processedCount)")
                     .font(Theme.FontToken.playfair(28, weight: .bold))
-                Text("of \(checklist.count) tasks complete")
+                Text("/ \(max(items.count, 1)) done")
                     .font(Theme.FontToken.inter(12))
                     .foregroundStyle(Theme.ColorToken.textMuted)
             }
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    Rectangle().fill(Theme.ColorToken.border).frame(height: 2)
+                    Rectangle().fill(Theme.ColorToken.border).frame(height: 3)
                     Rectangle()
-                        .fill(Theme.ColorToken.accent)
-                        .frame(width: geo.size.width * progressFraction, height: 2)
+                        .fill(isPrepComplete ? Theme.ColorToken.success : Theme.ColorToken.accent)
+                        .frame(width: geo.size.width * progressFraction, height: 3)
                 }
             }
-            .frame(height: 2)
-            Text(remainingTimeLabel)
-                .font(Theme.FontToken.inter(11))
-                .foregroundStyle(Theme.ColorToken.textMuted)
+            .frame(height: 3)
+        }
+        .padding(.bottom, 12)
+    }
+
+    private var pendingCount: Int { max(items.count - processedCount, 0) }
+
+    private var reminderBannerText: String? {
+        PrepReminderService.bannerText(
+            settings: checklistSettings,
+            daysUntilDeparture: appEnv.preferences.daysUntilDeparture,
+            pendingCount: pendingCount
+        )
+    }
+
+    private func reminderBanner(_ text: String) -> some View {
+        Text(text)
+            .font(Theme.FontToken.inter(12, weight: .medium))
+            .foregroundStyle(Theme.ColorToken.textPrimary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(Color.yellow.opacity(0.25))
+            .padding(.bottom, 10)
+    }
+
+    private var progressFraction: CGFloat {
+        guard !items.isEmpty else { return 0 }
+        return CGFloat(processedCount) / CGFloat(items.count)
+    }
+
+    private var itineraryPicker: some View {
+        Menu {
+            ForEach(appEnv.preferences.savedItineraries) { trip in
+                Button(trip.title) {
+                    appEnv.preferences.activeItineraryId = trip.id
+                    let cityIds = SampleItinerary.orderedCityIds(from: trip)
+                    if !cityIds.isEmpty {
+                        appEnv.preferences.selectedCityIds = cityIds
+                    }
+                }
+            }
+        } label: {
+            HStack {
+                Text(context.activeItinerary?.title ?? "Select trip")
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .foregroundStyle(Theme.ColorToken.textPrimary)
+            .padding(.vertical, 8)
         }
         .padding(.bottom, 8)
     }
 
-    private var remainingTimeLabel: String {
-        let minutes = checklist
-            .filter { !appEnv.preferences.completedChecklistIds.contains($0.id) }
-            .compactMap(\.estimatedMinutes)
-            .reduce(0, +)
-        if minutes <= 0 { return "Almost done — finish your checklist" }
-        return "~\(minutes) minutes of setup remaining"
+    @ViewBuilder
+    private var checklistSections: some View {
+        ForEach(prepResult.displaySections) { section in
+            Text(section.title)
+                .font(Theme.FontToken.inter(10, weight: .medium))
+                .foregroundStyle(Theme.ColorToken.textDisabled)
+                .textCase(.uppercase)
+                .padding(.top, 16)
+                .padding(.bottom, 8)
+
+            ForEach(section.items) { item in
+                ChecklistRowView(
+                    item: item,
+                    status: itemStatus(item),
+                    onToggle: {
+                        appEnv.preferences.toggleChecklistItem(item.id, type: item.type)
+                    },
+                    onOpenDetail: { selectedDetailItem = item },
+                    onSkip: {
+                        appEnv.preferences.skipChecklistItem(item.id, type: item.type)
+                    },
+                    onRestoreRequest: { restoreConfirmItem = item }
+                )
+            }
+        }
     }
 
-    private var progressFraction: CGFloat {
-        guard !checklist.isEmpty else { return 0 }
-        return CGFloat(completedCount) / CGFloat(checklist.count)
-    }
-
-    private var embeddedShopping: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("🛍 Pack Before You Go")
-                    .sectionTitleStyle()
-                Spacer()
-                Button("View all →") { showShoppingList = true }
-                    .font(Theme.FontToken.inter(10, weight: .medium))
+    private var cityPlaceholderCard: some View {
+        VStack(spacing: 12) {
+            Text("🗺")
+                .font(.largeTitle)
+            Text("Add your destination to see city-specific prep")
+                .font(Theme.FontToken.inter(13))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+                .multilineTextAlignment(.center)
+            Button {
+                appEnv.navigation.dismissModal()
+                appEnv.navigation.openTab(.plan)
+            } label: {
+                Text("Plan a Trip →")
+                    .font(Theme.FontToken.inter(12, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.accent)
-                    .textCase(.uppercase)
             }
-            ForEach(shopping.prefix(3)) { item in
-                HStack(alignment: .top, spacing: 10) {
-                    Rectangle()
-                        .stroke(Theme.ColorToken.border, lineWidth: 1)
-                        .frame(width: 14, height: 14)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(item.titleEn)
-                            .font(Theme.FontToken.inter(12))
-                        if let note = item.noteEn {
-                            HTMLContentView(content: note, fontSize: 11, foregroundColor: Theme.ColorToken.textMuted)
-                        }
-                    }
-                }
-                .padding(.vertical, 7)
-            }
+            .buttonStyle(.plain)
         }
-        .padding(14)
+        .frame(maxWidth: .infinity)
+        .padding(20)
         .background(Theme.ColorToken.backgroundSubtle)
-        .overlay(alignment: .leading) {
-            Rectangle().fill(Theme.ColorToken.accent).frame(width: 2)
-        }
+        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
         .padding(.top, 16)
     }
 
@@ -261,228 +296,127 @@ struct PrepareView: View {
         .overlay(alignment: .leading) {
             Rectangle().fill(Theme.ColorToken.border).frame(width: 2)
         }
-        .padding(.top, 12)
-    }
-
-    private var donePanel: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                VStack(spacing: 8) {
-                    Text("✅").font(.largeTitle)
-                    Text("You're ready for China.")
-                        .font(Theme.FontToken.playfair(20, weight: .semibold))
-                    Text("\(subtitleLine.components(separatedBy: "·").first ?? "") preparation · \(completedCount)/\(checklist.count) tasks done")
-                        .font(Theme.FontToken.inter(12))
-                        .foregroundStyle(Theme.ColorToken.textMuted)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 24)
-                .background(Theme.ColorToken.backgroundSubtle)
-                .overlay(alignment: .top) {
-                    Rectangle().fill(Theme.ColorToken.success).frame(height: 2)
-                }
-
-                Text("What's next?")
-                    .sectionTitleStyle()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 24)
-                    .padding(.bottom, 12)
-
-                completionAction(icon: "🗺", title: "Plan my \(primarySelectedCityName) trip", sub: "Build your itinerary with AI") {
-                    appEnv.navigation.openPlanGenerator()
-                }
-                completionAction(icon: "🏨", title: "Find foreigner-friendly hotels", sub: "Curated list, English staff noted") {
-                    appEnv.navigation.openPlanGenerator()
-                }
-                completionAction(icon: "📖", title: "Explore \(primarySelectedCityName) audio guides", sub: "Prepare your tour experience") {
-                    let cityId = appEnv.preferences.selectedCityIds.first ?? "beijing"
-                    appEnv.navigation.openGuide(attractionId: "\(cityId)_forbidden_city", cityId: cityId)
-                }
-            }
-            .padding(.horizontal, Theme.screenPadding)
-            .padding(.bottom, 24)
-        }
-    }
-
-    private func completionAction(icon: String, title: String, sub: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Text(icon)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(Theme.FontToken.inter(13))
-                    Text(sub)
-                        .font(Theme.FontToken.inter(11))
-                        .foregroundStyle(Theme.ColorToken.textMuted)
-                }
-                Spacer()
-                Text("→")
-                    .font(Theme.FontToken.inter(11, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.accent)
-            }
-            .padding(14)
-            .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
-            .padding(.bottom, 10)
-        }
-        .buttonStyle(.plain)
+        .padding(.top, 16)
     }
 
     private func bootstrap() async {
         await loadCities()
-        if appEnv.preferences.selectedCityIds.isEmpty {
-            appEnv.preferences.selectedCityIds = [cities.first?.id ?? "beijing"]
-        }
-        await loadContent()
+        await reloadContent()
     }
 
     private func loadCities() async {
         cities = (try? await appEnv.content.fetchCities()) ?? []
     }
 
-    private func loadContent() async {
-        let ids = appEnv.preferences.selectedCityIds
-        checklist = (try? await appEnv.content.fetchChecklistItems(
-            cityIds: ids,
+    private func reloadContent() async {
+        let ctx = context
+        let cityIds = ctx.hasSavedItinerary ? ctx.itineraryCityIds : []
+        if ctx.hasSavedItinerary, !cityIds.isEmpty {
+            appEnv.preferences.selectedCityIds = cityIds
+        }
+
+        allChecklistItems = (try? await appEnv.content.fetchChecklistItems(
+            cityIds: cityIds,
             countryCode: appEnv.preferences.countryCode
         )) ?? []
-        shopping = (try? await appEnv.content.fetchShoppingItems(cityIds: ids)) ?? []
-        reading = (try? await appEnv.content.fetchReadingItems(cityIds: ids)) ?? []
+
+        prepResult = PrepChecklistAssembler.assemble(
+            allItems: allChecklistItems,
+            context: ctx,
+            cities: cities
+        )
+
+        let readingCityIds = cityIds.isEmpty ? appEnv.preferences.selectedCityIds : cityIds
+        reading = (try? await appEnv.content.fetchReadingItems(cityIds: readingCityIds)) ?? []
+        checklistSettings = (try? await appEnv.content.fetchChecklistSettings()) ?? .fallback
+
+        PrepReminderService.scheduleIfNeeded(
+            settings: checklistSettings,
+            daysUntilDeparture: appEnv.preferences.daysUntilDeparture,
+            pendingCount: pendingCount
+        )
+        await appEnv.rescheduleTripReminders()
     }
 }
 
 struct ChecklistRowView: View {
     let item: ChecklistItem
-    let isDone: Bool
+    let status: ChecklistItemStatus
     let onToggle: () -> Void
-    @State private var isExpanded = false
+    let onOpenDetail: () -> Void
+    let onSkip: () -> Void
+    let onRestoreRequest: () -> Void
+
+    private var isDone: Bool { status == .done }
+    private var isSkipped: Bool { status == .skipped }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Button(action: onToggle) {
-                HStack(spacing: 12) {
-                    ZStack {
-                        Rectangle()
-                            .stroke(Theme.ColorToken.border, lineWidth: 1)
-                            .frame(width: 14, height: 14)
-                        if isDone {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 9, weight: .bold))
-                        }
-                    }
-                    Text(item.titleEn)
-                        .font(Theme.FontToken.inter(14))
-                        .foregroundStyle(isDone ? Theme.ColorToken.textMuted : Theme.ColorToken.textPrimary)
-                        .strikethrough(isDone)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    HStack(spacing: 6) {
-                        ForEach(item.displayTags, id: \.self) { tag in
-                            tagView(tag)
-                        }
-                        if let mins = item.estimatedMinutes {
-                            Text("\(mins) min")
-                                .font(Theme.FontToken.inter(11))
-                                .foregroundStyle(Theme.ColorToken.textMuted)
-                        }
-                    }
-                }
-                .padding(.vertical, 11)
-            }
-            .buttonStyle(.plain)
-
-            if hasDetail {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
-                } label: {
-                    Text(isExpanded ? "Hide details" : "Why this matters")
-                        .font(Theme.FontToken.inter(10, weight: .medium))
-                        .foregroundStyle(Theme.ColorToken.accent)
+            HStack(spacing: 12) {
+                Button(action: onToggle) {
+                    checkbox
                 }
                 .buttonStyle(.plain)
-                .padding(.bottom, 6)
+                .disabled(isSkipped)
 
-                if isExpanded {
-                    detailBlock
-                        .padding(.bottom, 10)
-                }
-            }
+                Button(action: onOpenDetail) {
+                    HStack(spacing: 8) {
+                        Text(item.titleEn)
+                            .font(Theme.FontToken.inter(14))
+                            .foregroundStyle(rowTextColor)
+                            .strikethrough(isDone)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .multilineTextAlignment(.leading)
 
-            if let tip = item.culturalTip, !tip.isEmpty {
-                HTMLContentView(content: tip, fontSize: 10, foregroundColor: Theme.ColorToken.textMuted)
-                    .padding(10)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Theme.ColorToken.backgroundSubtle)
-                    .overlay(alignment: .leading) {
-                        Rectangle().fill(Theme.ColorToken.accent).frame(width: 2)
+                        if isSkipped {
+                            Button(action: onRestoreRequest) {
+                                Text("Skipped")
+                                    .font(Theme.FontToken.inter(9, weight: .medium))
+                                    .foregroundStyle(Theme.ColorToken.textMuted)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            Text(">")
+                                .font(Theme.FontToken.inter(11, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.textGhost)
+                        }
                     }
-                    .padding(.bottom, 8)
+                }
+                .buttonStyle(.plain)
             }
+            .padding(.vertical, 11)
         }
         .overlay(alignment: .bottom) {
             Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
         }
-    }
-
-    private var hasDetail: Bool {
-        item.whyImportant != nil || item.howToComplete != nil || !item.externalLinks.isEmpty
-    }
-
-    @ViewBuilder
-    private var detailBlock: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let why = item.whyImportant, !why.isEmpty {
-                HTMLContentView(content: why, fontSize: 12)
-            }
-            if let how = item.howToComplete, !how.isEmpty {
-                HTMLContentView(content: how, fontSize: 12, foregroundColor: Theme.ColorToken.textMuted)
-            }
-            ForEach(item.externalLinks, id: \.url) { link in
-                if let url = URL(string: link.url) {
-                    Link(link.label, destination: url)
-                        .font(Theme.FontToken.inter(11, weight: .medium))
-                        .foregroundStyle(Theme.ColorToken.accent)
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if !isSkipped, !isDone {
+                Button(action: onSkip) {
+                    Text("Skip")
                 }
+                .tint(.orange)
             }
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.ColorToken.backgroundSubtle)
     }
 
-    @ViewBuilder
-    private func tagView(_ tag: String) -> some View {
-        let label = tag.capitalized
-        let isUrgent = tag.lowercased() == "urgent"
-        Text(label)
-            .font(Theme.FontToken.inter(9, weight: .medium))
-            .foregroundStyle(isUrgent ? Theme.ColorToken.urgent : Theme.ColorToken.accent)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .overlay(
-                Rectangle().stroke(isUrgent ? Theme.ColorToken.urgent : Theme.ColorToken.accent, lineWidth: 1)
-            )
-    }
-}
-
-struct ShoppingListView: View {
-    let items: [ShoppingItem]
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            List(items) { item in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.titleEn)
-                    if let note = item.noteEn {
-                        HTMLContentView(content: note, fontSize: 12, foregroundColor: Theme.ColorToken.textMuted)
-                    }
-                }
-            }
-            .navigationTitle("Pack Before You Go")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
+    private var checkbox: some View {
+        ZStack {
+            Rectangle()
+                .stroke(Theme.ColorToken.border, lineWidth: 1)
+                .frame(width: 14, height: 14)
+            if isDone {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 9, weight: .bold))
             }
         }
+    }
+
+    private var rowTextColor: Color {
+        if isSkipped { return Theme.ColorToken.textDisabled }
+        return isDone ? Theme.ColorToken.textMuted : Theme.ColorToken.textPrimary
     }
 }
 

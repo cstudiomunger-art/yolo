@@ -154,10 +154,14 @@
       cols.forEach((c) => {
         html += `<td>${App.formatListCell(c, row)}</td>`;
       });
-      html += `<td>
-        <button class="btn btn-sm btn-secondary" data-edit-id="${App.escapeHtml(String(row[meta.pk]))}">编辑</button>
-        <button class="btn btn-sm btn-danger" data-del="${App.escapeHtml(String(row[meta.pk]))}">删除</button>
-      </td></tr>`;
+      let actions = `<button class="btn btn-sm btn-secondary" data-edit-id="${App.escapeHtml(String(row[meta.pk]))}">编辑</button>`;
+      if (table === "user_itineraries" && row.user_id) {
+        actions += ` <button class="btn btn-sm" data-open-profile="${App.escapeHtml(String(row.user_id))}">用户</button>`;
+      }
+      if (!meta.noDelete) {
+        actions += ` <button class="btn btn-sm btn-danger" data-del="${App.escapeHtml(String(row[meta.pk]))}">删除</button>`;
+      }
+      html += `<td>${actions}</td></tr>`;
     });
     html += "</tbody></table></div>";
     return html;
@@ -204,12 +208,31 @@
 
     const audioField = meta.fields.find((f) => f.type === "audio_upload");
     if (audioField && ctx.table === "audio_guides") {
+      if (form?.dataset?.audioUploading === "1") {
+        throw new Error("音频仍在上传中，请稍候再保存");
+      }
+      const pending = form?.dataset?.pendingAudioUrl?.trim();
+      if (pending) {
+        payload.audio_url = pending;
+      }
       const fileInput = App.formFileInput(form, audioField.key);
       const guideId = payload.id || row?.[meta.pk];
       if (fileInput?.files?.[0]) {
         if (!guideId) throw new Error("请先填写标题并保存，再上传音频");
         payload.audio_url = await App.uploadAudioGuideFile(fileInput.files[0], guideId);
+        try {
+          const seconds = await App.probeAudioDurationSeconds(fileInput.files[0]);
+          App.applyAudioDurationToForm(form, seconds, { force: true });
+          if (meta.fields.some((f) => f.key === "duration_seconds")) {
+            payload.duration_seconds = Number(
+              form.querySelector('[name="duration_seconds"]')?.value
+            );
+          }
+        } catch (_) {
+          /* optional */
+        }
       }
+      delete form?.dataset?.pendingAudioUrl;
     }
 
     const entityId = payload.id || row?.[meta.pk];
@@ -302,8 +325,51 @@
   };
 
   App.renderAppSettings = async function renderAppSettings() {
-    await App.renderSingleForm("app_settings", "global");
+    const main = App.$("#main-content");
+    main.innerHTML = `${App.iapPreviewSettingsBannerHtml()}
+      <div class="status-bar info">保存后 App 下次拉取 app_settings 或刷新内容模式时生效。</div>
+      <form id="single-form" class="settings-form settings-form--wide"></form>
+      <button type="submit" form="single-form" class="btn" style="margin-top:12px">保存</button>`;
     App.$("#page-title").textContent = App.TABLES.app_settings.label;
+
+    const meta = App.TABLES.app_settings;
+    const { data, error } = await App.client.from("app_settings").select("*").eq(meta.pk, "global").maybeSingle();
+    if (error) {
+      main.innerHTML = `<div class="status-bar error">${App.escapeHtml(error.message)}</div>`;
+      return;
+    }
+    const row = data || { [meta.pk]: "global" };
+    const form = App.$("#single-form");
+    form.innerHTML = App.buildFormFieldsHtml(meta, row, { fixedCityId: null });
+    App.mountFieldInteractions(form, meta, { isNew: false, pk: meta.pk, formEl: form });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        const payload = await App.collectFormPayload(form, meta, row, false, { table: "app_settings" });
+        const { error: err } = data
+          ? await App.client.from("app_settings").update(payload).eq(meta.pk, "global")
+          : await App.client.from("app_settings").insert({ ...payload, [meta.pk]: "global" });
+        if (err) throw err;
+        App.showToast("已保存");
+        await App.loadRefCache(true);
+      } catch (ex) {
+        App.showToast(ex.message, "error");
+      }
+    });
+  };
+
+  App.iapPreviewSettingsBannerHtml = function iapPreviewSettingsBannerHtml() {
+    return `<div class="status-bar info iap-settings-banner">
+      <strong>试听与内购</strong>
+      <ul>
+        <li><code>free_audio_preview_seconds</code>：未购用户主景点与子区域共用试听上限（秒）。</li>
+        <li><code>use_remote_iap</code>：开启后 App 显示锁定与付费墙；关闭则全员视为已解锁（本地演示）。</li>
+        <li>Paywall 文案区控制解锁弹窗；<code>iap_pro_*</code> 为 Profile 等展示文案。</li>
+        <li>景点级 <code>iap_product_id</code> 在城市工作台 → 编辑解说 →「内购（景点级）」；当前 App 购买仍为本地模拟。</li>
+        <li>音频上传：城市工作台内联「语音导览」选文件即传；侧栏「音频导览」表需先有导览 ID。</li>
+      </ul>
+    </div>`;
   };
 
   App.renderEmergencyConfig = async function renderEmergencyConfig() {
@@ -312,14 +378,51 @@
   };
 
   App.renderChecklistSettings = async function renderChecklistSettings() {
-    await App.renderSingleForm("checklist_settings", "global");
+    const main = App.$("#main-content");
+    main.innerHTML = `${App.checklistArchitectureBannerHtml()}
+      <div class="status-bar info">保存后 App 下次打开 Prepare 或刷新内容时生效。</div>
+      <form id="single-form" class="settings-form settings-form--wide"></form>
+      <button type="submit" form="single-form" class="btn" style="margin-top:12px">保存</button>`;
     App.$("#page-title").textContent = App.TABLES.checklist_settings.label;
+
+    const meta = App.TABLES.checklist_settings;
+    const { data, error } = await App.client.from("checklist_settings").select("*").eq("id", "global").maybeSingle();
+    if (error) {
+      main.innerHTML = `<div class="status-bar error">${App.escapeHtml(error.message)}</div>`;
+      return;
+    }
+    const row = data || { id: "global" };
+    const form = App.$("#single-form", main);
+    form.innerHTML = App.buildFormFieldsHtml(meta, row, { fixedCityId: null });
+    App.mountFieldInteractions(form, meta, { isNew: false, pk: meta.pk, formEl: form });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        const payload = await App.collectFormPayload(form, meta, row, false, { table: "checklist_settings" });
+        const { error: err } = data
+          ? await App.client.from("checklist_settings").update(payload).eq("id", "global")
+          : await App.client.from("checklist_settings").insert({ ...payload, id: "global" });
+        if (err) throw err;
+        App.showToast("已保存");
+      } catch (ex) {
+        App.showToast(ex.message, "error");
+      }
+    });
   };
 
   App.renderTable = async function renderTable(table, filterFn) {
     const meta = App.TABLES[table];
     const main = App.$("#main-content");
     const cityCfg = App.TABLE_CITY_FILTERS[table];
+
+    if (table === "user_itineraries") {
+      try {
+        await App.loadUserProfilesIndex();
+      } catch (_) {
+        /* list still works with UUID fallback */
+      }
+    }
 
     let query = App.client.from(table).select("*");
     if (meta.order) query = query.order(meta.order, { ascending: !meta.orderDesc });
@@ -365,7 +468,11 @@
       });
       toolbar += `</select>`;
     }
-    toolbar += `</div><div id="table-body-host"></div>`;
+    toolbar += `</div>`;
+    if (table === "checklist_items") {
+      toolbar += App.checklistArchitectureBannerHtml();
+    }
+    toolbar += `<div id="table-body-host"></div>`;
 
     main.innerHTML = toolbar;
     const host = App.$("#table-body-host", main);
@@ -397,11 +504,35 @@
 
     const applyFilters = () => {
       let rows = allRows;
+      const userFilter = sessionStorage.getItem("yolo.admin.userItinerariesFilter");
+      if (table === "user_itineraries" && userFilter) {
+        rows = rows.filter((r) => r.user_id === userFilter);
+      }
       rows = App.filterTableRowsByCity(table, rows, App.tableListCtx.cityId);
       if (meta.typeFilter) rows = App.filterChecklistRowsByType(rows, App.tableListCtx.typeFilter);
       rows = App.searchTableRows(table, rows, App.tableListCtx.search);
-      host.innerHTML = App.renderTableBody(table, rows);
+      let bodyHtml = App.renderTableBody(table, rows);
+      if (table === "user_itineraries" && userFilter) {
+        bodyHtml =
+          `<div class="status-bar info">仅显示用户 <code>${App.escapeHtml(userFilter.slice(0, 8))}…</code>（${App.escapeHtml(App.profileEmail(userFilter))}）的行程。
+          <button type="button" class="btn btn-sm btn-secondary" id="clear-user-itin-filter" style="margin-left:8px">显示全部</button></div>` +
+          bodyHtml;
+      }
+      host.innerHTML = bodyHtml;
+      App.$("#clear-user-itin-filter", host)?.addEventListener("click", () => {
+        sessionStorage.removeItem("yolo.admin.userItinerariesFilter");
+        applyFilters();
+      });
       bindTableRowActions(table, host, filterFn);
+      host.querySelectorAll("[data-open-profile]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          App.usersHubUserId = btn.dataset.openProfile;
+          App.currentView = "users_hub";
+          App.$$(".nav-btn").forEach((b) => b.classList.remove("active"));
+          App.$('.nav-btn[data-view="users_hub"]')?.classList.add("active");
+          App.loadCurrentSection();
+        });
+      });
     };
 
     App.$("#table-search", main)?.addEventListener("input", (e) => {
@@ -548,16 +679,28 @@
     if (!typeEl || form.dataset.checklistTypeBound === "1") return;
     form.dataset.checklistTypeBound = "1";
 
+    const groupEl = form.elements.group_title;
+
     const refresh = () => {
-      const formValues = { type: typeEl.value };
+      const t = typeEl.value;
+      const formValues = { type: t };
       meta.fields.forEach((f) => {
         if (!f.showWhen) return;
         const block = form.querySelector(`[data-field-key="${f.key}"]`);
         if (!block) return;
         block.classList.toggle("hidden", !App.fieldMatchesShowWhen(f, formValues));
       });
+      if (groupEl && !groupEl.dataset.userEdited) {
+        if (t === "entry" && !groupEl.value.trim()) groupEl.value = "Entry Requirements";
+        if (t === "universal" && !groupEl.value.trim()) groupEl.value = "Essential Prep";
+      }
     };
 
+    if (groupEl) {
+      groupEl.addEventListener("input", () => {
+        groupEl.dataset.userEdited = "1";
+      });
+    }
     typeEl.addEventListener("change", refresh);
     refresh();
   };

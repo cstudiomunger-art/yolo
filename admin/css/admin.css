@@ -624,6 +624,66 @@ tr:hover td {
   margin: 0 0 8px;
 }
 
+.attraction-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.iap-settings-banner ul {
+  margin: 8px 0 0;
+  padding-left: 1.2rem;
+  font-size: 0.9rem;
+}
+
+.iap-settings-banner li {
+  margin-bottom: 4px;
+}
+
+.users-hub-toolbar {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-grid--attractions .checkbox-group {
+  margin-bottom: 12px;
+}
+
+.checkbox-grid--attractions .checkbox-group-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.user-trips-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.user-trips-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-users-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.admin-users-list li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
 .intro-preview {
   font-size: 0.85rem;
   color: var(--muted);
@@ -730,6 +790,34 @@ tr:hover td {
 /* Quill rich text */
 .rich-text-host {
   margin-bottom: 12px;
+}
+
+/* Attraction introduction + sub-area body — match audio preview panel */
+.field-block[data-field-key="introduction"] .rich-text-host,
+.sub-area-inline-form .field-block[data-field-key="body"] .rich-text-host {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.field-block[data-field-key="introduction"] .rich-text-host .ql-toolbar.ql-snow,
+.sub-area-inline-form .field-block[data-field-key="body"] .rich-text-host .ql-toolbar.ql-snow {
+  background: var(--surface2);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.field-block[data-field-key="introduction"] .rich-text-host .ql-container.ql-snow,
+.sub-area-inline-form .field-block[data-field-key="body"] .rich-text-host .ql-container.ql-snow {
+  background: var(--surface2);
+  border: none;
+  border-radius: 0;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  color: var(--text);
+  min-height: 160px;
 }
 
 .rich-text-host .ql-toolbar.ql-snow {
@@ -900,9 +988,18 @@ tr:hover td {
 .media-preview.empty {
   padding: 16px;
   background: var(--surface2);
-  border-radius: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.media-preview[data-audio-preview-field]:not(.empty),
+.audio-upload-wrap .audio-upload-preview:not([hidden]) {
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
 .media-preview audio {

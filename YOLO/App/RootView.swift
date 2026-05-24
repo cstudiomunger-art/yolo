@@ -26,8 +26,21 @@ struct RootView: View {
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
-                Task { await appEnv.refreshContentMode(clearSettingsCache: true) }
+                Task {
+                    await appEnv.refreshContentMode(clearSettingsCache: true)
+                    await appEnv.rescheduleTripReminders()
+                }
             }
+        }
+        .onChange(of: appEnv.preferences.departureDate) { _, _ in
+            Task { await appEnv.rescheduleTripReminders() }
+        }
+        .sheet(isPresented: Binding(
+            get: { appEnv.auth.passwordRecoveryPending },
+            set: { if !$0 { appEnv.auth.clearPasswordRecoveryPending() } }
+        )) {
+            SetNewPasswordView()
+                .environment(appEnv)
         }
         .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
             if isAuthenticated {

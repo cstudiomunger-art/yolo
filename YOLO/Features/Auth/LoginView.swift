@@ -10,6 +10,7 @@ struct LoginView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var infoMessage: String?
+    @State private var acceptedLegal = false
 
     var body: some View {
         Form {
@@ -29,18 +30,31 @@ struct LoginView: View {
 
                 SecureField("密码", text: $password)
                     .textContentType(.password)
+
+                if !AppConfig.useMock {
+                    NavigationLink(String(localized: "Forgot password?")) {
+                        ForgotPasswordView()
+                    }
+                    .font(Theme.FontToken.inter(12))
+                }
+            }
+
+            Section {
+                Toggle(isOn: $acceptedLegal) {
+                    legalConsentLabel
+                }
             }
 
             Section {
                 Button("登录") {
                     signIn()
                 }
-                .disabled(cannotSubmit)
+                .disabled(cannotSubmitSignIn)
 
                 Button("注册") {
                     signUp()
                 }
-                .disabled(cannotSubmit)
+                .disabled(cannotSubmitSignUp)
             }
 
             if isLoading {
@@ -66,13 +80,35 @@ struct LoginView: View {
         .navigationTitle("登录")
     }
 
-    private var cannotSubmit: Bool {
+    private var legalConsentLabel: some View {
+        HStack(alignment: .top, spacing: 0) {
+            Text(String(localized: "I agree to the "))
+                .font(Theme.FontToken.inter(11))
+            NavigationLink(String(localized: "Terms")) {
+                LegalDocumentView(kind: .terms)
+            }
+            .font(Theme.FontToken.inter(11, weight: .medium))
+            Text(String(localized: " and "))
+                .font(Theme.FontToken.inter(11))
+            NavigationLink(String(localized: "Privacy Policy")) {
+                LegalDocumentView(kind: .privacy)
+            }
+            .font(Theme.FontToken.inter(11, weight: .medium))
+        }
+    }
+
+    private var cannotSubmitSignIn: Bool {
         email.isEmpty || password.isEmpty || isLoading || AppConfig.useMock
+    }
+
+    private var cannotSubmitSignUp: Bool {
+        cannotSubmitSignIn || !acceptedLegal
     }
 
     private func signIn() {
         runAuth {
             _ = try await SupabaseManager.shared.auth.signIn(email: email, password: password)
+            TelemetryService.shared.logEvent("sign_in")
             dismiss()
         }
     }
@@ -81,6 +117,7 @@ struct LoginView: View {
         runAuth {
             let response = try await SupabaseManager.shared.auth.signUp(email: email, password: password)
             if response.session != nil {
+                TelemetryService.shared.logEvent("sign_up")
                 dismiss()
             } else {
                 infoMessage = "注册成功。请查收确认邮件并点击链接后，再使用「登录」。"

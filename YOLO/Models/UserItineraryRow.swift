@@ -10,6 +10,8 @@ struct UserItineraryRow: Codable, Sendable {
     var cities: [String]
     var payload: SampleItinerary
     var isDeleted: Bool
+    var shareSlug: String?
+    var isShared: Bool = false
 
     enum CodingKeys: String, CodingKey {
         case id, title, cities, payload
@@ -17,6 +19,8 @@ struct UserItineraryRow: Codable, Sendable {
         case startDate = "start_date"
         case endDate = "end_date"
         case isDeleted = "is_deleted"
+        case shareSlug = "share_slug"
+        case isShared = "is_shared"
     }
 
     static func from(trip: SampleItinerary, userId: UUID, isDeleted: Bool = false) -> UserItineraryRow {
@@ -28,11 +32,18 @@ struct UserItineraryRow: Codable, Sendable {
             endDate: nil,
             cities: Self.extractCityIds(from: trip),
             payload: trip,
-            isDeleted: isDeleted
+            isDeleted: isDeleted,
+            shareSlug: trip.shareSlug,
+            isShared: trip.isShared
         )
     }
 
-    var asSampleItinerary: SampleItinerary { payload }
+    var asSampleItinerary: SampleItinerary {
+        var trip = payload
+        trip.shareSlug = shareSlug
+        trip.isShared = isShared
+        return trip
+    }
 
     private static func extractCityIds(from trip: SampleItinerary) -> [String] {
         var ids = Set<String>()

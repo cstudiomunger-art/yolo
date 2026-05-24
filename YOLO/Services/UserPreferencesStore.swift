@@ -3,21 +3,7 @@ import Observation
 
 @Observable
 final class UserPreferencesStore {
-    private enum Keys {
-        static let onboardingDone = "chinago.onboardingCompleted"
-        static let nationalityOnboardingVersion = "chinago.nationalityOnboardingVersion"
-        static let countryCode = "chinago.countryCode"
-        static let departureDate = "chinago.departureDate"
-        static let selectedCityIds = "chinago.selectedCityIds"
-        static let completedChecklistIds = "chinago.completedChecklistIds"
-        static let simulateProPurchase = "chinago.simulateProPurchase"
-        static let savedItineraries = "chinago.savedItineraries"
-        static let activeItineraryId = "chinago.activeItineraryId"
-        static let purchasedAttractionIds = "chinago.purchasedAttractionIds"
-        static let appLanguage = "chinago.appLanguage"
-        static let introOnboardingDone = "chinago.introOnboardingDone"
-        static let notificationOnboardingDone = "chinago.notificationOnboardingDone"
-    }
+    private typealias Keys = UserDefaultsKeys
 
     /// Called when profile-syncable fields change (debounced push in `ProfileSyncService`).
     var onSyncableChange: (() -> Void)?
@@ -41,6 +27,9 @@ final class UserPreferencesStore {
     var countryCode: String {
         didSet {
             UserDefaults.standard.set(countryCode, forKey: Keys.countryCode)
+            if oldValue != countryCode, !oldValue.isEmpty {
+                clearEntryChecklistStatuses()
+            }
             notifySyncableChange()
         }
     }
@@ -87,7 +76,26 @@ final class UserPreferencesStore {
     }
 
     var completedChecklistIds: Set<String> {
+        Set(checklistStatuses.compactMap { key, entry in
+            guard entry.status == .done else { return nil }
+            return Self.itemId(fromStorageKey: key)
+        })
+    }
+
+    static func storageKey(itemId: String, type: ChecklistItemType, itineraryId: String?) -> String {
+        if type == .city, let itineraryId, !itineraryId.isEmpty {
+            return "\(itemId)#\(itineraryId)"
+        }
+        return itemId
+    }
+
+    static func itemId(fromStorageKey key: String) -> String {
+        key.split(separator: "#", maxSplits: 1).first.map(String.init) ?? key
+    }
+
+    private(set) var checklistStatuses: [String: ChecklistStatusEntry] = [:] {
         didSet {
+            persistChecklistStatuses()
             UserDefaults.standard.set(Array(completedChecklistIds), forKey: Keys.completedChecklistIds)
             notifySyncableChange()
         }
@@ -139,7 +147,7 @@ final class UserPreferencesStore {
             departureDate = Calendar.current.date(byAdding: .day, value: 18, to: .now) ?? .now
         }
         selectedCityIds = UserDefaults.standard.stringArray(forKey: Keys.selectedCityIds) ?? ["beijing"]
-        completedChecklistIds = Set(UserDefaults.standard.stringArray(forKey: Keys.completedChecklistIds) ?? [])
+        checklistStatuses = Self.loadInitialChecklistStatuses()
         simulateProPurchase = UserDefaults.standard.bool(forKey: Keys.simulateProPurchase)
         activeItineraryId = UserDefaults.standard.string(forKey: Keys.activeItineraryId)
         if let data = UserDefaults.standard.data(forKey: Keys.savedItineraries),
@@ -174,6 +182,7 @@ final class UserPreferencesStore {
             Keys.departureDate,
             Keys.selectedCityIds,
             Keys.completedChecklistIds,
+            Keys.checklistStatuses,
             Keys.simulateProPurchase,
             Keys.savedItineraries,
             Keys.activeItineraryId,
@@ -191,7 +200,7 @@ final class UserPreferencesStore {
         countryCode = ""
         departureDate = Calendar.current.date(byAdding: .day, value: 18, to: .now) ?? .now
         selectedCityIds = ["beijing"]
-        completedChecklistIds = []
+        checklistStatuses = [:]
         simulateProPurchase = false
         savedItineraries = []
         activeItineraryId = nil
@@ -223,20 +232,75 @@ final class UserPreferencesStore {
         hasCompletedOnboarding = false
     }
 
-    var onChecklistToggled: ((String, Bool) -> Void)?
+    var onChecklistStatusChanged: ((String, ChecklistItemType, ChecklistItemStatus) -> Void)?
 
-    func toggleChecklistItem(_ id: String) {
-        var set = completedChecklistIds
-        let isDone: Bool
-        if set.contains(id) {
-            set.remove(id)
-            isDone = false
+    func checklistStatus(for itemId: String, type: ChecklistItemType) -> ChecklistItemStatus {
+        let key = Self.storageKey(itemId: itemId, type: type, itineraryId: activeItineraryId)
+        return checklistStatuses[key]?.status ?? .pending
+    }
+
+    func setChecklistStatus(itemId: String, type: ChecklistItemType, status: ChecklistItemStatus) {
+        let key = Self.storageKey(itemId: itemId, type: type, itineraryId: activeItineraryId)
+        var map = checklistStatuses
+        if status == .pending {
+            map.removeValue(forKey: key)
         } else {
-            set.insert(id)
-            isDone = true
+            map[key] = ChecklistStatusEntry(status: status, type: type)
         }
-        completedChecklistIds = set
-        onChecklistToggled?(id, isDone)
+        checklistStatuses = map
+        onChecklistStatusChanged?(itemId, type, status)
+    }
+
+    func toggleChecklistItem(_ id: String, type: ChecklistItemType) {
+        let current = checklistStatus(for: id, type: type)
+        let next: ChecklistItemStatus = current == .done ? .pending : .done
+        setChecklistStatus(itemId: id, type: type, status: next)
+    }
+
+    func skipChecklistItem(_ id: String, type: ChecklistItemType) {
+        setChecklistStatus(itemId: id, type: type, status: .skipped)
+    }
+
+    func restoreChecklistItem(_ id: String, type: ChecklistItemType) {
+        setChecklistStatus(itemId: id, type: type, status: .pending)
+    }
+
+    func clearEntryChecklistStatuses() {
+        checklistStatuses = checklistStatuses.filter { $0.value.type != .entry }
+    }
+
+    func clearEntryChecklistStatuses(entryItemIds: Set<String>) {
+        var map = checklistStatuses
+        for id in entryItemIds {
+            map.removeValue(forKey: id)
+        }
+        checklistStatuses = map
+    }
+
+    func itineraryIdForCompletion(type: ChecklistItemType) -> String? {
+        type == .city ? activeItineraryId : nil
+    }
+
+    private static func loadInitialChecklistStatuses() -> [String: ChecklistStatusEntry] {
+        if let data = UserDefaults.standard.data(forKey: Keys.checklistStatuses),
+           let decoded = try? JSONDecoder().decode([String: ChecklistStatusEntry].self, from: data) {
+            return decoded
+        }
+        let legacyDone = Set(UserDefaults.standard.stringArray(forKey: Keys.completedChecklistIds) ?? [])
+        if !legacyDone.isEmpty {
+            return Dictionary(
+                uniqueKeysWithValues: legacyDone.map { ($0, ChecklistStatusEntry(status: .done, type: .universal)) }
+            )
+        }
+        return [:]
+    }
+
+    private func persistChecklistStatuses() {
+        if let data = try? JSONEncoder().encode(checklistStatuses) {
+            UserDefaults.standard.set(data, forKey: Keys.checklistStatuses)
+        } else {
+            UserDefaults.standard.removeObject(forKey: Keys.checklistStatuses)
+        }
     }
 
     var activeItinerary: SampleItinerary? {
@@ -256,6 +320,15 @@ final class UserPreferencesStore {
         }
         savedItineraries = list
         activeItineraryId = itinerary.id
+        showPrepareGuideAfterSave = true
+        onItinerarySaved?()
+    }
+
+    func updateItineraryShareState(_ itinerary: SampleItinerary) {
+        guard let index = savedItineraries.firstIndex(where: { $0.id == itinerary.id }) else { return }
+        var list = savedItineraries
+        list[index] = itinerary
+        savedItineraries = list
         onItinerarySaved?()
     }
 
@@ -265,15 +338,29 @@ final class UserPreferencesStore {
 
     var onItineraryDeleted: ((String) -> Void)?
     var onItinerarySaved: (() -> Void)?
+    var showPrepareGuideAfterSave = false
 
     func deleteItinerary(id: String) {
         var list = savedItineraries
         list.removeAll { $0.id == id }
         savedItineraries = list
+        purgeChecklistStatuses(forItineraryId: id)
         if activeItineraryId == id {
             activeItineraryId = list.first?.id
         }
         onItineraryDeleted?(id)
+    }
+
+    /// Removes local done/skipped for items that only apply to a deleted trip’s city list.
+    func purgeChecklistStatuses(forItineraryId itineraryId: String) {
+        let suffix = "#\(itineraryId)"
+        checklistStatuses = checklistStatuses.filter { !$0.key.hasSuffix(suffix) }
+    }
+
+    func applyRemoteChecklistStatuses(_ map: [String: ChecklistStatusEntry]) {
+        suppressSyncNotification = true
+        checklistStatuses = map
+        suppressSyncNotification = false
     }
 
     func applyRemoteItineraries(_ trips: [SampleItinerary], activeId: String?) {
@@ -317,7 +404,12 @@ final class UserPreferencesStore {
         if !row.selectedCityIds.isEmpty {
             selectedCityIds = row.selectedCityIds
         }
-        completedChecklistIds = Set(row.completedChecklistIds)
+        let done = Set(row.completedChecklistIds)
+        if !done.isEmpty, checklistStatuses.isEmpty {
+            checklistStatuses = Dictionary(
+                uniqueKeysWithValues: done.map { ($0, ChecklistStatusEntry(status: .done, type: .universal)) }
+            )
+        }
         purchasedAttractionIds = Set(row.purchasedAttractionIds)
         simulateProPurchase = row.isPro
         // Trips are synced via `user_itineraries` (021), not profiles.saved_itineraries JSON.

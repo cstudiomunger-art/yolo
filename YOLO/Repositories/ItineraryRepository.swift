@@ -22,6 +22,19 @@ struct ItineraryRepository: Sendable {
             .execute()
     }
 
+    func fetchByShareSlug(_ slug: String) async throws -> UserItineraryRow? {
+        let rows: [UserItineraryRow] = try await client
+            .from("user_itineraries")
+            .select()
+            .eq("share_slug", value: slug)
+            .eq("is_shared", value: true)
+            .eq("is_deleted", value: false)
+            .limit(1)
+            .execute()
+            .value
+        return rows.first
+    }
+
     func markDeleted(id: String, userId: UUID) async throws {
         struct Patch: Encodable {
             let isDeleted: Bool

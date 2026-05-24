@@ -53,8 +53,22 @@ struct SectionTitleStyle: ViewModifier {
     }
 }
 
+struct GuideContentCardStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.ColorToken.backgroundSubtle)
+            .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+    }
+}
+
 extension View {
     func sectionTitleStyle() -> some View {
         modifier(SectionTitleStyle())
+    }
+
+    func guideContentCardStyle() -> some View {
+        modifier(GuideContentCardStyle())
     }
 }
