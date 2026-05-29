@@ -56,22 +56,9 @@
     }
     .icon.success { background: #e8f6ee; color: var(--success); }
     .icon.error { background: #fdecea; color: var(--error); }
-    .icon.pending { background: #f4f0ea; color: var(--accent); }
-    h1 {
-      font-size: 1.35rem;
-      font-weight: 600;
-      margin: 0 0 10px;
-    }
-    p {
-      margin: 0 0 12px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-    .email {
-      color: var(--text);
-      font-weight: 600;
-      word-break: break-all;
-    }
+    h1 { font-size: 1.35rem; font-weight: 600; margin: 0 0 10px; }
+    p { margin: 0 0 12px; color: var(--muted); font-size: 0.95rem; }
+    .email { color: var(--text); font-weight: 600; word-break: break-all; }
     .cta {
       display: block;
       margin-top: 22px;
@@ -90,22 +77,13 @@
       margin-top: 10px;
       font-weight: 500;
     }
-    .hint {
-      font-size: 0.8rem;
-      color: #999;
-      margin-top: 18px;
-    }
+    .hint { font-size: 0.8rem; color: #999; margin-top: 18px; }
     .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="card">
     <p class="badge">YOLO HAPPY</p>
-    <div id="state-loading">
-      <div class="icon pending">…</div>
-      <h1 id="title-loading"></h1>
-      <p id="msg-loading"></p>
-    </div>
     <div id="state-success" class="hidden">
       <div class="icon success">✓</div>
       <h1 id="title-success"></h1>
@@ -123,16 +101,15 @@
     </div>
   </div>
   <script src="/config.js"></script>
+  <script src="/auth/auth-callback.js"></script>
   <script>
     (function () {
       const cfg = window.YOLO_WEB_CONFIG || {};
+      const auth = window.YOLOAuthCallback;
       const lang = (navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en";
       const appScheme = "yoloapp://auth/confirm";
-
       const copy = {
         zh: {
-          loadingTitle: "正在确认邮箱…",
-          loadingMsg: "请稍候，我们正在验证您的确认链接。",
           successTitle: "邮箱确认成功",
           successMsg: "您的账号已验证完成，可以登录 YOLO HAPPY 开始规划行程。",
           openApp: "打开 YOLO App",
@@ -146,8 +123,6 @@
           invalidMsg: "请从注册确认邮件中打开链接，不要直接访问此页面。",
         },
         en: {
-          loadingTitle: "Confirming your email…",
-          loadingMsg: "Please wait while we verify your confirmation link.",
           successTitle: "Email confirmed",
           successMsg: "Your account is verified. Sign in to YOLO HAPPY and start planning your trip.",
           openApp: "Open YOLO App",
@@ -162,80 +137,22 @@
         },
       };
       const t = copy[lang];
+      const params = auth.parseAuthParams();
 
-      function show(id) {
-        ["state-loading", "state-success", "state-error"].forEach(function (s) {
-          document.getElementById(s).classList.toggle("hidden", s !== id);
-        });
-      }
-
-      function parseAuthParams() {
-        const hash = (location.hash || "").replace(/^#/, "");
-        const search = (location.search || "").replace(/^\?/, "");
-        const raw = [hash, search].filter(Boolean).join("&");
-        const params = new URLSearchParams(raw);
-        const out = {};
-        params.forEach(function (v, k) { out[k] = v; });
-        return out;
-      }
-
-      function decodeJwtEmail(token) {
-        try {
-          const payload = token.split(".")[1];
-          if (!payload) return null;
-          const json = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
-          return json.email || null;
-        } catch (_) {
-          return null;
-        }
-      }
-
-      function appDeepLink(params) {
-        const qs = new URLSearchParams(params).toString();
-        return appScheme + (qs ? "#" + qs : "");
-      }
-
-      document.getElementById("title-loading").textContent = t.loadingTitle;
-      document.getElementById("msg-loading").textContent = t.loadingMsg;
-
-      const params = parseAuthParams();
-      const hasError = Boolean(params.error || params.error_code);
-      const hasSession = Boolean(params.access_token);
-      const isSignup = params.type === "signup" || params.type === "email" || hasSession;
-
-      if (!hasError && !hasSession && !params.type) {
-        show("state-error");
-        document.getElementById("title-error").textContent = t.invalidTitle;
-        document.getElementById("msg-error").textContent = t.invalidMsg;
-        document.getElementById("retry-signin").textContent = t.retry;
-        document.getElementById("retry-signin").href = "/";
-        return;
-      }
-
-      if (hasError) {
-        show("state-error");
-        document.getElementById("title-error").textContent = t.errorTitle;
-        document.getElementById("msg-error").textContent =
-          params.error_description || params.error || t.errorDefault;
-        document.getElementById("retry-signin").textContent = t.retry;
-        document.getElementById("retry-signin").href = "/";
-        return;
-      }
-
-      if (isSignup || hasSession) {
-        show("state-success");
+      function showSuccess() {
+        document.getElementById("state-success").classList.remove("hidden");
         document.getElementById("title-success").textContent = t.successTitle;
         document.getElementById("msg-success").textContent = t.successMsg;
         document.getElementById("hint-success").textContent = t.hint;
 
-        const email = decodeJwtEmail(params.access_token || "");
+        const email = auth.decodeJwtEmail(params.access_token || "");
         if (email) {
           const el = document.getElementById("email-success");
           el.textContent = email;
           el.classList.remove("hidden");
         }
 
-        const deepLink = appDeepLink(params);
+        const deepLink = auth.appDeepLinkFromLocation(appScheme);
         const openApp = document.getElementById("open-app");
         openApp.textContent = t.openApp;
         openApp.href = deepLink;
@@ -247,21 +164,33 @@
           store.classList.remove("hidden");
         }
 
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (isMobile) {
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
           document.getElementById("hint-success").textContent = t.autoOpen;
           setTimeout(function () {
             window.location.href = deepLink;
           }, 600);
         }
+      }
+
+      function showError(title, message) {
+        document.getElementById("state-error").classList.remove("hidden");
+        document.getElementById("title-error").textContent = title;
+        document.getElementById("msg-error").textContent = message;
+        document.getElementById("retry-signin").textContent = t.retry;
+        document.getElementById("retry-signin").href = "/";
+      }
+
+      if (auth.hasAuthError(params)) {
+        showError(t.errorTitle, params.error_description || params.error || t.errorDefault);
         return;
       }
 
-      show("state-error");
-      document.getElementById("title-error").textContent = t.errorTitle;
-      document.getElementById("msg-error").textContent = t.errorDefault;
-      document.getElementById("retry-signin").textContent = t.retry;
-      document.getElementById("retry-signin").href = "/";
+      if (!auth.hasAuthPayload(params)) {
+        showError(t.invalidTitle, t.invalidMsg);
+        return;
+      }
+
+      showSuccess();
     })();
   </script>
 </body>

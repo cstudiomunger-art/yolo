@@ -12,7 +12,7 @@ enum DeepLinkHandler {
             if url.host == "auth", url.path.contains("confirm") || containsEmailConfirmationType(in: url) {
                 return .emailConfirmation
             }
-            if url.host == "auth", url.path.contains("reset") || url.fragment?.contains("type=recovery") == true {
+            if url.host == "auth", url.path.contains("reset") || containsPasswordRecoveryType(in: url) {
                 return .passwordRecovery
             }
             if let slug = ItineraryShareService.parseShareSlug(from: url) {
@@ -32,10 +32,20 @@ enum DeepLinkHandler {
     }
 
     private static func containsEmailConfirmationType(in url: URL) -> Bool {
-        let combined = [url.fragment, url.query, url.absoluteString]
-            .compactMap { $0 }
-            .joined(separator: "&")
+        let combined = authParamString(in: url)
         return combined.localizedCaseInsensitiveContains("type=signup")
             || combined.localizedCaseInsensitiveContains("type=email")
+    }
+
+    private static func containsPasswordRecoveryType(in url: URL) -> Bool {
+        let combined = authParamString(in: url)
+        return combined.localizedCaseInsensitiveContains("type=recovery")
+            || combined.localizedCaseInsensitiveContains("code=")
+    }
+
+    private static func authParamString(in url: URL) -> String {
+        [url.fragment, url.query, url.absoluteString]
+            .compactMap { $0 }
+            .joined(separator: "&")
     }
 }

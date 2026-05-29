@@ -1,4 +1,2 @@
 # Rewrite /i/<slug> to share.html (target must NOT match /i/* or Cloudflare reports infinite loop)
 /i/*  /share.html  200
-/auth/confirm  /auth/confirm.html  200
-/auth/reset-password  /auth/reset-password.html  200

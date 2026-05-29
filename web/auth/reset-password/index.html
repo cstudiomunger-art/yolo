@@ -89,8 +89,10 @@
       <p id="msg-error"></p>
     </div>
   </div>
+  <script src="/auth/auth-callback.js"></script>
   <script>
     (function () {
+      const auth = window.YOLOAuthCallback;
       const lang = (navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en";
       const appScheme = "yoloapp://auth/reset-password";
       const copy = {
@@ -114,28 +116,9 @@
         },
       };
       const t = copy[lang];
+      const params = auth.parseAuthParams();
 
-      function parseAuthParams() {
-        const hash = (location.hash || "").replace(/^#/, "");
-        const search = (location.search || "").replace(/^\?/, "");
-        const raw = [hash, search].filter(Boolean).join("&");
-        const params = new URLSearchParams(raw);
-        const out = {};
-        params.forEach(function (v, k) { out[k] = v; });
-        return out;
-      }
-
-      function appDeepLink(params) {
-        const qs = new URLSearchParams(params).toString();
-        return appScheme + (qs ? "#" + qs : "");
-      }
-
-      const params = parseAuthParams();
-      const hasError = Boolean(params.error || params.error_code);
-      const hasSession = Boolean(params.access_token);
-      const isRecovery = params.type === "recovery" || hasSession;
-
-      if (hasError || (!hasSession && !isRecovery)) {
+      if (auth.hasAuthError(params) || !auth.hasAuthPayload(params)) {
         document.getElementById("state-error").classList.remove("hidden");
         document.getElementById("title-error").textContent = t.errorTitle;
         document.getElementById("msg-error").textContent =
@@ -148,14 +131,16 @@
       document.getElementById("msg-success").textContent = t.successMsg;
       document.getElementById("hint-success").textContent = t.hint;
 
-      const deepLink = appDeepLink(params);
+      const deepLink = auth.appDeepLinkFromLocation(appScheme);
       const openApp = document.getElementById("open-app");
       openApp.textContent = t.openApp;
       openApp.href = deepLink;
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         document.getElementById("hint-success").textContent = t.autoOpen;
-        setTimeout(function () { window.location.href = deepLink; }, 600);
+        setTimeout(function () {
+          window.location.href = deepLink;
+        }, 600);
       }
     })();
   </script>
