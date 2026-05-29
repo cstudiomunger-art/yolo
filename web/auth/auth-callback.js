@@ -46,9 +46,21 @@
   function hasAuthPayload(params) {
     return Boolean(
       params.access_token ||
+      params.refresh_token ||
       params.code ||
+      params.token_hash ||
       params.type === "signup" ||
       params.type === "email" ||
+      params.type === "recovery"
+    );
+  }
+
+  function hasRecoveryPayload(params) {
+    if (hasAuthError(params)) return false;
+    return Boolean(
+      params.token_hash ||
+      params.code ||
+      params.access_token ||
       params.type === "recovery"
     );
   }
@@ -60,5 +72,6 @@
     decodeJwtEmail: decodeJwtEmail,
     hasAuthError: hasAuthError,
     hasAuthPayload: hasAuthPayload,
+    hasRecoveryPayload: hasRecoveryPayload,
   };
 })(window);

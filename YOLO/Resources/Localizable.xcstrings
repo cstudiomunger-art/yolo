@@ -666,26 +666,6 @@
         }
       }
     },
-    "Agree to terms and privacy policy" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "同意服务条款与隐私政策"
-          }
-        }
-      }
-    },
-    "Agreed to terms and privacy policy" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已同意服务条款与隐私政策"
-          }
-        }
-      }
-    },
     "Account deletion is not available in this build." : {
 
     },
@@ -709,6 +689,26 @@
     },
     "Added to Day %lld" : {
 
+    },
+    "Agree to terms and privacy policy" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同意服务条款与隐私政策"
+          }
+        }
+      }
+    },
+    "Agreed to terms and privacy policy" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已同意服务条款与隐私政策"
+          }
+        }
+      }
     },
     "AI-generated, China-aware" : {
       "extractionState" : "stale",
@@ -1374,16 +1374,6 @@
         }
       }
     },
-    "Go to sign in" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "去登录"
-          }
-        }
-      }
-    },
     "From $%lld/night" : {
 
     },
@@ -1413,6 +1403,16 @@
     },
     "Get Started" : {
 
+    },
+    "Go to sign in" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "去登录"
+          }
+        }
+      }
     },
     "Going to multiple cities? Tap to select more." : {
       "extractionState" : "stale",
@@ -1491,6 +1491,16 @@
     "I agree to the " : {
 
     },
+    "If you don't see the email, check your spam folder or try resending." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "若未收到邮件，请检查垃圾箱或尝试重新发送。"
+          }
+        }
+      }
+    },
     "Image" : {
 
     },
@@ -1503,16 +1513,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "包含在 %@ 语音导览中"
-          }
-        }
-      }
-    },
-    "If you don't see the email, check your spam folder or try resending." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "若未收到邮件，请检查垃圾箱或尝试重新发送。"
           }
         }
       }
@@ -1722,6 +1722,16 @@
         }
       }
     },
+    "Password must be at least %lld characters." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "密码至少需要 %lld 个字符。"
+          }
+        }
+      }
+    },
     "Password reset email sent. Check your inbox." : {
       "localizations" : {
         "zh-Hans" : {
@@ -1738,16 +1748,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "密码已更新成功。"
-          }
-        }
-      }
-    },
-    "Password must be at least %lld characters." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "密码至少需要 %lld 个字符。"
           }
         }
       }
@@ -1826,6 +1826,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "规划中："
+          }
+        }
+      }
+    },
+    "Please wait %lld seconds before requesting another email." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请等待 %lld 秒后再请求发送邮件。"
           }
         }
       }
@@ -2004,22 +2014,22 @@
     "Reorder" : {
 
     },
-    "Resend reset link" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重发重置链接"
-          }
-        }
-      }
-    },
     "Resend confirmation email" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "重发确认邮件"
+          }
+        }
+      }
+    },
+    "Resend reset link" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重发重置链接"
           }
         }
       }
@@ -2319,11 +2329,22 @@
 
     },
     "Too many attempts. Please try again later." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "操作过于频繁，请稍后再试。"
+          }
+        }
+      }
+    },
+    "Too many password reset emails sent. Wait a few minutes, check your inbox and spam folder, then try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重置密码邮件发送过于频繁。请等待几分钟，并检查收件箱与垃圾箱中是否已有邮件，然后再试。"
           }
         }
       }
@@ -2416,6 +2437,16 @@
     },
     "Update password" : {
 
+    },
+    "Use a different email" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用其他邮箱"
+          }
+        }
+      }
     },
     "v1.0.0" : {
       "extractionState" : "stale",
@@ -2587,17 +2618,6 @@
     "Your China adventure starts here" : {
 
     },
-    "Use a different email" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用其他邮箱"
-          }
-        }
-      }
-    },
-
     "Your in-China helper" : {
 
     },

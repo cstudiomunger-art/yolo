@@ -1,4 +1,4 @@
-import Supabase
+import Combine
 import SwiftUI
 
 struct ForgotPasswordView: View {
@@ -9,6 +9,9 @@ struct ForgotPasswordView: View {
     @State private var errorMessage: String?
     @State private var infoMessage: String?
     @State private var resetLinkSent = false
+    @State private var retryAfter: Date?
+
+    private let resendCooldownSeconds = 60
 
     var body: some View {
         Form {
@@ -23,6 +26,11 @@ struct ForgotPasswordView: View {
         .onAppear {
             if email.isEmpty, !initialEmail.isEmpty {
                 email = initialEmail
+            }
+        }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { now in
+            if let retryAfter, retryAfter <= now {
+                self.retryAfter = nil
             }
         }
     }
@@ -47,7 +55,7 @@ struct ForgotPasswordView: View {
             Button(String(localized: "Send reset link")) {
                 sendReset()
             }
-            .disabled(!canSubmit)
+            .disabled(!canSubmit || isInCooldown)
         }
 
         statusSections
@@ -70,7 +78,7 @@ struct ForgotPasswordView: View {
             Button(String(localized: "Resend reset link")) {
                 sendReset()
             }
-            .disabled(isLoading || AppConfig.useMock)
+            .disabled(isLoading || AppConfig.useMock || isInCooldown)
 
             Button(String(localized: "Use a different email")) {
                 resetLinkSent = false
@@ -99,6 +107,11 @@ struct ForgotPasswordView: View {
                 Text(errorMessage)
                     .foregroundStyle(.red)
             }
+        } else if let cooldownHint {
+            Section {
+                Text(cooldownHint)
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
         }
     }
 
@@ -112,8 +125,27 @@ struct ForgotPasswordView: View {
             && AuthFormSupport.isValidEmail(trimmedEmail)
     }
 
+    private var isInCooldown: Bool {
+        guard let retryAfter else { return false }
+        return retryAfter > .now
+    }
+
+    private var cooldownHint: String? {
+        guard let retryAfter, retryAfter > .now else { return nil }
+        let seconds = max(1, Int(retryAfter.timeIntervalSinceNow.rounded(.up)))
+        return String(
+            format: String(localized: "Please wait %lld seconds before requesting another email."),
+            seconds
+        )
+    }
+
     private func sendReset() {
         clearMessages()
+
+        if isInCooldown, let cooldownHint {
+            errorMessage = cooldownHint
+            return
+        }
 
         guard AuthFormSupport.isValidEmail(trimmedEmail) else {
             errorMessage = String(localized: "Enter a valid email address.")
@@ -125,15 +157,16 @@ struct ForgotPasswordView: View {
             defer { isLoading = false }
 
             do {
-                try await SupabaseManager.shared.auth.resetPasswordForEmail(
-                    trimmedEmail,
-                    redirectTo: AppConfig.authRedirectURL
-                )
+                try await PasswordRecoveryEmailService.sendResetEmail(to: trimmedEmail)
                 resetLinkSent = true
                 infoMessage = String(localized: "Password reset email sent. Check your inbox.")
+                retryAfter = Date().addingTimeInterval(TimeInterval(resendCooldownSeconds))
                 TelemetryService.shared.logEvent("password_reset_requested")
             } catch {
                 errorMessage = AuthFormSupport.errorMessage(for: error)
+                if AuthFormSupport.isRateLimitError(error) {
+                    retryAfter = Date().addingTimeInterval(TimeInterval(resendCooldownSeconds * 2))
+                }
             }
         }
     }

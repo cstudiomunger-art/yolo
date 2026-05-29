@@ -78,3 +78,5 @@ Auth → **URL Configuration**：
 | Site URL | `https://yolo.cstudiomunger.workers.dev` |
 | Redirect URLs | `https://yolo.cstudiomunger.workers.dev/auth/confirm` |
 | | `https://yolo.cstudiomunger.workers.dev/auth/reset-password` |
+
+重置密码邮件链接会在网页完成验证与改密；App 通过非 PKCE 的 `/auth/v1/recover` 发起，回调后浏览器 URL 带 `#access_token`（implicit flow）。若使用自定义邮件模板，也可改为 `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery`。

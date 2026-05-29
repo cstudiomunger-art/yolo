@@ -13,6 +13,7 @@
       --card: #fff;
       --success: #1b7f4a;
       --error: #b00020;
+      --border: #e4e0da;
     }
     * { box-sizing: border-box; }
     body {
@@ -56,10 +57,36 @@
     }
     .icon.success { background: #e8f6ee; color: var(--success); }
     .icon.error { background: #fdecea; color: var(--error); }
+    .icon.pending { background: #f5f0e8; color: var(--accent); }
     h1 { font-size: 1.35rem; font-weight: 600; margin: 0 0 10px; }
     p { margin: 0 0 12px; color: var(--muted); font-size: 0.95rem; }
+    .email { color: var(--text); font-weight: 600; word-break: break-all; }
+    .field {
+      text-align: left;
+      margin-bottom: 14px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #fff;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(200, 169, 126, 0.2);
+    }
     .cta {
       display: block;
+      width: 100%;
       margin-top: 22px;
       background: var(--accent);
       color: #fff;
@@ -68,81 +95,325 @@
       border-radius: 10px;
       font-weight: 600;
       font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .cta:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .cta.secondary {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      margin-top: 10px;
+      font-weight: 500;
     }
     .hint { font-size: 0.8rem; color: #999; margin-top: 18px; }
+    .form-error {
+      color: var(--error);
+      font-size: 0.85rem;
+      text-align: left;
+      margin-top: 8px;
+    }
     .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="card">
     <p class="badge">YOLO HAPPY</p>
+
+    <div id="state-confirm" class="hidden">
+      <div class="icon pending">🔒</div>
+      <h1 id="title-confirm"></h1>
+      <p id="msg-confirm"></p>
+      <button id="btn-confirm" type="button" class="cta"></button>
+      <p id="hint-confirm" class="hint"></p>
+    </div>
+
+    <div id="state-form" class="hidden">
+      <div class="icon success">✓</div>
+      <h1 id="title-form"></h1>
+      <p id="msg-form"></p>
+      <p id="email-form" class="email hidden"></p>
+      <form id="password-form" novalidate>
+        <div class="field">
+          <label for="password" id="label-password"></label>
+          <input id="password" type="password" autocomplete="new-password" required minlength="6" />
+        </div>
+        <div class="field">
+          <label for="confirm-password" id="label-confirm-password"></label>
+          <input id="confirm-password" type="password" autocomplete="new-password" required minlength="6" />
+        </div>
+        <p id="form-error" class="form-error hidden"></p>
+        <button id="btn-submit" type="submit" class="cta"></button>
+      </form>
+    </div>
+
     <div id="state-success" class="hidden">
       <div class="icon success">✓</div>
       <h1 id="title-success"></h1>
       <p id="msg-success"></p>
-      <a id="open-app" class="cta" href="#"></a>
+      <a id="open-app" class="cta secondary hidden" href="#"></a>
       <p id="hint-success" class="hint"></p>
     </div>
+
     <div id="state-error" class="hidden">
       <div class="icon error">!</div>
       <h1 id="title-error"></h1>
       <p id="msg-error"></p>
     </div>
-  </div>
-  <script src="/auth/auth-callback.js"></script>
-  <script>
-    (function () {
-      const auth = window.YOLOAuthCallback;
-      const lang = (navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en";
-      const appScheme = "yoloapp://auth/reset-password";
-      const copy = {
-        zh: {
-          successTitle: "链接验证成功",
-          successMsg: "请在 YOLO App 中设置您的新密码。",
-          openApp: "打开 YOLO App 设置密码",
-          autoOpen: "正在尝试打开 App…",
-          hint: "若未自动跳转，请点击上方按钮。",
-          errorTitle: "链接无效",
-          errorDefault: "重置链接已过期或无效，请重新申请重置密码。",
-        },
-        en: {
-          successTitle: "Link verified",
-          successMsg: "Open YOLO App to choose a new password.",
-          openApp: "Open YOLO App",
-          autoOpen: "Opening the app…",
-          hint: "If nothing happens, tap the button above.",
-          errorTitle: "Invalid link",
-          errorDefault: "This reset link is invalid or expired. Request a new one from the app.",
-        },
-      };
-      const t = copy[lang];
-      const params = auth.parseAuthParams();
 
-      if (auth.hasAuthError(params) || !auth.hasAuthPayload(params)) {
-        document.getElementById("state-error").classList.remove("hidden");
-        document.getElementById("title-error").textContent = t.errorTitle;
-        document.getElementById("msg-error").textContent =
-          params.error_description || params.error || t.errorDefault;
+    <div id="state-loading" class="hidden">
+      <div class="icon pending">…</div>
+      <h1 id="title-loading"></h1>
+      <p id="msg-loading"></p>
+    </div>
+  </div>
+
+  <script src="/config.js"></script>
+  <script src="/auth/auth-callback.js"></script>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const cfg = window.YOLO_WEB_CONFIG || {};
+    const auth = window.YOLOAuthCallback;
+    const lang = (navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en";
+    const minPasswordLength = 6;
+    const appScheme = "yoloapp://auth/reset-password";
+
+    const copy = {
+      zh: {
+        confirmTitle: "确认重置密码",
+        confirmMsg: "点击下方按钮验证邮件链接，验证通过后即可设置新密码。",
+        confirmBtn: "确认并继续",
+        confirmHint: "链接仅可使用一次，请在 5 分钟内完成。",
+        verifyingTitle: "正在验证…",
+        verifyingMsg: "请稍候。",
+        formTitle: "设置新密码",
+        formMsg: "请输入您的新密码。",
+        newPassword: "新密码",
+        confirmPassword: "确认密码",
+        submitBtn: "更新密码",
+        mismatch: "两次输入的密码不一致。",
+        tooShort: "密码至少需要 6 个字符。",
+        updating: "正在更新密码…",
+        successTitle: "密码已更新",
+        successMsg: "您可以使用新密码登录 YOLO HAPPY。",
+        openApp: "打开 YOLO App",
+        successHint: "也可以直接在 App 中使用新密码登录。",
+        errorTitle: "链接无效",
+        errorDefault: "重置链接已过期或无效，请返回 App 重新申请重置密码。",
+        pkceError: "此链接需在发起重置的同一设备上打开 App 完成验证。请重新申请重置邮件，并在本页面完成改密。",
+        invalidTitle: "无效的重置链接",
+        invalidMsg: "请从重置密码邮件中打开链接，不要直接访问此页面。",
+        configError: "页面配置缺失，请稍后再试。",
+      },
+      en: {
+        confirmTitle: "Confirm password reset",
+        confirmMsg: "Tap below to verify your email link. You can choose a new password right after verification.",
+        confirmBtn: "Confirm and continue",
+        confirmHint: "This link works once. Complete within 5 minutes.",
+        verifyingTitle: "Verifying…",
+        verifyingMsg: "Please wait.",
+        formTitle: "Choose a new password",
+        formMsg: "Enter your new password below.",
+        newPassword: "New password",
+        confirmPassword: "Confirm password",
+        submitBtn: "Update password",
+        mismatch: "Passwords do not match.",
+        tooShort: "Password must be at least 6 characters.",
+        updating: "Updating password…",
+        successTitle: "Password updated",
+        successMsg: "You can now sign in to YOLO HAPPY with your new password.",
+        openApp: "Open YOLO App",
+        successHint: "You can also sign in from the app with your new password.",
+        errorTitle: "Invalid link",
+        errorDefault: "This reset link is invalid or expired. Request a new one from the app.",
+        pkceError: "This link must be completed in the app on the device that requested the reset. Request a new email and finish on this page.",
+        invalidTitle: "Invalid reset link",
+        invalidMsg: "Open the link from your password reset email instead of visiting this page directly.",
+        configError: "Missing page configuration. Please try again later.",
+      },
+    };
+    const t = copy[lang];
+    const params = auth.parseAuthParams();
+
+    const states = {
+      confirm: document.getElementById("state-confirm"),
+      form: document.getElementById("state-form"),
+      success: document.getElementById("state-success"),
+      error: document.getElementById("state-error"),
+      loading: document.getElementById("state-loading"),
+    };
+
+    function showState(name) {
+      Object.keys(states).forEach(function (key) {
+        states[key].classList.toggle("hidden", key !== name);
+      });
+    }
+
+    function showError(title, message) {
+      showState("error");
+      document.getElementById("title-error").textContent = title;
+      document.getElementById("msg-error").textContent = message;
+    }
+
+    function showLoading(title, message) {
+      showState("loading");
+      document.getElementById("title-loading").textContent = title;
+      document.getElementById("msg-loading").textContent = message;
+    }
+
+    if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+      showError(t.errorTitle, t.configError);
+      throw new Error("missing config");
+    }
+
+    if (auth.hasAuthError(params)) {
+      showError(t.errorTitle, params.error_description || params.error || t.errorDefault);
+      throw new Error("auth error");
+    }
+
+    if (!auth.hasRecoveryPayload(params)) {
+      showError(t.invalidTitle, t.invalidMsg);
+      throw new Error("invalid link");
+    }
+
+    const supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+      auth: {
+        detectSessionInUrl: false,
+        persistSession: true,
+        autoRefreshToken: false,
+      },
+    });
+
+    let verifiedEmail = null;
+
+    async function establishRecoverySession() {
+      if (params.token_hash && params.type) {
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: params.token_hash,
+          type: params.type,
+        });
+        if (error) throw error;
+        verifiedEmail = data.user?.email || null;
         return;
       }
 
-      document.getElementById("state-success").classList.remove("hidden");
+      if (params.access_token && params.refresh_token) {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: params.access_token,
+          refresh_token: params.refresh_token,
+        });
+        if (error) throw error;
+        verifiedEmail = data.user?.email || auth.decodeJwtEmail(params.access_token);
+        return;
+      }
+
+      if (params.code) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(params.code);
+        if (error) {
+          const msg = (error.message || "").toLowerCase();
+          if (msg.includes("code verifier") || msg.includes("non-empty")) {
+            throw new Error(t.pkceError);
+          }
+          throw error;
+        }
+        verifiedEmail = data.user?.email || null;
+        return;
+      }
+
+      throw new Error(t.errorDefault);
+    }
+
+    function showPasswordForm() {
+      showState("form");
+      document.getElementById("title-form").textContent = t.formTitle;
+      document.getElementById("msg-form").textContent = t.formMsg;
+      document.getElementById("label-password").textContent = t.newPassword;
+      document.getElementById("label-confirm-password").textContent = t.confirmPassword;
+      document.getElementById("btn-submit").textContent = t.submitBtn;
+
+      if (verifiedEmail) {
+        const emailEl = document.getElementById("email-form");
+        emailEl.textContent = verifiedEmail;
+        emailEl.classList.remove("hidden");
+      }
+    }
+
+    function showSuccess() {
+      showState("success");
       document.getElementById("title-success").textContent = t.successTitle;
       document.getElementById("msg-success").textContent = t.successMsg;
-      document.getElementById("hint-success").textContent = t.hint;
+      document.getElementById("hint-success").textContent = t.successHint;
 
       const deepLink = auth.appDeepLinkFromLocation(appScheme);
       const openApp = document.getElementById("open-app");
       openApp.textContent = t.openApp;
       openApp.href = deepLink;
+      openApp.classList.remove("hidden");
+    }
 
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        document.getElementById("hint-success").textContent = t.autoOpen;
-        setTimeout(function () {
-          window.location.href = deepLink;
-        }, 600);
+    showState("confirm");
+    document.getElementById("title-confirm").textContent = t.confirmTitle;
+    document.getElementById("msg-confirm").textContent = t.confirmMsg;
+    document.getElementById("btn-confirm").textContent = t.confirmBtn;
+    document.getElementById("hint-confirm").textContent = t.confirmHint;
+
+    document.getElementById("btn-confirm").addEventListener("click", async function () {
+      const btn = document.getElementById("btn-confirm");
+      btn.disabled = true;
+      showLoading(t.verifyingTitle, t.verifyingMsg);
+
+      try {
+        await establishRecoverySession();
+        showPasswordForm();
+      } catch (err) {
+        showError(t.errorTitle, err.message || t.errorDefault);
+      } finally {
+        btn.disabled = false;
       }
-    })();
+    });
+
+    document.getElementById("password-form").addEventListener("submit", async function (event) {
+      event.preventDefault();
+      const formError = document.getElementById("form-error");
+      const submitBtn = document.getElementById("btn-submit");
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirm-password").value;
+
+      formError.classList.add("hidden");
+      formError.textContent = "";
+
+      if (password.length < minPasswordLength) {
+        formError.textContent = t.tooShort;
+        formError.classList.remove("hidden");
+        return;
+      }
+      if (password !== confirmPassword) {
+        formError.textContent = t.mismatch;
+        formError.classList.remove("hidden");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      showLoading(t.verifyingTitle, t.updating);
+
+      try {
+        const { error } = await supabase.auth.updateUser({ password: password });
+        if (error) throw error;
+        await supabase.auth.signOut();
+        showSuccess();
+      } catch (err) {
+        showPasswordForm();
+        formError.textContent = err.message || t.errorDefault;
+        formError.classList.remove("hidden");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>

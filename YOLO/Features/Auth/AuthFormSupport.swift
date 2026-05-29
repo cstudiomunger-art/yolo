@@ -26,6 +26,13 @@ enum AuthFormSupport {
         return user.identities?.isEmpty == true
     }
 
+    static func isRateLimitError(_ error: Error) -> Bool {
+        let description = error.localizedDescription
+        return description.localizedCaseInsensitiveContains("rate limit")
+            || description.localizedCaseInsensitiveContains("over_email_send_rate_limit")
+            || description.localizedCaseInsensitiveContains("too many requests")
+    }
+
     static func errorMessage(for error: Error) -> String {
         let description = error.localizedDescription
         if description.localizedCaseInsensitiveContains("email not confirmed") {
@@ -34,8 +41,10 @@ enum AuthFormSupport {
         if description.localizedCaseInsensitiveContains("invalid login credentials") {
             return String(localized: "Incorrect email or password. Please try again.")
         }
-        if description.localizedCaseInsensitiveContains("rate limit") {
-            return String(localized: "Too many attempts. Please try again later.")
+        if description.localizedCaseInsensitiveContains("rate limit")
+            || description.localizedCaseInsensitiveContains("over_email_send_rate_limit")
+            || description.localizedCaseInsensitiveContains("too many requests") {
+            return String(localized: "Too many password reset emails sent. Wait a few minutes, check your inbox and spam folder, then try again.")
         }
         if description.localizedCaseInsensitiveContains("user already registered")
             || description.localizedCaseInsensitiveContains("email_exists")
