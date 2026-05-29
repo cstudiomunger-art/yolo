@@ -65,6 +65,40 @@
     );
   }
 
+  function authLandingPath(params) {
+    const type = (params.type || "").toLowerCase();
+    if (hasAuthError(params)) {
+      return type === "recovery" ? "/auth/reset-password" : "/auth/confirm";
+    }
+    if (type === "recovery") return "/auth/reset-password";
+    if (type === "signup" || type === "email" || type === "magiclink") {
+      return "/auth/confirm";
+    }
+    if (params.token_hash) {
+      return type === "recovery" ? "/auth/reset-password" : "/auth/confirm";
+    }
+    if (params.code) return "/auth/reset-password";
+    if (params.access_token) {
+      return type === "signup" || type === "email"
+        ? "/auth/confirm"
+        : "/auth/reset-password";
+    }
+    return null;
+  }
+
+  function maybeRedirectAuthLanding() {
+    const params = parseAuthParams();
+    const target = authLandingPath(params);
+    if (!target) return false;
+
+    const current = (location.pathname || "/").replace(/\/$/, "") || "/";
+    const desired = target.replace(/\/$/, "") || "/";
+    if (current === desired) return false;
+
+    location.replace(target + location.search + location.hash);
+    return true;
+  }
+
   global.YOLOAuthCallback = {
     parseAuthParams: parseAuthParams,
     appDeepLink: appDeepLink,
@@ -73,5 +107,7 @@
     hasAuthError: hasAuthError,
     hasAuthPayload: hasAuthPayload,
     hasRecoveryPayload: hasRecoveryPayload,
+    authLandingPath: authLandingPath,
+    maybeRedirectAuthLanding: maybeRedirectAuthLanding,
   };
 })(window);

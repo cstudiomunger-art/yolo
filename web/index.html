@@ -4,6 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>YOLO HAPPY</title>
+  <script src="/auth/auth-callback.js"></script>
+  <script>
+    if (window.YOLOAuthCallback.maybeRedirectAuthLanding()) {
+      document.documentElement.lang = "zh-Hans";
+    }
+  </script>
   <style>
     body { font-family: -apple-system, sans-serif; max-width: 480px; margin: 48px auto; padding: 0 20px; color: #1a1a1a; line-height: 1.6; }
     h1 { font-size: 1.5rem; }
@@ -12,6 +18,7 @@
   </style>
 </head>
 <body>
+  <p id="auth-redirect" hidden>正在跳转到验证页面…</p>
   <h1>YOLO HAPPY</h1>
   <p>Plan and explore travel in China — itineraries, audio guides, and prep checklists.</p>
   <p><strong>Shared trip links</strong> look like:</p>

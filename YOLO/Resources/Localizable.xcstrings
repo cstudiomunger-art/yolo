@@ -2414,6 +2414,9 @@
     "Unable to load content. Pull to refresh." : {
 
     },
+    "Unable to send password reset email. Please try again." : {
+
+    },
     "Unlock Audio Guide" : {
       "localizations" : {
         "zh-Hans" : {
