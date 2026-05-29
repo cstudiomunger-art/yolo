@@ -1,5 +1,6 @@
 # Cloudflare Worker「yolo」— 默认域名 yolo.cstudiomunger.workers.dev
-# 部署：在 web/ 目录执行 npm run build && wrangler deploy
+# Git 自动部署请用仓库根目录 wrangler.jsonc + `npm run build:web`（见 web/README.md）
+# 本文件仅用于在 web/ 目录手动 wrangler deploy
 
 name = "yolo"
 compatibility_date = "2024-04-01"

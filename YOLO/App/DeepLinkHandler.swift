@@ -4,10 +4,14 @@ enum DeepLinkHandler {
     enum Action: Equatable {
         case openSharedItinerary(slug: String)
         case passwordRecovery
+        case emailConfirmation
     }
 
     static func action(for url: URL) -> Action? {
         if url.scheme?.lowercased() == "yoloapp" {
+            if url.host == "auth", url.path.contains("confirm") || containsEmailConfirmationType(in: url) {
+                return .emailConfirmation
+            }
             if url.host == "auth", url.path.contains("reset") || url.fragment?.contains("type=recovery") == true {
                 return .passwordRecovery
             }
@@ -21,6 +25,17 @@ enum DeepLinkHandler {
         if url.absoluteString.contains("type=recovery") {
             return .passwordRecovery
         }
+        if containsEmailConfirmationType(in: url) {
+            return .emailConfirmation
+        }
         return nil
+    }
+
+    private static func containsEmailConfirmationType(in url: URL) -> Bool {
+        let combined = [url.fragment, url.query, url.absoluteString]
+            .compactMap { $0 }
+            .joined(separator: "&")
+        return combined.localizedCaseInsensitiveContains("type=signup")
+            || combined.localizedCaseInsensitiveContains("type=email")
     }
 }

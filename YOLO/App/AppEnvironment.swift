@@ -75,6 +75,14 @@ final class AppEnvironment {
             } catch {
                 TelemetryService.shared.recordError(error, context: "password_recovery_link")
             }
+        case .emailConfirmation:
+            do {
+                _ = try await SupabaseManager.shared.auth.session(from: url)
+                TelemetryService.shared.logEvent("email_confirmed")
+                await profileSync.syncAfterSignIn()
+            } catch {
+                TelemetryService.shared.recordError(error, context: "email_confirmation_link")
+            }
         }
     }
 

@@ -2,82 +2,192 @@ import Supabase
 import SwiftUI
 
 struct LoginView: View {
-    @Environment(AppEnvironment.self) private var appEnv
+    private enum AuthMode: String, CaseIterable, Identifiable {
+        case signIn
+        case signUp
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .signIn: String(localized: "Sign In")
+            case .signUp: String(localized: "Sign Up")
+            }
+        }
+    }
+
     @Environment(\.dismiss) private var dismiss
 
+    @State private var mode: AuthMode = .signIn
     @State private var email = ""
     @State private var password = ""
+    @State private var confirmPassword = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var infoMessage: String?
     @State private var acceptedLegal = false
+    @State private var pendingEmailConfirmation = false
+    @State private var suggestSignIn = false
 
     var body: some View {
         Form {
             if AppConfig.useMock {
                 Section {
-                    Text("当前为 Mock 模式，未连接 Supabase。请在 Secrets.xcconfig 中配置 SUPABASE_URL 与 SUPABASE_ANON_KEY。")
+                    Text(String(localized: "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig."))
                         .foregroundStyle(.orange)
                 }
             }
 
-            Section {
-                TextField("邮箱", text: $email)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
+            if pendingEmailConfirmation {
+                pendingConfirmationSection
+            } else {
+                authFormSections
+            }
+        }
+        .navigationTitle(mode == .signIn ? String(localized: "Sign In") : String(localized: "Sign Up"))
+    }
 
-                SecureField("密码", text: $password)
-                    .textContentType(.password)
-
-                if !AppConfig.useMock {
-                    NavigationLink(String(localized: "Forgot password?")) {
-                        ForgotPasswordView()
-                    }
-                    .font(Theme.FontToken.inter(12))
+    @ViewBuilder
+    private var authFormSections: some View {
+        Section {
+            Picker(String(localized: "Account"), selection: $mode) {
+                ForEach(AuthMode.allCases) { option in
+                    Text(option.title).tag(option)
                 }
             }
+            .pickerStyle(.segmented)
+            .onChange(of: mode) { _, _ in
+                clearMessages()
+                confirmPassword = ""
+                suggestSignIn = false
+            }
+        }
 
+        Section {
+            TextField(String(localized: "Email"), text: $email)
+                .textContentType(.emailAddress)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+
+            SecureField(String(localized: "Password"), text: $password)
+                .textContentType(mode == .signUp ? .newPassword : .password)
+
+            if mode == .signUp {
+                SecureField(String(localized: "Confirm password"), text: $confirmPassword)
+                    .textContentType(.newPassword)
+            }
+
+            if mode == .signIn, !AppConfig.useMock {
+                NavigationLink(String(localized: "Forgot password?")) {
+                    ForgotPasswordView(initialEmail: trimmedEmail)
+                }
+                .font(Theme.FontToken.inter(12))
+            }
+        }
+
+        if mode == .signUp {
             Section {
-                Toggle(isOn: $acceptedLegal) {
+                HStack(alignment: .top, spacing: 10) {
+                    Button {
+                        acceptedLegal.toggle()
+                    } label: {
+                        Image(systemName: acceptedLegal ? "largecircle.fill.circle" : "circle")
+                            .font(.system(size: 20))
+                            .foregroundStyle(
+                                acceptedLegal ? Theme.ColorToken.accent : Theme.ColorToken.textMuted
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(
+                        acceptedLegal
+                            ? String(localized: "Agreed to terms and privacy policy")
+                            : String(localized: "Agree to terms and privacy policy")
+                    )
+
                     legalConsentLabel
                 }
             }
+        }
 
+        Section {
+            Button(primaryActionTitle) {
+                submit()
+            }
+            .disabled(!canSubmit)
+        }
+
+        if suggestSignIn {
             Section {
-                Button("登录") {
-                    signIn()
-                }
-                .disabled(cannotSubmitSignIn)
-
-                Button("注册") {
-                    signUp()
-                }
-                .disabled(cannotSubmitSignUp)
-            }
-
-            if isLoading {
-                Section {
-                    ProgressView()
-                }
-            }
-
-            if let infoMessage {
-                Section {
-                    Text(infoMessage)
-                        .foregroundStyle(Theme.ColorToken.accent)
-                }
-            }
-
-            if let errorMessage {
-                Section {
-                    Text(errorMessage)
-                        .foregroundStyle(.red)
+                Button(String(localized: "Go to sign in")) {
+                    mode = .signIn
+                    suggestSignIn = false
+                    clearMessages()
                 }
             }
         }
-        .navigationTitle("登录")
+
+        if isLoading {
+            Section {
+                ProgressView()
+            }
+        }
+
+        if let infoMessage {
+            Section {
+                Text(infoMessage)
+                    .foregroundStyle(Theme.ColorToken.accent)
+            }
+        }
+
+        if let errorMessage {
+            Section {
+                Text(errorMessage)
+                    .foregroundStyle(.red)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var pendingConfirmationSection: some View {
+        Section {
+            Text(String(localized: "Check your email to confirm your account before signing in."))
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+            Text(trimmedEmail)
+                .font(Theme.FontToken.inter(13, weight: .medium))
+        }
+
+        Section {
+            Button(String(localized: "Resend confirmation email")) {
+                resendConfirmation()
+            }
+            .disabled(isLoading || AppConfig.useMock)
+
+            Button(String(localized: "Back to sign in")) {
+                pendingEmailConfirmation = false
+                mode = .signIn
+                clearMessages()
+            }
+        }
+
+        if isLoading {
+            Section { ProgressView() }
+        }
+
+        if let infoMessage {
+            Section {
+                Text(infoMessage)
+                    .foregroundStyle(Theme.ColorToken.accent)
+            }
+        }
+
+        if let errorMessage {
+            Section {
+                Text(errorMessage)
+                    .foregroundStyle(.red)
+            }
+        }
     }
 
     private var legalConsentLabel: some View {
@@ -97,17 +207,58 @@ struct LoginView: View {
         }
     }
 
-    private var cannotSubmitSignIn: Bool {
-        email.isEmpty || password.isEmpty || isLoading || AppConfig.useMock
+    private var primaryActionTitle: String {
+        mode == .signIn ? String(localized: "Sign In") : String(localized: "Sign Up")
     }
 
-    private var cannotSubmitSignUp: Bool {
-        cannotSubmitSignIn || !acceptedLegal
+    private var trimmedEmail: String {
+        AuthFormSupport.trimmedEmail(email)
+    }
+
+    private var canSubmit: Bool {
+        guard !isLoading, !AppConfig.useMock else { return false }
+        guard AuthFormSupport.isValidEmail(trimmedEmail) else { return false }
+        guard password.count >= AuthFormSupport.minimumPasswordLength else { return false }
+
+        switch mode {
+        case .signIn:
+            return !password.isEmpty
+        case .signUp:
+            return password == confirmPassword && acceptedLegal
+        }
+    }
+
+    private func submit() {
+        clearMessages()
+        suggestSignIn = false
+
+        guard AuthFormSupport.isValidEmail(trimmedEmail) else {
+            errorMessage = String(localized: "Enter a valid email address.")
+            return
+        }
+        guard password.count >= AuthFormSupport.minimumPasswordLength else {
+            errorMessage = String(
+                format: String(localized: "Password must be at least %lld characters."),
+                AuthFormSupport.minimumPasswordLength
+            )
+            return
+        }
+
+        switch mode {
+        case .signIn:
+            signIn()
+        case .signUp:
+            guard password == confirmPassword else {
+                errorMessage = String(localized: "Passwords do not match.")
+                return
+            }
+            signUp()
+        }
     }
 
     private func signIn() {
         runAuth {
-            _ = try await SupabaseManager.shared.auth.signIn(email: email, password: password)
+            _ = try await SupabaseManager.shared.auth.signIn(email: trimmedEmail, password: password)
             TelemetryService.shared.logEvent("sign_in")
             dismiss()
         }
@@ -115,13 +266,53 @@ struct LoginView: View {
 
     private func signUp() {
         runAuth {
-            let response = try await SupabaseManager.shared.auth.signUp(email: email, password: password)
-            if response.session != nil {
-                TelemetryService.shared.logEvent("sign_up")
-                dismiss()
-            } else {
-                infoMessage = "注册成功。请查收确认邮件并点击链接后，再使用「登录」。"
+            let response = try await SupabaseManager.shared.auth.signUp(
+                email: trimmedEmail,
+                password: password,
+                redirectTo: AppConfig.emailConfirmationRedirectURL
+            )
+
+            if AuthFormSupport.isAlreadyRegisteredUser(response.user) {
+                suggestSignIn = true
+                errorMessage = String(localized: "An account with this email already exists. Try signing in instead.")
+                return
             }
+
+            TelemetryService.shared.logEvent("sign_up")
+
+            if response.session != nil {
+                dismiss()
+                return
+            }
+
+            try await completeSignInAfterSignUp()
+        }
+    }
+
+    private func completeSignInAfterSignUp() async throws {
+        do {
+            _ = try await SupabaseManager.shared.auth.signIn(email: trimmedEmail, password: password)
+            TelemetryService.shared.logEvent("sign_in")
+            dismiss()
+        } catch {
+            let message = AuthFormSupport.errorMessage(for: error)
+            if message == String(localized: "Email not confirmed. Check your sign-up confirmation email before signing in.") {
+                pendingEmailConfirmation = true
+                infoMessage = String(localized: "Sign up successful. Check your email and tap the confirmation link.")
+            } else {
+                throw error
+            }
+        }
+    }
+
+    private func resendConfirmation() {
+        runAuth {
+            try await SupabaseManager.shared.auth.resend(
+                email: trimmedEmail,
+                type: .signup,
+                emailRedirectTo: AppConfig.emailConfirmationRedirectURL
+            )
+            infoMessage = String(localized: "Confirmation email sent. Check your inbox.")
         }
     }
 
@@ -129,29 +320,26 @@ struct LoginView: View {
         Task {
             isLoading = true
             errorMessage = nil
-            infoMessage = nil
+            if !pendingEmailConfirmation {
+                infoMessage = nil
+            }
             defer { isLoading = false }
 
             do {
                 try await action()
             } catch {
-                errorMessage = authErrorMessage(for: error)
+                let message = AuthFormSupport.errorMessage(for: error)
+                errorMessage = message
+                if message == String(localized: "An account with this email already exists. Try signing in instead.") {
+                    suggestSignIn = true
+                }
             }
         }
     }
 
-    private func authErrorMessage(for error: Error) -> String {
-        let description = error.localizedDescription
-        if description.localizedCaseInsensitiveContains("email not confirmed") {
-            return "邮箱尚未确认。请查收注册确认邮件后再登录。"
-        }
-        if description.localizedCaseInsensitiveContains("invalid login credentials") {
-            return "邮箱或密码错误，请重试。"
-        }
-        if description.localizedCaseInsensitiveContains("rate limit") {
-            return "操作过于频繁，请稍后再试。"
-        }
-        return description
+    private func clearMessages() {
+        errorMessage = nil
+        infoMessage = nil
     }
 }
 

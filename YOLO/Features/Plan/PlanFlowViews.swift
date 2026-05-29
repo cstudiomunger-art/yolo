@@ -162,13 +162,17 @@ struct ItineraryDetailView: View {
     }
 
     private var currentItinerary: SampleItinerary {
-        SampleItinerary(
+        let days = editableDays.isEmpty ? itinerary.days : editableDays
+        let saved = appEnv.preferences.savedItineraries.first(where: { $0.id == itinerary.id })
+        return SampleItinerary(
             id: itinerary.id,
             title: itinerary.title,
             meta: itinerary.meta,
             routeSummary: itinerary.routeSummary,
             estimatedBudget: itinerary.estimatedBudget,
-            days: editableDays.isEmpty ? itinerary.days : editableDays
+            days: days,
+            shareSlug: saved?.shareSlug ?? itinerary.shareSlug,
+            isShared: saved?.isShared ?? itinerary.isShared
         )
     }
 
@@ -742,55 +746,69 @@ struct HotelCardView: View {
 // MARK: - Share
 
 struct ShareItinerarySheet: View {
+    private enum ShareMode: String, CaseIterable, Identifiable {
+        case image
+        case link
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .image: String(localized: "Image")
+            case .link: String(localized: "Link")
+            }
+        }
+    }
+
+    @Environment(AppEnvironment.self) private var appEnv
     let itinerary: SampleItinerary
     @Environment(\.dismiss) private var dismiss
+
+    @State private var mode: ShareMode = .image
     @State private var shareImage: UIImage?
+    @State private var imageRenderError: String?
+
+    @State private var shareSlug: String?
+    @State private var isSavingLink = false
+    @State private var linkSaveError: String?
+    @State private var linkCopied = false
+
     @State private var showSystemShare = false
-    @State private var renderError: String?
+    @State private var systemShareItems: [Any] = []
+
+    init(itinerary: SampleItinerary) {
+        self.itinerary = itinerary
+        _shareSlug = State(initialValue: itinerary.shareSlug)
+    }
+
+    private var branding: AppBranding { appEnv.contentMode.branding }
+
+    private var shareURL: URL? {
+        guard let slug = shareSlug else { return nil }
+        return ItineraryShareService.shareURL(slug: slug, branding: branding)
+    }
 
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
                 Text(String(localized: "Share Itinerary"))
                     .font(Theme.FontToken.playfair(18, weight: .semibold))
-                Text(String(localized: "Save or send your trip as an image."))
+                Text(itinerary.title)
                     .font(Theme.FontToken.inter(12))
                     .foregroundStyle(Theme.ColorToken.textMuted)
 
-                if let shareImage {
-                    ScrollView {
-                        Image(uiImage: shareImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
+                Picker(String(localized: "Share as"), selection: $mode) {
+                    ForEach(ShareMode.allCases) { option in
+                        Text(option.title).tag(option)
                     }
-                    .frame(maxHeight: 420)
+                }
+                .pickerStyle(.segmented)
 
-                    Button {
-                        showSystemShare = true
-                        TelemetryService.shared.logEvent("itinerary_share_image")
-                    } label: {
-                        Text(String(localized: "Share Image"))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Theme.ColorToken.accent)
-                            .foregroundStyle(.white)
-                    }
-                    .buttonStyle(.plain)
-                } else if let renderError {
-                    Text(renderError)
-                        .font(Theme.FontToken.inter(12))
-                        .foregroundStyle(.red)
-                    Button(String(localized: "Try Again")) {
-                        Task { await generateImage() }
-                    }
-                    .font(Theme.FontToken.inter(12, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.accent)
-                } else {
-                    ProgressView(String(localized: "Creating image…"))
-                        .frame(maxWidth: .infinity, minHeight: 200)
+                switch mode {
+                case .image:
+                    imageSection
+                case .link:
+                    linkSection
                 }
             }
             .padding(Theme.screenPadding)
@@ -800,28 +818,166 @@ struct ShareItinerarySheet: View {
                 }
             }
             .sheet(isPresented: $showSystemShare) {
-                if let shareImage {
-                    ShareSheet(items: shareItems(image: shareImage))
+                ShareSheet(items: systemShareItems)
+            }
+            .onChange(of: mode) { _, newMode in
+                switch newMode {
+                case .image:
+                    if shareImage == nil, imageRenderError == nil {
+                        Task { await generateImage() }
+                    }
+                case .link:
+                    Task { await ensureShareLink() }
                 }
             }
             .task {
-                await generateImage()
+                switch mode {
+                case .image:
+                    await generateImage()
+                case .link:
+                    await ensureShareLink()
+                }
             }
         }
     }
 
-    private func shareItems(image: UIImage) -> [Any] {
-        [image]
+    @ViewBuilder
+    private var imageSection: some View {
+        Text(String(localized: "Create a trip poster you can send to friends."))
+            .font(Theme.FontToken.inter(12))
+            .foregroundStyle(Theme.ColorToken.textMuted)
+
+        if let shareImage {
+            ScrollView {
+                Image(uiImage: shareImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .shadow(color: .black.opacity(0.08), radius: 8, y: 4)
+            }
+            .frame(maxHeight: 360)
+
+            Button {
+                systemShareItems = [shareImage]
+                showSystemShare = true
+                TelemetryService.shared.logEvent("itinerary_share_image")
+            } label: {
+                Text(String(localized: "Share Image"))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Theme.ColorToken.accent)
+                    .foregroundStyle(.white)
+            }
+            .buttonStyle(.plain)
+        } else if let imageRenderError {
+            Text(imageRenderError)
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(.red)
+            Button(String(localized: "Try Again")) {
+                Task { await generateImage() }
+            }
+            .font(Theme.FontToken.inter(12, weight: .medium))
+            .foregroundStyle(Theme.ColorToken.accent)
+        } else {
+            ProgressView(String(localized: "Creating image…"))
+                .frame(maxWidth: .infinity, minHeight: 180)
+        }
+    }
+
+    @ViewBuilder
+    private var linkSection: some View {
+        Text(String(localized: "Anyone with the link can view this trip read-only in a browser or the app."))
+            .font(Theme.FontToken.inter(12))
+            .foregroundStyle(Theme.ColorToken.textMuted)
+
+        if AppConfig.useMock {
+            Text(String(localized: "Link sharing requires a signed-in Supabase account."))
+                .font(Theme.FontToken.inter(11))
+                .foregroundStyle(Theme.ColorToken.warning)
+        } else if let shareURL {
+            Text(shareURL.absoluteString)
+                .font(Theme.FontToken.inter(11))
+                .foregroundStyle(Theme.ColorToken.accent)
+                .textSelection(.enabled)
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.ColorToken.backgroundSubtle)
+
+            HStack(spacing: 10) {
+                Button {
+                    UIPasteboard.general.string = shareURL.absoluteString
+                    linkCopied = true
+                } label: {
+                    Text(linkCopied ? String(localized: "Copied!") : String(localized: "Copy Link"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Theme.ColorToken.textPrimary)
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    systemShareItems = [shareURL]
+                    showSystemShare = true
+                    TelemetryService.shared.logEvent("itinerary_share_link")
+                } label: {
+                    Text(String(localized: "Share Link"))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Theme.ColorToken.accent)
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+            }
+        } else if isSavingLink {
+            ProgressView(String(localized: "Preparing link…"))
+                .frame(maxWidth: .infinity, minHeight: 120)
+        } else if let linkSaveError {
+            Text(linkSaveError)
+                .font(Theme.FontToken.inter(11))
+                .foregroundStyle(.red)
+            Button(String(localized: "Try Again")) {
+                Task { await ensureShareLink() }
+            }
+            .font(Theme.FontToken.inter(12, weight: .medium))
+            .foregroundStyle(Theme.ColorToken.accent)
+        }
     }
 
     private func generateImage() async {
-        renderError = nil
+        imageRenderError = nil
         shareImage = nil
         await Task.yield()
         guard let image = ItineraryShareImageRenderer.render(itinerary: itinerary) else {
-            renderError = String(localized: "Could not create share image. Please try again.")
+            imageRenderError = String(localized: "Could not create share image. Please try again.")
             return
         }
         shareImage = image
+    }
+
+    private func ensureShareLink() async {
+        guard !AppConfig.useMock else { return }
+        if isSavingLink { return }
+
+        if let existing = shareSlug ?? itinerary.shareSlug, !existing.isEmpty, itinerary.isShared {
+            shareSlug = existing
+            return
+        }
+
+        isSavingLink = true
+        linkSaveError = nil
+        linkCopied = false
+        defer { isSavingLink = false }
+
+        let slug = shareSlug ?? itinerary.shareSlug ?? ItineraryShareService.makeSlug()
+        var updated = itinerary
+        updated.shareSlug = slug
+        updated.isShared = true
+        shareSlug = slug
+
+        appEnv.preferences.updateItineraryShareState(updated)
+        await appEnv.profileSync.pushItinerariesNow()
+        TelemetryService.shared.logEvent("itinerary_share_link_enabled")
     }
 }

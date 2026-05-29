@@ -656,6 +656,36 @@
         }
       }
     },
+    "Account" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账号"
+          }
+        }
+      }
+    },
+    "Agree to terms and privacy policy" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "同意服务条款与隐私政策"
+          }
+        }
+      }
+    },
+    "Agreed to terms and privacy policy" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已同意服务条款与隐私政策"
+          }
+        }
+      }
+    },
     "Account deletion is not available in this build." : {
 
     },
@@ -717,6 +747,19 @@
       }
     },
     "Almost ready…" : {
+
+    },
+    "An account with this email already exists. Try signing in instead." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该邮箱已注册，请直接登录。"
+          }
+        }
+      }
+    },
+    "Anyone with the link can view this trip read-only in a browser or the app." : {
 
     },
     "Ask anything about traveling in China..." : {
@@ -787,6 +830,16 @@
     "Back to dates" : {
 
     },
+    "Back to sign in" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回登录"
+          }
+        }
+      }
+    },
     "Buy This Guide · $1.99" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -832,6 +885,16 @@
     },
     "Check your email for a password reset link." : {
 
+    },
+    "Check your email to confirm your account before signing in." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请先查收确认邮件并点击链接，再回到此处登录。"
+          }
+        }
+      }
     },
     "Checklist" : {
       "extractionState" : "stale",
@@ -928,6 +991,16 @@
     "Confirm password" : {
 
     },
+    "Confirmation email sent. Check your inbox." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确认邮件已发送，请查收收件箱。"
+          }
+        }
+      }
+    },
     "Connect to the internet to open shared trips." : {
 
     },
@@ -979,6 +1052,12 @@
         }
       }
     },
+    "Copied!" : {
+
+    },
+    "Copy Link" : {
+
+    },
     "Cost estimate" : {
 
     },
@@ -992,6 +1071,9 @@
 
     },
     "Could not load hotels" : {
+
+    },
+    "Create a trip poster you can send to friends." : {
 
     },
     "Creating image…" : {
@@ -1188,7 +1270,24 @@
       }
     },
     "Email" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "邮箱"
+          }
+        }
+      }
+    },
+    "Email not confirmed. Check your sign-up confirmation email before signing in." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "邮箱尚未确认。请查收注册确认邮件后再登录。"
+          }
+        }
+      }
     },
     "Emergency" : {
       "localizations" : {
@@ -1212,6 +1311,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "结束日期"
+          }
+        }
+      }
+    },
+    "Enter a valid email address." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入有效的邮箱地址。"
           }
         }
       }
@@ -1261,6 +1370,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "免费"
+          }
+        }
+      }
+    },
+    "Go to sign in" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "去登录"
           }
         }
       }
@@ -1372,6 +1491,9 @@
     "I agree to the " : {
 
     },
+    "Image" : {
+
+    },
     "In your trip" : {
 
     },
@@ -1381,6 +1503,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "包含在 %@ 语音导览中"
+          }
+        }
+      }
+    },
+    "If you don't see the email, check your spam folder or try resending." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "若未收到邮件，请检查垃圾箱或尝试重新发送。"
+          }
+        }
+      }
+    },
+    "Incorrect email or password. Please try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "邮箱或密码错误，请重试。"
           }
         }
       }
@@ -1404,6 +1546,12 @@
           }
         }
       }
+    },
+    "Link" : {
+
+    },
+    "Link sharing requires a signed-in Supabase account." : {
+
     },
     "Live · AI" : {
 
@@ -1475,6 +1623,16 @@
     },
     "Maybe Later" : {
 
+    },
+    "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前为 Mock 模式，未连接 Supabase。请在 Secrets.xcconfig 中配置 SUPABASE_URL 与 SUPABASE_ANON_KEY。"
+          }
+        }
+      }
     },
     "Mock 模式（未连接 Supabase）" : {
 
@@ -1550,6 +1708,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "行前采购"
+          }
+        }
+      }
+    },
+    "Password" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "密码"
+          }
+        }
+      }
+    },
+    "Password reset email sent. Check your inbox." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重置密码邮件已发送，请查收收件箱。"
+          }
+        }
+      }
+    },
+    "Password updated successfully." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "密码已更新成功。"
+          }
+        }
+      }
+    },
+    "Password must be at least %lld characters." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "密码至少需要 %lld 个字符。"
+          }
+        }
+      }
+    },
+    "Passwords do not match." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "两次输入的密码不一致。"
           }
         }
       }
@@ -1670,6 +1878,9 @@
           }
         }
       }
+    },
+    "Preparing link…" : {
+
     },
     "Preview" : {
 
@@ -1793,6 +2004,26 @@
     "Reorder" : {
 
     },
+    "Resend reset link" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重发重置链接"
+          }
+        }
+      }
+    },
+    "Resend confirmation email" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重发确认邮件"
+          }
+        }
+      }
+    },
     "Restore" : {
 
     },
@@ -1824,9 +2055,6 @@
           }
         }
       }
-    },
-    "Save or send your trip as an image." : {
-
     },
     "Save trip" : {
 
@@ -1929,6 +2157,9 @@
         }
       }
     },
+    "Share as" : {
+
+    },
     "Share Image" : {
 
     },
@@ -1942,11 +2173,44 @@
         }
       }
     },
+    "Share Link" : {
+
+    },
     "Shared trip" : {
 
     },
+    "Sign In" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录"
+          }
+        }
+      }
+    },
     "Sign in to plan your China trip" : {
 
+    },
+    "Sign Up" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注册"
+          }
+        }
+      }
+    },
+    "Sign up successful. Check your email and tap the confirmation link." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注册成功。请查收确认邮件并点击链接完成验证。"
+          }
+        }
+      }
     },
     "Skip" : {
 
@@ -2053,6 +2317,16 @@
     },
     "Title" : {
 
+    },
+    "Too many attempts. Please try again later." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作过于频繁，请稍后再试。"
+          }
+        }
+      }
     },
     "Travel Assistant" : {
       "extractionState" : "stale",
@@ -2313,6 +2587,17 @@
     "Your China adventure starts here" : {
 
     },
+    "Use a different email" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用其他邮箱"
+          }
+        }
+      }
+    },
+
     "Your in-China helper" : {
 
     },
@@ -2342,28 +2627,13 @@
     "Your trip starts tomorrow" : {
 
     },
-    "密码" : {
-
-    },
     "已登录：%@" : {
-
-    },
-    "当前为 Mock 模式，未连接 Supabase。请在 Secrets.xcconfig 中配置 SUPABASE_URL 与 SUPABASE_ANON_KEY。" : {
-
-    },
-    "注册" : {
-
-    },
-    "登录" : {
 
     },
     "登录 / 注册 →" : {
 
     },
     "退出登录" : {
-
-    },
-    "邮箱" : {
 
     }
   },

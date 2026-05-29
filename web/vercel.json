@@ -1,3 +1,7 @@
 {
-  "rewrites": [{ "source": "/i/:slug", "destination": "/share.html" }]
+  "rewrites": [
+    { "source": "/i/:slug", "destination": "/share.html" },
+    { "source": "/auth/confirm", "destination": "/auth/confirm.html" },
+    { "source": "/auth/reset-password", "destination": "/auth/reset-password.html" }
+  ]
 }

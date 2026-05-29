@@ -54,9 +54,22 @@ enum AppConfig {
         plistBool(forKey: "FORCE_BUNDLED") == true
     }
 
+    /// Web base used for auth email links (must match Supabase Auth redirect allow list).
+    static var authWebBaseURL: String {
+        let configured = plistString(forKey: "AUTH_WEB_BASE_URL")?
+            .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        if let configured, !configured.isEmpty { return configured }
+        return "https://yolo.cstudiomunger.workers.dev"
+    }
+
     /// Password reset redirect (must match Supabase Auth redirect allow list).
     static var authRedirectURL: URL {
-        URL(string: "yoloapp://auth/reset-password")!
+        URL(string: "\(authWebBaseURL)/auth/reset-password")!
+    }
+
+    /// Email signup confirmation redirect (must match Supabase Auth redirect allow list).
+    static var emailConfirmationRedirectURL: URL {
+        URL(string: "\(authWebBaseURL)/auth/confirm")!
     }
 
     private static func plistBool(forKey key: String) -> Bool? {
