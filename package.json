@@ -2,6 +2,7 @@
   "name": "yolo",
   "private": true,
   "scripts": {
+    "build": "npm run build:web",
     "build:web": "npm run build --prefix web",
     "deploy:web": "npm run build:web && wrangler deploy"
   },

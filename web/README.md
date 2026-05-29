@@ -25,6 +25,8 @@
 | Build command | `npm run build:web` |
 | Deploy command | `npx wrangler deploy` |
 
+构建会生成并提交 `web/config.js`（anon key 为公开客户端密钥）。若使用 Cloudflare 环境变量 `SUPABASE_ANON_KEY`，构建时会覆盖 example 中的默认值。
+
 5. **Environment variables**（构建阶段需要，用于生成 `web/config.js`）：
 
 | 变量名 | 值 |
