@@ -222,11 +222,13 @@
       App.$("#user-open-itineraries")?.addEventListener("click", () => {
         sessionStorage.setItem("yolo.admin.userItinerariesFilter", userId);
         App.usersHubUserId = null;
-        App.currentView = "table";
-        App.currentTable = "user_itineraries";
-        App.$$(".nav-btn").forEach((b) => b.classList.remove("active"));
-        App.$('.nav-btn[data-table="user_itineraries"]')?.classList.add("active");
-        App.loadCurrentSection();
+        if (App.navigateTo) {
+          App.navigateTo({ kind: "table", table: "user_itineraries" });
+        } else {
+          App.currentView = "table";
+          App.currentTable = "user_itineraries";
+          App.loadCurrentSection();
+        }
       });
       form.querySelectorAll("[data-edit-trip]").forEach((btn) => {
         btn.addEventListener("click", async () => {

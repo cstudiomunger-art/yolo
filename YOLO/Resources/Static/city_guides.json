@@ -1,0 +1,60 @@
+[
+  {
+    "id": "beijing_highlights",
+    "city_id": "beijing",
+    "title_en": "Beijing Highlights",
+    "title_zh": "北京精华",
+    "subtitle": "8 must-see places, linked to each guide",
+    "icon": "✦",
+    "badge": null,
+    "cover_images": [],
+    "body": "<p>From the Forbidden City to the Great Wall — eight essential stops that define imperial Beijing.</p>",
+    "audio_url": "",
+    "audio_title": null,
+    "audio_duration_seconds": 0,
+    "audio_quote": null,
+    "audio_transcript": null,
+    "meta_items": [],
+    "display_order": 0
+  },
+  {
+    "id": "beijing_best_season",
+    "city_id": "beijing",
+    "title_en": "Best Season to Visit",
+    "title_zh": "最佳季节",
+    "subtitle": "Sep–Oct & Apr–May",
+    "icon": "☀",
+    "badge": null,
+    "cover_images": [],
+    "body": "<p>Spring and autumn offer clear skies, mild temperatures, and golden foliage in the hutongs.</p>",
+    "audio_url": "",
+    "audio_title": null,
+    "audio_duration_seconds": 0,
+    "audio_quote": null,
+    "audio_transcript": null,
+    "meta_items": [],
+    "display_order": 1
+  },
+  {
+    "id": "beijing_hutong_citywalk",
+    "city_id": "beijing",
+    "title_en": "Hutong Citywalk",
+    "title_zh": "胡同漫步",
+    "subtitle": "3.2 km · ~90 min · 5 stops",
+    "icon": "🚶",
+    "badge": "Citywalk",
+    "cover_images": [],
+    "body": "<p>Beijing's soul lives in its hutong — grey-brick lanes that have laced the old city since the Yuan dynasty.</p><h2>The Route</h2><p>Start at Lama Temple, thread Nanluoguxiang and Yandai Xiejie, then finish at the Bell &amp; Drum Towers.</p>",
+    "audio_url": "",
+    "audio_title": null,
+    "audio_duration_seconds": 0,
+    "audio_quote": null,
+    "audio_transcript": null,
+    "meta_items": [
+      { "icon": "⏱", "label": "Duration", "value": "~90 min" },
+      { "icon": "📏", "label": "Distance", "value": "3.2 km" },
+      { "icon": "📍", "label": "Stops", "value": "5" }
+    ],
+    "display_order": 2
+  }
+]

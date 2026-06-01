@@ -88,6 +88,8 @@ enum ContentCacheKey {
     static func cities() -> String { "cities" }
     static func cultureTips() -> String { "culture_tips" }
     static func attractions(cityId: String) -> String { "attractions_\(cityId.lowercased())" }
+    static func cityGuides(cityId: String) -> String { "city_guides_\(cityId.lowercased())" }
+    static func cityGuide(id: String) -> String { "city_guide_\(id.lowercased())" }
     static func attraction(id: String) -> String { "attraction_\(id.lowercased())" }
     static func audioGuides(attractionId: String) -> String { "audio_guides_\(attractionId.lowercased())" }
     static func audioGuide(id: String) -> String { "audio_guide_\(id.lowercased())" }

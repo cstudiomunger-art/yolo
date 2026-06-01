@@ -1,0 +1,7 @@
+{
+  "name": "yolo-happy-admin",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-config.mjs"
+  }
+}

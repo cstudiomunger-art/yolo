@@ -21,11 +21,15 @@
       }
       App.showApp(App.session.user.email);
       await App.loadRefCache();
+      App.invalidateCityTreeCache?.();
       const storageProbe = await App.probeStorageAccess();
       if (!storageProbe.ok) {
         App.showToast(`Storage 不可达：${storageProbe.message}`, "error");
       }
-      await App.loadCurrentSection();
+      await App.renderSidebar();
+      const route = App.restoreLastRoute();
+      App.expandTreePathForSelection?.(route);
+      await App.navigateTo(route);
     } catch (err) {
       const box = App.$("#login-error");
       box.textContent = err.message;
@@ -37,46 +41,6 @@
     await App.client.auth.signOut();
     App.session = null;
     App.showLogin();
-  }
-
-  function setActiveNav(btn) {
-    App.$$(".nav-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-  }
-
-  function bindNav() {
-    App.$$(".nav-btn[data-view]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        setActiveNav(btn);
-        App.currentView = btn.dataset.view;
-        App.currentTable = null;
-        App.cityHubCityId = null;
-        App.attractionEditId = null;
-        App.usersHubUserId = null;
-        App.loadCurrentSection();
-      });
-    });
-
-    App.$$(".nav-btn[data-table]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        setActiveNav(btn);
-        App.currentView = "table";
-        App.currentTable = btn.dataset.table;
-        App.cityHubCityId = null;
-        App.attractionEditId = null;
-        App.usersHubUserId = null;
-        App.loadCurrentSection();
-      });
-    });
-
-    App.$("#logout-btn").addEventListener("click", handleLogout);
-    App.$("#add-row-btn").addEventListener("click", () => {
-      if (App.currentView === "city_hub") {
-        App.openModal(null, "cities", { onSaved: () => App.renderCityHubList() });
-      } else if (App.currentTable) {
-        App.openModal(null, App.currentTable, App.getTableCreateContext(App.currentTable));
-      }
-    });
   }
 
   App.loadCurrentSection = async function loadCurrentSection() {
@@ -93,12 +57,26 @@
     }
 
     if (App.currentView === "city_detail" && App.cityHubCityId) {
-      await App.openCityHub(App.cityHubCityId);
+      await App.loadCityPanel(App.cityHubCityId, App.cityHubPanel || "overview");
       return;
     }
 
-    if (App.currentView === "attraction_edit" && App.attractionEditId && App.cityHubCityId) {
-      await App.openAttractionEditor(App.attractionEditId, App.cityHubCityId);
+    if (App.currentView === "attraction_edit" && App.cityHubCityId) {
+      await App.openAttractionEditor(App.attractionEditId, App.cityHubCityId, {
+        focusSection: App.attractionFocusSection,
+        focusId: App.attractionFocusId,
+      });
+      return;
+    }
+
+    if (App.currentView === "checklist_settings_global") {
+      const cityId = App.cityHubCityId;
+      const city = App.refCache.cities.find((c) => c.id === cityId);
+      App.$("#page-title").textContent = city
+        ? `${city.chinese_name || city.name} · 全局清单设置`
+        : "全局清单设置";
+      addBtn.classList.add("hidden");
+      await App.renderChecklistSettings();
       return;
     }
 
@@ -135,8 +113,27 @@
       return;
     }
 
+    App.initThemeListener?.();
+    App.applyTheme?.();
+    App.$("#login-theme-toggle")?.addEventListener("click", () => App.cycleTheme());
     App.$("#login-form").addEventListener("submit", handleLogin);
-    bindNav();
+    App.bindSidebarEvents?.();
+    App.$("#logout-btn")?.addEventListener("click", handleLogout);
+
+    App.$("#add-row-btn")?.addEventListener("click", () => {
+      if (App.currentView === "city_hub") {
+        App.openModal(null, "cities", {
+          onSaved: async () => {
+            await App.loadRefCache(true);
+            App.invalidateCityTreeCache?.();
+            await App.renderSidebar();
+            await App.renderCityHubList();
+          },
+        });
+      } else if (App.currentTable) {
+        App.openModal(null, App.currentTable, App.getTableCreateContext(App.currentTable));
+      }
+    });
 
     await App.refreshSession();
     if (App.session) {
@@ -155,9 +152,10 @@
         if (!storageProbe.ok) {
           App.showToast(`Storage 不可达：${storageProbe.message}`, "error");
         }
-        App.currentView = "city_hub";
-        setActiveNav(App.$('.nav-btn[data-view="city_hub"]'));
-        await App.loadCurrentSection();
+        await App.renderSidebar();
+        const route = App.restoreLastRoute();
+        App.expandTreePathForSelection?.(route);
+        await App.navigateTo(route);
       } catch (e) {
         App.showLogin();
       }

@@ -49,7 +49,7 @@ struct AttractionDetailView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    dismiss()
+                    handleBack()
                 } label: {
                     Text(backTitle)
                         .font(Theme.FontToken.inter(12))
@@ -95,6 +95,15 @@ struct AttractionDetailView: View {
         case .browse: "← \(cityName)"
         case .planDay(let day): "← Back to Day \(day + 1)"
         case .planAddToDay: "← Back to Itinerary"
+        }
+    }
+
+    private func handleBack() {
+        switch route.presentation {
+        case .planDay:
+            appEnv.navigation.returnToPlanFromGuide()
+        case .browse, .planAddToDay:
+            dismiss()
         }
     }
 

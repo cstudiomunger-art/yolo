@@ -47,7 +47,17 @@ async function main() {
   const cities = loadJson("cities");
   await upsert("cities", cities);
 
-  await upsert("city_routes", loadJson("city_routes"));
+  try {
+    await upsert("city_guides", loadJson("city_guides"));
+  } catch (e) {
+    console.warn("  ⚠ city_guides skipped:", e.message);
+  }
+
+  try {
+    await upsert("city_routes", loadJson("city_routes"));
+  } catch (e) {
+    console.warn("  ⚠ city_routes skipped:", e.message);
+  }
   await upsert("attractions", loadJson("attractions"));
   await upsert("audio_guides", loadJson("audio_guides"));
   await upsert("checklist_items", loadJson("checklist_items"));

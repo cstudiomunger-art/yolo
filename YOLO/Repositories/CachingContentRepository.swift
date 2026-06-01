@@ -19,6 +19,20 @@ struct CachingContentRepository: ContentRepositoryProtocol {
         try await upstream.fetchCityRoutes(cityId: cityId)
     }
 
+    func fetchCityGuides(cityId: String) async throws -> [CityGuide] {
+        let key = ContentCacheKey.cityGuides(cityId: cityId)
+        return try await cached(key: key) {
+            try await upstream.fetchCityGuides(cityId: cityId)
+        }
+    }
+
+    func fetchCityGuide(id: String) async throws -> CityGuide? {
+        let key = ContentCacheKey.cityGuide(id: id)
+        return try await cachedOptional(key: key) {
+            try await upstream.fetchCityGuide(id: id)
+        }
+    }
+
     func fetchAttractions(cityId: String) async throws -> [Attraction] {
         let key = ContentCacheKey.attractions(cityId: cityId)
         return try await cached(key: key) {

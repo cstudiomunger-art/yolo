@@ -28,14 +28,14 @@ final class AppNavigation {
     var guideAttractionId: String?
     var guidePresentationContext: GuidePresentationContext?
     var guideDeepLinkRevision = 0
+    /// Increment to reset Guide `NavigationStack` to home.
+    var guideStackResetRevision = 0
     var planShowGenerator = false
     /// Guide `NavigationStack` depth (0 = home).
     var guidePathCount = 0
     /// Plan `NavigationStack` depth (0 = list).
     var planPathCount = 0
     var presentedModal: AppModal?
-    /// After full onboarding, open Plan tab once.
-    var landOnPlanAfterOnboarding = false
 
     /// Universal link / custom URL share slug pending presentation.
     var pendingShareSlug: String?
@@ -63,6 +63,12 @@ final class AppNavigation {
 
     func openPlanGenerator() {
         planShowGenerator = true
+        selectedTab = .plan
+    }
+
+    func returnToPlanFromGuide() {
+        guideStackResetRevision += 1
+        guidePathCount = 0
         selectedTab = .plan
     }
 
@@ -106,25 +112,18 @@ final class AppNavigation {
         return link
     }
 
-    func consumeLandOnPlan() -> Bool {
-        guard landOnPlanAfterOnboarding else { return false }
-        landOnPlanAfterOnboarding = false
-        selectedTab = .plan
-        return true
-    }
-
     func reset() {
         selectedTab = .home
         guideCityId = nil
         guideAttractionId = nil
         guidePresentationContext = nil
         guideDeepLinkRevision = 0
+        guideStackResetRevision = 0
         guideAddToItineraryHandler = nil
         planShowGenerator = false
         guidePathCount = 0
         planPathCount = 0
         presentedModal = nil
-        landOnPlanAfterOnboarding = false
         pendingShareSlug = nil
     }
 }

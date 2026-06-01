@@ -42,6 +42,5 @@ struct NotificationPermissionView: View {
 
     private func complete() {
         appEnv.preferences.markNotificationOnboardingCompleted()
-        appEnv.navigation.landOnPlanAfterOnboarding = true
     }
 }

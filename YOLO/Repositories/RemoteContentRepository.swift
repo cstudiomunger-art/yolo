@@ -19,6 +19,44 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
         []
     }
 
+    func fetchCityGuides(cityId: String) async throws -> [CityGuide] {
+        let normalizedCityId = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        do {
+            let rows: [CityGuide] = try await client
+                .from("city_guides")
+                .select()
+                .eq("city_id", value: normalizedCityId)
+                .eq("is_published", value: true)
+                .order("display_order", ascending: true)
+                .execute()
+                .value
+            if !rows.isEmpty { return rows }
+        } catch {
+            let fallback = try await bundledFallback.fetchCityGuides(cityId: normalizedCityId)
+            if !fallback.isEmpty { return fallback }
+            throw error
+        }
+        return try await bundledFallback.fetchCityGuides(cityId: normalizedCityId)
+    }
+
+    func fetchCityGuide(id: String) async throws -> CityGuide? {
+        let normalizedId = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        do {
+            let rows: [CityGuide] = try await client
+                .from("city_guides")
+                .select()
+                .eq("id", value: normalizedId)
+                .eq("is_published", value: true)
+                .limit(1)
+                .execute()
+                .value
+            if let row = rows.first { return row }
+        } catch {
+            return try await bundledFallback.fetchCityGuide(id: normalizedId)
+        }
+        return try await bundledFallback.fetchCityGuide(id: normalizedId)
+    }
+
     func fetchAttractions(cityId: String) async throws -> [Attraction] {
         let normalizedCityId = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         do {

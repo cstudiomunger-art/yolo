@@ -3,6 +3,8 @@ import Foundation
 protocol ContentRepositoryProtocol: Sendable {
     func fetchCities() async throws -> [City]
     func fetchCityRoutes(cityId: String) async throws -> [CityRoute]
+    func fetchCityGuides(cityId: String) async throws -> [CityGuide]
+    func fetchCityGuide(id: String) async throws -> CityGuide?
     func fetchAttractions(cityId: String) async throws -> [Attraction]
     func fetchAttraction(id: String) async throws -> Attraction?
     func fetchAudioGuides(attractionId: String) async throws -> [AudioGuide]
@@ -28,6 +30,7 @@ protocol ContentRepositoryProtocol: Sendable {
 struct BundledContentRepository: ContentRepositoryProtocol {
     private let cities: [City]
     private let routes: [CityRoute]
+    private let cityGuides: [CityGuide]
     private let attractions: [Attraction]
     private let audioGuides: [AudioGuide]
     private let checklist: [ChecklistItem]
@@ -47,6 +50,7 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     init() {
         cities = BundledJSONLoader.load([City].self, resource: "cities")
         routes = BundledJSONLoader.load([CityRoute].self, resource: "city_routes")
+        cityGuides = BundledJSONLoader.load([CityGuide].self, resource: "city_guides")
         attractions = BundledJSONLoader.load([Attraction].self, resource: "attractions")
         audioGuides = BundledJSONLoader.load([AudioGuide].self, resource: "audio_guides")
         checklist = BundledJSONLoader.load([ChecklistItem].self, resource: "checklist_items")
@@ -69,6 +73,18 @@ struct BundledContentRepository: ContentRepositoryProtocol {
 
     func fetchCityRoutes(cityId: String) async throws -> [CityRoute] {
         routes.filter { $0.cityId == cityId }.sorted { $0.sortOrder < $1.sortOrder }
+    }
+
+    func fetchCityGuides(cityId: String) async throws -> [CityGuide] {
+        let normalized = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return cityGuides
+            .filter { $0.cityId.lowercased() == normalized }
+            .sorted { $0.displayOrder < $1.displayOrder }
+    }
+
+    func fetchCityGuide(id: String) async throws -> CityGuide? {
+        let normalized = id.trimmingCharacters(in: .whitespacesAndNewlines)
+        return cityGuides.first { $0.id == normalized }
     }
 
     func fetchAttractions(cityId: String) async throws -> [Attraction] {

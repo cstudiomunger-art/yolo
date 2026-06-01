@@ -1318,6 +1318,10 @@
         fixedAttractionId: ctx.fixedAttractionId,
       });
     } else {
+      const cityGuideUpload = form.querySelector('[name="_cg_audio_upload"]');
+      if (cityGuideUpload) {
+        App.setupCityGuideAudioControls(form, ctx);
+      } else {
       const guideId =
         form.querySelector('[name="id"]')?.value?.trim() ||
         form.dataset.audioGuideId?.trim() ||
@@ -1329,6 +1333,7 @@
           if (input.closest(".sub-area-inline-form")) return;
           App.bindAudioUploadInput(input);
         });
+      }
       }
     }
 

@@ -169,7 +169,7 @@
 
   App.collectFormPayload = async function collectFormPayload(form, meta, row, isNew, ctx = {}) {
     App.syncAllQuillFields(form);
-    const payload = { updated_at: new Date().toISOString() };
+    let payload = { updated_at: new Date().toISOString() };
     const fieldCtx = { ...ctx, isNew };
 
     for (const f of meta.fields) {
@@ -281,6 +281,33 @@
       delete form.dataset.pendingAudioUrl;
     }
 
+    if (ctx.table === "city_guides") {
+      if (form?.dataset?.audioUploading === "1") {
+        throw new Error("音频仍在上传中，请稍候再保存");
+      }
+      const entityId = payload.id || row?.[meta.pk];
+      const pending = form?.dataset?.pendingAudioUrl?.trim();
+      if (pending) {
+        payload.audio_url = pending;
+      }
+      const audioUp = App.formFileInput(form, "_cg_audio_upload");
+      if (audioUp?.files?.[0]) {
+        if (!entityId) throw new Error("请先填写指南英文标题");
+        payload.audio_url = await App.uploadCityGuideAudioFile(audioUp.files[0], entityId);
+        try {
+          const seconds = await App.probeAudioDurationSeconds(audioUp.files[0]);
+          App.applyAudioDurationToForm(form, seconds, { durationField: "audio_duration_seconds", force: true });
+          payload.audio_duration_seconds = Number(
+            form.querySelector('[name="audio_duration_seconds"]')?.value
+          );
+        } catch (_) {
+          /* optional */
+        }
+      }
+      delete form?.dataset?.pendingAudioUrl;
+      payload = App.sanitizePayloadForTable(payload, "city_guides", { omitId: isNew });
+    }
+
     if (ctx.table === "user_itineraries") {
       return App.packUserItineraryPayload(payload, row);
     }
@@ -379,7 +406,11 @@
 
   App.renderChecklistSettings = async function renderChecklistSettings() {
     const main = App.$("#main-content");
-    main.innerHTML = `${App.checklistArchitectureBannerHtml()}
+    const backBtn =
+      App.currentView === "checklist_settings_global" && App.cityHubCityId
+        ? `<button type="button" class="btn btn-secondary btn-sm" id="cl-settings-back" style="margin-bottom:12px">← 返回行前清单</button>`
+        : "";
+    main.innerHTML = `${backBtn}${App.checklistArchitectureBannerHtml()}
       <div class="status-bar info">保存后 App 下次打开 Prepare 或刷新内容时生效。</div>
       <form id="single-form" class="settings-form settings-form--wide"></form>
       <button type="submit" form="single-form" class="btn" style="margin-top:12px">保存</button>`;
@@ -395,6 +426,12 @@
     const form = App.$("#single-form", main);
     form.innerHTML = App.buildFormFieldsHtml(meta, row, { fixedCityId: null });
     App.mountFieldInteractions(form, meta, { isNew: false, pk: meta.pk, formEl: form });
+
+    App.$("#cl-settings-back", main)?.addEventListener("click", () => {
+      if (App.navigateTo && App.cityHubCityId) {
+        App.navigateTo({ kind: "city_panel", cityId: App.cityHubCityId, panel: "checklist" });
+      }
+    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -468,9 +505,13 @@
       });
       toolbar += `</select>`;
     }
-    toolbar += `</div>`;
+    toolbar += `<span id="table-row-count" class="table-row-count muted"></span></div>`;
     if (table === "checklist_items") {
       toolbar += App.checklistArchitectureBannerHtml();
+    }
+    const hubTables = ["cities", "attractions", "sub_areas", "audio_guides", "city_guides", "hotels", "checklist_items"];
+    if (hubTables.includes(table)) {
+      toolbar += `<div class="status-bar info workflow-hint">推荐从侧栏 <strong>城市</strong> 树按城编辑；此页适合跨城浏览与批量操作。</div>`;
     }
     toolbar += `<div id="table-body-host"></div>`;
 
@@ -519,6 +560,8 @@
           bodyHtml;
       }
       host.innerHTML = bodyHtml;
+      const countEl = App.$("#table-row-count", main);
+      if (countEl) countEl.textContent = `共 ${rows.length} 条`;
       App.$("#clear-user-itin-filter", host)?.addEventListener("click", () => {
         sessionStorage.removeItem("yolo.admin.userItinerariesFilter");
         applyFilters();

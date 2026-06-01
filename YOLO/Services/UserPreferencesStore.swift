@@ -9,6 +9,7 @@ final class UserPreferencesStore {
     var onSyncableChange: (() -> Void)?
 
     private var suppressSyncNotification = false
+    private var skipItineraryPersistence = false
 
     var appLanguage: AppLanguage {
         didSet {
@@ -108,16 +109,23 @@ final class UserPreferencesStore {
         }
     }
 
+    /// When set, itineraries are read/written under per-account UserDefaults keys.
+    private(set) var storageUserId: String?
+
     var activeItineraryId: String? {
         didSet {
-            UserDefaults.standard.set(activeItineraryId, forKey: Keys.activeItineraryId)
+            if !skipItineraryPersistence {
+                persistActiveItineraryId()
+            }
             notifySyncableChange()
         }
     }
 
     var savedItineraries: [SampleItinerary] {
         didSet {
-            persistSavedItineraries()
+            if !skipItineraryPersistence {
+                persistSavedItineraries()
+            }
             notifySyncableChange()
         }
     }
@@ -149,13 +157,10 @@ final class UserPreferencesStore {
         selectedCityIds = UserDefaults.standard.stringArray(forKey: Keys.selectedCityIds) ?? ["beijing"]
         checklistStatuses = Self.loadInitialChecklistStatuses()
         simulateProPurchase = UserDefaults.standard.bool(forKey: Keys.simulateProPurchase)
-        activeItineraryId = UserDefaults.standard.string(forKey: Keys.activeItineraryId)
-        if let data = UserDefaults.standard.data(forKey: Keys.savedItineraries),
-           let items = try? JSONDecoder().decode([SampleItinerary].self, from: data) {
-            savedItineraries = items
-        } else {
-            savedItineraries = []
-        }
+        storageUserId = nil
+        let itineraryLoad = Self.loadItinerariesFromDisk(storageUserId: nil)
+        activeItineraryId = itineraryLoad.activeId
+        savedItineraries = itineraryLoad.itineraries
         purchasedAttractionIds = Set(UserDefaults.standard.stringArray(forKey: Keys.purchasedAttractionIds) ?? [])
         appLanguage = AppLanguage.resolved(fromStoredValue: UserDefaults.standard.string(forKey: Keys.appLanguage))
         hasCompletedIntroOnboarding = UserDefaults.standard.bool(forKey: Keys.introOnboardingDone)
@@ -184,8 +189,6 @@ final class UserPreferencesStore {
             Keys.completedChecklistIds,
             Keys.checklistStatuses,
             Keys.simulateProPurchase,
-            Keys.savedItineraries,
-            Keys.activeItineraryId,
             Keys.purchasedAttractionIds,
             Keys.appLanguage,
             Keys.introOnboardingDone,
@@ -202,8 +205,7 @@ final class UserPreferencesStore {
         selectedCityIds = ["beijing"]
         checklistStatuses = [:]
         simulateProPurchase = false
-        savedItineraries = []
-        activeItineraryId = nil
+        clearItinerarySessionState()
         purchasedAttractionIds = []
         appLanguage = AppLanguage.resolved(fromStoredValue: nil)
         cachedVisaRule = nil
@@ -363,6 +365,7 @@ final class UserPreferencesStore {
         suppressSyncNotification = false
     }
 
+    /// Merges synced trips into local storage (always persisted to disk for the active account).
     func applyRemoteItineraries(_ trips: [SampleItinerary], activeId: String?) {
         suppressSyncNotification = true
         defer { suppressSyncNotification = false }
@@ -372,6 +375,32 @@ final class UserPreferencesStore {
         } else {
             activeItineraryId = trips.first?.id
         }
+    }
+
+    /// Switches the on-disk itinerary cache to the signed-in account (or legacy guest key when nil).
+    func setStorageUserId(_ userId: UUID?) {
+        let normalized = userId?.uuidString.lowercased()
+        guard storageUserId != normalized else { return }
+        if let normalized {
+            migrateLegacyItinerariesIfNeeded(toUserId: normalized)
+        }
+        storageUserId = normalized
+        reloadItinerariesFromDisk()
+    }
+
+    /// Clears in-memory itinerary state after sign-out without deleting per-account local caches.
+    func clearItinerarySession() {
+        suppressSyncNotification = true
+        defer { suppressSyncNotification = false }
+        clearItinerarySessionState()
+    }
+
+    private func clearItinerarySessionState() {
+        skipItineraryPersistence = true
+        defer { skipItineraryPersistence = false }
+        storageUserId = nil
+        savedItineraries = []
+        activeItineraryId = nil
     }
 
     func hasAccessToAttraction(_ attractionId: String, iapProductId: String?) -> Bool {
@@ -458,11 +487,81 @@ final class UserPreferencesStore {
         return formatter.date(from: string)
     }
 
+    private func reloadItinerariesFromDisk() {
+        suppressSyncNotification = true
+        skipItineraryPersistence = true
+        defer {
+            skipItineraryPersistence = false
+            suppressSyncNotification = false
+        }
+
+        let loaded = Self.loadItinerariesFromDisk(storageUserId: storageUserId)
+        activeItineraryId = loaded.activeId
+        savedItineraries = loaded.itineraries
+    }
+
+    private static func loadItinerariesFromDisk(storageUserId: String?) -> (activeId: String?, itineraries: [SampleItinerary]) {
+        let tripsKey = savedItinerariesStorageKey(for: storageUserId)
+        let activeKey = activeItineraryStorageKey(for: storageUserId)
+        let activeId = UserDefaults.standard.string(forKey: activeKey)
+        let itineraries: [SampleItinerary]
+        if let data = UserDefaults.standard.data(forKey: tripsKey),
+           let items = try? JSONDecoder().decode([SampleItinerary].self, from: data) {
+            itineraries = items
+        } else {
+            itineraries = []
+        }
+        return (activeId, itineraries)
+    }
+
+    private func savedItinerariesStorageKey() -> String {
+        Self.savedItinerariesStorageKey(for: storageUserId)
+    }
+
+    private static func savedItinerariesStorageKey(for storageUserId: String?) -> String {
+        guard let storageUserId else { return Keys.savedItineraries }
+        return Keys.savedItineraries + "." + storageUserId
+    }
+
+    private func activeItineraryStorageKey() -> String {
+        Self.activeItineraryStorageKey(for: storageUserId)
+    }
+
+    private static func activeItineraryStorageKey(for storageUserId: String?) -> String {
+        guard let storageUserId else { return Keys.activeItineraryId }
+        return Keys.activeItineraryId + "." + storageUserId
+    }
+
+    private func persistActiveItineraryId() {
+        let key = activeItineraryStorageKey()
+        if let activeItineraryId {
+            UserDefaults.standard.set(activeItineraryId, forKey: key)
+        } else {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+
     private func persistSavedItineraries() {
+        let key = savedItinerariesStorageKey()
         if let data = try? JSONEncoder().encode(savedItineraries) {
-            UserDefaults.standard.set(data, forKey: Keys.savedItineraries)
+            UserDefaults.standard.set(data, forKey: key)
+            persistActiveItineraryId()
         } else if savedItineraries.isEmpty {
-            UserDefaults.standard.removeObject(forKey: Keys.savedItineraries)
+            UserDefaults.standard.removeObject(forKey: key)
+            UserDefaults.standard.removeObject(forKey: activeItineraryStorageKey())
+        }
+    }
+
+    /// One-time copy of pre-account-local trips into the first signed-in user's cache.
+    private func migrateLegacyItinerariesIfNeeded(toUserId userId: String) {
+        let userTripsKey = Keys.savedItineraries + "." + userId
+        guard UserDefaults.standard.object(forKey: userTripsKey) == nil,
+              let data = UserDefaults.standard.data(forKey: Keys.savedItineraries)
+        else { return }
+
+        UserDefaults.standard.set(data, forKey: userTripsKey)
+        if let activeId = UserDefaults.standard.string(forKey: Keys.activeItineraryId) {
+            UserDefaults.standard.set(activeId, forKey: Keys.activeItineraryId + "." + userId)
         }
     }
 }

@@ -4,6 +4,7 @@ import SwiftUI
 struct CoverImageView: View {
     let path: String?
     var height: CGFloat = 120
+    var width: CGFloat?
     var cornerRadius: CGFloat = 4
 
     @State private var loadedImage: UIImage?
@@ -23,8 +24,8 @@ struct CoverImageView: View {
                 placeholder
             }
         }
-        .frame(height: height)
-        .frame(maxWidth: .infinity)
+        .frame(width: width, height: height)
+        .frame(maxWidth: width == nil ? .infinity : nil)
         .clipped()
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .task(id: path) {

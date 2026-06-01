@@ -159,6 +159,9 @@
         }
       }
     },
+    "%lld available" : {
+
+    },
     "%lld days" : {
       "localizations" : {
         "zh-Hans" : {
@@ -331,6 +334,9 @@
         }
       }
     },
+    "▴" : {
+
+    },
     "▶ Play" : {
       "localizations" : {
         "zh-Hans" : {
@@ -350,6 +356,9 @@
           }
         }
       }
+    },
+    "▾" : {
+
     },
     "★ %@" : {
 
@@ -519,6 +528,9 @@
           }
         }
       }
+    },
+    "📝 %@" : {
+
     },
     "🔄 Redo" : {
       "extractionState" : "stale",
@@ -793,7 +805,6 @@
       }
     },
     "Attractions" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -826,6 +837,9 @@
           }
         }
       }
+    },
+    "Audio transcript" : {
+
     },
     "Back to dates" : {
 
@@ -952,6 +966,9 @@
         }
       }
     },
+    "City Guides" : {
+
+    },
     "City not found" : {
 
     },
@@ -1002,6 +1019,9 @@
       }
     },
     "Connect to the internet to open shared trips." : {
+
+    },
+    "Content coming soon" : {
 
     },
     "Content coming soon for this area" : {
@@ -2408,7 +2428,7 @@
     "Unable to load" : {
 
     },
-    "Unable to load attractions. Check your connection." : {
+    "Unable to load city content. Check your connection." : {
 
     },
     "Unable to load content. Pull to refresh." : {

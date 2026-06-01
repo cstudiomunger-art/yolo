@@ -42,7 +42,7 @@ final class AppEnvironment {
         preferences.onItinerarySaved = { [weak self] in
             guard let self else { return }
             Task {
-                await self.profileSync.pushItinerariesNow()
+                await self.profileSync.syncItineraries()
                 await self.rescheduleTripReminders()
             }
         }
@@ -87,7 +87,7 @@ final class AppEnvironment {
     }
 
     func signOutAndReset() async {
-        await profileSync.pushToRemote()
+        await profileSync.syncItineraries()
         try? await auth.signOut()
         preferences.resetAll()
         contentMode.clearCachedSettings()

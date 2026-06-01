@@ -16,6 +16,9 @@ final class ProfileSyncService {
     @ObservationIgnored
     private var scheduledPushTask: Task<Void, Never>?
 
+    @ObservationIgnored
+    private var itinerarySyncTask: Task<Void, Error>?
+
     func bind(preferences: UserPreferencesStore, auth: AuthSessionStore) {
         self.preferences = preferences
         self.auth = auth
@@ -40,6 +43,8 @@ final class ProfileSyncService {
         defer { isSyncing = false }
 
         do {
+            preferences.setStorageUserId(userId)
+
             var profileActiveItineraryId: String?
             if let remote = try await repository.fetch(userId: userId) {
                 profileActiveItineraryId = remote.activeItineraryId
@@ -52,7 +57,9 @@ final class ProfileSyncService {
                 try await repository.upsert(preferences.makeProfileRow(userId: userId, email: auth.userEmail))
             }
 
-            try await pullItineraries(userId: userId, preferences: preferences)
+            try await runItinerarySync {
+                try await self.bidirectionalItinerarySync(userId: userId, preferences: preferences)
+            }
             applyActiveItineraryFromProfile(profileActiveItineraryId)
             try await pullChecklistCompletion(userId: userId, preferences: preferences)
         } catch {
@@ -71,65 +78,109 @@ final class ProfileSyncService {
 
         do {
             try await repository.upsert(preferences.makeProfileRow(userId: userId, email: auth.userEmail))
-            try await pushItineraries(userId: userId, preferences: preferences)
+            try await runItinerarySync {
+                try await self.pushItineraries(userId: userId, preferences: preferences)
+            }
             try await pushChecklistCompletion(userId: userId, preferences: preferences)
         } catch {
             lastSyncError = error.localizedDescription
         }
     }
 
-    // MARK: - Itineraries (021)
+    // MARK: - Itineraries (local + cloud)
 
-    private func pullItineraries(userId: UUID, preferences: UserPreferencesStore) async throws {
-        let remoteRows = try await itineraryRepository.fetchAll(userId: userId)
-        let remoteTrips = remoteRows.map(\.asSampleItinerary)
-
-        if remoteTrips.isEmpty, !preferences.savedItineraries.isEmpty {
-            for trip in preferences.savedItineraries {
-                try await itineraryRepository.upsert(UserItineraryRow.from(trip: trip, userId: userId))
-            }
-            return
-        }
-
-        if !remoteTrips.isEmpty {
-            let merged = mergeItineraries(
-                local: preferences.savedItineraries,
-                remote: remoteTrips
-            )
-            let activeId = preferences.activeItineraryId ?? merged.first?.id
-            preferences.applyRemoteItineraries(merged, activeId: activeId)
-        }
-    }
-
-    /// Merges remote rows with local-only trips that have not been uploaded yet.
-    private func mergeItineraries(local: [SampleItinerary], remote: [SampleItinerary]) -> [SampleItinerary] {
-        var byId = Dictionary(uniqueKeysWithValues: remote.map { ($0.id, $0) })
-        for trip in local where byId[trip.id] == nil {
-            byId[trip.id] = trip
-        }
-        let remoteIds = remote.map(\.id)
-        let localOnly = local.filter { !remoteIds.contains($0.id) }
-        return remote + localOnly
-    }
-
-    func refreshItinerariesFromRemote() async {
+    /// Merges cloud trips with the on-device cache, persists locally, then uploads the merged set.
+    func syncItineraries() async {
         guard let preferences, let auth, auth.isAuthenticated, let userId = auth.userId else { return }
         guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else { return }
+
+        isSyncing = true
+        lastSyncError = nil
+        defer { isSyncing = false }
+
         do {
-            try await pullItineraries(userId: userId, preferences: preferences)
+            preferences.setStorageUserId(userId)
+            try await runItinerarySync {
+                try await self.bidirectionalItinerarySync(userId: userId, preferences: preferences)
+            }
         } catch {
             lastSyncError = error.localizedDescription
         }
+    }
+
+    /// Kept for call sites that only refreshed from remote; now performs full bidirectional sync.
+    func refreshItinerariesFromRemote() async {
+        await syncItineraries()
     }
 
     func pushItinerariesNow() async {
         guard let preferences, let auth, auth.isAuthenticated, let userId = auth.userId else { return }
         guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else { return }
+
         do {
-            try await pushItineraries(userId: userId, preferences: preferences)
+            preferences.setStorageUserId(userId)
+            try await runItinerarySync {
+                try await self.pushItineraries(userId: userId, preferences: preferences)
+            }
         } catch {
             lastSyncError = error.localizedDescription
         }
+    }
+
+    private func bidirectionalItinerarySync(userId: UUID, preferences: UserPreferencesStore) async throws {
+        let remoteRows = try await itineraryRepository.fetchAll(userId: userId)
+        let remoteTrips = remoteRows.map(\.asSampleItinerary)
+
+        let merged = mergeItineraries(
+            local: preferences.savedItineraries,
+            remote: remoteTrips
+        )
+        let activeId = preferences.activeItineraryId ?? merged.first?.id
+        preferences.applyRemoteItineraries(merged, activeId: activeId)
+
+        try await pushItineraries(userId: userId, preferences: preferences)
+    }
+
+    /// Union of local and remote trips; local wins when the same id exists on both sides.
+    private func mergeItineraries(local: [SampleItinerary], remote: [SampleItinerary]) -> [SampleItinerary] {
+        var byId: [String: SampleItinerary] = [:]
+        for trip in remote {
+            byId[trip.id] = trip
+        }
+        for trip in local {
+            byId[trip.id] = trip
+        }
+
+        var merged: [SampleItinerary] = []
+        var seen = Set<String>()
+
+        for trip in local {
+            guard let resolved = byId[trip.id], !seen.contains(trip.id) else { continue }
+            merged.append(resolved)
+            seen.insert(trip.id)
+        }
+        for trip in remote where !seen.contains(trip.id) {
+            merged.append(trip)
+            seen.insert(trip.id)
+        }
+
+        if merged.count > UserPreferencesStore.maxSavedItineraries {
+            merged = Array(merged.prefix(UserPreferencesStore.maxSavedItineraries))
+        }
+        return merged
+    }
+
+    /// Serializes itinerary sync so concurrent pulls cannot overwrite newer local saves.
+    private func runItinerarySync(_ operation: @escaping () async throws -> Void) async throws {
+        let previous = itinerarySyncTask
+        let task = Task<Void, Error> {
+            if let previous {
+                _ = await previous.result
+            }
+            try await operation()
+        }
+        itinerarySyncTask = task
+        try await task.value
     }
 
     /// Applies `active_itinerary_id` from profiles after trips were loaded from `user_itineraries`.
@@ -161,7 +212,6 @@ final class ProfileSyncService {
 
     private func pullChecklistCompletion(userId: UUID, preferences: UserPreferencesStore) async throws {
         let rows = try await checklistRepository.fetchAll(userId: userId)
-        let activeId = preferences.activeItineraryId
         var map = preferences.checklistStatuses
 
         for row in rows {

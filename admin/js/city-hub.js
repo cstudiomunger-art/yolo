@@ -23,8 +23,10 @@
     });
 
     main.innerHTML = `
+      <div class="status-bar info workflow-hint">在左侧 <strong>城市</strong> 树中选择城市进行编辑；此处用于新建城市或快速浏览全部城市卡片。</div>
       <div class="hub-toolbar">
         <input type="search" id="city-search" placeholder="搜索城市名称…" class="search-input" />
+        <span id="city-grid-count" class="muted"></span>
       </div>
       <div class="city-grid" id="city-grid"></div>`;
 
@@ -50,15 +52,27 @@
       grid.appendChild(card);
     });
 
+    const updateCityGridCount = () => {
+      const visible = App.$$(".city-card", grid).filter((c) => !c.classList.contains("hidden")).length;
+      const total = App.$$(".city-card", grid).length;
+      const el = App.$("#city-grid-count");
+      if (el) el.textContent = `显示 ${visible} / ${total}`;
+    };
+    updateCityGridCount();
+
     App.$("#city-search")?.addEventListener("input", (e) => {
       const q = e.target.value.toLowerCase();
       App.$$(".city-card", grid).forEach((card) => {
         card.classList.toggle("hidden", q && !card.dataset.name.includes(q));
       });
+      updateCityGridCount();
     });
 
     main.querySelectorAll("[data-open-hub]").forEach((btn) => {
-      btn.addEventListener("click", () => App.openCityHub(btn.dataset.openHub));
+      btn.addEventListener("click", () => {
+        if (App.navigateTo) App.navigateTo({ kind: "city_panel", cityId: btn.dataset.openHub, panel: "overview" });
+        else App.openCityHub(btn.dataset.openHub);
+      });
     });
     main.querySelectorAll("[data-edit-city]").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -68,42 +82,55 @@
     });
   };
 
-  App.openCityHub = async function openCityHub(cityId) {
+  App.HUB_PANEL_LABELS = {
+    overview: "城市概览",
+    city_guides: "城市指南",
+    attractions: "景点与解说",
+    audio: "音频导览",
+    hotels: "酒店",
+    checklist: "行前清单",
+    home_tips: "首页提示",
+    shopping_items: "购物清单",
+    reading_list: "阅读清单",
+  };
+
+  App.loadCityPanel = async function loadCityPanel(cityId, panelId) {
     App.cityHubCityId = cityId;
+    App.cityHubPanel = panelId || "overview";
     App.currentView = "city_detail";
-    const city = App.refCache.cities.find((c) => c.id === cityId) || (await App.client.from("cities").select("*").eq("id", cityId).single()).data;
-    App.$("#page-title").innerHTML = `<button type="button" class="breadcrumb-link" id="hub-back">城市工作台</button> <span class="breadcrumb-sep">›</span> ${App.escapeHtml(city?.chinese_name || city?.name || cityId)}`;
+    App.currentTable = null;
+
+    const city =
+      App.refCache.cities.find((c) => c.id === cityId) ||
+      (await App.client.from("cities").select("*").eq("id", cityId).single()).data;
+    const panelLabel = App.HUB_PANEL_LABELS[App.cityHubPanel] || App.cityHubPanel;
+    App.$("#page-title").textContent = `${city?.chinese_name || city?.name || cityId} · ${panelLabel}`;
     App.$("#add-row-btn").classList.add("hidden");
-    App.$("#hub-back")?.addEventListener("click", () => {
-      App.currentView = "city_hub";
-      App.renderCityHubList();
-    });
 
     const main = App.$("#main-content");
-    main.innerHTML = `
-      <nav class="hub-tabs">
-        <button type="button" class="hub-tab active" data-tab="overview">概览</button>
-        <button type="button" class="hub-tab" data-tab="attractions">景点与解说</button>
-        <button type="button" class="hub-tab" data-tab="audio">音频导览</button>
-        <button type="button" class="hub-tab" data-tab="hotels">酒店</button>
-        <button type="button" class="hub-tab" data-tab="checklist">行前清单</button>
-      </nav>
-      <div id="hub-panel"></div>`;
+    main.innerHTML = `<div id="hub-panel"></div>`;
+    const panel = App.$("#hub-panel");
 
-    const loadTab = async (tab) => {
-      App.$$(".hub-tab", main).forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
-      const panel = App.$("#hub-panel");
-      if (tab === "overview") await App.renderCityOverview(cityId, panel);
-      else if (tab === "attractions") await App.renderCityAttractionsList(cityId, panel);
-      else if (tab === "audio") await App.renderCityAudioHub(cityId, panel);
-      else if (tab === "hotels") await App.renderCitySubTable(cityId, panel, "hotels");
-      else if (tab === "checklist") await App.renderCityChecklist(cityId, panel);
-    };
+    const p = App.cityHubPanel;
+    if (p === "overview") await App.renderCityOverview(cityId, panel);
+    else if (p === "city_guides") await App.renderCitySubTable(cityId, panel, "city_guides");
+    else if (p === "attractions") await App.renderCityAttractionsList(cityId, panel);
+    else if (p === "audio") await App.renderCityAudioHub(cityId, panel);
+    else if (p === "hotels") await App.renderCitySubTable(cityId, panel, "hotels");
+    else if (p === "checklist") await App.renderCityChecklist(cityId, panel);
+    else if (p === "home_tips") await App.renderCitySubTable(cityId, panel, "home_tips");
+    else if (p === "shopping_items") await App.renderCitySubTable(cityId, panel, "shopping_items");
+    else if (p === "reading_list") await App.renderCityReadingList(cityId, panel);
+    else await App.renderCityOverview(cityId, panel);
 
-    App.$$(".hub-tab", main).forEach((btn) => {
-      btn.addEventListener("click", () => loadTab(btn.dataset.tab));
-    });
-    await loadTab("overview");
+    if (App.syncNavSelectionFromState && App.highlightNavSelection) {
+      App.syncNavSelectionFromState();
+      App.highlightNavSelection();
+    }
+  };
+
+  App.openCityHub = async function openCityHub(cityId, panelId) {
+    await App.loadCityPanel(cityId, panelId || "overview");
   };
 
   App.renderCityOverview = async function renderCityOverview(cityId, panel) {
@@ -167,12 +194,21 @@
       App.openAttractionEditor(null, cityId);
     });
     panel.querySelectorAll("[data-edit-attr]").forEach((btn) => {
-      btn.addEventListener("click", () => App.openAttractionEditor(btn.dataset.editAttr, cityId));
+      btn.addEventListener("click", () => {
+        if (App.navigateTo) {
+          App.navigateTo({ kind: "attraction", cityId, attractionId: btn.dataset.editAttr });
+        } else {
+          App.openAttractionEditor(btn.dataset.editAttr, cityId);
+        }
+      });
     });
   };
 
-  App.openAttractionEditor = async function openAttractionEditor(attractionId, cityId) {
+  App.openAttractionEditor = async function openAttractionEditor(attractionId, cityId, options) {
+    const opts = options || {};
     App.attractionEditId = attractionId;
+    App.attractionFocusSection = opts.focusSection || null;
+    App.attractionFocusId = opts.focusId || null;
     App.currentView = "attraction_edit";
     await App.loadRefCache();
     const isNew = !attractionId;
@@ -512,8 +548,27 @@
     await renderSubAreasSection();
     await renderAudioSection();
 
-    App.$("#hub-back-attr")?.addEventListener("click", () => App.openCityHub(cityId));
-    App.$("#cancel-attr-edit")?.addEventListener("click", () => App.openCityHub(cityId));
+    const backToCity = () => {
+      if (App.navigateTo) App.navigateTo({ kind: "city_panel", cityId, panel: "attractions" });
+      else App.openCityHub(cityId, "attractions");
+    };
+    App.$("#hub-back-attr")?.addEventListener("click", backToCity);
+    App.$("#cancel-attr-edit")?.addEventListener("click", backToCity);
+
+    if (App.attractionFocusSection === "sub_areas" && App.attractionFocusId) {
+      form.querySelectorAll(".sub-area-block").forEach((b) => {
+        const idInput = b.querySelector('[name="id"]');
+        if (idInput?.value === App.attractionFocusId) {
+          b.open = true;
+          b.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+    if (App.attractionFocusSection === "audio" && App.attractionFocusId) {
+      const block = form.querySelector(`[data-guide-id="${App.attractionFocusId}"]`);
+      block?.closest("details")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (block?.closest("details")) block.closest("details").open = true;
+    }
     App.$("#delete-attr-edit")?.addEventListener("click", async () => {
       if (!attractionId || !confirm("确定删除该景点？关联子区域与音频需已手动处理或将被级联删除。")) return;
       const { error: err } = await App.client.from("attractions").delete().eq("id", attractionId);
@@ -686,9 +741,49 @@
     });
   };
 
+  App.renderCityReadingList = async function renderCityReadingList(cityId, panel) {
+    const meta = App.TABLES.reading_list;
+    panel.innerHTML = `<div class="hub-toolbar"><button type="button" class="btn" id="hub-new-row">+ 新建</button></div><div id="hub-table-host"></div>`;
+    App.$("#hub-new-row", panel).addEventListener("click", () => {
+      App.openModal({ city_ids: [cityId] }, "reading_list", {
+        fixedCityId: cityId,
+        onSaved: () => App.renderCityReadingList(cityId, panel),
+      });
+    });
+    const host = App.$("#hub-table-host", panel);
+    const { data, error } = await App.client.from("reading_list").select("*").order(meta.order || "sort_order");
+    if (error) {
+      host.innerHTML = `<div class="status-bar error">${App.escapeHtml(error.message)}</div>`;
+      return;
+    }
+    const rows = (data || []).filter((r) => {
+      const ids = Array.isArray(r.city_ids) ? r.city_ids : [];
+      return !ids.length || ids.includes(cityId);
+    });
+    host.innerHTML = App.renderTableBody("reading_list", rows);
+    host.querySelectorAll("[data-edit-id]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const { data: row } = await App.client.from("reading_list").select("*").eq(meta.pk, btn.dataset.editId).single();
+        App.openModal(row, "reading_list", { fixedCityId: cityId, onSaved: () => App.renderCityReadingList(cityId, panel) });
+      });
+    });
+    host.querySelectorAll("[data-del]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("确定删除？")) return;
+        const { error: err } = await App.client.from("reading_list").delete().eq(meta.pk, btn.dataset.del);
+        if (err) App.showToast(err.message, "error");
+        else {
+          App.showToast("已删除");
+          await App.renderCityReadingList(cityId, panel);
+        }
+      });
+    });
+  };
+
   App.renderCityChecklist = async function renderCityChecklist(cityId, panel) {
     const meta = App.TABLES.checklist_items;
     panel.innerHTML = `<div class="hub-toolbar">
+      <button type="button" class="btn btn-secondary btn-sm" id="hub-global-cl-settings">全局清单设置</button>
       <button type="button" class="btn" id="hub-new-cl">+ 新建清单项</button>
       <select id="hub-cl-type-filter" class="search-input">
         <option value="">全部类型</option>
@@ -699,6 +794,11 @@
     </div>
     <p class="muted">本页显示：全部 <strong>入境 entry</strong> 与 <strong>通用 universal</strong>（与行程无关）+ <strong>target_cities</strong> 含本城市的 city 项。用户未保存行程时 App 不展示任何 city 项。</p>
     <div id="hub-cl-host"></div>`;
+
+    App.$("#hub-global-cl-settings", panel)?.addEventListener("click", () => {
+      if (App.navigateTo) App.navigateTo({ kind: "checklist_settings_global", cityId });
+      else App.renderChecklistSettings();
+    });
 
     App.$("#hub-new-cl", panel).addEventListener("click", () => {
       App.openModal(App.getChecklistCreateDefaults({ fixedCityId: cityId }), "checklist_items", {

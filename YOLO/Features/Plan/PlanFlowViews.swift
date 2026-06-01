@@ -977,7 +977,7 @@ struct ShareItinerarySheet: View {
         shareSlug = slug
 
         appEnv.preferences.updateItineraryShareState(updated)
-        await appEnv.profileSync.pushItinerariesNow()
+        await appEnv.profileSync.syncItineraries()
         TelemetryService.shared.logEvent("itinerary_share_link_enabled")
     }
 }

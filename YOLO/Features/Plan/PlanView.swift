@@ -19,7 +19,7 @@ struct PlanView: View {
     var body: some View {
         navigationStack
             .onAppear { consumePlanGeneratorDeepLink() }
-            .task { await appEnv.profileSync.refreshItinerariesFromRemote() }
+            .task { await appEnv.profileSync.syncItineraries() }
             .onChange(of: appEnv.navigation.planShowGenerator) { _, shouldOpen in
                 if shouldOpen { consumePlanGeneratorDeepLink() }
             }

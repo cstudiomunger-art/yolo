@@ -18,8 +18,15 @@ struct GuideSubAreaRoute: Hashable {
     let attractionName: String
 }
 
+struct GuideCityGuideRoute: Hashable {
+    let guideId: String
+    let cityId: String
+    let cityName: String
+}
+
 enum GuideRoute: Hashable {
     case city(String)
+    case cityGuide(GuideCityGuideRoute)
     case cultureTips
     case cultureTip(String)
     case attraction(GuideAttractionRoute)

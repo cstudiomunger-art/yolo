@@ -17,6 +17,7 @@ App.tableListCtx = { cityId: "", search: "" };
 /** Flat-list tables: city filter + optional global rows (city_id empty). */
 App.TABLE_CITY_FILTERS = {
   attractions: { cityField: "city_id" },
+  city_guides: { cityField: "city_id" },
   audio_guides: { cityField: "attraction_id", viaAttraction: true },
   sub_areas: { cityField: "attraction_id", viaAttraction: true },
   checklist_items: { cityField: "city_id", includeGlobal: true },
@@ -386,6 +387,14 @@ App.uploadSubAreaAudioFile = async function uploadSubAreaAudioFile(file, subArea
   return App.uploadStorageFile("audio-guides", path, file, App.normalizeAudioContentType(file));
 };
 
+/** Upload city-guide audio directly (no audio_guides row). */
+App.uploadCityGuideAudioFile = async function uploadCityGuideAudioFile(file, guideId) {
+  if (!guideId) throw new Error("请先填写指南英文标题后再上传音频");
+  const ext = (file.name.split(".").pop() || "m4a").toLowerCase().replace(/[^a-z0-9]/g, "") || "m4a";
+  const path = `city-guides/${guideId}.${ext}`;
+  return App.uploadStorageFile("audio-guides", path, file, App.normalizeAudioContentType(file));
+};
+
 /** Per-attraction audio guide list (city-hub + modals). */
 App.attractionGuidesCache = App.attractionGuidesCache || {};
 
@@ -522,11 +531,15 @@ App.probeAudioDurationSeconds = function probeAudioDurationSeconds(source) {
 /** Apply duration_seconds to a form if the field exists and is empty or force. */
 App.applyAudioDurationToForm = function applyAudioDurationToForm(form, seconds, opts = {}) {
   if (!form || !Number.isFinite(seconds)) return;
-  const inp = form.querySelector('[name="duration_seconds"]');
-  if (!inp) return;
-  const current = Number(inp.value);
-  if (!opts.force && inp.value?.trim() !== "" && Number.isFinite(current) && current > 0) return;
-  inp.value = String(Math.max(1, Math.round(seconds)));
+  const keys = opts.durationField ? [opts.durationField] : ["duration_seconds", "audio_duration_seconds"];
+  for (const key of keys) {
+    const inp = form.querySelector(`[name="${key}"]`);
+    if (!inp) continue;
+    const current = Number(inp.value);
+    if (!opts.force && inp.value?.trim() !== "" && Number.isFinite(current) && current > 0) return;
+    inp.value = String(Math.max(1, Math.round(seconds)));
+    return;
+  }
 };
 
 /** Bind audio_guides upload — immediate upload + preview refresh (city-hub inline & modals). */
@@ -597,6 +610,44 @@ App.setupSubAreaAudioControls = function setupSubAreaAudioControls(form, ctx = {
       App.showToast(saveHint);
       if (typeof ctx.onUploaded === "function") {
         ctx.onUploaded({ audioUrl, subAreaId });
+      }
+      return { audioUrl };
+    },
+  });
+};
+
+/** Bind city-guide direct audio upload (modal forms). */
+App.setupCityGuideAudioControls = function setupCityGuideAudioControls(form, ctx = {}) {
+  const cgAudioInput = App.formFileInput(form, "_cg_audio_upload");
+  if (!cgAudioInput || cgAudioInput.dataset.cityGuideAudioSetup === "1") return;
+  cgAudioInput.dataset.cityGuideAudioSetup = "1";
+
+  const resolveGuideId = () => {
+    const existing = form.querySelector('[name="id"]')?.value?.trim();
+    if (existing) return existing;
+    const titleEn = form.querySelector('[name="title_en"]')?.value?.trim();
+    const cityId = ctx.fixedCityId || form.querySelector('[name="city_id"]')?.value?.trim();
+    return titleEn && cityId ? App.slugify(titleEn, cityId) : "";
+  };
+
+  App.bindAudioUploadInput(cgAudioInput, {
+    form,
+    previewFieldKey: "audio_url",
+    onUpload: async (file) => {
+      const guideId = resolveGuideId();
+      if (!guideId) throw new Error("请先填写指南英文标题");
+      const audioUrl = await App.uploadCityGuideAudioFile(file, guideId);
+      form.dataset.pendingAudioUrl = audioUrl;
+      App.setAudioPreviewField(form, "audio_url", audioUrl);
+      try {
+        const seconds = await App.probeAudioDurationSeconds(file);
+        App.applyAudioDurationToForm(form, seconds, { durationField: "audio_duration_seconds", force: true });
+      } catch (_) {
+        /* optional */
+      }
+      App.showToast("音频已上传，请点击「保存」");
+      if (typeof ctx.onUploaded === "function") {
+        ctx.onUploaded({ audioUrl, guideId });
       }
       return { audioUrl };
     },
@@ -710,6 +761,26 @@ App.TABLE_COLUMNS = {
     "is_active",
     "updated_at",
   ],
+  city_guides: [
+    "id",
+    "city_id",
+    "title_en",
+    "title_zh",
+    "subtitle",
+    "icon",
+    "badge",
+    "cover_images",
+    "body",
+    "audio_url",
+    "audio_title",
+    "audio_duration_seconds",
+    "audio_quote",
+    "audio_transcript",
+    "meta_items",
+    "display_order",
+    "is_published",
+    "updated_at",
+  ],
 };
 
 App.sanitizePayloadForTable = function sanitizePayloadForTable(payload, table, opts = {}) {
@@ -734,6 +805,7 @@ App.fillTableDefaults = function fillTableDefaults(payload, table) {
   const defaults = {
     attractions: { audio_guide_count: 0, display_order: 0, is_published: true, category: "sight", priority: "P1" },
     cities: { attraction_count: 0, display_order: 0, is_published: true },
+    city_guides: { display_order: 0, is_published: true, audio_duration_seconds: 0, cover_images: [], meta_items: [] },
     audio_guides: { duration_seconds: 0, sort_order: 0, is_active: true },
     sub_areas: { sort_order: 0, is_active: true },
     checklist_items: { sort_order: 0, is_active: true, priority: "recommended", type: "universal" },

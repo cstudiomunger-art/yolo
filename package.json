@@ -4,7 +4,9 @@
   "scripts": {
     "build": "npm run build:web",
     "build:web": "npm run build --prefix web",
-    "deploy:web": "npm run build:web && wrangler deploy"
+    "build:admin": "npm run build --prefix admin",
+    "deploy:web": "npm run build:web && wrangler deploy",
+    "deploy:admin": "bash scripts/deploy-admin.sh"
   },
   "devDependencies": {
     "wrangler": "^4.95.0"

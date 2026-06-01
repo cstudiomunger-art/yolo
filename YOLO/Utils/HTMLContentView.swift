@@ -8,6 +8,7 @@ struct HTMLContentView: View {
     var foregroundColor: Color = Theme.ColorToken.textSecondary
     var lineSpacing: CGFloat = 6
     var lineLimit: Int?
+    var allowsInteraction: Bool = true
 
     var body: some View {
         if lineLimit != nil || !Self.isLikelyHTML(content) {
@@ -21,7 +22,8 @@ struct HTMLContentView: View {
                 html: content,
                 fontSize: fontSize,
                 foregroundColor: foregroundColor,
-                lineSpacing: lineSpacing
+                lineSpacing: lineSpacing,
+                allowsInteraction: allowsInteraction
             )
         }
     }
@@ -96,6 +98,7 @@ private struct HTMLWebContentView: View {
     let fontSize: CGFloat
     let foregroundColor: Color
     let lineSpacing: CGFloat
+    var allowsInteraction: Bool = true
 
     @State private var contentHeight: CGFloat = 120
 
@@ -105,9 +108,11 @@ private struct HTMLWebContentView: View {
             fontSize: fontSize,
             foregroundColor: foregroundColor,
             lineSpacing: lineSpacing,
+            allowsInteraction: allowsInteraction,
             contentHeight: $contentHeight
         )
         .frame(height: contentHeight)
+        .allowsHitTesting(allowsInteraction)
     }
 }
 
@@ -116,6 +121,7 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
     let fontSize: CGFloat
     let foregroundColor: Color
     let lineSpacing: CGFloat
+    let allowsInteraction: Bool
     @Binding var contentHeight: CGFloat
 
     func makeCoordinator() -> Coordinator {
@@ -128,12 +134,14 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.isScrollEnabled = false
+        webView.isUserInteractionEnabled = allowsInteraction
         webView.navigationDelegate = context.coordinator
         return webView
     }
 
     func updateUIView(_ webView: WKWebView, context: Context) {
         context.coordinator.contentHeight = $contentHeight
+        webView.isUserInteractionEnabled = allowsInteraction
         let uiColor = UIColor(foregroundColor)
         let displayHtml = HTMLContentView.htmlForDisplay(html)
         let wrapped = """

@@ -28,6 +28,9 @@ struct GuideView: View {
         .onChange(of: appEnv.navigation.guideDeepLinkRevision) { _, _ in
             Task { await applyDeepLink() }
         }
+        .onChange(of: appEnv.navigation.guideStackResetRevision) { _, _ in
+            path = NavigationPath()
+        }
         .onChange(of: path.count) { _, count in
             appEnv.navigation.guidePathCount = count
         }
@@ -38,17 +41,29 @@ struct GuideView: View {
         switch route {
         case .city(let cityId):
             if let city = cities.first(where: { $0.id == cityId }) {
-                GuideCityAttractionsView(city: city) { attraction in
-                    path.append(GuideRoute.attraction(GuideAttractionRoute(
-                        attractionId: attraction.id,
-                        cityId: city.id,
-                        presentation: .browse(cityName: city.name)
-                    )))
-                }
+                GuideCityAttractionsView(
+                    city: city,
+                    onSelectCityGuide: { guide in
+                        path.append(GuideRoute.cityGuide(GuideCityGuideRoute(
+                            guideId: guide.id,
+                            cityId: city.id,
+                            cityName: city.name
+                        )))
+                    },
+                    onSelectAttraction: { attraction in
+                        path.append(GuideRoute.attraction(GuideAttractionRoute(
+                            attractionId: attraction.id,
+                            cityId: city.id,
+                            presentation: .browse(cityName: city.name)
+                        )))
+                    }
+                )
             } else {
                 Text("City not found")
                     .padding()
             }
+        case .cityGuide(let route):
+            CityGuideDetailLoaderView(route: route)
         case .cultureTips:
             GuideCultureTipsView(tips: cultureTips) { tip in
                 path.append(GuideRoute.cultureTip(tip.id))
@@ -82,9 +97,15 @@ struct GuideView: View {
         let cityId = link.cityId ?? "beijing"
         let city = cities.first(where: { $0.id == cityId }) ?? cities.first
         let presentation = link.presentation ?? .browse(cityName: city?.name ?? cityId)
+        let isPlanContext: Bool = {
+            switch presentation {
+            case .planDay, .planAddToDay: return true
+            case .browse: return false
+            }
+        }()
 
         path = NavigationPath()
-        if let city {
+        if !isPlanContext, let city {
             path.append(GuideRoute.city(city.id))
         }
 
@@ -93,6 +114,45 @@ struct GuideView: View {
             cityId: city?.id ?? cityId,
             presentation: presentation
         )))
+    }
+}
+
+private struct CityGuideDetailLoaderView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+
+    let route: GuideCityGuideRoute
+    @State private var preview: CityGuide?
+    @State private var failed = false
+
+    var body: some View {
+        Group {
+            if let preview {
+                CityGuideDetailView(listPreview: preview, route: route)
+            } else if failed {
+                Text("Content coming soon")
+                    .font(Theme.FontToken.inter(13))
+                    .padding(Theme.screenPadding)
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .task(id: route.guideId) { await resolvePreview() }
+    }
+
+    private func resolvePreview() async {
+        failed = false
+        preview = nil
+        if let full = try? await appEnv.content.fetchCityGuide(id: route.guideId) {
+            preview = full
+            return
+        }
+        if let list = try? await appEnv.content.fetchCityGuides(cityId: route.cityId),
+           let match = list.first(where: { $0.id == route.guideId }) {
+            preview = match
+            return
+        }
+        failed = true
     }
 }
 

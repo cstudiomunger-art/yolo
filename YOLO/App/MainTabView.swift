@@ -85,9 +85,6 @@ struct MainTabView: View {
         }
         .background(Theme.ColorToken.background)
         .onAppear {
-            if appEnv.navigation.consumeLandOnPlan() {
-                appEnv.navigation.openPlanGenerator()
-            }
             presentPendingShareIfNeeded()
         }
         .onChange(of: appEnv.navigation.pendingShareSlug) { _, _ in

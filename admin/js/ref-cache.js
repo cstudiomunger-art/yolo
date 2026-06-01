@@ -32,6 +32,7 @@
     App.refCache.scenarios = scenRes.data || [];
     App.refCache.countries = countryRes.data || [];
     App.refCache.loaded = true;
+    if (force && App.invalidateCityTreeCache) App.invalidateCityTreeCache();
   };
 
   App.audioGuidesForAttraction = function audioGuidesForAttraction(attractionId) {

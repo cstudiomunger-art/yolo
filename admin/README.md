@@ -2,12 +2,15 @@
 
 基于浏览器的可视化 CMS，通过 **Supabase Auth** 登录，使用 **anon key** 读写数据库（需先配置管理员 RLS）。
 
+**内容运营请阅读：[OPERATIONS_MANUAL.md](./OPERATIONS_MANUAL.md)**（后台每项功能对应 App 页面位置、示意图与「待接入」说明）。
+
 ## 推荐工作流
 
-1. 打开 **城市工作台** → 选择城市 → 进入工作台  
-2. **景点与解说** → 编辑书面解说、**实用信息**（门票/时长/开放时间等可增删条目）、西方游客贴士、周边推荐  
-3. 同一页面内管理 **语音导览**（引文、章节时间轴、上传 MP3）  
-4. 全局内容（签证、助手、行程模板等）使用侧栏扁平菜单  
+1. 侧栏展开 **城市** → 点击城市名 → 主区编辑城市概览；展开该城下 **景点** 或「城市指南 / 酒店 / 清单」等节点  
+2. 点击 **景点** → 主区进入「解说与详情」（书面解说、子区域、语音导览同一页）  
+3. 侧栏可继续展开景点的 **子区域**、**语音导览** 条目，主区自动滚动到对应块  
+4. **用户与购买**、**应用配置**、签证/助手在侧栏其它分组；跨城全表在 **工具 · 跨城**  
+5. 侧栏顶部可 **搜索城市/景点**；品牌旁 **◐** 切换浅色 / 深色 / 跟随系统  
 
 ## 1. 数据库准备
 
@@ -78,11 +81,73 @@ cd admin && python3 -m http.server 8080
 
 打开 **http://localhost:8080**
 
+## 6. 部署到 Cloudflare
+
+后台为纯静态站点（`admin/`），与分享站 `web/` 类似，使用 **独立 Worker 项目 `yolo-admin`**，避免与 `yolo`（分享页）混在同一目录。
+
+### 6.1 一次性：本机部署
+
+```bash
+# 仓库根目录
+npm install
+npx wrangler login
+
+# 方式 A — 从 iOS Secrets.xcconfig 读取 Supabase（若存在）
+./scripts/deploy-admin.sh
+
+# 方式 B — 环境变量
+export SUPABASE_URL="https://你的项目.supabase.co"
+export SUPABASE_ANON_KEY="你的_publishable_或_anon_key"
+npm run deploy:admin
+```
+
+部署成功后终端会提示 URL；也可在 [Cloudflare Dashboard](https://dash.cloudflare.com) → **Workers & Pages** → **yolo-admin** 查看，形如：
+
+`https://yolo-admin.<你的子域>.workers.dev`
+
+用浏览器打开该地址即可登录 CMS（须 `admin_users` 中有账号）。
+
+构建时会执行 `admin/scripts/build-config.mjs`，根据环境变量生成 **`admin/js/config.js`**（该文件仍在 `.gitignore`，不会提交 Git）。
+
+### 6.2 连接 GitHub 自动部署（推荐）
+
+在 Dashboard 为 **`yolo-admin`** 新建或绑定 **Workers** 项目（与现有 `yolo` 分享站为**两个项目**）：
+
+| 配置项 | 值 |
+|--------|-----|
+| Production branch | `main`（或你的主分支） |
+| Root directory | `/`（仓库根目录） |
+| Build command | `npm install && npm run build:admin` |
+| Deploy command | `npx wrangler deploy --config wrangler.admin.jsonc` |
+
+**Environment variables**（构建阶段必填）：
+
+| 变量名 | 值 |
+|--------|-----|
+| `SUPABASE_URL` | 与 iOS `Secrets.xcconfig` 相同 |
+| `SUPABASE_ANON_KEY` | Dashboard → API Keys → Publishable 或 Legacy anon |
+
+保存后每次 push 主分支会自动部署。
+
+### 6.3 安全建议
+
+| 项 | 说明 |
+|----|------|
+| Anon Key | 前端可见属正常；写权限由 RLS + `admin_users` 限制 |
+| 公开 URL | 任何人可打开登录页；仅管理员账号可改内容 |
+| 加强防护 | 可在 Cloudflare **Zero Trust → Access** 为 `yolo-admin` 域名加团队邮箱登录，再进 CMS |
+| Storage 上传 | 须 HTTPS；若上传失败，检查浏览器是否拦截 `*.supabase.co` |
+
+### 6.4 与分享站同域（可选）
+
+若希望 `https://你的分享域/admin/` 而不是单独 Worker，需在构建时把 `admin/` 复制到 `web/admin/` 并改 `wrangler.jsonc` 的 assets 目录；当前默认方案为 **独立 `yolo-admin`**，运维更简单。
+
 ## 功能概览
 
 | 功能 | 说明 |
 |------|------|
-| 城市工作台 | 卡片列表、按城管理景点/音频/路线/酒店/清单 |
+| 城市树导航 | 侧栏按城市 → 景点 → 子区域/语音展开编辑 |
+| 城市卡片列表 | 「+ 新建 / 管理城市」跨城浏览与新建 |
 | 可视化关联 | 城市、景点、国家、助手场景均为下拉选择，无需手写 ID |
 | 结构化编辑 | 贴士列表、周边地点、音频章节、行程天数、紧急联系人 |
 | 封面 / 图集 / 内容图 / 音频上传 | Storage 桶 `cover-images`、`audio-guides`；支持本地上传，保存时写入公网 URL |
