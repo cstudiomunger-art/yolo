@@ -42,6 +42,16 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
+      - name: Check Cloudflare API token
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "::error::未配置 GitHub Secret「CLOUDFLARE_API_TOKEN」。"
+            echo "请打开：仓库 Settings → Secrets and variables → Actions → New repository secret"
+            echo "Token 在 Cloudflare → My Profile → API Tokens → Create Token（模板：Edit Cloudflare Workers）"
+            echo "或改用 Cloudflare Dashboard 为 yolo-admin 连接本仓库自动部署（见 admin/README.md 6.3）"
+            exit 1
+          fi
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
