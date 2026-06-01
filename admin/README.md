@@ -109,7 +109,24 @@ npm run deploy:admin
 
 构建时会执行 `admin/scripts/build-config.mjs`，根据环境变量生成 **`admin/js/config.js`**（该文件仍在 `.gitignore`，不会提交 Git）。
 
-### 6.2 连接 GitHub 自动部署（推荐）
+### 6.2 推送到 GitHub 自动部署（推荐）
+
+仓库已包含 [`.github/workflows/deploy-admin.yml`](../.github/workflows/deploy-admin.yml)：向 **`main`** 推送且改动 `admin/` 相关文件时，GitHub Actions 会自动部署 **`yolo-admin`**。
+
+在 GitHub 仓库 **Settings → Secrets and variables → Actions** 添加：
+
+| Secret | 说明 |
+|--------|------|
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API Token（需 Workers 编辑权限） |
+| `CLOUDFLARE_ACCOUNT_ID` | Dashboard 右侧 Account ID（可选但建议填，避免多账号歧义） |
+| `SUPABASE_URL` | 与 iOS 相同 |
+| `SUPABASE_ANON_KEY` | Publishable / anon key |
+
+推送后打开 **Actions** 页查看「Deploy Admin CMS」是否成功；访问 URL 仍在 Cloudflare → **yolo-admin**。
+
+> 说明：现有 **`yolo`** 项目的 Git 自动部署只构建 `web/`（分享站），**不会**部署后台；后台依赖上述 Workflow 或下方 Dashboard 手动配置。
+
+### 6.3 连接 Cloudflare Git（可选，与 Actions 二选一）
 
 在 Dashboard 为 **`yolo-admin`** 新建或绑定 **Workers** 项目（与现有 `yolo` 分享站为**两个项目**）：
 
@@ -129,7 +146,7 @@ npm run deploy:admin
 
 保存后每次 push 主分支会自动部署。
 
-### 6.3 安全建议
+### 6.4 安全建议
 
 | 项 | 说明 |
 |----|------|
@@ -138,7 +155,7 @@ npm run deploy:admin
 | 加强防护 | 可在 Cloudflare **Zero Trust → Access** 为 `yolo-admin` 域名加团队邮箱登录，再进 CMS |
 | Storage 上传 | 须 HTTPS；若上传失败，检查浏览器是否拦截 `*.supabase.co` |
 
-### 6.4 与分享站同域（可选）
+### 6.5 与分享站同域（可选）
 
 若希望 `https://你的分享域/admin/` 而不是单独 Worker，需在构建时把 `admin/` 复制到 `web/admin/` 并改 `wrangler.jsonc` 的 assets 目录；当前默认方案为 **独立 `yolo-admin`**，运维更简单。
 
