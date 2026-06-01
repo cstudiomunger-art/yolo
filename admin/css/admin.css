@@ -183,6 +183,11 @@ a {
   background: var(--surface2);
 }
 
+.nav-btn--primary {
+  font-weight: 600;
+  color: var(--text);
+}
+
 .nav-group {
   margin-bottom: 4px;
 }

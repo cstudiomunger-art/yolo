@@ -23,7 +23,7 @@
     });
 
     main.innerHTML = `
-      <div class="status-bar info workflow-hint">在左侧 <strong>城市</strong> 树中选择城市进行编辑；此处用于新建城市或快速浏览全部城市卡片。</div>
+      <div class="status-bar info workflow-hint">在侧栏 <strong>城市工作台</strong> 下方展开 <strong>城市</strong> 树选择城市；此处可浏览全部城市卡片，或使用顶部「+ 新建城市」。</div>
       <div class="hub-toolbar">
         <input type="search" id="city-search" placeholder="搜索城市名称…" class="search-input" />
         <span id="city-grid-count" class="muted"></span>

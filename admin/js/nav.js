@@ -19,6 +19,12 @@
 
   App.GLOBAL_NAV_GROUPS = [
     {
+      id: "workspace",
+      label: "工作台",
+      defaultExpanded: true,
+      items: [{ kind: "city_list", label: "城市工作台" }],
+    },
+    {
       id: "users",
       label: "用户",
       defaultExpanded: true,
@@ -164,7 +170,7 @@
     } else if (sel.kind === "table") {
       App.$(`.nav-btn[data-nav-table="${sel.table}"]`)?.classList.add("active");
     } else if (sel.kind === "city_list") {
-      App.$('.nav-tree-row[data-nav-kind="city_list"]')?.classList.add("active");
+      App.$('.nav-btn[data-nav-city-list], .nav-tree-row[data-nav-kind="city_list"]')?.classList.add("active");
     } else if (sel.cityId) {
       const rowSel = `[data-city-id="${sel.cityId}"]`;
       if (sel.kind === "city_panel" && sel.panel) {
@@ -406,6 +412,8 @@
       for (const item of group.items) {
         if (item.kind === "view") {
           globalHtml += `<button type="button" class="nav-btn" data-nav-view="${App.escapeHtml(item.view)}">${App.escapeHtml(item.label)}</button>`;
+        } else if (item.kind === "city_list") {
+          globalHtml += `<button type="button" class="nav-btn nav-btn--primary" data-nav-city-list="1">${App.escapeHtml(item.label)}</button>`;
         } else {
           globalHtml += `<button type="button" class="nav-btn" data-nav-table="${App.escapeHtml(item.table)}">${App.escapeHtml(item.label)}</button>`;
         }
@@ -416,8 +424,8 @@
     let citiesHtml = `<section class="nav-group nav-group--cities ${citiesRootExpanded ? "" : "nav-group--collapsed"}" data-group-id="cities">
       <button type="button" class="nav-group-toggle nav-group-toggle--cities" data-toggle-key="cities_root" aria-expanded="${citiesRootExpanded}">${App.navCaretMarkup(citiesRootExpanded)}<span class="nav-group-label">城市</span></button>
       <div class="nav-group-items nav-tree-wrap">
-        <div class="nav-tree-row nav-tree-row--depth-0 nav-tree-row--action" data-nav-kind="city_list" role="button" tabindex="0">
-          <span class="nav-tree-label">+ 新建 / 管理城市</span>
+        <div class="nav-tree-row nav-tree-row--depth-0 nav-tree-row--action" data-nav-kind="new_city" role="button" tabindex="0">
+          <span class="nav-tree-label">+ 新建城市</span>
         </div>
         <div id="city-tree-host" class="${citiesRootExpanded ? "" : "hidden"}">`;
 
@@ -513,6 +521,17 @@
       await App.navigateTo({ kind: "city_list" });
       return;
     }
+    if (kind === "new_city") {
+      App.openModal(null, "cities", {
+        onSaved: async () => {
+          await App.loadRefCache(true);
+          App.invalidateCityTreeCache?.();
+          await App.renderSidebar();
+          if (App.currentView === "city_hub") await App.renderCityHubList();
+        },
+      });
+      return;
+    }
     if (kind === "new_attraction" && cityId) {
       await App.navigateTo({ kind: "attraction", cityId, attractionId: null });
       return;
@@ -593,9 +612,11 @@
     });
 
     nav?.addEventListener("click", (e) => {
-      const btn = e.target.closest(".nav-btn[data-nav-view], .nav-btn[data-nav-table]");
+      const btn = e.target.closest(".nav-btn[data-nav-view], .nav-btn[data-nav-table], .nav-btn[data-nav-city-list]");
       if (!btn) return;
-      if (btn.dataset.navView) {
+      if (btn.dataset.navCityList) {
+        App.navigateTo({ kind: "city_list" });
+      } else if (btn.dataset.navView) {
         App.navigateTo({ kind: "view", view: btn.dataset.navView });
       } else if (btn.dataset.navTable) {
         App.navigateTo({ kind: "table", table: btn.dataset.navTable });
