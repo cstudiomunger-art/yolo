@@ -1,5 +1,6 @@
 # Deploy admin CMS to Cloudflare Worker「yolo-admin」on push to main.
-# Required GitHub repo secrets: CLOUDFLARE_API_TOKEN, SUPABASE_URL, SUPABASE_ANON_KEY
+# Required GitHub secret: CLOUDFLARE_API_TOKEN
+# Optional: SUPABASE_URL, SUPABASE_ANON_KEY (else uses config.example defaults)
 
 name: Deploy Admin CMS
 
@@ -11,6 +12,7 @@ on:
       - "wrangler.admin.jsonc"
       - "package.json"
       - "package-lock.json"
+      - "web/config.example.js"
       - "scripts/deploy-admin.sh"
       - ".github/workflows/deploy-admin.yml"
 
@@ -44,5 +46,10 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy --config wrangler.admin.jsonc
+
+      - name: Deployment note
+        if: success()
+        run: |
+          echo "Admin CMS deployed to Worker yolo-admin."
+          echo "Open Cloudflare Dashboard → Workers & Pages → yolo-admin for the URL."

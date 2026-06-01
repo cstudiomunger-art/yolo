@@ -115,12 +115,13 @@ npm run deploy:admin
 
 在 GitHub 仓库 **Settings → Secrets and variables → Actions** 添加：
 
-| Secret | 说明 |
-|--------|------|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API Token（需 Workers 编辑权限） |
-| `CLOUDFLARE_ACCOUNT_ID` | Dashboard 右侧 Account ID（可选但建议填，避免多账号歧义） |
-| `SUPABASE_URL` | 与 iOS 相同 |
-| `SUPABASE_ANON_KEY` | Publishable / anon key |
+| Secret | 必填 | 说明 |
+|--------|------|------|
+| `CLOUDFLARE_API_TOKEN` | **是** | [Cloudflare API Token](https://dash.cloudflare.com/profile/api-tokens)（模板：Edit Cloudflare Workers） |
+| `SUPABASE_URL` | 否 | 未设置时使用 `config.example.js` 默认值（与 web 相同） |
+| `SUPABASE_ANON_KEY` | 否 | 同上 |
+
+若 Workflow 在 **Generate admin/js/config.js** 失败，说明 example 里也无有效 key；若 **Deploy** 失败，多半是未配置 `CLOUDFLARE_API_TOKEN`。
 
 推送后打开 **Actions** 页查看「Deploy Admin CMS」是否成功；访问 URL 仍在 Cloudflare → **yolo-admin**。
 

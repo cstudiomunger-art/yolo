@@ -1,20 +1,36 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
-function readExampleField(name) {
-  const raw = readFileSync(new URL("../js/config.example.js", import.meta.url), "utf8");
-  const match = raw.match(new RegExp(`${name}:\\s*"([^"]*)"`));
-  return match ? match[1] : "";
+function readJsExampleField(fileUrl, fieldName) {
+  try {
+    const raw = readFileSync(fileUrl, "utf8");
+    const match = raw.match(new RegExp(`${fieldName}:\\s*"([^"]*)"`));
+    return match ? match[1] : "";
+  } catch {
+    return "";
+  }
 }
+
+const adminExample = new URL("../js/config.example.js", import.meta.url);
+const webExample = new URL("../../web/config.example.js", import.meta.url);
 
 const supabaseUrl =
   process.env.SUPABASE_URL ||
-  readExampleField("supabaseUrl") ||
+  readJsExampleField(adminExample, "supabaseUrl") ||
+  readJsExampleField(webExample, "supabaseUrl") ||
   "https://edwvrriuwzaaqznklrgi.supabase.co";
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || readExampleField("supabaseAnonKey") || "";
 
-if (!supabaseAnonKey || supabaseAnonKey.includes("你的")) {
+const supabaseAnonKey =
+  process.env.SUPABASE_ANON_KEY ||
+  readJsExampleField(adminExample, "supabaseAnonKey") ||
+  readJsExampleField(webExample, "supabaseAnonKey") ||
+  "";
+
+const invalidKey =
+  !supabaseAnonKey || supabaseAnonKey.includes("你的") || supabaseAnonKey.includes("anon_key");
+
+if (invalidKey) {
   console.error(
-    "Missing SUPABASE_ANON_KEY. Set env var, Cloudflare build env, or fill admin/js/config.example.js for local defaults."
+    "Missing SUPABASE_ANON_KEY. Add GitHub Actions secret SUPABASE_ANON_KEY, Cloudflare build env, or set web/config.example.js / admin/js/config.example.js."
   );
   process.exit(1);
 }
