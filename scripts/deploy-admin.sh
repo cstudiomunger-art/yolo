@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Deploy admin/ CMS to Cloudflare Workers static assets (project「yolo-admin」).
-# Default URL: https://yolo-admin.<account>.workers.dev
+# Deploy admin/ CMS to Cloudflare Workers static assets (project「yoloadmin」).
+# Default URL: https://yoloadmin.<account>.workers.dev
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -44,10 +44,10 @@ echo "==> 生成 admin/js/config.js ..."
 cd "$ADMIN"
 npm run build
 
-echo "==> 部署到 Cloudflare Workers（项目 yolo-admin）..."
+echo "==> 部署到 Cloudflare Workers（项目 yoloadmin）..."
 cd "$ROOT"
 npx wrangler deploy --config wrangler.admin.jsonc
 
 echo ""
-echo "部署完成。在 Dashboard → Workers → yolo-admin 查看访问 URL。"
+echo "部署完成。在 Dashboard → Workers → yoloadmin 查看访问 URL。"
 echo "建议仅团队使用；可在 Cloudflare Zero Trust 为该 Worker 加 Access 登录保护。"

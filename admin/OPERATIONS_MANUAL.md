@@ -29,7 +29,7 @@ cd admin && python3 -m http.server 8081
 
 浏览器打开 **http://localhost:8081**（不要用 `file://` 打开，否则无法上传图片/音频）。
 
-**Cloudflare 线上（团队共用）：** 见 [README.md — 部署到 Cloudflare](./README.md#6-部署到-cloudflare)。部署后使用 Workers 提供的 `https://yolo-admin.*.workers.dev` 地址登录（与本地相同 Supabase 管理员账号）。
+**Cloudflare 线上（团队共用）：** 见 [README.md — 部署到 Cloudflare](./README.md#6-部署到-cloudflare)。当前项目地址示例：**https://yoloadmin.cstudiomunger.workers.dev**（须部署 `admin/` 目录；若打开是分享站说明页，见 README「打开却是分享站首页」）。
 
 使用 Supabase **管理员账号**登录（账号须在 `admin_users` 表中）。
 

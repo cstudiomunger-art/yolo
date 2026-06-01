@@ -127,16 +127,31 @@ npm run deploy:admin
 
 > 说明：现有 **`yolo`** 项目的 Git 自动部署只构建 `web/`（分享站），**不会**部署后台；后台依赖上述 Workflow 或下方 Dashboard 手动配置。
 
-### 6.3 连接 Cloudflare Git（可选，与 Actions 二选一）
+### 6.3 连接 Cloudflare Git（推荐：你当前的 yoloadmin 项目）
 
-在 Dashboard 为 **`yolo-admin`** 新建或绑定 **Workers** 项目（与现有 `yolo` 分享站为**两个项目**）：
+在 Dashboard 打开 **`yoloadmin`**（或新建 Worker）→ **设置 → 构建**，必须如下（**不要**与分享站 `yolo` 用同一套命令）：
+
+| 配置项 | 后台 CMS（yoloadmin） | 分享站（yolo） |
+|--------|----------------------|----------------|
+| Build command | `npm install && npm run build:admin` | `npm run build:web` |
+| Deploy command | `npx wrangler deploy --config wrangler.admin.jsonc` | `npx wrangler deploy` |
+| 静态目录 | `admin/`（由 wrangler.admin.jsonc 指定） | `web/` |
 
 | 配置项 | 值 |
 |--------|-----|
-| Production branch | `main`（或你的主分支） |
+| Production branch | `main` |
 | Root directory | `/`（仓库根目录） |
-| Build command | `npm install && npm run build:admin` |
-| Deploy command | `npx wrangler deploy --config wrangler.admin.jsonc` |
+
+保存后点 **重新部署**。成功时打开 `https://yoloadmin.<子域>.workers.dev` 应看到 **「YOLO HAPPY CMS」登录页**（邮箱/密码），而不是 “Shared trip links” 说明页。
+
+#### 打开却是分享站首页？
+
+若页面写着 *Plan and explore travel…*、`/i/your-trip-slug`，说明部署的是 **`web/`**，不是后台。请改上表 Build/Deploy 命令后重新部署。
+
+| 你看到的 | 实际部署目录 |
+|----------|----------------|
+| Shared trip links / apple-app-site-association 说明 | `web/`（错） |
+| YOLO HAPPY **CMS** 登录表单 | `admin/`（对） |
 
 **Environment variables**（构建阶段必填）：
 
