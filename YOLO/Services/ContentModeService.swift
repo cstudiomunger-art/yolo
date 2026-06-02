@@ -90,11 +90,18 @@ final class ContentModeService {
 
     private func apply(remote settings: AppSettingsRemote) {
         useRemoteContent = settings.useRemoteContent
-        useRemoteIAP = settings.useRemoteIAP
+        // IAP is enabled by default in production.
+        // The CMS 'use_remote_iap' field can disable it (set to false) for demo builds.
+        // Migration 053 sets the DB default to true; this fallback handles pre-migration DBs.
+        useRemoteIAP = settings.useRemoteIAP || Self.defaultRemoteIAPEnabled
         branding = settings.resolvedBranding
         aiSettings = settings.resolvedAI
         backend = settings.useRemoteContent ? .remote : .bundled
         useRemoteAI = Self.defaultRemoteAIEnabled
+    }
+
+    private static var defaultRemoteIAPEnabled: Bool {
+        AppConfig.isSupabaseConfigured && !AppConfig.forceBundled && !AppConfig.useMock
     }
 
     private func applyBundledDefaults() {
@@ -176,7 +183,7 @@ final class ContentModeService {
                 .value
             guard let row = rows.first else { return false }
             useRemoteContent = row.useRemoteContent
-            useRemoteIAP = row.useRemoteIap
+            useRemoteIAP = row.useRemoteIap || Self.defaultRemoteIAPEnabled
             backend = row.useRemoteContent ? .remote : .bundled
             useRemoteAI = Self.defaultRemoteAIEnabled
             return true
