@@ -133,26 +133,39 @@ struct AudioGuideSection: View {
     private var lockedControls: some View {
         let previewMinutes = max(Int(freeTrialSeconds / 60), 1)
         if allowsPreview {
-            Button {
-                playback.togglePlay()
-            } label: {
-                if playback.isPlaying {
-                    Text(String(localized: "⏸ Pause preview"))
-                } else {
-                    Text(String(format: String(localized: "▶ Preview (%lld min free)"), previewMinutes))
+            if playback.mode == .loading {
+                HStack(spacing: 6) {
+                    ProgressView().scaleEffect(0.7)
+                    Text(String(localized: "Loading preview…"))
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
                 }
+            } else {
+                Button {
+                    playback.togglePlay()
+                } label: {
+                    if playback.isPlaying {
+                        Text(String(localized: "⏸ Pause preview"))
+                    } else {
+                        Text(String(format: String(localized: "▶ Preview (%lld min free)"), previewMinutes))
+                    }
+                }
+                .font(Theme.FontToken.inter(12, weight: .medium))
+                .foregroundStyle(playback.canPlay ? Theme.ColorToken.textPrimary : Theme.ColorToken.textMuted)
+                .buttonStyle(.plain)
+                .disabled(!playback.canPlay)
             }
-            .font(Theme.FontToken.inter(12, weight: .medium))
-            .foregroundStyle(playback.canPlay ? Theme.ColorToken.textPrimary : Theme.ColorToken.textMuted)
-            .buttonStyle(.plain)
-            .disabled(!playback.canPlay)
         }
 
-        scrubSlider(maxSeconds: previewCapSeconds)
+        if previewCapSeconds > 0 {
+            scrubSlider(maxSeconds: previewCapSeconds)
+        }
 
-        Text("\(formatTime(Int(scrubProgress))) / \(formatTime(previewCapSeconds))")
-            .font(Theme.FontToken.inter(10))
-            .foregroundStyle(Theme.ColorToken.textMuted)
+        if previewCapSeconds > 0 {
+            Text("\(formatTime(Int(scrubProgress))) / \(formatTime(previewCapSeconds))")
+                .font(Theme.FontToken.inter(10))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+        }
 
         if allowsPreview, playback.isPlaying, playback.canPlay, playback.remainingPreviewSeconds > 0 {
             Text(String(

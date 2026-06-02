@@ -97,6 +97,14 @@ struct EditProfileView: View {
                 Text(avatarError)
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(.red)
+                // Avatar bucket is created by migration 051 — needs supabase db push
+                if avatarError.lowercased().contains("not found") ||
+                   avatarError.lowercased().contains("bucket") ||
+                   avatarError.lowercased().contains("storage") {
+                    Text(String(localized: "Storage bucket not set up yet. Run: supabase db push"))
+                        .font(Theme.FontToken.inter(10))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                }
             }
         }
     }
