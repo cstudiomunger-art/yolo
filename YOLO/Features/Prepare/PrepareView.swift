@@ -52,8 +52,8 @@ struct PrepareView: View {
                 }
         }
         .task { await bootstrap() }
-        .onChange(of: appEnv.contentRevision) { _, _ in Task { await reloadContent() } }
-        .onChange(of: appEnv.preferences.activeItineraryId) { _, _ in Task { await reloadContent() } }
+        .onChange(of: appEnv.contentRevision) { _, _ in Task { await reloadContent(invalidateCache: true) } }
+        .onChange(of: appEnv.preferences.activeItineraryId) { _, _ in Task { await reloadContent(invalidateCache: true) } }
         .onChange(of: appEnv.preferences.savedItineraries.count) { _, _ in Task { await reloadContent() } }
         .sheet(isPresented: $showReadingList) {
             ReadingListView(items: reading)
@@ -384,11 +384,15 @@ struct PrepareView: View {
         cities = (try? await appEnv.content.fetchCities()) ?? []
     }
 
-    private func reloadContent() async {
+    private func reloadContent(invalidateCache: Bool = false) async {
         let ctx = context
         let cityIds = ctx.hasSavedItinerary ? ctx.itineraryCityIds : []
         if ctx.hasSavedItinerary, !cityIds.isEmpty {
             appEnv.preferences.selectedCityIds = cityIds
+        }
+
+        if invalidateCache, let repo = appEnv.content as? CachingContentRepository {
+            await repo.invalidateCultureTips(cityIds: cityIds)
         }
 
         allChecklistItems = (try? await appEnv.content.fetchChecklistItems(
