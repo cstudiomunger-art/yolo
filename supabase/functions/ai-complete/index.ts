@@ -20,7 +20,6 @@ import {
 import {
   chatCompletion,
   corsHeaders,
-  volcengineConfig,
   type ChatMessage,
 } from "../_shared/volcengine.ts";
 
@@ -252,11 +251,6 @@ async function handleAssistantChat(
     { role: "user", content: message },
   ];
 
-  // Streaming path: forward SSE directly to client
-  if (body.stream === true) {
-    return await streamAssistantChat(messages, ai);
-  }
-
   const text =
     (await chatCompletion({
       messages,
@@ -269,52 +263,6 @@ async function handleAssistantChat(
     "I'm here to help with your China trip. Please try again in a moment, or use the quick-help chips above.";
 
   return jsonResponse({ code: 200, text });
-}
-
-async function streamAssistantChat(
-  messages: ChatMessage[],
-  ai: AISettings,
-): Promise<Response> {
-  const cfg = volcengineConfig();
-  const apiKey = cfg.apiKey;
-  const model = ai.modelId?.trim() || cfg.model;
-  const apiUrl = ai.apiUrl?.trim() || cfg.apiUrl;
-
-  if (!apiKey || !model) {
-    return jsonResponse({ code: 500, error: "AI not configured" }, 500);
-  }
-
-  const upstream = await fetch(apiUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      max_tokens: ai.chatMaxTokens,
-      temperature: ai.temperature,
-      stream: true,
-    }),
-  });
-
-  if (!upstream.ok || !upstream.body) {
-    const errText = await upstream.text().catch(() => "");
-    return jsonResponse(
-      { code: upstream.status, error: `Upstream error: ${errText.slice(0, 200)}` },
-      upstream.status,
-    );
-  }
-
-  return new Response(upstream.body, {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      "X-Accel-Buffering": "no",
-    },
-  });
 }
 
 async function handleItinerary(
