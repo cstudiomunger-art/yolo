@@ -11,6 +11,8 @@ struct AssistantView: View {
     @State private var showEmergency = false
     @State private var chips: [AssistantChip] = []
     @State private var isThinking = false
+    @State private var isStreaming = false
+    @State private var streamingText = ""
     @State private var didApplyPrefill = false
     @State private var didApplyScenario = false
 
@@ -27,25 +29,36 @@ struct AssistantView: View {
                 chipRow
             }
 
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    ForEach(messages) { message in
-                        chatBubble(message)
-                    }
-                    if isThinking {
-                        HStack {
-                            ProgressView()
-                            Text("Thinking…")
-                                .font(Theme.FontToken.inter(12))
-                                .foregroundStyle(Theme.ColorToken.textMuted)
-                            Spacer()
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 16) {
+                        ForEach(messages) { message in
+                            chatBubble(message)
                         }
+                        if isStreaming {
+                            streamingBubble
+                        } else if isThinking {
+                            HStack {
+                                ProgressView()
+                                Text("Thinking…")
+                                    .font(Theme.FontToken.inter(12))
+                                    .foregroundStyle(Theme.ColorToken.textMuted)
+                                Spacer()
+                            }
+                        }
+                        Color.clear.frame(height: 1).id("bottom")
                     }
+                    .padding(.horizontal, Theme.screenPadding)
+                    .padding(.vertical, 16)
                 }
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.vertical, 16)
+                .scrollDismissesKeyboard(.interactively)
+                .onChange(of: streamingText) { _, _ in
+                    proxy.scrollTo("bottom", anchor: .bottom)
+                }
+                .onChange(of: messages.count) { _, _ in
+                    withAnimation { proxy.scrollTo("bottom", anchor: .bottom) }
+                }
             }
-            .scrollDismissesKeyboard(.interactively)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             inputBar
@@ -102,6 +115,20 @@ struct AssistantView: View {
             }
             .padding(.horizontal, Theme.screenPadding)
             .padding(.vertical, 10)
+        }
+    }
+
+    private var streamingBubble: some View {
+        HStack {
+            Text(streamingText.isEmpty ? "…" : streamingText)
+                .font(Theme.FontToken.inter(13))
+                .foregroundStyle(Theme.ColorToken.textPrimary)
+                .padding(12)
+                .background(Theme.ColorToken.chatAI)
+                .overlay(alignment: .leading) {
+                    Rectangle().fill(Theme.ColorToken.accent).frame(width: 2)
+                }
+            Spacer(minLength: 40)
         }
     }
 
@@ -186,19 +213,33 @@ struct AssistantView: View {
         }
 
         if appEnv.contentMode.effectiveUseRemoteAI {
-            isThinking = true
-            defer { isThinking = false }
-
             let userText = messages.last(where: \.isUser)?.text ?? ""
             let history = messages.dropLast().suffix(12).map { msg in
                 (role: msg.isUser ? "user" : "assistant", content: msg.text)
             }
-            let reply = await AIService.chatAssistant(
+
+            isThinking = true
+            isStreaming = false
+            streamingText = ""
+
+            await AIService.chatAssistantStream(
                 message: userText,
                 history: Array(history),
                 scenarioId: scenarioId
-            )
-            messages.append(ChatMessage(isUser: false, text: formatAssistantText(reply)))
+            ) { chunk in
+                Task { @MainActor in
+                    if self.isThinking { self.isThinking = false; self.isStreaming = true }
+                    self.streamingText += chunk
+                }
+            }
+
+            let finalText = streamingText.isEmpty
+                ? "I'm here to help with your China trip. Please try again in a moment."
+                : formatAssistantText(streamingText)
+            isStreaming = false
+            isThinking = false
+            streamingText = ""
+            messages.append(ChatMessage(isUser: false, text: finalText))
             return
         }
 

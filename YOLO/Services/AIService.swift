@@ -32,6 +32,58 @@ enum AIService {
         }
     }
 
+    /// Streaming variant — calls Edge Function with stream:true and delivers SSE deltas via onChunk.
+    static func chatAssistantStream(
+        message: String,
+        history: [(role: String, content: String)],
+        scenarioId: String? = nil,
+        onChunk: @escaping @Sendable (String) -> Void
+    ) async {
+        guard AppConfig.isSupabaseConfigured, !AppConfig.forceBundled else {
+            onChunk(offlineHint)
+            return
+        }
+
+        let functionURL = AppConfig.supabaseURL
+            .appendingPathComponent("functions/v1/ai-complete")
+
+        var request = URLRequest(url: functionURL)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(AppConfig.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(AppConfig.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 60
+
+        let payload = AssistantChatStreamRequest(
+            type: "assistant_chat",
+            message: message,
+            history: history.map { ChatHistoryItem(role: $0.role, content: $0.content) },
+            scenarioId: scenarioId,
+            stream: true
+        )
+        guard let body = try? JSONCoding.makeEncoder().encode(payload) else { return }
+        request.httpBody = body
+
+        do {
+            let (bytes, response) = try await URLSession.shared.bytes(for: request)
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return }
+
+            for try await line in bytes.lines {
+                guard line.hasPrefix("data: ") else { continue }
+                let data = String(line.dropFirst(6))
+                guard data != "[DONE]" else { break }
+                guard let jsonData = data.data(using: .utf8),
+                      let chunk = try? JSONDecoder().decode(SSEChunk.self, from: jsonData),
+                      let content = chunk.choices.first?.delta.content,
+                      !content.isEmpty
+                else { continue }
+                onChunk(content)
+            }
+        } catch {
+            // Stream ended or connection dropped — no further action needed.
+        }
+    }
+
     static func generateItinerary(
         content: any ContentRepositoryProtocol,
         cities: [String],
@@ -146,6 +198,33 @@ private struct AssistantChatRequest: Encodable {
         case type, message, history
         case scenarioId = "scenario_id"
     }
+}
+
+private struct AssistantChatStreamRequest: Encodable {
+    let type: String
+    let message: String
+    let history: [ChatHistoryItem]
+    let scenarioId: String?
+    let stream: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case type, message, history, stream
+        case scenarioId = "scenario_id"
+    }
+}
+
+// MARK: - SSE Parsing
+
+private struct SSEChunk: Decodable {
+    let choices: [SSEChoice]
+}
+
+private struct SSEChoice: Decodable {
+    let delta: SSEDelta
+}
+
+private struct SSEDelta: Decodable {
+    let content: String?
 }
 
 private struct ChatHistoryItem: Encodable {
