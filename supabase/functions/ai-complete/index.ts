@@ -270,13 +270,18 @@ async function handleAssistantChat(
     { role: "user", content: message },
   ];
 
-  return await streamChatCompletion({
-    messages,
-    maxTokens: ai.chatMaxTokens,
-    temperature: ai.temperature,
-    modelId: ai.modelId,
-    apiUrl: ai.apiUrl,
-  });
+  const text =
+    (await chatCompletion({
+      messages,
+      maxTokens: ai.chatMaxTokens,
+      temperature: ai.temperature,
+      modelId: ai.modelId,
+      apiUrl: ai.apiUrl,
+      timeoutMs: ai.timeoutMs,
+    })) ??
+    "I'm here to help with your China trip. Please try again in a moment, or use the quick-help chips above.";
+
+  return jsonResponse({ code: 200, text });
 }
 
 async function handleItinerary(
