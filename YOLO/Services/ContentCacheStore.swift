@@ -44,6 +44,16 @@ actor ContentCacheStore {
         try? FileManager.default.removeItem(at: fileURL(for: key))
     }
 
+    func removeByPrefix(_ prefix: String) {
+        guard let contents = try? FileManager.default.contentsOfDirectory(
+            at: directory, includingPropertiesForKeys: nil
+        ) else { return }
+        let safe = prefix.lowercased().replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: " ", with: "_")
+        for url in contents where url.lastPathComponent.hasPrefix(safe) {
+            try? FileManager.default.removeItem(at: url)
+        }
+    }
+
     func removeAll() {
         guard let contents = try? FileManager.default.contentsOfDirectory(
             at: directory,

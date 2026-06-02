@@ -377,7 +377,7 @@ struct PrepareView: View {
 
     private func bootstrap() async {
         await loadCities()
-        await reloadContent()
+        await reloadContent(invalidateCache: true)
     }
 
     private func loadCities() async {
@@ -392,7 +392,7 @@ struct PrepareView: View {
         }
 
         if invalidateCache, let repo = appEnv.content as? CachingContentRepository {
-            await repo.invalidateCultureTips(cityIds: cityIds)
+            await repo.invalidateCultureTips()
         }
 
         allChecklistItems = (try? await appEnv.content.fetchChecklistItems(

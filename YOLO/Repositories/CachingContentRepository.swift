@@ -116,8 +116,8 @@ struct CachingContentRepository: ContentRepositoryProtocol {
         }
     }
 
-    func invalidateCultureTips(cityIds: [String]) async {
-        await store.remove(key: ContentCacheKey.cultureTips(cityIds: cityIds))
+    func invalidateCultureTips() async {
+        await store.removeByPrefix("culture_tips_")
     }
 
     func fetchSampleItinerary() async throws -> SampleItinerary {
