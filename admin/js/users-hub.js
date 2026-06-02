@@ -57,7 +57,6 @@
           <option value="subscribed">订阅会员</option>
           <option value="pro">is_pro 标记</option>
           <option value="purchased">已单购景点</option>
-          <option value="avatar_pending">头像待审核</option>
           <option value="onboarded">已完成引导</option>
         </select>
         <button type="button" class="btn btn-secondary btn-sm" id="users-refresh">刷新</button>
@@ -89,7 +88,6 @@
         if (filter === "subscribed") list = list.filter((p) => p.subscription_plan_id);
         if (filter === "pro") list = list.filter((p) => p.is_pro);
         if (filter === "purchased") list = list.filter((p) => (p.purchased_attraction_ids || []).length > 0);
-        if (filter === "avatar_pending") list = list.filter((p) => p.avatar_status === "pending");
         if (filter === "onboarded") list = list.filter((p) => p.has_completed_onboarding);
 
         if (!list.length) {
@@ -253,17 +251,8 @@
       const avatarSection = profile.avatar_url
         ? `<div class="field-block">
             <label>当前头像</label>
-            <div style="display:flex;align-items:center;gap:12px">
-              <img src="${App.escapeHtml(profile.avatar_url)}"
-                   style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:1px solid var(--border)" />
-              <div>
-                <span class="badge ${profile.avatar_status === "approved" ? "badge-green" : profile.avatar_status === "rejected" ? "badge-red" : "badge-yellow"}">${App.escapeHtml(profile.avatar_status || "none")}</span>
-                <div style="margin-top:6px;display:flex;gap:6px">
-                  <button type="button" class="btn btn-sm" id="avatar-approve-btn">✓ 通过</button>
-                  <button type="button" class="btn btn-sm btn-danger" id="avatar-reject-btn">✗ 拒绝并删除</button>
-                </div>
-              </div>
-            </div>
+            <img src="${App.escapeHtml(profile.avatar_url)}"
+                 style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:1px solid var(--border)" />
           </div>`
         : `<div class="field-block"><label>当前头像</label><p class="muted">未上传头像</p></div>`;
 
@@ -412,33 +401,6 @@
         sessionStorage.setItem("yolo.admin.userItinerariesFilter", userId);
         App.usersHubUserId = null;
         App.navigateTo?.({ kind: "table", table: "user_itineraries" });
-      });
-
-      // Avatar moderation
-      App.$("#avatar-approve-btn")?.addEventListener("click", async () => {
-        const { error } = await App.client
-          .from("profiles")
-          .update({ avatar_status: "approved" })
-          .eq("id", userId);
-        if (error) return App.showToast(error.message, "error");
-        App.showToast("头像已通过审核");
-        await App.renderUserDetail(userId);
-      });
-
-      App.$("#avatar-reject-btn")?.addEventListener("click", async () => {
-        if (!confirm("确认拒绝并删除该用户头像？")) return;
-        // Remove from Storage
-        const avatarPath = profile.avatar_url?.split("/avatars/")[1];
-        if (avatarPath) {
-          await App.client.storage.from("avatars").remove([avatarPath]);
-        }
-        const { error } = await App.client
-          .from("profiles")
-          .update({ avatar_status: "rejected", avatar_url: null })
-          .eq("id", userId);
-        if (error) return App.showToast(error.message, "error");
-        App.showToast("头像已拒绝并删除");
-        await App.renderUserDetail(userId);
       });
 
       // Edit trips

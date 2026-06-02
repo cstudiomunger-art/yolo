@@ -25,7 +25,6 @@ struct EditProfileView: View {
             Form {
                 avatarSection
                 nameSection
-                statusSection
             }
             .navigationTitle(String(localized: "Edit Profile"))
             .navigationBarTitleDisplayMode(.inline)
@@ -118,28 +117,6 @@ struct EditProfileView: View {
         }
     }
 
-    @ViewBuilder
-    private var statusSection: some View {
-        if appEnv.preferences.avatarStatus == "pending" {
-            Section {
-                Label(
-                    String(localized: "Avatar is being reviewed"),
-                    systemImage: "clock"
-                )
-                .font(Theme.FontToken.inter(12))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-            }
-        } else if appEnv.preferences.avatarStatus == "rejected" {
-            Section {
-                Label(
-                    String(localized: "Avatar was rejected — please upload a different image"),
-                    systemImage: "exclamationmark.triangle"
-                )
-                .font(Theme.FontToken.inter(12))
-                .foregroundStyle(.red)
-            }
-        }
-    }
 
     // MARK: - Actions
 
@@ -202,20 +179,8 @@ struct EditProfileView: View {
                 .absoluteString
 
             appEnv.preferences.avatarUrl = publicURL
-            appEnv.preferences.avatarStatus = "pending"
+            appEnv.preferences.avatarStatus = "approved"
             await appEnv.profileSync.schedulePush()
-
-            // Trigger async content moderation (session token auto-attached by Supabase SDK)
-            Task {
-                _ = try? await SupabaseManager.shared.functions.invoke(
-                    "moderate-avatar",
-                    options: FunctionInvokeOptions(
-                        body: ["userId": userId.uuidString, "avatarPath": path]
-                    )
-                )
-                // Re-sync profile to pick up updated avatar_status from webhook
-                await appEnv.profileSync.syncAfterSignIn()
-            }
         } catch {
             avatarError = error.localizedDescription
         }
