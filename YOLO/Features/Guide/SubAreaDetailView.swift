@@ -89,7 +89,7 @@ struct SubAreaDetailView: View {
                 if let body = area.body?.trimmingCharacters(in: .whitespacesAndNewlines), !body.isEmpty {
                     // Default to locked (false) when attraction data hasn't loaded yet — prevents
                     // revenue leaks from timing windows where attraction is still nil.
-                    let hasAccess = !appEnv.contentMode.useRemoteIAP
+                    let hasAccess = !appEnv.contentMode.effectiveUseRemoteIAP
                         || (attraction?.textPaywallFree == true)
                         || (attraction.map { appEnv.purchase.hasAccess(to: \.textContent, for: $0.id) } ?? false)
                     ContentPaywallOverlay(

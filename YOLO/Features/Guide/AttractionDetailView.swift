@@ -24,13 +24,13 @@ struct AttractionDetailView: View {
     private var cityName: String { route.presentation.browseCityName ?? "Guide" }
 
     private var hasFullAccess: Bool {
-        if !appEnv.contentMode.useRemoteIAP { return true }
+        if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
         return appEnv.purchase.hasAccess(to: \.audioGuides, for: display.id)
             || appEnv.preferences.hasAccessToAttraction(display.id, iapProductId: display.iapProductId)
     }
 
     private func hasContentAccess(_ flag: KeyPath<MembershipPlan.AccessFlags, Bool>) -> Bool {
-        if !appEnv.contentMode.useRemoteIAP { return true }
+        if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
         if display.textPaywallFree { return true }
         return appEnv.purchase.hasAccess(to: flag, for: display.id)
     }

@@ -23,7 +23,7 @@ struct AudioGuideSection: View {
 
     private var hasFullAccess: Bool {
         _ = accessRefresh
-        if !appEnv.contentMode.useRemoteIAP { return true }
+        if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
         return appEnv.purchase.hasAccess(to: \.audioGuides, for: attraction.id)
             || appEnv.preferences.hasAccessToAttraction(attraction.id, iapProductId: attraction.iapProductId)
     }
