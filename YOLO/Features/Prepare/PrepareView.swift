@@ -13,6 +13,7 @@ struct PrepareView: View {
     )
     @State private var reading: [ReadingItem] = []
     @State private var cultureTips: [CultureTip] = []
+    @State private var collapsedSections: Set<String> = []
     @State private var showReadingList = false
     @State private var selectedDetailItem: ChecklistItem?
     @State private var selectedCultureTip: CultureTip?
@@ -227,28 +228,58 @@ struct PrepareView: View {
     @ViewBuilder
     private var checklistSections: some View {
         ForEach(prepResult.displaySections) { section in
-            Text(section.title)
-                .font(Theme.FontToken.inter(10, weight: .medium))
-                .foregroundStyle(Theme.ColorToken.textDisabled)
-                .textCase(.uppercase)
-                .padding(.top, 16)
-                .padding(.bottom, 8)
-
-            ForEach(section.items) { item in
-                ChecklistRowView(
-                    item: item,
-                    status: itemStatus(item),
-                    onToggle: {
-                        appEnv.preferences.toggleChecklistItem(item.id, type: item.type)
-                    },
-                    onOpenDetail: { selectedDetailItem = item },
-                    onSkip: {
-                        appEnv.preferences.skipChecklistItem(item.id, type: item.type)
-                    },
-                    onRestoreRequest: { restoreConfirmItem = item }
-                )
+            checklistSectionHeader(section)
+            if !collapsedSections.contains(section.id) {
+                ForEach(section.items) { item in
+                    ChecklistRowView(
+                        item: item,
+                        status: itemStatus(item),
+                        onToggle: {
+                            appEnv.preferences.toggleChecklistItem(item.id, type: item.type)
+                        },
+                        onOpenDetail: { selectedDetailItem = item },
+                        onSkip: {
+                            appEnv.preferences.skipChecklistItem(item.id, type: item.type)
+                        },
+                        onRestoreRequest: { restoreConfirmItem = item }
+                    )
+                }
             }
         }
+    }
+
+    private func checklistSectionHeader(_ section: PrepChecklistSection) -> some View {
+        let isCollapsed = collapsedSections.contains(section.id)
+        let doneCount = section.items.filter { itemStatus($0) == .done || itemStatus($0) == .skipped }.count
+        return Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                if isCollapsed {
+                    collapsedSections.remove(section.id)
+                } else {
+                    collapsedSections.insert(section.id)
+                }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Text(section.title)
+                    .font(Theme.FontToken.inter(10, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textDisabled)
+                    .textCase(.uppercase)
+                Spacer()
+                if isCollapsed {
+                    Text("\(doneCount)/\(section.items.count)")
+                        .font(Theme.FontToken.inter(10))
+                        .foregroundStyle(Theme.ColorToken.textGhost)
+                }
+                Image(systemName: isCollapsed ? "chevron.down" : "chevron.up")
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textGhost)
+            }
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var cityPlaceholderCard: some View {
