@@ -870,12 +870,6 @@
     "Audio transcript" : {
 
     },
-    "Avatar is being reviewed" : {
-
-    },
-    "Avatar was rejected — please upload a different image" : {
-
-    },
     "Back to dates" : {
 
     },
@@ -1681,6 +1675,9 @@
         }
       }
     },
+    "Loading preview…" : {
+
+    },
     "Loading trip…" : {
 
     },
@@ -2462,6 +2459,9 @@
         }
       }
     },
+    "Storage bucket not set up yet. Run: supabase db push" : {
+
+    },
     "Submit Request" : {
 
     },
@@ -2653,16 +2653,13 @@
     "Unlock Full Content →" : {
 
     },
+    "Unlock visitor tips →" : {
+
+    },
     "Update password" : {
 
     },
     "Upgrade to unlock all content" : {
-
-    },
-    "Upgrade to unlock all visitor tips" : {
-
-    },
-    "Upgrade to unlock full content" : {
 
     },
     "Uploading…" : {
