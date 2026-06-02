@@ -147,7 +147,7 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     func fetchCultureTips(cityIds: [String]) async throws -> [CultureTip] {
         cultureTips.filter { tip in
             guard let cid = tip.cityId else { return true }
-            return cityIds.contains(cid)
+            return cityIds.isEmpty || cityIds.contains(cid)
         }
     }
 

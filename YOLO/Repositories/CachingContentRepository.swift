@@ -109,9 +109,9 @@ struct CachingContentRepository: ContentRepositoryProtocol {
         }
     }
 
-    func fetchCultureTips() async throws -> [CultureTip] {
-        try await cached(key: ContentCacheKey.cultureTips()) {
-            try await upstream.fetchCultureTips()
+    func fetchCultureTips(cityIds: [String]) async throws -> [CultureTip] {
+        try await cached(key: ContentCacheKey.cultureTips(cityIds: cityIds)) {
+            try await upstream.fetchCultureTips(cityIds: cityIds)
         }
     }
 

@@ -219,7 +219,7 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
             if !all.isEmpty {
                 return all.filter { tip in
                     guard let cid = tip.cityId else { return true }
-                    return cityIds.contains(cid)
+                    return cityIds.isEmpty || cityIds.contains(cid)
                 }
             }
         } catch {

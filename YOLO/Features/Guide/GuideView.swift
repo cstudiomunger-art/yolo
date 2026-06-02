@@ -82,10 +82,10 @@ struct GuideView: View {
     private func load() async {
         do {
             cities = try await appEnv.content.fetchCities()
-            cultureTips = try await appEnv.content.fetchCultureTips()
+            cultureTips = try await appEnv.content.fetchCultureTips(cityIds: [])
         } catch {
             cities = (try? await BundledContentRepository().fetchCities()) ?? []
-            cultureTips = (try? await BundledContentRepository().fetchCultureTips()) ?? []
+            cultureTips = (try? await BundledContentRepository().fetchCultureTips(cityIds: [])) ?? []
         }
         await applyDeepLink()
     }
