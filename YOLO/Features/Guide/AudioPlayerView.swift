@@ -315,7 +315,11 @@ final class AudioPlaybackController: ObservableObject {
     }
 }
 
-struct PurchaseOptionsView: View {
+// PurchaseOptionsView has been replaced by MembershipPlansView (Features/Purchase/MembershipPlansView.swift).
+// This typealias keeps any stray references compiling during the transition.
+typealias PurchaseOptionsView = MembershipPlansView
+
+private struct _LegacyPurchaseOptionsViewUnused: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
     @State private var showLogin = false
@@ -494,4 +498,4 @@ struct PurchaseOptionsView: View {
         }
         showRestoreAlert = true
     }
-}
+} // end _LegacyPurchaseOptionsViewUnused

@@ -10,36 +10,45 @@ final class AppEnvironment {
     let preferences: UserPreferencesStore
     let navigation: AppNavigation
     let profileSync: ProfileSyncService
+    let purchase: PurchaseService
     private(set) var content: any ContentRepositoryProtocol
     /// 内容源或 CMS 配置变更时递增，用于驱动各 Tab 重新加载远程数据。
     private(set) var contentRevision = 0
 
+    @ObservationIgnored private var contentRefreshTask: Task<Void, Never>?
+
     init(
-        contentMode: ContentModeService = ContentModeService(),
-        preferences: UserPreferencesStore = UserPreferencesStore(),
-        navigation: AppNavigation = AppNavigation(),
+        contentMode: ContentModeService? = nil,
+        preferences: UserPreferencesStore? = nil,
+        navigation: AppNavigation? = nil,
         profileSync: ProfileSyncService? = nil
     ) {
+        let resolvedContentMode = contentMode ?? ContentModeService()
+        let resolvedPreferences = preferences ?? UserPreferencesStore()
+        let resolvedNavigation = navigation ?? AppNavigation()
         self.auth = AuthSessionStore()
-        self.contentMode = contentMode
-        self.preferences = preferences
-        self.navigation = navigation
-        self.profileSync = profileSync ?? ProfileSyncService()
+        self.contentMode = resolvedContentMode
+        self.preferences = resolvedPreferences
+        self.navigation = resolvedNavigation
+        let resolvedSync = profileSync ?? ProfileSyncService()
+        self.profileSync = resolvedSync
+        self.purchase = PurchaseService()
         self.content = BundledContentRepository()
-        self.profileSync.bind(preferences: preferences, auth: auth)
-        preferences.onSyncableChange = { [weak self] in
+        resolvedSync.bind(preferences: resolvedPreferences, auth: auth)
+        purchase.bind(preferences: resolvedPreferences, auth: auth, profileSync: resolvedSync)
+        resolvedPreferences.onSyncableChange = { [weak self] in
             guard let self else { return }
             Task { await self.profileSync.schedulePush() }
         }
-        preferences.onChecklistStatusChanged = { [weak self] itemId, type, status in
+        resolvedPreferences.onChecklistStatusChanged = { [weak self] itemId, type, status in
             guard let self else { return }
             Task { await self.profileSync.syncChecklistStatus(itemId: itemId, type: type, status: status) }
         }
-        preferences.onItineraryDeleted = { [weak self] tripId in
+        resolvedPreferences.onItineraryDeleted = { [weak self] tripId in
             guard let self else { return }
             Task { await self.profileSync.syncItineraryDeleted(id: tripId) }
         }
-        preferences.onItinerarySaved = { [weak self] in
+        resolvedPreferences.onItinerarySaved = { [weak self] in
             guard let self else { return }
             Task {
                 await self.profileSync.syncItineraries()
@@ -88,12 +97,21 @@ final class AppEnvironment {
 
     func signOutAndReset() async {
         await profileSync.syncItineraries()
+        await purchase.logout()
         try? await auth.signOut()
         preferences.resetAll()
         contentMode.clearCachedSettings()
         await invalidateOfflineCaches()
         navigation.reset()
         await refreshContentMode(clearSettingsCache: false)
+    }
+
+    func syncAfterSignIn() async {
+        if let userId = auth.userId {
+            await purchase.login(userId: userId)
+        }
+        await profileSync.syncAfterSignIn()
+        await purchase.loadPlans()
     }
 
     func reloadRepositories() {
@@ -106,20 +124,26 @@ final class AppEnvironment {
     }
 
     func refreshContentMode(clearSettingsCache: Bool = false) async {
-        if clearSettingsCache {
-            contentMode.clearCachedSettings()
-            await invalidateOfflineCaches()
+        contentRefreshTask?.cancel()
+        let task = Task {
+            if clearSettingsCache {
+                contentMode.clearCachedSettings()
+                await invalidateOfflineCaches()
+            }
+            guard !Task.isCancelled else { return }
+            let previousBackend = contentMode.backend
+            await contentMode.refreshFromRemote()
+            guard !Task.isCancelled else { return }
+            reloadRepositories()
+            await contentMode.refreshBranding(from: content)
+            if contentMode.backend != previousBackend {
+                await invalidateOfflineCaches()
+                contentRevision += 1
+            }
+            await refreshVisaRule()
         }
-        let previousBackend = contentMode.backend
-        await contentMode.refreshFromRemote()
-        reloadRepositories()
-        await contentMode.refreshBranding(from: content)
-        // Only remount tab roots when bundled ↔ remote switches (avoids breaking TextField focus).
-        if contentMode.backend != previousBackend {
-            await invalidateOfflineCaches()
-            contentRevision += 1
-        }
-        await refreshVisaRule()
+        contentRefreshTask = task
+        await task.value
     }
 
     func invalidateOfflineCaches() async {

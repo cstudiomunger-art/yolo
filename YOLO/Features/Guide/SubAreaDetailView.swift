@@ -87,8 +87,18 @@ struct SubAreaDetailView: View {
                 }
 
                 if let body = area.body?.trimmingCharacters(in: .whitespacesAndNewlines), !body.isEmpty {
-                    HTMLContentView(content: body)
-                        .guideContentCardStyle()
+                    // Default to locked (false) when attraction data hasn't loaded yet — prevents
+                    // revenue leaks from timing windows where attraction is still nil.
+                    let hasAccess = !appEnv.contentMode.useRemoteIAP
+                        || (attraction?.textPaywallFree == true)
+                        || (attraction.map { appEnv.purchase.hasAccess(to: \.textContent, for: $0.id) } ?? false)
+                    ContentPaywallOverlay(
+                        htmlContent: body,
+                        freeChars: appEnv.contentMode.branding.freeTextPreviewChars,
+                        hasAccess: hasAccess,
+                        attraction: attraction
+                    )
+                    .guideContentCardStyle()
                 } else if !area.contentBlocks.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(area.contentBlocks, id: \.self) { block in

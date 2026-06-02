@@ -29,6 +29,17 @@ enum AppConfig {
         return key
     }
 
+    /// RevenueCat public API key. Nil until configured in Secrets.xcconfig.
+    static var revenueCatApiKey: String? {
+        guard let key = plistString(forKey: "REVENUECAT_API_KEY"),
+              !key.isEmpty,
+              !key.hasPrefix("你的")
+        else { return nil }
+        return key
+    }
+
+    static var isRevenueCatConfigured: Bool { revenueCatApiKey != nil }
+
     /// 遗留开关：未配置 Supabase 时等同强制静态模式。
     static var useMock: Bool {
         if plistBool(forKey: "USE_MOCK") == true { return true }
@@ -64,12 +75,14 @@ enum AppConfig {
 
     /// Password reset redirect (must match Supabase Auth redirect allow list).
     static var authRedirectURL: URL {
-        URL(string: "\(authWebBaseURL)/auth/reset-password")!
+        URL(string: "\(authWebBaseURL)/auth/reset-password")
+            ?? URL(string: "https://yolo.cstudiomunger.workers.dev/auth/reset-password")!
     }
 
     /// Email signup confirmation redirect (must match Supabase Auth redirect allow list).
     static var emailConfirmationRedirectURL: URL {
-        URL(string: "\(authWebBaseURL)/auth/confirm")!
+        URL(string: "\(authWebBaseURL)/auth/confirm")
+            ?? URL(string: "https://yolo.cstudiomunger.workers.dev/auth/confirm")!
     }
 
     private static func plistBool(forKey key: String) -> Bool? {

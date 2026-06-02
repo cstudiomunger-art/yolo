@@ -28,7 +28,16 @@
       id: "users",
       label: "用户",
       defaultExpanded: true,
-      items: [{ kind: "view", view: "users_hub", label: "用户与购买" }],
+      items: [{ kind: "view", view: "users_hub", label: "用户管理" }],
+    },
+    {
+      id: "membership",
+      label: "会员与购买",
+      defaultExpanded: true,
+      items: [
+        { kind: "view", view: "membership_hub", label: "👑 会员计划" },
+        { kind: "view", view: "transactions_hub", label: "💳 购买记录" },
+      ],
     },
     {
       id: "global",
@@ -88,8 +97,8 @@
   };
 
   App.syncNavSelectionFromState = function syncNavSelectionFromState() {
-    if (App.currentView === "users_hub") {
-      App.navSelection = { kind: "view", view: "users_hub" };
+    if (App.currentView === "users_hub" || App.currentView === "membership_hub" || App.currentView === "transactions_hub") {
+      App.navSelection = { kind: "view", view: App.currentView };
     } else if (App.currentView === "table" && App.currentTable) {
       App.navSelection = { kind: "table", table: App.currentTable };
     } else if (App.currentView === "attraction_edit" && App.cityHubCityId) {

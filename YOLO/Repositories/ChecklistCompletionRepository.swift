@@ -19,6 +19,13 @@ struct ChecklistCompletionRepository: Sendable {
         itineraryId: String?,
         status: String
     ) async throws {
+        try await setStatusBatch(userId: userId, rows: [(checklistItemId: checklistItemId, itineraryId: itineraryId, status: status)])
+    }
+
+    func setStatusBatch(
+        userId: UUID,
+        rows: [(checklistItemId: String, itineraryId: String?, status: String)]
+    ) async throws {
         struct UpsertRow: Encodable {
             let userId: UUID
             let checklistItemId: String
@@ -34,17 +41,19 @@ struct ChecklistCompletionRepository: Sendable {
                 case completedAt = "completed_at"
             }
         }
-        let completedAt = status == "done" ? ISO8601DateFormatter().string(from: Date()) : nil
-        let row = UpsertRow(
-            userId: userId,
-            checklistItemId: checklistItemId,
-            itineraryId: itineraryId,
-            status: status,
-            completedAt: completedAt
-        )
+        let formatter = ISO8601DateFormatter()
+        let upsertRows = rows.map { row in
+            UpsertRow(
+                userId: userId,
+                checklistItemId: row.checklistItemId,
+                itineraryId: row.itineraryId,
+                status: row.status,
+                completedAt: row.status == "done" ? formatter.string(from: Date()) : nil
+            )
+        }
         try await client
             .from("checklist_completion")
-            .upsert(row, onConflict: "user_id,checklist_item_id,itinerary_id")
+            .upsert(upsertRows, onConflict: "user_id,checklist_item_id,itinerary_id")
             .execute()
     }
 

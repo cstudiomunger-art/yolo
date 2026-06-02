@@ -275,13 +275,17 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
     }
 
     func fetchEmergencyData() async throws -> EmergencyData {
-        try await client
+        let rows: [EmergencyData] = try await client
             .from("emergency_config")
             .select()
             .eq("id", value: "global")
-            .single()
+            .limit(1)
             .execute()
             .value
+        guard let data = rows.first else {
+            throw URLError(.resourceUnavailable)
+        }
+        return data
     }
 
     func fetchAssistantChips() async throws -> [AssistantChip] {
@@ -318,16 +322,18 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
     }
 
     private func fetchItinerary(kind: String) async throws -> SampleItinerary {
-        let row: ContentItineraryRow = try await client
+        let rows: [ContentItineraryRow] = try await client
             .from("content_itineraries")
             .select()
             .eq("kind", value: kind)
             .eq("is_active", value: true)
             .order("sort_order", ascending: true)
             .limit(1)
-            .single()
             .execute()
             .value
+        guard let row = rows.first else {
+            throw URLError(.resourceUnavailable)
+        }
         return row.asSampleItinerary()
     }
 }

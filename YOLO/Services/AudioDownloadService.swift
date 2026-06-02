@@ -7,6 +7,7 @@ final class AudioDownloadService {
     private let defaultsKey = UserDefaultsKeys.downloadedAudioGuideIds
 
     private(set) var downloadedGuideIds: Set<String> = []
+    private var activeDownloads: Set<String> = []
 
     private init() {
         downloadedGuideIds = Set(UserDefaults.standard.stringArray(forKey: defaultsKey) ?? [])
@@ -31,9 +32,12 @@ final class AudioDownloadService {
     }
 
     func download(guide: AudioGuide) async throws {
+        guard !activeDownloads.contains(guide.id) else { return }
         guard let remote = MediaURLResolver.audioURL(from: guide.audioUrl) else {
             throw AudioDownloadError.noRemoteURL
         }
+        activeDownloads.insert(guide.id)
+        defer { activeDownloads.remove(guide.id) }
         let (tempURL, _) = try await URLSession.shared.download(from: remote)
         let ext = Self.fileExtension(for: remote)
         let dest = storageDirectory.appendingPathComponent("\(guide.id).\(ext)")

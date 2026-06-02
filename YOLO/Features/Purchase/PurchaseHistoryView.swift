@@ -1,0 +1,126 @@
+import Supabase
+import SwiftUI
+
+struct PurchaseHistoryView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+
+    @State private var transactions: [IAPTransaction] = []
+    @State private var isLoading = true
+    @State private var loadError: String?
+
+    var body: some View {
+        Group {
+            if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if transactions.isEmpty {
+                VStack(spacing: 12) {
+                    Text(String(localized: "No purchases yet"))
+                        .font(Theme.FontToken.playfair(16, weight: .semibold))
+                    Text(String(localized: "Your purchase history will appear here after your first transaction."))
+                        .font(Theme.FontToken.inter(12))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(Theme.screenPadding)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List(transactions) { tx in
+                    TransactionRow(transaction: tx)
+                }
+                .listStyle(.plain)
+            }
+        }
+        .navigationTitle(String(localized: "Purchase History"))
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await load() }
+        .overlay(alignment: .top) {
+            if let loadError {
+                Text(loadError)
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(.red)
+                    .padding(Theme.screenPadding)
+            }
+        }
+    }
+
+    private func load() async {
+        isLoading = true
+        loadError = nil
+        defer { isLoading = false }
+        guard let userId = appEnv.auth.userId,
+              AppConfig.isSupabaseConfigured else { return }
+        do {
+            let rows: [IAPTransaction] = try await SupabaseManager.shared
+                .from("user_iap_transactions")
+                .select()
+                .eq("user_id", value: userId.uuidString)
+                .order("purchased_at", ascending: false)
+                .execute()
+                .value
+            transactions = rows
+        } catch {
+            loadError = error.localizedDescription
+        }
+    }
+}
+
+private struct TransactionRow: View {
+    let transaction: IAPTransaction
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(transaction.eventTypeLabel)
+                    .font(Theme.FontToken.inter(13, weight: .medium))
+                Spacer()
+                if let price = transaction.priceUsd {
+                    Text(String(format: "$%.2f", price))
+                        .font(Theme.FontToken.inter(12))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                }
+            }
+            Text(transaction.productId)
+                .font(Theme.FontToken.inter(11))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+            Text(transaction.purchasedAt, style: .date)
+                .font(Theme.FontToken.inter(10))
+                .foregroundStyle(Theme.ColorToken.textGhost)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct IAPTransaction: Identifiable, Codable {
+    let id: UUID
+    let productId: String
+    let eventType: String
+    let priceUsd: Double?
+    let currency: String?
+    let purchasedAt: Date
+    let expiresAt: Date?
+    let planId: String?
+
+    var eventTypeLabel: String {
+        switch eventType {
+        case "INITIAL_PURCHASE": return String(localized: "Purchase")
+        case "RENEWAL": return String(localized: "Renewal")
+        case "REFUND": return String(localized: "Refund")
+        case "CANCELLATION": return String(localized: "Cancelled")
+        case "EXPIRATION": return String(localized: "Expired")
+        case "NON_RENEWING_PURCHASE": return String(localized: "One-time Purchase")
+        default: return eventType
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case productId = "product_id"
+        case eventType = "event_type"
+        case priceUsd = "price_usd"
+        case currency
+        case purchasedAt = "purchased_at"
+        case expiresAt = "expires_at"
+        case planId = "plan_id"
+    }
+}

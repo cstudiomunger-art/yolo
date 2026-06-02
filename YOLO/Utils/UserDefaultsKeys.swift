@@ -22,6 +22,11 @@ enum UserDefaultsKeys {
     static let cachedAppSettings = prefix + "cachedAppSettings.v6"
     static let offlineCacheMigrated = prefix + "offlineCacheMigratedToAppSupport.v1"
     static let downloadedAudioGuideIds = prefix + "downloadedAudioGuideIds"
+    static let subscriptionPlanId = prefix + "subscriptionPlanId"
+    static let subscriptionExpiresAt = prefix + "subscriptionExpiresAt"
+    static let displayName = prefix + "displayName"
+    static let avatarUrl = prefix + "avatarUrl"
+    static let avatarStatus = prefix + "avatarStatus"
 
     private static let legacyMap: [(new: String, old: String)] = [
         (onboardingDone, "chinago.onboardingCompleted"),

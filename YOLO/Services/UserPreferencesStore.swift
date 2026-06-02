@@ -137,6 +137,40 @@ final class UserPreferencesStore {
         }
     }
 
+    var subscriptionPlanId: String? {
+        didSet {
+            UserDefaults.standard.set(subscriptionPlanId, forKey: Keys.subscriptionPlanId)
+            notifySyncableChange()
+        }
+    }
+
+    var subscriptionExpiresAt: Date? {
+        didSet {
+            UserDefaults.standard.set(subscriptionExpiresAt?.timeIntervalSince1970, forKey: Keys.subscriptionExpiresAt)
+            notifySyncableChange()
+        }
+    }
+
+    var displayName: String? {
+        didSet {
+            UserDefaults.standard.set(displayName, forKey: Keys.displayName)
+            notifySyncableChange()
+        }
+    }
+
+    var avatarUrl: String? {
+        didSet {
+            UserDefaults.standard.set(avatarUrl, forKey: Keys.avatarUrl)
+            notifySyncableChange()
+        }
+    }
+
+    var avatarStatus: String {
+        didSet {
+            UserDefaults.standard.set(avatarStatus, forKey: Keys.avatarStatus)
+        }
+    }
+
     /// Filled from CMS via `AppEnvironment.refreshVisaRule()`.
     var cachedVisaRule: VisaRule?
 
@@ -162,6 +196,15 @@ final class UserPreferencesStore {
         activeItineraryId = itineraryLoad.activeId
         savedItineraries = itineraryLoad.itineraries
         purchasedAttractionIds = Set(UserDefaults.standard.stringArray(forKey: Keys.purchasedAttractionIds) ?? [])
+        subscriptionPlanId = UserDefaults.standard.string(forKey: Keys.subscriptionPlanId)
+        if let exp = UserDefaults.standard.object(forKey: Keys.subscriptionExpiresAt) as? TimeInterval {
+            subscriptionExpiresAt = Date(timeIntervalSince1970: exp)
+        } else {
+            subscriptionExpiresAt = nil
+        }
+        displayName = UserDefaults.standard.string(forKey: Keys.displayName)
+        avatarUrl = UserDefaults.standard.string(forKey: Keys.avatarUrl)
+        avatarStatus = UserDefaults.standard.string(forKey: Keys.avatarStatus) ?? "none"
         appLanguage = AppLanguage.resolved(fromStoredValue: UserDefaults.standard.string(forKey: Keys.appLanguage))
         hasCompletedIntroOnboarding = UserDefaults.standard.bool(forKey: Keys.introOnboardingDone)
         hasCompletedNotificationOnboarding = UserDefaults.standard.bool(forKey: Keys.notificationOnboardingDone)
@@ -190,6 +233,11 @@ final class UserPreferencesStore {
             Keys.checklistStatuses,
             Keys.simulateProPurchase,
             Keys.purchasedAttractionIds,
+            Keys.subscriptionPlanId,
+            Keys.subscriptionExpiresAt,
+            Keys.displayName,
+            Keys.avatarUrl,
+            Keys.avatarStatus,
             Keys.appLanguage,
             Keys.introOnboardingDone,
             Keys.notificationOnboardingDone,
@@ -204,6 +252,11 @@ final class UserPreferencesStore {
         departureDate = Calendar.current.date(byAdding: .day, value: 18, to: .now) ?? .now
         selectedCityIds = ["beijing"]
         checklistStatuses = [:]
+        subscriptionPlanId = nil
+        subscriptionExpiresAt = nil
+        displayName = nil
+        avatarUrl = nil
+        avatarStatus = "none"
         simulateProPurchase = false
         clearItinerarySessionState()
         purchasedAttractionIds = []
@@ -404,9 +457,18 @@ final class UserPreferencesStore {
     }
 
     func hasAccessToAttraction(_ attractionId: String, iapProductId: String?) -> Bool {
-        if simulateProPurchase { return true }
+        // simulateProPurchase is only honoured in mock / development builds, never in production
+        // (AppConfig.useMock is true when Supabase is not configured or USE_MOCK=true in xcconfig)
+        if simulateProPurchase && AppConfig.useMock { return true }
+        if isSubscriptionActive { return true }
         if purchasedAttractionIds.contains(attractionId) { return true }
         return false
+    }
+
+    var isSubscriptionActive: Bool {
+        guard subscriptionPlanId != nil else { return false }
+        if let exp = subscriptionExpiresAt { return exp > .now }
+        return true
     }
 
     func purchaseAttraction(_ attractionId: String) {
@@ -441,6 +503,13 @@ final class UserPreferencesStore {
         }
         purchasedAttractionIds = Set(row.purchasedAttractionIds)
         simulateProPurchase = row.isPro
+        subscriptionPlanId = row.subscriptionPlanId
+        if let expStr = row.subscriptionExpiresAt {
+            subscriptionExpiresAt = Self.parseISO8601(expStr)
+        }
+        if let name = row.displayName, !name.isEmpty { displayName = name }
+        if let url = row.avatarUrl, !url.isEmpty { avatarUrl = url }
+        avatarStatus = row.avatarStatus
         // Trips are synced via `user_itineraries` (021), not profiles.saved_itineraries JSON.
         if let activeId = row.activeItineraryId {
             activeItineraryId = activeId
@@ -451,17 +520,30 @@ final class UserPreferencesStore {
         UserProfileRow(
             id: userId,
             email: email,
-            displayName: nil,
+            displayName: displayName,
+            avatarUrl: avatarUrl,
+            avatarStatus: avatarStatus,
             countryCode: countryCode.isEmpty ? "GB" : countryCode,
             hasCompletedOnboarding: hasCompletedOnboarding,
             departureDate: Self.formatDateOnly(departureDate),
             selectedCityIds: selectedCityIds,
             completedChecklistIds: Array(completedChecklistIds),
             purchasedAttractionIds: Array(purchasedAttractionIds),
-            isPro: simulateProPurchase,
+            isPro: simulateProPurchase || isSubscriptionActive,
+            subscriptionPlanId: subscriptionPlanId,
+            subscriptionExpiresAt: subscriptionExpiresAt.map { Self.formatISO8601($0) },
+            rcCustomerId: nil,
             savedItineraries: [],
             activeItineraryId: activeItineraryId
         )
+    }
+
+    private static func parseISO8601(_ string: String) -> Date? {
+        ISO8601DateFormatter().date(from: string)
+    }
+
+    private static func formatISO8601(_ date: Date) -> String {
+        ISO8601DateFormatter().string(from: date)
     }
 
     private func notifySyncableChange() {

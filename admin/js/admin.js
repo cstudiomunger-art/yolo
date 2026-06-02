@@ -56,6 +56,16 @@
       return;
     }
 
+    if (App.currentView === "membership_hub") {
+      await App.renderMembershipHub();
+      return;
+    }
+
+    if (App.currentView === "transactions_hub") {
+      await App.renderTransactionsHub();
+      return;
+    }
+
     if (App.currentView === "city_detail" && App.cityHubCityId) {
       await App.loadCityPanel(App.cityHubCityId, App.cityHubPanel || "overview");
       return;

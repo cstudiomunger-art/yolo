@@ -24,8 +24,15 @@ struct AttractionDetailView: View {
     private var cityName: String { route.presentation.browseCityName ?? "Guide" }
 
     private var hasFullAccess: Bool {
-        appEnv.preferences.hasAccessToAttraction(display.id, iapProductId: display.iapProductId)
-            || !appEnv.contentMode.useRemoteIAP
+        if !appEnv.contentMode.useRemoteIAP { return true }
+        return appEnv.purchase.hasAccess(to: \.audioGuides, for: display.id)
+            || appEnv.preferences.hasAccessToAttraction(display.id, iapProductId: display.iapProductId)
+    }
+
+    private func hasContentAccess(_ flag: KeyPath<MembershipPlan.AccessFlags, Bool>) -> Bool {
+        if !appEnv.contentMode.useRemoteIAP { return true }
+        if display.textPaywallFree { return true }
+        return appEnv.purchase.hasAccess(to: flag, for: display.id)
     }
 
     private var mainGuide: AudioGuide? {
@@ -192,20 +199,31 @@ struct AttractionDetailView: View {
     @ViewBuilder
     private var introductionSection: some View {
         if !detailBody.isEmpty {
-        let body = detailBody
-        Text("Introduction")
-            .sectionTitleStyle()
-        VStack(alignment: .leading, spacing: 8) {
-            HTMLContentView(content: body, lineSpacing: 5, lineLimit: introExpanded ? nil : 3)
-            if HTMLContentView.plainText(from: body).count > 120 {
-                Button(introExpanded ? "Read less ▲" : "Read more ▼") {
-                    introExpanded.toggle()
+            let body = detailBody
+            let hasAccess = hasContentAccess(\.textContent)
+            let freeChars = appEnv.contentMode.branding.freeTextPreviewChars
+            Text("Introduction")
+                .sectionTitleStyle()
+            VStack(alignment: .leading, spacing: 8) {
+                if hasAccess {
+                    HTMLContentView(content: body, lineSpacing: 5, lineLimit: introExpanded ? nil : 3)
+                    if HTMLContentView.plainText(from: body).count > 120 {
+                        Button(introExpanded ? "Read less ▲" : "Read more ▼") {
+                            introExpanded.toggle()
+                        }
+                        .font(Theme.FontToken.inter(11, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.accent)
+                    }
+                } else {
+                    ContentPaywallOverlay(
+                        htmlContent: body,
+                        freeChars: freeChars,
+                        hasAccess: false,
+                        attraction: display
+                    )
                 }
-                .font(Theme.FontToken.inter(11, weight: .medium))
-                .foregroundStyle(Theme.ColorToken.accent)
             }
-        }
-        .guideContentCardStyle()
+            .guideContentCardStyle()
         }
     }
 
@@ -259,15 +277,12 @@ struct AttractionDetailView: View {
         if !display.westernVisitorTips.isEmpty {
             Text("Visitor Tips")
                 .sectionTitleStyle()
-            ForEach(display.westernVisitorTips, id: \.self) { tip in
-                HStack(alignment: .top, spacing: 8) {
-                    Text("•")
-                        .foregroundStyle(Theme.ColorToken.accent)
-                    Text(tip)
-                        .font(Theme.FontToken.inter(12))
-                        .foregroundStyle(Theme.ColorToken.textSecondary)
-                }
-            }
+            VisitorTipsPaywallOverlay(
+                tips: display.westernVisitorTips,
+                freeCount: appEnv.contentMode.branding.freeVisitorTipsCount,
+                hasAccess: hasContentAccess(\.visitorTips),
+                attraction: display
+            )
         }
     }
 

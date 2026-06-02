@@ -134,7 +134,10 @@ struct HomeView: View {
                     .foregroundStyle(Theme.ColorToken.textPrimary)
             }
             Spacer()
-            ProfileAvatarButton { showProfile = true }
+            ProfileAvatarButton(
+                avatarUrl: appEnv.preferences.avatarUrl,
+                displayName: appEnv.preferences.displayName
+            ) { showProfile = true }
         }
         .padding(.horizontal, Theme.screenPadding)
         .padding(.top, 20)

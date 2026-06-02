@@ -196,6 +196,7 @@ struct Attraction: Identifiable, Hashable, Codable {
     let nearbyPlaces: [NearbyPlace]
     let audioGuideCount: Int
     let iapProductId: String?
+    let textPaywallFree: Bool
     let displayOrder: Int
     let shortDescription: String?
     let coverImages: [String]
@@ -230,6 +231,7 @@ struct Attraction: Identifiable, Hashable, Codable {
         nearbyPlaces = (try? c.decode([NearbyPlace].self, forKey: .nearbyPlaces)) ?? []
         audioGuideCount = try c.decodeIfPresent(Int.self, forKey: .audioGuideCount) ?? 0
         iapProductId = try c.decodeIfPresent(String.self, forKey: .iapProductId)
+        textPaywallFree = try c.decodeIfPresent(Bool.self, forKey: .textPaywallFree) ?? false
         displayOrder = try c.decodeIfPresent(Int.self, forKey: .displayOrder) ?? 0
         shortDescription = try c.decodeIfPresent(String.self, forKey: .shortDescription)
         var images = Self.decodeStringArray(from: c, forKey: .coverImages)
@@ -295,6 +297,7 @@ struct Attraction: Identifiable, Hashable, Codable {
         try c.encode(nearbyPlaces, forKey: .nearbyPlaces)
         try c.encode(audioGuideCount, forKey: .audioGuideCount)
         try c.encodeIfPresent(iapProductId, forKey: .iapProductId)
+        try c.encode(textPaywallFree, forKey: .textPaywallFree)
         try c.encode(displayOrder, forKey: .displayOrder)
         try c.encodeIfPresent(shortDescription, forKey: .shortDescription)
         try c.encode(coverImages, forKey: .coverImages)
@@ -307,7 +310,7 @@ struct Attraction: Identifiable, Hashable, Codable {
         case id, cityId, name, chineseName, category, coverImagePath, summary, introduction
         case priority, ticketPrice, recommendedDuration, openingHours, closedDays
         case requiresAdvanceBooking, metroAccess, practicalInfo, westernVisitorTips, nearbyPlaces
-        case audioGuideCount, iapProductId, displayOrder
+        case audioGuideCount, iapProductId, textPaywallFree, displayOrder
         case shortDescription, coverImages, addressEn, addressZh, paywallSubtitleOverride
     }
 
@@ -1183,6 +1186,8 @@ struct AppBranding: Codable, Equatable {
     let planAlertLinkCityId: String?
     let planAlertLinkLabel: String
     let freeAudioPreviewSeconds: Int
+    let freeTextPreviewChars: Int
+    let freeVisitorTipsCount: Int
     let paywall: PaywallCopy
     let flightPlatforms: [FlightPlatform]
     let privacyPolicyBody: String
@@ -1206,6 +1211,8 @@ struct AppBranding: Codable, Equatable {
         planAlertLinkCityId: String?,
         planAlertLinkLabel: String,
         freeAudioPreviewSeconds: Int,
+        freeTextPreviewChars: Int = 80,
+        freeVisitorTipsCount: Int = 1,
         paywall: PaywallCopy = .fallback,
         flightPlatforms: [FlightPlatform] = AppBranding.fallback.flightPlatforms,
         privacyPolicyBody: String = "",
@@ -1228,6 +1235,8 @@ struct AppBranding: Codable, Equatable {
         self.planAlertLinkCityId = planAlertLinkCityId
         self.planAlertLinkLabel = planAlertLinkLabel
         self.freeAudioPreviewSeconds = freeAudioPreviewSeconds
+        self.freeTextPreviewChars = freeTextPreviewChars
+        self.freeVisitorTipsCount = freeVisitorTipsCount
         self.paywall = paywall
         self.flightPlatforms = flightPlatforms
         self.privacyPolicyBody = privacyPolicyBody
@@ -1253,6 +1262,8 @@ struct AppBranding: Codable, Equatable {
         planAlertLinkCityId = try c.decodeIfPresent(String.self, forKey: .planAlertLinkCityId)
         planAlertLinkLabel = try c.decodeIfPresent(String.self, forKey: .planAlertLinkLabel) ?? "How to Book →"
         freeAudioPreviewSeconds = try c.decodeIfPresent(Int.self, forKey: .freeAudioPreviewSeconds) ?? 180
+        freeTextPreviewChars = try c.decodeIfPresent(Int.self, forKey: .freeTextPreviewChars) ?? 80
+        freeVisitorTipsCount = try c.decodeIfPresent(Int.self, forKey: .freeVisitorTipsCount) ?? 1
         paywall = (try? c.decode(PaywallCopy.self, forKey: .paywall)) ?? .fallback
         flightPlatforms = (try? c.decode([FlightPlatform].self, forKey: .flightPlatforms)) ?? Self.fallback.flightPlatforms
         privacyPolicyBody = try c.decodeIfPresent(String.self, forKey: .privacyPolicyBody) ?? ""
@@ -1265,7 +1276,7 @@ struct AppBranding: Codable, Equatable {
         case iapProTitle, iapProPrice, iapProTrialText, iapProFeatures, iapSinglePriceLabel
         case assistantGreetingGeneral, assistantGreetingPlanning
         case planAlertMessage, planAlertLinkAttractionId, planAlertLinkCityId, planAlertLinkLabel
-        case freeAudioPreviewSeconds, paywall, flightPlatforms
+        case freeAudioPreviewSeconds, freeTextPreviewChars, freeVisitorTipsCount, paywall, flightPlatforms
         case privacyPolicyBody, termsOfServiceBody, shareWebBaseURL
     }
 
@@ -1357,6 +1368,8 @@ struct AppSettingsRow: Decodable {
     let planAlertLinkCityId: String?
     let planAlertLinkLabel: String?
     let freeAudioPreviewSeconds: Int?
+    let freeTextPreviewChars: Int?
+    let freeVisitorTipsCount: Int?
     let aiModelId: String?
     let aiChatApiUrl: String?
     let aiChatMaxTokens: Int?
@@ -1404,6 +1417,8 @@ struct AppSettingsRow: Decodable {
         case planAlertLinkCityId
         case planAlertLinkLabel
         case freeAudioPreviewSeconds
+        case freeTextPreviewChars
+        case freeVisitorTipsCount
         case aiModelId
         case aiChatApiUrl
         case aiChatMaxTokens
@@ -1452,6 +1467,8 @@ struct AppSettingsRow: Decodable {
         planAlertLinkCityId = try container.decodeIfPresent(String.self, forKey: .planAlertLinkCityId)
         planAlertLinkLabel = try container.decodeIfPresent(String.self, forKey: .planAlertLinkLabel)
         freeAudioPreviewSeconds = try container.decodeIfPresent(Int.self, forKey: .freeAudioPreviewSeconds)
+        freeTextPreviewChars = try container.decodeIfPresent(Int.self, forKey: .freeTextPreviewChars)
+        freeVisitorTipsCount = try container.decodeIfPresent(Int.self, forKey: .freeVisitorTipsCount)
         aiModelId = try container.decodeIfPresent(String.self, forKey: .aiModelId)
         aiChatApiUrl = try container.decodeIfPresent(String.self, forKey: .aiChatApiUrl)
         aiChatMaxTokens = try container.decodeIfPresent(Int.self, forKey: .aiChatMaxTokens)
@@ -1541,6 +1558,8 @@ struct AppSettingsRow: Decodable {
             planAlertLinkCityId: planAlertLinkCityId ?? defaults.planAlertLinkCityId,
             planAlertLinkLabel: planAlertLinkLabel ?? defaults.planAlertLinkLabel,
             freeAudioPreviewSeconds: freeAudioPreviewSeconds ?? defaults.freeAudioPreviewSeconds,
+            freeTextPreviewChars: freeTextPreviewChars ?? defaults.freeTextPreviewChars,
+            freeVisitorTipsCount: freeVisitorTipsCount ?? defaults.freeVisitorTipsCount,
             paywall: paywall,
             flightPlatforms: flightPlatforms ?? defaults.flightPlatforms,
             privacyPolicyBody: privacyPolicyBody ?? defaults.privacyPolicyBody,

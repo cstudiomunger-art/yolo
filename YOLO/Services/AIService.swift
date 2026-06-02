@@ -61,7 +61,10 @@ enum AIService {
         request.httpBody = body
         do {
             let (bytes, resp) = try await URLSession.shared.bytes(for: request)
-            guard (resp as? HTTPURLResponse)?.statusCode == 200 else { return }
+            guard (resp as? HTTPURLResponse)?.statusCode == 200 else {
+                onChunk(String(localized: "⚠️ AI service unavailable. Please try again."))
+                return
+            }
             for try await line in bytes.lines {
                 guard line.hasPrefix("data: ") else { continue }
                 let data = String(line.dropFirst(6))
@@ -73,7 +76,11 @@ enum AIService {
                 else { continue }
                 onChunk(content)
             }
-        } catch { }
+        } catch is CancellationError {
+            // Task cancelled intentionally — no user-facing message needed.
+        } catch {
+            onChunk(String(localized: "⚠️ Connection failed. Please try again."))
+        }
     }
 
     static func generateItinerary(

@@ -5,6 +5,7 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var showSplash = true
+    @State private var lastForegroundRefresh: Date = .distantPast
 
     var body: some View {
         Group {
@@ -17,8 +18,9 @@ struct RootView: View {
         .environment(\.locale, appEnv.preferences.appLanguage.locale)
         .task {
             await appEnv.refreshContentMode(clearSettingsCache: true)
+            await appEnv.purchase.loadPlans()
             if appEnv.auth.isAuthenticated {
-                await appEnv.profileSync.syncAfterSignIn()
+                await appEnv.syncAfterSignIn()
             }
         }
         .onChange(of: appEnv.preferences.countryCode) { _, _ in
@@ -26,8 +28,11 @@ struct RootView: View {
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
+                let now = Date()
+                guard now.timeIntervalSince(lastForegroundRefresh) > 300 else { return }
+                lastForegroundRefresh = now
                 Task {
-                    await appEnv.refreshContentMode(clearSettingsCache: true)
+                    await appEnv.refreshContentMode(clearSettingsCache: false)
                     await appEnv.rescheduleTripReminders()
                 }
             }
@@ -44,7 +49,7 @@ struct RootView: View {
         }
         .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
             if isAuthenticated {
-                Task { await appEnv.profileSync.syncAfterSignIn() }
+                Task { await appEnv.syncAfterSignIn() }
             }
         }
     }

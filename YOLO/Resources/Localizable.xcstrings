@@ -93,17 +93,20 @@
         }
       }
     },
-    "%@ %@ Passport · %@" : {
+    "%@ %@ Passport" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$@ %2$@ Passport · %3$@"
+            "value" : "%1$@ %2$@ Passport"
           }
         }
       }
     },
     "%@ →" : {
+
+    },
+    "%@ 特色贴士" : {
 
     },
     "%@: %@" : {
@@ -223,6 +226,16 @@
         }
       }
     },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
+          }
+        }
+      }
+    },
     "%lld/%lld prep complete" : {
       "localizations" : {
         "en" : {
@@ -300,6 +313,9 @@
     "+%lld more days" : {
 
     },
+    "+%lld more tips — unlock" : {
+
+    },
     ">" : {
 
     },
@@ -373,6 +389,12 @@
         }
       }
     },
+    "⚠️ AI service unavailable. Please try again." : {
+
+    },
+    "⚠️ Connection failed. Please try again." : {
+
+    },
     "⚠️ No English-speaking staff" : {
 
     },
@@ -417,6 +439,9 @@
         }
       }
     },
+    "✓" : {
+
+    },
     "✓ Downloaded" : {
       "localizations" : {
         "zh-Hans" : {
@@ -434,6 +459,7 @@
 
     },
     "✨ Active" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -617,6 +643,9 @@
         }
       }
     },
+    "2–30 characters. Shown to other users." : {
+
+    },
     "3 min free preview · Unlock full guide" : {
       "localizations" : {
         "zh-Hans" : {
@@ -639,9 +668,6 @@
       }
     },
     "110 · 120 · Offline" : {
-
-    },
-    "A" : {
 
     },
     "About" : {
@@ -682,6 +708,9 @@
 
     },
     "ACTIVE" : {
+
+    },
+    "Active Membership" : {
 
     },
     "Activity name" : {
@@ -841,6 +870,12 @@
     "Audio transcript" : {
 
     },
+    "Avatar is being reviewed" : {
+
+    },
+    "Avatar was rejected — please upload a different image" : {
+
+    },
     "Back to dates" : {
 
     },
@@ -868,6 +903,18 @@
     "Cache Cleared" : {
 
     },
+    "Cache Size" : {
+
+    },
+    "Cached cities, attractions, tips" : {
+
+    },
+    "Cached cover images have been removed." : {
+
+    },
+    "Cached guide cover photos" : {
+
+    },
     "Cancel" : {
       "localizations" : {
         "zh-Hans" : {
@@ -878,7 +925,11 @@
         }
       }
     },
+    "Cancelled" : {
+
+    },
     "Change nationality" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -946,6 +997,9 @@
         }
       }
     },
+    "Choose a membership plan" : {
+
+    },
     "Choose a new password for your account." : {
 
     },
@@ -983,6 +1037,18 @@
         }
       }
     },
+    "Clear Cover Images" : {
+
+    },
+    "Clear Downloaded Audio" : {
+
+    },
+    "Clear Offline Content" : {
+
+    },
+    "Clear Temporary Cache" : {
+
+    },
     "Close" : {
       "localizations" : {
         "zh-Hans" : {
@@ -992,12 +1058,6 @@
           }
         }
       }
-    },
-    "CMS 远程内容已开启" : {
-
-    },
-    "CMS 远程内容未开启（仍为内置 JSON）" : {
-
     },
     "Coming soon — we're adding content for %@" : {
 
@@ -1031,7 +1091,6 @@
 
     },
     "Content Mode" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1042,6 +1101,7 @@
       }
     },
     "Content: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1091,6 +1151,9 @@
 
     },
     "Could not load hotels" : {
+
+    },
+    "Could not load the selected image." : {
 
     },
     "Create a trip poster you can send to friends." : {
@@ -1215,6 +1278,9 @@
     "Details" : {
 
     },
+    "Display name" : {
+
+    },
     "Don't miss important reminders" : {
 
     },
@@ -1252,6 +1318,9 @@
         }
       }
     },
+    "Downloaded audio files have been removed." : {
+
+    },
     "Drag days" : {
 
     },
@@ -1267,6 +1336,9 @@
           }
         }
       }
+    },
+    "Edit Profile" : {
+
     },
     "Edit Profile →" : {
       "extractionState" : "stale",
@@ -1361,6 +1433,9 @@
         }
       }
     },
+    "Expired" : {
+
+    },
     "Explore All Cities" : {
 
     },
@@ -1395,6 +1470,9 @@
       }
     },
     "From $%lld/night" : {
+
+    },
+    "Full content locked" : {
 
     },
     "Full list →" : {
@@ -1557,6 +1635,9 @@
         }
       }
     },
+    "Just this attraction" : {
+
+    },
     "Language" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1566,6 +1647,9 @@
           }
         }
       }
+    },
+    "Lifetime access" : {
+
     },
     "Link" : {
 
@@ -1614,6 +1698,7 @@
       }
     },
     "Manage →" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1622,6 +1707,9 @@
           }
         }
       }
+    },
+    "Manage in App Store →" : {
+
     },
     "Maps →" : {
 
@@ -1642,6 +1730,12 @@
 
     },
     "Maybe Later" : {
+
+    },
+    "Membership" : {
+
+    },
+    "Membership & Purchases" : {
 
     },
     "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig." : {
@@ -1668,6 +1762,12 @@
         }
       }
     },
+    "Name must be 30 characters or fewer." : {
+
+    },
+    "Name must be at least 2 characters." : {
+
+    },
     "Nationality" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1684,7 +1784,16 @@
     "Next" : {
 
     },
+    "No active membership" : {
+
+    },
     "No hotels found for this city." : {
+
+    },
+    "No plans available. Please try again later." : {
+
+    },
+    "No purchases yet" : {
 
     },
     "No shared itinerary matches this link." : {
@@ -1701,13 +1810,28 @@
         }
       }
     },
+    "Official refund channels" : {
+
+    },
+    "Offline audio guides" : {
+
+    },
+    "Offline CMS content cache has been removed." : {
+
+    },
     "OK" : {
+
+    },
+    "One-time Purchase" : {
 
     },
     "Open →" : {
 
     },
     "Open checklist" : {
+
+    },
+    "or" : {
 
     },
     "Or buy just this guide" : {
@@ -1720,6 +1844,9 @@
           }
         }
       }
+    },
+    "Or tell us what happened" : {
+
     },
     "Pack Before You Go" : {
       "extractionState" : "stale",
@@ -1928,6 +2055,12 @@
         }
       }
     },
+    "Purchase" : {
+
+    },
+    "Purchase History" : {
+
+    },
     "Quick Access" : {
 
     },
@@ -2015,6 +2148,15 @@
         }
       }
     },
+    "Refund" : {
+
+    },
+    "Refund Request" : {
+
+    },
+    "Refunds are processed by Apple. Most requests are resolved within 2 business days." : {
+
+    },
     "Remove" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2031,7 +2173,28 @@
     "Remove this day" : {
 
     },
+    "Renewal" : {
+
+    },
+    "Renews in %lld days" : {
+
+    },
     "Reorder" : {
+
+    },
+    "Report a Problem (Apple)" : {
+
+    },
+    "Request a refund" : {
+
+    },
+    "Request a Refund" : {
+
+    },
+    "Request refund via Apple" : {
+
+    },
+    "Request submitted" : {
 
     },
     "Resend confirmation email" : {
@@ -2153,7 +2316,6 @@
       }
     },
     "Send Feedback" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2166,6 +2328,9 @@
     "Send reset link" : {
 
     },
+    "Session temp files and HTTP cache" : {
+
+    },
     "Set your nationality in Profile" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2175,6 +2340,9 @@
           }
         }
       }
+    },
+    "Settings" : {
+
     },
     "Share" : {
       "extractionState" : "stale",
@@ -2219,7 +2387,13 @@
         }
       }
     },
+    "Sign in / Register →" : {
+
+    },
     "Sign in to plan your China trip" : {
+
+    },
+    "Sign Out" : {
 
     },
     "Sign Up" : {
@@ -2288,7 +2462,16 @@
         }
       }
     },
-    "Syncing profile…" : {
+    "Submit Request" : {
+
+    },
+    "Subscribe" : {
+
+    },
+    "Subscribe →" : {
+
+    },
+    "Syncing…" : {
 
     },
     "Tell us your dates and cities" : {
@@ -2313,6 +2496,9 @@
         }
       }
     },
+    "Temporary files and HTTP cache have been removed." : {
+
+    },
     "Terms" : {
 
     },
@@ -2329,6 +2515,9 @@
 
     },
     "This link may have expired or sharing was turned off." : {
+
+    },
+    "This name is not allowed." : {
 
     },
     "This permanently removes your account and cloud trips. This cannot be undone." : {
@@ -2437,6 +2626,9 @@
     "Unable to send password reset email. Please try again." : {
 
     },
+    "Unlock all attraction guides, text content, and more." : {
+
+    },
     "Unlock Audio Guide" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2458,7 +2650,22 @@
         }
       }
     },
+    "Unlock Full Content →" : {
+
+    },
     "Update password" : {
+
+    },
+    "Upgrade to unlock all content" : {
+
+    },
+    "Upgrade to unlock all visitor tips" : {
+
+    },
+    "Upgrade to unlock full content" : {
+
+    },
+    "Uploading…" : {
 
     },
     "Use a different email" : {
@@ -2481,6 +2688,9 @@
           }
         }
       }
+    },
+    "Valid until: " : {
+
     },
     "Version %@" : {
 
@@ -2511,6 +2721,9 @@
 
     },
     "View Itinerary" : {
+
+    },
+    "View Plans →" : {
 
     },
     "Visa required" : {
@@ -2550,6 +2763,9 @@
     "We'll remind you when your trip is approaching and key prep items are overdue." : {
 
     },
+    "We'll review your request and follow up by email." : {
+
+    },
     "We'll show visa rules and travel tips for your country" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2559,6 +2775,9 @@
           }
         }
       }
+    },
+    "We've received your request. Refunds are typically processed by Apple within 48 hours." : {
+
     },
     "What's next?" : {
       "extractionState" : "stale",
@@ -2618,6 +2837,7 @@
       }
     },
     "YOLO HAPPY Pro (demo)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2638,6 +2858,9 @@
         }
       }
     },
+    "Your benefits" : {
+
+    },
     "Your China adventure starts here" : {
 
     },
@@ -2645,6 +2868,9 @@
 
     },
     "Your itinerary" : {
+
+    },
+    "Your purchase history will appear here after your first transaction." : {
 
     },
     "Your Trip" : {
@@ -2673,7 +2899,7 @@
     "已登录：%@" : {
 
     },
-    "登录 / 注册 →" : {
+    "文化贴士" : {
 
     },
     "退出登录" : {

@@ -8,6 +8,7 @@ enum ContentBackend: Equatable {
 }
 
 @Observable
+@MainActor
 final class ContentModeService {
     private typealias Keys = UserDefaultsKeys
 

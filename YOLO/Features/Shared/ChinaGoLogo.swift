@@ -16,17 +16,47 @@ struct ChinaGoLogo: View {
 }
 
 struct ProfileAvatarButton: View {
+    var avatarUrl: String?
+    var displayName: String?
+    var size: CGFloat = 30
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text("A")
-                .font(Theme.FontToken.inter(12, weight: .medium))
-                .foregroundStyle(.white)
-                .frame(width: 30, height: 30)
-                .background(Theme.ColorToken.textPrimary)
+            avatarContent
+                .frame(width: size, height: size)
                 .clipShape(Circle())
         }
         .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var avatarContent: some View {
+        if let urlString = avatarUrl,
+           !urlString.isEmpty,
+           let url = URL(string: urlString) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image.resizable().scaledToFill()
+                default:
+                    initialsView
+                }
+            }
+        } else {
+            initialsView
+        }
+    }
+
+    private var initialsView: some View {
+        Text(initials)
+            .font(Theme.FontToken.inter(size * 0.4, weight: .medium))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Theme.ColorToken.textPrimary)
+    }
+
+    private var initials: String {
+        displayName?.first.map(String.init)?.uppercased() ?? "A"
     }
 }

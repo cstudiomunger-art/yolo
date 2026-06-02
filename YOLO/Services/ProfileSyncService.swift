@@ -235,21 +235,15 @@ final class ProfileSyncService {
     }
 
     private func pushChecklistCompletion(userId: UUID, preferences: UserPreferencesStore) async throws {
-        for (storageKey, entry) in preferences.checklistStatuses {
+        let rows = preferences.checklistStatuses.map { storageKey, entry -> (checklistItemId: String, itineraryId: String?, status: String) in
             let itemId = UserPreferencesStore.itemId(fromStorageKey: storageKey)
-            let itineraryId: String?
-            if entry.type == .city {
-                itineraryId = storageKey.split(separator: "#", maxSplits: 1).dropFirst().first.map(String.init)
-            } else {
-                itineraryId = nil
-            }
-            try await checklistRepository.setStatus(
-                userId: userId,
-                checklistItemId: itemId,
-                itineraryId: itineraryId,
-                status: entry.status.rawValue
-            )
+            let itineraryId: String? = entry.type == .city
+                ? storageKey.split(separator: "#", maxSplits: 1).dropFirst().first.map(String.init)
+                : nil
+            return (checklistItemId: itemId, itineraryId: itineraryId, status: entry.status.rawValue)
         }
+        guard !rows.isEmpty else { return }
+        try await checklistRepository.setStatusBatch(userId: userId, rows: rows)
     }
 
     func syncChecklistStatus(itemId: String, type: ChecklistItemType, status: ChecklistItemStatus) async {

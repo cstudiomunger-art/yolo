@@ -17,7 +17,7 @@ final class AuthSessionStore {
     private var observeTask: Task<Void, Never>?
 
     init(client: SupabaseClient = SupabaseManager.shared) {
-        observeTask = Task {
+        observeTask = Task { @MainActor in
             for await (event, session) in client.auth.authStateChanges {
                 switch event {
                 case .initialSession, .signedIn, .signedOut, .tokenRefreshed, .userUpdated:
