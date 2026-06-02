@@ -10,6 +10,8 @@ export type ChatCompletionOptions = {
   modelId?: string;
   apiUrl?: string;
   timeoutMs?: number;
+  /** "auto" lets the model decide when to think; omit to disable thinking. */
+  thinkingMode?: "auto" | "enabled" | "disabled";
 };
 
 const DEFAULT_API_URL = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
@@ -47,7 +49,10 @@ export async function chatCompletion(
   }
 
   const maxTokens = options.maxTokens ?? cfg.maxTokens;
-  const temperature = options.temperature ?? cfg.temperature;
+  // thinking requires temperature = 1
+  const useThinking = options.thinkingMode && options.thinkingMode !== "disabled";
+  const temperature = useThinking ? 1 : (options.temperature ?? cfg.temperature);
+  const thinkingParam = useThinking ? { type: options.thinkingMode } : undefined;
   let lastError: unknown;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -65,6 +70,7 @@ export async function chatCompletion(
           messages: options.messages,
           max_tokens: maxTokens,
           temperature,
+          ...(thinkingParam ? { thinking: thinkingParam } : {}),
         }),
         signal: controller.signal,
       });
@@ -93,6 +99,54 @@ export async function chatCompletion(
 
   console.error("VolcEngine chatCompletion failed:", lastError);
   return null;
+}
+
+/** Open a streaming chat completion and return the raw SSE Response for forwarding. */
+export async function streamChatCompletion(
+  options: ChatCompletionOptions,
+): Promise<Response> {
+  const cfg = volcengineConfig();
+  const apiKey = cfg.apiKey;
+  const model = options.modelId?.trim() || cfg.model;
+  const apiUrl = options.apiUrl?.trim() || cfg.apiUrl;
+  const maxTokens = options.maxTokens ?? cfg.maxTokens;
+  const useThinking = options.thinkingMode && options.thinkingMode !== "disabled";
+  const temperature = useThinking ? 1 : (options.temperature ?? cfg.temperature);
+  const thinkingParam = useThinking ? { type: options.thinkingMode } : undefined;
+
+  if (!apiKey || !model) {
+    throw new Error("Missing VOLCENGINE_API_KEY or model id");
+  }
+
+  const upstream = await fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: options.messages,
+      max_tokens: maxTokens,
+      temperature,
+      stream: true,
+      ...(thinkingParam ? { thinking: thinkingParam } : {}),
+    }),
+  });
+
+  if (!upstream.ok || !upstream.body) {
+    const err = await upstream.text().catch(() => "");
+    throw new Error(`VolcEngine stream HTTP ${upstream.status}: ${err.slice(0, 200)}`);
+  }
+
+  return new Response(upstream.body, {
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "X-Accel-Buffering": "no",
+    },
+  });
 }
 
 export const corsHeaders: Record<string, string> = {

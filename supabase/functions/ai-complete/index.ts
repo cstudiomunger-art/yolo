@@ -19,6 +19,7 @@ import {
 } from "../_shared/itinerary-assembler.ts";
 import {
   chatCompletion,
+  streamChatCompletion,
   corsHeaders,
   type ChatMessage,
 } from "../_shared/volcengine.ts";
@@ -251,18 +252,14 @@ async function handleAssistantChat(
     { role: "user", content: message },
   ];
 
-  const text =
-    (await chatCompletion({
-      messages,
-      maxTokens: ai.chatMaxTokens,
-      temperature: ai.temperature,
-      modelId: ai.modelId,
-      apiUrl: ai.apiUrl,
-      timeoutMs: ai.timeoutMs,
-    })) ??
-    "I'm here to help with your China trip. Please try again in a moment, or use the quick-help chips above.";
-
-  return jsonResponse({ code: 200, text });
+  // Always stream with thinking:auto — first token arrives fast, thinking runs in background.
+  return await streamChatCompletion({
+    messages,
+    maxTokens: ai.chatMaxTokens,
+    modelId: ai.modelId,
+    apiUrl: ai.apiUrl,
+    thinkingMode: "auto",
+  });
 }
 
 async function handleItinerary(

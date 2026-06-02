@@ -32,6 +32,50 @@ enum AIService {
         }
     }
 
+    /// Streams the assistant reply via SSE, calling onChunk for each content token.
+    /// Thinking tokens (reasoning_content / thinking_content) are silently skipped.
+    static func chatAssistantStream(
+        message: String,
+        history: [(role: String, content: String)],
+        scenarioId: String? = nil,
+        onChunk: @escaping @Sendable (String) -> Void
+    ) async {
+        guard AppConfig.isSupabaseConfigured, !AppConfig.forceBundled else {
+            onChunk(offlineHint); return
+        }
+        var request = URLRequest(
+            url: AppConfig.supabaseURL.appendingPathComponent("functions/v1/ai-complete")
+        )
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(AppConfig.supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(AppConfig.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 90
+        let payload = AssistantChatRequest(
+            type: "assistant_chat",
+            message: message,
+            history: history.map { ChatHistoryItem(role: $0.role, content: $0.content) },
+            scenarioId: scenarioId
+        )
+        guard let body = try? JSONCoding.makeEncoder().encode(payload) else { return }
+        request.httpBody = body
+        do {
+            let (bytes, resp) = try await URLSession.shared.bytes(for: request)
+            guard (resp as? HTTPURLResponse)?.statusCode == 200 else { return }
+            for try await line in bytes.lines {
+                guard line.hasPrefix("data: ") else { continue }
+                let data = String(line.dropFirst(6))
+                guard data != "[DONE]",
+                      let json = data.data(using: .utf8),
+                      let chunk = try? JSONDecoder().decode(SSEChunk.self, from: json),
+                      let content = chunk.choices.first?.delta.content,
+                      !content.isEmpty
+                else { continue }
+                onChunk(content)
+            }
+        } catch { }
+    }
+
     static func generateItinerary(
         content: any ContentRepositoryProtocol,
         cities: [String],
@@ -173,4 +217,20 @@ private struct ItineraryRequest: Encodable {
 private struct ItineraryResponse: Decodable {
     let code: Int
     let itinerary: SampleItinerary?
+}
+
+// MARK: - SSE types
+
+private struct SSEChunk: Decodable {
+    let choices: [SSEChoice]
+}
+private struct SSEChoice: Decodable {
+    let delta: SSEDelta
+}
+private struct SSEDelta: Decodable {
+    // Regular answer token
+    let content: String?
+    // Thinking tokens — present when thinking:auto is active; we skip these.
+    let reasoningContent: String?
+    let thinkingContent: String?
 }
