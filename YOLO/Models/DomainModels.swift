@@ -807,6 +807,7 @@ struct CultureTip: Identifiable, Codable, Hashable {
     let category: CultureTipCategory
     let doText: String?
     let dontText: String?
+    let cityId: String?
 
     init(
         id: String,
@@ -816,7 +817,8 @@ struct CultureTip: Identifiable, Codable, Hashable {
         body: String,
         category: CultureTipCategory = .social,
         doText: String? = nil,
-        dontText: String? = nil
+        dontText: String? = nil,
+        cityId: String? = nil
     ) {
         self.id = id
         self.emoji = emoji
@@ -826,6 +828,7 @@ struct CultureTip: Identifiable, Codable, Hashable {
         self.category = category
         self.doText = doText
         self.dontText = dontText
+        self.cityId = cityId
     }
 
     init(from decoder: Decoder) throws {
@@ -843,12 +846,14 @@ struct CultureTip: Identifiable, Codable, Hashable {
         }
         doText = try c.decodeIfPresent(String.self, forKey: .doText)
         dontText = try c.decodeIfPresent(String.self, forKey: .dontText)
+        cityId = try c.decodeIfPresent(String.self, forKey: .cityId)
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, emoji, title, preview, body, category
         case doText = "do_text"
         case dontText = "dont_text"
+        case cityId = "city_id"
     }
 }
 

@@ -661,11 +661,13 @@
       listColumns: [
         { key: "title", label: "标题" },
         { key: "category", label: "分类" },
+        { key: "city_id", label: "城市", ref: "city" },
         { key: "is_active", label: "启用" },
       ],
       fields: [
         { key: "id", type: "slug", slugSource: "title", slugPrefix: "culture", required: true },
         { key: "emoji", type: "text" },
+        { key: "city_id", type: "ref_city", allowEmpty: true, emptyLabel: "通用（所有城市）", label: "城市（空=通用）" },
         { key: "category", type: "enum", options: [
           { value: "food", label: "Food & Dining" },
           { value: "payments", label: "Payments & Money" },

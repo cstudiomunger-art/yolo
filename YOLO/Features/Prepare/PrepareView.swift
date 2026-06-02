@@ -12,8 +12,10 @@ struct PrepareView: View {
         showsCityPlaceholder: true
     )
     @State private var reading: [ReadingItem] = []
+    @State private var cultureTips: [CultureTip] = []
     @State private var showReadingList = false
     @State private var selectedDetailItem: ChecklistItem?
+    @State private var selectedCultureTip: CultureTip?
     @State private var restoreConfirmItem: ChecklistItem?
     @State private var checklistSettings = ChecklistSettings.fallback
 
@@ -44,6 +46,9 @@ struct PrepareView: View {
                 .background(Theme.ColorToken.background)
                 .navigationDestination(item: $selectedDetailItem) { item in
                     ChecklistItemDetailView(item: item)
+                }
+                .navigationDestination(item: $selectedCultureTip) { tip in
+                    CultureTipDetailView(tip: tip)
                 }
         }
         .task { await bootstrap() }
@@ -83,6 +88,9 @@ struct PrepareView: View {
                 checklistSections
                 if prepResult.showsCityPlaceholder {
                     cityPlaceholderCard
+                }
+                if context.hasSavedItinerary, !cultureTips.isEmpty {
+                    cultureTipsSection
                 }
                 embeddedReading
             }
@@ -268,6 +276,70 @@ struct PrepareView: View {
         .padding(.top, 16)
     }
 
+    @ViewBuilder
+    private var cultureTipsSection: some View {
+        let universalTips = cultureTips.filter { $0.cityId == nil }
+        let cityIds = context.itineraryCityIds
+
+        Text("文化贴士")
+            .font(Theme.FontToken.inter(10, weight: .medium))
+            .foregroundStyle(Theme.ColorToken.textDisabled)
+            .textCase(.uppercase)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+
+        if !universalTips.isEmpty {
+            ForEach(universalTips) { tip in
+                cultureTipRow(tip)
+            }
+        }
+
+        ForEach(cityIds, id: \.self) { cityId in
+            let tips = cultureTips.filter { $0.cityId == cityId }
+            if !tips.isEmpty {
+                let cityName = cities.first { $0.id == cityId }?.name ?? cityId
+                Text("\(cityName) 特色贴士")
+                    .font(Theme.FontToken.inter(10, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textDisabled)
+                    .textCase(.uppercase)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+                ForEach(tips) { tip in
+                    cultureTipRow(tip)
+                }
+            }
+        }
+    }
+
+    private func cultureTipRow(_ tip: CultureTip) -> some View {
+        Button { selectedCultureTip = tip } label: {
+            HStack(spacing: 10) {
+                Text(tip.emoji)
+                    .font(.system(size: 16))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(tip.title)
+                        .font(Theme.FontToken.inter(14))
+                        .foregroundStyle(Theme.ColorToken.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                    Text(HTMLContentView.plainText(from: tip.preview))
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                }
+                Text(">")
+                    .font(Theme.FontToken.inter(11, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textGhost)
+            }
+            .padding(.vertical, 11)
+        }
+        .buttonStyle(.plain)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
+        }
+    }
+
     private var embeddedReading: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -328,6 +400,7 @@ struct PrepareView: View {
 
         let readingCityIds = cityIds.isEmpty ? appEnv.preferences.selectedCityIds : cityIds
         reading = (try? await appEnv.content.fetchReadingItems(cityIds: readingCityIds)) ?? []
+        cultureTips = (try? await appEnv.content.fetchCultureTips()) ?? []
         checklistSettings = (try? await appEnv.content.fetchChecklistSettings()) ?? .fallback
 
         PrepReminderService.scheduleIfNeeded(
