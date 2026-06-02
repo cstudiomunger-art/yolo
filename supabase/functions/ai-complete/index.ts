@@ -252,13 +252,12 @@ async function handleAssistantChat(
     { role: "user", content: message },
   ];
 
-  // Always stream with thinking:auto — first token arrives fast, thinking runs in background.
   return await streamChatCompletion({
     messages,
     maxTokens: ai.chatMaxTokens,
+    temperature: ai.temperature,
     modelId: ai.modelId,
     apiUrl: ai.apiUrl,
-    thinkingMode: "auto",
   });
 }
 
