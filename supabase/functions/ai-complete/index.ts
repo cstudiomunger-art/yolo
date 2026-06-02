@@ -172,9 +172,19 @@ async function buildItineraryFromAI(
   });
 }
 
+type ScenarioCache = { aiSystemPrompt: string | null; responseMode: string };
+const _scenarioCache = new Map<string, { value: ScenarioCache | null; cachedAt: number }>();
+const SCENARIO_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
 async function loadAssistantScenario(
   scenarioId: string,
-): Promise<{ aiSystemPrompt: string | null; responseMode: string } | null> {
+): Promise<ScenarioCache | null> {
+  const now = Date.now();
+  const cached = _scenarioCache.get(scenarioId);
+  if (cached && now - cached.cachedAt < SCENARIO_TTL_MS) {
+    return cached.value;
+  }
+
   const url = Deno.env.get("SUPABASE_URL");
   const key =
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY");
@@ -190,16 +200,24 @@ async function loadAssistantScenario(
         },
       },
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      _scenarioCache.set(scenarioId, { value: null, cachedAt: now });
+      return null;
+    }
     const rows = await res.json();
-    if (!Array.isArray(rows) || rows.length === 0) return null;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      _scenarioCache.set(scenarioId, { value: null, cachedAt: now });
+      return null;
+    }
     const row = rows[0] as Record<string, unknown>;
-    return {
+    const value: ScenarioCache = {
       aiSystemPrompt: row.ai_system_prompt
         ? String(row.ai_system_prompt).trim() || null
         : null,
       responseMode: String(row.response_mode ?? "ai"),
     };
+    _scenarioCache.set(scenarioId, { value, cachedAt: now });
+    return value;
   } catch {
     return null;
   }

@@ -14,8 +14,12 @@ const DEFAULT_API_URL = "https://ark.cn-beijing.volces.com/api/v3/chat/completio
 const DEFAULT_ASSISTANT_PROMPT =
   "You are YOLO HAPPY Travel Assistant — a friendly expert helping international visitors plan and enjoy trips in China. " +
   "Reply in clear English (you may include brief Chinese phrases for place names). " +
-  "Keep answers practical, warm, and under 300 words. " +
-  "Cover payment, transport, food, safety, and culture when relevant.";
+  "Cover payment, transport, food, safety, and culture when relevant.\n\n" +
+  "RESPONSE LENGTH RULE: Match length strictly to the question.\n" +
+  "- Greetings or simple yes/no questions → 1–2 sentences max.\n" +
+  "- Single factual questions → 2–4 sentences.\n" +
+  "- Complex planning or multi-part questions → up to 200 words with brief structure.\n" +
+  "Never pad, repeat, or summarise unnecessarily. Stop as soon as the answer is complete.";
 
 function envNumber(key: string, fallback: number): number {
   const raw = Deno.env.get(key);
@@ -67,7 +71,17 @@ export function mergeAISettings(row: Record<string, unknown> | null): AISettings
   };
 }
 
+// Module-level cache — persists for the lifetime of the Edge Function instance.
+let _aiSettingsCache: AISettings | null = null;
+let _aiSettingsCachedAt = 0;
+const AI_SETTINGS_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export async function loadAISettingsFromCMS(): Promise<AISettings> {
+  const now = Date.now();
+  if (_aiSettingsCache && now - _aiSettingsCachedAt < AI_SETTINGS_TTL_MS) {
+    return _aiSettingsCache;
+  }
+
   const url = Deno.env.get("SUPABASE_URL");
   const key =
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY");
@@ -88,14 +102,16 @@ export async function loadAISettingsFromCMS(): Promise<AISettings> {
     );
     if (!res.ok) {
       console.warn("ai-settings: CMS fetch failed", res.status);
-      return envDefaults();
+      return _aiSettingsCache ?? envDefaults();
     }
     const rows = await res.json();
     const row = Array.isArray(rows) && rows[0] ? rows[0] : null;
-    return mergeAISettings(row as Record<string, unknown> | null);
+    _aiSettingsCache = mergeAISettings(row as Record<string, unknown> | null);
+    _aiSettingsCachedAt = now;
+    return _aiSettingsCache;
   } catch (err) {
     console.warn("ai-settings: CMS fetch error", err);
-    return envDefaults();
+    return _aiSettingsCache ?? envDefaults();
   }
 }
 
