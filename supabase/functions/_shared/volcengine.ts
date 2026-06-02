@@ -29,7 +29,9 @@ export function volcengineConfig() {
   const apiKey = Deno.env.get("VOLCENGINE_API_KEY") ?? "";
   const model = Deno.env.get("VOLCENGINE_SUGGESTION_MODEL") ?? "";
   const apiUrl = Deno.env.get("VOLCENGINE_CHAT_API_URL") ?? DEFAULT_API_URL;
-  const maxTokens = envNumber("VOLCENGINE_SUGGESTION_MAX_TOKENS", 450);
+  // These env-var fallbacks are last-resort for local dev only.
+  // Production values must be set in app_settings via the admin CMS.
+  const maxTokens = envNumber("VOLCENGINE_SUGGESTION_MAX_TOKENS", 200);
   const temperature = envNumber("VOLCENGINE_SUGGESTION_TEMPERATURE", 0.7);
   const timeoutMs = envNumber("VOLCENGINE_SUGGESTION_TIMEOUT_MS", 20000);
   return { apiKey, model, apiUrl, maxTokens, temperature, timeoutMs };

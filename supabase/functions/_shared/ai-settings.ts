@@ -11,15 +11,9 @@ export type AISettings = {
 
 const DEFAULT_API_URL = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
 
-const DEFAULT_ASSISTANT_PROMPT =
-  "You are YOLO HAPPY Travel Assistant — a friendly expert helping international visitors plan and enjoy trips in China. " +
-  "Reply in clear English (you may include brief Chinese phrases for place names). " +
-  "Cover payment, transport, food, safety, and culture when relevant.\n\n" +
-  "RESPONSE LENGTH RULE: Match length strictly to the question.\n" +
-  "- Greetings or simple yes/no questions → 1–2 sentences max.\n" +
-  "- Single factual questions → 2–4 sentences.\n" +
-  "- Complex planning or multi-part questions → up to 200 words with brief structure.\n" +
-  "Never pad, repeat, or summarise unnecessarily. Stop as soon as the answer is complete.";
+// Minimal safety fallback — only used when the DB row has no value (e.g. fresh local dev).
+// All real configuration lives in app_settings via the admin CMS.
+const FALLBACK_ASSISTANT_PROMPT = "You are a helpful China travel assistant. Be concise.";
 
 function envNumber(key: string, fallback: number): number {
   const raw = Deno.env.get(key);
@@ -117,7 +111,7 @@ export async function loadAISettingsFromCMS(): Promise<AISettings> {
 
 export function defaultAssistantSystemPrompt(scenarioHint = ""): string {
   const hint = scenarioHint ? ` ${scenarioHint}` : "";
-  return `${DEFAULT_ASSISTANT_PROMPT}${hint}`;
+  return `${FALLBACK_ASSISTANT_PROMPT}${hint}`;
 }
 
 export function defaultItinerarySystemPrompt(_days: number, schema: string): string {
