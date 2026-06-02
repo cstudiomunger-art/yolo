@@ -29,25 +29,32 @@ struct AssistantView: View {
                 chipRow
             }
 
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    ForEach(messages) { message in
-                        chatBubble(message)
-                    }
-                    if isThinking {
-                        HStack {
-                            ProgressView()
-                            Text("Thinking…")
-                                .font(Theme.FontToken.inter(12))
-                                .foregroundStyle(Theme.ColorToken.textMuted)
-                            Spacer()
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 16) {
+                        ForEach(messages) { message in
+                            chatBubble(message)
                         }
+                        if isStreaming {
+                            chatBubble(ChatMessage(isUser: false, text: streamingText.isEmpty ? "…" : streamingText))
+                        } else if isThinking {
+                            HStack {
+                                ProgressView()
+                                Text("Thinking…")
+                                    .font(Theme.FontToken.inter(12))
+                                    .foregroundStyle(Theme.ColorToken.textMuted)
+                                Spacer()
+                            }
+                        }
+                        Color.clear.frame(height: 1).id("bottom")
                     }
+                    .padding(.horizontal, Theme.screenPadding)
+                    .padding(.vertical, 16)
                 }
-                .padding(.horizontal, Theme.screenPadding)
-                .padding(.vertical, 16)
+                .scrollDismissesKeyboard(.interactively)
+                .onChange(of: streamingText) { _, _ in proxy.scrollTo("bottom", anchor: .bottom) }
+                .onChange(of: messages.count) { _, _ in proxy.scrollTo("bottom", anchor: .bottom) }
             }
-            .scrollDismissesKeyboard(.interactively)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             inputBar
@@ -132,7 +139,7 @@ struct AssistantView: View {
             Button("Send") { sendMessage() }
                 .font(Theme.FontToken.inter(11, weight: .medium))
                 .foregroundStyle(Theme.ColorToken.accent)
-                .disabled(isThinking || input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(isThinking || isStreaming || input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
         .padding(.horizontal, Theme.screenPadding)
         .padding(.vertical, 12)
@@ -188,18 +195,26 @@ struct AssistantView: View {
         }
 
         if appEnv.contentMode.effectiveUseRemoteAI {
-            isThinking = true
-            defer { isThinking = false }
             let userText = messages.last(where: \.isUser)?.text ?? ""
-            let history = messages.dropLast().suffix(12).map { msg in
+            let history = messages.dropLast().suffix(6).map { msg in
                 (role: msg.isUser ? "user" : "assistant", content: msg.text)
             }
-            let reply = await AIService.chatAssistant(
+            isThinking = true; isStreaming = false; streamingText = ""
+            await AIService.chatAssistantStream(
                 message: userText,
                 history: Array(history),
                 scenarioId: scenarioId
-            )
-            messages.append(ChatMessage(isUser: false, text: formatAssistantText(reply)))
+            ) { chunk in
+                Task { @MainActor in
+                    if self.isThinking { self.isThinking = false; self.isStreaming = true }
+                    self.streamingText += chunk
+                }
+            }
+            let final = streamingText.isEmpty
+                ? "I'm here to help with your China trip. Please try again in a moment."
+                : formatAssistantText(streamingText)
+            isThinking = false; isStreaming = false; streamingText = ""
+            messages.append(ChatMessage(isUser: false, text: final))
             return
         }
 
