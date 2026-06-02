@@ -851,9 +851,7 @@ struct CultureTip: Identifiable, Codable, Hashable {
 
     private enum CodingKeys: String, CodingKey {
         case id, emoji, title, preview, body, category
-        case doText = "do_text"
-        case dontText = "dont_text"
-        case cityId = "city_id"
+        case doText, dontText, cityId
     }
 }
 
