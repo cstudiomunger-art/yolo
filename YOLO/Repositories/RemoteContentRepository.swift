@@ -207,20 +207,25 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
         }
     }
 
-    func fetchCultureTips() async throws -> [CultureTip] {
+    func fetchCultureTips(cityIds: [String]) async throws -> [CultureTip] {
         do {
-            let rows: [CultureTip] = try await client
+            let all: [CultureTip] = try await client
                 .from("culture_tips")
                 .select()
                 .eq("is_active", value: true)
                 .order("sort_order", ascending: true)
                 .execute()
                 .value
-            if !rows.isEmpty { return rows }
+            if !all.isEmpty {
+                return all.filter { tip in
+                    guard let cid = tip.cityId else { return true }
+                    return cityIds.contains(cid)
+                }
+            }
         } catch {
-            return try await bundledFallback.fetchCultureTips()
+            return try await bundledFallback.fetchCultureTips(cityIds: cityIds)
         }
-        return try await bundledFallback.fetchCultureTips()
+        return try await bundledFallback.fetchCultureTips(cityIds: cityIds)
     }
 
     func fetchSampleItinerary() async throws -> SampleItinerary {

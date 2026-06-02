@@ -276,11 +276,21 @@ struct PrepareView: View {
         .padding(.top, 16)
     }
 
+    private var universalCultureTips: [CultureTip] {
+        cultureTips.filter { $0.cityId == nil }
+    }
+
+    private var cityCultureTipGroups: [(cityName: String, tips: [CultureTip])] {
+        context.itineraryCityIds.compactMap { cityId in
+            let tips = cultureTips.filter { $0.cityId == cityId }
+            guard !tips.isEmpty else { return nil }
+            let name = cities.first { $0.id == cityId }?.name ?? cityId
+            return (cityName: name, tips: tips)
+        }
+    }
+
     @ViewBuilder
     private var cultureTipsSection: some View {
-        let universalTips = cultureTips.filter { $0.cityId == nil }
-        let cityIds = context.itineraryCityIds
-
         Text("文化贴士")
             .font(Theme.FontToken.inter(10, weight: .medium))
             .foregroundStyle(Theme.ColorToken.textDisabled)
@@ -288,25 +298,19 @@ struct PrepareView: View {
             .padding(.top, 16)
             .padding(.bottom, 8)
 
-        if !universalTips.isEmpty {
-            ForEach(universalTips) { tip in
-                cultureTipRow(tip)
-            }
+        ForEach(universalCultureTips) { tip in
+            cultureTipRow(tip)
         }
 
-        ForEach(cityIds, id: \.self) { cityId in
-            let tips = cultureTips.filter { $0.cityId == cityId }
-            if !tips.isEmpty {
-                let cityName = cities.first { $0.id == cityId }?.name ?? cityId
-                Text("\(cityName) 特色贴士")
-                    .font(Theme.FontToken.inter(10, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.textDisabled)
-                    .textCase(.uppercase)
-                    .padding(.top, 12)
-                    .padding(.bottom, 8)
-                ForEach(tips) { tip in
-                    cultureTipRow(tip)
-                }
+        ForEach(cityCultureTipGroups, id: \.cityName) { group in
+            Text("\(group.cityName) 特色贴士")
+                .font(Theme.FontToken.inter(10, weight: .medium))
+                .foregroundStyle(Theme.ColorToken.textDisabled)
+                .textCase(.uppercase)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
+            ForEach(group.tips) { tip in
+                cultureTipRow(tip)
             }
         }
     }
@@ -400,7 +404,7 @@ struct PrepareView: View {
 
         let readingCityIds = cityIds.isEmpty ? appEnv.preferences.selectedCityIds : cityIds
         reading = (try? await appEnv.content.fetchReadingItems(cityIds: readingCityIds)) ?? []
-        cultureTips = (try? await appEnv.content.fetchCultureTips()) ?? []
+        cultureTips = (try? await appEnv.content.fetchCultureTips(cityIds: cityIds)) ?? []
         checklistSettings = (try? await appEnv.content.fetchChecklistSettings()) ?? .fallback
 
         PrepReminderService.scheduleIfNeeded(

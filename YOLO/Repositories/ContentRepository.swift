@@ -16,7 +16,7 @@ protocol ContentRepositoryProtocol: Sendable {
     func fetchReadingItems(cityIds: [String]) async throws -> [ReadingItem]
     func fetchHotels(cityId: String) async throws -> [Hotel]
     func fetchHomeTips(cityIds: [String]) async throws -> [HomeTip]
-    func fetchCultureTips() async throws -> [CultureTip]
+    func fetchCultureTips(cityIds: [String]) async throws -> [CultureTip]
     func fetchSampleItinerary() async throws -> SampleItinerary
     func fetchPlanningItinerary() async throws -> SampleItinerary
     func fetchAssistantReply(scenarioId: String) async throws -> AssistantReply?
@@ -144,7 +144,12 @@ struct BundledContentRepository: ContentRepositoryProtocol {
         }
     }
 
-    func fetchCultureTips() async throws -> [CultureTip] { cultureTips }
+    func fetchCultureTips(cityIds: [String]) async throws -> [CultureTip] {
+        cultureTips.filter { tip in
+            guard let cid = tip.cityId else { return true }
+            return cityIds.contains(cid)
+        }
+    }
 
     func fetchSampleItinerary() async throws -> SampleItinerary { sampleItinerary }
 
