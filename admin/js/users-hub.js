@@ -30,6 +30,38 @@
     return p?.email || `${String(userId).slice(0, 8)}…`;
   };
 
+  // ─── Membership plan cache + status helpers ──────────────────────────────────
+
+  App.loadMembershipPlansCache = async function loadMembershipPlansCache(force) {
+    if (!force && App.membershipPlansCacheMap) return App.membershipPlansCacheMap;
+    const { data } = await App.client
+      .from("membership_plans")
+      .select("id,name_zh,name_en,plan_type,access_flags,feature_lines,duration_days,free_trial_days,price_label,is_active")
+      .order("display_order");
+    App.membershipPlansList = data || [];
+    App.membershipPlansCacheMap = Object.fromEntries((data || []).map((p) => [p.id, p]));
+    return App.membershipPlansCacheMap;
+  };
+
+  App.membershipPlanName = function membershipPlanName(planId) {
+    if (!planId) return null;
+    const p = App.membershipPlansCacheMap?.[planId];
+    return p ? (p.name_zh || p.name_en) : planId;
+  };
+
+  /** Active subscription = has plan AND (no expiry [lifetime] OR expiry in future). */
+  App.isActiveMember = function isActiveMember(profile) {
+    if (!profile?.subscription_plan_id) return false;
+    if (!profile.subscription_expires_at) return true;
+    return new Date(profile.subscription_expires_at) > new Date();
+  };
+
+  App.daysUntil = function daysUntil(dateStr) {
+    if (!dateStr) return null;
+    const ms = new Date(dateStr).getTime() - Date.now();
+    return Math.ceil(ms / 86400000);
+  };
+
   // ─── Hub entry ─────────────────────────────────────────────────────────────
 
   App.renderUsersHub = async function renderUsersHub() {
@@ -54,7 +86,8 @@
         <input type="search" id="users-search" class="search-input" placeholder="搜索邮箱、昵称、UUID…" />
         <select id="users-filter" class="search-input">
           <option value="">全部用户</option>
-          <option value="subscribed">订阅会员</option>
+          <option value="active_member">有效会员</option>
+          <option value="expired">会员已过期</option>
           <option value="pro">is_pro 标记</option>
           <option value="purchased">已单购景点</option>
           <option value="onboarded">已完成引导</option>
@@ -74,7 +107,15 @@
       host.innerHTML = `<p class="muted">加载中…</p>`;
       try {
         await App.loadRefCache();
+        await App.loadMembershipPlansCache();
         const rows = await App.loadUserProfilesIndex(true);
+        const nowStats = new Date();
+        const stats = {
+          total: rows.length,
+          members: rows.filter((p) => App.isActiveMember(p)).length,
+          expired: rows.filter((p) => p.subscription_plan_id && p.subscription_expires_at && new Date(p.subscription_expires_at) <= nowStats).length,
+          single: rows.filter((p) => (p.purchased_attraction_ids || []).length > 0).length,
+        };
         const q = (App.$("#users-search")?.value || "").trim().toLowerCase();
         const filter = App.$("#users-filter")?.value || "";
 
@@ -85,7 +126,8 @@
             return blob.includes(q);
           });
         }
-        if (filter === "subscribed") list = list.filter((p) => p.subscription_plan_id);
+        if (filter === "active_member") list = list.filter((p) => App.isActiveMember(p));
+        if (filter === "expired") list = list.filter((p) => p.subscription_plan_id && p.subscription_expires_at && new Date(p.subscription_expires_at) <= nowStats);
         if (filter === "pro") list = list.filter((p) => p.is_pro);
         if (filter === "purchased") list = list.filter((p) => (p.purchased_attraction_ids || []).length > 0);
         if (filter === "onboarded") list = list.filter((p) => p.has_completed_onboarding);
@@ -96,7 +138,13 @@
         }
 
         const now = new Date();
-        let html = `<table class="data-table"><thead><tr>
+        const statsHtml = `<div class="user-stats">
+          <div class="stat-card"><div class="stat-num">${stats.total}</div><div class="stat-label">总用户</div></div>
+          <div class="stat-card stat-green"><div class="stat-num">${stats.members}</div><div class="stat-label">有效会员</div></div>
+          <div class="stat-card stat-red"><div class="stat-num">${stats.expired}</div><div class="stat-label">会员已过期</div></div>
+          <div class="stat-card stat-blue"><div class="stat-num">${stats.single}</div><div class="stat-label">单购用户</div></div>
+        </div>`;
+        let html = statsHtml + `<table class="data-table"><thead><tr>
           <th>头像</th><th>邮箱 / 昵称</th><th>国籍</th>
           <th>会员</th><th>到期</th><th>已购景点</th>
           <th>头像状态</th><th>更新</th><th></th>
@@ -108,8 +156,9 @@
             ? `<img src="${App.escapeHtml(p.avatar_url)}" class="avatar-thumb" />`
             : `<span class="avatar-initial">${(p.display_name || p.email || "?")[0].toUpperCase()}</span>`;
 
+          const memberActive = App.isActiveMember(p);
           const subscriptionBadge = p.subscription_plan_id
-            ? `<span class="badge badge-green">${App.escapeHtml(p.subscription_plan_id)}</span>`
+            ? `<span class="badge ${memberActive ? "badge-green" : "badge-gray"}">${App.escapeHtml(App.membershipPlanName(p.subscription_plan_id))}${memberActive ? "" : " · 失效"}</span>`
             : (p.is_pro ? `<span class="badge badge-blue">is_pro</span>` : `<span class="badge badge-gray">免费</span>`);
 
           const expiresAt = p.subscription_expires_at
@@ -208,12 +257,9 @@
         .single();
       if (error) throw error;
 
-      // Load membership plans for dropdown
-      const { data: plans } = await App.client
-        .from("membership_plans")
-        .select("id,name_zh,name_en,plan_type")
-        .eq("is_active", true)
-        .order("display_order");
+      // Membership plans (cached — includes access_flags / feature_lines / duration)
+      await App.loadMembershipPlansCache(true);
+      const plans = (App.membershipPlansList || []).filter((p) => p.is_active);
 
       // Load user itineraries
       const { data: trips } = await App.client
@@ -247,6 +293,67 @@
       const planOptions = (plans || [])
         .map((p) => `<option value="${App.escapeHtml(p.id)}" ${profile.subscription_plan_id === p.id ? "selected" : ""}>${App.escapeHtml(p.name_zh || p.name_en)} (${p.plan_type === "subscription" ? "订阅" : "单次"})</option>`)
         .join("");
+
+      // ── Membership status overview + quick actions ──
+      const curPlan = profile.subscription_plan_id ? App.membershipPlansCacheMap?.[profile.subscription_plan_id] : null;
+      const memberActive = App.isActiveMember(profile);
+      const expiresD = profile.subscription_expires_at ? new Date(profile.subscription_expires_at) : null;
+      const daysLeft = App.daysUntil(profile.subscription_expires_at);
+
+      let statusBadge;
+      if (memberActive) statusBadge = `<span class="badge badge-green">● 有效会员</span>`;
+      else if (profile.subscription_plan_id) statusBadge = `<span class="badge badge-red">● 会员已过期</span>`;
+      else if (profile.is_pro) statusBadge = `<span class="badge badge-blue">● is_pro（遗留）</span>`;
+      else statusBadge = `<span class="badge badge-gray">○ 免费用户</span>`;
+
+      const flagIcons = {
+        audio_guides: "🎧 音频", text_content: "📄 文字", offline_download: "⬇ 离线",
+        visitor_tips: "💡 贴士", ai_advanced: "🤖 AI",
+      };
+      const flags = curPlan?.access_flags || {};
+      const flagsHtml = curPlan
+        ? Object.entries(flagIcons).map(([k, v]) =>
+            `<span class="badge ${flags[k] ? "badge-green" : "badge-gray"}">${v}${flags[k] ? "" : " ✕"}</span>`
+          ).join(" ")
+        : "";
+
+      const expiryLine = expiresD
+        ? `${expiresD.toLocaleString("zh-CN")} ${memberActive
+            ? `<span class="badge ${daysLeft <= 7 ? "badge-yellow" : "badge-blue"}">剩 ${daysLeft} 天</span>`
+            : `<span class="badge badge-red">已过期</span>`}`
+        : (profile.subscription_plan_id ? `<span class="badge badge-blue">永久 / 终身</span>` : "—");
+
+      const subPlanOptions = (plans || [])
+        .filter((p) => p.plan_type === "subscription")
+        .map((p) => `<option value="${App.escapeHtml(p.id)}">${App.escapeHtml(p.name_zh || p.name_en)}</option>`)
+        .join("");
+
+      const memberStatusCard = `
+        <div class="member-status-card">
+          <div class="member-status-head">
+            ${statusBadge}
+            ${curPlan ? `<strong>${App.escapeHtml(curPlan.name_zh || curPlan.name_en)}</strong>
+              <span class="muted">${curPlan.plan_type === "subscription" ? "订阅" : "单次"}${curPlan.price_label ? " · " + App.escapeHtml(curPlan.price_label) : ""}</span>` : ""}
+          </div>
+          <div class="member-status-row"><span class="ms-label">到期</span>${expiryLine}</div>
+          ${curPlan ? `<div class="member-status-row"><span class="ms-label">权益</span><span class="ms-flags">${flagsHtml}</span></div>` : ""}
+          <div class="member-status-row"><span class="ms-label">单购景点</span>${(profile.purchased_attraction_ids || []).length} 个</div>
+        </div>
+        <div class="member-quick-actions">
+          <select id="gift-plan" class="search-input">
+            <option value="">选订阅计划…</option>${subPlanOptions}
+          </select>
+          <select id="gift-days" class="search-input">
+            <option value="30">+30 天</option>
+            <option value="90">+90 天</option>
+            <option value="365" selected>+365 天</option>
+            <option value="0">永久</option>
+          </select>
+          <button type="button" class="btn btn-sm" id="gift-apply">赠送/设置会员</button>
+          <button type="button" class="btn btn-sm btn-secondary" id="extend-30">续 30 天</button>
+          <button type="button" class="btn btn-sm btn-secondary" id="extend-365">续 1 年</button>
+          <button type="button" class="btn btn-sm btn-danger" id="cancel-sub">取消会员</button>
+        </div>`;
 
       const avatarSection = profile.avatar_url
         ? `<div class="field-block">
@@ -314,7 +421,8 @@
 
           <section class="editor-section">
             <h3>会员与订阅</h3>
-            <p class="muted">修改后 App 下次拉取 profile 或用户重新登录时生效。</p>
+            ${memberStatusCard}
+            <p class="muted" style="margin-top:16px">手动调整（高级）：直接编辑下列字段并「保存用户资料」。修改后 App 下次拉取 profile 或用户重新登录时生效。</p>
             <div class="field-block">
               <label>订阅计划</label>
               <select name="subscription_plan_id">
@@ -430,6 +538,43 @@
           App.showToast(`退款申请已${newStatus === "approved" ? "通过" : "拒绝"}`);
           await App.renderUserDetail(userId);
         });
+      });
+
+      // Membership quick actions
+      const applyMemberPatch = async (patch) => {
+        const { error } = await App.client
+          .from("profiles")
+          .update({ ...patch, updated_at: new Date().toISOString() })
+          .eq("id", userId);
+        if (error) return App.showToast(error.message, "error");
+        App.showToast("会员状态已更新");
+        await App.loadUserProfilesIndex(true);
+        await App.renderUserDetail(userId);
+      };
+
+      App.$("#gift-apply")?.addEventListener("click", () => {
+        const planId = App.$("#gift-plan")?.value;
+        if (!planId) return App.showToast("请先选择订阅计划", "error");
+        const days = parseInt(App.$("#gift-days")?.value || "0", 10);
+        const expires = days > 0 ? new Date(Date.now() + days * 86400000).toISOString() : null;
+        if (!confirm(`确认将该用户设为「${App.membershipPlanName(planId)}」会员，有效期：${days > 0 ? days + " 天" : "永久"}？`)) return;
+        applyMemberPatch({ subscription_plan_id: planId, subscription_expires_at: expires, is_pro: true });
+      });
+
+      const extendDays = (days) => {
+        if (!profile.subscription_plan_id) return App.showToast("该用户暂无订阅计划，请先赠送/设置会员", "error");
+        const base = (profile.subscription_expires_at && new Date(profile.subscription_expires_at) > new Date())
+          ? new Date(profile.subscription_expires_at)
+          : new Date();
+        const expires = new Date(base.getTime() + days * 86400000).toISOString();
+        applyMemberPatch({ subscription_expires_at: expires, is_pro: true });
+      };
+      App.$("#extend-30")?.addEventListener("click", () => extendDays(30));
+      App.$("#extend-365")?.addEventListener("click", () => extendDays(365));
+
+      App.$("#cancel-sub")?.addEventListener("click", () => {
+        if (!confirm("确认取消该用户的会员？将清空订阅计划与到期时间（单购景点不受影响）。")) return;
+        applyMemberPatch({ subscription_plan_id: null, subscription_expires_at: null, is_pro: false });
       });
 
       // Save form

@@ -909,6 +909,40 @@ tr:hover td {
   border: 1px solid var(--border);
 }
 
+/* User management — stats overview */
+.user-stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.user-stats .stat-card {
+  flex: 1;
+  min-width: 110px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  text-align: center;
+}
+.user-stats .stat-num { font-size: 1.6rem; font-weight: 700; color: var(--text); line-height: 1.1; }
+.user-stats .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 5px; }
+.user-stats .stat-green .stat-num { color: #3fb950; }
+.user-stats .stat-red .stat-num { color: #e5534b; }
+.user-stats .stat-blue .stat-num { color: #58a6ff; }
+
+/* User detail — membership status card */
+.member-status-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.member-status-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.member-status-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 0; font-size: 0.88rem; }
+.member-status-row .ms-label { display: inline-block; width: 64px; flex-shrink: 0; color: var(--muted); font-size: 0.82rem; }
+.member-status-row .ms-flags { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+
+/* User detail — membership quick actions */
+.member-quick-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 4px; }
+.member-quick-actions .search-input { max-width: 150px; margin-bottom: 0; }
+
 /* ── 应用配置：折叠分组卡片 + 快速跳转 + sticky 保存栏 ── */
 .settings-help {
   border: 1px solid var(--border);
