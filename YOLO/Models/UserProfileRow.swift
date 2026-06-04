@@ -21,22 +21,8 @@ struct UserProfileRow: Codable, Sendable {
     var savedItineraries: [SampleItinerary]
     var activeItineraryId: String?
 
-    enum CodingKeys: String, CodingKey {
-        case id, email
-        case displayName = "display_name"
-        case avatarUrl = "avatar_url"
-        case avatarStatus = "avatar_status"
-        case countryCode = "country_code"
-        case hasCompletedOnboarding = "has_completed_onboarding"
-        case departureDate = "departure_date"
-        case selectedCityIds = "selected_city_ids"
-        case completedChecklistIds = "completed_checklist_ids"
-        case purchasedAttractionIds = "purchased_attraction_ids"
-        case isPro = "is_pro"
-        case subscriptionPlanId = "subscription_plan_id"
-        case subscriptionExpiresAt = "subscription_expires_at"
-        case rcCustomerId = "rc_customer_id"
-        case savedItineraries = "saved_itineraries"
-        case activeItineraryId = "active_itinerary_id"
-    }
+    // No explicit CodingKeys: the Supabase codec uses .convertFromSnakeCase /
+    // .convertToSnakeCase, so synthesized camelCase keys map to/from snake_case
+    // columns automatically (e.g. display_name ↔ displayName). Writing snake_case
+    // raw values here would break decoding (every field would read as nil/throw).
 }

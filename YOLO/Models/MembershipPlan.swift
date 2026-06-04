@@ -36,30 +36,35 @@ struct MembershipPlan: Identifiable, Codable, Sendable {
             aiAdvanced: false
         )
 
+        // camelCase keys — the Supabase decoder uses .convertFromSnakeCase,
+        // so JSON `audio_guides` is auto-mapped to `audioGuides`. Do NOT write
+        // snake_case raw values here or decoding silently fails.
         enum CodingKeys: String, CodingKey {
-            case audioGuides = "audio_guides"
-            case textContent = "text_content"
-            case offlineDownload = "offline_download"
-            case visitorTips = "visitor_tips"
-            case aiAdvanced = "ai_advanced"
+            case audioGuides
+            case textContent
+            case offlineDownload
+            case visitorTips
+            case aiAdvanced
         }
     }
 
+    // camelCase keys — Supabase decoder uses .convertFromSnakeCase (snake→camel).
+    // Writing snake_case raw values here would break decoding (fields read as nil).
     enum CodingKeys: String, CodingKey {
         case id
-        case rcPackageId = "rc_package_id"
-        case appleProductId = "apple_product_id"
-        case nameEn = "name_en"
-        case nameZh = "name_zh"
-        case priceLabel = "price_label"
-        case durationDays = "duration_days"
-        case freeTrialDays = "free_trial_days"
-        case planType = "plan_type"
-        case accessFlags = "access_flags"
-        case featureLines = "feature_lines"
-        case isBestValue = "is_best_value"
-        case displayOrder = "display_order"
-        case isActive = "is_active"
+        case rcPackageId
+        case appleProductId
+        case nameEn
+        case nameZh
+        case priceLabel
+        case durationDays
+        case freeTrialDays
+        case planType
+        case accessFlags
+        case featureLines
+        case isBestValue
+        case displayOrder
+        case isActive
     }
 
     // Memberwise initializer (used by bundled fallback plans)
