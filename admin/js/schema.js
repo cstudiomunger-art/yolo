@@ -40,6 +40,7 @@
     app_settings: {
       label: "应用配置",
       single: true,
+      groupedSections: true,
       pk: "id",
       order: null,
       fields: [

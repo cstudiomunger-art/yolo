@@ -66,12 +66,45 @@
     const fieldCtx = { ...ctx, isNew, pk: meta.pk, formValues };
     let html = App.renderContextBanner(ctx) + App.renderHiddenContextFields(ctx, meta);
 
+    // Grouped layout: each `section` opens a collapsible card wrapping its fields.
+    if (meta.groupedSections) {
+      let groupOpen = false;
+      // Fields before the first section render in a small "general" group.
+      meta.fields.forEach((f) => {
+        if (!App.shouldRenderField(f, fieldCtx)) return;
+        if (f.advanced || f.type === "slug") return; // advanced handled below
+        if (f.type === "section") {
+          if (groupOpen) html += `</div></details>`;
+          const hint = f.hint ? `<p class="field-hint section-hint">${App.escapeHtml(f.hint)}</p>` : "";
+          html += `<details class="settings-group" open id="grp-${App.escapeHtml(f.key)}">`
+            + `<summary>${App.escapeHtml(f.label || "")}</summary>`
+            + `<div class="settings-group-body">${hint}`;
+          groupOpen = true;
+          return;
+        }
+        if (!groupOpen) {
+          html += `<details class="settings-group" open id="grp-_general"><summary>基础开关</summary><div class="settings-group-body">`;
+          groupOpen = true;
+        }
+        const val = App.fieldToFormValue(f, row ? row[f.key] : "");
+        html += App.renderFieldBlock(f, val, fieldCtx);
+      });
+      if (groupOpen) html += `</div></details>`;
+      html += App.buildAdvancedFieldsHtml(meta, row, fieldCtx, isNew);
+      return html;
+    }
+
     meta.fields.forEach((f) => {
       if (!App.shouldRenderField(f, fieldCtx)) return;
       const val = App.fieldToFormValue(f, row ? row[f.key] : "");
       html += App.renderFieldBlock(f, val, fieldCtx);
     });
 
+    html += App.buildAdvancedFieldsHtml(meta, row, fieldCtx, isNew);
+    return html;
+  };
+
+  App.buildAdvancedFieldsHtml = function buildAdvancedFieldsHtml(meta, row, fieldCtx, isNew) {
     const advancedFields = meta.fields.filter((f) => {
       if (f.type === "section") return false;
       if (f.type === "slug") return true;
@@ -79,13 +112,12 @@
       if (!isNew && f.readonly && f.key === meta.pk && f.type === "text") return true;
       return false;
     });
-    if (advancedFields.length) {
-      html += `<details class="advanced-fields"><summary>高级选项（ID / 技术字段）</summary><div class="advanced-inner">`;
-      advancedFields.forEach((f) => {
-        html += App.renderFieldBlock(f, App.fieldToFormValue(f, row ? row[f.key] : ""), { ...fieldCtx, showAdvanced: true });
-      });
-      html += `</div></details>`;
-    }
+    if (!advancedFields.length) return "";
+    let html = `<details class="advanced-fields"><summary>高级选项（ID / 技术字段）</summary><div class="advanced-inner">`;
+    advancedFields.forEach((f) => {
+      html += App.renderFieldBlock(f, App.fieldToFormValue(f, row ? row[f.key] : ""), { ...fieldCtx, showAdvanced: true });
+    });
+    html += `</div></details>`;
     return html;
   };
 
@@ -353,13 +385,28 @@
 
   App.renderAppSettings = async function renderAppSettings() {
     const main = App.$("#main-content");
-    main.innerHTML = `${App.iapPreviewSettingsBannerHtml()}
-      <div class="status-bar info">保存后 App 下次拉取 app_settings 或刷新内容模式时生效。</div>
-      <form id="single-form" class="settings-form settings-form--wide"></form>
-      <button type="submit" form="single-form" class="btn" style="margin-top:12px">保存</button>`;
-    App.$("#page-title").textContent = App.TABLES.app_settings.label;
-
     const meta = App.TABLES.app_settings;
+    App.$("#page-title").textContent = meta.label;
+
+    // Quick-jump chips from the section list
+    const sections = meta.fields.filter((f) => f.type === "section");
+    const chips = [`<button type="button" class="settings-chip" data-jump="grp-_general">基础开关</button>`]
+      .concat(sections.map((s) =>
+        `<button type="button" class="settings-chip" data-jump="grp-${App.escapeHtml(s.key)}">${App.escapeHtml(s.label || s.key)}</button>`
+      )).join("");
+
+    main.innerHTML = `
+      <details class="settings-help">
+        <summary>📖 配置说明（点击展开）</summary>
+        <div class="settings-help-body">${App.iapPreviewSettingsBannerHtml()}</div>
+      </details>
+      <div class="settings-nav">${chips}</div>
+      <form id="single-form" class="settings-form settings-form--wide"></form>
+      <div class="settings-save-bar">
+        <span class="muted">保存后 App 下次拉取 app_settings 或刷新内容模式时生效</span>
+        <button type="submit" form="single-form" class="btn">保存配置</button>
+      </div>`;
+
     const { data, error } = await App.client.from("app_settings").select("*").eq(meta.pk, "global").maybeSingle();
     if (error) {
       main.innerHTML = `<div class="status-bar error">${App.escapeHtml(error.message)}</div>`;
@@ -369,6 +416,17 @@
     const form = App.$("#single-form");
     form.innerHTML = App.buildFormFieldsHtml(meta, row, { fixedCityId: null });
     App.mountFieldInteractions(form, meta, { isNew: false, pk: meta.pk, formEl: form });
+
+    // Quick-jump: open the target group and scroll to it
+    main.querySelectorAll("[data-jump]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const el = document.getElementById(btn.dataset.jump);
+        if (el) {
+          el.open = true;
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
