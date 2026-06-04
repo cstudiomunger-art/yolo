@@ -17,6 +17,7 @@ struct AttractionDetailView: View {
     @State private var carouselIndex = 0
     @State private var fullScreenImagePath: String?
     @State private var showAddToast = false
+    @State private var showPaywall = false
 
     private let subAreasAnchor = "exploreByArea"
 
@@ -67,6 +68,17 @@ struct AttractionDetailView: View {
         .safeAreaInset(edge: .bottom) {
             if case .planAddToDay(let dayIndex) = route.presentation {
                 addToDayBar(dayIndex: dayIndex)
+            } else if shouldShowUnlockBar {
+                unlockStickyBar
+            }
+        }
+        .sheet(isPresented: $showPaywall) {
+            if let guide = mainGuide {
+                MembershipPlansView(attraction: display, guide: guide)
+                    .environment(appEnv)
+            } else {
+                MembershipPlansView(attraction: display)
+                    .environment(appEnv)
             }
         }
         .refreshable { await loadDetail(attractionId: listPreview.id) }
@@ -333,6 +345,46 @@ struct AttractionDetailView: View {
             .buttonStyle(.plain)
         }
         .background(Theme.ColorToken.background)
+    }
+
+    // MARK: - Sticky unlock bar (locked state)
+
+    private var shouldShowUnlockBar: Bool {
+        guard case .browse = route.presentation else { return false }
+        guard !isLoading, !display.name.isEmpty else { return false }
+        return !hasFullAccess
+    }
+
+    private var unlockStickyBar: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "Unlock this Guide"))
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                Text(String(localized: "audio + full article"))
+                    .font(Theme.FontToken.inter(10))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            Spacer()
+            Button {
+                showPaywall = true
+            } label: {
+                Text(String(localized: "Unlock"))
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                    .tracking(0.8)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 11)
+                    .background(Theme.ColorToken.textPrimary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, Theme.screenPadding)
+        .padding(.vertical, 11)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Theme.ColorToken.border).frame(height: 1)
+        }
     }
 
     private var detailBody: String {

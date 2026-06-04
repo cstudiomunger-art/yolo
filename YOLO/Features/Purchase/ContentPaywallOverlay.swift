@@ -19,37 +19,47 @@ struct ContentPaywallOverlay: View {
             HTMLContentView(content: htmlContent)
         } else {
             VStack(alignment: .leading, spacing: 0) {
-                // Preview: show truncated plain text clearly, no masking
-                if !previewText.isEmpty {
-                    Text(previewText + "…")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Theme.ColorToken.textSecondary)
-                        .lineSpacing(4)
-                        .padding(.bottom, 12)
-                }
+                // Locked preview: text clipped with a fade-to-background mask at the bottom
+                Text(previewText + "…")
+                    .font(.system(size: 13, weight: .light))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
+                    .lineSpacing(5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxHeight: 132, alignment: .top)
+                    .clipped()
+                    .overlay(alignment: .bottom) {
+                        LinearGradient(
+                            colors: [Theme.ColorToken.backgroundSubtle.opacity(0), Theme.ColorToken.backgroundSubtle],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        .frame(height: 64)
+                        .allowsHitTesting(false)
+                    }
 
                 // Paywall CTA
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 9) {
                     HStack(spacing: 6) {
-                        Text("🔒")
-                        Text(String(localized: "Full content locked"))
-                            .font(Theme.FontToken.inter(12))
+                        Text("🔒").font(.system(size: 11))
+                        Text(String(localized: "Full Guide locked — audio + full article"))
+                            .font(Theme.FontToken.inter(11))
                             .foregroundStyle(Theme.ColorToken.textMuted)
                     }
 
                     Button {
                         showPaywall = true
                     } label: {
-                        Text(String(localized: "Unlock Full Content →"))
+                        Text(String(localized: "Unlock the Guide →"))
                             .font(Theme.FontToken.inter(12, weight: .medium))
+                            .tracking(0.5)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Theme.ColorToken.accent)
+                            .padding(.vertical, 12)
+                            .background(Theme.ColorToken.textPrimary)
                     }
                     .buttonStyle(.plain)
                 }
-                .padding(.top, 4)
+                .padding(.top, 6)
             }
             .sheet(isPresented: $showPaywall) {
                 if let attraction {

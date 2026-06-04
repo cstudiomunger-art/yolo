@@ -23,11 +23,11 @@
           <tr>
             <th>ID</th><th>名称</th><th>类型</th>
             <th>Apple Product ID</th><th>RC Package ID</th>
-            <th>价格文案</th><th>时效（天）</th>
+            <th>价格文案</th><th>时效（天）</th><th>试用</th>
             <th>内容权益</th><th>最优惠</th><th>激活</th><th>操作</th>
           </tr>
         </thead>
-        <tbody id="mh-tbody"><tr><td colspan="11" class="muted">加载中…</td></tr></tbody>
+        <tbody id="mh-tbody"><tr><td colspan="12" class="muted">加载中…</td></tr></tbody>
       </table>`;
 
     App.$("#mh-add-btn")?.addEventListener("click", () => App.openPlanEditor(null));
@@ -38,7 +38,7 @@
   App.refreshPlansTable = async function refreshPlansTable() {
     const tbody = App.$("#mh-tbody");
     if (!tbody) return;
-    tbody.innerHTML = `<tr><td colspan="11" class="muted">加载中…</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="12" class="muted">加载中…</td></tr>`;
     try {
       const { data: plans, error } = await App.client
         .from("membership_plans")
@@ -47,7 +47,7 @@
       if (error) throw error;
 
       if (!plans?.length) {
-        tbody.innerHTML = `<tr><td colspan="11" class="muted">暂无计划</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="muted">暂无计划</td></tr>`;
         return;
       }
 
@@ -79,6 +79,7 @@
           <td><code style="font-size:11px">${App.escapeHtml(p.rc_package_id || "—")}</code></td>
           <td>${App.escapeHtml(p.price_label)}</td>
           <td>${p.duration_days ?? "永久"}</td>
+          <td>${p.free_trial_days ? `<span class="badge badge-green">${p.free_trial_days}天</span>` : "—"}</td>
           <td>${flagBadges || "<span class='muted'>无</span>"}</td>
           <td>${p.is_best_value ? "★" : ""}</td>
           <td><span class="badge ${p.is_active ? "badge-green" : "badge-gray"}">${p.is_active ? "激活" : "停用"}</span></td>
@@ -96,14 +97,14 @@
         btn.addEventListener("click", () => App.confirmDeletePlan(btn.dataset.deletePlan));
       });
     } catch (ex) {
-      tbody.innerHTML = `<tr><td colspan="11" class="status-bar error">${App.escapeHtml(ex.message)}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="12" class="status-bar error">${App.escapeHtml(ex.message)}</td></tr>`;
     }
   };
 
   App.openPlanEditor = async function openPlanEditor(planId) {
     let plan = {
       id: "", rc_package_id: "", apple_product_id: "", name_en: "", name_zh: "",
-      price_label: "", duration_days: null, plan_type: "subscription",
+      price_label: "", duration_days: null, free_trial_days: 0, plan_type: "subscription",
       access_flags: { audio_guides: false, text_content: false, offline_download: false, visitor_tips: false, ai_advanced: false },
       feature_lines: [], is_best_value: false, display_order: 0, is_active: true,
     };
@@ -158,6 +159,9 @@
           </label>
           <label>有效天数 <small>（空 = 永久）</small>
             <input id="mh-days" type="number" value="${plan.duration_days || ""}" placeholder="365">
+          </label>
+          <label>免费试用天数 <small>（0 = 无试用）</small>
+            <input id="mh-trial" type="number" value="${plan.free_trial_days || 0}" placeholder="7">
           </label>
           <label>排序 <small>（数字越小越靠前）</small>
             <input id="mh-order" type="number" value="${plan.display_order}">
@@ -221,6 +225,7 @@
           name_zh: modal.querySelector("#mh-name-zh").value.trim() || null,
           price_label: modal.querySelector("#mh-price").value.trim(),
           duration_days: parseInt(modal.querySelector("#mh-days").value) || null,
+          free_trial_days: parseInt(modal.querySelector("#mh-trial").value) || 0,
           plan_type: modal.querySelector("#mh-type").value,
           display_order: parseInt(modal.querySelector("#mh-order").value) || 0,
           access_flags: {

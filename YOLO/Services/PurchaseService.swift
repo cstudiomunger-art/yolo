@@ -204,6 +204,7 @@ final class PurchaseService {
             nameZh: "年度会员",
             priceLabel: "$19.99/year",
             durationDays: 365,
+            freeTrialDays: 7,
             planType: .subscription,
             accessFlags: MembershipPlan.AccessFlags(
                 audioGuides: true, textContent: true, offlineDownload: true,
@@ -228,6 +229,7 @@ final class PurchaseService {
             nameZh: "季度会员",
             priceLabel: "$7.99/quarter",
             durationDays: 90,
+            freeTrialDays: 0,
             planType: .subscription,
             accessFlags: MembershipPlan.AccessFlags(
                 audioGuides: true, textContent: true, offlineDownload: false,
@@ -250,6 +252,7 @@ final class PurchaseService {
             nameZh: "月度会员",
             priceLabel: "$3.99/month",
             durationDays: 30,
+            freeTrialDays: 0,
             planType: .subscription,
             accessFlags: MembershipPlan.AccessFlags(
                 audioGuides: true, textContent: false, offlineDownload: false,
