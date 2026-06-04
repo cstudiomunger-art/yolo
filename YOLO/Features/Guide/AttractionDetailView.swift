@@ -25,15 +25,16 @@ struct AttractionDetailView: View {
     private var cityName: String { route.presentation.browseCityName ?? "Guide" }
 
     private var hasFullAccess: Bool {
-        if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
-        return appEnv.purchase.hasAccess(to: \.audioGuides, for: display.id)
-            || appEnv.preferences.hasAccessToAttraction(display.id, iapProductId: display.iapProductId)
+        hasContentAccess(\.audioGuides)
     }
 
     private func hasContentAccess(_ flag: KeyPath<MembershipPlan.AccessFlags, Bool>) -> Bool {
         if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
-        if display.textPaywallFree { return true }
-        return appEnv.purchase.hasAccess(to: flag, for: display.id)
+        return appEnv.purchase.hasContentAccess(
+            flag,
+            requiresPurchase: display.requiresPurchase,
+            contentId: display.id
+        )
     }
 
     private var mainGuide: AudioGuide? {
@@ -73,13 +74,12 @@ struct AttractionDetailView: View {
             }
         }
         .sheet(isPresented: $showPaywall) {
-            if let guide = mainGuide {
-                MembershipPlansView(attraction: display, guide: guide)
-                    .environment(appEnv)
-            } else {
-                MembershipPlansView(attraction: display)
-                    .environment(appEnv)
-            }
+            MembershipPlansView(
+                attraction: display,
+                guide: mainGuide,
+                priceTierId: display.priceTierId
+            )
+            .environment(appEnv)
         }
         .refreshable { await loadDetail(attractionId: listPreview.id) }
         .task(id: listPreview.id) {
@@ -231,7 +231,8 @@ struct AttractionDetailView: View {
                         htmlContent: body,
                         freeChars: freeChars,
                         hasAccess: false,
-                        attraction: display
+                        attraction: display,
+                        priceTierId: display.priceTierId
                     )
                 }
             }
@@ -293,7 +294,8 @@ struct AttractionDetailView: View {
                 tips: display.westernVisitorTips,
                 freeCount: appEnv.contentMode.branding.freeVisitorTipsCount,
                 hasAccess: hasContentAccess(\.visitorTips),
-                attraction: display
+                attraction: display,
+                priceTierId: display.priceTierId
             )
         }
     }

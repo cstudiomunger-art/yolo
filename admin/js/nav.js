@@ -36,6 +36,7 @@
       defaultExpanded: true,
       items: [
         { kind: "view", view: "membership_hub", label: "👑 会员计划" },
+        { kind: "view", view: "pricing_hub", label: "🏷️ 景点定价" },
         { kind: "view", view: "transactions_hub", label: "💳 购买记录" },
       ],
     },
@@ -97,7 +98,7 @@
   };
 
   App.syncNavSelectionFromState = function syncNavSelectionFromState() {
-    if (App.currentView === "users_hub" || App.currentView === "membership_hub" || App.currentView === "transactions_hub") {
+    if (App.currentView === "users_hub" || App.currentView === "membership_hub" || App.currentView === "transactions_hub" || App.currentView === "pricing_hub") {
       App.navSelection = { kind: "view", view: App.currentView };
     } else if (App.currentView === "table" && App.currentTable) {
       App.navSelection = { kind: "table", table: App.currentTable };

@@ -8,6 +8,12 @@ struct MembershipPlansView: View {
 
     let attraction: Attraction
     var guide: AudioGuide?
+    /// Single-purchase price tier (membership_plans id of a one_time_attraction). nil → default tier.
+    var priceTierId: String?
+    /// Id to unlock on single purchase. nil → attraction.id (sub-areas pass their own id).
+    var purchaseTargetId: String?
+    /// Title shown in the sheet header. nil → attraction.name (sub-areas pass their name).
+    var displayTitle: String?
     var onPurchaseComplete: (() -> Void)?
 
     @State private var selectedId: String?
@@ -21,8 +27,11 @@ struct MembershipPlansView: View {
     }
 
     private var singleAttractionPlan: MembershipPlan? {
-        appEnv.purchase.availablePlans.first { $0.planType == .oneTimeAttraction }
+        appEnv.purchase.singlePlan(forTier: priceTierId)
     }
+
+    private var headerTitle: String { displayTitle ?? attraction.name }
+    private var unlockTargetId: String { purchaseTargetId ?? attraction.id }
 
     /// Ordered options shown as selectable cards: subscriptions first, then single-attraction.
     /// The single-attraction plan is a universal product that unlocks whichever attraction is open.
@@ -125,7 +134,7 @@ struct MembershipPlansView: View {
                 .font(Theme.FontToken.inter(9, weight: .medium))
                 .tracking(1.2)
                 .foregroundStyle(Theme.ColorToken.accent)
-            Text(attraction.name)
+            Text(headerTitle)
                 .font(Theme.FontToken.playfair(22, weight: .semibold))
             Text(branding.paywall.previewLine(duration: guideDurationLabel))
                 .font(Theme.FontToken.inter(12))
@@ -254,7 +263,7 @@ struct MembershipPlansView: View {
     private var ctaSub: String {
         guard let p = selectedPlan else { return "" }
         if p.planType == .oneTimeAttraction {
-            return String(format: String(localized: "one-time · %@"), attraction.name)
+            return String(format: String(localized: "one-time · %@"), headerTitle)
         }
         if p.freeTrialDays > 0 {
             return String(format: String(localized: "then %@ · cancel anytime"), p.priceLabel)
@@ -275,7 +284,7 @@ struct MembershipPlansView: View {
         guard let plan = selectedPlan else { return }
         errorMessage = nil
         if plan.planType == .oneTimeAttraction {
-            await appEnv.purchase.purchaseSingleAttraction(attraction.id, plan: plan)
+            await appEnv.purchase.purchaseSingleAttraction(unlockTargetId, plan: plan)
         } else {
             await appEnv.purchase.purchase(plan: plan)
         }

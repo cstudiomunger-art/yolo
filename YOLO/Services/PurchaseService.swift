@@ -74,16 +74,44 @@ final class PurchaseService {
         return prefs.isSubscriptionActive
     }
 
-    func hasAccess(to flag: KeyPath<MembershipPlan.AccessFlags, Bool>, for attractionId: String? = nil) -> Bool {
+    /// Whether a content type is unlocked for an attraction or sub-area.
+    /// - requiresPurchase: the item's paywall flag (false = free → always unlocked)
+    /// - contentId: the attraction or sub-area id
+    /// - parentId: for sub-areas, the parent attraction id (buying the parent unlocks all children)
+    func hasContentAccess(
+        _ flag: KeyPath<MembershipPlan.AccessFlags, Bool>,
+        requiresPurchase: Bool,
+        contentId: String,
+        parentId: String? = nil
+    ) -> Bool {
+        if !requiresPurchase { return true }
         if isProActive { return currentAccessFlags[keyPath: flag] }
-        if let id = attractionId, preferences?.purchasedAttractionIds.contains(id) == true {
-            // Single-attraction purchases get: audio + text + visitor tips
-            let singleFlags: [KeyPath<MembershipPlan.AccessFlags, Bool>] = [
-                \.audioGuides, \.textContent, \.visitorTips
-            ]
-            return singleFlags.contains(flag)
-        }
+        guard let prefs = preferences else { return false }
+        if prefs.purchasedAttractionIds.contains(contentId) { return Self.singleUnlocks(flag) }
+        if let parentId, prefs.purchasedAttractionIds.contains(parentId) { return Self.singleUnlocks(flag) }
         return false
+    }
+
+    /// Content types granted by a single (one-time) purchase: audio + text + visitor tips.
+    private static func singleUnlocks(_ flag: KeyPath<MembershipPlan.AccessFlags, Bool>) -> Bool {
+        let singleFlags: [KeyPath<MembershipPlan.AccessFlags, Bool>] = [
+            \.audioGuides, \.textContent, \.visitorTips,
+        ]
+        return singleFlags.contains(flag)
+    }
+
+    /// Resolve the one-time-purchase plan for a price tier id (falls back to any one-time plan).
+    func singlePlan(forTier tierId: String?) -> MembershipPlan? {
+        if let tierId,
+           let p = availablePlans.first(where: { $0.id == tierId && $0.planType == .oneTimeAttraction }) {
+            return p
+        }
+        return availablePlans.first { $0.planType == .oneTimeAttraction }
+    }
+
+    /// Display price for a price tier (empty if no one-time plan exists).
+    func priceLabel(forTier tierId: String?) -> String {
+        singlePlan(forTier: tierId)?.priceLabel ?? ""
     }
 
     // MARK: - Purchase (simulation — swap bodies for RevenueCat calls)

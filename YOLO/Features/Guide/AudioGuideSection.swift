@@ -8,6 +8,9 @@ struct AudioGuideSection: View {
     let guide: AudioGuide
     var includedWithLabel: String?
     var allowsPreview: Bool = true
+    /// When this audio belongs to a sub-area, pass it so the paywall uses the sub-area's
+    /// purchase flag, price tier, and unlock target (parent purchase also unlocks it).
+    var subArea: SubArea?
 
     @State private var showPurchase = false
     @State private var accessRefresh = UUID()
@@ -24,8 +27,19 @@ struct AudioGuideSection: View {
     private var hasFullAccess: Bool {
         _ = accessRefresh
         if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
-        return appEnv.purchase.hasAccess(to: \.audioGuides, for: attraction.id)
-            || appEnv.preferences.hasAccessToAttraction(attraction.id, iapProductId: attraction.iapProductId)
+        if let sub = subArea {
+            return appEnv.purchase.hasContentAccess(
+                \.audioGuides,
+                requiresPurchase: sub.requiresPurchase,
+                contentId: sub.id,
+                parentId: attraction.id
+            )
+        }
+        return appEnv.purchase.hasContentAccess(
+            \.audioGuides,
+            requiresPurchase: attraction.requiresPurchase,
+            contentId: attraction.id
+        )
     }
 
     private var isDownloaded: Bool {
@@ -78,7 +92,13 @@ struct AudioGuideSection: View {
         }
         .guideContentCardStyle()
         .sheet(isPresented: $showPurchase) {
-            PurchaseOptionsView(attraction: attraction, guide: guide) {
+            MembershipPlansView(
+                attraction: attraction,
+                guide: guide,
+                priceTierId: subArea?.priceTierId ?? attraction.priceTierId,
+                purchaseTargetId: subArea?.id,
+                displayTitle: subArea?.nameEn
+            ) {
                 playback.updateAccess(hasFullAccess: true, freeTrialSeconds: freeTrialSeconds)
                 accessRefresh = UUID()
                 if playback.progress > 0 {
@@ -86,6 +106,7 @@ struct AudioGuideSection: View {
                 }
                 showUnlockedToast = true
             }
+            .environment(appEnv)
         }
         .task(id: guide.id) {
             playback.configure(

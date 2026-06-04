@@ -61,6 +61,11 @@
       return;
     }
 
+    if (App.currentView === "pricing_hub") {
+      await App.renderPricingHub();
+      return;
+    }
+
     if (App.currentView === "transactions_hub") {
       await App.renderTransactionsHub();
       return;

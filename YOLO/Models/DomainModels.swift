@@ -197,6 +197,8 @@ struct Attraction: Identifiable, Hashable, Codable {
     let audioGuideCount: Int
     let iapProductId: String?
     let textPaywallFree: Bool
+    let requiresPurchase: Bool
+    let priceTierId: String?
     let displayOrder: Int
     let shortDescription: String?
     let coverImages: [String]
@@ -232,6 +234,8 @@ struct Attraction: Identifiable, Hashable, Codable {
         audioGuideCount = try c.decodeIfPresent(Int.self, forKey: .audioGuideCount) ?? 0
         iapProductId = try c.decodeIfPresent(String.self, forKey: .iapProductId)
         textPaywallFree = try c.decodeIfPresent(Bool.self, forKey: .textPaywallFree) ?? false
+        requiresPurchase = try c.decodeIfPresent(Bool.self, forKey: .requiresPurchase) ?? false
+        priceTierId = try c.decodeIfPresent(String.self, forKey: .priceTierId)
         displayOrder = try c.decodeIfPresent(Int.self, forKey: .displayOrder) ?? 0
         shortDescription = try c.decodeIfPresent(String.self, forKey: .shortDescription)
         var images = Self.decodeStringArray(from: c, forKey: .coverImages)
@@ -298,6 +302,8 @@ struct Attraction: Identifiable, Hashable, Codable {
         try c.encode(audioGuideCount, forKey: .audioGuideCount)
         try c.encodeIfPresent(iapProductId, forKey: .iapProductId)
         try c.encode(textPaywallFree, forKey: .textPaywallFree)
+        try c.encode(requiresPurchase, forKey: .requiresPurchase)
+        try c.encodeIfPresent(priceTierId, forKey: .priceTierId)
         try c.encode(displayOrder, forKey: .displayOrder)
         try c.encodeIfPresent(shortDescription, forKey: .shortDescription)
         try c.encode(coverImages, forKey: .coverImages)
@@ -310,7 +316,7 @@ struct Attraction: Identifiable, Hashable, Codable {
         case id, cityId, name, chineseName, category, coverImagePath, summary, introduction
         case priority, ticketPrice, recommendedDuration, openingHours, closedDays
         case requiresAdvanceBooking, metroAccess, practicalInfo, westernVisitorTips, nearbyPlaces
-        case audioGuideCount, iapProductId, textPaywallFree, displayOrder
+        case audioGuideCount, iapProductId, textPaywallFree, requiresPurchase, priceTierId, displayOrder
         case shortDescription, coverImages, addressEn, addressZh, paywallSubtitleOverride
     }
 
@@ -571,6 +577,8 @@ struct SubArea: Identifiable, Hashable, Codable {
     let audioUrl: String?
     let audioGuideId: String?
     let sortOrder: Int
+    let requiresPurchase: Bool
+    let priceTierId: String?
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -584,6 +592,8 @@ struct SubArea: Identifiable, Hashable, Codable {
         audioUrl = try c.decodeIfPresent(String.self, forKey: .audioUrl)
         audioGuideId = try c.decodeIfPresent(String.self, forKey: .audioGuideId)
         sortOrder = try c.decodeIfPresent(Int.self, forKey: .sortOrder) ?? 0
+        requiresPurchase = try c.decodeIfPresent(Bool.self, forKey: .requiresPurchase) ?? false
+        priceTierId = try c.decodeIfPresent(String.self, forKey: .priceTierId)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -598,10 +608,13 @@ struct SubArea: Identifiable, Hashable, Codable {
         try c.encodeIfPresent(audioUrl, forKey: .audioUrl)
         try c.encodeIfPresent(audioGuideId, forKey: .audioGuideId)
         try c.encode(sortOrder, forKey: .sortOrder)
+        try c.encode(requiresPurchase, forKey: .requiresPurchase)
+        try c.encodeIfPresent(priceTierId, forKey: .priceTierId)
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, attractionId, nameEn, nameZh, coverImagePath, body, contentBlocks, audioUrl, audioGuideId, sortOrder
+        case requiresPurchase, priceTierId
     }
 
     func playbackGuide(attractionId: String) -> AudioGuide? {

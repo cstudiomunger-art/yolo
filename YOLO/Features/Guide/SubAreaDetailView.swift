@@ -82,21 +82,20 @@ struct SubAreaDetailView: View {
                             format: String(localized: "Included with %@ audio guide"),
                             route.attractionName
                         ),
-                        allowsPreview: true
+                        allowsPreview: true,
+                        subArea: area
                     )
                 }
 
                 if let body = area.body?.trimmingCharacters(in: .whitespacesAndNewlines), !body.isEmpty {
-                    // Default to locked (false) when attraction data hasn't loaded yet — prevents
-                    // revenue leaks from timing windows where attraction is still nil.
-                    let hasAccess = !appEnv.contentMode.effectiveUseRemoteIAP
-                        || (attraction?.textPaywallFree == true)
-                        || (attraction.map { appEnv.purchase.hasAccess(to: \.textContent, for: $0.id) } ?? false)
                     ContentPaywallOverlay(
                         htmlContent: body,
                         freeChars: appEnv.contentMode.branding.freeTextPreviewChars,
-                        hasAccess: hasAccess,
-                        attraction: attraction
+                        hasAccess: subAreaTextAccess(area),
+                        attraction: attraction,
+                        priceTierId: area.priceTierId,
+                        purchaseTargetId: area.id,
+                        displayTitle: area.nameEn
                     )
                     .guideContentCardStyle()
                 } else if !area.contentBlocks.isEmpty {
@@ -112,6 +111,17 @@ struct SubAreaDetailView: View {
             }
             .padding(Theme.screenPadding)
         }
+    }
+
+    /// Text access for a sub-area: free items always open; otherwise member / single / parent purchase.
+    private func subAreaTextAccess(_ area: SubArea) -> Bool {
+        if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
+        return appEnv.purchase.hasContentAccess(
+            \.textContent,
+            requiresPurchase: area.requiresPurchase,
+            contentId: area.id,
+            parentId: attraction?.id
+        )
     }
 
     private func load() async {

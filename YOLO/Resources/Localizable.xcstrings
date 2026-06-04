@@ -216,6 +216,9 @@
         }
       }
     },
+    "%lld-day free trial" : {
+
+    },
     "%lld-day stay permitted" : {
       "localizations" : {
         "zh-Hans" : {
@@ -843,6 +846,9 @@
         }
       }
     },
+    "audio + full article" : {
+
+    },
     "Audio attraction tours" : {
 
     },
@@ -883,6 +889,9 @@
         }
       }
     },
+    "BEST VALUE" : {
+
+    },
     "Buy This Guide · $1.99" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -918,6 +927,9 @@
           }
         }
       }
+    },
+    "cancel anytime" : {
+
     },
     "Cancelled" : {
 
@@ -1463,10 +1475,13 @@
         }
       }
     },
+    "Free preview ended. " : {
+
+    },
     "From $%lld/night" : {
 
     },
-    "Full content locked" : {
+    "Full Guide locked — audio + full article" : {
 
     },
     "Full list →" : {
@@ -1628,9 +1643,6 @@
           }
         }
       }
-    },
-    "Just this attraction" : {
-
     },
     "Language" : {
       "localizations" : {
@@ -1819,6 +1831,12 @@
     "OK" : {
 
     },
+    "one-time · %@" : {
+
+    },
+    "One-time · this attraction · yours forever" : {
+
+    },
     "One-time Purchase" : {
 
     },
@@ -1826,9 +1844,6 @@
 
     },
     "Open checklist" : {
-
-    },
-    "or" : {
 
     },
     "Or buy just this guide" : {
@@ -2432,6 +2447,9 @@
         }
       }
     },
+    "Start Free Trial" : {
+
+    },
     "Start Free Trial →" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2468,7 +2486,7 @@
     "Subscribe" : {
 
     },
-    "Subscribe →" : {
+    "Subscribe · %@" : {
 
     },
     "Syncing…" : {
@@ -2503,6 +2521,9 @@
 
     },
     "Terms of Service" : {
+
+    },
+    "then %@ · cancel anytime" : {
 
     },
     "These are experience ideas — no specific venues. Ask Assistant for details." : {
@@ -2626,6 +2647,9 @@
     "Unable to send password reset email. Please try again." : {
 
     },
+    "Unlock" : {
+
+    },
     "Unlock all attraction guides, text content, and more." : {
 
     },
@@ -2650,7 +2674,19 @@
         }
       }
     },
-    "Unlock Full Content →" : {
+    "Unlock Guide · %@" : {
+
+    },
+    "Unlock the full Guide to keep listening & reading." : {
+
+    },
+    "UNLOCK THE GUIDE" : {
+
+    },
+    "Unlock the Guide →" : {
+
+    },
+    "Unlock this Guide" : {
 
     },
     "Unlock visitor tips →" : {

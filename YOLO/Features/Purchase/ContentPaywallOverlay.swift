@@ -10,6 +10,9 @@ struct ContentPaywallOverlay: View {
     let hasAccess: Bool
     var attraction: Attraction?
     var guide: AudioGuide?
+    var priceTierId: String?
+    var purchaseTargetId: String?
+    var displayTitle: String?
     var onUnlock: (() -> Void)?
 
     @State private var showPaywall = false
@@ -66,6 +69,9 @@ struct ContentPaywallOverlay: View {
                     MembershipPlansView(
                         attraction: attraction,
                         guide: guide,
+                        priceTierId: priceTierId,
+                        purchaseTargetId: purchaseTargetId,
+                        displayTitle: displayTitle,
                         onPurchaseComplete: { onUnlock?() }
                     )
                     .environment(appEnv)
@@ -97,6 +103,7 @@ struct VisitorTipsPaywallOverlay: View {
     let freeCount: Int
     let hasAccess: Bool
     var attraction: Attraction?
+    var priceTierId: String?
     var onUnlock: (() -> Void)?
 
     @State private var showPaywall = false
@@ -144,6 +151,7 @@ struct VisitorTipsPaywallOverlay: View {
             if let attraction {
                 MembershipPlansView(
                     attraction: attraction,
+                    priceTierId: priceTierId,
                     onPurchaseComplete: { onUnlock?() }
                 )
                 .environment(appEnv)
