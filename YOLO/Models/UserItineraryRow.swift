@@ -13,14 +13,12 @@ struct UserItineraryRow: Codable, Sendable {
     var shareSlug: String?
     var isShared: Bool = false
 
+    // camelCase keys — Supabase codec uses .convert*SnakeCase, so these auto-map
+    // to/from snake_case columns (user_id ↔ userId). Snake_case raw values here
+    // would break decoding (fields read as nil → fetch fails).
     enum CodingKeys: String, CodingKey {
         case id, title, cities, payload
-        case userId = "user_id"
-        case startDate = "start_date"
-        case endDate = "end_date"
-        case isDeleted = "is_deleted"
-        case shareSlug = "share_slug"
-        case isShared = "is_shared"
+        case userId, startDate, endDate, isDeleted, shareSlug, isShared
     }
 
     static func from(trip: SampleItinerary, userId: UUID, isDeleted: Bool = false) -> UserItineraryRow {
@@ -72,12 +70,10 @@ struct ChecklistCompletionRow: Codable, Sendable, Identifiable {
     let status: String
     let completedAt: String?
 
+    // camelCase keys — see UserItineraryRow note. .convert*SnakeCase handles the mapping.
     enum CodingKeys: String, CodingKey {
         case id, status
-        case userId = "user_id"
-        case checklistItemId = "checklist_item_id"
-        case itineraryId = "itinerary_id"
-        case completedAt = "completed_at"
+        case userId, checklistItemId, itineraryId, completedAt
     }
 }
 
