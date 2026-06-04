@@ -417,16 +417,24 @@
     form.innerHTML = App.buildFormFieldsHtml(meta, row, { fixedCityId: null });
     App.mountFieldInteractions(form, meta, { isNew: false, pk: meta.pk, formEl: form });
 
-    // Quick-jump: open the target group and scroll to it
+    const jumpToGroup = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.open = true;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    // Quick-jump chips
     main.querySelectorAll("[data-jump]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const el = document.getElementById(btn.dataset.jump);
-        if (el) {
-          el.open = true;
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
+      btn.addEventListener("click", () => jumpToGroup(btn.dataset.jump));
     });
+
+    // Sidebar deep-link: jump to a section requested from the nav sub-item
+    if (App.pendingSettingsAnchor) {
+      const target = App.pendingSettingsAnchor;
+      App.pendingSettingsAnchor = null;
+      requestAnimationFrame(() => jumpToGroup(target));
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();

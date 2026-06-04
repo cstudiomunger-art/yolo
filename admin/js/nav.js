@@ -45,7 +45,7 @@
       label: "全局配置",
       defaultExpanded: true,
       items: [
-        { kind: "table", table: "app_settings", label: "应用配置" },
+        { kind: "table", table: "app_settings", label: "应用配置", expandSections: true },
         { kind: "table", table: "emergency_config", label: "紧急联系" },
       ],
     },
@@ -85,6 +85,27 @@
   App.navCaretMarkup = function navCaretMarkup(expanded) {
     const cls = expanded ? "nav-caret--expanded" : "nav-caret--collapsed";
     return `<span class="nav-caret ${cls}" aria-hidden="true"></span>`;
+  };
+
+  /** Collapsible "应用配置" nav item — children jump to each settings group. */
+  App.renderSettingsNavItem = function renderSettingsNavItem(item) {
+    const open = App.isTreeExpanded("settings_sections", false);
+    const meta = App.TABLES[item.table] || {};
+    const sections = (meta.fields || []).filter((f) => f.type === "section");
+    const subItems = [{ key: "_general", label: "基础开关" }]
+      .concat(sections.map((s) => ({ key: s.key, label: s.label || s.key })));
+
+    const subHtml = subItems.map((s) =>
+      `<button type="button" class="nav-subitem" data-nav-table="${App.escapeHtml(item.table)}" data-section="grp-${App.escapeHtml(s.key)}">${App.escapeHtml(s.label)}</button>`
+    ).join("");
+
+    return `<div class="nav-settings-wrap${open ? " is-open" : ""}">
+      <div class="nav-btn nav-btn--has-sub" data-nav-table="${App.escapeHtml(item.table)}">
+        <span class="nav-settings-caret" data-toggle-key="settings_sections" role="button" tabindex="0" aria-expanded="${open}" aria-label="展开或收起">${App.navCaretMarkup(open)}</span>
+        <span class="nav-btn-text">${App.escapeHtml(item.label)}</span>
+      </div>
+      <div class="nav-subitems${open ? "" : " hidden"}">${subHtml}</div>
+    </div>`;
   };
 
   App.cityLabelShort = function cityLabelShort(city) {
@@ -424,6 +445,8 @@
           globalHtml += `<button type="button" class="nav-btn" data-nav-view="${App.escapeHtml(item.view)}">${App.escapeHtml(item.label)}</button>`;
         } else if (item.kind === "city_list") {
           globalHtml += `<button type="button" class="nav-btn nav-btn--primary" data-nav-city-list="1">${App.escapeHtml(item.label)}</button>`;
+        } else if (item.expandSections) {
+          globalHtml += App.renderSettingsNavItem(item);
         } else {
           globalHtml += `<button type="button" class="nav-btn" data-nav-table="${App.escapeHtml(item.table)}">${App.escapeHtml(item.label)}</button>`;
         }
@@ -622,6 +645,23 @@
     });
 
     nav?.addEventListener("click", (e) => {
+      // Caret on "应用配置" — toggle the section sub-list, don't navigate
+      const caret = e.target.closest(".nav-settings-caret");
+      if (caret?.dataset.toggleKey) {
+        e.stopPropagation();
+        const key = caret.dataset.toggleKey;
+        App.setTreeExpanded(key, !App.isTreeExpanded(key, false));
+        App.renderSidebar();
+        return;
+      }
+      // Settings section child — open the page and jump to that group
+      const sub = e.target.closest(".nav-subitem");
+      if (sub?.dataset.navTable) {
+        App.pendingSettingsAnchor = sub.dataset.section || null;
+        App.navigateTo({ kind: "table", table: sub.dataset.navTable });
+        return;
+      }
+
       const btn = e.target.closest(".nav-btn[data-nav-view], .nav-btn[data-nav-table], .nav-btn[data-nav-city-list]");
       if (!btn) return;
       if (btn.dataset.navCityList) {

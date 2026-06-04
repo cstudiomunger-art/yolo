@@ -328,6 +328,44 @@ a {
   border-color: var(--muted) transparent transparent transparent;
 }
 
+/* 应用配置：侧边栏可折叠父项 + 分区子项 */
+.nav-btn--has-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-btn--has-sub .nav-btn-text { flex: 1; }
+.nav-settings-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: -6px;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.nav-settings-caret:hover { background: var(--border); }
+
+.nav-subitems { display: flex; flex-direction: column; }
+.nav-subitems.hidden { display: none; }
+.nav-subitem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 20px 7px 42px;
+  border: none;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+.nav-subitem:hover { color: var(--text); background: var(--surface2); }
+.nav-subitem.active { color: var(--text); border-left-color: var(--accent); background: var(--surface2); }
+
 .nav-tree-spacer {
   display: inline-block;
   width: 22px;
