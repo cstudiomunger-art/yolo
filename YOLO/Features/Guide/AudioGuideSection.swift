@@ -32,7 +32,7 @@ struct AudioGuideSection: View {
                 \.audioGuides,
                 requiresPurchase: sub.requiresPurchase,
                 contentId: sub.id,
-                parentId: attraction.id
+                parentId: sub.attractionId
             )
         }
         return appEnv.purchase.hasContentAccess(

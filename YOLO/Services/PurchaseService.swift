@@ -85,7 +85,11 @@ final class PurchaseService {
         parentId: String? = nil
     ) -> Bool {
         if !requiresPurchase { return true }
-        if isProActive { return currentAccessFlags[keyPath: flag] }
+        // Membership unlocks only the content types its plan includes…
+        if isProActive && currentAccessFlags[keyPath: flag] { return true }
+        // …but a single purchase (of this item or its parent) is an independent,
+        // additive unlock — so a member whose plan excludes this type can still
+        // have bought it individually.
         guard let prefs = preferences else { return false }
         if prefs.purchasedAttractionIds.contains(contentId) { return Self.singleUnlocks(flag) }
         if let parentId, prefs.purchasedAttractionIds.contains(parentId) { return Self.singleUnlocks(flag) }

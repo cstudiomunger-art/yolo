@@ -119,8 +119,10 @@ struct SubAreaDetailView: View {
         return appEnv.purchase.hasContentAccess(
             \.textContent,
             requiresPurchase: area.requiresPurchase,
+            // Use the sub-area's own parent id so a parent purchase still unlocks it
+            // even if the parent Attraction object failed to load.
             contentId: area.id,
-            parentId: attraction?.id
+            parentId: area.attractionId
         )
     }
 
