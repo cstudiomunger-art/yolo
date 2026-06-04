@@ -36,10 +36,16 @@ final class PurchaseService {
 
     // MARK: - Plan Loading
 
-    /// Loads membership plans from Supabase (if configured) with local fallback.
+    private static let plansCacheKey = "yolohappy.cachedMembershipPlans.v1"
+
+    /// Loads membership plans from Supabase (the source of truth for names / prices /
+    /// features / access flags / trial). On success the result is cached locally so that
+    /// later offline launches keep showing the real backend config — not the hardcoded
+    /// bundled plans. bundledFallbackPlans is only the last resort when nothing was ever
+    /// fetched (fresh install, no network).
     func loadPlans() async {
         guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else {
-            availablePlans = Self.bundledFallbackPlans
+            availablePlans = cachedPlans() ?? Self.bundledFallbackPlans
             return
         }
         isLoadingPlans = true
@@ -52,10 +58,30 @@ final class PurchaseService {
                 .order("display_order", ascending: true)
                 .execute()
                 .value
-            availablePlans = plans.isEmpty ? Self.bundledFallbackPlans : plans
+            if plans.isEmpty {
+                availablePlans = cachedPlans() ?? Self.bundledFallbackPlans
+            } else {
+                availablePlans = plans
+                cachePlans(plans)
+            }
         } catch {
-            availablePlans = Self.bundledFallbackPlans
+            // Network/decoding failure → prefer the last successfully fetched backend
+            // config over the hardcoded bundle.
+            availablePlans = cachedPlans() ?? Self.bundledFallbackPlans
         }
+    }
+
+    private func cachePlans(_ plans: [MembershipPlan]) {
+        if let data = try? JSONEncoder().encode(plans) {
+            UserDefaults.standard.set(data, forKey: Self.plansCacheKey)
+        }
+    }
+
+    private func cachedPlans() -> [MembershipPlan]? {
+        guard let data = UserDefaults.standard.data(forKey: Self.plansCacheKey),
+              let plans = try? JSONDecoder().decode([MembershipPlan].self, from: data),
+              !plans.isEmpty else { return nil }
+        return plans
     }
 
     // MARK: - Access Flags
