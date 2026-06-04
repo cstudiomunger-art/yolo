@@ -9,13 +9,16 @@ struct ChecklistSettings: Codable, Sendable {
     let homeBannerEnabled: Bool
     let homeBannerTemplate: String
 
+    // camelCase keys — Supabase decoder uses .convertFromSnakeCase, which maps
+    // reminder_days → reminderDays automatically. Snake_case raw values would
+    // break decoding (fetch fails → always falls back to .fallback).
     enum CodingKeys: String, CodingKey {
         case id
-        case reminderDays = "reminder_days"
-        case pushTitle = "push_title"
-        case pushBody = "push_body"
-        case homeBannerEnabled = "home_banner_enabled"
-        case homeBannerTemplate = "home_banner_template"
+        case reminderDays
+        case pushTitle
+        case pushBody
+        case homeBannerEnabled
+        case homeBannerTemplate
     }
 
     static let fallback = ChecklistSettings(

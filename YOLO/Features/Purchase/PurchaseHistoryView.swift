@@ -83,9 +83,11 @@ private struct TransactionRow: View {
             Text(transaction.productId)
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
-            Text(transaction.purchasedAt, style: .date)
-                .font(Theme.FontToken.inter(10))
-                .foregroundStyle(Theme.ColorToken.textGhost)
+            if let date = transaction.purchasedDate {
+                Text(date, style: .date)
+                    .font(Theme.FontToken.inter(10))
+                    .foregroundStyle(Theme.ColorToken.textGhost)
+            }
         }
         .padding(.vertical, 4)
     }
@@ -97,9 +99,17 @@ struct IAPTransaction: Identifiable, Codable {
     let eventType: String
     let priceUsd: Double?
     let currency: String?
-    let purchasedAt: Date
-    let expiresAt: Date?
+    // timestamptz columns arrive as ISO8601 strings; the shared decoder has no
+    // date strategy, so receive as String (project convention) and parse for display.
+    let purchasedAt: String
+    let expiresAt: String?
     let planId: String?
+
+    var purchasedDate: Date? {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f.date(from: purchasedAt) ?? ISO8601DateFormatter().date(from: purchasedAt)
+    }
 
     var eventTypeLabel: String {
         switch eventType {
@@ -113,14 +123,16 @@ struct IAPTransaction: Identifiable, Codable {
         }
     }
 
+    // camelCase keys — Supabase decoder uses .convertFromSnakeCase (product_id →
+    // productId). Snake_case raw values would break decoding (history reads empty).
     enum CodingKeys: String, CodingKey {
         case id
-        case productId = "product_id"
-        case eventType = "event_type"
-        case priceUsd = "price_usd"
+        case productId
+        case eventType
+        case priceUsd
         case currency
-        case purchasedAt = "purchased_at"
-        case expiresAt = "expires_at"
-        case planId = "plan_id"
+        case purchasedAt
+        case expiresAt
+        case planId
     }
 }

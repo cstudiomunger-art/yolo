@@ -26,20 +26,14 @@ struct ChecklistCompletionRepository: Sendable {
         userId: UUID,
         rows: [(checklistItemId: String, itineraryId: String?, status: String)]
     ) async throws {
+        // camelCase fields — the Supabase encoder uses .convertToSnakeCase, so
+        // userId is written as user_id automatically (no explicit CodingKeys needed).
         struct UpsertRow: Encodable {
             let userId: UUID
             let checklistItemId: String
             let itineraryId: String?
             let status: String
             let completedAt: String?
-
-            enum CodingKeys: String, CodingKey {
-                case status
-                case userId = "user_id"
-                case checklistItemId = "checklist_item_id"
-                case itineraryId = "itinerary_id"
-                case completedAt = "completed_at"
-            }
         }
         let formatter = ISO8601DateFormatter()
         let upsertRows = rows.map { row in

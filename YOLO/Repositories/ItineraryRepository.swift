@@ -36,11 +36,9 @@ struct ItineraryRepository: Sendable {
     }
 
     func markDeleted(id: String, userId: UUID) async throws {
+        // camelCase — encoder uses .convertToSnakeCase (isDeleted → is_deleted).
         struct Patch: Encodable {
             let isDeleted: Bool
-            enum CodingKeys: String, CodingKey {
-                case isDeleted = "is_deleted"
-            }
         }
         try await client
             .from("user_itineraries")
