@@ -66,30 +66,35 @@
     const fieldCtx = { ...ctx, isNew, pk: meta.pk, formValues };
     let html = App.renderContextBanner(ctx) + App.renderHiddenContextFields(ctx, meta);
 
-    // Grouped layout: each `section` opens a collapsible card wrapping its fields.
+    // Grouped layout: each `section` becomes a card with its own "保存本节" button.
     if (meta.groupedSections) {
-      let groupOpen = false;
-      // Fields before the first section render in a small "general" group.
+      let curKey = null; // null = no group open yet
+      const closeGroup = () =>
+        curKey === null
+          ? ""
+          : `</div><div class="settings-group-actions">`
+            + `<button type="button" class="btn btn-sm" data-save-section="${App.escapeHtml(curKey)}">保存本节</button>`
+            + `</div></details>`;
       meta.fields.forEach((f) => {
         if (!App.shouldRenderField(f, fieldCtx)) return;
         if (f.advanced || f.type === "slug") return; // advanced handled below
         if (f.type === "section") {
-          if (groupOpen) html += `</div></details>`;
+          html += closeGroup();
           const hint = f.hint ? `<p class="field-hint section-hint">${App.escapeHtml(f.hint)}</p>` : "";
           html += `<details class="settings-group" open id="grp-${App.escapeHtml(f.key)}">`
             + `<summary>${App.escapeHtml(f.label || "")}</summary>`
             + `<div class="settings-group-body">${hint}`;
-          groupOpen = true;
+          curKey = f.key;
           return;
         }
-        if (!groupOpen) {
+        if (curKey === null) {
           html += `<details class="settings-group" open id="grp-_general"><summary>基础开关</summary><div class="settings-group-body">`;
-          groupOpen = true;
+          curKey = "_general";
         }
         const val = App.fieldToFormValue(f, row ? row[f.key] : "");
         html += App.renderFieldBlock(f, val, fieldCtx);
       });
-      if (groupOpen) html += `</div></details>`;
+      html += closeGroup();
       html += App.buildAdvancedFieldsHtml(meta, row, fieldCtx, isNew);
       return html;
     }
@@ -207,6 +212,8 @@
     for (const f of meta.fields) {
       if (f.type === "section") continue;
       if (f.virtual) continue;
+      // Per-section save: only collect the fields belonging to the saved section.
+      if (ctx.onlyFields && !ctx.onlyFields.has(f.key)) continue;
       if (
         f.readonly ||
         f.type === "audio_upload" ||
@@ -401,11 +408,7 @@
         <div class="settings-help-body">${App.iapPreviewSettingsBannerHtml()}</div>
       </details>
       <div class="settings-nav">${chips}</div>
-      <form id="single-form" class="settings-form settings-form--wide"></form>
-      <div class="settings-save-bar">
-        <span class="muted">保存后 App 下次拉取 app_settings 或刷新内容模式时生效</span>
-        <button type="submit" form="single-form" class="btn">保存配置</button>
-      </div>`;
+      <form id="single-form" class="settings-form settings-form--wide"></form>`;
 
     const { data, error } = await App.client.from("app_settings").select("*").eq(meta.pk, "global").maybeSingle();
     if (error) {
@@ -446,19 +449,43 @@
     App.pendingSettingsAnchor = null;
     showOnlySection(initial);
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      try {
-        const payload = await App.collectFormPayload(form, meta, row, false, { table: "app_settings" });
-        const { error: err } = data
-          ? await App.client.from("app_settings").update(payload).eq(meta.pk, "global")
-          : await App.client.from("app_settings").insert({ ...payload, [meta.pk]: "global" });
-        if (err) throw err;
-        App.showToast("已保存");
-        await App.loadRefCache(true);
-      } catch (ex) {
-        App.showToast(ex.message, "error");
-      }
+    // Map each section → its field keys (same grouping rule as buildFormFieldsHtml)
+    const sectionFieldKeys = {};
+    let curKey = "_general";
+    sectionFieldKeys[curKey] = [];
+    meta.fields.forEach((f) => {
+      if (f.advanced || f.type === "slug") return;
+      if (f.type === "section") { curKey = f.key; sectionFieldKeys[curKey] = []; return; }
+      sectionFieldKeys[curKey].push(f.key);
+    });
+
+    // Per-section save buttons
+    form.querySelectorAll("[data-save-section]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const key = btn.dataset.saveSection;
+        const keys = sectionFieldKeys[key] || [];
+        if (!keys.length) { App.showToast("本节无可保存字段"); return; }
+        btn.disabled = true;
+        try {
+          const raw = await App.collectFormPayload(form, meta, row, false, {
+            table: "app_settings",
+            onlyFields: new Set(keys),
+          });
+          // Keep only this section's fields (+ updated_at) so other sections are untouched.
+          const payload = { updated_at: raw.updated_at };
+          keys.forEach((k) => { if (k in raw) payload[k] = raw[k]; });
+          const { error: err } = data
+            ? await App.client.from("app_settings").update(payload).eq(meta.pk, "global")
+            : await App.client.from("app_settings").insert({ ...payload, [meta.pk]: "global" });
+          if (err) throw err;
+          App.showToast("本节已保存");
+          await App.loadRefCache(true);
+        } catch (ex) {
+          App.showToast(ex.message, "error");
+        } finally {
+          btn.disabled = false;
+        }
+      });
     });
   };
 

@@ -984,8 +984,15 @@ tr:hover td {
   transition: transform 0.15s;
 }
 .settings-group[open] > summary::before { transform: rotate(90deg); }
-.settings-group-body { padding: 8px 18px 18px; }
+.settings-group-body { padding: 8px 18px 14px; }
 .settings-group-body .section-hint { margin: 8px 0 14px; }
+.settings-group-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
 
 .settings-save-bar {
   position: sticky;
