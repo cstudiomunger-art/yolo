@@ -417,24 +417,34 @@
     form.innerHTML = App.buildFormFieldsHtml(meta, row, { fixedCityId: null });
     App.mountFieldInteractions(form, meta, { isNew: false, pk: meta.pk, formEl: form });
 
-    const jumpToGroup = (id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.open = true;
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Tab behaviour: show only the selected section; the others stay in the DOM
+    // (hidden) so collectFormPayload still reads every field on save.
+    const groups = Array.from(form.querySelectorAll(".settings-group"));
+    const chipBtns = Array.from(main.querySelectorAll(".settings-chip"));
+    // Hide the advanced (id/tech) block in tab mode — fields stay in the DOM for save.
+    const advancedBlock = form.querySelector(".advanced-fields");
+    if (advancedBlock) advancedBlock.style.display = "none";
+
+    const showOnlySection = (id) => {
+      let target = id;
+      if (!groups.some((g) => g.id === target) && groups[0]) target = groups[0].id;
+      groups.forEach((g) => {
+        const on = g.id === target;
+        g.style.display = on ? "" : "none";
+        if (on) g.open = true;
+      });
+      chipBtns.forEach((c) => c.classList.toggle("active", c.dataset.jump === target));
+      App.settingsActiveSection = target;
     };
 
-    // Quick-jump chips
-    main.querySelectorAll("[data-jump]").forEach((btn) => {
-      btn.addEventListener("click", () => jumpToGroup(btn.dataset.jump));
+    chipBtns.forEach((btn) => {
+      btn.addEventListener("click", () => showOnlySection(btn.dataset.jump));
     });
 
-    // Sidebar deep-link: jump to a section requested from the nav sub-item
-    if (App.pendingSettingsAnchor) {
-      const target = App.pendingSettingsAnchor;
-      App.pendingSettingsAnchor = null;
-      requestAnimationFrame(() => jumpToGroup(target));
-    }
+    // Initial section: sidebar deep-link > last viewed > first group
+    const initial = App.pendingSettingsAnchor || App.settingsActiveSection || (groups[0] && groups[0].id);
+    App.pendingSettingsAnchor = null;
+    showOnlySection(initial);
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();

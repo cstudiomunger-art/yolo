@@ -951,6 +951,11 @@ tr:hover td {
   transition: border-color 0.15s, color 0.15s;
 }
 .settings-chip:hover { border-color: var(--accent); color: var(--text); }
+.settings-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 
 .settings-group {
   border: 1px solid var(--border);
