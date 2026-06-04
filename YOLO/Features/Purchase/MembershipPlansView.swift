@@ -25,10 +25,10 @@ struct MembershipPlansView: View {
     }
 
     /// Ordered options shown as selectable cards: subscriptions first, then single-attraction.
+    /// The single-attraction plan is a universal product that unlocks whichever attraction is open.
     private var options: [MembershipPlan] {
         var list = subscriptions
-        if attraction.iapProductId != nil || singleAttractionPlan != nil,
-           let single = singleAttractionPlan {
+        if let single = singleAttractionPlan {
             list.append(single)
         }
         return list

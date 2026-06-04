@@ -265,5 +265,28 @@ final class PurchaseService {
             displayOrder: 2,
             isActive: true
         ),
+        MembershipPlan(
+            id: "attraction_single",
+            rcPackageId: "$rc_attraction_single",
+            appleProductId: "com.yolohappy.attraction.single",
+            nameEn: "This Guide",
+            nameZh: "单独购买此景点",
+            priceLabel: "$2.99",
+            durationDays: nil,
+            freeTrialDays: 0,
+            planType: .oneTimeAttraction,
+            accessFlags: MembershipPlan.AccessFlags(
+                audioGuides: true, textContent: true, offlineDownload: false,
+                visitorTips: true, aiAdvanced: false
+            ),
+            featureLines: [
+                "Audio guide for this attraction",
+                "Full text content for this attraction",
+                "Visitor tips unlocked",
+            ],
+            isBestValue: false,
+            displayOrder: 3,
+            isActive: true
+        ),
     ]
 }
