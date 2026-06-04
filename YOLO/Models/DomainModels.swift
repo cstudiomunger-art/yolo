@@ -638,37 +638,15 @@ struct FlightPlatform: Codable, Hashable, Identifiable {
 }
 
 struct PaywallCopy: Codable, Equatable, Hashable {
-    let titleTemplate: String
     let previewLineTemplate: String
-    let proTitle: String
-    let proSubtitle: String
-    let proPriceHint: String
-    let proCta: String
-    let singleTitle: String
-    let singleSubtitle: String
-    let singleCta: String
-    let maybeLater: String
     let restore: String
     let footnote: String
 
     static let fallback = PaywallCopy(
-        titleTemplate: "Unlock {attraction_name} Audio Guide",
         previewLineTemplate: "{duration} min · Literary narrative",
-        proTitle: "YOLO HAPPY Pro",
-        proSubtitle: "Unlock ALL audio guides",
-        proPriceHint: "Billed annually · Cancel anytime",
-        proCta: "Start Pro",
-        singleTitle: "This Attraction Only",
-        singleSubtitle: "One-time purchase · Yours forever",
-        singleCta: "Buy This Guide",
-        maybeLater: "Maybe Later",
         restore: "Restore Purchase",
         footnote: "Prices shown in your local currency. Subscriptions renew automatically unless cancelled."
     )
-
-    func title(for attractionName: String) -> String {
-        titleTemplate.replacingOccurrences(of: "{attraction_name}", with: attractionName)
-    }
 
     func previewLine(duration: String) -> String {
         previewLineTemplate.replacingOccurrences(of: "{duration}", with: duration)
@@ -1159,11 +1137,6 @@ struct AppBranding: Codable, Equatable {
         aboutTitle: "YOLO HAPPY",
         aboutVersion: "1.0.0",
         aboutBody: "Your companion for planning and experiencing travel in China.",
-        iapProTitle: "YOLO HAPPY Pro",
-        iapProPrice: "$19.99/year",
-        iapProTrialText: "3-day free trial",
-        iapProFeatures: "All attraction guides\nUnlimited AI planning\nOffline download",
-        iapSinglePriceLabel: "Buy This Guide · $1.99",
         assistantGreetingGeneral: "Good morning. How can I assist with your China trip today?",
         assistantGreetingPlanning: "Hi! I'm building your itinerary. Tell me: how many days, interests, and budget?",
         planAlertMessage: "",
@@ -1187,11 +1160,6 @@ struct AppBranding: Codable, Equatable {
     let aboutTitle: String
     let aboutVersion: String
     let aboutBody: String
-    let iapProTitle: String
-    let iapProPrice: String
-    let iapProTrialText: String
-    let iapProFeatures: String
-    let iapSinglePriceLabel: String
     let assistantGreetingGeneral: String
     let assistantGreetingPlanning: String
     let planAlertMessage: String
@@ -1212,11 +1180,6 @@ struct AppBranding: Codable, Equatable {
         aboutTitle: String,
         aboutVersion: String,
         aboutBody: String,
-        iapProTitle: String,
-        iapProPrice: String,
-        iapProTrialText: String,
-        iapProFeatures: String,
-        iapSinglePriceLabel: String,
         assistantGreetingGeneral: String,
         assistantGreetingPlanning: String,
         planAlertMessage: String,
@@ -1236,11 +1199,6 @@ struct AppBranding: Codable, Equatable {
         self.aboutTitle = aboutTitle
         self.aboutVersion = aboutVersion
         self.aboutBody = aboutBody
-        self.iapProTitle = iapProTitle
-        self.iapProPrice = iapProPrice
-        self.iapProTrialText = iapProTrialText
-        self.iapProFeatures = iapProFeatures
-        self.iapSinglePriceLabel = iapSinglePriceLabel
         self.assistantGreetingGeneral = assistantGreetingGeneral
         self.assistantGreetingPlanning = assistantGreetingPlanning
         self.planAlertMessage = planAlertMessage
@@ -1263,11 +1221,6 @@ struct AppBranding: Codable, Equatable {
         aboutTitle = try c.decode(String.self, forKey: .aboutTitle)
         aboutVersion = try c.decode(String.self, forKey: .aboutVersion)
         aboutBody = try c.decode(String.self, forKey: .aboutBody)
-        iapProTitle = try c.decode(String.self, forKey: .iapProTitle)
-        iapProPrice = try c.decode(String.self, forKey: .iapProPrice)
-        iapProTrialText = try c.decode(String.self, forKey: .iapProTrialText)
-        iapProFeatures = try c.decode(String.self, forKey: .iapProFeatures)
-        iapSinglePriceLabel = try c.decode(String.self, forKey: .iapSinglePriceLabel)
         assistantGreetingGeneral = try c.decode(String.self, forKey: .assistantGreetingGeneral)
         assistantGreetingPlanning = try c.decode(String.self, forKey: .assistantGreetingPlanning)
         planAlertMessage = try c.decodeIfPresent(String.self, forKey: .planAlertMessage) ?? ""
@@ -1286,24 +1239,10 @@ struct AppBranding: Codable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case supportEmail, aboutTitle, aboutVersion, aboutBody
-        case iapProTitle, iapProPrice, iapProTrialText, iapProFeatures, iapSinglePriceLabel
         case assistantGreetingGeneral, assistantGreetingPlanning
         case planAlertMessage, planAlertLinkAttractionId, planAlertLinkCityId, planAlertLinkLabel
         case freeAudioPreviewSeconds, freeTextPreviewChars, freeVisitorTipsCount, paywall, flightPlatforms
         case privacyPolicyBody, termsOfServiceBody, shareWebBaseURL
-    }
-
-    var iapProFeatureLines: [String] {
-        iapProFeatures
-            .split(separator: "\n", omittingEmptySubsequences: false)
-            .map { line in
-                let trimmed = line.trimmingCharacters(in: .whitespaces)
-                if trimmed.hasPrefix("•") {
-                    return String(trimmed.dropFirst()).trimmingCharacters(in: .whitespaces)
-                }
-                return trimmed
-            }
-            .filter { !$0.isEmpty }
     }
 
 }
@@ -1369,11 +1308,6 @@ struct AppSettingsRow: Decodable {
     let aboutTitle: String?
     let aboutVersion: String?
     let aboutBody: String?
-    let iapProTitle: String?
-    let iapProPrice: String?
-    let iapProTrialText: String?
-    let iapProFeatures: String?
-    let iapSinglePriceLabel: String?
     let assistantGreetingGeneral: String?
     let assistantGreetingPlanning: String?
     let planAlertMessage: String?
@@ -1391,16 +1325,7 @@ struct AppSettingsRow: Decodable {
     let aiTimeoutMs: Int?
     let aiSystemPromptAssistant: String?
     let aiSystemPromptItinerary: String?
-    let paywallTitleTemplate: String?
     let paywallPreviewLineTemplate: String?
-    let paywallProTitle: String?
-    let paywallProSubtitle: String?
-    let paywallProPriceHint: String?
-    let paywallProCta: String?
-    let paywallSingleTitle: String?
-    let paywallSingleSubtitle: String?
-    let paywallSingleCta: String?
-    let paywallMaybeLater: String?
     let paywallRestore: String?
     let paywallFootnote: String?
     let flightPlatforms: [FlightPlatform]?
@@ -1418,11 +1343,6 @@ struct AppSettingsRow: Decodable {
         case aboutTitle
         case aboutVersion
         case aboutBody
-        case iapProTitle
-        case iapProPrice
-        case iapProTrialText
-        case iapProFeatures
-        case iapSinglePriceLabel
         case assistantGreetingGeneral
         case assistantGreetingPlanning
         case planAlertMessage
@@ -1440,16 +1360,7 @@ struct AppSettingsRow: Decodable {
         case aiTimeoutMs
         case aiSystemPromptAssistant
         case aiSystemPromptItinerary
-        case paywallTitleTemplate
         case paywallPreviewLineTemplate
-        case paywallProTitle
-        case paywallProSubtitle
-        case paywallProPriceHint
-        case paywallProCta
-        case paywallSingleTitle
-        case paywallSingleSubtitle
-        case paywallSingleCta
-        case paywallMaybeLater
         case paywallRestore
         case paywallFootnote
         case flightPlatforms
@@ -1468,11 +1379,6 @@ struct AppSettingsRow: Decodable {
         aboutTitle = try container.decodeIfPresent(String.self, forKey: .aboutTitle)
         aboutVersion = try container.decodeIfPresent(String.self, forKey: .aboutVersion)
         aboutBody = try container.decodeIfPresent(String.self, forKey: .aboutBody)
-        iapProTitle = try container.decodeIfPresent(String.self, forKey: .iapProTitle)
-        iapProPrice = try container.decodeIfPresent(String.self, forKey: .iapProPrice)
-        iapProTrialText = try container.decodeIfPresent(String.self, forKey: .iapProTrialText)
-        iapProFeatures = try container.decodeIfPresent(String.self, forKey: .iapProFeatures)
-        iapSinglePriceLabel = try container.decodeIfPresent(String.self, forKey: .iapSinglePriceLabel)
         assistantGreetingGeneral = try container.decodeIfPresent(String.self, forKey: .assistantGreetingGeneral)
         assistantGreetingPlanning = try container.decodeIfPresent(String.self, forKey: .assistantGreetingPlanning)
         planAlertMessage = try container.decodeIfPresent(String.self, forKey: .planAlertMessage)
@@ -1490,16 +1396,7 @@ struct AppSettingsRow: Decodable {
         aiTimeoutMs = try container.decodeIfPresent(Int.self, forKey: .aiTimeoutMs)
         aiSystemPromptAssistant = try container.decodeIfPresent(String.self, forKey: .aiSystemPromptAssistant)
         aiSystemPromptItinerary = try container.decodeIfPresent(String.self, forKey: .aiSystemPromptItinerary)
-        paywallTitleTemplate = try container.decodeIfPresent(String.self, forKey: .paywallTitleTemplate)
         paywallPreviewLineTemplate = try container.decodeIfPresent(String.self, forKey: .paywallPreviewLineTemplate)
-        paywallProTitle = try container.decodeIfPresent(String.self, forKey: .paywallProTitle)
-        paywallProSubtitle = try container.decodeIfPresent(String.self, forKey: .paywallProSubtitle)
-        paywallProPriceHint = try container.decodeIfPresent(String.self, forKey: .paywallProPriceHint)
-        paywallProCta = try container.decodeIfPresent(String.self, forKey: .paywallProCta)
-        paywallSingleTitle = try container.decodeIfPresent(String.self, forKey: .paywallSingleTitle)
-        paywallSingleSubtitle = try container.decodeIfPresent(String.self, forKey: .paywallSingleSubtitle)
-        paywallSingleCta = try container.decodeIfPresent(String.self, forKey: .paywallSingleCta)
-        paywallMaybeLater = try container.decodeIfPresent(String.self, forKey: .paywallMaybeLater)
         paywallRestore = try container.decodeIfPresent(String.self, forKey: .paywallRestore)
         paywallFootnote = try container.decodeIfPresent(String.self, forKey: .paywallFootnote)
         flightPlatforms = try container.decodeIfPresent([FlightPlatform].self, forKey: .flightPlatforms)
@@ -1541,16 +1438,7 @@ struct AppSettingsRow: Decodable {
         let defaults = AppBranding.fallback
         let paywallDefaults = PaywallCopy.fallback
         let paywall = PaywallCopy(
-            titleTemplate: paywallTitleTemplate ?? paywallDefaults.titleTemplate,
             previewLineTemplate: paywallPreviewLineTemplate ?? paywallDefaults.previewLineTemplate,
-            proTitle: paywallProTitle ?? paywallDefaults.proTitle,
-            proSubtitle: paywallProSubtitle ?? paywallDefaults.proSubtitle,
-            proPriceHint: paywallProPriceHint ?? paywallDefaults.proPriceHint,
-            proCta: paywallProCta ?? paywallDefaults.proCta,
-            singleTitle: paywallSingleTitle ?? paywallDefaults.singleTitle,
-            singleSubtitle: paywallSingleSubtitle ?? paywallDefaults.singleSubtitle,
-            singleCta: paywallSingleCta ?? paywallDefaults.singleCta,
-            maybeLater: paywallMaybeLater ?? paywallDefaults.maybeLater,
             restore: paywallRestore ?? paywallDefaults.restore,
             footnote: paywallFootnote ?? paywallDefaults.footnote
         )
@@ -1559,11 +1447,6 @@ struct AppSettingsRow: Decodable {
             aboutTitle: aboutTitle ?? defaults.aboutTitle,
             aboutVersion: aboutVersion ?? defaults.aboutVersion,
             aboutBody: aboutBody ?? defaults.aboutBody,
-            iapProTitle: iapProTitle ?? defaults.iapProTitle,
-            iapProPrice: iapProPrice ?? defaults.iapProPrice,
-            iapProTrialText: iapProTrialText ?? defaults.iapProTrialText,
-            iapProFeatures: iapProFeatures ?? defaults.iapProFeatures,
-            iapSinglePriceLabel: iapSinglePriceLabel ?? defaults.iapSinglePriceLabel,
             assistantGreetingGeneral: assistantGreetingGeneral ?? defaults.assistantGreetingGeneral,
             assistantGreetingPlanning: assistantGreetingPlanning ?? defaults.assistantGreetingPlanning,
             planAlertMessage: planAlertMessage ?? defaults.planAlertMessage,

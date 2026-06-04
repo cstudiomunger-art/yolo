@@ -23,14 +23,6 @@
     ) {
       return Array.isArray(value) ? value : [];
     }
-    if (field.type === "home_cards_list") {
-      const presets = App.HOME_CARD_OPTIONS || [];
-      const saved = Array.isArray(value) ? value : [];
-      return presets.map((p) => {
-        const hit = saved.find((x) => x.id === p.id);
-        return { id: p.id, enabled: hit ? hit.enabled !== false : false };
-      });
-    }
     if (
       field.type === "json" ||
       field.type === "string_list" ||
@@ -148,9 +140,6 @@
         break;
       case "flight_platform_list":
         inner = App.renderFlightPlatformList(name, value);
-        break;
-      case "home_cards_list":
-        inner = App.renderHomeCardsList(name, value);
         break;
       case "help_phrase_list":
         inner = App.renderHelpPhraseList(name, value);
@@ -642,18 +631,6 @@
     return html;
   };
 
-  App.renderHomeCardsList = function renderHomeCardsList(name, cards) {
-    const arr = Array.isArray(cards) ? cards : [];
-    let html = `<div class="home-cards-editor" data-name="${name}">`;
-    (App.HOME_CARD_OPTIONS || []).forEach((preset) => {
-      const hit = arr.find((x) => x.id === preset.id);
-      const enabled = hit ? hit.enabled !== false : false;
-      html += `<label class="checkbox-chip home-card-chip"><input type="checkbox" data-card-id="${App.escapeHtml(preset.id)}" ${enabled ? "checked" : ""} /> ${App.escapeHtml(preset.label)}</label>`;
-    });
-    html += `</div>`;
-    return html;
-  };
-
   App.renderHelpPhraseList = function renderHelpPhraseList(name, items) {
     const arr = Array.isArray(items) ? items : [];
     let html = `<div class="list-builder" data-list-type="help_phrase" data-name="${name}"><div class="list-header"><span>中文</span><span>拼音</span><span>英文</span><span></span></div>`;
@@ -835,14 +812,6 @@
         const box = form.querySelector(`[data-name="${field.key}"]`);
         if (!box) return [];
         return App.$$(`input:checked`, box).map((inp) => inp.value);
-      }
-      case "home_cards_list": {
-        const box = form.querySelector(`[data-name="${field.key}"]`);
-        if (!box) return [];
-        return (App.HOME_CARD_OPTIONS || []).map((preset) => {
-          const inp = box.querySelector(`[data-card-id="${preset.id}"]`);
-          return { id: preset.id, enabled: inp ? inp.checked : false };
-        });
       }
       case "string_list":
       case "place_list":

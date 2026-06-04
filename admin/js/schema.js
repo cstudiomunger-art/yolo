@@ -107,12 +107,6 @@
         { key: "paywall_footnote", type: "textarea", label: "底部说明" },
         { key: "flight_section", type: "section", label: "机票平台链接" },
         { key: "flight_platforms", type: "flight_platform_list", label: "机票预订平台" },
-        { key: "ai_limits_section", type: "section", label: "AI 行程限制" },
-        { key: "ai_max_trip_days", type: "number", label: "最长行程天数" },
-        { key: "ai_generation_timeout_sec", type: "number", label: "生成超时（秒）" },
-        { key: "ai_max_cities", type: "number", label: "最多城市数" },
-        { key: "home_cards_section", type: "section", label: "Home 无行程轮播卡" },
-        { key: "home_dashboard_cards", type: "home_cards_list", label: "Home 无行程轮播卡" },
       ],
     },
     assistant_scenarios: {
@@ -792,11 +786,4 @@
   ];
 
   App.TIME_SLOT_OPTIONS = TIME_SLOT_OPTIONS;
-
-  App.HOME_CARD_OPTIONS = [
-    { id: "traveler", label: "旅行者卡 (traveler)" },
-    { id: "countdown", label: "倒计时卡 (countdown)" },
-    { id: "prep", label: "行前准备 (prep)" },
-    { id: "get_started", label: "开始规划 (get_started)" },
-  ];
 })();
