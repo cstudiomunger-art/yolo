@@ -88,7 +88,7 @@
           <option value="">全部用户</option>
           <option value="active_member">有效会员</option>
           <option value="expired">会员已过期</option>
-          <option value="pro">is_pro 标记</option>
+          <option value="pro">is_pro 标记（遗留）</option>
           <option value="purchased">已单购景点</option>
           <option value="onboarded">已完成引导</option>
         </select>
@@ -439,8 +439,14 @@
             <div class="field-block">
               <label class="checkbox-chip" style="display:inline-flex">
                 <input type="checkbox" name="is_pro" ${profile.is_pro ? "checked" : ""} />
-                &nbsp;is_pro 标记（遗留字段，优先使用 subscription_plan_id）
+                &nbsp;is_pro（遗留布尔标记）
               </label>
+              <p class="muted" style="font-size:11px;margin-top:4px;line-height:1.6">
+                ⚠️ 这是早期的会员标记。<strong>正式版 App 不依据它判断会员权限</strong>
+                （仅本地演示 / Mock 模式生效）。要给用户开通会员，请用上方
+                <strong>「赠送/设置会员」</strong>或选择<strong>订阅计划</strong>。
+                有效订阅用户该标记会被 App 自动同步为 true。
+              </p>
             </div>
             <div class="field-block"><label>RevenueCat Customer ID</label>
               <input name="rc_customer_id" type="text" value="${App.escapeHtml(profile.rc_customer_id || "")}" placeholder="通常与 Supabase UUID 相同" />
