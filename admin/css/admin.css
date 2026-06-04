@@ -709,6 +709,168 @@ tr:hover td {
   color: #ffc9a8;
 }
 
+.status-bar.hidden { display: none; }
+
+/* ===========================================================
+   Custom hubs (会员计划 / 景点定价 / 购买记录 / 用户管理)
+   Shared components so these modules match the rest of the CMS.
+   =========================================================== */
+
+/* Data tables in custom hubs — bordered, rounded, like .table-wrap */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.data-table th {
+  background: var(--surface2);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--row-hover); }
+.data-table td.muted,
+.data-table td.loading { color: var(--muted); text-align: center; padding: 22px; }
+.data-table code { font-size: 11px; color: var(--muted); }
+
+/* Modal (custom hubs) — aligned with .modal-backdrop / .modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 100;
+}
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+.modal-card h3 { margin: 0 0 18px; }
+.modal-card h4 {
+  margin: 18px 0 8px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Two-column form grid for modal editors */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0;
+}
+.form-grid label.full { grid-column: 1 / -1; }
+.form-grid label small { font-weight: 400; color: var(--muted); opacity: 0.8; }
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  width: 100%;
+}
+.form-grid input:focus,
+.form-grid select:focus { outline: none; border-color: var(--accent); }
+
+/* Access-flags grid (membership plan editor) */
+.flags-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 18px;
+  background: var(--surface2);
+  padding: 12px 14px;
+  border-radius: var(--radius);
+}
+.flags-grid label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+/* Feature-line editor */
+.feature-row { display: flex; gap: 8px; margin-bottom: 6px; }
+.feature-row input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+/* Checkbox row + inline pay toggle */
+.checkbox-row { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 16px; }
+.checkbox-row label { display: flex; align-items: center; gap: 7px; font-size: 0.88rem; cursor: pointer; }
+.switch-sm { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; cursor: pointer; white-space: nowrap; }
+
+/* Toolbar helpers */
+.toolbar-spacer { flex: 1; }
+.hub-toolbar .search-input { margin-bottom: 0; }
+.hub-toolbar.wrap { flex-wrap: wrap; align-items: center; }
+
+/* Pricing hub rows */
+.pr-name code { font-size: 10px; color: var(--muted); margin-left: 4px; }
+.pr-sub-label {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
+}
+.data-table td.indent { padding-left: 30px; }
+.data-table td select.search-input { width: 100%; max-width: 100%; }
+
+/* Avatar thumbnail in lists */
+.avatar-thumb {
+  width: 28px; height: 28px; border-radius: 50%;
+  object-fit: cover; vertical-align: middle;
+  border: 1px solid var(--border);
+}
+
 /* Hub & cards */
 .nav-section-label {
   padding: 12px 20px 4px;

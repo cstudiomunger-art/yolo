@@ -21,7 +21,7 @@
       <div class="hub-toolbar" style="flex-wrap:wrap;gap:10px">
         <select id="pr-city" class="search-input" style="max-width:220px"></select>
         <input type="search" id="pr-search" class="search-input" placeholder="搜索名称…" style="max-width:200px" />
-        <span style="flex:1"></span>
+        <span class="toolbar-spacer"></span>
         <span class="muted" id="pr-selcount">已选 0</span>
         <select id="pr-batch-tier" class="search-input" style="max-width:160px">
           <option value="">批量设价格档…</option>
@@ -154,14 +154,13 @@
   };
 
   function pricingRowHtml({ kind, id, name, indent, requires, tierId, tierOptions, tierLabel }) {
-    const pad = indent ? "padding-left:28px" : "";
-    const subTag = indent ? `<span class="muted" style="font-size:10px">子景点</span> ` : "";
+    const subTag = indent ? `<span class="pr-sub-label">子景点</span>` : "";
     return `<tr>
       <td style="text-align:center"><input type="checkbox" data-sel data-kind="${kind}" data-id="${App.escapeHtml(id)}"></td>
-      <td style="${pad}">${subTag}${App.escapeHtml(name)} <code style="font-size:10px;color:var(--muted)">${App.escapeHtml(id)}</code></td>
+      <td class="pr-name${indent ? " indent" : ""}">${subTag}${App.escapeHtml(name)} <code>${App.escapeHtml(id)}</code></td>
       <td><label class="switch-sm"><input type="checkbox" data-pay-toggle data-kind="${kind}" data-id="${App.escapeHtml(id)}" ${requires ? "checked" : ""}> 付费</label></td>
       <td>
-        <select data-tier-select data-kind="${kind}" data-id="${App.escapeHtml(id)}" class="search-input" style="width:100%" ${requires ? "" : "disabled"}>
+        <select data-tier-select data-kind="${kind}" data-id="${App.escapeHtml(id)}" class="search-input" ${requires ? "" : "disabled"}>
           ${tierOptions(tierId)}
         </select>
       </td>

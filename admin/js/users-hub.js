@@ -105,7 +105,7 @@
         list.forEach((p) => {
           const purchased = p.purchased_attraction_ids || [];
           const avatarThumb = p.avatar_url
-            ? `<img src="${App.escapeHtml(p.avatar_url)}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />`
+            ? `<img src="${App.escapeHtml(p.avatar_url)}" class="avatar-thumb" />`
             : `<span class="avatar-initial">${(p.display_name || p.email || "?")[0].toUpperCase()}</span>`;
 
           const subscriptionBadge = p.subscription_plan_id

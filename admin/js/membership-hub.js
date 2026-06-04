@@ -115,13 +115,13 @@
     }
 
     function flagToggle(id, label, checked) {
-      return `<label style="display:flex;align-items:center;gap:6px;padding:4px 0">
+      return `<label>
         <input type="checkbox" id="${id}" ${checked ? "checked" : ""}> ${label}
       </label>`;
     }
     function featureLine(idx, val) {
-      return `<div style="display:flex;gap:6px;margin-bottom:4px">
-        <input class="mh-feature-input" style="flex:1" value="${App.escapeHtml(val)}" placeholder="权益描述文字">
+      return `<div class="feature-row">
+        <input class="mh-feature-input" value="${App.escapeHtml(val)}" placeholder="权益描述文字">
         <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">×</button>
       </div>`;
     }
@@ -129,10 +129,10 @@
     const modal = document.createElement("div");
     modal.className = "modal-overlay";
     modal.innerHTML = `
-      <div class="modal-card" style="max-width:600px;width:100%;max-height:90vh;overflow-y:auto">
+      <div class="modal-card">
         <h3>${planId ? "编辑" : "新建"}会员计划</h3>
 
-        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-grid">
           <label>ID <small>（创建后不可改）</small>
             <input id="mh-id" value="${App.escapeHtml(plan.id)}" ${planId ? "disabled" : ""} placeholder="annual / quarterly / monthly">
           </label>
@@ -168,8 +168,8 @@
           </label>
         </div>
 
-        <h4 style="margin:16px 0 8px">内容权益 (access_flags)</h4>
-        <div style="display:grid;grid-template-columns:1fr 1fr;background:var(--bg-subtle);padding:12px;border-radius:4px">
+        <h4>内容权益 (access_flags)</h4>
+        <div class="flags-grid">
           ${flagToggle("mh-audio", "🎧 音频导览（解锁全部景点音频）", plan.access_flags?.audio_guides)}
           ${flagToggle("mh-text", "📄 文字内容（解锁景点完整介绍）", plan.access_flags?.text_content)}
           ${flagToggle("mh-offline", "⬇ 离线下载（允许下载音频）", plan.access_flags?.offline_download)}
@@ -177,19 +177,19 @@
           ${flagToggle("mh-ai", "🤖 AI 高级模式", plan.access_flags?.ai_advanced)}
         </div>
 
-        <h4 style="margin:16px 0 8px">权益描述（展示给用户）</h4>
+        <h4>权益描述（展示给用户）</h4>
         <div id="mh-features-list">
           ${(plan.feature_lines || []).map((l, i) => featureLine(i, l)).join("")}
         </div>
         <button type="button" class="btn btn-sm btn-secondary" id="mh-add-feature">+ 添加权益描述</button>
 
-        <div style="display:flex;gap:16px;margin-top:16px">
+        <div class="checkbox-row">
           <label><input type="checkbox" id="mh-best-value" ${plan.is_best_value ? "checked" : ""}> 标注为「最优惠」★</label>
           <label><input type="checkbox" id="mh-active" ${plan.is_active ? "checked" : ""}> 激活（App 中展示）</label>
         </div>
 
         <div id="mh-edit-error" class="status-bar error hidden" style="margin-top:12px"></div>
-        <div class="modal-actions" style="margin-top:16px">
+        <div class="modal-actions" style="margin-top:18px">
           <button type="button" class="btn btn-secondary" id="mh-cancel">取消</button>
           <button type="button" class="btn" id="mh-save">保存</button>
         </div>
@@ -200,8 +200,8 @@
     modal.querySelector("#mh-add-feature")?.addEventListener("click", () => {
       const list = modal.querySelector("#mh-features-list");
       const div = document.createElement("div");
-      div.style.cssText = "display:flex;gap:6px;margin-bottom:4px";
-      div.innerHTML = `<input class="mh-feature-input" style="flex:1" placeholder="权益描述文字">
+      div.className = "feature-row";
+      div.innerHTML = `<input class="mh-feature-input" placeholder="权益描述文字">
         <button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">×</button>`;
       list.appendChild(div);
       featureCount++;
