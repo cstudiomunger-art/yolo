@@ -307,8 +307,7 @@
       else statusBadge = `<span class="badge badge-gray">○ 免费用户</span>`;
 
       const flagIcons = {
-        audio_guides: "🎧 音频", text_content: "📄 文字", offline_download: "⬇ 离线",
-        visitor_tips: "💡 贴士", ai_advanced: "🤖 AI",
+        audio_guides: "🎧 音频", text_content: "📄 文字", visitor_tips: "💡 贴士",
       };
       const flags = curPlan?.access_flags || {};
       const flagsHtml = curPlan

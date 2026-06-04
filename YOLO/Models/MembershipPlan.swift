@@ -24,27 +24,28 @@ struct MembershipPlan: Identifiable, Codable, Sendable {
     struct AccessFlags: Codable, Sendable {
         var audioGuides: Bool
         var textContent: Bool
-        var offlineDownload: Bool
         var visitorTips: Bool
-        var aiAdvanced: Bool
 
-        static let none = AccessFlags(
-            audioGuides: false,
-            textContent: false,
-            offlineDownload: false,
-            visitorTips: false,
-            aiAdvanced: false
-        )
+        static let none = AccessFlags(audioGuides: false, textContent: false, visitorTips: false)
 
-        // camelCase keys — the Supabase decoder uses .convertFromSnakeCase,
-        // so JSON `audio_guides` is auto-mapped to `audioGuides`. Do NOT write
-        // snake_case raw values here or decoding silently fails.
+        init(audioGuides: Bool, textContent: Bool, visitorTips: Bool) {
+            self.audioGuides = audioGuides
+            self.textContent = textContent
+            self.visitorTips = visitorTips
+        }
+
+        // camelCase keys — Supabase decoder uses .convertFromSnakeCase (audio_guides
+        // → audioGuides). decodeIfPresent makes this tolerant of missing/legacy keys
+        // (e.g. the removed offline_download / ai_advanced still present in old rows).
         enum CodingKeys: String, CodingKey {
-            case audioGuides
-            case textContent
-            case offlineDownload
-            case visitorTips
-            case aiAdvanced
+            case audioGuides, textContent, visitorTips
+        }
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            audioGuides = try c.decodeIfPresent(Bool.self, forKey: .audioGuides) ?? false
+            textContent = try c.decodeIfPresent(Bool.self, forKey: .textContent) ?? false
+            visitorTips = try c.decodeIfPresent(Bool.self, forKey: .visitorTips) ?? false
         }
     }
 

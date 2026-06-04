@@ -54,9 +54,7 @@
       const flagIcons = {
         audio_guides: "🎧",
         text_content: "📄",
-        offline_download: "⬇",
         visitor_tips: "💡",
-        ai_advanced: "🤖",
       };
 
       tbody.innerHTML = plans.map((p) => {
@@ -105,7 +103,7 @@
     let plan = {
       id: "", rc_package_id: "", apple_product_id: "", name_en: "", name_zh: "",
       price_label: "", duration_days: null, free_trial_days: 0, plan_type: "subscription",
-      access_flags: { audio_guides: false, text_content: false, offline_download: false, visitor_tips: false, ai_advanced: false },
+      access_flags: { audio_guides: false, text_content: false, visitor_tips: false },
       feature_lines: [], is_best_value: false, display_order: 0, is_active: true,
     };
 
@@ -172,9 +170,7 @@
         <div class="flags-grid">
           ${flagToggle("mh-audio", "🎧 音频导览（解锁全部景点音频）", plan.access_flags?.audio_guides)}
           ${flagToggle("mh-text", "📄 文字内容（解锁景点完整介绍）", plan.access_flags?.text_content)}
-          ${flagToggle("mh-offline", "⬇ 离线下载（允许下载音频）", plan.access_flags?.offline_download)}
           ${flagToggle("mh-tips", "💡 访客贴士（解锁全部贴士）", plan.access_flags?.visitor_tips)}
-          ${flagToggle("mh-ai", "🤖 AI 高级模式", plan.access_flags?.ai_advanced)}
         </div>
 
         <h4>权益描述（展示给用户）</h4>
@@ -231,9 +227,7 @@
           access_flags: {
             audio_guides: modal.querySelector("#mh-audio").checked,
             text_content: modal.querySelector("#mh-text").checked,
-            offline_download: modal.querySelector("#mh-offline").checked,
             visitor_tips: modal.querySelector("#mh-tips").checked,
-            ai_advanced: modal.querySelector("#mh-ai").checked,
           },
           feature_lines: features,
           is_best_value: modal.querySelector("#mh-best-value").checked,

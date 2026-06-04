@@ -264,10 +264,7 @@ final class PurchaseService {
             durationDays: 365,
             freeTrialDays: 7,
             planType: .subscription,
-            accessFlags: MembershipPlan.AccessFlags(
-                audioGuides: true, textContent: true, offlineDownload: true,
-                visitorTips: true, aiAdvanced: true
-            ),
+            accessFlags: MembershipPlan.AccessFlags(audioGuides: true, textContent: true, visitorTips: true),
             featureLines: [
                 "Unlimited audio guides for all attractions",
                 "Full text content for every attraction",
@@ -289,10 +286,7 @@ final class PurchaseService {
             durationDays: 90,
             freeTrialDays: 0,
             planType: .subscription,
-            accessFlags: MembershipPlan.AccessFlags(
-                audioGuides: true, textContent: true, offlineDownload: false,
-                visitorTips: true, aiAdvanced: false
-            ),
+            accessFlags: MembershipPlan.AccessFlags(audioGuides: true, textContent: true, visitorTips: true),
             featureLines: [
                 "Unlimited audio guides for all attractions",
                 "Full text content for every attraction",
@@ -312,10 +306,7 @@ final class PurchaseService {
             durationDays: 30,
             freeTrialDays: 0,
             planType: .subscription,
-            accessFlags: MembershipPlan.AccessFlags(
-                audioGuides: true, textContent: false, offlineDownload: false,
-                visitorTips: false, aiAdvanced: false
-            ),
+            accessFlags: MembershipPlan.AccessFlags(audioGuides: true, textContent: false, visitorTips: false),
             featureLines: [
                 "Unlimited audio guides for all attractions",
             ],
@@ -333,10 +324,7 @@ final class PurchaseService {
             durationDays: nil,
             freeTrialDays: 0,
             planType: .oneTimeAttraction,
-            accessFlags: MembershipPlan.AccessFlags(
-                audioGuides: true, textContent: true, offlineDownload: false,
-                visitorTips: true, aiAdvanced: false
-            ),
+            accessFlags: MembershipPlan.AccessFlags(audioGuides: true, textContent: true, visitorTips: true),
             featureLines: [
                 "Audio guide for this attraction",
                 "Full text content for this attraction",
