@@ -14,7 +14,7 @@
       .select(
         "id,email,display_name,avatar_url,avatar_status,country_code," +
         "has_completed_onboarding,departure_date,selected_city_ids," +
-        "purchased_attraction_ids,is_pro,subscription_plan_id,subscription_expires_at," +
+        "purchased_attraction_ids,subscription_plan_id,subscription_expires_at," +
         "rc_customer_id,active_itinerary_id,created_at,updated_at"
       )
       .order("updated_at", { ascending: false });
@@ -88,7 +88,6 @@
           <option value="">全部用户</option>
           <option value="active_member">有效会员</option>
           <option value="expired">会员已过期</option>
-          <option value="pro">is_pro 标记（遗留）</option>
           <option value="purchased">已单购景点</option>
           <option value="onboarded">已完成引导</option>
         </select>
@@ -128,7 +127,6 @@
         }
         if (filter === "active_member") list = list.filter((p) => App.isActiveMember(p));
         if (filter === "expired") list = list.filter((p) => p.subscription_plan_id && p.subscription_expires_at && new Date(p.subscription_expires_at) <= nowStats);
-        if (filter === "pro") list = list.filter((p) => p.is_pro);
         if (filter === "purchased") list = list.filter((p) => (p.purchased_attraction_ids || []).length > 0);
         if (filter === "onboarded") list = list.filter((p) => p.has_completed_onboarding);
 
@@ -159,7 +157,7 @@
           const memberActive = App.isActiveMember(p);
           const subscriptionBadge = p.subscription_plan_id
             ? `<span class="badge ${memberActive ? "badge-green" : "badge-gray"}">${App.escapeHtml(App.membershipPlanName(p.subscription_plan_id))}${memberActive ? "" : " · 失效"}</span>`
-            : (p.is_pro ? `<span class="badge badge-blue">is_pro</span>` : `<span class="badge badge-gray">免费</span>`);
+            : `<span class="badge badge-gray">免费</span>`;
 
           const expiresAt = p.subscription_expires_at
             ? new Date(p.subscription_expires_at)
@@ -303,7 +301,6 @@
       let statusBadge;
       if (memberActive) statusBadge = `<span class="badge badge-green">● 有效会员</span>`;
       else if (profile.subscription_plan_id) statusBadge = `<span class="badge badge-red">● 会员已过期</span>`;
-      else if (profile.is_pro) statusBadge = `<span class="badge badge-blue">● is_pro（遗留）</span>`;
       else statusBadge = `<span class="badge badge-gray">○ 免费用户</span>`;
 
       const flagIcons = {
@@ -435,18 +432,6 @@
                 value="${profile.subscription_expires_at ? new Date(profile.subscription_expires_at).toISOString().slice(0,16) : ""}" />
               <span class="muted" style="font-size:11px">留空 = 永久有效（不自动续费的终身计划）</span>
             </div>
-            <div class="field-block">
-              <label class="checkbox-chip" style="display:inline-flex">
-                <input type="checkbox" name="is_pro" ${profile.is_pro ? "checked" : ""} />
-                &nbsp;is_pro（遗留布尔标记）
-              </label>
-              <p class="muted" style="font-size:11px;margin-top:4px;line-height:1.6">
-                ⚠️ 这是早期的会员标记。<strong>正式版 App 不依据它判断会员权限</strong>
-                （仅本地演示 / Mock 模式生效）。要给用户开通会员，请用上方
-                <strong>「赠送/设置会员」</strong>或选择<strong>订阅计划</strong>。
-                有效订阅用户该标记会被 App 自动同步为 true。
-              </p>
-            </div>
             <div class="field-block"><label>RevenueCat Customer ID</label>
               <input name="rc_customer_id" type="text" value="${App.escapeHtml(profile.rc_customer_id || "")}" placeholder="通常与 Supabase UUID 相同" />
             </div>
@@ -563,7 +548,7 @@
         const days = parseInt(App.$("#gift-days")?.value || "0", 10);
         const expires = days > 0 ? new Date(Date.now() + days * 86400000).toISOString() : null;
         if (!confirm(`确认将该用户设为「${App.membershipPlanName(planId)}」会员，有效期：${days > 0 ? days + " 天" : "永久"}？`)) return;
-        applyMemberPatch({ subscription_plan_id: planId, subscription_expires_at: expires, is_pro: true });
+        applyMemberPatch({ subscription_plan_id: planId, subscription_expires_at: expires });
       });
 
       const extendDays = (days) => {
@@ -572,14 +557,14 @@
           ? new Date(profile.subscription_expires_at)
           : new Date();
         const expires = new Date(base.getTime() + days * 86400000).toISOString();
-        applyMemberPatch({ subscription_expires_at: expires, is_pro: true });
+        applyMemberPatch({ subscription_expires_at: expires });
       };
       App.$("#extend-30")?.addEventListener("click", () => extendDays(30));
       App.$("#extend-365")?.addEventListener("click", () => extendDays(365));
 
       App.$("#cancel-sub")?.addEventListener("click", () => {
         if (!confirm("确认取消该用户的会员？将清空订阅计划与到期时间（单购景点不受影响）。")) return;
-        applyMemberPatch({ subscription_plan_id: null, subscription_expires_at: null, is_pro: false });
+        applyMemberPatch({ subscription_plan_id: null, subscription_expires_at: null });
       });
 
       // Save form
@@ -590,7 +575,6 @@
           const payload = {
             display_name: form.querySelector('[name="display_name"]')?.value?.trim() || null,
             country_code: form.querySelector('[name="country_code"]')?.value?.trim() || "GB",
-            is_pro: !!form.querySelector('[name="is_pro"]')?.checked,
             subscription_plan_id: form.querySelector('[name="subscription_plan_id"]')?.value || null,
             subscription_expires_at: expiresRaw ? new Date(expiresRaw).toISOString() : null,
             rc_customer_id: form.querySelector('[name="rc_customer_id"]')?.value?.trim() || null,

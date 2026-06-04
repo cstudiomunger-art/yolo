@@ -94,10 +94,7 @@ final class PurchaseService {
 
     /// Whether the user has an active (non-expired) subscription.
     var isProActive: Bool {
-        guard let prefs = preferences else { return false }
-        // simulateProPurchase is only effective in mock/dev mode, never in production
-        if prefs.simulateProPurchase && AppConfig.useMock { return true }
-        return prefs.isSubscriptionActive
+        preferences?.isSubscriptionActive ?? false
     }
 
     /// Whether a content type is unlocked for an attraction or sub-area.
@@ -163,10 +160,6 @@ final class PurchaseService {
         guard let prefs = preferences else { return }
         prefs.subscriptionPlanId = plan.id
         prefs.subscriptionExpiresAt = expiryDate(for: plan)
-        // Only set simulateProPurchase in mock/dev mode — production uses isSubscriptionActive
-        if AppConfig.useMock {
-            prefs.simulateProPurchase = true
-        }
         await profileSync?.schedulePush()
     }
 

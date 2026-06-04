@@ -11,7 +11,6 @@ enum UserDefaultsKeys {
     static let selectedCityIds = prefix + "selectedCityIds"
     static let completedChecklistIds = prefix + "completedChecklistIds"
     static let checklistStatuses = prefix + "checklistStatuses"
-    static let simulateProPurchase = prefix + "simulateProPurchase"
     static let savedItineraries = prefix + "savedItineraries"
     static let activeItineraryId = prefix + "activeItineraryId"
     static let purchasedAttractionIds = prefix + "purchasedAttractionIds"
@@ -36,7 +35,6 @@ enum UserDefaultsKeys {
         (selectedCityIds, "chinago.selectedCityIds"),
         (completedChecklistIds, "chinago.completedChecklistIds"),
         (checklistStatuses, "chinago.checklistStatuses"),
-        (simulateProPurchase, "chinago.simulateProPurchase"),
         (savedItineraries, "chinago.savedItineraries"),
         (activeItineraryId, "chinago.activeItineraryId"),
         (purchasedAttractionIds, "chinago.purchasedAttractionIds"),

@@ -1373,11 +1373,6 @@
     if (typeof col === "object" && col.format === "user_email") {
       return App.escapeHtml(App.profileEmail(v));
     }
-    if (typeof col === "object" && col.format === "is_pro") {
-      return v
-        ? '<span class="tag on">Pro</span>'
-        : '<span class="tag off">—</span>';
-    }
     if (typeof col === "object" && col.format === "purchased_count") {
       const n = Array.isArray(v) ? v.length : 0;
       return n > 0

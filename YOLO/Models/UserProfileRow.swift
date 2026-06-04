@@ -13,7 +13,6 @@ struct UserProfileRow: Codable, Sendable {
     var selectedCityIds: [String]
     var completedChecklistIds: [String]
     var purchasedAttractionIds: [String]
-    var isPro: Bool
     var subscriptionPlanId: String?
     var subscriptionExpiresAt: String?
     var rcCustomerId: String?

@@ -102,13 +102,6 @@ final class UserPreferencesStore {
         }
     }
 
-    var simulateProPurchase: Bool {
-        didSet {
-            UserDefaults.standard.set(simulateProPurchase, forKey: Keys.simulateProPurchase)
-            notifySyncableChange()
-        }
-    }
-
     /// When set, itineraries are read/written under per-account UserDefaults keys.
     private(set) var storageUserId: String?
 
@@ -190,7 +183,6 @@ final class UserPreferencesStore {
         }
         selectedCityIds = UserDefaults.standard.stringArray(forKey: Keys.selectedCityIds) ?? ["beijing"]
         checklistStatuses = Self.loadInitialChecklistStatuses()
-        simulateProPurchase = UserDefaults.standard.bool(forKey: Keys.simulateProPurchase)
         storageUserId = nil
         let itineraryLoad = Self.loadItinerariesFromDisk(storageUserId: nil)
         activeItineraryId = itineraryLoad.activeId
@@ -231,7 +223,6 @@ final class UserPreferencesStore {
             Keys.selectedCityIds,
             Keys.completedChecklistIds,
             Keys.checklistStatuses,
-            Keys.simulateProPurchase,
             Keys.purchasedAttractionIds,
             Keys.subscriptionPlanId,
             Keys.subscriptionExpiresAt,
@@ -257,7 +248,6 @@ final class UserPreferencesStore {
         displayName = nil
         avatarUrl = nil
         avatarStatus = "none"
-        simulateProPurchase = false
         clearItinerarySessionState()
         purchasedAttractionIds = []
         appLanguage = AppLanguage.resolved(fromStoredValue: nil)
@@ -457,9 +447,6 @@ final class UserPreferencesStore {
     }
 
     func hasAccessToAttraction(_ attractionId: String, iapProductId: String?) -> Bool {
-        // simulateProPurchase is only honoured in mock / development builds, never in production
-        // (AppConfig.useMock is true when Supabase is not configured or USE_MOCK=true in xcconfig)
-        if simulateProPurchase && AppConfig.useMock { return true }
         if isSubscriptionActive { return true }
         if purchasedAttractionIds.contains(attractionId) { return true }
         return false
@@ -502,7 +489,6 @@ final class UserPreferencesStore {
             )
         }
         purchasedAttractionIds = Set(row.purchasedAttractionIds)
-        simulateProPurchase = row.isPro
         subscriptionPlanId = row.subscriptionPlanId
         if let expStr = row.subscriptionExpiresAt {
             subscriptionExpiresAt = Self.parseISO8601(expStr)
@@ -529,7 +515,6 @@ final class UserPreferencesStore {
             selectedCityIds: selectedCityIds,
             completedChecklistIds: Array(completedChecklistIds),
             purchasedAttractionIds: Array(purchasedAttractionIds),
-            isPro: simulateProPurchase || isSubscriptionActive,
             subscriptionPlanId: subscriptionPlanId,
             subscriptionExpiresAt: subscriptionExpiresAt.map { Self.formatISO8601($0) },
             rcCustomerId: nil,
