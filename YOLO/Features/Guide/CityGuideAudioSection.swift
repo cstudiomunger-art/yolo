@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CityGuideAudioSection: View {
-    @StateObject private var playback = AudioPlaybackController()
+    @Environment(AppEnvironment.self) private var appEnv
 
     let guide: CityGuide
     let audioGuide: AudioGuide
@@ -9,6 +9,25 @@ struct CityGuideAudioSection: View {
     @State private var scrubProgress: Double = 0
     @State private var isScrubbing = false
     @State private var transcriptExpanded = false
+
+    private var player: AudioQueuePlayer { appEnv.audioPlayer }
+    private var isActive: Bool { player.currentTrackId == audioGuide.id }
+    private var isPlayingThis: Bool { isActive && player.isPlaying }
+    private var displayMode: AudioQueuePlayer.Mode { isActive ? player.mode : .idle }
+    private var canPlayThis: Bool { isActive ? player.canPlay : true }
+    private var displayDuration: Int {
+        isActive ? player.durationSeconds : max(audioGuide.durationSeconds, 1)
+    }
+
+    private var selfTrack: AudioTrack {
+        AudioTrack(
+            guide: audioGuide,
+            title: audioGuide.titleEn,
+            artist: guide.titleEn,
+            allowsPreview: false,
+            isFree: true
+        )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -40,18 +59,18 @@ struct CityGuideAudioSection: View {
 
             HStack(spacing: 12) {
                 Button {
-                    playback.togglePlay()
+                    startOrToggle()
                 } label: {
-                    Text(playback.isPlaying ? String(localized: "⏸ Pause") : String(localized: "▶ Play"))
+                    Text(isPlayingThis ? String(localized: "⏸ Pause") : String(localized: "▶ Play"))
                         .font(Theme.FontToken.inter(12, weight: .medium))
                 }
                 .buttonStyle(.plain)
-                .disabled(playback.mode == .loading || !playback.canPlay)
+                .disabled(displayMode == .loading || !canPlayThis)
 
                 scrubSlider
             }
 
-            Text("\(formatTime(Int(scrubProgress))) / \(formatTime(playback.durationSeconds))")
+            Text("\(formatTime(Int(scrubProgress))) / \(formatTime(displayDuration))")
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(Theme.ColorToken.textMuted)
 
@@ -80,38 +99,39 @@ struct CityGuideAudioSection: View {
             }
         }
         .guideContentCardStyle()
-        .task(id: audioGuide.id) {
-            playback.configure(
-                guide: audioGuide,
-                hasFullAccess: true,
-                freeTrialSeconds: 0,
-                nowPlayingTitle: audioGuide.titleEn,
-                nowPlayingArtist: guide.titleEn,
-                onTrialEnded: {}
-            )
-            scrubProgress = playback.progress
+        .onAppear {
+            if isActive { scrubProgress = player.progress }
         }
-        .onChange(of: playback.progress) { _, newValue in
-            if !isScrubbing {
-                scrubProgress = newValue
-            }
+        .onChange(of: player.progress) { _, newValue in
+            if isActive, !isScrubbing { scrubProgress = newValue }
         }
-        .onDisappear {
-            if !playback.isPlaying {
-                playback.teardown()
+        .onChange(of: isActive) { _, active in
+            if active {
+                scrubProgress = player.progress
+            } else {
+                scrubProgress = 0
+                isScrubbing = false
             }
         }
     }
 
+    private func startOrToggle() {
+        if isActive {
+            player.togglePlay()
+        } else {
+            player.play(queue: [selfTrack], startIndex: 0)
+        }
+    }
+
     private var scrubSlider: some View {
-        let maxValue = max(Double(playback.durationSeconds), 1)
+        let maxValue = max(Double(displayDuration), 1)
         return Slider(
             value: Binding(
                 get: { min(scrubProgress, maxValue) },
                 set: { newValue in
                     scrubProgress = newValue
-                    if !isScrubbing {
-                        playback.seek(to: newValue)
+                    if isActive, !isScrubbing {
+                        player.seek(to: newValue)
                     }
                 }
             ),
@@ -119,12 +139,16 @@ struct CityGuideAudioSection: View {
             onEditingChanged: { editing in
                 isScrubbing = editing
                 if !editing {
-                    playback.seek(to: scrubProgress)
+                    if isActive {
+                        player.seek(to: scrubProgress)
+                    } else {
+                        player.play(queue: [selfTrack], startIndex: 0)
+                    }
                 }
             }
         )
         .tint(Theme.ColorToken.accent)
-        .disabled(!playback.canPlay && playback.durationSeconds > 0)
+        .disabled(!isActive)
     }
 
     private func formatTime(_ seconds: Int) -> String {

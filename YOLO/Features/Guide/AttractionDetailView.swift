@@ -41,6 +41,35 @@ struct AttractionDetailView: View {
         audioGuides.first(where: \.isMainGuide) ?? audioGuides.first
     }
 
+    /// Attraction-scoped play queue: the attraction's audio guides followed by each sub-area's
+    /// audio, deduplicated by guide id. Powers next/previous and the mini-player's playlist.
+    private var attractionAudioQueue: [AudioTrack] {
+        var seen = Set<String>()
+        var tracks: [AudioTrack] = []
+        for g in audioGuides where seen.insert(g.id).inserted {
+            tracks.append(AudioTrack(
+                guide: g,
+                title: g.titleEn,
+                artist: display.name,
+                attraction: display,
+                subArea: nil,
+                allowsPreview: true
+            ))
+        }
+        for area in subAreas {
+            guard let g = subAreaAudio[area.id], seen.insert(g.id).inserted else { continue }
+            tracks.append(AudioTrack(
+                guide: g,
+                title: g.titleEn,
+                artist: display.name,
+                attraction: display,
+                subArea: area,
+                allowsPreview: true
+            ))
+        }
+        return tracks
+    }
+
     var body: some View {
         Group {
             if isLoading {
@@ -204,7 +233,15 @@ struct AttractionDetailView: View {
         if let guide = mainGuide {
             Text("🎧 Audio Guide")
                 .sectionTitleStyle()
-            AudioGuideSection(attraction: display, guide: guide, allowsPreview: true)
+            let queue = attractionAudioQueue
+            AudioGuideSection(
+                attraction: display,
+                guide: guide,
+                allowsPreview: true,
+                showsUnlockButton: !shouldShowUnlockBar,
+                queue: queue,
+                trackIndex: queue.firstIndex(where: { $0.guide.id == guide.id }) ?? 0
+            )
         }
     }
 
@@ -232,7 +269,8 @@ struct AttractionDetailView: View {
                         freeChars: freeChars,
                         hasAccess: false,
                         attraction: display,
-                        priceTierId: display.priceTierId
+                        priceTierId: display.priceTierId,
+                        showsUnlockButton: !shouldShowUnlockBar
                     )
                 }
             }

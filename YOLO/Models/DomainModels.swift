@@ -1337,8 +1337,11 @@ struct AppSettingsRow: Decodable {
     enum CodingKeys: String, CodingKey {
         case id
         case useRemoteContent
-        case useRemoteAI
-        case useRemoteIAP
+        // `convertFromSnakeCase` maps use_remote_ai → "useRemoteAi" / use_remote_iap → "useRemoteIap"
+        // (only the first letter of each component is capitalised). The raw values must match those
+        // forms exactly, otherwise the keys never resolve and the flags silently decode to false.
+        case useRemoteAI = "useRemoteAi"
+        case useRemoteIAP = "useRemoteIap"
         case supportEmail
         case aboutTitle
         case aboutVersion
@@ -1422,16 +1425,10 @@ struct AppSettingsRow: Decodable {
         return false
     }
 
-    /// `convertFromSnakeCase` maps `use_remote_ai` → `useRemoteAi`, not `useRemoteAI`.
+    /// Key resolution is handled by the CodingKeys raw values (aligned with `convertFromSnakeCase`);
+    /// this just lets `decodeBool` try the one canonical key with bool/int/string tolerance.
     private static func boolKeyCandidates(for key: CodingKeys) -> [CodingKeys] {
-        switch key {
-        case .useRemoteAI:
-            return [.useRemoteAI, CodingKeys(stringValue: "useRemoteAi")].compactMap { $0 }
-        case .useRemoteIAP:
-            return [.useRemoteIAP, CodingKeys(stringValue: "useRemoteIap")].compactMap { $0 }
-        default:
-            return [key]
-        }
+        [key]
     }
 
     var asSettings: AppSettingsRemote {

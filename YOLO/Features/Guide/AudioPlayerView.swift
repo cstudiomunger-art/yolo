@@ -1,10 +1,52 @@
 import AVFoundation
 import Combine
+import Observation
 import SwiftUI
 import UIKit
 
+/// One playable entry in the global audio queue. Carries the routing context needed to
+/// re-resolve access (member / single purchase / parent purchase) and to present the paywall.
+struct AudioTrack: Identifiable, Equatable {
+    let guide: AudioGuide
+    let title: String
+    let artist: String
+    /// Parent attraction (used for paywall routing). Nil for free city audio.
+    let attraction: Attraction?
+    /// Sub-area when the audio belongs to one (paywall uses its purchase flag + parent unlock).
+    let subArea: SubArea?
+    /// Whether a free preview is allowed when locked.
+    let allowsPreview: Bool
+    /// Free content (e.g. city guide audio) bypasses the paywall entirely.
+    let isFree: Bool
+
+    var id: String { guide.id }
+
+    static func == (lhs: AudioTrack, rhs: AudioTrack) -> Bool { lhs.guide.id == rhs.guide.id }
+
+    init(
+        guide: AudioGuide,
+        title: String,
+        artist: String,
+        attraction: Attraction? = nil,
+        subArea: SubArea? = nil,
+        allowsPreview: Bool = true,
+        isFree: Bool = false
+    ) {
+        self.guide = guide
+        self.title = title
+        self.artist = artist
+        self.attraction = attraction
+        self.subArea = subArea
+        self.allowsPreview = allowsPreview
+        self.isFree = isFree
+    }
+}
+
+/// Single, app-wide audio player with a queue. Drives both the inline guide sections and the
+/// floating mini-player. Only one AVPlayer ever plays at a time.
 @MainActor
-final class AudioPlaybackController: ObservableObject {
+@Observable
+final class AudioQueuePlayer {
     enum Mode: Equatable {
         case idle
         case loading
@@ -12,24 +54,51 @@ final class AudioPlaybackController: ObservableObject {
         case unavailable(String)
     }
 
-    @Published private(set) var isPlaying = false
-    @Published private(set) var progress: Double = 0
-    @Published private(set) var mode: Mode = .idle
-    @Published private(set) var durationSeconds: Int = 0
+    // MARK: Observable state
+    private(set) var isPlaying = false
+    private(set) var progress: Double = 0
+    private(set) var mode: Mode = .idle
+    private(set) var durationSeconds: Int = 0
 
-    private var player: AVPlayer?
-    private var playerItem: AVPlayerItem?
-    private var timeObserver: Any?
-    private var statusObservation: NSKeyValueObservation?
-    private var endObserver: NSObjectProtocol?
-    private var hasFullAccess = true
-    private var freeTrialSeconds: Double = 180
-    private var onTrialEnded: (() -> Void)?
-    private var configuredGuideId: String?
-    private var configuredGuide: AudioGuide?
-    private var preferLocalPlayback = true
-    private var nowPlayingTitle = ""
-    private var nowPlayingArtist = ""
+    private(set) var queue: [AudioTrack] = []
+    private(set) var currentIndex: Int = 0
+
+    /// Whether the floating note button is shown.
+    var isVisible = false
+    /// Whether the floating control bar is expanded.
+    var isExpanded = false
+    /// Persisted drag position of the floating button. Nil = default anchor (bottom-trailing).
+    var dragPosition: CGPoint?
+
+    /// Resolves current access for a track (member / purchase / free). Set by AppEnvironment.
+    @ObservationIgnored var resolveAccess: ((AudioTrack) -> (hasFullAccess: Bool, freeTrialSeconds: Double))?
+    /// Fires when a locked preview reaches its cap, so the host can present the paywall.
+    @ObservationIgnored var onTrialEnded: ((AudioTrack) -> Void)?
+
+    // MARK: AVPlayer internals
+    @ObservationIgnored private var player: AVPlayer?
+    @ObservationIgnored private var playerItem: AVPlayerItem?
+    @ObservationIgnored private var timeObserver: Any?
+    @ObservationIgnored private var statusObservation: NSKeyValueObservation?
+    @ObservationIgnored private var endObserver: NSObjectProtocol?
+    @ObservationIgnored private var hasFullAccess = true
+    @ObservationIgnored private var freeTrialSeconds: Double = 180
+    @ObservationIgnored private var configuredGuide: AudioGuide?
+    @ObservationIgnored private var preferLocalPlayback = true
+    @ObservationIgnored private var shouldAutoPlay = false
+    @ObservationIgnored private var pendingSeek: Double?
+    @ObservationIgnored private var nowPlayingTitle = ""
+    @ObservationIgnored private var nowPlayingArtist = ""
+
+    // MARK: Derived
+    var currentTrack: AudioTrack? {
+        queue.indices.contains(currentIndex) ? queue[currentIndex] : nil
+    }
+
+    var currentTrackId: String? { currentTrack?.id }
+
+    var canGoNext: Bool { currentIndex + 1 < queue.count }
+    var canGoPrevious: Bool { currentIndex > 0 }
 
     var canPlay: Bool {
         switch mode {
@@ -42,28 +111,93 @@ final class AudioPlaybackController: ObservableObject {
 
     var previewMaxSeconds: Double { effectiveMaxTime }
 
-    var remainingPreviewSeconds: Double {
-        max(0, effectiveMaxTime - progress)
+    var remainingPreviewSeconds: Double { max(0, effectiveMaxTime - progress) }
+
+    /// Whether the currently loaded track is locked to a preview.
+    var currentTrackIsPreview: Bool { !hasFullAccess }
+
+    // MARK: Queue control
+
+    /// Start playing a queue from the given index, revealing the floating player.
+    func play(queue: [AudioTrack], startIndex: Int) {
+        self.queue = queue
+        currentIndex = max(0, min(startIndex, queue.count - 1))
+        isVisible = true
+        loadCurrent(autoPlay: true)
     }
 
-    func configure(
-        guide: AudioGuide,
-        hasFullAccess: Bool,
-        freeTrialSeconds: Double,
-        nowPlayingTitle: String,
-        nowPlayingArtist: String,
-        onTrialEnded: @escaping () -> Void
-    ) {
-        teardown()
-        configuredGuideId = guide.id
+    func next() {
+        guard canGoNext else { return }
+        currentIndex += 1
+        loadCurrent(autoPlay: true)
+    }
+
+    func previous() {
+        guard canGoPrevious else { return }
+        currentIndex -= 1
+        loadCurrent(autoPlay: true)
+    }
+
+    func playTrack(at index: Int) {
+        guard queue.indices.contains(index) else { return }
+        if index == currentIndex, canPlay {
+            togglePlay()
+            return
+        }
+        currentIndex = index
+        loadCurrent(autoPlay: true)
+    }
+
+    /// X button: stop everything and hide the floating player.
+    func close() {
+        teardownPlayer()
+        progress = 0
+        mode = .idle
+        queue = []
+        currentIndex = 0
+        isVisible = false
+        isExpanded = false
+        AudioNowPlayingService.clear()
+    }
+
+    /// Re-resolve access for the current track (call after a purchase / subscription change).
+    func refreshCurrentTrackAccess() {
+        guard let track = currentTrack, let access = resolveAccess?(track) else { return }
+        updateAccess(hasFullAccess: access.hasFullAccess, freeTrialSeconds: access.freeTrialSeconds)
+    }
+
+    /// Swap to a freshly downloaded/removed local file if the affected guide is playing.
+    func reloadIfCurrent(guideId: String) {
+        guard currentTrack?.guide.id == guideId else { return }
+        let savedProgress = progress
+        let wasPlaying = isPlaying
+        pendingSeek = savedProgress
+        loadCurrent(autoPlay: wasPlaying)
+    }
+
+    private func loadCurrent(autoPlay: Bool) {
+        guard let track = currentTrack else {
+            close()
+            return
+        }
+        let access = resolveAccess?(track) ?? (hasFullAccess: true, freeTrialSeconds: .greatestFiniteMagnitude)
+        configure(track: track, hasFullAccess: access.hasFullAccess, freeTrialSeconds: access.freeTrialSeconds, autoPlay: autoPlay)
+    }
+
+    // MARK: Playback core
+
+    private func configure(track: AudioTrack, hasFullAccess: Bool, freeTrialSeconds: Double, autoPlay: Bool) {
+        teardownPlayer()
+        let guide = track.guide
         configuredGuide = guide
         preferLocalPlayback = true
         self.hasFullAccess = hasFullAccess
         self.freeTrialSeconds = hasFullAccess ? .greatestFiniteMagnitude : freeTrialSeconds
-        self.onTrialEnded = onTrialEnded
-        self.nowPlayingTitle = nowPlayingTitle
-        self.nowPlayingArtist = nowPlayingArtist
+        shouldAutoPlay = autoPlay
+        nowPlayingTitle = track.title
+        nowPlayingArtist = track.artist
         durationSeconds = max(guide.durationSeconds, 1)
+        progress = 0
 
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try? AVAudioSession.sharedInstance().setActive(true)
@@ -102,7 +236,7 @@ final class AudioPlaybackController: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.handlePlaybackEnded(notifyTrial: false)
+                self?.handleTrackFinished()
             }
         }
 
@@ -112,28 +246,6 @@ final class AudioPlaybackController: ObservableObject {
     func updateAccess(hasFullAccess: Bool, freeTrialSeconds: Double) {
         self.hasFullAccess = hasFullAccess
         self.freeTrialSeconds = hasFullAccess ? .greatestFiniteMagnitude : freeTrialSeconds
-    }
-
-    func reconfigureIfNeeded(
-        guide: AudioGuide,
-        hasFullAccess: Bool,
-        freeTrialSeconds: Double,
-        nowPlayingTitle: String,
-        nowPlayingArtist: String
-    ) {
-        guard guide.id == configuredGuideId else { return }
-        let savedProgress = progress
-        let wasPlaying = isPlaying
-        configure(
-            guide: guide,
-            hasFullAccess: hasFullAccess,
-            freeTrialSeconds: freeTrialSeconds,
-            nowPlayingTitle: nowPlayingTitle,
-            nowPlayingArtist: nowPlayingArtist,
-            onTrialEnded: onTrialEnded ?? {}
-        )
-        seek(to: savedProgress)
-        if wasPlaying, canPlay { togglePlay() }
     }
 
     func activeSegmentIndex(in segments: [AudioSegment]) -> Int? {
@@ -156,7 +268,7 @@ final class AudioPlaybackController: ObservableObject {
         guard canPlay else { return }
 
         if !hasFullAccess && progress >= effectiveMaxTime {
-            onTrialEnded?()
+            if let track = currentTrack { onTrialEnded?(track) }
             return
         }
 
@@ -188,18 +300,17 @@ final class AudioPlaybackController: ObservableObject {
         syncNowPlaying()
     }
 
-    func teardown() {
+    /// Tears down the AVPlayer only, keeping the queue + visibility intact (used when switching tracks).
+    private func teardownPlayer() {
         clearPlayerObservers()
         player?.pause()
         player = nil
         playerItem = nil
         isPlaying = false
-        progress = 0
-        mode = .idle
-        configuredGuideId = nil
         configuredGuide = nil
         preferLocalPlayback = true
-        AudioNowPlayingService.clear()
+        shouldAutoPlay = false
+        pendingSeek = nil
     }
 
     private func syncNowPlaying() {
@@ -243,7 +354,15 @@ final class AudioPlaybackController: ObservableObject {
                 durationSeconds = Int(actual.rounded())
             }
             mode = .streaming
+            if let pendingSeek {
+                self.pendingSeek = nil
+                seek(to: pendingSeek)
+            }
             syncNowPlaying()
+            if shouldAutoPlay {
+                shouldAutoPlay = false
+                togglePlay()
+            }
         case .failed:
             fallbackAfterStreamFailure()
         case .unknown:
@@ -262,9 +381,9 @@ final class AudioPlaybackController: ObservableObject {
             let savedProgress = progress
             let wasPlaying = isPlaying
             if let remote = MediaURLResolver.playbackURL(for: guide, preferLocal: false) {
+                shouldAutoPlay = wasPlaying
+                pendingSeek = savedProgress
                 startStreaming(url: remote)
-                seek(to: savedProgress)
-                if wasPlaying, canPlay { togglePlay() }
                 return
             }
         }
@@ -287,12 +406,22 @@ final class AudioPlaybackController: ObservableObject {
         mode = .unavailable(String(localized: "Audio not available yet."))
     }
 
-    private func handlePlaybackEnded(notifyTrial: Bool = true) {
+    /// A locked preview reached its cap: pause and surface the paywall.
+    private func handleTrialEnded() {
         isPlaying = false
         progress = effectiveMaxTime
         player?.pause()
-        if notifyTrial, !hasFullAccess, freeTrialSeconds < .greatestFiniteMagnitude, progress >= freeTrialSeconds - 0.5 {
-            onTrialEnded?()
+        if let track = currentTrack { onTrialEnded?(track) }
+    }
+
+    /// A full track played to the end: auto-advance to the next queue item if any.
+    private func handleTrackFinished() {
+        isPlaying = false
+        if canGoNext {
+            next()
+        } else {
+            progress = Double(durationSeconds)
+            player?.pause()
         }
     }
 
@@ -307,8 +436,8 @@ final class AudioPlaybackController: ObservableObject {
                 self.progress = seconds
                 self.syncNowPlaying()
 
-                if seconds >= self.effectiveMaxTime {
-                    self.handlePlaybackEnded()
+                if !self.hasFullAccess, seconds >= self.effectiveMaxTime {
+                    self.handleTrialEnded()
                 }
             }
         }

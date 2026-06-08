@@ -22,14 +22,16 @@ final class ContentModeService {
         AppConfig.isSupabaseConfigured && !AppConfig.forceBundled
     }
 
-    /// Raw CMS flag (`app_settings.use_remote_iap`). For gating decisions use `effectiveUseRemoteIAP`.
-    private(set) var useRemoteIAP = false
+    /// CMS flag (`app_settings.use_remote_iap`) controlling the paywall. For gating decisions use
+    /// `effectiveUseRemoteIAP`. Defaults to `true` so the paywall is fail-safe locked before settings
+    /// load (and on fetch failure with no cache) — avoiding the "everyone gets free access" regression.
+    /// Once settings load, this follows the admin toggle (`apply(remote:)` / `applyFlagsFallback`).
+    private(set) var useRemoteIAP = true
 
-    /// Default-on: paywall is active whenever Supabase is configured (unless FORCE_BUNDLED / Mock).
-    /// Independent of fetch timing — so the paywall works even before settings load or if the
-    /// `app_settings` row hasn't been migrated yet. Demo builds disable it via FORCE_BUNDLED / USE_MOCK.
+    /// Paywall is active when Supabase is configured (not FORCE_BUNDLED / Mock) AND the admin has
+    /// kept `use_remote_iap` on. Admin can disable the paywall by turning that flag off in the CMS.
     var effectiveUseRemoteIAP: Bool {
-        AppConfig.isSupabaseConfigured && !AppConfig.forceBundled && !AppConfig.useMock
+        AppConfig.isSupabaseConfigured && !AppConfig.forceBundled && !AppConfig.useMock && useRemoteIAP
     }
     private(set) var branding: AppBranding = .fallback
     private(set) var aiSettings: AISettings = .fallback

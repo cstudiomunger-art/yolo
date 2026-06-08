@@ -82,6 +82,11 @@ struct MainTabView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
             }
+
+            if appEnv.audioPlayer.isVisible {
+                MiniAudioPlayerView(player: appEnv.audioPlayer)
+                    .zIndex(100)
+            }
         }
         .background(Theme.ColorToken.background)
         .onAppear {

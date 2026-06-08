@@ -452,10 +452,12 @@ final class UserPreferencesStore {
         return false
     }
 
+    /// A subscription counts as active only with a plan id AND a future expiry. A dangling
+    /// `subscriptionPlanId` without an expiry must NOT grant lifetime access (one-time attraction
+    /// purchases are tracked via `purchasedAttractionIds`, not here).
     var isSubscriptionActive: Bool {
-        guard subscriptionPlanId != nil else { return false }
-        if let exp = subscriptionExpiresAt { return exp > .now }
-        return true
+        guard subscriptionPlanId != nil, let exp = subscriptionExpiresAt else { return false }
+        return exp > .now
     }
 
     func purchaseAttraction(_ attractionId: String) {

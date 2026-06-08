@@ -4,6 +4,26 @@
     "" : {
 
     },
+    "Playlist" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放列表"
+          }
+        }
+      }
+    },
+    "Preview · unlock the full guide" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试听 · 解锁完整导览"
+          }
+        }
+      }
+    },
     "  +%lld more" : {
 
     },
@@ -383,6 +403,7 @@
 
     },
     "★ Best Value" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2233,6 +2254,7 @@
 
     },
     "Restore Purchases" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {

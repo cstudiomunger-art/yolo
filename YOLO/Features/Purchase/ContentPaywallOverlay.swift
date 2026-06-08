@@ -13,6 +13,9 @@ struct ContentPaywallOverlay: View {
     var priceTierId: String?
     var purchaseTargetId: String?
     var displayTitle: String?
+    /// Hide the inline unlock CTA when the host screen already provides one (e.g. the
+    /// attraction detail page's sticky bottom bar). Sub-area pages have no bar, so default on.
+    var showsUnlockButton: Bool = true
     var onUnlock: (() -> Void)?
 
     @State private var showPaywall = false
@@ -49,18 +52,21 @@ struct ContentPaywallOverlay: View {
                             .foregroundStyle(Theme.ColorToken.textMuted)
                     }
 
-                    Button {
-                        showPaywall = true
-                    } label: {
-                        Text(String(localized: "Unlock the Guide →"))
-                            .font(Theme.FontToken.inter(12, weight: .medium))
-                            .tracking(0.5)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Theme.ColorToken.textPrimary)
+                    if showsUnlockButton {
+                        Button {
+                            showPaywall = true
+                        } label: {
+                            Text(String(localized: "Unlock the Guide →"))
+                                .font(Theme.FontToken.inter(12, weight: .medium))
+                                .tracking(0.8)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 11)
+                                .background(Theme.ColorToken.textPrimary)
+                        }
+                        .buttonStyle(.plain)
+                        .fixedSize()
                     }
-                    .buttonStyle(.plain)
                 }
                 .padding(.top, 6)
             }

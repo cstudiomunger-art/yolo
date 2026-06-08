@@ -11,6 +11,8 @@ final class AppEnvironment {
     let navigation: AppNavigation
     let profileSync: ProfileSyncService
     let purchase: PurchaseService
+    /// Single, app-wide audio player shared by every guide section and the floating mini-player.
+    let audioPlayer = AudioQueuePlayer()
     private(set) var content: any ContentRepositoryProtocol
     /// 内容源或 CMS 配置变更时递增，用于驱动各 Tab 重新加载远程数据。
     private(set) var contentRevision = 0
@@ -36,6 +38,7 @@ final class AppEnvironment {
         self.content = BundledContentRepository()
         resolvedSync.bind(preferences: resolvedPreferences, auth: auth)
         purchase.bind(preferences: resolvedPreferences, auth: auth, profileSync: resolvedSync)
+        bindAudioPlayer()
         resolvedPreferences.onSyncableChange = { [weak self] in
             guard let self else { return }
             Task { await self.profileSync.schedulePush() }
@@ -54,6 +57,37 @@ final class AppEnvironment {
                 await self.profileSync.syncItineraries()
                 await self.rescheduleTripReminders()
             }
+        }
+    }
+
+    /// Wire the shared audio player so it can re-resolve per-track access (member / single /
+    /// parent purchase) and read the free-preview length from branding. Mirrors the access
+    /// logic in `AudioGuideSection.hasFullAccess`.
+    private func bindAudioPlayer() {
+        audioPlayer.resolveAccess = { [weak self] track in
+            guard let self else { return (hasFullAccess: true, freeTrialSeconds: 0) }
+            if track.isFree || !self.contentMode.effectiveUseRemoteIAP {
+                return (hasFullAccess: true, freeTrialSeconds: .greatestFiniteMagnitude)
+            }
+            let hasAccess: Bool
+            if let sub = track.subArea {
+                hasAccess = self.purchase.hasContentAccess(
+                    \.audioGuides,
+                    requiresPurchase: sub.requiresPurchase,
+                    contentId: sub.id,
+                    parentId: sub.attractionId
+                )
+            } else if let attraction = track.attraction {
+                hasAccess = self.purchase.hasContentAccess(
+                    \.audioGuides,
+                    requiresPurchase: attraction.requiresPurchase,
+                    contentId: attraction.id
+                )
+            } else {
+                hasAccess = false
+            }
+            let trial = track.allowsPreview ? Double(self.contentMode.branding.freeAudioPreviewSeconds) : 0
+            return (hasFullAccess: hasAccess, freeTrialSeconds: trial)
         }
     }
 
@@ -96,6 +130,7 @@ final class AppEnvironment {
     }
 
     func signOutAndReset() async {
+        audioPlayer.close()
         await profileSync.syncItineraries()
         await purchase.logout()
         try? await auth.signOut()

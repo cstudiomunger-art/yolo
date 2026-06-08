@@ -11,6 +11,7 @@ struct SubAreaDetailView: View {
     @State private var audioGuide: AudioGuide?
     @State private var isLoading = true
     @State private var fullScreenImagePath: String?
+    @State private var showPaywall = false
 
     var body: some View {
         Group {
@@ -38,6 +39,23 @@ struct SubAreaDetailView: View {
                         .foregroundStyle(Theme.ColorToken.textMuted)
                         .lineLimit(1)
                 }
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            if let area = unlockableSubArea {
+                unlockStickyBar(for: area)
+            }
+        }
+        .sheet(isPresented: $showPaywall) {
+            if let area = subArea, let attraction {
+                MembershipPlansView(
+                    attraction: attraction,
+                    guide: audioGuide,
+                    priceTierId: area.priceTierId,
+                    purchaseTargetId: area.id,
+                    displayTitle: area.nameEn
+                )
+                .environment(appEnv)
             }
         }
         .task(id: route.subAreaId) { await load() }
@@ -83,6 +101,7 @@ struct SubAreaDetailView: View {
                             route.attractionName
                         ),
                         allowsPreview: true,
+                        showsUnlockButton: false,
                         subArea: area
                     )
                 }
@@ -95,7 +114,8 @@ struct SubAreaDetailView: View {
                         attraction: attraction,
                         priceTierId: area.priceTierId,
                         purchaseTargetId: area.id,
-                        displayTitle: area.nameEn
+                        displayTitle: area.nameEn,
+                        showsUnlockButton: false
                     )
                     .guideContentCardStyle()
                 } else if !area.contentBlocks.isEmpty {
@@ -110,6 +130,59 @@ struct SubAreaDetailView: View {
                 }
             }
             .padding(Theme.screenPadding)
+        }
+    }
+
+    /// The sub-area to gate behind the sticky bottom unlock bar: only when the parent
+    /// attraction is loaded (needed to present the paywall) and the area isn't unlocked yet.
+    private var unlockableSubArea: SubArea? {
+        guard !isLoading, attraction != nil, let area = subArea else { return nil }
+        return subAreaHasFullAccess(area) ? nil : area
+    }
+
+    /// Whether both the audio and text of a sub-area are unlocked (a single purchase unlocks both).
+    private func subAreaHasFullAccess(_ area: SubArea) -> Bool {
+        if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
+        let audioOK = appEnv.purchase.hasContentAccess(
+            \.audioGuides, requiresPurchase: area.requiresPurchase,
+            contentId: area.id, parentId: area.attractionId
+        )
+        let textOK = appEnv.purchase.hasContentAccess(
+            \.textContent, requiresPurchase: area.requiresPurchase,
+            contentId: area.id, parentId: area.attractionId
+        )
+        return audioOK && textOK
+    }
+
+    private func unlockStickyBar(for area: SubArea) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(String(localized: "Unlock this Guide"))
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                Text(String(localized: "audio + full article"))
+                    .font(Theme.FontToken.inter(10))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            Spacer()
+            Button {
+                showPaywall = true
+            } label: {
+                Text(String(localized: "Unlock"))
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                    .tracking(0.8)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 11)
+                    .background(Theme.ColorToken.textPrimary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, Theme.screenPadding)
+        .padding(.vertical, 11)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Theme.ColorToken.border).frame(height: 1)
         }
     }
 
