@@ -49,6 +49,31 @@ struct LoginView: View {
 
     @ViewBuilder
     private var authFormSections: some View {
+        if !AppConfig.useMock {
+            Section {
+                AppleSignInButton(
+                    onStart: {
+                        clearMessages()
+                        isLoading = true
+                    },
+                    onSuccess: {
+                        isLoading = false
+                        dismiss()
+                    },
+                    onError: { message in
+                        isLoading = false
+                        errorMessage = message
+                    }
+                )
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+            } footer: {
+                Text(String(localized: "or continue with email"))
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+            }
+        }
+
         Section {
             Picker(String(localized: "Account"), selection: $mode) {
                 ForEach(AuthMode.allCases) { option in

@@ -4,106 +4,6 @@
     "" : {
 
     },
-    "Day · in progress" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "进行中"
-          }
-        }
-      }
-    },
-    "Day %lld of %lld" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "第 %lld 天 / 共 %lld 天"
-          }
-        }
-      }
-    },
-    "Days until start" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "距开始天数"
-          }
-        }
-      }
-    },
-    "Ended" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已结束"
-          }
-        }
-      }
-    },
-    "Starts in %lld days" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 天后开始"
-          }
-        }
-      }
-    },
-    "Trip ended" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程已结束"
-          }
-        }
-      }
-    },
-    "Welcome back!" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "欢迎回家！"
-          }
-        }
-      }
-    },
-    "Your trip “%@” has ended. Tap to revisit your itinerary." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程「%@」已结束，点按回顾你的行程。"
-          }
-        }
-      }
-    },
-    "Playlist" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "播放列表"
-          }
-        }
-      }
-    },
-    "Preview · unlock the full guide" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "试听 · 解锁完整导览"
-          }
-        }
-      }
-    },
     "  +%lld more" : {
 
     },
@@ -835,6 +735,16 @@
     "Added to Day %lld" : {
 
     },
+    "Apple sign-in failed. Please try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple 登录失败，请重试。"
+          }
+        }
+      }
+    },
     "Agree to terms and privacy policy" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1319,12 +1229,32 @@
         }
       }
     },
+    "Day · in progress" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进行中"
+          }
+        }
+      }
+    },
     "Day %lld · %@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Day %1$lld · %2$@"
+          }
+        }
+      }
+    },
+    "Day %lld of %lld" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %lld 天 / 共 %lld 天"
           }
         }
       }
@@ -1346,6 +1276,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "距离出发"
+          }
+        }
+      }
+    },
+    "Days until start" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "距开始天数"
           }
         }
       }
@@ -1510,6 +1450,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "结束日期"
+          }
+        }
+      }
+    },
+    "Ended" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已结束"
           }
         }
       }
@@ -1961,6 +1911,16 @@
     "Or tell us what happened" : {
 
     },
+    "or continue with email" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "或使用邮箱登录"
+          }
+        }
+      }
+    },
     "Pack Before You Go" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2090,6 +2050,16 @@
         }
       }
     },
+    "Playlist" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "播放列表"
+          }
+        }
+      }
+    },
     "Please wait %lld seconds before requesting another email." : {
       "localizations" : {
         "zh-Hans" : {
@@ -2154,6 +2124,16 @@
     },
     "Preview" : {
 
+    },
+    "Preview · unlock the full guide" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试听 · 解锁完整导览"
+          }
+        }
+      }
     },
     "Privacy Policy" : {
 
@@ -2566,6 +2546,16 @@
     "Start your prep checklist before you go" : {
 
     },
+    "Starts in %lld days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 天后开始"
+          }
+        }
+      }
+    },
     "Static · AI" : {
 
     },
@@ -2715,6 +2705,16 @@
     },
     "Traveler" : {
 
+    },
+    "Trip ended" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程已结束"
+          }
+        }
+      }
     },
     "Trip not found" : {
 
@@ -2914,6 +2914,16 @@
     "We've received your request. Refunds are typically processed by Apple within 48 hours." : {
 
     },
+    "Welcome back!" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "欢迎回家！"
+          }
+        }
+      }
+    },
     "What's next?" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3011,6 +3021,16 @@
     "Your Trip" : {
 
     },
+    "Your trip “%@” has ended. Tap to revisit your itinerary." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程「%@」已结束，点按回顾你的行程。"
+          }
+        }
+      }
+    },
     "Your Trip ★" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3035,6 +3055,9 @@
 
     },
     "文化贴士" : {
+
+    },
+    "请先登录后再使用 AI 助手。" : {
 
     },
     "退出登录" : {
