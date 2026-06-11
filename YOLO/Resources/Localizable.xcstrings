@@ -4,6 +4,86 @@
     "" : {
 
     },
+    "Day · in progress" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进行中"
+          }
+        }
+      }
+    },
+    "Day %lld of %lld" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %lld 天 / 共 %lld 天"
+          }
+        }
+      }
+    },
+    "Days until start" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "距开始天数"
+          }
+        }
+      }
+    },
+    "Ended" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已结束"
+          }
+        }
+      }
+    },
+    "Starts in %lld days" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 天后开始"
+          }
+        }
+      }
+    },
+    "Trip ended" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程已结束"
+          }
+        }
+      }
+    },
+    "Welcome back!" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "欢迎回家！"
+          }
+        }
+      }
+    },
+    "Your trip “%@” has ended. Tap to revisit your itinerary." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程「%@」已结束，点按回顾你的行程。"
+          }
+        }
+      }
+    },
     "Playlist" : {
       "localizations" : {
         "zh-Hans" : {

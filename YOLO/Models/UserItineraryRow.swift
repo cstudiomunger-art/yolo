@@ -26,8 +26,8 @@ struct UserItineraryRow: Codable, Sendable {
             id: trip.id,
             userId: userId,
             title: trip.title,
-            startDate: nil,
-            endDate: nil,
+            startDate: trip.startDate.map(Self.formatDateOnly),
+            endDate: trip.endDate.map(Self.formatDateOnly),
             cities: Self.extractCityIds(from: trip),
             payload: trip,
             isDeleted: isDeleted,
@@ -40,7 +40,27 @@ struct UserItineraryRow: Codable, Sendable {
         var trip = payload
         trip.shareSlug = shareSlug
         trip.isShared = isShared
+        // payload 通常已带日期；老行程从 DATE 列兜底回填。
+        if trip.startDate == nil, let s = startDate { trip.startDate = Self.parseDateOnly(s) }
+        if trip.endDate == nil, let e = endDate { trip.endDate = Self.parseDateOnly(e) }
         return trip
+    }
+
+    private static func dateOnlyFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }
+
+    private static func formatDateOnly(_ date: Date) -> String {
+        dateOnlyFormatter().string(from: date)
+    }
+
+    private static func parseDateOnly(_ string: String) -> Date? {
+        dateOnlyFormatter().date(from: string)
     }
 
     private static func extractCityIds(from trip: SampleItinerary) -> [String] {

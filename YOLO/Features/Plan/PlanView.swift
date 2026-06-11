@@ -204,10 +204,16 @@ struct PlanView: View {
             || (appEnv.preferences.activeItineraryId == nil && savedTrips.first?.id == trip.id)
 
         return VStack(alignment: .leading, spacing: 8) {
-            if isActive {
-                Text(String(localized: "ACTIVE"))
-                    .font(Theme.FontToken.inter(9, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.accent)
+            HStack(spacing: 8) {
+                if isActive {
+                    Text(String(localized: "ACTIVE"))
+                        .font(Theme.FontToken.inter(9, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.accent)
+                }
+                if let status = trip.tripStatus() {
+                    tripStatusPill(status)
+                }
+                Spacer(minLength: 0)
             }
             Text(trip.title)
                 .font(Theme.FontToken.playfair(16, weight: .semibold))
@@ -231,6 +237,35 @@ struct PlanView: View {
             }
         }
         .padding(.vertical, 6)
+    }
+
+    @ViewBuilder
+    private func tripStatusPill(_ status: TripStatus) -> some View {
+        Text(tripStatusLabel(status))
+            .font(Theme.FontToken.inter(9, weight: .semibold))
+            .foregroundStyle(tripStatusColor(status))
+            .padding(.horizontal, 7)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(tripStatusColor(status).opacity(0.12)))
+    }
+
+    private func tripStatusLabel(_ status: TripStatus) -> String {
+        switch status {
+        case .upcoming(let days):
+            return String(format: String(localized: "Starts in %lld days"), days)
+        case .ongoing(let day, let total):
+            return String(format: String(localized: "Day %lld of %lld"), day, total)
+        case .ended:
+            return String(localized: "Ended")
+        }
+    }
+
+    private func tripStatusColor(_ status: TripStatus) -> Color {
+        switch status {
+        case .upcoming: return Theme.ColorToken.accent
+        case .ongoing: return Theme.ColorToken.success
+        case .ended: return Theme.ColorToken.textMuted
+        }
     }
 
     private func reloadPrepProgress() async {

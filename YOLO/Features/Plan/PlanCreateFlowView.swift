@@ -557,7 +557,9 @@ struct PlanCreateFlowView: View {
             meta: PlanTripDateMath.formatTripMeta(arrival: arrivalDate, departure: departureDate),
             routeSummary: route,
             estimatedBudget: trip.estimatedBudget,
-            days: days
+            days: days,
+            startDate: arrivalDate,
+            endDate: departureDate
         )
     }
 

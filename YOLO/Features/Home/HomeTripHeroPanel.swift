@@ -66,6 +66,7 @@ struct HomeTripHeroPanel: View {
             title: String(localized: "Your China adventure starts here"),
             datesLine: Self.formatDepartureDateOnly(departureDate),
             budgetLine: nil,
+            status: nil,
             prepCompleted: prepCompleted,
             prepTotal: prepTotal,
             primaryTitle: String(localized: "Plan My First Trip"),
@@ -82,6 +83,7 @@ struct HomeTripHeroPanel: View {
             title: trip.title,
             datesLine: trip.meta,
             budgetLine: budget.isEmpty ? nil : budget,
+            status: trip.tripStatus(),
             prepCompleted: prepCompleted,
             prepTotal: prepTotal,
             primaryTitle: String(localized: "View Itinerary"),
@@ -105,6 +107,7 @@ struct HomeTripHeroPanel: View {
         let title: String
         let datesLine: String?
         let budgetLine: String?
+        let status: TripStatus?
         let prepCompleted: Int
         let prepTotal: Int
         let primaryTitle: String
@@ -124,6 +127,7 @@ struct HomeTripHeroPanel: View {
             HStack(alignment: .top, spacing: 16) {
                 HomeDepartureCountdownBlock(
                     daysUntilDeparture: daysUntilDeparture,
+                    status: content.status,
                     onTap: onSetDeparture
                 )
                 .frame(width: countdownColumnWidth, alignment: .leading)

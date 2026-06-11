@@ -3,19 +3,21 @@ import SwiftUI
 /// Tappable departure countdown column (left side of hero card).
 struct HomeDepartureCountdownBlock: View {
     let daysUntilDeparture: Int
+    /// 当前卡片对应行程的状态。nil（如空状态卡）时回退为出发倒计时。
+    var status: TripStatus?
     var onTap: () -> Void = {}
 
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("\(daysUntilDeparture)")
+                Text(bigText)
                     .font(Theme.FontToken.playfair(56, weight: .bold))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
                     .lineSpacing(0)
-                    .minimumScaleFactor(0.6)
+                    .minimumScaleFactor(0.5)
                     .lineLimit(1)
 
-                Text(String(localized: "Days until departure"))
+                Text(caption)
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textSecondary)
                     .textCase(.uppercase)
@@ -26,9 +28,27 @@ struct HomeDepartureCountdownBlock: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(String(localized: "Days until departure"))
-        .accessibilityValue("\(daysUntilDeparture)")
+        .accessibilityLabel(caption)
+        .accessibilityValue(bigText)
         .accessibilityHint(String(localized: "Double tap to change departure date"))
+    }
+
+    private var bigText: String {
+        switch status {
+        case .ongoing(let day, _): return "\(day)"
+        case .ended: return "✓"
+        case .upcoming(let days): return "\(days)"
+        case nil: return "\(daysUntilDeparture)"
+        }
+    }
+
+    private var caption: String {
+        switch status {
+        case .ongoing: return String(localized: "Day · in progress")
+        case .ended: return String(localized: "Trip ended")
+        case .upcoming: return String(localized: "Days until start")
+        case nil: return String(localized: "Days until departure")
+        }
     }
 }
 

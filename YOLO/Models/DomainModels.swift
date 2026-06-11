@@ -877,6 +877,10 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
     let days: [ItineraryDay]
     var shareSlug: String?
     var isShared: Bool
+    /// 行程首日（到达日）。新建行程写入；老行程可能为 nil（回退到 meta 解析）。
+    var startDate: Date?
+    /// 行程末日（离开日）。
+    var endDate: Date?
 
     init(
         id: String,
@@ -886,7 +890,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         estimatedBudget: String,
         days: [ItineraryDay],
         shareSlug: String? = nil,
-        isShared: Bool = false
+        isShared: Bool = false,
+        startDate: Date? = nil,
+        endDate: Date? = nil
     ) {
         self.id = id
         self.title = title
@@ -896,6 +902,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         self.days = days
         self.shareSlug = shareSlug
         self.isShared = isShared
+        self.startDate = startDate
+        self.endDate = endDate
     }
 
     init(from decoder: Decoder) throws {
@@ -908,10 +916,12 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         days = try c.decode([ItineraryDay].self, forKey: .days)
         shareSlug = try c.decodeIfPresent(String.self, forKey: .shareSlug)
         isShared = try c.decodeIfPresent(Bool.self, forKey: .isShared) ?? false
+        startDate = try c.decodeIfPresent(Date.self, forKey: .startDate)
+        endDate = try c.decodeIfPresent(Date.self, forKey: .endDate)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, title, meta, routeSummary, estimatedBudget, days, shareSlug, isShared
+        case id, title, meta, routeSummary, estimatedBudget, days, shareSlug, isShared, startDate, endDate
     }
 }
 
