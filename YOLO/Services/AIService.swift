@@ -14,6 +14,7 @@ enum AIService {
         guard AppConfig.isSupabaseConfigured, !AppConfig.forceBundled else {
             return offlineHint
         }
+        guard isAuthenticated else { return loginRequiredHint }
         let payload = AssistantChatRequest(
             type: "assistant_chat",
             message: message,
@@ -43,13 +44,17 @@ enum AIService {
         guard AppConfig.isSupabaseConfigured, !AppConfig.forceBundled else {
             onChunk(offlineHint); return
         }
+        // ai-complete 现要求登录用户 JWT（verify_jwt=true）；用当前会话的 access token。
+        guard let accessToken = try? await SupabaseManager.shared.auth.session.accessToken else {
+            onChunk(loginRequiredHint); return
+        }
         var request = URLRequest(
             url: AppConfig.supabaseURL.appendingPathComponent("functions/v1/ai-complete")
         )
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(AppConfig.supabaseAnonKey, forHTTPHeaderField: "apikey")
-        request.setValue("Bearer \(AppConfig.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 90
         let payload = AssistantChatRequest(
             type: "assistant_chat",
@@ -90,7 +95,7 @@ enum AIService {
         useRemoteAI: Bool,
         userNotes: String? = nil
     ) async throws -> SampleItinerary {
-        if useRemoteAI, AppConfig.isSupabaseConfigured, !AppConfig.forceBundled {
+        if useRemoteAI, isAuthenticated, AppConfig.isSupabaseConfigured, !AppConfig.forceBundled {
             let payload = ItineraryRequest(
                 type: "itinerary",
                 cities: cities,
@@ -117,7 +122,7 @@ enum AIService {
         cities: [String],
         userNotes: String? = nil
     ) async throws -> SampleItinerary {
-        if useRemoteAI, AppConfig.isSupabaseConfigured, !AppConfig.forceBundled {
+        if useRemoteAI, isAuthenticated, AppConfig.isSupabaseConfigured, !AppConfig.forceBundled {
             return try await generateItinerary(
                 content: content,
                 cities: cities.isEmpty ? ["beijing"] : cities,
@@ -182,6 +187,15 @@ enum AIService {
 
     private static var offlineHint: String {
         "当前为离线/演示模式，无法调用 AI。请在 CMS 开启「远程 AI」并配置 Supabase。"
+    }
+
+    /// ai-complete 要求登录用户 JWT（verify_jwt=true）；游客一律走本地兜底，不调用远程。
+    private static var isAuthenticated: Bool {
+        SupabaseManager.shared.auth.currentSession != nil
+    }
+
+    private static var loginRequiredHint: String {
+        String(localized: "请先登录后再使用 AI 助手。")
     }
 }
 

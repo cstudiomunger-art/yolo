@@ -41,6 +41,19 @@ serve(async (req) => {
   }
 
   const admin = createClient(supabaseUrl, serviceRoleKey);
+
+  // 删除该用户的头像文件（avatars/{userId}/...）。失败不阻断删号。
+  try {
+    const { data: files } = await admin.storage.from("avatars").list(userData.user.id);
+    if (files?.length) {
+      await admin.storage
+        .from("avatars")
+        .remove(files.map((f) => `${userData.user.id}/${f.name}`));
+    }
+  } catch (_) {
+    // 头像清理失败可忽略：账号仍会被删除。
+  }
+
   const { error: deleteError } = await admin.auth.admin.deleteUser(userData.user.id);
   if (deleteError) {
     return json({ error: deleteError.message }, 500);

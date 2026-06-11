@@ -54,9 +54,17 @@
         if (meta) html += '<p class="meta">' + esc(meta) + "</p>";
         const days = trip.days || [];
         for (const day of days) {
-          html += '<section class="day"><h2>' + esc(day.dateLabel || "") + "</h2><ul>";
-          for (const act of day.activities || []) {
+          // payload JSON is snake_case (iOS encodes with .convertToSnakeCase);
+          // keep camelCase fallbacks for any legacy rows.
+          const label = day.date_label || day.dateLabel || "";
+          const acts = day.activities || [];
+          const expItems = day.experience_items || day.experienceItems || [];
+          html += '<section class="day"><h2>' + esc(label) + "</h2><ul>";
+          for (const act of acts) {
             html += "<li>" + esc(act.name || "") + "</li>";
+          }
+          for (const item of expItems) {
+            html += "<li>" + esc(item) + "</li>";
           }
           html += "</ul></section>";
         }

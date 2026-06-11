@@ -5,8 +5,8 @@
 project_id = "edwvrriuwzaaqznklrgi"
 
 [functions.ai-complete]
-# App 助手可在未登录时使用；鉴权依赖 anon key + 服务端 Secrets
-verify_jwt = false
+# 仅登录用户可用：平台校验用户 JWT（游客在 App 内自动走本地兜底，不调用本函数）
+verify_jwt = true
 
 [functions.delete-account]
 # 仅已登录用户可调用；函数内再用 service role 删除 auth.users
