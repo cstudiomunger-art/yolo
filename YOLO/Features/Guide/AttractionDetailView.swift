@@ -210,8 +210,12 @@ struct AttractionDetailView: View {
 
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(display.name)
-                .font(Theme.FontToken.playfair(22, weight: .semibold))
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(display.name)
+                    .font(Theme.FontToken.playfair(22, weight: .semibold))
+                Spacer(minLength: 8)
+                FavoriteAttractionButton(attraction: display)
+            }
             Text(display.chineseName)
                 .font(Theme.FontToken.inter(13))
                 .foregroundStyle(Theme.ColorToken.textMuted)

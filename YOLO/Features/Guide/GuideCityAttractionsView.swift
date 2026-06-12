@@ -99,13 +99,9 @@ struct GuideCityAttractionsView: View {
             .padding(.top, cityGuides.isEmpty ? 14 : 10)
 
             ForEach(attractions) { attraction in
-                Button {
+                AttractionRowView(attraction: attraction) {
                     onSelectAttraction(attraction)
-                } label: {
-                    AttractionRowView(attraction: attraction)
-                        .contentShape(Rectangle())
                 }
-                .buttonStyle(.plain)
             }
         }
     }
@@ -161,6 +157,7 @@ struct AttractionRowView: View {
     private static let thumbnailSize: CGFloat = 92
 
     let attraction: Attraction
+    var onSelect: (() -> Void)?
 
     private var coverPath: String? {
         attraction.coverImages.first ?? attraction.coverImagePath
@@ -171,10 +168,14 @@ struct AttractionRowView: View {
             coverThumbnail
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(attraction.name)
-                    .font(Theme.FontToken.inter(14, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.textPrimary)
-                    .lineLimit(2)
+                HStack(alignment: .top, spacing: 4) {
+                    Text(attraction.name)
+                        .font(Theme.FontToken.inter(14, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.textPrimary)
+                        .lineLimit(2)
+                    Spacer(minLength: 4)
+                    FavoriteAttractionButton(attraction: attraction)
+                }
                 if let short = attraction.shortDescription, !short.isEmpty {
                     Text(HTMLContentView.plainText(from: short))
                         .font(Theme.FontToken.inter(12))
@@ -193,6 +194,10 @@ struct AttractionRowView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onSelect?()
         }
         .padding(.vertical, 12)
         .overlay(alignment: .bottom) {

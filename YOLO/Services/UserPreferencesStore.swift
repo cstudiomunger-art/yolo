@@ -138,6 +138,13 @@ final class UserPreferencesStore {
         }
     }
 
+    /// Saved attractions, newest first.
+    var favoriteAttractions: [FavoriteAttractionRecord] {
+        didSet {
+            persistFavoriteAttractions()
+        }
+    }
+
     var subscriptionPlanId: String? {
         didSet {
             UserDefaults.standard.set(subscriptionPlanId, forKey: Keys.subscriptionPlanId)
@@ -196,6 +203,7 @@ final class UserPreferencesStore {
         activeItineraryId = itineraryLoad.activeId
         savedItineraries = itineraryLoad.itineraries
         purchasedAttractionIds = Set(UserDefaults.standard.stringArray(forKey: Keys.purchasedAttractionIds) ?? [])
+        favoriteAttractions = Self.loadFavoriteAttractions()
         subscriptionPlanId = UserDefaults.standard.string(forKey: Keys.subscriptionPlanId)
         if let exp = UserDefaults.standard.object(forKey: Keys.subscriptionExpiresAt) as? TimeInterval {
             subscriptionExpiresAt = Date(timeIntervalSince1970: exp)
@@ -242,6 +250,7 @@ final class UserPreferencesStore {
             Keys.introOnboardingDone,
             Keys.notificationOnboardingDone,
             Keys.guestMode,
+            Keys.favoriteAttractions,
         ] {
             UserDefaults.standard.removeObject(forKey: key)
         }
@@ -261,8 +270,38 @@ final class UserPreferencesStore {
         avatarStatus = "none"
         clearItinerarySessionState()
         purchasedAttractionIds = []
+        favoriteAttractions = []
         appLanguage = AppLanguage.resolved(fromStoredValue: nil)
         cachedVisaRule = nil
+    }
+
+    func isFavorite(attractionId: String) -> Bool {
+        favoriteAttractions.contains { $0.attractionId == attractionId }
+    }
+
+    func toggleFavorite(attraction: Attraction) {
+        if let index = favoriteAttractions.firstIndex(where: { $0.attractionId == attraction.id }) {
+            favoriteAttractions.remove(at: index)
+        } else {
+            let record = FavoriteAttractionRecord(
+                attractionId: attraction.id,
+                cityId: attraction.cityId
+            )
+            favoriteAttractions.insert(record, at: 0)
+        }
+    }
+
+    private static func loadFavoriteAttractions() -> [FavoriteAttractionRecord] {
+        guard let data = UserDefaults.standard.data(forKey: Keys.favoriteAttractions),
+              let decoded = try? JSONDecoder().decode([FavoriteAttractionRecord].self, from: data)
+        else { return [] }
+        return decoded
+    }
+
+    private func persistFavoriteAttractions() {
+        if let data = try? JSONEncoder().encode(favoriteAttractions) {
+            UserDefaults.standard.set(data, forKey: Keys.favoriteAttractions)
+        }
     }
 
     func markIntroOnboardingCompleted() {

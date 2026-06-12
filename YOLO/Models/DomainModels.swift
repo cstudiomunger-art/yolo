@@ -365,6 +365,12 @@ struct NearbyPlace: Codable, Hashable {
     let distance: String
 }
 
+struct FavoriteAttractionRecord: Codable, Equatable, Identifiable {
+    var id: String { attractionId }
+    let attractionId: String
+    let cityId: String
+}
+
 struct AudioGuide: Identifiable, Codable {
     let id: String
     let attractionId: String

@@ -29,6 +29,7 @@ enum GuideRoute: Hashable {
     case cityGuide(GuideCityGuideRoute)
     case cultureTips
     case cultureTip(String)
+    case favorites
     case attraction(GuideAttractionRoute)
     case subArea(GuideSubAreaRoute)
 }
