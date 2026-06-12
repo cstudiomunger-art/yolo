@@ -14,13 +14,19 @@ struct ForgotPasswordView: View {
     private let resendCooldownSeconds = 60
 
     var body: some View {
-        Form {
-            if resetLinkSent {
-                resetSentSections
-            } else {
-                requestResetSections
+        ScrollView {
+            VStack(spacing: 0) {
+                if resetLinkSent {
+                    resetSentContent
+                } else {
+                    requestResetContent
+                }
             }
+            .padding(.horizontal, Theme.screenPadding)
+            .padding(.top, 20)
+            .padding(.bottom, 24)
         }
+        .background(Theme.ColorToken.background)
         .navigationTitle(String(localized: "Forgot password"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
@@ -36,34 +42,39 @@ struct ForgotPasswordView: View {
     }
 
     @ViewBuilder
-    private var requestResetSections: some View {
-        Section {
-            Text(String(localized: "Enter your account email. We will send a link to reset your password."))
-                .font(Theme.FontToken.inter(12))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-        }
+    private var requestResetContent: some View {
+        Text(String(localized: "Enter your account email. We will send a link to reset your password."))
+            .font(Theme.FontToken.inter(12))
+            .foregroundStyle(Theme.ColorToken.textMuted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.bottom, 16)
 
-        Section {
-            TextField(String(localized: "Email"), text: $email)
-                .textContentType(.emailAddress)
-                .keyboardType(.emailAddress)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-        }
+        TextField(String(localized: "Email"), text: $email)
+            .textContentType(.emailAddress)
+            .keyboardType(.emailAddress)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .authFieldStyle()
 
-        Section {
-            Button(String(localized: "Send reset link")) {
-                sendReset()
+        Button {
+            sendReset()
+        } label: {
+            if isLoading {
+                ProgressView()
+            } else {
+                Text(String(localized: "Send reset link"))
             }
-            .disabled(!canSubmit || isInCooldown)
         }
+        .buttonStyle(AuthPrimaryButtonStyle())
+        .disabled(!canSubmit || isInCooldown)
+        .padding(.top, 20)
 
-        statusSections
+        statusContent
     }
 
     @ViewBuilder
-    private var resetSentSections: some View {
-        Section {
+    private var resetSentContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
             Text(String(localized: "Check your email for a password reset link."))
                 .font(Theme.FontToken.inter(12))
                 .foregroundStyle(Theme.ColorToken.textMuted)
@@ -73,45 +84,63 @@ struct ForgotPasswordView: View {
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .overlay(
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                .stroke(Theme.ColorToken.border, lineWidth: 1)
+        )
 
-        Section {
-            Button(String(localized: "Resend reset link")) {
-                sendReset()
-            }
-            .disabled(isLoading || AppConfig.useMock || isInCooldown)
-
-            Button(String(localized: "Use a different email")) {
-                resetLinkSent = false
-                clearMessages()
+        Button {
+            sendReset()
+        } label: {
+            if isLoading {
+                ProgressView()
+            } else {
+                Text(String(localized: "Resend reset link"))
             }
         }
+        .buttonStyle(AuthPrimaryButtonStyle())
+        .disabled(isLoading || AppConfig.useMock || isInCooldown)
+        .padding(.top, 20)
 
-        statusSections
+        Button(String(localized: "Use a different email")) {
+            resetLinkSent = false
+            clearMessages()
+        }
+        .font(Theme.FontToken.inter(13, weight: .medium))
+        .foregroundStyle(Theme.ColorToken.accent)
+        .padding(.top, 16)
+
+        statusContent
     }
 
     @ViewBuilder
-    private var statusSections: some View {
-        if isLoading {
-            Section { ProgressView() }
-        }
-
+    private var statusContent: some View {
         if let infoMessage {
-            Section {
-                Text(infoMessage)
-                    .foregroundStyle(Theme.ColorToken.accent)
-            }
+            Text(infoMessage)
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(Theme.ColorToken.accent)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
         }
 
         if let errorMessage {
-            Section {
-                Text(errorMessage)
-                    .foregroundStyle(.red)
-            }
+            Text(errorMessage)
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(.red)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
         } else if let cooldownHint {
-            Section {
-                Text(cooldownHint)
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-            }
+            Text(cooldownHint)
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
         }
     }
 

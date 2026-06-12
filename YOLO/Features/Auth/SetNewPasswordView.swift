@@ -11,50 +11,65 @@ struct SetNewPasswordView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                if didUpdate {
-                    Section {
+            ScrollView {
+                VStack(spacing: 0) {
+                    if didUpdate {
                         Text(String(localized: "Password updated successfully."))
+                            .font(Theme.FontToken.inter(13, weight: .medium))
                             .foregroundStyle(Theme.ColorToken.accent)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 24)
+                    } else {
+                        inputContent
                     }
-                } else {
-                    inputSections
                 }
+                .padding(.horizontal, Theme.screenPadding)
+                .padding(.top, 20)
+                .padding(.bottom, 24)
             }
+            .background(Theme.ColorToken.background)
             .navigationTitle(String(localized: "New password"))
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 
     @ViewBuilder
-    private var inputSections: some View {
-        Section {
-            Text(String(localized: "Choose a new password for your account."))
-                .font(Theme.FontToken.inter(12))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-        }
+    private var inputContent: some View {
+        Text(String(localized: "Choose a new password for your account."))
+            .font(Theme.FontToken.inter(12))
+            .foregroundStyle(Theme.ColorToken.textMuted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.bottom, 16)
 
-        Section {
+        VStack(spacing: 10) {
             SecureField(String(localized: "New password"), text: $password)
                 .textContentType(.newPassword)
+                .authFieldStyle()
             SecureField(String(localized: "Confirm password"), text: $confirmPassword)
                 .textContentType(.newPassword)
+                .authFieldStyle()
         }
 
-        Section {
-            Button(String(localized: "Update password")) {
-                updatePassword()
+        Button {
+            updatePassword()
+        } label: {
+            if isLoading {
+                ProgressView()
+            } else {
+                Text(String(localized: "Update password"))
             }
-            .disabled(!canSubmit)
         }
-
-        if isLoading {
-            Section { ProgressView() }
-        }
+        .buttonStyle(AuthPrimaryButtonStyle())
+        .disabled(!canSubmit)
+        .padding(.top, 20)
 
         if let errorMessage {
-            Section {
-                Text(errorMessage).foregroundStyle(.red)
-            }
+            Text(errorMessage)
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(.red)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
         }
     }
 

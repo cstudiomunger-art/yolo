@@ -2,18 +2,9 @@ import Supabase
 import SwiftUI
 
 struct LoginView: View {
-    private enum AuthMode: String, CaseIterable, Identifiable {
+    private enum AuthMode {
         case signIn
         case signUp
-
-        var id: String { rawValue }
-
-        var title: String {
-            switch self {
-            case .signIn: String(localized: "Sign In")
-            case .signUp: String(localized: "Sign Up")
-            }
-        }
     }
 
     @Environment(\.dismiss) private var dismiss
@@ -28,212 +19,261 @@ struct LoginView: View {
     @State private var acceptedLegal = false
     @State private var pendingEmailConfirmation = false
     @State private var suggestSignIn = false
+    @State private var presentedLegal: LegalDocumentKind?
 
     var body: some View {
-        Form {
-            if AppConfig.useMock {
-                Section {
-                    Text(String(localized: "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig."))
-                        .foregroundStyle(.orange)
+        ScrollView {
+            VStack(spacing: 0) {
+                if AppConfig.useMock {
+                    mockNotice
+                }
+
+                if pendingEmailConfirmation {
+                    pendingConfirmationContent
+                } else {
+                    authFormContent
                 }
             }
-
-            if pendingEmailConfirmation {
-                pendingConfirmationSection
-            } else {
-                authFormSections
-            }
+            .padding(.horizontal, Theme.screenPadding)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
         }
-        .navigationTitle(mode == .signIn ? String(localized: "Sign In") : String(localized: "Sign Up"))
+        .background(Theme.ColorToken.background)
+        .legalDocumentSheet(item: $presentedLegal)
     }
 
+    // MARK: - Form
+
     @ViewBuilder
-    private var authFormSections: some View {
+    private var authFormContent: some View {
         if !AppConfig.useMock {
-            Section {
-                AppleSignInButton(
-                    onStart: {
-                        clearMessages()
-                        isLoading = true
-                    },
-                    onSuccess: {
-                        isLoading = false
-                        dismiss()
-                    },
-                    onError: { message in
-                        isLoading = false
-                        errorMessage = message
-                    }
-                )
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-            } footer: {
-                Text(String(localized: "or continue with email"))
-                    .frame(maxWidth: .infinity)
-                    .multilineTextAlignment(.center)
-            }
-        }
-
-        Section {
-            Picker(String(localized: "Account"), selection: $mode) {
-                ForEach(AuthMode.allCases) { option in
-                    Text(option.title).tag(option)
+            AppleSignInButton(
+                onStart: {
+                    clearMessages()
+                    isLoading = true
+                },
+                onSuccess: {
+                    isLoading = false
+                    dismiss()
+                },
+                onError: { message in
+                    isLoading = false
+                    errorMessage = message
                 }
-            }
-            .pickerStyle(.segmented)
-            .onChange(of: mode) { _, _ in
-                clearMessages()
-                confirmPassword = ""
-                suggestSignIn = false
-            }
+            )
+
+            LegalLinksText(
+                text: "By continuing, you agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)",
+                presentedLegal: $presentedLegal
+            )
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 10)
+
+            AuthDivider(label: "or continue with email")
+                .padding(.vertical, 22)
         }
 
-        Section {
+        VStack(spacing: 10) {
             TextField(String(localized: "Email"), text: $email)
                 .textContentType(.emailAddress)
                 .keyboardType(.emailAddress)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
+                .authFieldStyle()
 
             SecureField(String(localized: "Password"), text: $password)
                 .textContentType(mode == .signUp ? .newPassword : .password)
+                .authFieldStyle()
 
             if mode == .signUp {
                 SecureField(String(localized: "Confirm password"), text: $confirmPassword)
                     .textContentType(.newPassword)
+                    .authFieldStyle()
             }
+        }
 
-            if mode == .signIn, !AppConfig.useMock {
-                NavigationLink(String(localized: "Forgot password?")) {
+        if mode == .signIn, !AppConfig.useMock {
+            HStack {
+                Spacer()
+                NavigationLink {
                     ForgotPasswordView(initialEmail: trimmedEmail)
+                } label: {
+                    Text(String(localized: "Forgot password?"))
+                        .font(Theme.FontToken.inter(12))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
                 }
-                .font(Theme.FontToken.inter(12))
             }
+            .padding(.top, 12)
         }
 
         if mode == .signUp {
-            Section {
-                HStack(alignment: .top, spacing: 10) {
-                    Button {
-                        acceptedLegal.toggle()
-                    } label: {
-                        Image(systemName: acceptedLegal ? "largecircle.fill.circle" : "circle")
-                            .font(.system(size: 20))
-                            .foregroundStyle(
-                                acceptedLegal ? Theme.ColorToken.accent : Theme.ColorToken.textMuted
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(
-                        acceptedLegal
-                            ? String(localized: "Agreed to terms and privacy policy")
-                            : String(localized: "Agree to terms and privacy policy")
-                    )
-
-                    legalConsentLabel
+            HStack(alignment: .top, spacing: 10) {
+                Button {
+                    acceptedLegal.toggle()
+                } label: {
+                    Image(systemName: acceptedLegal ? "largecircle.fill.circle" : "circle")
+                        .font(.system(size: 20))
+                        .foregroundStyle(
+                            acceptedLegal ? Theme.ColorToken.accent : Theme.ColorToken.textMuted
+                        )
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    acceptedLegal
+                        ? String(localized: "Agreed to terms and privacy policy")
+                        : String(localized: "Agree to terms and privacy policy")
+                )
+
+                LegalLinksText(
+                    text: "I agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)",
+                    presentedLegal: $presentedLegal,
+                    fontSize: 12
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 2)
             }
+            .padding(.top, 16)
         }
 
-        Section {
-            Button(primaryActionTitle) {
-                submit()
+        Button {
+            submit()
+        } label: {
+            if isLoading {
+                ProgressView()
+            } else {
+                Text(primaryActionTitle)
             }
-            .disabled(!canSubmit)
         }
+        .buttonStyle(AuthPrimaryButtonStyle())
+        .disabled(!canSubmit)
+        .padding(.top, 20)
+
+        statusMessages
 
         if suggestSignIn {
-            Section {
-                Button(String(localized: "Go to sign in")) {
-                    mode = .signIn
-                    suggestSignIn = false
-                    clearMessages()
-                }
+            Button(String(localized: "Go to sign in")) {
+                switchMode(to: .signIn)
             }
+            .font(Theme.FontToken.inter(13, weight: .medium))
+            .foregroundStyle(Theme.ColorToken.accent)
+            .padding(.top, 12)
         }
 
-        if isLoading {
-            Section {
-                ProgressView()
-            }
-        }
+        modeSwitchRow
+            .padding(.top, 28)
+    }
 
-        if let infoMessage {
-            Section {
-                Text(infoMessage)
+    private var modeSwitchRow: some View {
+        HStack(spacing: 5) {
+            Text(
+                mode == .signIn
+                    ? String(localized: "Don't have an account?")
+                    : String(localized: "Already have an account?")
+            )
+            .font(Theme.FontToken.inter(12))
+            .foregroundStyle(Theme.ColorToken.textMuted)
+
+            Button {
+                switchMode(to: mode == .signIn ? .signUp : .signIn)
+            } label: {
+                Text(mode == .signIn ? String(localized: "Sign Up") : String(localized: "Sign In"))
+                    .font(Theme.FontToken.inter(12, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.accent)
             }
         }
-
-        if let errorMessage {
-            Section {
-                Text(errorMessage)
-                    .foregroundStyle(.red)
-            }
-        }
+        .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder
-    private var pendingConfirmationSection: some View {
-        Section {
+    private var statusMessages: some View {
+        if let infoMessage {
+            Text(infoMessage)
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(Theme.ColorToken.accent)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
+        }
+
+        if let errorMessage {
+            Text(errorMessage)
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(.red)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
+        }
+    }
+
+    private var mockNotice: some View {
+        Text(String(localized: "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig."))
+            .font(Theme.FontToken.inter(12))
+            .foregroundStyle(.orange)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .background(Theme.ColorToken.warningBackground)
+            .overlay(
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .stroke(Theme.ColorToken.border, lineWidth: 1)
+            )
+            .padding(.bottom, 20)
+    }
+
+    // MARK: - Pending email confirmation
+
+    @ViewBuilder
+    private var pendingConfirmationContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
             Text(String(localized: "Check your email to confirm your account before signing in."))
                 .font(Theme.FontToken.inter(12))
                 .foregroundStyle(Theme.ColorToken.textMuted)
             Text(trimmedEmail)
                 .font(Theme.FontToken.inter(13, weight: .medium))
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .overlay(
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                .stroke(Theme.ColorToken.border, lineWidth: 1)
+        )
 
-        Section {
-            Button(String(localized: "Resend confirmation email")) {
-                resendConfirmation()
-            }
-            .disabled(isLoading || AppConfig.useMock)
-
-            Button(String(localized: "Back to sign in")) {
-                pendingEmailConfirmation = false
-                mode = .signIn
-                clearMessages()
-            }
-        }
-
-        if isLoading {
-            Section { ProgressView() }
-        }
-
-        if let infoMessage {
-            Section {
-                Text(infoMessage)
-                    .foregroundStyle(Theme.ColorToken.accent)
+        Button {
+            resendConfirmation()
+        } label: {
+            if isLoading {
+                ProgressView()
+            } else {
+                Text(String(localized: "Resend confirmation email"))
             }
         }
+        .buttonStyle(AuthPrimaryButtonStyle())
+        .disabled(isLoading || AppConfig.useMock)
+        .padding(.top, 20)
 
-        if let errorMessage {
-            Section {
-                Text(errorMessage)
-                    .foregroundStyle(.red)
-            }
+        Button(String(localized: "Back to sign in")) {
+            pendingEmailConfirmation = false
+            switchMode(to: .signIn)
         }
+        .font(Theme.FontToken.inter(13, weight: .medium))
+        .foregroundStyle(Theme.ColorToken.accent)
+        .padding(.top, 16)
+
+        statusMessages
     }
 
-    private var legalConsentLabel: some View {
-        HStack(alignment: .top, spacing: 0) {
-            Text(String(localized: "I agree to the "))
-                .font(Theme.FontToken.inter(11))
-            NavigationLink(String(localized: "Terms")) {
-                LegalDocumentView(kind: .terms)
-            }
-            .font(Theme.FontToken.inter(11, weight: .medium))
-            Text(String(localized: " and "))
-                .font(Theme.FontToken.inter(11))
-            NavigationLink(String(localized: "Privacy Policy")) {
-                LegalDocumentView(kind: .privacy)
-            }
-            .font(Theme.FontToken.inter(11, weight: .medium))
-        }
+    // MARK: - State helpers
+
+    private func switchMode(to newMode: AuthMode) {
+        mode = newMode
+        clearMessages()
+        confirmPassword = ""
+        suggestSignIn = false
     }
 
     private var primaryActionTitle: String {
-        mode == .signIn ? String(localized: "Sign In") : String(localized: "Sign Up")
+        mode == .signIn ? String(localized: "Sign In") : String(localized: "Create Account")
     }
 
     private var trimmedEmail: String {
@@ -252,6 +292,8 @@ struct LoginView: View {
             return password == confirmPassword && acceptedLegal
         }
     }
+
+    // MARK: - Actions
 
     private func submit() {
         clearMessages()

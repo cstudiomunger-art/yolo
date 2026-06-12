@@ -735,6 +735,46 @@
     "Added to Day %lld" : {
 
     },
+    "By continuing, you agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续即表示你同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
+          }
+        }
+      }
+    },
+    "I agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我已阅读并同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
+          }
+        }
+      }
+    },
+    "Don't have an account?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还没有账号？"
+          }
+        }
+      }
+    },
+    "Create Account" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建账号"
+          }
+        }
+      }
+    },
     "Apple sign-in failed. Please try again." : {
       "localizations" : {
         "zh-Hans" : {
@@ -803,6 +843,16 @@
     },
     "Almost ready…" : {
 
+    },
+    "Already have an account?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已有账号？"
+          }
+        }
+      }
     },
     "An account with this email already exists. Try signing in instead." : {
       "localizations" : {
@@ -1514,7 +1564,14 @@
 
     },
     "Forgot password?" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "忘记密码？"
+          }
+        }
+      }
     },
     "Free" : {
       "localizations" : {
@@ -2485,7 +2542,14 @@
 
     },
     "Sign in to plan your China trip" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录后开始规划你的中国之旅"
+          }
+        }
+      }
     },
     "Sign Out" : {
 
