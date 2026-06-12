@@ -3,6 +3,11 @@ import SwiftUI
 /// First-screen account chooser: Apple / Google / email. Each opens its own flow,
 /// but only after the user has agreed to the legal terms via the checkbox.
 struct LoginView: View {
+    /// Shows the "Explore as guest" entry. Only the full-screen login gate sets this;
+    /// the in-app re-login sheet (Profile) leaves it off.
+    var showGuestOption = false
+
+    @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
 
     @State private var isLoading = false
@@ -10,6 +15,7 @@ struct LoginView: View {
     @State private var acceptedLegal = false
     @State private var presentedLegal: LegalDocumentKind?
     @State private var showEmailSheet = false
+    @State private var consentShake: CGFloat = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -17,11 +23,30 @@ struct LoginView: View {
                 mockNotice
             } else {
                 socialButtons
-                    .disabled(!acceptedLegal)
-                    .opacity(acceptedLegal ? 1 : 0.4)
+                    .overlay {
+                        // Until the user agrees, swallow taps on the buttons and shake the consent row.
+                        if !acceptedLegal {
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .onTapGesture { triggerConsentShake() }
+                        }
+                    }
 
                 legalConsentRow
+                    .modifier(ShakeEffect(animatableData: consentShake))
                     .padding(.top, 18)
+
+                if showGuestOption {
+                    Button {
+                        appEnv.preferences.isGuestMode = true
+                    } label: {
+                        Text(String(localized: "Explore as guest"))
+                            .font(Theme.FontToken.inter(13, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                            .underline()
+                    }
+                    .padding(.top, 22)
+                }
 
                 if let errorMessage {
                     Text(errorMessage)
@@ -41,6 +66,12 @@ struct LoginView: View {
                 showEmailSheet = false
                 dismiss()
             })
+        }
+    }
+
+    private func triggerConsentShake() {
+        withAnimation(.linear(duration: 0.4)) {
+            consentShake += 1
         }
     }
 

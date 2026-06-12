@@ -26,6 +26,7 @@ enum UserDefaultsKeys {
     static let displayName = prefix + "displayName"
     static let avatarUrl = prefix + "avatarUrl"
     static let avatarStatus = prefix + "avatarStatus"
+    static let guestMode = prefix + "guestMode"
 
     private static let legacyMap: [(new: String, old: String)] = [
         (onboardingDone, "chinago.onboardingCompleted"),

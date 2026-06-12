@@ -7,6 +7,7 @@ struct HomeView: View {
     @State private var cities: [City] = []
     @State private var showProfile = false
     @State private var showDatePicker = false
+    @State private var showLogin = false
     @State private var aiInput = ""
 
     private var trips: [SampleItinerary] { orderedTrips }
@@ -91,6 +92,7 @@ struct HomeView: View {
         .sheet(isPresented: $showProfile) {
             ProfileSheetView()
         }
+        .loginSheet(isPresented: $showLogin, appEnv: appEnv)
         .sheet(isPresented: $showDatePicker) {
             NavigationStack {
                 DatePicker(
@@ -175,6 +177,10 @@ struct HomeView: View {
     private func submitAI() {
         let text = aiInput.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
+        if !appEnv.auth.isAuthenticated, !AppConfig.useMock {
+            showLogin = true
+            return
+        }
         aiInput = ""
         appEnv.navigation.presentAssistant(prefill: text)
     }

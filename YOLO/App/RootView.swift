@@ -58,7 +58,7 @@ struct RootView: View {
     private var mainFlow: some View {
         if AppConfig.useMock {
             mockFlow
-        } else if !appEnv.auth.isAuthenticated {
+        } else if !appEnv.auth.isAuthenticated && !appEnv.preferences.isGuestMode {
             AuthLandingView()
         } else if appEnv.preferences.needsIntroOnboarding {
             OnboardingPagerView()

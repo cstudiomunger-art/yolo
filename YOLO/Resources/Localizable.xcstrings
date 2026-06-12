@@ -785,6 +785,16 @@
         }
       }
     },
+    "Explore as guest" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先逛逛"
+          }
+        }
+      }
+    },
     "Back" : {
       "localizations" : {
         "zh-Hans" : {

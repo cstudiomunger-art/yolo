@@ -186,6 +186,8 @@ private struct PlanSummaryRow: View {
     let plan: MembershipPlan
     let onPurchased: () -> Void
 
+    @State private var showLogin = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -197,6 +199,10 @@ private struct PlanSummaryRow: View {
                     .foregroundStyle(Theme.ColorToken.textMuted)
             }
             Button {
+                if !appEnv.auth.isAuthenticated, !AppConfig.useMock {
+                    showLogin = true
+                    return
+                }
                 Task {
                     await appEnv.purchase.purchase(plan: plan)
                     onPurchased()
@@ -216,5 +222,6 @@ private struct PlanSummaryRow: View {
         .overlay(Rectangle().stroke(
             plan.isBestValue ? Theme.ColorToken.accent : Theme.ColorToken.borderLight, lineWidth: 1
         ))
+        .loginSheet(isPresented: $showLogin, appEnv: appEnv)
     }
 }

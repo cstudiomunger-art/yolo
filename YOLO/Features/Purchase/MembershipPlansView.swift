@@ -18,6 +18,7 @@ struct MembershipPlansView: View {
 
     @State private var selectedId: String?
     @State private var showRefund = false
+    @State private var showLogin = false
     @State private var errorMessage: String?
 
     // MARK: - Derived plan lists
@@ -89,6 +90,7 @@ struct MembershipPlansView: View {
             .sheet(isPresented: $showRefund) {
                 RefundRequestView().environment(appEnv)
             }
+            .loginSheet(isPresented: $showLogin, appEnv: appEnv)
             .task {
                 if options.isEmpty { await appEnv.purchase.loadPlans() }
                 ensureSelection()
@@ -282,6 +284,10 @@ struct MembershipPlansView: View {
 
     private func purchaseSelected() async {
         guard let plan = selectedPlan else { return }
+        if !appEnv.auth.isAuthenticated, !AppConfig.useMock {
+            showLogin = true
+            return
+        }
         errorMessage = nil
         if plan.planType == .oneTimeAttraction {
             await appEnv.purchase.purchaseSingleAttraction(unlockTargetId, plan: plan)

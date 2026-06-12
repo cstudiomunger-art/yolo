@@ -18,7 +18,7 @@ struct AuthLandingView: View {
 
                 Spacer(minLength: 24)
 
-                LoginView()
+                LoginView(showGuestOption: true)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Theme.ColorToken.background)

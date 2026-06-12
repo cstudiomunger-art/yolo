@@ -49,6 +49,14 @@ final class UserPreferencesStore {
         }
     }
 
+    /// True when the user chose "Explore as guest" and is browsing without an account.
+    /// Cleared on sign-out via `resetAll()`; irrelevant once `auth.isAuthenticated` is true.
+    var isGuestMode: Bool {
+        didSet {
+            UserDefaults.standard.set(isGuestMode, forKey: Keys.guestMode)
+        }
+    }
+
     /// True after the user confirms nationality on the onboarding screen (v2+).
     var needsNationalityOnboarding: Bool {
         !hasCompletedOnboarding || countryCode.isEmpty
@@ -200,6 +208,7 @@ final class UserPreferencesStore {
         appLanguage = AppLanguage.resolved(fromStoredValue: UserDefaults.standard.string(forKey: Keys.appLanguage))
         hasCompletedIntroOnboarding = UserDefaults.standard.bool(forKey: Keys.introOnboardingDone)
         hasCompletedNotificationOnboarding = UserDefaults.standard.bool(forKey: Keys.notificationOnboardingDone)
+        isGuestMode = UserDefaults.standard.bool(forKey: Keys.guestMode)
         migrateNationalityOnboardingIfNeeded()
         if countryCode.isEmpty {
             hasCompletedOnboarding = false
@@ -232,10 +241,12 @@ final class UserPreferencesStore {
             Keys.appLanguage,
             Keys.introOnboardingDone,
             Keys.notificationOnboardingDone,
+            Keys.guestMode,
         ] {
             UserDefaults.standard.removeObject(forKey: key)
         }
 
+        isGuestMode = false
         hasCompletedIntroOnboarding = false
         hasCompletedNotificationOnboarding = false
         hasCompletedOnboarding = false

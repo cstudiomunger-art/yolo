@@ -1,6 +1,20 @@
+import Foundation
 import SwiftUI
 
 /// Shared styling for the auth flow (login, sign-up, password reset).
+
+/// Horizontal shake to draw attention to the legal consent row when a user tries to
+/// sign in without agreeing first. Animate by bumping `animatableData`.
+struct ShakeEffect: GeometryEffect {
+    var amount: CGFloat = 8
+    var shakesPerUnit = 3
+    var animatableData: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        let translation = amount * CGFloat(sin(Double(animatableData) * .pi * Double(shakesPerUnit)))
+        return ProjectionTransform(CGAffineTransform(translationX: translation, y: 0))
+    }
+}
 
 /// Bordered input field matching the app's card language (subtle background + 1pt border).
 struct AuthFieldStyle: ViewModifier {
@@ -165,6 +179,21 @@ extension View {
         sheet(item: item) { kind in
             NavigationStack {
                 LegalDocumentView(kind: kind)
+            }
+        }
+    }
+
+    /// Presents the login screen as a sheet — used to gate account-only actions for guests.
+    func loginSheet(isPresented: Binding<Bool>, appEnv: AppEnvironment) -> some View {
+        sheet(isPresented: isPresented) {
+            NavigationStack {
+                LoginView()
+                    .environment(appEnv)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button(String(localized: "Close")) { isPresented.wrappedValue = false }
+                        }
+                    }
             }
         }
     }
