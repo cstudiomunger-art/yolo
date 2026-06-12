@@ -14,8 +14,9 @@ struct AuthLandingView: View {
                         .foregroundStyle(Theme.ColorToken.textMuted)
                         .multilineTextAlignment(.center)
                 }
-                .padding(.top, 64)
-                .padding(.bottom, 28)
+                .padding(.top, 80)
+
+                Spacer(minLength: 24)
 
                 LoginView()
             }

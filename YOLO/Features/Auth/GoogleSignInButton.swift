@@ -25,14 +25,7 @@ struct GoogleSignInButton: View {
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 48)
-            .background(Theme.ColorToken.background)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(Theme.ColorToken.textPrimary, lineWidth: 1)
-            )
-            .contentShape(Rectangle())
+            .socialButtonChrome()
         }
         .buttonStyle(.plain)
     }

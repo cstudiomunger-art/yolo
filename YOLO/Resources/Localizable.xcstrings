@@ -775,6 +775,76 @@
         }
       }
     },
+    "Continue with email" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用邮箱登录"
+          }
+        }
+      }
+    },
+    "Back" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回"
+          }
+        }
+      }
+    },
+    "Show password" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示密码"
+          }
+        }
+      }
+    },
+    "Hide password" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏密码"
+          }
+        }
+      }
+    },
+    "Enter your email and password. We'll create your account if you're new." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入邮箱和密码。如果你是新用户，我们会自动为你创建账号。"
+          }
+        }
+      }
+    },
+    "Account created. Check your email and tap the confirmation link." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账号已创建。请前往邮箱点击确认链接。"
+          }
+        }
+      }
+    },
+    "Check your email and tap the confirmation link to finish signing in." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请前往邮箱点击确认链接以完成登录。"
+          }
+        }
+      }
+    },
     "Create Account" : {
       "localizations" : {
         "zh-Hans" : {

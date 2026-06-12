@@ -17,6 +17,67 @@ struct AuthFieldStyle: ViewModifier {
     }
 }
 
+/// Password field with a reveal/hide toggle, styled like `AuthFieldStyle`.
+struct AuthPasswordField: View {
+    let placeholder: String
+    @Binding var text: String
+    var textContentType: UITextContentType? = .password
+
+    @State private var isRevealed = false
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Group {
+                if isRevealed {
+                    TextField(placeholder, text: $text)
+                } else {
+                    SecureField(placeholder, text: $text)
+                }
+            }
+            .font(Theme.FontToken.inter(14))
+            .textContentType(textContentType)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+
+            Button {
+                isRevealed.toggle()
+            } label: {
+                Image(systemName: isRevealed ? "eye.slash" : "eye")
+                    .font(.system(size: 15))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(
+                isRevealed
+                    ? String(localized: "Hide password")
+                    : String(localized: "Show password")
+            )
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 13)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .overlay(
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                .stroke(Theme.ColorToken.border, lineWidth: 1)
+        )
+    }
+}
+
+/// Shared chrome for the first-screen social buttons (white background + light 1pt border, 48 tall).
+struct SocialButtonChrome: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .background(Theme.ColorToken.background)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(Theme.ColorToken.border, lineWidth: 1)
+            )
+            .contentShape(Rectangle())
+    }
+}
+
 /// Full-width primary action button: white background, 1pt dark border.
 struct AuthPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
@@ -93,6 +154,10 @@ struct LegalLinksText: View {
 extension View {
     func authFieldStyle() -> some View {
         modifier(AuthFieldStyle())
+    }
+
+    func socialButtonChrome() -> some View {
+        modifier(SocialButtonChrome())
     }
 
     /// Presents the tapped legal document as a bottom sheet.

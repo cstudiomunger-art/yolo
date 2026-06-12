@@ -6,8 +6,6 @@ import SwiftUI
 /// Native Sign in with Apple → exchanges the Apple identity token for a Supabase session.
 /// Requires the bundle id to be listed in Supabase Dashboard → Auth → Providers → Apple → Client IDs.
 struct AppleSignInButton: View {
-    @Environment(\.colorScheme) private var colorScheme
-
     var onStart: () -> Void = {}
     var onSuccess: () -> Void = {}
     var onError: (String) -> Void = { _ in }
@@ -24,9 +22,13 @@ struct AppleSignInButton: View {
         } onCompletion: { result in
             handle(result)
         }
-        .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+        .signInWithAppleButtonStyle(.white)
         .frame(height: 48)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Theme.ColorToken.border, lineWidth: 1)
+        )
     }
 
     private func handle(_ result: Result<ASAuthorization, Error>) {
