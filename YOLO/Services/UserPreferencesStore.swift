@@ -139,7 +139,7 @@ final class UserPreferencesStore {
     }
 
     /// Saved attractions, newest first.
-    var favoriteAttractions: [FavoriteAttractionRecord] {
+    private(set) var favoriteAttractions: [FavoriteAttractionRecord] = [] {
         didSet {
             persistFavoriteAttractions()
         }
@@ -203,7 +203,7 @@ final class UserPreferencesStore {
         activeItineraryId = itineraryLoad.activeId
         savedItineraries = itineraryLoad.itineraries
         purchasedAttractionIds = Set(UserDefaults.standard.stringArray(forKey: Keys.purchasedAttractionIds) ?? [])
-        favoriteAttractions = Self.loadFavoriteAttractions()
+        favoriteAttractions = Self.loadFavoriteAttractions(storageUserId: nil)
         subscriptionPlanId = UserDefaults.standard.string(forKey: Keys.subscriptionPlanId)
         if let exp = UserDefaults.standard.object(forKey: Keys.subscriptionExpiresAt) as? TimeInterval {
             subscriptionExpiresAt = Date(timeIntervalSince1970: exp)
@@ -279,29 +279,53 @@ final class UserPreferencesStore {
         favoriteAttractions.contains { $0.attractionId == attractionId }
     }
 
+    var onFavoriteChanged: ((String, String, Bool) -> Void)?
+
     func toggleFavorite(attraction: Attraction) {
         if let index = favoriteAttractions.firstIndex(where: { $0.attractionId == attraction.id }) {
             favoriteAttractions.remove(at: index)
+            onFavoriteChanged?(attraction.id, attraction.cityId, false)
         } else {
             let record = FavoriteAttractionRecord(
                 attractionId: attraction.id,
-                cityId: attraction.cityId
+                cityId: attraction.cityId,
+                createdAt: .now
             )
             favoriteAttractions.insert(record, at: 0)
+            onFavoriteChanged?(attraction.id, attraction.cityId, true)
         }
     }
 
-    private static func loadFavoriteAttractions() -> [FavoriteAttractionRecord] {
-        guard let data = UserDefaults.standard.data(forKey: Keys.favoriteAttractions),
+    func applyRemoteFavoriteAttractions(_ records: [FavoriteAttractionRecord]) {
+        suppressSyncNotification = true
+        favoriteAttractions = records
+        suppressSyncNotification = false
+    }
+
+    private static func loadFavoriteAttractions(storageUserId: String?) -> [FavoriteAttractionRecord] {
+        let key = favoriteAttractionsStorageKey(for: storageUserId)
+        guard let data = UserDefaults.standard.data(forKey: key),
               let decoded = try? JSONDecoder().decode([FavoriteAttractionRecord].self, from: data)
         else { return [] }
         return decoded
     }
 
     private func persistFavoriteAttractions() {
+        let key = Self.favoriteAttractionsStorageKey(for: storageUserId)
         if let data = try? JSONEncoder().encode(favoriteAttractions) {
-            UserDefaults.standard.set(data, forKey: Keys.favoriteAttractions)
+            UserDefaults.standard.set(data, forKey: key)
         }
+    }
+
+    private func reloadFavoritesFromDisk() {
+        suppressSyncNotification = true
+        defer { suppressSyncNotification = false }
+        favoriteAttractions = Self.loadFavoriteAttractions(storageUserId: storageUserId)
+    }
+
+    private static func favoriteAttractionsStorageKey(for storageUserId: String?) -> String {
+        guard let storageUserId else { return Keys.favoriteAttractions }
+        return Keys.favoriteAttractions + "." + storageUserId
     }
 
     func markIntroOnboardingCompleted() {
@@ -476,9 +500,11 @@ final class UserPreferencesStore {
         guard storageUserId != normalized else { return }
         if let normalized {
             migrateLegacyItinerariesIfNeeded(toUserId: normalized)
+            migrateLegacyFavoritesIfNeeded(toUserId: normalized)
         }
         storageUserId = normalized
         reloadItinerariesFromDisk()
+        reloadFavoritesFromDisk()
     }
 
     /// Clears in-memory itinerary state after sign-out without deleting per-account local caches.
@@ -682,5 +708,13 @@ final class UserPreferencesStore {
         if let activeId = UserDefaults.standard.string(forKey: Keys.activeItineraryId) {
             UserDefaults.standard.set(activeId, forKey: Keys.activeItineraryId + "." + userId)
         }
+    }
+
+    private func migrateLegacyFavoritesIfNeeded(toUserId userId: String) {
+        let userKey = Self.favoriteAttractionsStorageKey(for: userId)
+        guard UserDefaults.standard.object(forKey: userKey) == nil,
+              let data = UserDefaults.standard.data(forKey: Keys.favoriteAttractions)
+        else { return }
+        UserDefaults.standard.set(data, forKey: userKey)
     }
 }

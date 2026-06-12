@@ -25,7 +25,6 @@ struct GuideHomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
-                favoritesEntry
                 if !tripCities.isEmpty {
                     tripSection
                 }
@@ -50,46 +49,30 @@ struct GuideHomeView: View {
         appEnv.preferences.favoriteAttractions.count
     }
 
-    private var favoritesEntry: some View {
+    private var favoritesButton: some View {
         Button(action: onOpenFavorites) {
-            HStack(spacing: 12) {
-                Image(systemName: "heart.fill")
-                    .font(.system(size: 16))
-                    .foregroundStyle(Theme.ColorToken.accent)
-                    .frame(width: 20)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(String(localized: "My Favorites"))
-                        .font(Theme.FontToken.inter(14, weight: .medium))
-                        .foregroundStyle(Theme.ColorToken.textPrimary)
-                    if favoritesCount > 0 {
-                        Text(String(localized: "\(favoritesCount) favorites"))
-                            .font(Theme.FontToken.inter(11))
-                            .foregroundStyle(Theme.ColorToken.textMuted)
-                    } else {
-                        Text(String(localized: "No favorites yet"))
-                            .font(Theme.FontToken.inter(11))
-                            .foregroundStyle(Theme.ColorToken.textMuted)
-                    }
-                }
-
-                Spacer()
-
-                Text("›")
-                    .foregroundStyle(Theme.ColorToken.textGhost)
-                    .font(.system(size: 18))
+            VStack(spacing: 2) {
+                Image(systemName: favoritesCount > 0 ? "heart.fill" : "heart")
+                    .font(.system(size: 20, weight: .medium))
+                Text(String(localized: "Saved"))
+                    .font(Theme.FontToken.inter(10, weight: .medium))
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+            .foregroundStyle(favoritesCount > 0 ? Theme.ColorToken.accent : Theme.ColorToken.textMuted)
+            .frame(minWidth: 32)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(String(localized: "My Favorites"))
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Guide")
-                .font(Theme.FontToken.playfair(30, weight: .bold))
+            HStack(alignment: .top, spacing: 8) {
+                Text("Guide")
+                    .font(Theme.FontToken.playfair(30, weight: .bold))
+                Spacer(minLength: 8)
+                favoritesButton
+            }
             Text("Audio attraction tours")
                 .font(Theme.FontToken.inter(13))
                 .foregroundStyle(Theme.ColorToken.textMuted)

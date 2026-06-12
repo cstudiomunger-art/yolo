@@ -47,6 +47,16 @@ final class AppEnvironment {
             guard let self else { return }
             Task { await self.profileSync.syncChecklistStatus(itemId: itemId, type: type, status: status) }
         }
+        resolvedPreferences.onFavoriteChanged = { [weak self] attractionId, cityId, isFavorite in
+            guard let self else { return }
+            Task {
+                await self.profileSync.syncFavoriteToggle(
+                    attractionId: attractionId,
+                    cityId: cityId,
+                    isFavorite: isFavorite
+                )
+            }
+        }
         resolvedPreferences.onItineraryDeleted = { [weak self] tripId in
             guard let self else { return }
             Task { await self.profileSync.syncItineraryDeleted(id: tripId) }

@@ -369,6 +369,13 @@ struct FavoriteAttractionRecord: Codable, Equatable, Identifiable {
     var id: String { attractionId }
     let attractionId: String
     let cityId: String
+    let createdAt: Date?
+
+    init(attractionId: String, cityId: String, createdAt: Date? = nil) {
+        self.attractionId = attractionId
+        self.cityId = cityId
+        self.createdAt = createdAt
+    }
 }
 
 struct AudioGuide: Identifiable, Codable {

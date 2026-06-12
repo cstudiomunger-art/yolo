@@ -138,16 +138,6 @@
     "%lld attractions " : {
 
     },
-    "%lld favorites" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已收藏 %lld 个"
-          }
-        }
-      }
-    },
     "%lld attractions · in your plan" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -184,6 +174,17 @@
     },
     "%lld days total" : {
 
+    },
+    "%lld favorites" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已收藏 %lld 个"
+          }
+        }
+      }
     },
     "%lld items left" : {
 
@@ -738,6 +739,9 @@
     "Add attraction" : {
 
     },
+    "Add day" : {
+
+    },
     "Add to favorites" : {
       "localizations" : {
         "zh-Hans" : {
@@ -747,9 +751,6 @@
           }
         }
       }
-    },
-    "Add day" : {
-
     },
     "Add your destination to see city-specific prep" : {
 
@@ -2517,6 +2518,16 @@
     },
     "Save trip" : {
 
+    },
+    "Saved" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "收藏"
+          }
+        }
+      }
     },
     "Saved trips · %lld" : {
 

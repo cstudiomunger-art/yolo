@@ -7,6 +7,7 @@ final class ProfileSyncService {
     private let repository = ProfileRepository()
     private let itineraryRepository = ItineraryRepository()
     private let checklistRepository = ChecklistCompletionRepository()
+    private let favoriteRepository = FavoriteAttractionRepository()
     private weak var preferences: UserPreferencesStore?
     private weak var auth: AuthSessionStore?
 
@@ -62,6 +63,7 @@ final class ProfileSyncService {
             }
             applyActiveItineraryFromProfile(profileActiveItineraryId)
             try await pullChecklistCompletion(userId: userId, preferences: preferences)
+            try await bidirectionalFavoriteSync(userId: userId, preferences: preferences)
         } catch {
             lastSyncError = error.localizedDescription
         }
@@ -82,6 +84,7 @@ final class ProfileSyncService {
                 try await self.pushItineraries(userId: userId, preferences: preferences)
             }
             try await pushChecklistCompletion(userId: userId, preferences: preferences)
+            try await pushFavoriteAttractions(userId: userId, preferences: preferences)
         } catch {
             lastSyncError = error.localizedDescription
         }
@@ -256,6 +259,82 @@ final class ProfileSyncService {
                 itineraryId: preferences.itineraryIdForCompletion(type: type),
                 status: status == .pending ? "pending" : status.rawValue
             )
+        } catch {
+            lastSyncError = error.localizedDescription
+        }
+    }
+
+    // MARK: - Favorite attractions
+
+    private func bidirectionalFavoriteSync(userId: UUID, preferences: UserPreferencesStore) async throws {
+        let remoteRows = try await favoriteRepository.fetchAll(userId: userId)
+        let remote = remoteRows.map { $0.asRecord() }
+        let merged = mergeFavorites(local: preferences.favoriteAttractions, remote: remote)
+        preferences.applyRemoteFavoriteAttractions(merged)
+        try await pushFavoriteAttractions(userId: userId, preferences: preferences)
+    }
+
+    private func mergeFavorites(
+        local: [FavoriteAttractionRecord],
+        remote: [FavoriteAttractionRecord]
+    ) -> [FavoriteAttractionRecord] {
+        var byId: [String: FavoriteAttractionRecord] = [:]
+        for record in remote {
+            byId[record.attractionId] = record
+        }
+        for record in local {
+            if let existing = byId[record.attractionId] {
+                let localDate = record.createdAt ?? .distantPast
+                let remoteDate = existing.createdAt ?? .distantPast
+                byId[record.attractionId] = localDate >= remoteDate ? record : existing
+            } else {
+                byId[record.attractionId] = record
+            }
+        }
+        return byId.values.sorted { lhs, rhs in
+            let left = lhs.createdAt ?? .distantPast
+            let right = rhs.createdAt ?? .distantPast
+            if left != right { return left > right }
+            return lhs.attractionId < rhs.attractionId
+        }
+    }
+
+    private func pushFavoriteAttractions(userId: UUID, preferences: UserPreferencesStore) async throws {
+        let local = preferences.favoriteAttractions
+        let remoteRows = try await favoriteRepository.fetchAll(userId: userId)
+        let localIds = Set(local.map(\.attractionId))
+
+        for record in local {
+            try await favoriteRepository.upsert(
+                userId: userId,
+                attractionId: record.attractionId,
+                cityId: record.cityId,
+                createdAt: record.createdAt ?? .now
+            )
+        }
+
+        for row in remoteRows where !localIds.contains(row.attractionId) {
+            try await favoriteRepository.delete(userId: userId, attractionId: row.attractionId)
+        }
+    }
+
+    func syncFavoriteToggle(attractionId: String, cityId: String, isFavorite: Bool) async {
+        guard let auth, auth.isAuthenticated, let userId = auth.userId else { return }
+        guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else { return }
+        do {
+            if isFavorite {
+                let createdAt = preferences?.favoriteAttractions
+                    .first(where: { $0.attractionId == attractionId })?
+                    .createdAt ?? .now
+                try await favoriteRepository.upsert(
+                    userId: userId,
+                    attractionId: attractionId,
+                    cityId: cityId,
+                    createdAt: createdAt
+                )
+            } else {
+                try await favoriteRepository.delete(userId: userId, attractionId: attractionId)
+            }
         } catch {
             lastSyncError = error.localizedDescription
         }
