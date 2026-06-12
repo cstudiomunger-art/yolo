@@ -147,7 +147,7 @@ struct LoginView: View {
         }
         .buttonStyle(AuthPrimaryButtonStyle())
         .disabled(!canSubmit)
-        .padding(.top, 20)
+        .padding(.top, 40)
 
         statusMessages
 
