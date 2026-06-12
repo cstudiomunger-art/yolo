@@ -3,7 +3,6 @@ import SwiftUI
 struct ExperienceSuggestionsDayCard: View {
     let day: ItineraryDay
     let cityDisplayName: String
-    var onAskAssistant: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -32,17 +31,10 @@ struct ExperienceSuggestionsDayCard: View {
                 .fill(Theme.ColorToken.borderLight)
                 .frame(height: 1)
 
-            Text(String(localized: "These are experience ideas — no specific venues. Ask Assistant for details."))
+            Text(String(localized: "These are experience ideas — no specific venues."))
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(Theme.ColorToken.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
-
-            Button(action: onAskAssistant) {
-                Text(String(localized: "Ask Assistant →"))
-                    .font(Theme.FontToken.inter(11, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.accent)
-            }
-            .buttonStyle(.plain)
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)

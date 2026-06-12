@@ -7,8 +7,6 @@ struct HomeView: View {
     @State private var cities: [City] = []
     @State private var showProfile = false
     @State private var showDatePicker = false
-    @State private var showLogin = false
-    @State private var aiInput = ""
 
     private var trips: [SampleItinerary] { orderedTrips }
 
@@ -54,6 +52,9 @@ struct HomeView: View {
     }
 
     private var displayName: String {
+        if let name = appEnv.preferences.displayName, !name.isEmpty {
+            return name
+        }
         if let email = appEnv.auth.userEmail,
            let local = email.split(separator: "@").first {
             return String(local).capitalized
@@ -84,7 +85,6 @@ struct HomeView: View {
                     onOpenPrepare: { appEnv.navigation.presentPrepare() },
                     onOpenEmergency: { appEnv.navigation.presentEmergency() }
                 )
-                aiInputBar
             }
             .padding(.bottom, 24)
         }
@@ -92,7 +92,6 @@ struct HomeView: View {
         .sheet(isPresented: $showProfile) {
             ProfileSheetView()
         }
-        .loginSheet(isPresented: $showLogin, appEnv: appEnv)
         .sheet(isPresented: $showDatePicker) {
             NavigationStack {
                 DatePicker(
@@ -144,45 +143,6 @@ struct HomeView: View {
         .padding(.horizontal, Theme.screenPadding)
         .padding(.top, 20)
         .padding(.bottom, 8)
-    }
-
-    private var aiInputBar: some View {
-        HStack(spacing: 10) {
-            Text("✨")
-            TextField("Ask me anything about China…", text: $aiInput)
-                .font(Theme.FontToken.inter(14))
-                .onSubmit { submitAI() }
-            Button {
-                submitAI()
-            } label: {
-                Image(systemName: "arrow.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Theme.ColorToken.textPrimary.opacity(0.3))
-                    .frame(width: 36, height: 36)
-                    .background(Theme.ColorToken.border.opacity(0.5))
-                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            }
-            .disabled(aiInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-        }
-        .padding(14)
-        .background(Theme.ColorToken.background)
-        .overlay(
-            RoundedRectangle(cornerRadius: 40, style: .continuous)
-                .stroke(Theme.ColorToken.textPrimary.opacity(0.3), lineWidth: 1)
-        )
-        .padding(.horizontal, Theme.screenPadding)
-        .padding(.top, 16)
-    }
-
-    private func submitAI() {
-        let text = aiInput.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
-        if !appEnv.auth.isAuthenticated, !AppConfig.useMock {
-            showLogin = true
-            return
-        }
-        aiInput = ""
-        appEnv.navigation.presentAssistant(prefill: text)
     }
 
     private func reload() {

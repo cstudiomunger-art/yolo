@@ -132,13 +132,6 @@ struct CachingContentRepository: ContentRepositoryProtocol {
         }
     }
 
-    func fetchAssistantReply(scenarioId: String) async throws -> AssistantReply? {
-        let key = ContentCacheKey.assistantReply(scenarioId: scenarioId)
-        return try await cachedOptional(key: key) {
-            try await upstream.fetchAssistantReply(scenarioId: scenarioId)
-        }
-    }
-
     func fetchPassportCountries() async throws -> [PassportCountry] {
         try await cached(key: ContentCacheKey.passportCountries()) {
             try await upstream.fetchPassportCountries()
@@ -155,12 +148,6 @@ struct CachingContentRepository: ContentRepositoryProtocol {
     func fetchEmergencyData() async throws -> EmergencyData {
         try await cached(key: ContentCacheKey.emergencyData()) {
             try await upstream.fetchEmergencyData()
-        }
-    }
-
-    func fetchAssistantChips() async throws -> [AssistantChip] {
-        try await cached(key: ContentCacheKey.assistantChips()) {
-            try await upstream.fetchAssistantChips()
         }
     }
 

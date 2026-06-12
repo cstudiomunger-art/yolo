@@ -3,13 +3,11 @@ import Observation
 
 enum AppModal: Identifiable, Equatable, Hashable {
     case prepare
-    case assistant(prefill: String?, scenarioId: String?)
     case emergency
 
     var id: String {
         switch self {
         case .prepare: "prepare"
-        case .assistant(let text, let scenario): "assistant-\(text ?? "")-\(scenario ?? "")"
         case .emergency: "emergency"
         }
     }
@@ -85,10 +83,6 @@ final class AppNavigation {
 
     func presentPrepare() {
         presentedModal = .prepare
-    }
-
-    func presentAssistant(prefill: String? = nil, scenarioId: String? = nil) {
-        presentedModal = .assistant(prefill: prefill, scenarioId: scenarioId)
     }
 
     func presentEmergency() {

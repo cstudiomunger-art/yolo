@@ -109,15 +109,6 @@ struct MainTabView: View {
             switch modal {
             case .prepare:
                 NavigationStack { PrepareView() }
-            case .assistant(let prefill, let scenarioId):
-                NavigationStack {
-                    AssistantView(initialPrefill: prefill, initialScenarioId: scenarioId)
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                Button("Close") { appEnv.navigation.dismissModal() }
-                            }
-                        }
-                }
             case .emergency:
                 EmergencyView()
             }

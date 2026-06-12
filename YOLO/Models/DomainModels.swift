@@ -1084,12 +1084,6 @@ struct ItineraryActivity: Identifiable, Codable, Hashable {
     }
 }
 
-struct AssistantReply: Codable {
-    let scenarioId: String
-    let userMessage: String?
-    let assistantMessage: String
-}
-
 struct EmergencyContact: Codable, Identifiable, Hashable {
     var id: String { label }
     let label: String
@@ -1255,13 +1249,6 @@ struct AppBranding: Codable, Equatable {
         case privacyPolicyBody, termsOfServiceBody, shareWebBaseURL
     }
 
-}
-
-struct AssistantChip: Identifiable, Codable, Hashable {
-    let id: String
-    let scenarioId: String
-    let label: String
-    let sortOrder: Int
 }
 
 struct AISettings: Codable, Hashable {

@@ -10,9 +10,6 @@
     " · %lld days" : {
 
     },
-    " and " : {
-
-    },
     "· %@" : {
 
     },
@@ -393,12 +390,6 @@
         }
       }
     },
-    "⚠️ AI service unavailable. Please try again." : {
-
-    },
-    "⚠️ Connection failed. Please try again." : {
-
-    },
     "⚠️ No English-speaking staff" : {
 
     },
@@ -699,11 +690,22 @@
       }
     },
     "Account" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "账号"
+          }
+        }
+      }
+    },
+    "Account created. Check your email and tap the confirmation link." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账号已创建。请前往邮箱点击确认链接。"
           }
         }
       }
@@ -734,146 +736,6 @@
     },
     "Added to Day %lld" : {
 
-    },
-    "By continuing, you agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "继续即表示你同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
-          }
-        }
-      }
-    },
-    "I agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我已阅读并同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
-          }
-        }
-      }
-    },
-    "Don't have an account?" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "还没有账号？"
-          }
-        }
-      }
-    },
-    "Continue with Google" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "通过 Google 继续"
-          }
-        }
-      }
-    },
-    "Continue with email" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用邮箱登录"
-          }
-        }
-      }
-    },
-    "Explore as guest" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "先逛逛"
-          }
-        }
-      }
-    },
-    "Back" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "返回"
-          }
-        }
-      }
-    },
-    "Show password" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示密码"
-          }
-        }
-      }
-    },
-    "Hide password" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "隐藏密码"
-          }
-        }
-      }
-    },
-    "Enter your email and password. We'll create your account if you're new." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "输入邮箱和密码。如果你是新用户，我们会自动为你创建账号。"
-          }
-        }
-      }
-    },
-    "Account created. Check your email and tap the confirmation link." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "账号已创建。请前往邮箱点击确认链接。"
-          }
-        }
-      }
-    },
-    "Check your email and tap the confirmation link to finish signing in." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请前往邮箱点击确认链接以完成登录。"
-          }
-        }
-      }
-    },
-    "Create Account" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "创建账号"
-          }
-        }
-      }
-    },
-    "Apple sign-in failed. Please try again." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apple 登录失败，请重试。"
-          }
-        }
-      }
     },
     "Agree to terms and privacy policy" : {
       "localizations" : {
@@ -935,6 +797,7 @@
 
     },
     "Already have an account?" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -957,8 +820,15 @@
     "Anyone with the link can view this trip read-only in a browser or the app." : {
 
     },
-    "Ask anything about traveling in China..." : {
-
+    "Apple sign-in failed. Please try again." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple 登录失败，请重试。"
+          }
+        }
+      }
     },
     "Ask Assistant" : {
       "extractionState" : "stale",
@@ -971,13 +841,8 @@
         }
       }
     },
-    "Ask Assistant →" : {
-
-    },
-    "Ask me anything about China…" : {
-
-    },
     "Assistant" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1027,10 +892,21 @@
     "Audio transcript" : {
 
     },
+    "Back" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "返回"
+          }
+        }
+      }
+    },
     "Back to dates" : {
 
     },
     "Back to sign in" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1050,6 +926,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "购买本导览 · $1.99"
+          }
+        }
+      }
+    },
+    "By continuing, you agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续即表示你同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
           }
         }
       }
@@ -1104,6 +991,16 @@
     },
     "Check today's plan in YOLO HAPPY" : {
 
+    },
+    "Check your email and tap the confirmation link to finish signing in." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请前往邮箱点击确认链接以完成登录。"
+          }
+        }
+      }
     },
     "Check your email for a password reset link." : {
 
@@ -1289,6 +1186,26 @@
         }
       }
     },
+    "Continue with email" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用邮箱登录"
+          }
+        }
+      }
+    },
+    "Continue with Google" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通过 Google 继续"
+          }
+        }
+      }
+    },
     "Copied!" : {
 
     },
@@ -1315,6 +1232,17 @@
     },
     "Create a trip poster you can send to friends." : {
 
+    },
+    "Create Account" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建账号"
+          }
+        }
+      }
     },
     "Creating image…" : {
 
@@ -1468,6 +1396,17 @@
     "Display name" : {
 
     },
+    "Don't have an account?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还没有账号？"
+          }
+        }
+      }
+    },
     "Don't miss important reminders" : {
 
     },
@@ -1617,6 +1556,16 @@
     "Enter your account email. We will send a link to reset your password." : {
 
     },
+    "Enter your email and password. We'll create your account if you're new." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输入邮箱和密码。如果你是新用户，我们会自动为你创建账号。"
+          }
+        }
+      }
+    },
     "Estimated budget" : {
 
     },
@@ -1635,6 +1584,16 @@
     },
     "Explore All Cities" : {
 
+    },
+    "Explore as guest" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先逛逛"
+          }
+        }
+      }
     },
     "Explore by Area" : {
 
@@ -1710,6 +1669,7 @@
 
     },
     "Go to sign in" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1771,6 +1731,16 @@
     "Helpful Phrases" : {
 
     },
+    "Hide password" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏密码"
+          }
+        }
+      }
+    },
     "Home" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1793,8 +1763,15 @@
         }
       }
     },
-    "I agree to the " : {
-
+    "I agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我已阅读并同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
+          }
+        }
+      }
     },
     "If you don't see the email, check your spam folder or try resending." : {
       "localizations" : {
@@ -1807,9 +1784,6 @@
       }
     },
     "Image" : {
-
-    },
-    "In your trip" : {
 
     },
     "Included with %@ audio guide" : {
@@ -2055,10 +2029,8 @@
         }
       }
     },
-    "Or tell us what happened" : {
-
-    },
     "or continue with email" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2067,6 +2039,9 @@
           }
         }
       }
+    },
+    "Or tell us what happened" : {
+
     },
     "Pack Before You Go" : {
       "extractionState" : "stale",
@@ -2547,6 +2522,7 @@
       }
     },
     "Send" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2618,7 +2594,18 @@
     "Shared trip" : {
 
     },
+    "Show password" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示密码"
+          }
+        }
+      }
+    },
     "Sign In" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2645,6 +2632,7 @@
 
     },
     "Sign Up" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2655,6 +2643,7 @@
       }
     },
     "Sign up successful. Check your email and tap the confirmation link." : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2763,19 +2752,13 @@
     "Temporary files and HTTP cache have been removed." : {
 
     },
-    "Terms" : {
-
-    },
     "Terms of Service" : {
 
     },
     "then %@ · cancel anytime" : {
 
     },
-    "These are experience ideas — no specific venues. Ask Assistant for details." : {
-
-    },
-    "Thinking…" : {
+    "These are experience ideas — no specific venues." : {
 
     },
     "This cannot be undone." : {
@@ -3163,9 +3146,6 @@
     "Your China adventure starts here" : {
 
     },
-    "Your in-China helper" : {
-
-    },
     "Your itinerary" : {
 
     },
@@ -3209,9 +3189,6 @@
 
     },
     "文化贴士" : {
-
-    },
-    "请先登录后再使用 AI 助手。" : {
 
     },
     "退出登录" : {

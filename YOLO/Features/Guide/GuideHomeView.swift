@@ -33,7 +33,7 @@ struct GuideHomeView: View {
 
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                     ForEach(cities) { city in
-                        cityGridCard(city, inTrip: tripCityIds.contains(city.id))
+                        cityGridCard(city)
                     }
                 }
             }
@@ -202,7 +202,7 @@ struct GuideHomeView: View {
         .buttonStyle(.plain)
     }
 
-    private func cityGridCard(_ city: City, inTrip: Bool) -> some View {
+    private func cityGridCard(_ city: City) -> some View {
         Button {
             onSelectCity(city)
         } label: {
@@ -211,18 +211,6 @@ struct GuideHomeView: View {
                     .frame(maxWidth: .infinity)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    if inTrip {
-                        Text("In your trip")
-                            .font(Theme.FontToken.inter(8, weight: .medium))
-                            .foregroundStyle(Theme.ColorToken.accent)
-                            .textCase(.uppercase)
-                            .kerning(0.6)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 1)
-                            .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
-                            .padding(.bottom, 4)
-                    }
-
                     Text(city.name)
                         .font(Theme.FontToken.playfair(14, weight: .semibold))
                         .foregroundStyle(Theme.ColorToken.textPrimary)

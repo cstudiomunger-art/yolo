@@ -218,9 +218,7 @@ struct ItineraryDetailView: View {
                             ExperienceSuggestionsDayCard(
                                 day: day,
                                 cityDisplayName: experienceCityDisplayName(day)
-                            ) {
-                                askAssistantForExperience(day: day)
-                            }
+                            )
                             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
@@ -282,15 +280,6 @@ struct ItineraryDetailView: View {
     private func experienceCityDisplayName(_ day: ItineraryDay) -> String {
         guard let cid = day.experienceCityId else { return "" }
         return cityNameById[cid] ?? cid.capitalized
-    }
-
-    private func askAssistantForExperience(day: ItineraryDay) {
-        let city = experienceCityDisplayName(day)
-        let topics = day.experienceItems.prefix(5).joined(separator: ", ")
-        let prefill = city.isEmpty
-            ? "Tell me more about these local experience ideas: \(topics)"
-            : "Tell me more about local experiences in \(city): \(topics)"
-        appEnv.navigation.presentAssistant(prefill: prefill)
     }
 
     private func daySectionHeader(_ day: ItineraryDay) -> some View {

@@ -19,11 +19,9 @@ protocol ContentRepositoryProtocol: Sendable {
     func fetchCultureTips(cityIds: [String]) async throws -> [CultureTip]
     func fetchSampleItinerary() async throws -> SampleItinerary
     func fetchPlanningItinerary() async throws -> SampleItinerary
-    func fetchAssistantReply(scenarioId: String) async throws -> AssistantReply?
     func fetchPassportCountries() async throws -> [PassportCountry]
     func fetchVisaRule(countryCode: String) async throws -> VisaRule?
     func fetchEmergencyData() async throws -> EmergencyData
-    func fetchAssistantChips() async throws -> [AssistantChip]
     func fetchAppBranding() async throws -> AppBranding
 }
 
@@ -41,10 +39,8 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     private let cultureTips: [CultureTip]
     private let sampleItinerary: SampleItinerary
     private let planningItinerary: SampleItinerary?
-    private let assistantReplies: [AssistantReply]
     private let visaRules: [VisaRule]
     private let emergencyData: EmergencyData
-    private let assistantChips: [AssistantChip]
     private let appBranding: AppBranding
 
     init() {
@@ -61,11 +57,9 @@ struct BundledContentRepository: ContentRepositoryProtocol {
         cultureTips = BundledJSONLoader.load([CultureTip].self, resource: "culture_tips")
         sampleItinerary = BundledJSONLoader.load(SampleItinerary.self, resource: "sample_itinerary")
         planningItinerary = BundledJSONLoader.loadOptional(SampleItinerary.self, resource: "planning_itinerary")
-        assistantReplies = BundledJSONLoader.load([AssistantReply].self, resource: "assistant_replies")
         let visaBundle = BundledJSONLoader.load(VisaRulesBundle.self, resource: "visa-rules")
         visaRules = visaBundle.rules
         emergencyData = BundledJSONLoader.load(EmergencyData.self, resource: "emergency-data")
-        assistantChips = BundledJSONLoader.load([AssistantChip].self, resource: "assistant_chips")
         appBranding = BundledJSONLoader.load(AppBranding.self, resource: "app_branding")
     }
 
@@ -157,10 +151,6 @@ struct BundledContentRepository: ContentRepositoryProtocol {
         planningItinerary ?? sampleItinerary
     }
 
-    func fetchAssistantReply(scenarioId: String) async throws -> AssistantReply? {
-        assistantReplies.first { $0.scenarioId == scenarioId }
-    }
-
     func fetchPassportCountries() async throws -> [PassportCountry] {
         visaRules.enumerated().map { index, rule in
             PassportCountry(
@@ -177,10 +167,6 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     }
 
     func fetchEmergencyData() async throws -> EmergencyData { emergencyData }
-
-    func fetchAssistantChips() async throws -> [AssistantChip] {
-        assistantChips.sorted { $0.sortOrder < $1.sortOrder }
-    }
 
     func fetchAppBranding() async throws -> AppBranding { appBranding }
 }

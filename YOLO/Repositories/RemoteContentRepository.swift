@@ -240,18 +240,6 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
         }
     }
 
-    func fetchAssistantReply(scenarioId: String) async throws -> AssistantReply? {
-        let rows: [AssistantReply] = try await client
-            .from("assistant_replies")
-            .select()
-            .eq("scenario_id", value: scenarioId)
-            .eq("is_active", value: true)
-            .limit(1)
-            .execute()
-            .value
-        return rows.first
-    }
-
     func fetchPassportCountries() async throws -> [PassportCountry] {
         try await client
             .from("passport_countries")
@@ -286,16 +274,6 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
             throw URLError(.resourceUnavailable)
         }
         return data
-    }
-
-    func fetchAssistantChips() async throws -> [AssistantChip] {
-        try await client
-            .from("assistant_chips")
-            .select()
-            .eq("is_active", value: true)
-            .order("sort_order", ascending: true)
-            .execute()
-            .value
     }
 
     func fetchChecklistSettings() async throws -> ChecklistSettings {

@@ -377,9 +377,7 @@ struct PlanCreateFlowView: View {
                 ExperienceSuggestionsDayCard(
                     day: day,
                     cityDisplayName: visited
-                ) {
-                    askAssistantForExperience(day: day, cityName: visited)
-                }
+                )
             } else {
                 ForEach(day.activities) { activity in
                     reviewActivityRow(activity, dayIndex: dayIndex)
@@ -398,14 +396,6 @@ struct PlanCreateFlowView: View {
         }
         .padding(16)
         .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
-    }
-
-    private func askAssistantForExperience(day: ItineraryDay, cityName: String) {
-        let topics = day.experienceItems.prefix(5).joined(separator: ", ")
-        let prefill = cityName.isEmpty
-            ? "Tell me more about these local experience ideas: \(topics)"
-            : "Tell me more about local experiences in \(cityName): \(topics)"
-        appEnv.navigation.presentAssistant(prefill: prefill)
     }
 
     private func reviewActivityRow(_ activity: ItineraryActivity, dayIndex: Int) -> some View {

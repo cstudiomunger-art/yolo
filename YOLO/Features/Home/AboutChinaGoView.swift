@@ -22,7 +22,6 @@ struct AboutChinaGoView: View {
                         aboutRow("Prepare", "City-aware checklists and cultural tips")
                         aboutRow("Plan", "Build and save multi-city itineraries")
                         aboutRow("Guide", "Attraction details and audio tours")
-                        aboutRow("Assistant", "Quick answers for food, transport, and emergencies")
                     }
                     .padding(.top, 8)
                 }

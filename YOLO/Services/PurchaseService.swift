@@ -263,7 +263,7 @@ final class PurchaseService {
                 "Full text content for every attraction",
                 "Offline audio downloads",
                 "All visitor tips unlocked",
-                "Advanced AI travel assistant",
+                "AI-powered itinerary planning",
             ],
             isBestValue: true,
             displayOrder: 0,
