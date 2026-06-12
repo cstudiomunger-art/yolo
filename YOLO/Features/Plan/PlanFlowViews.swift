@@ -102,7 +102,12 @@ struct ItineraryDetailView: View {
             editableDays = itinerary.days
         }
         .task(id: itinerary.id) {
-            cities = (try? await appEnv.content.fetchCities()) ?? []
+            do {
+                cities = try await appEnv.content.fetchCities()
+            } catch {
+                cities = []
+                TelemetryService.shared.recordError(error, context: "plan_detail_cities")
+            }
             await loadAttractionCache()
         }
         .onChange(of: editableDays) { _, _ in
@@ -122,14 +127,7 @@ struct ItineraryDetailView: View {
     }
 
     private func loadAttractionCache() async {
-        var cache: [String: Attraction] = [:]
-        let ids = Set(currentItinerary.days.flatMap(\.activities).compactMap(\.attractionId))
-        for id in ids {
-            if let a = try? await appEnv.content.fetchAttraction(id: id) {
-                cache[id] = a
-            }
-        }
-        attractionCache = cache
+        attractionCache = await PlanItineraryHelpers.attractionCache(for: currentItinerary, content: appEnv.content)
     }
 
     private var tripCityIds: [String] {
@@ -146,17 +144,8 @@ struct ItineraryDetailView: View {
 
     private func appendAttraction(_ attraction: Attraction, dayIndex: Int) {
         guard editableDays.indices.contains(dayIndex) else { return }
-        let activity = ItineraryActivity(
-            id: UUID().uuidString,
-            name: attraction.name,
-            detail: HTMLContentView.plainText(from: attraction.summary ?? attraction.shortDescription ?? ""),
-            attractionId: attraction.id,
-            cityId: attraction.cityId,
-            hasAudio: attraction.audioGuideCount > 0
-        )
-        var day = editableDays[dayIndex]
-        day = day.withActivities(day.activities + [activity])
-        editableDays[dayIndex] = day
+        let day = editableDays[dayIndex]
+        editableDays[dayIndex] = day.withActivities(day.activities + [PlanItineraryHelpers.activity(from: attraction)])
         attractionCache[attraction.id] = attraction
         persistItineraryOrder()
     }
@@ -172,7 +161,9 @@ struct ItineraryDetailView: View {
             estimatedBudget: itinerary.estimatedBudget,
             days: days,
             shareSlug: saved?.shareSlug ?? itinerary.shareSlug,
-            isShared: saved?.isShared ?? itinerary.isShared
+            isShared: saved?.isShared ?? itinerary.isShared,
+            startDate: saved?.startDate ?? itinerary.startDate,
+            endDate: saved?.endDate ?? itinerary.endDate
         )
     }
 

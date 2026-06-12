@@ -1,55 +1,5 @@
 import SwiftUI
 
-struct PlanAddAttractionContext: Identifiable {
-    let id = UUID()
-    let dayIndex: Int
-    let cityIds: [String]
-}
-
-enum PlanTripCities {
-    static func cityIds(
-        itinerary: SampleItinerary,
-        selectedCityIds: [String],
-        attractionCache: [String: Attraction] = [:]
-    ) -> [String] {
-        var ids = Set(selectedCityIds)
-        for day in itinerary.days {
-            for act in day.activities {
-                if let cid = act.cityId, !cid.isEmpty { ids.insert(cid) }
-                if let aid = act.attractionId, let cityId = attractionCache[aid]?.cityId {
-                    ids.insert(cityId)
-                }
-            }
-            let legacy = day.cityName.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !legacy.isEmpty {
-                ids.insert(legacy.lowercased().replacingOccurrences(of: " ", with: "_"))
-            }
-        }
-        if ids.isEmpty, !itinerary.routeSummary.isEmpty {
-            itinerary.routeSummary
-                .components(separatedBy: CharacterSet(charactersIn: "→·,"))
-                .map { $0.trimmingCharacters(in: .whitespaces).lowercased().replacingOccurrences(of: " ", with: "_") }
-                .filter { !$0.isEmpty }
-                .forEach { ids.insert($0) }
-        }
-        return ids.sorted()
-    }
-
-    static func visitedCityNames(
-        day: ItineraryDay,
-        cityNameById: [String: String],
-        attractionCache: [String: Attraction]
-    ) -> String {
-        var seen: [String] = []
-        for act in day.activities {
-            let cid = act.cityId ?? act.attractionId.flatMap { attractionCache[$0]?.cityId }
-            guard let cid, let name = cityNameById[cid], !seen.contains(name) else { continue }
-            seen.append(name)
-        }
-        return seen.joined(separator: " · ")
-    }
-}
-
 /// Non-conversational flow: cities → dates → AI generate → edit card → save.
 struct PlanCreateFlowView: View {
     @Environment(AppEnvironment.self) private var appEnv
@@ -125,7 +75,7 @@ struct PlanCreateFlowView: View {
             planDateSheet(
                 title: String(localized: "Start date"),
                 selection: $arrivalDate,
-                range: Date()...
+                range: Date()...Date.distantFuture
             ) {
                 departureDate = PlanTripDateMath.clampDeparture(departureDate, arrival: arrivalDate)
                 showArrivalPicker = false
@@ -463,7 +413,12 @@ struct PlanCreateFlowView: View {
     // MARK: - Actions
 
     private func loadCities() async {
-        cities = (try? await appEnv.content.fetchCities()) ?? []
+        do {
+            cities = try await appEnv.content.fetchCities()
+        } catch {
+            cities = []
+            TelemetryService.shared.recordError(error, context: "plan_create_cities")
+        }
         selectedCityIds = Set(appEnv.preferences.selectedCityIds)
         departureDate = appEnv.preferences.departureDate
         departureDate = PlanTripDateMath.clampDeparture(departureDate, arrival: arrivalDate)
@@ -554,14 +509,7 @@ struct PlanCreateFlowView: View {
     }
 
     private func loadAttractionCache(for trip: SampleItinerary) async {
-        var cache: [String: Attraction] = [:]
-        let ids = Set(trip.days.flatMap(\.activities).compactMap(\.attractionId))
-        for id in ids {
-            if let a = try? await appEnv.content.fetchAttraction(id: id) {
-                cache[id] = a
-            }
-        }
-        attractionCache = cache
+        attractionCache = await PlanItineraryHelpers.attractionCache(for: trip, content: appEnv.content)
     }
 
     private func reviewTripCityIds() -> [String] {
@@ -577,43 +525,19 @@ struct PlanCreateFlowView: View {
     }
 
     private func removeActivity(dayIndex: Int, activityId: String) {
-        guard var trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return }
-        var day = trip.days[dayIndex]
-        day = day.withActivities(day.activities.filter { $0.id != activityId })
+        guard let trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return }
+        let day = trip.days[dayIndex]
         var days = trip.days
-        days[dayIndex] = day
-        draftItinerary = SampleItinerary(
-            id: trip.id,
-            title: trip.title,
-            meta: trip.meta,
-            routeSummary: trip.routeSummary,
-            estimatedBudget: trip.estimatedBudget,
-            days: days
-        )
+        days[dayIndex] = day.withActivities(day.activities.filter { $0.id != activityId })
+        draftItinerary = trip.withDays(days)
     }
 
     private func appendAttraction(_ attraction: Attraction, dayIndex: Int) {
-        guard var trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return }
-        var day = trip.days[dayIndex]
-        let activity = ItineraryActivity(
-            id: UUID().uuidString,
-            name: attraction.name,
-            detail: HTMLContentView.plainText(from: attraction.summary ?? attraction.shortDescription ?? ""),
-            attractionId: attraction.id,
-            cityId: attraction.cityId,
-            hasAudio: attraction.audioGuideCount > 0
-        )
-        day = day.withActivities(day.activities + [activity])
+        guard let trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return }
+        let day = trip.days[dayIndex]
         var days = trip.days
-        days[dayIndex] = day
-        draftItinerary = SampleItinerary(
-            id: trip.id,
-            title: trip.title,
-            meta: trip.meta,
-            routeSummary: trip.routeSummary,
-            estimatedBudget: trip.estimatedBudget,
-            days: days
-        )
+        days[dayIndex] = day.withActivities(day.activities + [PlanItineraryHelpers.activity(from: attraction)])
+        draftItinerary = trip.withDays(days)
         attractionCache[attraction.id] = attraction
     }
 
@@ -659,27 +583,6 @@ struct PlanCreateFlowView: View {
                 .background(Theme.ColorToken.textPrimary)
         }
         .buttonStyle(.plain)
-    }
-
-    private func planDateSheet(
-        title: String,
-        selection: Binding<Date>,
-        range: PartialRangeFrom<Date>,
-        onDone: @escaping () -> Void
-    ) -> some View {
-        NavigationStack {
-            DatePicker(title, selection: selection, in: range, displayedComponents: .date)
-                .datePickerStyle(.graphical)
-                .padding()
-                .navigationTitle(title)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done", action: onDone)
-                    }
-                }
-        }
-        .presentationDetents([.medium])
     }
 
     private func planDateSheet(
@@ -855,6 +758,11 @@ struct PlanAttractionPickerSheet: View {
     }
 
     private func loadAttractions(cityId: String) async {
-        attractions = (try? await appEnv.content.fetchAttractions(cityId: cityId)) ?? []
+        do {
+            attractions = try await appEnv.content.fetchAttractions(cityId: cityId)
+        } catch {
+            attractions = []
+            TelemetryService.shared.recordError(error, context: "plan_picker_attractions")
+        }
     }
 }

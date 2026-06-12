@@ -158,8 +158,18 @@ struct HomeView: View {
                 countryCode: appEnv.preferences.countryCode
             )
             async let citiesTask = repo.fetchCities()
-            let allItems = (try? await checklistTask) ?? []
-            cities = (try? await citiesTask) ?? []
+            var allItems: [ChecklistItem] = []
+            do {
+                allItems = try await checklistTask
+            } catch {
+                TelemetryService.shared.recordError(error, context: "home_reload_checklist")
+            }
+            do {
+                cities = try await citiesTask
+            } catch {
+                cities = []
+                TelemetryService.shared.recordError(error, context: "home_reload_cities")
+            }
             let result = PrepChecklistAssembler.assemble(
                 allItems: allItems,
                 context: ctx,

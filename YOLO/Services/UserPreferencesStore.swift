@@ -227,6 +227,8 @@ final class UserPreferencesStore {
         }
     }
 
+    // MARK: - Reset
+
     /// Clears all local preferences (e.g. on sign-out). Does not touch Supabase.
     func resetAll() {
         suppressSyncNotification = true
@@ -274,6 +276,8 @@ final class UserPreferencesStore {
         appLanguage = AppLanguage.resolved(fromStoredValue: nil)
         cachedVisaRule = nil
     }
+
+    // MARK: - Favorite attractions
 
     func isFavorite(attractionId: String) -> Bool {
         favoriteAttractions.contains { $0.attractionId == attractionId }
@@ -328,6 +332,8 @@ final class UserPreferencesStore {
         return Keys.favoriteAttractions + "." + storageUserId
     }
 
+    // MARK: - Onboarding
+
     func markIntroOnboardingCompleted() {
         hasCompletedIntroOnboarding = true
     }
@@ -350,6 +356,8 @@ final class UserPreferencesStore {
         countryCode = ""
         hasCompletedOnboarding = false
     }
+
+    // MARK: - Checklist
 
     var onChecklistStatusChanged: ((String, ChecklistItemType, ChecklistItemStatus) -> Void)?
 
@@ -421,6 +429,8 @@ final class UserPreferencesStore {
             UserDefaults.standard.removeObject(forKey: Keys.checklistStatuses)
         }
     }
+
+    // MARK: - Itineraries
 
     var activeItinerary: SampleItinerary? {
         if let id = activeItineraryId {
@@ -522,6 +532,8 @@ final class UserPreferencesStore {
         activeItineraryId = nil
     }
 
+    // MARK: - Purchases & subscription
+
     func hasAccessToAttraction(_ attractionId: String, iapProductId: String?) -> Bool {
         if isSubscriptionActive { return true }
         if purchasedAttractionIds.contains(attractionId) { return true }
@@ -546,6 +558,8 @@ final class UserPreferencesStore {
         guard !countryCode.isEmpty else { return nil }
         return cachedVisaRule
     }
+
+    // MARK: - Profile sync
 
     func applyRemoteProfile(_ row: UserProfileRow) {
         suppressSyncNotification = true
@@ -631,6 +645,8 @@ final class UserPreferencesStore {
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.date(from: string)
     }
+
+    // MARK: - Itinerary persistence
 
     private func reloadItinerariesFromDisk() {
         suppressSyncNotification = true
