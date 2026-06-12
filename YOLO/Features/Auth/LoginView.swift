@@ -47,20 +47,41 @@ struct LoginView: View {
     @ViewBuilder
     private var authFormContent: some View {
         if !AppConfig.useMock {
-            AppleSignInButton(
-                onStart: {
-                    clearMessages()
-                    isLoading = true
-                },
-                onSuccess: {
-                    isLoading = false
-                    dismiss()
-                },
-                onError: { message in
-                    isLoading = false
-                    errorMessage = message
-                }
-            )
+            VStack(spacing: 10) {
+                AppleSignInButton(
+                    onStart: {
+                        clearMessages()
+                        isLoading = true
+                    },
+                    onSuccess: {
+                        isLoading = false
+                        dismiss()
+                    },
+                    onError: { message in
+                        isLoading = false
+                        errorMessage = message
+                    }
+                )
+
+                GoogleSignInButton(
+                    onStart: {
+                        clearMessages()
+                        isLoading = true
+                    },
+                    onSuccess: {
+                        isLoading = false
+                        dismiss()
+                    },
+                    onCancel: {
+                        isLoading = false
+                    },
+                    onError: { message in
+                        isLoading = false
+                        errorMessage = message
+                    }
+                )
+            }
+            .padding(.top, 72)
 
             LegalLinksText(
                 text: "By continuing, you agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)",

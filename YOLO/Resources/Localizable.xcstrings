@@ -765,6 +765,16 @@
         }
       }
     },
+    "Continue with Google" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通过 Google 继续"
+          }
+        }
+      }
+    },
     "Create Account" : {
       "localizations" : {
         "zh-Hans" : {

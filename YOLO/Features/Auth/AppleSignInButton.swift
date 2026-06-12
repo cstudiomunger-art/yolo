@@ -26,6 +26,7 @@ struct AppleSignInButton: View {
         }
         .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
         .frame(height: 48)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private func handle(_ result: Result<ASAuthorization, Error>) {
