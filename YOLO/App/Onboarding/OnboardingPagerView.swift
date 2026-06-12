@@ -43,18 +43,22 @@ struct OnboardingPagerView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .always))
 
-            Button(page == pages.count - 1 ? "Get Started" : "Next") {
+            Button {
                 if page < pages.count - 1 {
                     withAnimation { page += 1 }
                 } else {
                     finish()
                 }
+            } label: {
+                Text(page == pages.count - 1 ? "Get Started" : "Next")
+                    .font(Theme.FontToken.inter(14, weight: .medium))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Theme.ColorToken.textPrimary)
+                    .contentShape(Rectangle())
             }
-            .font(Theme.FontToken.inter(14, weight: .medium))
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(Theme.ColorToken.textPrimary)
+            .buttonStyle(.plain)
             .padding(.horizontal, Theme.screenPadding)
             .padding(.bottom, 32)
         }

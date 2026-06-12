@@ -54,25 +54,26 @@ struct EditProfileView: View {
         Section {
             HStack {
                 Spacer()
-                ZStack(alignment: .bottomTrailing) {
-                    Group {
-                        if let img = selectedUIImage {
-                            Image(uiImage: img)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 80, height: 80)
-                                .clipShape(Circle())
-                        } else {
-                            ProfileAvatarButton(
-                                avatarUrl: appEnv.preferences.avatarUrl,
-                                displayName: appEnv.preferences.displayName,
-                                size: 80,
-                                action: {}
-                            )
+                PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                    ZStack(alignment: .bottomTrailing) {
+                        Group {
+                            if let img = selectedUIImage {
+                                Image(uiImage: img)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(Circle())
+                            } else {
+                                ProfileAvatarButton(
+                                    avatarUrl: appEnv.preferences.avatarUrl,
+                                    displayName: appEnv.preferences.displayName,
+                                    size: 80,
+                                    action: {}
+                                )
+                                .allowsHitTesting(false)
+                            }
                         }
-                    }
 
-                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                         Image(systemName: "camera.fill")
                             .font(.system(size: 12))
                             .foregroundStyle(.white)
@@ -80,7 +81,9 @@ struct EditProfileView: View {
                             .background(Theme.ColorToken.accent)
                             .clipShape(Circle())
                     }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 Spacer()
             }
             .listRowBackground(Color.clear)
