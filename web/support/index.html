@@ -23,6 +23,8 @@
   .topbar{display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
   .topbar .logo{font-weight:700}.topbar .logo span{color:var(--accent)}
   .topbar .who{font-size:12px;color:var(--muted)}
+  .agentAvatar{width:32px;height:32px;border-radius:50%;background:var(--ink);background-size:cover;background-position:center;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;flex:none;border:1px solid var(--border)}
+  .agentAvatar:hover{opacity:.85}
   .topbar .spacer{flex:1}
   .statusbtn{border:1px solid var(--border);background:#fff;border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
   .dot{width:9px;height:9px;border-radius:50%;background:#bbb;display:inline-block}
@@ -83,6 +85,8 @@
   <div class="console" id="console">
     <div class="topbar">
       <div class="logo">China<span>Go</span> · 客服</div>
+      <label for="avatarInput" id="agentAvatar" class="agentAvatar" title="点击上传/更换头像"></label>
+      <input id="avatarInput" type="file" accept="image/*" style="display:none">
       <div class="who" id="who"></div>
       <div class="spacer"></div>
       <button class="statusbtn" id="statusBtn"><span class="dot" id="statusDot"></span><span id="statusText">离线</span></button>
@@ -167,6 +171,7 @@
       $("login").style.display = "none";
       $("console").style.display = "grid";
       $("who").textContent = agent.name + " · " + (agent.role || "");
+      renderAgentAvatar();
       renderStatus();
       if ("Notification" in window && Notification.permission === "default") { try { Notification.requestPermission(); } catch(e){} }
       $("segOpen").onclick = () => { statusFilter = "open"; $("segOpen").classList.add("on"); $("segClosed").classList.remove("on"); loadConversations(); };
@@ -174,6 +179,28 @@
       await loadConversations();
       pollTimer = setInterval(tick, 3000);
     }
+
+    function renderAgentAvatar(){
+      const el = $("agentAvatar");
+      if (agent && agent.avatar_url){ el.style.backgroundImage = `url('${agent.avatar_url}')`; el.textContent = ""; }
+      else { el.style.backgroundImage = ""; el.textContent = ((agent && (agent.avatar_seed || (agent.name||"")[0])) || "?"); }
+    }
+
+    $("avatarInput").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if(!file || !agent) return;
+      $("avatarInput").value = "";
+      const { data:{ session } } = await sb.auth.getSession();
+      const path = `${session.user.id}/agent-avatar.jpg`;
+      const { error: upErr } = await sb.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type || "image/jpeg" });
+      if (upErr){ alert("头像上传失败: " + upErr.message); return; }
+      const pub = sb.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+      const url = pub + "?t=" + Date.now();   // cache-bust so the new image shows immediately
+      const { error } = await sb.from("support_agents").update({ avatar_url: url }).eq("id", agent.id);
+      if (error){ alert("头像保存失败: " + error.message); return; }
+      agent.avatar_url = url;
+      renderAgentAvatar();
+    });
 
     function renderStatus(){
       const s = agent.status || "offline";

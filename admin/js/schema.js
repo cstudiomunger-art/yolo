@@ -992,6 +992,7 @@
           { value: "busy", label: "忙碌" },
           { value: "offline", label: "离线" },
         ] },
+        { key: "avatar_url", type: "image_url", label: "头像（客服端可自己上传，也可在此设置）" },
         { key: "social_url", type: "text", label: "社交主页 URL" },
         { key: "display_order", type: "number" },
         { key: "is_active", type: "bool", label: "启用" },

@@ -820,7 +820,7 @@ App.fillTableDefaults = function fillTableDefaults(payload, table) {
     user_itineraries: { is_deleted: false },
     passport_countries: { display_order: 0 },
     // New CMS modules — fill NOT NULL columns so blank optional fields never submit null.
-    support_agents: { status: "offline", name: "", role: "", avatar_seed: "", social_url: "", languages: [], display_order: 0, is_active: true },
+    support_agents: { status: "offline", name: "", role: "", avatar_seed: "", social_url: "", avatar_url: "", languages: [], display_order: 0, is_active: true },
     visa_policies: { priority: 0, verdict: "green", area_scope: "nationwide", headline_en: "", headline_zh: "", is_active: true },
     visa_policy_grants: { is_active: true },
     city_visa_tags: { region_type: "mainland", is_port_of_entry: false, notes_en: "", notes_zh: "", is_active: true },

@@ -8,6 +8,7 @@ struct SupportAgent: Codable, Identifiable, Hashable {
     let languages: [String]
     let status: String          // "online" | "busy" | "offline"
     let socialUrl: String
+    let avatarUrl: String?      // agent's real profile photo (public); nil/"" → fall back to seed
 
     var isReachable: Bool { status == "online" || status == "busy" }
 }

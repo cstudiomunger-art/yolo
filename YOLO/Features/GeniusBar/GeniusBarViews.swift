@@ -126,10 +126,7 @@ struct GeniusBarHomeView: View {
         Button { start(agentId: agent.id, priority: "normal") } label: {
             VStack(spacing: 6) {
                 ZStack(alignment: .bottomTrailing) {
-                    Circle().fill(LinearGradient(colors: [Theme.ColorToken.accent, Theme.ColorToken.textPrimary], startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: 56, height: 56)
-                        .overlay(Text(agent.avatarSeed.isEmpty ? String(agent.name.prefix(1)) : agent.avatarSeed)
-                            .font(Theme.FontToken.playfair(20, weight: .bold)).foregroundStyle(.white))
+                    agentAvatar(agent, size: 56)
                     Circle().fill(statusColor(agent.status)).frame(width: 13, height: 13)
                         .overlay(Circle().stroke(.white, lineWidth: 2))
                 }
@@ -159,6 +156,24 @@ struct GeniusBarHomeView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+    }
+
+    @ViewBuilder
+    private func agentAvatar(_ agent: SupportAgent, size: CGFloat) -> some View {
+        if let urlStr = agent.avatarUrl, !urlStr.isEmpty, let url = URL(string: urlStr) {
+            AsyncImage(url: url) { img in
+                img.resizable().scaledToFill()
+            } placeholder: {
+                Circle().fill(Theme.ColorToken.backgroundSubtle)
+            }
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+        } else {
+            Circle().fill(LinearGradient(colors: [Theme.ColorToken.accent, Theme.ColorToken.textPrimary], startPoint: .topLeading, endPoint: .bottomTrailing))
+                .frame(width: size, height: size)
+                .overlay(Text(agent.avatarSeed.isEmpty ? String(agent.name.prefix(1)) : agent.avatarSeed)
+                    .font(Theme.FontToken.playfair(20, weight: .bold)).foregroundStyle(.white))
+        }
     }
 
     private func statusColor(_ s: String) -> Color {
