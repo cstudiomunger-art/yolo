@@ -18,6 +18,16 @@ struct ItineraryEditorView: View {
     var body: some View {
         NavigationStack {
             List {
+                if hasBookingTrace {
+                    Section {
+                        BookingTraceCard(days: editableDays)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
+                            .listRowBackground(Color.clear)
+                    } header: {
+                        Text("Booking trace · 行程留痕")
+                    }
+                }
+
                 Section("Trip overview") {
                     TextField("Title", text: $title)
                     TextField("Dates", text: $meta)
@@ -129,6 +139,12 @@ struct ItineraryEditorView: View {
         .padding(.vertical, 4)
     }
 
+    private var hasBookingTrace: Bool {
+        editableDays.contains { day in
+            day.activities.contains { $0.kind == .hotel || ($0.attractionId?.isEmpty == false) }
+        }
+    }
+
     // MARK: - Bindings
 
     private func dayStringBinding(_ dayIndex: Int, keyPath: KeyPath<ItineraryDay, String>) -> Binding<String> {
@@ -166,14 +182,7 @@ struct ItineraryEditorView: View {
             get: { editableDays[dayIndex].activities[actIndex].name },
             set: { newValue in
                 updateActivity(dayIndex: dayIndex, actIndex: actIndex) { act in
-                    ItineraryActivity(
-                        id: act.id,
-                        name: newValue,
-                        detail: act.detail,
-                        attractionId: act.attractionId,
-                        cityId: act.cityId,
-                        hasAudio: act.hasAudio
-                    )
+                    act.with(name: newValue)
                 }
             }
         )
@@ -184,14 +193,7 @@ struct ItineraryEditorView: View {
             get: { editableDays[dayIndex].activities[actIndex].detail },
             set: { newValue in
                 updateActivity(dayIndex: dayIndex, actIndex: actIndex) { act in
-                    ItineraryActivity(
-                        id: act.id,
-                        name: act.name,
-                        detail: newValue,
-                        attractionId: act.attractionId,
-                        cityId: act.cityId,
-                        hasAudio: act.hasAudio
-                    )
+                    act.with(detail: newValue)
                 }
             }
         )
@@ -202,14 +204,7 @@ struct ItineraryEditorView: View {
             get: { editableDays[dayIndex].activities[actIndex].hasAudio },
             set: { newValue in
                 updateActivity(dayIndex: dayIndex, actIndex: actIndex) { act in
-                    ItineraryActivity(
-                        id: act.id,
-                        name: act.name,
-                        detail: act.detail,
-                        attractionId: act.attractionId,
-                        cityId: act.cityId,
-                        hasAudio: newValue
-                    )
+                    act.with(hasAudio: newValue)
                 }
             }
         )
@@ -293,7 +288,11 @@ struct ItineraryEditorView: View {
             meta: meta.trimmingCharacters(in: .whitespacesAndNewlines),
             routeSummary: routeSummary.trimmingCharacters(in: .whitespacesAndNewlines),
             estimatedBudget: estimatedBudget.trimmingCharacters(in: .whitespacesAndNewlines),
-            days: editableDays
+            days: editableDays,
+            shareSlug: itinerary.shareSlug,
+            isShared: itinerary.isShared,
+            startDate: itinerary.startDate,
+            endDate: itinerary.endDate
         )
         appEnv.preferences.saveItinerary(updated)
         let cityIds = Set(

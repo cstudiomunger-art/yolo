@@ -450,11 +450,24 @@ private struct HotelSheetCity: Identifiable {
     let displayName: String
 }
 
+/// Lets a hotel card add itself to a chosen day of the active trip (booking trace).
+struct HotelTripAdder {
+    /// Standard (non-experience) days available to pick.
+    let days: [ItineraryDay]
+    /// Hotel ids already traced into the trip (to show "已加入").
+    let addedHotelIds: Set<String>
+    let add: (Hotel, ItineraryDay) -> Void
+}
+
 struct BookYourTripView: View {
     @Environment(AppEnvironment.self) private var appEnv
 
     let itinerary: SampleItinerary
     @State private var hotelSheetCity: HotelSheetCity?
+    /// Mutable working copy so added hotels persist and reflect immediately.
+    @State private var working: SampleItinerary?
+
+    private var activeItinerary: SampleItinerary { working ?? itinerary }
 
     var body: some View {
         ScrollView {
@@ -489,8 +502,41 @@ struct BookYourTripView: View {
             .padding(Theme.screenPadding)
         }
         .sheet(item: $hotelSheetCity) { city in
-            HotelSearchSheet(cityId: city.id, cityName: city.displayName)
+            HotelSearchSheet(cityId: city.id, cityName: city.displayName, adder: hotelAdder())
         }
+        .onAppear { if working == nil { working = itinerary } }
+    }
+
+    private func hotelAdder() -> HotelTripAdder {
+        let itin = activeItinerary
+        let standardDays = itin.days.filter { !$0.isExperienceSuggestions }
+        let addedHotelIds = Set(
+            itin.days.flatMap(\.activities).compactMap { $0.kind == .hotel ? $0.hotelId : nil }
+        )
+        return HotelTripAdder(days: standardDays, addedHotelIds: addedHotelIds) { hotel, day in
+            addHotel(hotel, to: day)
+        }
+    }
+
+    private func addHotel(_ hotel: Hotel, to day: ItineraryDay) {
+        var itin = activeItinerary
+        guard let di = itin.days.firstIndex(where: { $0.id == day.id }) else { return }
+        let activity = ItineraryActivity(
+            id: "hotel_\(UUID().uuidString.prefix(8))",
+            name: hotel.name,
+            detail: hotel.chineseName == hotel.name ? "" : hotel.chineseName,
+            attractionId: nil,
+            cityId: day.activities.first?.cityId,
+            hasAudio: false,
+            kind: .hotel,
+            hotelId: hotel.id,
+            sourcePlatform: "platform"
+        )
+        var days = itin.days
+        days[di] = days[di].withActivities(days[di].activities + [activity])
+        itin = itin.withDays(days)
+        working = itin
+        appEnv.preferences.saveItinerary(itin)
     }
 
     private var flightButtons: some View {
@@ -526,6 +572,7 @@ private struct HotelSearchSheet: View {
     @Environment(AppEnvironment.self) private var appEnv
     let cityId: String
     let cityName: String
+    var adder: HotelTripAdder? = nil
 
     @State private var hotels: [Hotel] = []
     @State private var isLoading = true
@@ -537,7 +584,8 @@ private struct HotelSearchSheet: View {
             hotels: hotels,
             isLoading: isLoading,
             loadError: loadError,
-            usesLiveContent: appEnv.contentMode.useRemoteContent
+            usesLiveContent: appEnv.contentMode.useRemoteContent,
+            adder: adder
         )
         .task(id: cityId) {
             await loadHotels()
@@ -565,6 +613,7 @@ struct HotelSearchView: View {
     var isLoading: Bool = false
     var loadError: String? = nil
     var usesLiveContent: Bool = true
+    var adder: HotelTripAdder? = nil
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -605,7 +654,7 @@ struct HotelSearchView: View {
                         .padding(.vertical, 24)
                     } else {
                         ForEach(hotels) { hotel in
-                            HotelCardView(hotel: hotel)
+                            HotelCardView(hotel: hotel, adder: adder)
                         }
                     }
                 }
@@ -623,13 +672,49 @@ struct HotelSearchView: View {
 
 struct HotelCardView: View {
     let hotel: Hotel
+    var adder: HotelTripAdder? = nil
+    @State private var showDayPicker = false
+
+    @ViewBuilder
+    private var addToTripControl: some View {
+        if let adder {
+            if adder.addedHotelIds.contains(hotel.id) {
+                Label("已加入", systemImage: "checkmark.circle.fill")
+                    .font(Theme.FontToken.inter(11, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.success)
+            } else {
+                Button {
+                    showDayPicker = true
+                } label: {
+                    Label("加入行程", systemImage: "plus")
+                        .font(Theme.FontToken.inter(11, weight: .medium))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.ColorToken.textPrimary, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .confirmationDialog("加入哪一天？", isPresented: $showDayPicker, titleVisibility: .visible) {
+                    ForEach(adder.days) { day in
+                        Button("Day \(day.dayIndex) · \(day.dateLabel.isEmpty ? "Day \(day.dayIndex)" : day.dateLabel)") {
+                            adder.add(hotel, day)
+                        }
+                    }
+                    Button("取消", role: .cancel) {}
+                }
+            }
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             CoverImageView(path: hotel.coverImagePath, height: 140, cornerRadius: 6)
 
-            Text(hotel.name)
-                .font(Theme.FontToken.playfair(16, weight: .semibold))
+            HStack(alignment: .top, spacing: 8) {
+                Text(hotel.name)
+                    .font(Theme.FontToken.playfair(16, weight: .semibold))
+                Spacer(minLength: 0)
+                addToTripControl
+            }
             if hotel.chineseName != hotel.name {
                 Text(hotel.chineseName)
                     .font(Theme.FontToken.inter(12))

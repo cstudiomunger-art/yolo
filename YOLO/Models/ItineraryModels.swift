@@ -178,6 +178,13 @@ struct ItineraryDay: Identifiable, Codable, Hashable {
     }
 }
 
+/// What kind of itinerary entry this is. Defaults to `.attraction` so old payloads
+/// (which never wrote this key) decode unchanged. `.hotel` marks a booking-trace hotel.
+enum ActivityKind: String, Codable, Hashable {
+    case attraction
+    case hotel
+}
+
 struct ItineraryActivity: Identifiable, Codable, Hashable {
     let id: String
     let timeSlot: String
@@ -186,6 +193,12 @@ struct ItineraryActivity: Identifiable, Codable, Hashable {
     let attractionId: String?
     let cityId: String?
     let hasAudio: Bool
+    /// Booking trace: attraction (default) or platform hotel added to the trip.
+    let kind: ActivityKind
+    /// Set when `kind == .hotel`; references the platform hotel.
+    let hotelId: String?
+    /// Provenance of a traced booking (e.g. "platform"); nil for plain activities.
+    let sourcePlatform: String?
 
     init(
         id: String,
@@ -194,7 +207,10 @@ struct ItineraryActivity: Identifiable, Codable, Hashable {
         detail: String,
         attractionId: String?,
         cityId: String? = nil,
-        hasAudio: Bool
+        hasAudio: Bool,
+        kind: ActivityKind = .attraction,
+        hotelId: String? = nil,
+        sourcePlatform: String? = nil
     ) {
         self.id = id
         self.timeSlot = timeSlot
@@ -203,6 +219,9 @@ struct ItineraryActivity: Identifiable, Codable, Hashable {
         self.attractionId = attractionId
         self.cityId = cityId
         self.hasAudio = hasAudio
+        self.kind = kind
+        self.hotelId = hotelId
+        self.sourcePlatform = sourcePlatform
     }
 
     init(from decoder: Decoder) throws {
@@ -214,6 +233,9 @@ struct ItineraryActivity: Identifiable, Codable, Hashable {
         attractionId = try c.decodeIfPresent(String.self, forKey: .attractionId)
         cityId = try c.decodeIfPresent(String.self, forKey: .cityId)
         hasAudio = try c.decodeIfPresent(Bool.self, forKey: .hasAudio) ?? false
+        kind = try c.decodeIfPresent(ActivityKind.self, forKey: .kind) ?? .attraction
+        hotelId = try c.decodeIfPresent(String.self, forKey: .hotelId)
+        sourcePlatform = try c.decodeIfPresent(String.self, forKey: .sourcePlatform)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -225,10 +247,34 @@ struct ItineraryActivity: Identifiable, Codable, Hashable {
         try c.encodeIfPresent(attractionId, forKey: .attractionId)
         try c.encodeIfPresent(cityId, forKey: .cityId)
         try c.encode(hasAudio, forKey: .hasAudio)
+        if kind != .attraction { try c.encode(kind, forKey: .kind) }
+        try c.encodeIfPresent(hotelId, forKey: .hotelId)
+        try c.encodeIfPresent(sourcePlatform, forKey: .sourcePlatform)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, timeSlot, name, detail, attractionId, cityId, hasAudio
+        case id, timeSlot, name, detail, attractionId, cityId, hasAudio, kind, hotelId, sourcePlatform
+    }
+
+    /// Copy with selected fields replaced; preserves all other fields (including
+    /// `kind`/`hotelId`/`sourcePlatform`) so edits never silently drop booking trace.
+    func with(
+        name: String? = nil,
+        detail: String? = nil,
+        hasAudio: Bool? = nil
+    ) -> ItineraryActivity {
+        ItineraryActivity(
+            id: id,
+            timeSlot: timeSlot,
+            name: name ?? self.name,
+            detail: detail ?? self.detail,
+            attractionId: attractionId,
+            cityId: cityId,
+            hasAudio: hasAudio ?? self.hasAudio,
+            kind: kind,
+            hotelId: hotelId,
+            sourcePlatform: sourcePlatform
+        )
     }
 }
 
