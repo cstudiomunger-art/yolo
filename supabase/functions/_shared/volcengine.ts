@@ -9,6 +9,8 @@ export type ChatCompletionOptions = {
   temperature?: number;
   modelId?: string;
   apiUrl?: string;
+  /** Override the API key (e.g. a separately-configured translation provider). */
+  apiKey?: string;
   timeoutMs?: number;
   /** "auto" lets the model decide when to think; omit to disable thinking. */
   thinkingMode?: "auto" | "enabled" | "disabled";
@@ -41,7 +43,7 @@ export async function chatCompletion(
   options: ChatCompletionOptions,
 ): Promise<string | null> {
   const cfg = volcengineConfig();
-  const apiKey = cfg.apiKey;
+  const apiKey = options.apiKey?.trim() || cfg.apiKey;
   const model = options.modelId?.trim() || cfg.model;
   const apiUrl = options.apiUrl?.trim() || cfg.apiUrl;
   const timeoutMs = options.timeoutMs ?? cfg.timeoutMs;

@@ -64,8 +64,48 @@
       defaultExpanded: false,
       items: [
         { kind: "table", table: "passport_countries", label: "护照国家" },
-        { kind: "table", table: "visa_rules", label: "签证规则" },
+        { kind: "table", table: "visa_rules", label: "签证规则（旧·回退）" },
         { kind: "table", table: "culture_tips", label: "文化贴士" },
+      ],
+    },
+    {
+      id: "visa_engine",
+      label: "🛂 签证引擎",
+      defaultExpanded: false,
+      items: [
+        { kind: "table", table: "visa_policies", label: "政策框架 P1-P5" },
+        { kind: "table", table: "visa_policy_grants", label: "政策适用（国籍×窗口）" },
+        { kind: "table", table: "city_visa_tags", label: "城市签证标签" },
+        { kind: "table", table: "entry_ports", label: "入境口岸" },
+        { kind: "table", table: "visa_rule_overrides", label: "逐城覆盖" },
+      ],
+    },
+    {
+      id: "payment_helper",
+      label: "💳 支付助手",
+      defaultExpanded: false,
+      items: [
+        { kind: "table", table: "payment_advice_rules", label: "支付建议规则" },
+        { kind: "table", table: "payment_merchant_phrases", label: "商家短语" },
+        { kind: "table", table: "payment_helper_links", label: "外链" },
+      ],
+    },
+    {
+      id: "support",
+      label: "💬 客服管理",
+      defaultExpanded: false,
+      items: [
+        { kind: "table", table: "support_agents", label: "客服坐席" },
+      ],
+    },
+    {
+      id: "infohub",
+      label: "🧭 实用信息内容",
+      defaultExpanded: false,
+      items: [
+        { kind: "table", table: "transport_tips", label: "交通攻略" },
+        { kind: "table", table: "common_phrases", label: "常用语" },
+        { kind: "table", table: "dialect_phrases", label: "方言彩蛋" },
       ],
     },
     {
