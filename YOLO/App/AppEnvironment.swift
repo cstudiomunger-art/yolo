@@ -11,6 +11,8 @@ final class AppEnvironment {
     let navigation: AppNavigation
     let profileSync: ProfileSyncService
     let purchase: PurchaseService
+    /// CMS-driven visa policy data for the on-device VisaPolicyEngine.
+    let visaData = VisaDataService()
     /// Single, app-wide audio player shared by every guide section and the floating mini-player.
     let audioPlayer = AudioQueuePlayer()
     private(set) var content: any ContentRepositoryProtocol

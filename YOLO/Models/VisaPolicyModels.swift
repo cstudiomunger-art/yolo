@@ -57,7 +57,7 @@ struct VisaRuleOverride: Codable, Identifiable, Hashable {
 }
 
 /// Bundle of all visa data the engine evaluates against (fetched + cached, or bundled).
-struct VisaDataSet: Equatable {
+struct VisaDataSet: Codable, Equatable {
     var policies: [VisaPolicy]
     var grants: [VisaPolicyGrant]
     var cityTags: [CityVisaTag]
