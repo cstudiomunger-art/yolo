@@ -37,6 +37,9 @@ final class SupportChatService {
 
     // MARK: - Conversation lifecycle
 
+    /// The user's own open conversations (one per agent) — drives the "我的会话" inbox.
+    private(set) var myConversations: [SupportConversation] = []
+
     private struct NewConversation: Encodable {
         let user_id: String
         let agent_id: String?
@@ -44,15 +47,50 @@ final class SupportChatService {
         let context_json: AnyJSON?
     }
 
-    func startConversation(userId: UUID, agentId: String?, priority: String = "normal", context: [String: String]? = nil) async {
-        let ctx: AnyJSON?
-        if let context { ctx = try? AnyJSON(context) } else { ctx = nil }
-        let payload = NewConversation(
-            user_id: userId.uuidString.lowercased(),
-            agent_id: agentId,
-            priority: priority,
-            context_json: ctx
-        )
+    func loadMyConversations(userId: UUID) async {
+        guard AppConfig.isSupabaseConfigured else { return }
+        do {
+            myConversations = try await client.from("support_conversations")
+                .select()
+                .eq("user_id", value: userId.uuidString.lowercased())
+                .eq("status", value: "open")
+                .order("updated_at", ascending: false)
+                .execute().value
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    /// Resume an existing conversation (from the inbox).
+    func openConversation(_ conv: SupportConversation) async {
+        conversation = conv
+        await loadMessages()
+        startPolling()
+    }
+
+    /// Start or resume a conversation. One user ↔ one agent = one open thread; tapping
+    /// the same agent again resumes it instead of duplicating. SOS always opens fresh.
+    /// The user's name/email are stashed in context_json so the agent console shows who it is.
+    func startConversation(
+        userId: UUID, agentId: String?, priority: String = "normal",
+        context: [String: String]? = nil, displayName: String? = nil, email: String? = nil
+    ) async {
+        let uid = userId.uuidString.lowercased()
+
+        if let agentId, priority == "normal" {
+            let existing: [SupportConversation] = (try? await client.from("support_conversations")
+                .select().eq("user_id", value: uid).eq("agent_id", value: agentId)
+                .eq("status", value: "open").order("updated_at", ascending: false).limit(1)
+                .execute().value) ?? []
+            if let conv = existing.first { await openConversation(conv); return }
+        }
+
+        var merged = context ?? [:]
+        if let displayName, !displayName.isEmpty { merged["user_name"] = displayName }
+        if let email, !email.isEmpty { merged["user_email"] = email }
+        let ctx: AnyJSON? = merged.isEmpty ? nil : (try? AnyJSON(merged))
+
+        let payload = NewConversation(user_id: uid, agent_id: agentId, priority: priority, context_json: ctx)
         do {
             let row: SupportConversation = try await client.from("support_conversations")
                 .insert(payload).select().single().execute().value

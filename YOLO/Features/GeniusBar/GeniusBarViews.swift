@@ -17,6 +17,9 @@ struct GeniusBarHomeView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     header
                     sosCard
+                    if !service.myConversations.isEmpty {
+                        inbox
+                    }
                     Text("选一位伙伴和你聊（点头像即开始）：")
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textSecondary)
@@ -33,7 +36,10 @@ struct GeniusBarHomeView: View {
             .navigationTitle("Genius Bar")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
-            .task { await service.loadAgents() }
+            .task {
+                await service.loadAgents()
+                if let uid = appEnv.auth.userId { await service.loadMyConversations(userId: uid) }
+            }
             .navigationDestination(isPresented: $openChat) { GeniusBarChatView() }
         }
     }
@@ -65,6 +71,39 @@ struct GeniusBarHomeView: View {
         }
         .buttonStyle(.plain)
         .disabled(appEnv.auth.userId == nil || starting)
+    }
+
+    private var inbox: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("我的会话 · 继续聊")
+                .font(Theme.FontToken.inter(11, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textMuted).textCase(.uppercase)
+            ForEach(service.myConversations) { conv in
+                Button { resume(conv) } label: {
+                    HStack(spacing: 11) {
+                        Text(conv.priority == "emergency" ? "🆘" : "💬").font(.system(size: 18))
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(agentName(conv.agentId)).font(Theme.FontToken.inter(13, weight: .medium))
+                            Text(conv.priority == "emergency" ? "紧急支援会话" : "继续和 TA 聊").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
+                    }
+                    .padding(12)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func agentName(_ agentId: String?) -> String {
+        guard let agentId, let a = service.agents.first(where: { $0.id == agentId }) else { return "客服" }
+        return a.name
+    }
+
+    private func resume(_ conv: SupportConversation) {
+        Task { await service.openConversation(conv); openChat = true }
     }
 
     private var grid: some View {
@@ -125,7 +164,10 @@ struct GeniusBarHomeView: View {
         guard let uid = appEnv.auth.userId, !starting else { return }
         starting = true
         Task {
-            await service.startConversation(userId: uid, agentId: agentId, priority: priority)
+            await service.startConversation(
+                userId: uid, agentId: agentId, priority: priority,
+                displayName: appEnv.preferences.displayName, email: appEnv.auth.userEmail
+            )
             starting = false
             if service.conversation != nil { openChat = true }
         }

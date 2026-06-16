@@ -151,16 +151,35 @@
       if(!error){ agent.status = s; renderStatus(); }
     }
 
+    function convName(c){
+      const ctx = c.context_json || {};
+      return ctx.user_name || ctx.user_email || ("用户 " + c.user_id.slice(0,8));
+    }
+
     async function loadConversations(){
       const { data } = await sb.from("support_conversations")
         .select("*").eq("status","open").order("priority",{ascending:false}).order("updated_at",{ascending:false}).limit(100);
       const rows = (data||[]).filter(c => c.agent_id === agent.id || c.agent_id === null || c.priority === "emergency");
       rows.sort((a,b)=> (a.priority==="emergency"?-1:0) - (b.priority==="emergency"?-1:0));
+
+      // One query for latest messages across the listed conversations → preview map.
+      const ids = rows.map(c => c.id);
+      const preview = {};
+      if (ids.length){
+        const { data: msgs } = await sb.from("support_messages")
+          .select("conversation_id,sender_type,body_original,image_url,created_at")
+          .in("conversation_id", ids).order("created_at",{ascending:false}).limit(300);
+        (msgs||[]).forEach(m => { if(!preview[m.conversation_id]) preview[m.conversation_id] = m; });
+      }
+
       const list = $("convList"); list.innerHTML = "";
       rows.forEach(c => {
+        const last = preview[c.id];
+        const snippet = last ? (last.image_url ? "📷 图片" : (last.sender_type==="agent"?"你: ":"") + (last.body_original||"").slice(0,24)) : "(暂无消息)";
         const el = document.createElement("div");
         el.className = "conv" + (activeConv && activeConv.id===c.id ? " active":"") + (c.priority==="emergency"?" emergency":"");
-        el.innerHTML = `<div class="t">${c.priority==="emergency"?'<span class="badge">SOS</span>':''} 用户 ${c.user_id.slice(0,8)}</div>
+        el.innerHTML = `<div class="t">${c.priority==="emergency"?'<span class="badge">SOS</span>':''} ${convName(c).replace(/</g,"&lt;")}</div>
+          <div class="s">${snippet.replace(/</g,"&lt;")}</div>
           <div class="s">${c.agent_id?'已接入':'待接入'} · ${new Date(c.updated_at).toLocaleString()}</div>`;
         el.onclick = () => openConv(c);
         list.appendChild(el);
@@ -173,8 +192,10 @@
       $("chatEmpty").style.display = "none";
       $("chatActive").style.display = "flex";
       $("console").classList.add("show-chat");
-      $("chatTitle").textContent = "用户 " + c.user_id.slice(0,8);
-      $("chatCtx").textContent = c.context_json ? ("上下文：" + JSON.stringify(c.context_json)) : "";
+      $("chatTitle").textContent = convName(c);
+      const ctx = c.context_json || {};
+      const ctxBits = Object.entries(ctx).filter(([k]) => k !== "user_name" && k !== "user_email").map(([k,v]) => `${k}: ${v}`);
+      $("chatCtx").textContent = (ctx.user_email ? ctx.user_email + " · " : "") + (ctxBits.length ? ctxBits.join(" · ") : "");
       await loadMessages();
       await loadConversations();
     }
