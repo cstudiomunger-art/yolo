@@ -819,6 +819,19 @@ App.fillTableDefaults = function fillTableDefaults(payload, table) {
     content_itineraries: { sort_order: 0 },
     user_itineraries: { is_deleted: false },
     passport_countries: { display_order: 0 },
+    // New CMS modules — fill NOT NULL columns so blank optional fields never submit null.
+    support_agents: { status: "offline", name: "", role: "", avatar_seed: "", social_url: "", languages: [], display_order: 0, is_active: true },
+    visa_policies: { priority: 0, verdict: "green", area_scope: "nationwide", headline_en: "", headline_zh: "", is_active: true },
+    visa_policy_grants: { is_active: true },
+    city_visa_tags: { region_type: "mainland", is_port_of_entry: false, notes_en: "", notes_zh: "", is_active: true },
+    entry_ports: { name_en: "", name_zh: "", transit_240h: false, is_hainan: false, display_order: 0, is_active: true },
+    visa_rule_overrides: { region_type: "mainland", visa_free: false, note_en: "", note_zh: "", is_active: true },
+    payment_advice_rules: { dimension: "sms", match_json: {}, severity: "info", body_en: "", body_zh: "", sort_order: 0, is_active: true },
+    payment_merchant_phrases: { en: "", sort_order: 0, is_active: true },
+    payment_helper_links: { label_en: "", label_zh: "", lane: "prep", sort_order: 0, is_active: true },
+    transport_tips: { category: "rail", title_en: "", title_zh: "", body_en: "", body_zh: "", city_id: null, sort_order: 0, is_active: true },
+    common_phrases: { pinyin: "", en: "", audio_url: "", sort_order: 0, is_active: true },
+    dialect_phrases: { emoji: "", pinyin: "", en: "", audio_url: "", sort_order: 0, is_active: true },
   };
   const tableDefaults = defaults[table];
   if (!tableDefaults) return payload;

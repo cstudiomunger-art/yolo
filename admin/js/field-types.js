@@ -98,9 +98,14 @@
         break;
       case "enum": {
         const opts = App.normalizeEnumOptions(field.options);
-        inner = `<select name="${name}" ${ro}><option value="">— 请选择 —</option>`;
+        // Pre-select field.default for new rows so NOT NULL enum columns never submit null.
+        const ev = (value === undefined || value === null || value === "")
+          ? (field.default ?? "")
+          : value;
+        const placeholder = field.default ? "" : `<option value="">— 请选择 —</option>`;
+        inner = `<select name="${name}" ${ro}>${placeholder}`;
         opts.forEach((o) => {
-          inner += `<option value="${App.escapeHtml(o.value)}" ${value === o.value ? "selected" : ""}>${App.escapeHtml(o.label)}</option>`;
+          inner += `<option value="${App.escapeHtml(o.value)}" ${ev === o.value ? "selected" : ""}>${App.escapeHtml(o.label)}</option>`;
         });
         inner += `</select>`;
         break;

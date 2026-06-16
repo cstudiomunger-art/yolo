@@ -987,7 +987,7 @@
         { key: "role", type: "text", label: "线路/专长", hint: "如 北京 · 签证" },
         { key: "avatar_seed", type: "text", label: "头像种子（首字）" },
         { key: "languages", type: "string_list", label: "语言" },
-        { key: "status", type: "enum", label: "状态", hint: "通常由客服端手动切换；此处可强制", options: [
+        { key: "status", type: "enum", label: "状态", default: "offline", hint: "通常由客服端手动切换；此处可强制", options: [
           { value: "online", label: "在线" },
           { value: "busy", label: "忙碌" },
           { value: "offline", label: "离线" },
