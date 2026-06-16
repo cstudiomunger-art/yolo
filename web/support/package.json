@@ -1,0 +1,8 @@
+{
+  "name": "yolo-support",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-config.mjs"
+  }
+}

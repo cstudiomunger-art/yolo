@@ -1,0 +1,58 @@
+# Deploy Genius Bar support console to Cloudflare「yolo-support」on push to main.
+# Required GitHub secret: CLOUDFLARE_API_TOKEN
+# Optional: SUPABASE_URL, SUPABASE_ANON_KEY (else uses config.example defaults)
+
+name: Deploy Support Console
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/support/**"
+      - "wrangler.support.jsonc"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-support.yml"
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate web/support/config.js
+        run: npm run build:support
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Check Cloudflare API token
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "::error::未配置 GitHub Secret「CLOUDFLARE_API_TOKEN」。"
+            exit 1
+          fi
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: deploy --config wrangler.support.jsonc
+
+      - name: Deployment note
+        if: success()
+        run: echo "Support console deployed to yolo-support."

@@ -12,3 +12,5 @@ supabase/.temp/
 !.dev.vars.example
 .env*
 !.env.example
+
+web/support/config.js
