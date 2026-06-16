@@ -1,0 +1,246 @@
+import SwiftUI
+import PhotosUI
+
+// MARK: - Home (pick a human)
+
+struct GeniusBarHomeView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    @Environment(\.dismiss) private var dismiss
+    @State private var openChat = false
+    @State private var starting = false
+
+    private var service: SupportChatService { appEnv.supportChat }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    header
+                    sosCard
+                    Text("选一位伙伴和你聊（点头像即开始）：")
+                        .font(Theme.FontToken.inter(12))
+                        .foregroundStyle(Theme.ColorToken.textSecondary)
+                    grid
+                    boundaryCard
+                    if appEnv.auth.userId == nil {
+                        Text("登录后才能开始对话。")
+                            .font(Theme.FontToken.inter(11))
+                            .foregroundStyle(Theme.ColorToken.warning)
+                    }
+                }
+                .padding(Theme.screenPadding)
+            }
+            .navigationTitle("Genius Bar")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
+            .task { await service.loadAgents() }
+            .navigationDestination(isPresented: $openChat) { GeniusBarChatView() }
+        }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Talk to a Human").font(Theme.FontToken.playfair(24, weight: .semibold))
+            Text("真诚是我们的护城河，不是机器人。我们是真心想帮你。")
+                .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
+        }
+    }
+
+    private var sosCard: some View {
+        Button { start(agentId: nil, priority: "emergency") } label: {
+            HStack(spacing: 13) {
+                Text("🆘").font(.system(size: 26))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("在华紧急支援").font(Theme.FontToken.playfair(15, weight: .semibold))
+                    Text("迷路 / 被偷报警 / 找不到帮手 — 远程支援")
+                        .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                }
+                Spacer()
+            }
+            .padding(15)
+            .frame(maxWidth: .infinity)
+            .background(Theme.ColorToken.warningBackground)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.ColorToken.warning.opacity(0.4), lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .disabled(appEnv.auth.userId == nil || starting)
+    }
+
+    private var grid: some View {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 11), GridItem(.flexible(), spacing: 11)], spacing: 11) {
+            ForEach(service.agents) { agent in
+                agentCard(agent)
+            }
+        }
+    }
+
+    private func agentCard(_ agent: SupportAgent) -> some View {
+        Button { start(agentId: agent.id, priority: "normal") } label: {
+            VStack(spacing: 6) {
+                ZStack(alignment: .bottomTrailing) {
+                    Circle().fill(LinearGradient(colors: [Theme.ColorToken.accent, Theme.ColorToken.textPrimary], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 56, height: 56)
+                        .overlay(Text(agent.avatarSeed.isEmpty ? String(agent.name.prefix(1)) : agent.avatarSeed)
+                            .font(Theme.FontToken.playfair(20, weight: .bold)).foregroundStyle(.white))
+                    Circle().fill(statusColor(agent.status)).frame(width: 13, height: 13)
+                        .overlay(Circle().stroke(.white, lineWidth: 2))
+                }
+                Text(agent.name).font(Theme.FontToken.playfair(15, weight: .semibold))
+                Text(agent.role).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.accent)
+                Text(statusLabel(agent.status)).font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+            .opacity(agent.isReachable ? 1 : 0.5)
+        }
+        .buttonStyle(.plain)
+        .disabled(!agent.isReachable || appEnv.auth.userId == nil || starting)
+    }
+
+    private var boundaryCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("✓ 我们能帮").font(Theme.FontToken.inter(10, weight: .semibold)).foregroundStyle(Theme.ColorToken.success)
+            Text("行前答疑 · 帮你找帮手 · 付款绑卡协助 · 在华紧急联络支援")
+                .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
+            Text("— 暂不能帮").font(Theme.FontToken.inter(10, weight: .semibold)).foregroundStyle(Theme.ColorToken.textMuted).padding(.top, 4)
+            Text("重大医疗诊断 · 涉政法律事务 — 请优先联系官方机构（110 / 120 / 使领馆）")
+                .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
+            Text("※ 边界文案待团队最终确认").font(Theme.FontToken.inter(9)).foregroundStyle(Theme.ColorToken.textMuted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+    }
+
+    private func statusColor(_ s: String) -> Color {
+        switch s { case "online": return Theme.ColorToken.success; case "busy": return Theme.ColorToken.warning; default: return Theme.ColorToken.textGhost }
+    }
+    private func statusLabel(_ s: String) -> String {
+        switch s { case "online": return "🟢 在线 · 通常几分钟回"; case "busy": return "🟡 忙 · 稍后回"; default: return "离线" }
+    }
+
+    private func start(agentId: String?, priority: String) {
+        guard let uid = appEnv.auth.userId, !starting else { return }
+        starting = true
+        Task {
+            await service.startConversation(userId: uid, agentId: agentId, priority: priority)
+            starting = false
+            if service.conversation != nil { openChat = true }
+        }
+    }
+}
+
+// MARK: - Chat
+
+struct GeniusBarChatView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    @State private var draft = ""
+    @State private var photoItem: PhotosPickerItem?
+
+    private var service: SupportChatService { appEnv.supportChat }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 10) {
+                        ForEach(service.messages) { msg in
+                            bubble(msg).id(msg.id)
+                        }
+                    }
+                    .padding(Theme.screenPadding)
+                }
+                .onChange(of: service.messages.count) { _, _ in
+                    if let last = service.messages.last { withAnimation { proxy.scrollTo(last.id, anchor: .bottom) } }
+                }
+            }
+            inputBar
+        }
+        .navigationTitle("对话")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await service.loadMessages() }
+        .onDisappear { service.stopPolling() }
+        .onChange(of: photoItem) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self), let uid = appEnv.auth.userId {
+                    await service.sendImage(data, userId: uid)
+                }
+                photoItem = nil
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func bubble(_ msg: SupportMessage) -> some View {
+        HStack {
+            if msg.isFromUser { Spacer(minLength: 40) }
+            VStack(alignment: msg.isFromUser ? .trailing : .leading, spacing: 3) {
+                if let path = msg.imageUrl {
+                    ChatImageView(path: path, service: service)
+                } else {
+                    Text(msg.bodyOriginal ?? "")
+                        .font(Theme.FontToken.inter(13))
+                        .foregroundStyle(msg.isFromUser ? .white : Theme.ColorToken.textPrimary)
+                        .padding(.horizontal, 13).padding(.vertical, 10)
+                        .background(msg.isFromUser ? Theme.ColorToken.success : Theme.ColorToken.background)
+                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(msg.isFromUser ? .clear : Theme.ColorToken.border, lineWidth: 1))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                    if let t = msg.bodyTranslated, !t.isEmpty, t != msg.bodyOriginal {
+                        Text("🌐 " + t).font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+                    }
+                }
+            }
+            if !msg.isFromUser { Spacer(minLength: 40) }
+        }
+    }
+
+    private var inputBar: some View {
+        HStack(spacing: 9) {
+            PhotosPicker(selection: $photoItem, matching: .images) {
+                Image(systemName: "photo").font(.system(size: 18)).foregroundStyle(Theme.ColorToken.textSecondary)
+            }
+            TextField("发消息…（中英都行，自动翻译）", text: $draft, axis: .vertical)
+                .font(Theme.FontToken.inter(13)).lineLimit(1...4)
+                .padding(.horizontal, 12).padding(.vertical, 8)
+                .background(Theme.ColorToken.backgroundSubtle).clipShape(Capsule())
+            Button { sendText() } label: {
+                Image(systemName: "arrow.up.circle.fill").font(.system(size: 30)).foregroundStyle(Theme.ColorToken.success)
+            }
+            .disabled(draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || service.isSending)
+        }
+        .padding(10)
+        .background(.ultraThinMaterial)
+    }
+
+    private func sendText() {
+        let text = draft
+        draft = ""
+        guard let uid = appEnv.auth.userId else { return }
+        Task { await service.sendText(text, userId: uid) }
+    }
+}
+
+/// Resolves a signed URL for a private chat image and renders it.
+private struct ChatImageView: View {
+    let path: String
+    let service: SupportChatService
+    @State private var url: URL?
+
+    var body: some View {
+        Group {
+            if let url {
+                AsyncImage(url: url) { img in
+                    img.resizable().scaledToFill()
+                } placeholder: { Color.gray.opacity(0.15) }
+                .frame(width: 180, height: 130)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+            } else {
+                RoundedRectangle(cornerRadius: 14).fill(Color.gray.opacity(0.15)).frame(width: 180, height: 130)
+            }
+        }
+        .task { url = await service.signedImageURL(for: path) }
+    }
+}

@@ -4,11 +4,19 @@ import Observation
 enum AppModal: Identifiable, Equatable, Hashable {
     case prepare
     case emergency
+    case infoHub
+    case visaChecker
+    case paymentHelper
+    case geniusBar
 
     var id: String {
         switch self {
         case .prepare: "prepare"
         case .emergency: "emergency"
+        case .infoHub: "infoHub"
+        case .visaChecker: "visaChecker"
+        case .paymentHelper: "paymentHelper"
+        case .geniusBar: "geniusBar"
         }
     }
 }
@@ -88,6 +96,11 @@ final class AppNavigation {
     func presentEmergency() {
         presentedModal = .emergency
     }
+
+    func presentInfoHub() { presentedModal = .infoHub }
+    func presentVisaChecker() { presentedModal = .visaChecker }
+    func presentPaymentHelper() { presentedModal = .paymentHelper }
+    func presentGeniusBar() { presentedModal = .geniusBar }
 
     func dismissModal() {
         presentedModal = nil

@@ -83,7 +83,7 @@ struct HomeView: View {
                     prepCompleted: processedPrepCount,
                     prepTotal: prepTotal,
                     onOpenPrepare: { appEnv.navigation.presentPrepare() },
-                    onOpenEmergency: { appEnv.navigation.presentEmergency() }
+                    onOpenInfoHub: { appEnv.navigation.presentInfoHub() }
                 )
             }
             .padding(.bottom, 24)

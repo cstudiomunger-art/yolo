@@ -5,7 +5,7 @@ struct HomeQuickAccessGrid: View {
     let prepCompleted: Int
     let prepTotal: Int
     var onOpenPrepare: () -> Void = {}
-    var onOpenEmergency: () -> Void = {}
+    var onOpenInfoHub: () -> Void = {}
 
     private var itemsLeft: Int {
         max(prepTotal - prepCompleted, 0)
@@ -29,10 +29,10 @@ struct HomeQuickAccessGrid: View {
                     action: onOpenPrepare
                 )
                 quickCell(
-                    icon: "⚠️",
-                    label: String(localized: "Emergency"),
-                    subtitle: String(localized: "110 · 120 · Offline"),
-                    action: onOpenEmergency
+                    icon: "🧭",
+                    label: String(localized: "Practical Info"),
+                    subtitle: String(localized: "Visa · Pay · Help · Transport"),
+                    action: onOpenInfoHub
                 )
             }
             .padding(.horizontal, Theme.screenPadding)

@@ -111,6 +111,14 @@ struct MainTabView: View {
                 NavigationStack { PrepareView() }
             case .emergency:
                 EmergencyView()
+            case .infoHub:
+                InfoHubView()
+            case .visaChecker:
+                VisaDetectorView()
+            case .paymentHelper:
+                PaymentHelperHomeView()
+            case .geniusBar:
+                GeniusBarHomeView()
             }
         }
     }

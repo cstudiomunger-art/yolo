@@ -13,6 +13,12 @@ final class AppEnvironment {
     let purchase: PurchaseService
     /// CMS-driven visa policy data for the on-device VisaPolicyEngine.
     let visaData = VisaDataService()
+    /// CMS-driven payment-helper content (advice / merchant phrases / links).
+    let paymentHelper = PaymentHelperService()
+    /// Genius Bar live support (agents / conversations / messages).
+    let supportChat = SupportChatService()
+    /// CMS-driven Info Hub content (transport / common phrases / dialect).
+    let infoHub = InfoHubContentService()
     /// Single, app-wide audio player shared by every guide section and the floating mini-player.
     let audioPlayer = AudioQueuePlayer()
     private(set) var content: any ContentRepositoryProtocol
