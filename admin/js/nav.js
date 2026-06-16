@@ -96,6 +96,8 @@
       defaultExpanded: false,
       items: [
         { kind: "table", table: "support_agents", label: "客服坐席" },
+        { kind: "table", table: "support_conversations", label: "会话监控（只读）" },
+        { kind: "table", table: "support_messages", label: "消息监控（只读）" },
       ],
     },
     {

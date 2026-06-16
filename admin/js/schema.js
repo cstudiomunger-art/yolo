@@ -998,6 +998,54 @@
       ],
     },
 
+    support_conversations: {
+      label: "客服会话（只读监控）",
+      pk: "id",
+      order: "updated_at",
+      orderDesc: true,
+      noCreate: true,
+      noDelete: true,
+      listColumns: [
+        { key: "user_id", label: "用户", format: "user_email" },
+        { key: "priority", label: "优先级" },
+        { key: "status", label: "状态" },
+        { key: "updated_at", label: "更新" },
+      ],
+      fields: [
+        { key: "id", type: "text", readonly: true },
+        { key: "user_id", type: "text", readonly: true, label: "用户 UUID" },
+        { key: "agent_id", type: "text", readonly: true, label: "客服坐席 ID" },
+        { key: "priority", type: "text", readonly: true },
+        { key: "status", type: "text", readonly: true },
+        { key: "context_json", type: "json", readonly: true, label: "上下文" },
+        { key: "created_at", type: "text", readonly: true },
+        { key: "updated_at", type: "text", readonly: true },
+      ],
+    },
+    support_messages: {
+      label: "客服消息（只读监控）",
+      pk: "id",
+      order: "created_at",
+      orderDesc: true,
+      noCreate: true,
+      noDelete: true,
+      listColumns: [
+        { key: "conversation_id", label: "会话" },
+        { key: "sender_type", label: "发送方" },
+        { key: "body_original", label: "原文" },
+        { key: "created_at", label: "时间" },
+      ],
+      fields: [
+        { key: "id", type: "text", readonly: true },
+        { key: "conversation_id", type: "text", readonly: true },
+        { key: "sender_type", type: "text", readonly: true },
+        { key: "body_original", type: "textarea", readonly: true, label: "原文" },
+        { key: "body_translated", type: "textarea", readonly: true, label: "译文" },
+        { key: "image_url", type: "text", readonly: true, label: "图片路径" },
+        { key: "created_at", type: "text", readonly: true },
+      ],
+    },
+
     // ════════════════════ 实用信息内容（交通 / 常用语 / 方言）════════════════════
     transport_tips: {
       label: "交通攻略",

@@ -31,6 +31,12 @@
   .main{display:grid;grid-template-columns:320px 1fr;min-height:0}
   .list{border-right:1px solid var(--border);background:var(--panel);overflow-y:auto}
   .list h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:14px 16px 8px}
+  .listhead{display:flex;gap:6px;padding:12px 16px 8px;position:sticky;top:0;background:var(--panel);z-index:1}
+  .seg{border:1px solid var(--border);background:#fff;border-radius:16px;padding:5px 12px;font-size:12px;color:var(--muted)}
+  .seg.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .imgbtn{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:16px;background:#fff;flex:none}
+  .imgbtn:hover{border-color:var(--ink)}
+  .bub .time{font-size:9px;color:var(--muted);margin-top:3px}
   .conv{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer}
   .conv:hover{background:#f0f3f7}
   .conv.active{background:#eef4ff}
@@ -84,7 +90,10 @@
     </div>
     <div class="main">
       <div class="list">
-        <h2>会话 · 紧急置顶</h2>
+        <div class="listhead">
+          <button class="seg on" id="segOpen">进行中</button>
+          <button class="seg" id="segClosed">已结束</button>
+        </div>
         <div id="convList"></div>
       </div>
       <div class="chat" id="chatPane">
@@ -101,6 +110,8 @@
           </div>
           <div class="msgs" id="msgs"></div>
           <div class="compose">
+            <label for="imgInput" class="imgbtn" title="发送图片">📎</label>
+            <input id="imgInput" type="file" accept="image/*" style="display:none">
             <input id="reply" placeholder="回复（中文，自动翻译给用户）">
             <button id="sendBtn">发送</button>
           </div>
@@ -118,7 +129,23 @@
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
     });
     let agent = null, activeConv = null, pollTimer = null;
+    let statusFilter = "open";
+    const notified = {};          // conversation_id → last notified message id
+    let audioCtx = null;
     const $ = (id) => document.getElementById(id);
+
+    function beep(){
+      try{
+        audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.type = "sine"; o.frequency.value = 880; g.gain.value = 0.08;
+        o.start(); o.stop(audioCtx.currentTime + 0.15);
+      }catch(e){}
+    }
+    function desktopNotify(title, body){
+      try{ if ("Notification" in window && Notification.permission === "granted") new Notification(title, { body }); }catch(e){}
+    }
 
     async function init(){
       const { data:{ session } } = await sb.auth.getSession();
@@ -141,6 +168,9 @@
       $("console").style.display = "grid";
       $("who").textContent = agent.name + " · " + (agent.role || "");
       renderStatus();
+      if ("Notification" in window && Notification.permission === "default") { try { Notification.requestPermission(); } catch(e){} }
+      $("segOpen").onclick = () => { statusFilter = "open"; $("segOpen").classList.add("on"); $("segClosed").classList.remove("on"); loadConversations(); };
+      $("segClosed").onclick = () => { statusFilter = "closed"; $("segClosed").classList.add("on"); $("segOpen").classList.remove("on"); loadConversations(); };
       await loadConversations();
       pollTimer = setInterval(tick, 3000);
     }
@@ -166,8 +196,12 @@
 
     async function loadConversations(){
       const { data } = await sb.from("support_conversations")
-        .select("*").eq("status","open").order("priority",{ascending:false}).order("updated_at",{ascending:false}).limit(100);
-      const rows = (data||[]).filter(c => c.agent_id === agent.id || c.agent_id === null || c.priority === "emergency");
+        .select("*").eq("status", statusFilter).order("priority",{ascending:false}).order("updated_at",{ascending:false}).limit(100);
+      const rows = (data||[]).filter(c =>
+        statusFilter === "closed"
+          ? c.agent_id === agent.id
+          : (c.agent_id === agent.id || c.agent_id === null || c.priority === "emergency")
+      );
       rows.sort((a,b)=> (a.priority==="emergency"?-1:0) - (b.priority==="emergency"?-1:0));
 
       // One query for latest messages across the listed conversations → preview map.
@@ -180,6 +214,22 @@
         (msgs||[]).forEach(m => {
           if(!preview[m.conversation_id]) preview[m.conversation_id] = m;
           (allMsgs[m.conversation_id] = allMsgs[m.conversation_id] || []).push(m);
+        });
+      }
+
+      // Ping the agent on a newly-arrived user message (skip the very first load).
+      if (statusFilter === "open"){
+        rows.forEach(c => {
+          const last = preview[c.id];
+          if (!last || last.sender_type !== "user") return;
+          if (notified[c.id] === undefined) { notified[c.id] = last.created_at; return; }
+          if (last.created_at > notified[c.id] && (!activeConv || activeConv.id !== c.id)) {
+            notified[c.id] = last.created_at;
+            beep();
+            desktopNotify(convName(c), last.image_url ? "发来一张图片" : (last.body_original||"").slice(0,40));
+          } else {
+            notified[c.id] = last.created_at;
+          }
         });
       }
 
@@ -262,7 +312,8 @@
           inner = (m.body_original||"").replace(/</g,"&lt;");
           if (m.body_translated && m.body_translated !== m.body_original) inner += `<div class="tx">🌐 ${m.body_translated.replace(/</g,"&lt;")}</div>`;
         }
-        row.innerHTML = `<div class="bub">${inner}</div>`;
+        const time = m.created_at ? new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : "";
+        row.innerHTML = `<div class="bub">${inner}<div class="time">${time}</div></div>`;
         box.appendChild(row);
       }
       box.scrollTop = box.scrollHeight;
@@ -270,6 +321,19 @@
 
     $("sendBtn").onclick = sendReply;
     $("reply").addEventListener("keydown", e => { if(e.key==="Enter") sendReply(); });
+
+    $("imgInput").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if(!file || !activeConv) return;
+      $("imgInput").value = "";
+      const path = `${activeConv.id}/${crypto.randomUUID()}.jpg`;
+      const { error } = await sb.storage.from("chat-images").upload(path, file, { contentType: file.type || "image/jpeg" });
+      if(error){ alert("图片上传失败: " + error.message); return; }
+      const { data:{ session } } = await sb.auth.getSession();
+      await sb.from("support_messages").insert({ conversation_id: activeConv.id, sender_type:"agent", sender_id: session.user.id, image_url: path });
+      await sb.from("support_conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
+      await loadMessages();
+    });
     async function sendReply(){
       const text = $("reply").value.trim();
       if(!text || !activeConv) return;
