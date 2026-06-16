@@ -6,9 +6,11 @@ struct VisaVerdictView: View {
     @Environment(\.dismiss) private var dismiss
     let verdict: VisaVerdict
     let cities: [String]
+    var routes: [VisaRoute] = []
 
     @State private var showRules = false
     @State private var showHumanNote = false
+    @State private var showRoutes = false
 
     private var color: Color {
         switch verdict.color {
@@ -38,6 +40,16 @@ struct VisaVerdictView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     citiesChips
                     verdictCard
+                    if !verdict.isEnough && !routes.isEmpty {
+                        Button { showRoutes = true } label: {
+                            Text("看签证友好路线 →")
+                                .font(Theme.FontToken.inter(13, weight: .semibold))
+                                .frame(maxWidth: .infinity).padding(.vertical, 12)
+                                .background(Theme.ColorToken.textPrimary).foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .buttonStyle(.plain)
+                    }
                     if showRules { rulesDetail }
                     Text("检测器只回答够不够用，不在此盖章收尾。绑卡 / 行前事项在「行前清单」里完成。")
                         .font(Theme.FontToken.inter(10))
@@ -51,7 +63,10 @@ struct VisaVerdictView: View {
             .alert("问真人确认", isPresented: $showHumanNote) {
                 Button("好") {}
             } message: {
-                Text("Genius Bar 真人客服即将上线；上线后这里会带着判定结果直接转接。")
+                Text("可在「实用信息 · Genius Bar」找真人，带着判定结果咨询。")
+            }
+            .sheet(isPresented: $showRoutes) {
+                PlanRouteVisaCompareView(routes: routes)
             }
         }
     }

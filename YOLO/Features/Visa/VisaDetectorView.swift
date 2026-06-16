@@ -19,6 +19,7 @@ struct VisaDetectorView: View {
     @State private var selfTestCities: Set<String> = []
 
     @State private var verdict: VisaVerdict?
+    @State private var routes: [VisaRoute] = []
 
     private var country: String { (appEnv.preferences.countryCode ?? "GB").uppercased() }
 
@@ -61,7 +62,7 @@ struct VisaDetectorView: View {
             }
             .task { await appEnv.visaData.load() }
             .sheet(item: Binding(get: { verdict.map { IdentifiedVerdict(verdict: $0) } }, set: { verdict = $0?.verdict })) { wrapped in
-                VisaVerdictView(verdict: wrapped.verdict, cities: activeCities)
+                VisaVerdictView(verdict: wrapped.verdict, cities: activeCities, routes: routes)
             }
         }
     }
@@ -228,7 +229,9 @@ struct VisaDetectorView: View {
             passportValidMonths: validity.months,
             cities: activeCities
         )
-        verdict = appEnv.visaData.evaluate(query)
+        let v = appEnv.visaData.evaluate(query)
+        routes = VisaTripChecker.routes(query: query, data: appEnv.visaData.data, verdict: v)
+        verdict = v
     }
 
     // MARK: - Country options
