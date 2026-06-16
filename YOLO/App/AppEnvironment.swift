@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import Supabase
+import UIKit
 
 @Observable
 @MainActor
@@ -125,6 +126,23 @@ final class AppEnvironment {
     }
 
     func handleIncomingURL(_ url: URL) async {
+        await handleDeepLinkAction(for: url)
+    }
+
+    /// Register for APNs and upload the device token once authenticated. Safe to call
+    /// repeatedly; no-op until the Push capability + APNs key are configured.
+    func enablePushRegistration() {
+        PushTokenStore.shared.onToken = { [weak self] token in
+            guard let self, let uid = self.auth.userId else { return }
+            Task { await self.supportChat.registerDeviceToken(token, userId: uid) }
+        }
+        UIApplication.shared.registerForRemoteNotifications()
+        if let token = PushTokenStore.shared.token, let uid = auth.userId {
+            Task { await supportChat.registerDeviceToken(token, userId: uid) }
+        }
+    }
+
+    private func handleDeepLinkAction(for url: URL) async {
         guard let action = DeepLinkHandler.action(for: url) else { return }
         switch action {
         case .openSharedItinerary(let slug):

@@ -39,6 +39,7 @@ struct GeniusBarHomeView: View {
             .task {
                 await service.loadAgents()
                 if let uid = appEnv.auth.userId { await service.loadMyConversations(userId: uid) }
+                appEnv.enablePushRegistration()
             }
             .navigationDestination(isPresented: $openChat) { GeniusBarChatView() }
         }
@@ -87,6 +88,13 @@ struct GeniusBarHomeView: View {
                             Text(conv.priority == "emergency" ? "紧急支援会话" : "继续和 TA 聊").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
                         }
                         Spacer()
+                        let unread = service.unread(for: conv.id)
+                        if unread > 0 {
+                            Text("\(unread)")
+                                .font(Theme.FontToken.inter(10, weight: .bold)).foregroundStyle(.white)
+                                .frame(minWidth: 18).padding(.horizontal, 5).padding(.vertical, 2)
+                                .background(Theme.ColorToken.urgent).clipShape(Capsule())
+                        }
                         Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
                     }
                     .padding(12)
@@ -198,7 +206,16 @@ struct GeniusBarChatView: View {
                     if let last = service.messages.last { withAnimation { proxy.scrollTo(last.id, anchor: .bottom) } }
                 }
             }
+            if service.agentIsTyping {
+                Text("对方正在输入…")
+                    .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, Theme.screenPadding).padding(.bottom, 4)
+            }
             inputBar
+        }
+        .onChange(of: draft) { _, value in
+            if !value.isEmpty { Task { await service.userIsTyping() } }
         }
         .navigationTitle("对话")
         .navigationBarTitleDisplayMode(.inline)

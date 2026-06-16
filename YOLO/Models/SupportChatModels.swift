@@ -18,6 +18,10 @@ struct SupportConversation: Codable, Identifiable, Hashable {
     let agentId: String?
     let priority: String        // "normal" | "emergency"
     let status: String          // "open" | "closed"
+    let userLastReadAt: String?
+    let agentLastReadAt: String?
+    let userTypingAt: String?
+    let agentTypingAt: String?
 }
 
 struct SupportMessage: Codable, Identifiable, Hashable {

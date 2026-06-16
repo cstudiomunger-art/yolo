@@ -90,7 +90,15 @@
       <div class="chat" id="chatPane">
         <div class="empty" id="chatEmpty">选择左侧一个会话开始</div>
         <div id="chatActive" style="display:none;flex:1;flex-direction:column;min-height:0">
-          <div class="hd"><button class="backbtn" id="backBtn">‹ 会话</button><span id="chatTitle"></span><div class="ctx" id="chatCtx"></div></div>
+          <div class="hd" style="display:flex;align-items:center;gap:8px">
+            <button class="backbtn" id="backBtn">‹ 会话</button>
+            <div style="flex:1;min-width:0">
+              <span id="chatTitle"></span>
+              <div class="ctx" id="chatCtx"></div>
+              <div class="ctx" id="userTyping" style="color:var(--accent2)"></div>
+            </div>
+            <button id="closeBtn" style="border:1px solid var(--border);background:#fff;border-radius:8px;padding:5px 10px;font-size:12px">结束会话</button>
+          </div>
           <div class="msgs" id="msgs"></div>
           <div class="compose">
             <input id="reply" placeholder="回复（中文，自动翻译给用户）">
@@ -164,21 +172,27 @@
 
       // One query for latest messages across the listed conversations → preview map.
       const ids = rows.map(c => c.id);
-      const preview = {};
+      const preview = {}, allMsgs = {};
       if (ids.length){
         const { data: msgs } = await sb.from("support_messages")
           .select("conversation_id,sender_type,body_original,image_url,created_at")
-          .in("conversation_id", ids).order("created_at",{ascending:false}).limit(300);
-        (msgs||[]).forEach(m => { if(!preview[m.conversation_id]) preview[m.conversation_id] = m; });
+          .in("conversation_id", ids).order("created_at",{ascending:false}).limit(400);
+        (msgs||[]).forEach(m => {
+          if(!preview[m.conversation_id]) preview[m.conversation_id] = m;
+          (allMsgs[m.conversation_id] = allMsgs[m.conversation_id] || []).push(m);
+        });
       }
 
       const list = $("convList"); list.innerHTML = "";
       rows.forEach(c => {
         const last = preview[c.id];
         const snippet = last ? (last.image_url ? "📷 图片" : (last.sender_type==="agent"?"你: ":"") + (last.body_original||"").slice(0,24)) : "(暂无消息)";
+        const readAt = c.agent_last_read_at ? new Date(c.agent_last_read_at).getTime() : 0;
+        const unread = (allMsgs[c.id]||[]).filter(m => m.sender_type==="user" && new Date(m.created_at).getTime() > readAt).length;
         const el = document.createElement("div");
         el.className = "conv" + (activeConv && activeConv.id===c.id ? " active":"") + (c.priority==="emergency"?" emergency":"");
-        el.innerHTML = `<div class="t">${c.priority==="emergency"?'<span class="badge">SOS</span>':''} ${convName(c).replace(/</g,"&lt;")}</div>
+        el.innerHTML = `<div class="t">${c.priority==="emergency"?'<span class="badge">SOS</span>':''} ${convName(c).replace(/</g,"&lt;")}
+            ${unread>0?`<span class="badge" style="background:var(--accent)">${unread}</span>`:''}</div>
           <div class="s">${snippet.replace(/</g,"&lt;")}</div>
           <div class="s">${c.agent_id?'已接入':'待接入'} · ${new Date(c.updated_at).toLocaleString()}</div>`;
         el.onclick = () => openConv(c);
@@ -196,10 +210,42 @@
       const ctx = c.context_json || {};
       const ctxBits = Object.entries(ctx).filter(([k]) => k !== "user_name" && k !== "user_email").map(([k,v]) => `${k}: ${v}`);
       $("chatCtx").textContent = (ctx.user_email ? ctx.user_email + " · " : "") + (ctxBits.length ? ctxBits.join(" · ") : "");
+      $("userTyping").textContent = "";
+      await markAgentRead(c.id);
       await loadMessages();
       await loadConversations();
     }
     $("backBtn").onclick = () => $("console").classList.remove("show-chat");
+
+    async function markAgentRead(id){
+      await sb.from("support_conversations").update({ agent_last_read_at: new Date().toISOString() }).eq("id", id);
+    }
+
+    $("closeBtn").onclick = async () => {
+      if(!activeConv || !confirm("结束这条会话？")) return;
+      await sb.from("support_conversations").update({ status: "closed" }).eq("id", activeConv.id);
+      activeConv = null;
+      $("chatActive").style.display = "none";
+      $("chatEmpty").style.display = "flex";
+      $("console").classList.remove("show-chat");
+      await loadConversations();
+    };
+
+    // Agent typing marker (throttled ~3s).
+    let lastTyping = 0;
+    $("reply").addEventListener("input", async () => {
+      if(!activeConv || Date.now() - lastTyping < 3000) return;
+      lastTyping = Date.now();
+      await sb.from("support_conversations").update({ agent_typing_at: new Date().toISOString() }).eq("id", activeConv.id);
+    });
+
+    async function refreshActive(){
+      if(!activeConv) return;
+      const { data } = await sb.from("support_conversations").select("user_typing_at").eq("id", activeConv.id).single();
+      const t = data && data.user_typing_at ? new Date(data.user_typing_at).getTime() : 0;
+      $("userTyping").textContent = (Date.now() - t < 6000) ? "用户正在输入…" : "";
+      await markAgentRead(activeConv.id);
+    }
 
     async function loadMessages(){
       if(!activeConv) return;
@@ -234,8 +280,20 @@
         conversation_id: activeConv.id, sender_type: "agent", sender_id: session.user.id,
         body_original: text, body_translated: translated
       });
-      await sb.from("support_conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConv.id);
+      await sb.from("support_conversations").update({ updated_at: new Date().toISOString(), agent_typing_at: null }).eq("id", activeConv.id);
+      notifyUser(activeConv.user_id, text);
       await loadMessages();
+    }
+
+    async function notifyUser(userId, text){
+      try{
+        const { data:{ session } } = await sb.auth.getSession();
+        await fetch(`${cfg.supabaseUrl}/functions/v1/notify-user`, {
+          method:"POST",
+          headers:{ "Content-Type":"application/json", "apikey": cfg.supabaseAnonKey, "Authorization":`Bearer ${session.access_token}` },
+          body: JSON.stringify({ user_id: userId, title: agent.name || "客服回复", body: text.slice(0,80) })
+        });
+      }catch(e){ /* push is best-effort */ }
     }
 
     async function translate(text, target){
@@ -251,7 +309,7 @@
       }catch(e){ return null; }
     }
 
-    async function tick(){ await loadConversations(); if(activeConv) await loadMessages(); }
+    async function tick(){ await loadConversations(); if(activeConv){ await loadMessages(); await refreshActive(); } }
 
     init();
   })();

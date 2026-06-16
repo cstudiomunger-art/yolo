@@ -14,7 +14,11 @@ final class SupportChatService {
     private(set) var messages: [SupportMessage] = []
     private(set) var conversation: SupportConversation?
     private(set) var isSending = false
+    private(set) var unreadByConversation: [String: Int] = [:]
+    private(set) var agentIsTyping = false
     var lastError: String?
+
+    var totalUnread: Int { unreadByConversation.values.reduce(0, +) }
 
     @ObservationIgnored private var pollTask: Task<Void, Never>?
 
@@ -56,16 +60,67 @@ final class SupportChatService {
                 .eq("status", value: "open")
                 .order("updated_at", ascending: false)
                 .execute().value
+            await recomputeUnread()
         } catch {
             lastError = error.localizedDescription
         }
     }
 
-    /// Resume an existing conversation (from the inbox).
-    func openConversation(_ conv: SupportConversation) async {
+    /// Unread = agent messages newer than the user's last-read marker, per conversation.
+    private func recomputeUnread() async {
+        let ids = myConversations.map(\.id)
+        guard !ids.isEmpty else { unreadByConversation = [:]; return }
+        let msgs: [SupportMessage] = (try? await client.from("support_messages")
+            .select().in("conversation_id", values: ids)
+            .order("created_at", ascending: false).limit(300).execute().value) ?? []
+        var counts: [String: Int] = [:]
+        for conv in myConversations {
+            let readAt = ChatDate.parse(conv.userLastReadAt)
+            counts[conv.id] = msgs.filter {
+                $0.conversationId == conv.id && $0.senderType == "agent" && ChatDate.newer($0.createdAt, than: readAt)
+            }.count
+        }
+        unreadByConversation = counts
+    }
+
+    func unread(for conversationId: String) -> Int { unreadByConversation[conversationId] ?? 0 }
+
+    /// Resume an existing conversation (from the inbox); marks it read.
+    func openConversation(_ conv: SupportConversation, userId: UUID? = nil) async {
         conversation = conv
+        agentIsTyping = false
         await loadMessages()
+        await markRead(conv.id)
         startPolling()
+    }
+
+    /// Mark the active conversation read by the user (clears its unread badge).
+    func markRead(_ convId: String) async {
+        _ = try? await client.from("support_conversations")
+            .update(["user_last_read_at": ChatDate.now()]).eq("id", value: convId).execute()
+        unreadByConversation[convId] = 0
+    }
+
+    // MARK: - Typing
+
+    @ObservationIgnored private var lastTypingPush = Date.distantPast
+
+    /// Throttled (~3s) update of the user's typing marker on the active conversation.
+    func userIsTyping() async {
+        guard let id = conversation?.id, Date().timeIntervalSince(lastTypingPush) > 3 else { return }
+        lastTypingPush = Date()
+        _ = try? await client.from("support_conversations")
+            .update(["user_typing_at": ChatDate.now()]).eq("id", value: id).execute()
+    }
+
+    // MARK: - Device push token
+
+    private struct DeviceTokenRow: Encodable { let user_id: String; let token: String; let platform: String }
+
+    func registerDeviceToken(_ token: String, userId: UUID) async {
+        _ = try? await client.from("device_tokens")
+            .upsert(DeviceTokenRow(user_id: userId.uuidString.lowercased(), token: token, platform: "ios"))
+            .execute()
     }
 
     /// Start or resume a conversation. One user ↔ one agent = one open thread; tapping
@@ -195,12 +250,54 @@ final class SupportChatService {
                 try? await Task.sleep(nanoseconds: 3_000_000_000)
                 if Task.isCancelled { break }
                 await self?.loadMessages()
+                await self?.refreshConversationMeta()
             }
         }
+    }
+
+    /// Refresh the active conversation row for the agent's typing marker; keeps the
+    /// user's read marker current while the chat is open.
+    private func refreshConversationMeta() async {
+        guard let id = conversation?.id else { return }
+        let rows: [SupportConversation] = (try? await client.from("support_conversations")
+            .select().eq("id", value: id).limit(1).execute().value) ?? []
+        if let c = rows.first {
+            conversation = c
+            agentIsTyping = ChatDate.isRecent(c.agentTypingAt)
+        }
+        await markRead(id)
     }
 
     func stopPolling() {
         pollTask?.cancel()
         pollTask = nil
+    }
+}
+
+/// Lenient ISO-8601 helpers for chat read/typing markers (best-effort, non-critical).
+enum ChatDate {
+    private static let withFraction: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter(); f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]; return f
+    }()
+    private static let plain: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter(); f.formatOptions = [.withInternetDateTime]; return f
+    }()
+
+    static func now() -> String { plain.string(from: Date()) }
+
+    static func parse(_ s: String?) -> Date? {
+        guard let s, !s.isEmpty else { return nil }
+        return withFraction.date(from: s) ?? plain.date(from: s)
+    }
+
+    static func newer(_ a: String?, than b: Date?) -> Bool {
+        guard let ad = parse(a) else { return false }
+        guard let bd = b else { return true }
+        return ad > bd
+    }
+
+    static func isRecent(_ s: String?, within seconds: TimeInterval = 6) -> Bool {
+        guard let d = parse(s) else { return false }
+        return Date().timeIntervalSince(d) < seconds
     }
 }

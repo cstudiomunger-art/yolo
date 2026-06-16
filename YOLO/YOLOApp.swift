@@ -8,6 +8,7 @@ import SwiftUI
 @main
 struct YOLOApp: App {
     @State private var appEnv = AppEnvironment()
+    @UIApplicationDelegateAdaptor(YOLOAppDelegate.self) private var appDelegate
 
     init() {
         UserDefaultsKeys.migrateLegacyKeysIfNeeded()
