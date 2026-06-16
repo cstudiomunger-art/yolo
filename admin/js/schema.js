@@ -821,7 +821,7 @@
       ],
       fields: [
         { key: "id", type: "text", required: true, label: "ID", hint: "如 p2_gb（手动唯一标识）" },
-        { key: "policy_key", type: "text", required: true, label: "政策键", hint: "P1/P2/P3/P4/P5" },
+        { key: "policy_key", type: "ref_visa_policy", required: true, label: "政策（下拉选）" },
         { key: "country_code", type: "ref_country", required: true, label: "国家" },
         { key: "effective_date", type: "text", label: "生效日", hint: "YYYY-MM-DD，空=长期" },
         { key: "expiry_date", type: "text", label: "截止日", hint: "YYYY-MM-DD，空=无截止" },
@@ -982,7 +982,7 @@
         { key: "is_active", label: "启用" },
       ],
       fields: [
-        { key: "user_id", type: "text", required: true, label: "Auth 用户 UUID", hint: "该客服登录账号的 auth.users.id" },
+        { key: "user_id", type: "ref_user", required: true, label: "登录账号（选邮箱）", hint: "下拉选择该客服的登录账号；在「用户管理」里能看到/创建账号" },
         { key: "name", type: "text", required: true, label: "姓名" },
         { key: "role", type: "text", label: "线路/专长", hint: "如 北京 · 签证" },
         { key: "avatar_seed", type: "text", label: "头像种子（首字）" },

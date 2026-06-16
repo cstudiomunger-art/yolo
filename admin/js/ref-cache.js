@@ -9,6 +9,8 @@
     audioGuides: [],
     scenarios: [],
     countries: [],
+    users: [],
+    policies: [],
     loaded: false,
   };
 
@@ -31,8 +33,35 @@
     App.refCache.audioGuides = audioRes.data || [];
     App.refCache.scenarios = scenRes.data || [];
     App.refCache.countries = countryRes.data || [];
+
+    // Pickers backed by newer tables — tolerant so a missing table never breaks core refs.
+    try {
+      const [usersRes, policiesRes] = await Promise.all([
+        App.client.from("profiles").select("id,email,display_name").order("email", { ascending: true }),
+        App.client.from("visa_policies").select("policy_key,headline_zh,priority").order("priority", { ascending: true }),
+      ]);
+      App.refCache.users = usersRes.data || App.refCache.users;
+      App.refCache.policies = policiesRes.data || App.refCache.policies;
+    } catch (e) {
+      // keep whatever was cached
+    }
+
     App.refCache.loaded = true;
     if (force && App.invalidateCityTreeCache) App.invalidateCityTreeCache();
+  };
+
+  App.userLabel = function userLabel(id) {
+    if (!id) return "—";
+    const u = App.refCache.users.find((x) => x.id === id);
+    if (!u) return id;
+    return u.email || u.display_name || id;
+  };
+
+  App.visaPolicyLabel = function visaPolicyLabel(key) {
+    if (!key) return "—";
+    const p = App.refCache.policies.find((x) => x.policy_key === key);
+    if (!p) return key;
+    return `${key} · ${p.headline_zh || ""}`.trim();
   };
 
   App.audioGuidesForAttraction = function audioGuidesForAttraction(attractionId) {

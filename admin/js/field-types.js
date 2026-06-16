@@ -117,6 +117,12 @@
       case "ref_country":
         inner = App.renderRefCountrySelect(name, value);
         break;
+      case "ref_user":
+        inner = App.renderRefUserSelect(name, value, field);
+        break;
+      case "ref_visa_policy":
+        inner = App.renderRefVisaPolicySelect(name, value, field);
+        break;
       case "ref_cities_multi":
         inner = App.renderRefCitiesMulti(name, value);
         break;
@@ -268,6 +274,26 @@
     let html = `<select name="${name}" data-ref-country="1"><option value="">— 选择国家 —</option>`;
     App.refCache.countries.forEach((c) => {
       html += `<option value="${App.escapeHtml(c.code)}" ${value === c.code ? "selected" : ""}>${App.escapeHtml(`${c.flag || ""} ${c.name}`.trim())}</option>`;
+    });
+    html += `</select>`;
+    return html;
+  };
+
+  App.renderRefUserSelect = function renderRefUserSelect(name, value, field) {
+    let html = `<select name="${name}"><option value="">${field?.emptyLabel || "— 选择登录账号（邮箱）—"}</option>`;
+    (App.refCache.users || []).forEach((u) => {
+      const label = u.email || u.display_name || u.id;
+      html += `<option value="${App.escapeHtml(u.id)}" ${value === u.id ? "selected" : ""}>${App.escapeHtml(label)}</option>`;
+    });
+    html += `</select>`;
+    return html;
+  };
+
+  App.renderRefVisaPolicySelect = function renderRefVisaPolicySelect(name, value, field) {
+    let html = `<select name="${name}"><option value="">${field?.emptyLabel || "— 选择政策 —"}</option>`;
+    (App.refCache.policies || []).forEach((p) => {
+      const label = `${p.policy_key} · ${p.headline_zh || ""}`.trim();
+      html += `<option value="${App.escapeHtml(p.policy_key)}" ${value === p.policy_key ? "selected" : ""}>${App.escapeHtml(label)}</option>`;
     });
     html += `</select>`;
     return html;
