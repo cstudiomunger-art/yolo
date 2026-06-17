@@ -370,15 +370,20 @@ struct GeniusBarChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Toggle("自动翻译收到的消息", isOn: Binding(
-                        get: { service.autoTranslate },
-                        set: { service.autoTranslate = $0; if $0 { service.autoTranslateVisibleTail() } }
-                    ))
+                Button {
+                    service.autoTranslate.toggle()
+                    if service.autoTranslate { service.autoTranslateVisibleTail() }
                 } label: {
-                    Image(systemName: service.autoTranslate ? "globe.badge.chevron.backward" : "globe")
-                        .foregroundStyle(service.autoTranslate ? Theme.ColorToken.success : Theme.ColorToken.textMuted)
+                    HStack(spacing: 3) {
+                        Image(systemName: "globe").font(.system(size: 11, weight: .semibold))
+                        Text("翻译").font(Theme.FontToken.inter(11, weight: .semibold))
+                    }
+                    .padding(.horizontal, 9).padding(.vertical, 5)
+                    .foregroundStyle(service.autoTranslate ? .white : Theme.ColorToken.textSecondary)
+                    .background(service.autoTranslate ? Theme.ColorToken.success : Theme.ColorToken.backgroundSubtle)
+                    .clipShape(Capsule())
                 }
+                .buttonStyle(.plain)
             }
             if service.conversation?.isClosed == false {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -387,7 +392,7 @@ struct GeniusBarChatView: View {
                 }
             }
         }
-        .confirmationDialog("结束这次会话？", isPresented: $showEndConfirm, titleVisibility: .visible) {
+        .alert("结束这次会话？", isPresented: $showEndConfirm) {
             Button("结束会话", role: .destructive) { Task { await service.endConversation() } }
             Button("取消", role: .cancel) {}
         } message: {
