@@ -216,7 +216,8 @@ final class SupportChatService {
                 .order("created_at")
                 .limit(200)
                 .execute().value
-            autoTranslateIncoming()
+            // No bulk translate here — the chat view auto-translates each incoming
+            // message only when it scrolls into view (visible range), via translateMessage.
         } catch {
             lastError = error.localizedDescription
         }
@@ -260,12 +261,20 @@ final class SupportChatService {
         await loadMessages()
     }
 
-    /// Auto-translate incoming (agent-sent) untranslated messages when the toggle is on.
-    private func autoTranslateIncoming() {
-        guard autoTranslate else { return }
-        for m in messages where m.senderType == "agent"
+    /// Whether an incoming message should be auto-translated (toggle on, from agent,
+    /// not yet translated, not in flight). Driven by the chat view's onAppear so only
+    /// messages scrolled into view (visible range) are translated.
+    func shouldAutoTranslate(_ m: SupportMessage) -> Bool {
+        autoTranslate && m.senderType == "agent"
             && (m.bodyTranslated ?? "").isEmpty
-            && !translatingIds.contains(m.id) {
+            && (m.bodyOriginal ?? "").isEmpty == false
+            && !translatingIds.contains(m.id)
+    }
+
+    /// When the toggle is switched on, translate just the visible tail (most recent),
+    /// not the whole history; older messages translate as they scroll into view.
+    func autoTranslateVisibleTail(limit: Int = 15) {
+        for m in messages.suffix(limit) where shouldAutoTranslate(m) {
             Task { await translateMessage(m) }
         }
     }

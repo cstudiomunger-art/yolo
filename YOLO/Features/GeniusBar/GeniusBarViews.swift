@@ -265,6 +265,11 @@ struct GeniusBarChatView: View {
                     LazyVStack(alignment: .leading, spacing: 10) {
                         ForEach(service.messages) { msg in
                             bubble(msg).id(msg.id)
+                                .onAppear {
+                                    if service.shouldAutoTranslate(msg) {
+                                        Task { await service.translateMessage(msg) }
+                                    }
+                                }
                         }
                     }
                     .padding(Theme.screenPadding)
@@ -295,7 +300,7 @@ struct GeniusBarChatView: View {
                 Menu {
                     Toggle("自动翻译收到的消息", isOn: Binding(
                         get: { service.autoTranslate },
-                        set: { service.autoTranslate = $0; if $0 { Task { await service.loadMessages() } } }
+                        set: { service.autoTranslate = $0; if $0 { service.autoTranslateVisibleTail() } }
                     ))
                 } label: {
                     Image(systemName: service.autoTranslate ? "globe.badge.chevron.backward" : "globe")

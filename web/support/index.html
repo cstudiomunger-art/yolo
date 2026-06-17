@@ -392,6 +392,7 @@
           inner = `<img src="${signed?signed.signedUrl:''}" alt="image"><div class="time">${time}</div>`;
         } else {
           const hasT = m.body_translated && m.body_translated !== m.body_original;
+          if (autoTranslate && m.sender_type === "user" && !hasT && (m.body_original||"").trim()) row.dataset.needtr = m.id;
           const visT = hasT && (autoTranslate || shownT.has(m.id));
           let ctrl = "";
           if (translatingMsg.has(m.id)) ctrl = `<span class="trbtn muted">翻译中…</span>`;
@@ -406,13 +407,24 @@
         box.appendChild(row);
       }
       box.scrollTop = box.scrollHeight;
-      if (autoTranslate){
-        for (const m of (data||[])){
-          if (m.sender_type === "user" && !m.body_translated && !translatingMsg.has(m.id) && (m.body_original||"").trim()){
-            translateMessageRow(m);
-          }
+      if (autoTranslate) setupAutoTranslateObserver(box);
+    }
+
+    // Only auto-translate messages scrolled into view (visible range), so a long
+    // history doesn't fire hundreds of translations at once.
+    let _trObserver = null;
+    function setupAutoTranslateObserver(box){
+      if (_trObserver) _trObserver.disconnect();
+      _trObserver = new IntersectionObserver((entries) => {
+        for (const en of entries){
+          if (!en.isIntersecting) continue;
+          const id = en.target.dataset.needtr;
+          _trObserver.unobserve(en.target);
+          const m = msgById[id];
+          if (m && !translatingMsg.has(id)) translateMessageRow(m);
         }
-      }
+      }, { root: box, threshold: 0.1 });
+      box.querySelectorAll("[data-needtr]").forEach((el) => _trObserver.observe(el));
     }
 
     $("sendBtn").onclick = sendReply;
