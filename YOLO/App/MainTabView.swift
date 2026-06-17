@@ -119,6 +119,15 @@ struct MainTabView: View {
                 PaymentHelperHomeView()
             case .geniusBar:
                 GeniusBarHomeView()
+            case .phrases:
+                NavigationStack {
+                    PhrasesView()
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("关闭") { appEnv.navigation.dismissModal() }
+                            }
+                        }
+                }
             }
         }
     }

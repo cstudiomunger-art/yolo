@@ -8,6 +8,7 @@ enum AppModal: Identifiable, Equatable, Hashable {
     case visaChecker
     case paymentHelper
     case geniusBar
+    case phrases
 
     var id: String {
         switch self {
@@ -17,6 +18,7 @@ enum AppModal: Identifiable, Equatable, Hashable {
         case .visaChecker: "visaChecker"
         case .paymentHelper: "paymentHelper"
         case .geniusBar: "geniusBar"
+        case .phrases: "phrases"
         }
     }
 }
@@ -101,6 +103,7 @@ final class AppNavigation {
     func presentVisaChecker() { presentedModal = .visaChecker }
     func presentPaymentHelper() { presentedModal = .paymentHelper }
     func presentGeniusBar() { presentedModal = .geniusBar }
+    func presentPhrases() { presentedModal = .phrases }
 
     func dismissModal() {
         presentedModal = nil

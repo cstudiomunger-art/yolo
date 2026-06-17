@@ -6,10 +6,14 @@ struct HomeQuickAccessGrid: View {
     let prepTotal: Int
     var onOpenPrepare: () -> Void = {}
     var onOpenInfoHub: () -> Void = {}
+    var onOpenGeniusBar: () -> Void = {}
+    var onOpenPhrases: () -> Void = {}
 
     private var itemsLeft: Int {
         max(prepTotal - prepCompleted, 0)
     }
+
+    private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -19,7 +23,7 @@ struct HomeQuickAccessGrid: View {
                 .textCase(.uppercase)
                 .padding(.horizontal, Theme.screenPadding)
 
-            HStack(spacing: 12) {
+            LazyVGrid(columns: columns, spacing: 12) {
                 quickCell(
                     icon: "📋",
                     label: String(localized: "Prep Checklist"),
@@ -29,9 +33,21 @@ struct HomeQuickAccessGrid: View {
                     action: onOpenPrepare
                 )
                 quickCell(
+                    icon: "💬",
+                    label: String(localized: "Talk to a Human"),
+                    subtitle: String(localized: "Genius Bar · real people"),
+                    action: onOpenGeniusBar
+                )
+                quickCell(
+                    icon: "🗣",
+                    label: String(localized: "Phrases & Dialect"),
+                    subtitle: String(localized: "Say it right · 方言彩蛋"),
+                    action: onOpenPhrases
+                )
+                quickCell(
                     icon: "🧭",
                     label: String(localized: "Practical Info"),
-                    subtitle: String(localized: "Visa · Pay · Help · Transport"),
+                    subtitle: String(localized: "Emergency · Visa · Pay · Transport"),
                     action: onOpenInfoHub
                 )
             }
