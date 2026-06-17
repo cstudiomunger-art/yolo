@@ -253,21 +253,21 @@ struct GeniusBarHistoryView: View {
                     .foregroundStyle(Theme.ColorToken.textMuted)
             } else {
                 ForEach(service.historyConversations) { conv in
-                    Button { chatIntent = .resume(conv) } label: {
-                        HStack(spacing: 11) {
-                            Text(conv.priority == "emergency" ? "🆘" : "💬").font(.system(size: 18))
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(agentName(conv.agentId)).font(Theme.FontToken.inter(14, weight: .medium))
-                                    .foregroundStyle(Theme.ColorToken.textPrimary)
-                                Text("已结束 · 查看记录").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
+                    // In a List, a Button(.plain) only registers taps on its content, so
+                    // blank space wouldn't respond — use a full-row contentShape + onTapGesture.
+                    HStack(spacing: 11) {
+                        Text(conv.priority == "emergency" ? "🆘" : "💬").font(.system(size: 18))
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(agentName(conv.agentId)).font(Theme.FontToken.inter(14, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.textPrimary)
+                            Text("已结束 · 查看记录").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
                         }
-                        .frame(maxWidth: .infinity)
-                        .contentShape(Rectangle())  // whole row tappable, not just text/icon
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
                     }
-                    .buttonStyle(.plain)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture { chatIntent = .resume(conv) }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             Task { await service.deleteMyConversation(conv.id) }
