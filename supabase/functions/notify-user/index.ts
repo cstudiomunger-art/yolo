@@ -89,6 +89,7 @@ serve(async (req) => {
     const payload = JSON.stringify({ aps: { alert: { title, body: message }, sound: "default", "mutable-content": 1 } });
 
     let sent = 0;
+    const deadTokens: string[] = [];
     await Promise.all((tokens as { token: string }[]).map(async (t) => {
       try {
         const res = await fetch(`https://${host}/3/device/${t.token}`, {
@@ -96,11 +97,26 @@ serve(async (req) => {
           headers: { authorization: `bearer ${jwt}`, "apns-topic": bundle, "apns-push-type": "alert" },
           body: payload,
         });
-        if (res.ok) sent++;
-      } catch (_) { /* ignore individual failures */ }
+        if (res.ok) {
+          sent++;
+        } else if (res.status === 410) {
+          // Unregistered — the app was uninstalled or the token rotated. Prune it
+          // so the per-user token list doesn't accumulate dead entries over time.
+          deadTokens.push(t.token);
+        } else {
+          const reason = await res.text().catch(() => "");
+          if (reason.includes("BadDeviceToken") || reason.includes("Unregistered")) {
+            deadTokens.push(t.token);
+          }
+        }
+      } catch (_) { /* ignore individual network failures */ }
     }));
 
-    return json({ sent });
+    if (deadTokens.length > 0) {
+      await admin.from("device_tokens").delete().eq("user_id", userId).in("token", deadTokens);
+    }
+
+    return json({ sent, pruned: deadTokens.length });
   } catch (err) {
     console.error("notify-user error:", err);
     return json({ error: err instanceof Error ? err.message : "error" }, 500);

@@ -219,7 +219,17 @@ final class SupportChatService {
             startPolling()
             subscribeRealtime()
         } catch {
-            lastError = error.localizedDescription
+            // Lost a create race (DB unique index on one open normal thread per
+            // user↔agent) — resolve to the existing thread instead of erroring.
+            if let agentId, priority == "normal",
+               let existing: SupportConversation = try? await client.from("support_conversations")
+                   .select().eq("user_id", value: uid).eq("agent_id", value: agentId)
+                   .eq("status", value: "open").order("updated_at", ascending: false).limit(1)
+                   .single().execute().value {
+                await openConversation(existing)
+            } else {
+                lastError = error.localizedDescription
+            }
         }
     }
 
