@@ -4,11 +4,18 @@ import UIKit
 
 // MARK: - Home (pick a human)
 
+/// What a tap should open in the chat view. Driving navigation by intent lets us
+/// push the chat screen instantly and create/resume the conversation inside it,
+/// instead of greying the home grid while a network round-trip runs first.
+enum ChatIntent: Hashable {
+    case resume(SupportConversation)
+    case start(agentId: String?, priority: String)
+}
+
 struct GeniusBarHomeView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
-    @State private var openChat = false
-    @State private var starting = false
+    @State private var chatIntent: ChatIntent?
     @State private var showHistory = false
 
     private var service: SupportChatService { appEnv.supportChat }
@@ -49,7 +56,7 @@ struct GeniusBarHomeView: View {
             .onDisappear {
                 Task { await service.stopHomeRealtime() }
             }
-            .navigationDestination(isPresented: $openChat) { GeniusBarChatView() }
+            .navigationDestination(item: $chatIntent) { GeniusBarChatView(intent: $0) }
             .navigationDestination(isPresented: $showHistory) { GeniusBarHistoryView() }
         }
     }
@@ -63,7 +70,7 @@ struct GeniusBarHomeView: View {
     }
 
     private var sosCard: some View {
-        Button { start(agentId: nil, priority: "emergency") } label: {
+        Button { chatIntent = .start(agentId: nil, priority: "emergency") } label: {
             HStack(spacing: 13) {
                 Text("🆘").font(.system(size: 26))
                 VStack(alignment: .leading, spacing: 2) {
@@ -80,7 +87,7 @@ struct GeniusBarHomeView: View {
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)
-        .disabled(appEnv.auth.userId == nil || starting)
+        .disabled(appEnv.auth.userId == nil)
     }
 
     private var inbox: some View {
@@ -118,7 +125,7 @@ struct GeniusBarHomeView: View {
                 .font(Theme.FontToken.inter(11, weight: .semibold))
                 .foregroundStyle(Theme.ColorToken.textMuted).textCase(.uppercase)
             ForEach(convs) { conv in
-                Button { resume(conv) } label: { conversationRow(conv, history: history) }
+                Button { chatIntent = .resume(conv) } label: { conversationRow(conv, history: history) }
                     .buttonStyle(.plain)
                     .contextMenu {
                         Button(role: .destructive) {
@@ -164,10 +171,6 @@ struct GeniusBarHomeView: View {
         return a.name
     }
 
-    private func resume(_ conv: SupportConversation) {
-        Task { await service.openConversation(conv); openChat = true }
-    }
-
     private var grid: some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 11), GridItem(.flexible(), spacing: 11)], spacing: 11) {
             ForEach(service.agents) { agent in
@@ -177,7 +180,7 @@ struct GeniusBarHomeView: View {
     }
 
     private func agentCard(_ agent: SupportAgent) -> some View {
-        Button { start(agentId: agent.id, priority: "normal") } label: {
+        Button { chatIntent = .start(agentId: agent.id, priority: "normal") } label: {
             VStack(spacing: 6) {
                 ZStack(alignment: .bottomTrailing) {
                     agentAvatar(agent, size: 56)
@@ -194,7 +197,7 @@ struct GeniusBarHomeView: View {
             .opacity(agent.isReachable ? 1 : 0.5)
         }
         .buttonStyle(.plain)
-        .disabled(!agent.isReachable || appEnv.auth.userId == nil || starting)
+        .disabled(!agent.isReachable || appEnv.auth.userId == nil)
     }
 
     private var boundaryCard: some View {
@@ -230,25 +233,13 @@ struct GeniusBarHomeView: View {
         switch s { case "online": return "🟢 在线 · 通常几分钟回"; case "busy": return "🟡 忙 · 稍后回"; default: return "离线" }
     }
 
-    private func start(agentId: String?, priority: String) {
-        guard let uid = appEnv.auth.userId, !starting else { return }
-        starting = true
-        Task {
-            await service.startConversation(
-                userId: uid, agentId: agentId, priority: priority,
-                displayName: appEnv.preferences.displayName, email: appEnv.auth.userEmail
-            )
-            starting = false
-            if service.conversation != nil { openChat = true }
-        }
-    }
 }
 
 // MARK: - History (read-only list, left-swipe to delete)
 
 struct GeniusBarHistoryView: View {
     @Environment(AppEnvironment.self) private var appEnv
-    @State private var openChat = false
+    @State private var chatIntent: ChatIntent?
     private var service: SupportChatService { appEnv.supportChat }
 
     var body: some View {
@@ -259,7 +250,7 @@ struct GeniusBarHistoryView: View {
                     .foregroundStyle(Theme.ColorToken.textMuted)
             } else {
                 ForEach(service.historyConversations) { conv in
-                    Button { Task { await service.openConversation(conv); openChat = true } } label: {
+                    Button { chatIntent = .resume(conv) } label: {
                         HStack(spacing: 11) {
                             Text(conv.priority == "emergency" ? "🆘" : "💬").font(.system(size: 18))
                             VStack(alignment: .leading, spacing: 1) {
@@ -282,7 +273,7 @@ struct GeniusBarHistoryView: View {
         .listStyle(.plain)
         .navigationTitle("历史会话")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationDestination(isPresented: $openChat) { GeniusBarChatView() }
+        .navigationDestination(item: $chatIntent) { GeniusBarChatView(intent: $0) }
     }
 
     private func agentName(_ agentId: String?) -> String {
@@ -294,6 +285,10 @@ struct GeniusBarHistoryView: View {
 // MARK: - Chat
 
 struct GeniusBarChatView: View {
+    /// What to open. `nil` means the conversation is already set on the service
+    /// (e.g. push-notification routing) — just load its messages.
+    var intent: ChatIntent?
+
     @Environment(AppEnvironment.self) private var appEnv
     @State private var draft = ""
     @State private var photoItem: PhotosPickerItem?
@@ -301,6 +296,22 @@ struct GeniusBarChatView: View {
     @State private var shownTranslations: Set<String> = []
 
     private var service: SupportChatService { appEnv.supportChat }
+
+    /// Resolve the tapped intent — runs once when the (freshly pushed) chat view appears.
+    private func resolveIntent() async {
+        switch intent {
+        case .resume(let conv):
+            await service.openConversation(conv)
+        case .start(let agentId, let priority):
+            guard let uid = appEnv.auth.userId else { return }
+            await service.startConversation(
+                userId: uid, agentId: agentId, priority: priority,
+                displayName: appEnv.preferences.displayName, email: appEnv.auth.userEmail
+            )
+        case nil:
+            await service.loadMessages()
+        }
+    }
 
     private var closedBanner: some View {
         VStack(spacing: 8) {
@@ -326,6 +337,17 @@ struct GeniusBarChatView: View {
     }
 
     var body: some View {
+        Group {
+        if intent != nil && service.conversation == nil {
+            VStack(spacing: 12) {
+                Spacer()
+                ProgressView()
+                Text("正在接通…")
+                    .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
         VStack(spacing: 0) {
             ScrollViewReader { proxy in
                 ScrollView {
@@ -356,6 +378,8 @@ struct GeniusBarChatView: View {
             } else {
                 inputBar
             }
+        }
+        }
         }
         .onChange(of: draft) { _, value in
             if !value.isEmpty { Task { await service.userIsTyping() } }
@@ -392,7 +416,7 @@ struct GeniusBarChatView: View {
         } message: {
             Text("结束后会进入「历史会话」，需要时可再次咨询（开启新会话）。")
         }
-        .task { await service.loadMessages() }
+        .task { await resolveIntent() }
         .onDisappear { service.stopPolling() }
         .onChange(of: photoItem) { _, item in
             guard let item else { return }

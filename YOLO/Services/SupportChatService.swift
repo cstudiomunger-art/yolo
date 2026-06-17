@@ -141,6 +141,7 @@ final class SupportChatService {
     func openConversation(_ conv: SupportConversation, userId: UUID? = nil) async {
         conversation = conv
         agentIsTyping = false
+        messages = []  // drop the previous thread so the chat view doesn't flash stale messages
         await loadMessages()
         await markRead(conv.id)
         startPolling()
@@ -190,6 +191,10 @@ final class SupportChatService {
         userId: UUID, agentId: String?, priority: String = "normal",
         context: [String: String]? = nil, displayName: String? = nil, email: String? = nil
     ) async {
+        // Clear any prior thread up front so optimistic navigation into the chat
+        // shows a loading state, not the previous conversation, while this resolves.
+        conversation = nil
+        messages = []
         let uid = userId.uuidString.lowercased()
 
         if let agentId, priority == "normal" {
