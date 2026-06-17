@@ -264,7 +264,10 @@ struct GeniusBarHistoryView: View {
                             Spacer()
                             Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
                         }
+                        .frame(maxWidth: .infinity)
+                        .contentShape(Rectangle())  // whole row tappable, not just text/icon
                     }
+                    .buttonStyle(.plain)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             Task { await service.deleteMyConversation(conv.id) }
