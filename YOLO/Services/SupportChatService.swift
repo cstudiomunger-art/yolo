@@ -118,20 +118,21 @@ final class SupportChatService {
         }
     }
 
+    private struct UnreadCount: Decodable { let conversation_id: String; let unread: Int }
+
     /// Unread = agent messages newer than the user's last-read marker, per conversation.
+    /// Computed server-side in one indexed query (support_unread_counts RPC) instead of
+    /// pulling hundreds of messages to the client and counting them on every refresh.
     private func recomputeUnread() async {
-        let ids = myConversations.map(\.id)
-        guard !ids.isEmpty else { unreadByConversation = [:]; return }
-        let msgs: [SupportMessage] = (try? await client.from("support_messages")
-            .select().in("conversation_id", values: ids)
-            .order("created_at", ascending: false).limit(300).execute().value) ?? []
-        var counts: [String: Int] = [:]
-        for conv in myConversations {
-            let readAt = ChatDate.parse(conv.userLastReadAt)
-            counts[conv.id] = msgs.filter {
-                $0.conversationId == conv.id && $0.senderType == "agent" && ChatDate.newer($0.createdAt, than: readAt)
-            }.count
+        guard !myConversations.isEmpty else {
+            if !unreadByConversation.isEmpty { unreadByConversation = [:] }
+            return
         }
+        guard let rows: [UnreadCount] = try? await client.rpc("support_unread_counts").execute().value else {
+            return  // best-effort; keep last known counts on transient failure
+        }
+        var counts: [String: Int] = [:]
+        for row in rows where row.unread > 0 { counts[row.conversation_id] = row.unread }
         if counts != unreadByConversation { unreadByConversation = counts }
     }
 
@@ -371,6 +372,9 @@ final class SupportChatService {
 
     @ObservationIgnored private var rtChannel: RealtimeChannelV2?
     @ObservationIgnored private var rtTasks: [Task<Void, Never>] = []
+    /// True once the chat realtime channel is subscribed — lets the poll loop drop to a
+    /// slow safety-net cadence instead of hammering the DB every 15s on every client.
+    @ObservationIgnored private var realtimeActive = false
 
     /// Subscribe to live postgres changes for the active conversation. RLS limits events
     /// to rows this user may see. Polling (below) stays as a low-frequency safety net.
@@ -385,7 +389,12 @@ final class SupportChatService {
         let inserts = channel.postgresChange(InsertAction.self, schema: "public", table: "support_messages")
         let updates = channel.postgresChange(UpdateAction.self, schema: "public", table: "support_messages")
         let convs = channel.postgresChange(UpdateAction.self, schema: "public", table: "support_conversations")
-        try? await channel.subscribeWithError()
+        do {
+            try await channel.subscribeWithError()
+            realtimeActive = true
+        } catch {
+            realtimeActive = false  // fall back to the faster 15s poll below
+        }
         rtChannel = channel
         rtTasks = [
             Task { [weak self] in for await _ in inserts { await self?.onIncomingMessageChange() } },
@@ -402,6 +411,7 @@ final class SupportChatService {
     private func stopRealtime() async {
         rtTasks.forEach { $0.cancel() }
         rtTasks = []
+        realtimeActive = false
         if let ch = rtChannel { await client.realtimeV2.removeChannel(ch) }
         rtChannel = nil
     }
@@ -443,8 +453,13 @@ final class SupportChatService {
         pollTask?.cancel()
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
-                // Realtime is primary; this is a 15s safety net (missed events / reconnect).
-                try? await Task.sleep(nanoseconds: 15_000_000_000)
+                // Realtime is primary. When it's subscribed, poll is just a slow
+                // reconnect/missed-event reconcile (60s); only fall back to a fast
+                // 15s cadence when realtime is down — this keeps per-client DB load
+                // low at scale instead of every client refetching every 15s.
+                let healthy = await self?.realtimeActive ?? false
+                let seconds: UInt64 = healthy ? 60 : 15
+                try? await Task.sleep(nanoseconds: seconds * 1_000_000_000)
                 if Task.isCancelled { break }
                 await self?.loadMessages()
                 await self?.refreshConversationMeta()
