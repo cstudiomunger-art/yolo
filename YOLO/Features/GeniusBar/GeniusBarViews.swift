@@ -231,6 +231,7 @@ struct GeniusBarChatView: View {
     @State private var draft = ""
     @State private var photoItem: PhotosPickerItem?
     @State private var showEndConfirm = false
+    @State private var shownTranslations: Set<String> = []
 
     private var service: SupportChatService { appEnv.supportChat }
 
@@ -290,6 +291,17 @@ struct GeniusBarChatView: View {
         .navigationTitle("对话")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Toggle("自动翻译收到的消息", isOn: Binding(
+                        get: { service.autoTranslate },
+                        set: { service.autoTranslate = $0; if $0 { Task { await service.loadMessages() } } }
+                    ))
+                } label: {
+                    Image(systemName: service.autoTranslate ? "globe.badge.chevron.backward" : "globe")
+                        .foregroundStyle(service.autoTranslate ? Theme.ColorToken.success : Theme.ColorToken.textMuted)
+                }
+            }
             if service.conversation?.isClosed == false {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("结束会话") { showEndConfirm = true }
@@ -331,12 +343,37 @@ struct GeniusBarChatView: View {
                         .background(msg.isFromUser ? Theme.ColorToken.success : Theme.ColorToken.background)
                         .overlay(RoundedRectangle(cornerRadius: 16).stroke(msg.isFromUser ? .clear : Theme.ColorToken.border, lineWidth: 1))
                         .clipShape(RoundedRectangle(cornerRadius: 16))
-                    if let t = msg.bodyTranslated, !t.isEmpty, t != msg.bodyOriginal {
+                    if translatedVisible(msg), let t = msg.bodyTranslated, !t.isEmpty {
                         Text("🌐 " + t).font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
                     }
+                    translateControl(msg)
                 }
             }
             if !msg.isFromUser { Spacer(minLength: 40) }
+        }
+    }
+
+    private func translatedVisible(_ msg: SupportMessage) -> Bool {
+        guard (msg.bodyTranslated ?? "").isEmpty == false else { return false }
+        return service.autoTranslate || shownTranslations.contains(msg.id)
+    }
+
+    @ViewBuilder
+    private func translateControl(_ msg: SupportMessage) -> some View {
+        if let body = msg.bodyOriginal, !body.isEmpty {
+            if service.translatingIds.contains(msg.id) {
+                Text("翻译中…").font(Theme.FontToken.inter(9)).foregroundStyle(Theme.ColorToken.textMuted)
+            } else if (msg.bodyTranslated ?? "").isEmpty {
+                Button("翻译") { Task { await service.translateMessage(msg) } }
+                    .font(Theme.FontToken.inter(9, weight: .medium)).foregroundStyle(Theme.ColorToken.accent)
+                    .buttonStyle(.plain)
+            } else if !service.autoTranslate {
+                Button(shownTranslations.contains(msg.id) ? "隐藏译文" : "显示译文") {
+                    if shownTranslations.contains(msg.id) { shownTranslations.remove(msg.id) } else { shownTranslations.insert(msg.id) }
+                }
+                .font(Theme.FontToken.inter(9, weight: .medium)).foregroundStyle(Theme.ColorToken.accent)
+                .buttonStyle(.plain)
+            }
         }
     }
 

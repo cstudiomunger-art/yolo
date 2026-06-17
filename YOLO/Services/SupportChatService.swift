@@ -16,7 +16,19 @@ final class SupportChatService {
     private(set) var isSending = false
     private(set) var unreadByConversation: [String: Int] = [:]
     private(set) var agentIsTyping = false
+    /// Message ids currently being translated (drives the "翻译中…" indicator).
+    private(set) var translatingIds: Set<String> = []
+    /// Auto-translate received (incoming, agent-sent) messages for this user. Default off.
+    var autoTranslate: Bool {
+        didSet { UserDefaults.standard.set(autoTranslate, forKey: Self.autoTranslateKey) }
+    }
     var lastError: String?
+
+    private static let autoTranslateKey = "yolohappy.supportAutoTranslate.v1"
+
+    init() {
+        autoTranslate = UserDefaults.standard.bool(forKey: Self.autoTranslateKey)
+    }
 
     var totalUnread: Int { unreadByConversation.values.reduce(0, +) }
 
@@ -204,6 +216,7 @@ final class SupportChatService {
                 .order("created_at")
                 .limit(200)
                 .execute().value
+            autoTranslateIncoming()
         } catch {
             lastError = error.localizedDescription
         }
@@ -224,12 +237,37 @@ final class SupportChatService {
         guard let convId = conversation?.id, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         isSending = true
         defer { isSending = false }
-        let translated = await translate(text, target: "zh")  // agent reads Chinese
+        // Send instantly with original only — translation happens on the receiving side
+        // (agent's auto-toggle or manual button), never blocking the send.
         let msg = NewMessage(
             conversation_id: convId, sender_type: "user", sender_id: userId.uuidString.lowercased(),
-            body_original: text, body_translated: translated, image_url: nil
+            body_original: text, body_translated: nil, image_url: nil
         )
         await insert(msg)
+    }
+
+    /// Translate one message into the recipient's language and persist body_translated
+    /// (visible to both sides). Target by sender: user→zh (agent reads), agent→en (user reads).
+    func translateMessage(_ message: SupportMessage) async {
+        guard let text = message.bodyOriginal, !text.isEmpty,
+              !translatingIds.contains(message.id) else { return }
+        let target = message.senderType == "user" ? "zh" : "en"
+        translatingIds.insert(message.id)
+        defer { translatingIds.remove(message.id) }
+        guard let translated = await translate(text, target: target), !translated.isEmpty else { return }
+        _ = try? await client.from("support_messages")
+            .update(["body_translated": translated]).eq("id", value: message.id).execute()
+        await loadMessages()
+    }
+
+    /// Auto-translate incoming (agent-sent) untranslated messages when the toggle is on.
+    private func autoTranslateIncoming() {
+        guard autoTranslate else { return }
+        for m in messages where m.senderType == "agent"
+            && (m.bodyTranslated ?? "").isEmpty
+            && !translatingIds.contains(m.id) {
+            Task { await translateMessage(m) }
+        }
     }
 
     func sendImage(_ data: Data, userId: UUID) async {

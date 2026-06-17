@@ -56,6 +56,9 @@
   .bub img{max-width:200px;border-radius:8px;display:block}
   .tx{font-size:10px;color:var(--muted);margin-top:4px}
   .row.me .tx{text-align:right}
+  .bub .tx{font-size:11px;opacity:.7;margin-top:3px}
+  .trbtn{background:none;border:none;color:inherit;opacity:.7;text-decoration:underline;font-size:11px;cursor:pointer;padding:0;margin-top:4px;display:inline-block}
+  .trbtn.muted{text-decoration:none;cursor:default}
   .compose{display:flex;gap:8px;padding:12px;background:var(--panel);border-top:1px solid var(--border)}
   .compose input{flex:1;padding:10px 13px;border:1px solid var(--border);border-radius:20px;font-size:14px}
   .compose button{border:none;border-radius:20px;padding:0 18px;background:var(--accent2);color:#fff;font-weight:600}
@@ -89,6 +92,7 @@
       <input id="avatarInput" type="file" accept="image/*" style="display:none">
       <div class="who" id="who"></div>
       <div class="spacer"></div>
+      <button class="statusbtn" id="autoTrBtn" title="自动翻译收到的消息"><span id="autoTrText">🌐 自动翻译：关</span></button>
       <button class="statusbtn" id="statusBtn"><span class="dot" id="statusDot"></span><span id="statusText">离线</span></button>
       <button class="signout" id="signout">登出</button>
     </div>
@@ -137,6 +141,10 @@
     let statusFilter = "open";
     const notified = {};          // conversation_id → last notified message id
     let audioCtx = null;
+    let autoTranslate = localStorage.getItem("autoTranslate") === "1";  // 接收端·默认关
+    const translatingMsg = new Set();   // message ids being translated
+    const shownT = new Set();            // message ids whose translation is shown (auto off)
+    let msgById = {};
     const $ = (id) => document.getElementById(id);
 
     function beep(){
@@ -173,6 +181,18 @@
       $("console").style.display = "grid";
       $("who").textContent = agent.name + " · " + (agent.role || "");
       renderAgentAvatar();
+      renderAutoTr();
+      $("autoTrBtn").onclick = () => {
+        autoTranslate = !autoTranslate;
+        localStorage.setItem("autoTranslate", autoTranslate ? "1" : "0");
+        renderAutoTr();
+        if (activeConv) loadMessages();
+      };
+      $("msgs").addEventListener("click", (e) => {
+        const tr = e.target.closest("[data-tr]"); const tg = e.target.closest("[data-toggle]");
+        if (tr) { const m = msgById[tr.dataset.tr]; if (m) translateMessageRow(m); }
+        else if (tg) { const id = tg.dataset.toggle; shownT.has(id) ? shownT.delete(id) : shownT.add(id); loadMessages(); }
+      });
       renderStatus();
       if ("Notification" in window && Notification.permission === "default") { try { Notification.requestPermission(); } catch(e){} }
       $("segOpen").onclick = () => { statusFilter = "open"; $("segOpen").classList.add("on"); $("segClosed").classList.remove("on"); loadConversations(); };
@@ -202,6 +222,22 @@
       agent.avatar_url = url;
       renderAgentAvatar();
     });
+
+    function renderAutoTr(){
+      $("autoTrText").textContent = autoTranslate ? "🌐 自动翻译：开" : "🌐 自动翻译：关";
+    }
+
+    // Translate one message into the recipient's language (user→zh, agent→en) and persist.
+    async function translateMessageRow(m){
+      if (translatingMsg.has(m.id) || !(m.body_original||"").trim()) return;
+      const target = m.sender_type === "user" ? "zh" : "en";
+      translatingMsg.add(m.id);
+      await loadMessages();
+      const t = await translate(m.body_original, target);
+      translatingMsg.delete(m.id);
+      if (t) await sb.from("support_messages").update({ body_translated: t }).eq("id", m.id);
+      await loadMessages();
+    }
 
     function renderStatus(){
       const s = agent.status || "offline";
@@ -343,24 +379,40 @@
 
     async function loadMessages(){
       if(!activeConv) return;
-      const { data } = await sb.from("support_messages").select("*").eq("conversation_id", activeConv.id).order("created_at");
-      const box = $("msgs"); box.innerHTML = "";
+      const { data } = await sb.from("support_messages").select("*").eq("conversation_id", activeConv.id).order("created_at").limit(200);
+      const box = $("msgs"); box.innerHTML = ""; msgById = {};
       for (const m of (data||[])){
+        msgById[m.id] = m;
         const me = m.sender_type === "agent";
         const row = document.createElement("div"); row.className = "row" + (me?" me":"");
-        let inner = "";
+        const time = m.created_at ? new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : "";
+        let inner;
         if (m.image_url){
           const { data: signed } = await sb.storage.from("chat-images").createSignedUrl(m.image_url, 3600);
-          inner = `<img src="${signed?signed.signedUrl:''}" alt="image">`;
+          inner = `<img src="${signed?signed.signedUrl:''}" alt="image"><div class="time">${time}</div>`;
         } else {
+          const hasT = m.body_translated && m.body_translated !== m.body_original;
+          const visT = hasT && (autoTranslate || shownT.has(m.id));
+          let ctrl = "";
+          if (translatingMsg.has(m.id)) ctrl = `<span class="trbtn muted">翻译中…</span>`;
+          else if (!hasT) ctrl = `<button class="trbtn" data-tr="${m.id}">翻译</button>`;
+          else if (!autoTranslate) ctrl = `<button class="trbtn" data-toggle="${m.id}">${shownT.has(m.id)?'隐藏译文':'显示译文'}</button>`;
           inner = (m.body_original||"").replace(/</g,"&lt;");
-          if (m.body_translated && m.body_translated !== m.body_original) inner += `<div class="tx">🌐 ${m.body_translated.replace(/</g,"&lt;")}</div>`;
+          if (visT) inner += `<div class="tx">🌐 ${m.body_translated.replace(/</g,"&lt;")}</div>`;
+          inner += `<div class="time">${time}</div>`;
+          if (ctrl) inner += `<div>${ctrl}</div>`;
         }
-        const time = m.created_at ? new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : "";
-        row.innerHTML = `<div class="bub">${inner}<div class="time">${time}</div></div>`;
+        row.innerHTML = `<div class="bub">${inner}</div>`;
         box.appendChild(row);
       }
       box.scrollTop = box.scrollHeight;
+      if (autoTranslate){
+        for (const m of (data||[])){
+          if (m.sender_type === "user" && !m.body_translated && !translatingMsg.has(m.id) && (m.body_original||"").trim()){
+            translateMessageRow(m);
+          }
+        }
+      }
     }
 
     $("sendBtn").onclick = sendReply;
@@ -382,11 +434,11 @@
       const text = $("reply").value.trim();
       if(!text || !activeConv) return;
       $("reply").value = "";
-      const translated = await translate(text, "en");
       const { data:{ session } } = await sb.auth.getSession();
+      // Send instantly with original only; translation is the receiving side's job.
       await sb.from("support_messages").insert({
         conversation_id: activeConv.id, sender_type: "agent", sender_id: session.user.id,
-        body_original: text, body_translated: translated
+        body_original: text
       });
       await sb.from("support_conversations").update({ updated_at: new Date().toISOString(), agent_typing_at: null }).eq("id", activeConv.id);
       notifyUser(activeConv.user_id, text);
