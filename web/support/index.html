@@ -53,7 +53,11 @@
   .row{display:flex}.row.me{justify-content:flex-end}
   .bub{max-width:74%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.45;background:#fff;border:1px solid var(--border)}
   .row.me .bub{background:var(--accent2);color:#fff;border-color:var(--accent2)}
-  .bub img{max-width:200px;border-radius:8px;display:block}
+  .bub img{max-width:200px;border-radius:8px;display:block;cursor:zoom-in}
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:1000;cursor:zoom-out}
+  .lightbox.open{display:flex}
+  .lightbox img{max-width:94vw;max-height:94vh;border-radius:6px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+  .lightbox .lb-close{position:absolute;top:16px;right:20px;border:none;background:none;color:#fff;font-size:30px;line-height:1;cursor:pointer;opacity:.9}
   .tx{font-size:10px;color:var(--muted);margin-top:4px}
   .row.me .tx{text-align:right}
   .bub .tx{font-size:11px;opacity:.7;margin-top:3px}
@@ -127,6 +131,11 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lb-close" id="lbClose" aria-label="关闭">&times;</button>
+    <img id="lbImg" src="" alt="预览">
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>
@@ -476,6 +485,17 @@
 
     $("sendBtn").onclick = sendReply;
     $("reply").addEventListener("keydown", e => { if(e.key==="Enter") sendReply(); });
+
+    // Tap a chat image → full-screen lightbox preview.
+    function openLightbox(src){ $("lbImg").src = src; $("lightbox").classList.add("open"); }
+    function closeLightbox(){ $("lightbox").classList.remove("open"); $("lbImg").src = ""; }
+    $("msgs").addEventListener("click", e => {
+      const img = e.target.closest(".bub img");
+      if (img && img.src) openLightbox(img.src);
+    });
+    $("lightbox").addEventListener("click", closeLightbox);        // click anywhere (backdrop/image) closes
+    $("lbClose").addEventListener("click", closeLightbox);
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
 
     $("imgInput").addEventListener("change", async (e) => {
       const file = e.target.files[0];
