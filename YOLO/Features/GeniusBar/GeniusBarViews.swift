@@ -41,6 +41,12 @@ struct GeniusBarHomeView: View {
                 if let uid = appEnv.auth.userId { await service.loadMyConversations(userId: uid) }
                 appEnv.enablePushRegistration()
             }
+            .onAppear {
+                if let uid = appEnv.auth.userId { service.subscribeHomeRealtime(userId: uid) }
+            }
+            .onDisappear {
+                Task { await service.stopHomeRealtime() }
+            }
             .navigationDestination(isPresented: $openChat) { GeniusBarChatView() }
         }
     }

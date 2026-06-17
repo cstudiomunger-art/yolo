@@ -368,6 +368,39 @@ final class SupportChatService {
         rtChannel = nil
     }
 
+    // MARK: - Home (inbox + agent status) realtime
+
+    @ObservationIgnored private var homeChannel: RealtimeChannelV2?
+    @ObservationIgnored private var homeTasks: [Task<Void, Never>] = []
+
+    /// Live agent online-status + inbox unread on the Genius Bar home screen.
+    func subscribeHomeRealtime(userId: UUID) {
+        Task { [weak self] in await self?.startHomeRealtime(userId: userId) }
+    }
+
+    private func startHomeRealtime(userId: UUID) async {
+        guard AppConfig.isSupabaseConfigured else { return }
+        await stopHomeRealtime()
+        let channel = client.channel("support-home-rt")
+        let agentsCh = channel.postgresChange(AnyAction.self, schema: "public", table: "support_agents")
+        let convCh = channel.postgresChange(AnyAction.self, schema: "public", table: "support_conversations")
+        let msgCh = channel.postgresChange(InsertAction.self, schema: "public", table: "support_messages")
+        try? await channel.subscribeWithError()
+        homeChannel = channel
+        homeTasks = [
+            Task { [weak self] in for await _ in agentsCh { await self?.loadAgents() } },
+            Task { [weak self] in for await _ in convCh { await self?.loadMyConversations(userId: userId) } },
+            Task { [weak self] in for await _ in msgCh { await self?.loadMyConversations(userId: userId) } },
+        ]
+    }
+
+    func stopHomeRealtime() async {
+        homeTasks.forEach { $0.cancel() }
+        homeTasks = []
+        if let ch = homeChannel { await client.realtimeV2.removeChannel(ch) }
+        homeChannel = nil
+    }
+
     private func startPolling() {
         pollTask?.cancel()
         pollTask = Task { [weak self] in
