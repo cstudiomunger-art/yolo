@@ -302,6 +302,7 @@ struct GeniusBarChatView: View {
     @State private var photoItem: PhotosPickerItem?
     @State private var showEndConfirm = false
     @State private var shownTranslations: Set<String> = []
+    @FocusState private var inputFocused: Bool
 
     private var service: SupportChatService { appEnv.supportChat }
 
@@ -374,6 +375,9 @@ struct GeniusBarChatView: View {
                 .onChange(of: service.messages.count) { _, _ in
                     if let last = service.messages.last { withAnimation { proxy.scrollTo(last.id, anchor: .bottom) } }
                 }
+                // Tap the message area (blank space included) or drag to dismiss the keyboard.
+                .scrollDismissesKeyboard(.interactively)
+                .simultaneousGesture(TapGesture().onEnded { inputFocused = false })
             }
             if service.conversation?.isClosed == false && service.agentIsTyping {
                 Text("对方正在输入…")
@@ -493,6 +497,7 @@ struct GeniusBarChatView: View {
             }
             TextField("发消息…（中英都行，自动翻译）", text: $draft, axis: .vertical)
                 .font(Theme.FontToken.inter(13)).lineLimit(1...4)
+                .focused($inputFocused)
                 .padding(.horizontal, 12).padding(.vertical, 8)
                 .background(Theme.ColorToken.backgroundSubtle).clipShape(Capsule())
             Button { sendText() } label: {
