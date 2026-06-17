@@ -1,6 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { chatCompletion, corsHeaders, type ChatMessage } from "../_shared/volcengine.ts";
 import { loadTranslateSettingsFromCMS } from "../_shared/translate-settings.ts";
+
+// Abuse limits: only eligible callers (agents / users in an open conversation) may
+// translate, capped per minute, with a bounded input size — translation hits a paid
+// LLM, so an authenticated user must not be able to run up the bill at will.
+const MAX_PER_MIN = 30;
+const MAX_TEXT_CHARS = 2000;
 
 // Genius Bar chat translation. Translates a single message to a target language.
 // Provider/model/key/url are configurable via app_settings (admin CMS); defaults
@@ -62,6 +69,30 @@ serve(async (req) => {
 
     if (!text) {
       return jsonResponse({ code: 400, error: "text is required" }, 400);
+    }
+
+    // Bound the cost of any single call. Chat messages are short; an oversized
+    // body is either abuse or a non-chat use — serve the original, skip the LLM.
+    if (text.length > MAX_TEXT_CHARS) {
+      return jsonResponse({ code: 200, translated: text, fallback: true, reason: "too_long" });
+    }
+
+    // Eligibility + per-user rate limit, atomically, under the caller's identity.
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const authHeader = req.headers.get("Authorization") ?? "";
+    if (!authHeader) {
+      return jsonResponse({ code: 401, error: "unauthorized" }, 401);
+    }
+    const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
+    const { data: allowed, error: rlErr } = await caller.rpc("translate_rate_check", { max_per_min: MAX_PER_MIN });
+    if (rlErr) {
+      console.error("translate_rate_check error:", rlErr);
+      return jsonResponse({ code: 500, error: "rate check failed" }, 500);
+    }
+    if (allowed !== true) {
+      // Either not eligible to translate, or over the per-minute limit.
+      return jsonResponse({ code: 429, error: "rate_limited", translated: text, fallback: true }, 429);
     }
 
     const cacheKey = `${target}::${text}`;
