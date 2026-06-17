@@ -1019,6 +1019,8 @@
         { key: "priority", type: "text", readonly: true },
         { key: "status", type: "text", readonly: true },
         { key: "context_json", type: "json", readonly: true, label: "上下文" },
+        { key: "user_deleted_at", type: "text", readonly: true, label: "用户删除于（软删）" },
+        { key: "agent_deleted_at", type: "text", readonly: true, label: "客服删除于（软删）" },
         { key: "created_at", type: "text", readonly: true },
         { key: "updated_at", type: "text", readonly: true },
       ],

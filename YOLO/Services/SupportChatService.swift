@@ -51,16 +51,54 @@ final class SupportChatService {
         let context_json: AnyJSON?
     }
 
+    /// Active (open) conversations — the inbox top section, with unread/typing.
+    var activeConversations: [SupportConversation] { myConversations.filter { !$0.isClosed } }
+    /// History (closed) conversations — read-only transcripts.
+    var historyConversations: [SupportConversation] { myConversations.filter { $0.isClosed } }
+
     func loadMyConversations(userId: UUID) async {
         guard AppConfig.isSupabaseConfigured else { return }
         do {
             myConversations = try await client.from("support_conversations")
                 .select()
                 .eq("user_id", value: userId.uuidString.lowercased())
-                .eq("status", value: "open")
+                .in("status", values: ["open", "closed"])
+                .is("user_deleted_at", value: nil)
                 .order("updated_at", ascending: false)
                 .execute().value
             await recomputeUnread()
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    /// User ends the active conversation (→ history, ticket closed).
+    func endConversation() async {
+        guard let id = conversation?.id else { return }
+        do {
+            _ = try await client.from("support_conversations")
+                .update(["status": "closed"]).eq("id", value: id).execute()
+            if let c = conversation {
+                conversation = SupportConversation(
+                    id: c.id, userId: c.userId, agentId: c.agentId, priority: c.priority, status: "closed",
+                    userLastReadAt: c.userLastReadAt, agentLastReadAt: c.agentLastReadAt,
+                    userTypingAt: c.userTypingAt, agentTypingAt: c.agentTypingAt,
+                    userDeletedAt: c.userDeletedAt, agentDeletedAt: c.agentDeletedAt
+                )
+            }
+            stopPolling()
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    /// Soft-delete a conversation from the user's side only (agent/admin retain it).
+    func deleteMyConversation(_ id: String) async {
+        do {
+            _ = try await client.from("support_conversations")
+                .update(["user_deleted_at": ChatDate.now()]).eq("id", value: id).execute()
+            myConversations.removeAll { $0.id == id }
+            unreadByConversation[id] = nil
         } catch {
             lastError = error.localizedDescription
         }
@@ -164,6 +202,7 @@ final class SupportChatService {
                 .select()
                 .eq("conversation_id", value: convId)
                 .order("created_at")
+                .limit(200)
                 .execute().value
         } catch {
             lastError = error.localizedDescription

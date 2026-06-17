@@ -75,34 +75,61 @@ struct GeniusBarHomeView: View {
     }
 
     private var inbox: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("我的会话 · 继续聊")
-                .font(Theme.FontToken.inter(11, weight: .semibold))
-                .foregroundStyle(Theme.ColorToken.textMuted).textCase(.uppercase)
-            ForEach(service.myConversations) { conv in
-                Button { resume(conv) } label: {
-                    HStack(spacing: 11) {
-                        Text(conv.priority == "emergency" ? "🆘" : "💬").font(.system(size: 18))
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(agentName(conv.agentId)).font(Theme.FontToken.inter(13, weight: .medium))
-                            Text(conv.priority == "emergency" ? "紧急支援会话" : "继续和 TA 聊").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
-                        }
-                        Spacer()
-                        let unread = service.unread(for: conv.id)
-                        if unread > 0 {
-                            Text("\(unread)")
-                                .font(Theme.FontToken.inter(10, weight: .bold)).foregroundStyle(.white)
-                                .frame(minWidth: 18).padding(.horizontal, 5).padding(.vertical, 2)
-                                .background(Theme.ColorToken.urgent).clipShape(Capsule())
-                        }
-                        Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
-                    }
-                    .padding(12)
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
-                }
-                .buttonStyle(.plain)
+        VStack(alignment: .leading, spacing: 14) {
+            if !service.activeConversations.isEmpty {
+                conversationSection("进行中 · 继续聊", convs: service.activeConversations, history: false)
+            }
+            if !service.historyConversations.isEmpty {
+                conversationSection("历史会话 · 只读", convs: service.historyConversations, history: true)
             }
         }
+    }
+
+    private func conversationSection(_ title: String, convs: [SupportConversation], history: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(Theme.FontToken.inter(11, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textMuted).textCase(.uppercase)
+            ForEach(convs) { conv in
+                Button { resume(conv) } label: { conversationRow(conv, history: history) }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            Task { await service.deleteMyConversation(conv.id) }
+                        } label: { Label("删除记录", systemImage: "trash") }
+                    }
+            }
+            if history {
+                Text("长按可删除历史记录（仅从你这里移除）")
+                    .font(Theme.FontToken.inter(9)).foregroundStyle(Theme.ColorToken.textGhost)
+            }
+        }
+    }
+
+    private func conversationRow(_ conv: SupportConversation, history: Bool) -> some View {
+        HStack(spacing: 11) {
+            Text(conv.priority == "emergency" ? "🆘" : "💬").font(.system(size: 18))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(agentName(conv.agentId)).font(Theme.FontToken.inter(13, weight: .medium))
+                Text(history ? "已结束 · 查看记录"
+                     : (conv.priority == "emergency" ? "紧急支援会话" : "继续和 TA 聊"))
+                    .font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            Spacer()
+            if !history {
+                let unread = service.unread(for: conv.id)
+                if unread > 0 {
+                    Text("\(unread)")
+                        .font(Theme.FontToken.inter(10, weight: .bold)).foregroundStyle(.white)
+                        .frame(minWidth: 18).padding(.horizontal, 5).padding(.vertical, 2)
+                        .background(Theme.ColorToken.urgent).clipShape(Capsule())
+                }
+            }
+            Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
+        }
+        .padding(12)
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
+        .opacity(history ? 0.7 : 1)
     }
 
     private func agentName(_ agentId: String?) -> String {
@@ -203,8 +230,32 @@ struct GeniusBarChatView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @State private var draft = ""
     @State private var photoItem: PhotosPickerItem?
+    @State private var showEndConfirm = false
 
     private var service: SupportChatService { appEnv.supportChat }
+
+    private var closedBanner: some View {
+        VStack(spacing: 8) {
+            Text("会话已结束 · 再次咨询将开启新会话")
+                .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+            if let agentId = service.conversation?.agentId, let uid = appEnv.auth.userId {
+                Button {
+                    Task {
+                        await service.startConversation(userId: uid, agentId: agentId,
+                            displayName: appEnv.preferences.displayName, email: appEnv.auth.userEmail)
+                    }
+                } label: {
+                    Text("再次咨询 TA")
+                        .font(Theme.FontToken.inter(13, weight: .semibold)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity).padding(.vertical, 12)
+                        .background(Theme.ColorToken.success).clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(.ultraThinMaterial)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -221,19 +272,37 @@ struct GeniusBarChatView: View {
                     if let last = service.messages.last { withAnimation { proxy.scrollTo(last.id, anchor: .bottom) } }
                 }
             }
-            if service.agentIsTyping {
+            if service.conversation?.isClosed == false && service.agentIsTyping {
                 Text("对方正在输入…")
                     .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, Theme.screenPadding).padding(.bottom, 4)
             }
-            inputBar
+            if service.conversation?.isClosed == true {
+                closedBanner
+            } else {
+                inputBar
+            }
         }
         .onChange(of: draft) { _, value in
             if !value.isEmpty { Task { await service.userIsTyping() } }
         }
         .navigationTitle("对话")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if service.conversation?.isClosed == false {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("结束会话") { showEndConfirm = true }
+                        .font(Theme.FontToken.inter(12, weight: .medium))
+                }
+            }
+        }
+        .confirmationDialog("结束这次会话？", isPresented: $showEndConfirm, titleVisibility: .visible) {
+            Button("结束会话", role: .destructive) { Task { await service.endConversation() } }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("结束后会进入「历史会话」，需要时可再次咨询（开启新会话）。")
+        }
         .task { await service.loadMessages() }
         .onDisappear { service.stopPolling() }
         .onChange(of: photoItem) { _, item in

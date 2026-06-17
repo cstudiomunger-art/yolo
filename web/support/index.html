@@ -111,9 +111,10 @@
               <div class="ctx" id="userTyping" style="color:var(--accent2)"></div>
             </div>
             <button id="closeBtn" style="border:1px solid var(--border);background:#fff;border-radius:8px;padding:5px 10px;font-size:12px">结束会话</button>
+            <button id="deleteBtn" style="display:none;border:1px solid var(--danger);color:var(--danger);background:#fff;border-radius:8px;padding:5px 10px;font-size:12px">删除记录</button>
           </div>
           <div class="msgs" id="msgs"></div>
-          <div class="compose">
+          <div class="compose" id="composeBar">
             <label for="imgInput" class="imgbtn" title="发送图片">📎</label>
             <input id="imgInput" type="file" accept="image/*" style="display:none">
             <input id="reply" placeholder="回复（中文，自动翻译给用户）">
@@ -223,7 +224,8 @@
 
     async function loadConversations(){
       const { data } = await sb.from("support_conversations")
-        .select("*").eq("status", statusFilter).order("priority",{ascending:false}).order("updated_at",{ascending:false}).limit(100);
+        .select("*").eq("status", statusFilter).is("agent_deleted_at", null)
+        .order("priority",{ascending:false}).order("updated_at",{ascending:false}).limit(100);
       const rows = (data||[]).filter(c =>
         statusFilter === "closed"
           ? c.agent_id === agent.id
@@ -288,11 +290,26 @@
       const ctxBits = Object.entries(ctx).filter(([k]) => k !== "user_name" && k !== "user_email").map(([k,v]) => `${k}: ${v}`);
       $("chatCtx").textContent = (ctx.user_email ? ctx.user_email + " · " : "") + (ctxBits.length ? ctxBits.join(" · ") : "");
       $("userTyping").textContent = "";
+      // Closed = read-only: hide compose + 结束会话, show 删除记录.
+      const closed = c.status === "closed";
+      $("composeBar").style.display = closed ? "none" : "flex";
+      $("closeBtn").style.display = closed ? "none" : "";
+      $("deleteBtn").style.display = closed ? "" : "none";
       await markAgentRead(c.id);
       await loadMessages();
       await loadConversations();
     }
     $("backBtn").onclick = () => $("console").classList.remove("show-chat");
+
+    $("deleteBtn").onclick = async () => {
+      if(!activeConv || !confirm("删除这条会话记录？（仅从你的列表移除，后台仍保留）")) return;
+      await sb.from("support_conversations").update({ agent_deleted_at: new Date().toISOString() }).eq("id", activeConv.id);
+      activeConv = null;
+      $("chatActive").style.display = "none";
+      $("chatEmpty").style.display = "flex";
+      $("console").classList.remove("show-chat");
+      await loadConversations();
+    };
 
     async function markAgentRead(id){
       await sb.from("support_conversations").update({ agent_last_read_at: new Date().toISOString() }).eq("id", id);

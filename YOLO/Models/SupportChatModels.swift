@@ -23,6 +23,10 @@ struct SupportConversation: Codable, Identifiable, Hashable {
     let agentLastReadAt: String?
     let userTypingAt: String?
     let agentTypingAt: String?
+    let userDeletedAt: String?
+    let agentDeletedAt: String?
+
+    var isClosed: Bool { status == "closed" }
 }
 
 struct SupportMessage: Codable, Identifiable, Hashable {
