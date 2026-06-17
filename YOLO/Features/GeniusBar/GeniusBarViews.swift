@@ -162,6 +162,8 @@ struct GeniusBarHomeView: View {
             Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
         }
         .padding(12)
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())  // make the whole row (incl. blank space) tappable, not just text/icons
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
         .opacity(history ? 0.7 : 1)
     }
@@ -193,6 +195,7 @@ struct GeniusBarHomeView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
+            .contentShape(Rectangle())  // whole card tappable, not just the avatar/text
             .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.ColorToken.borderLight, lineWidth: 1))
             .opacity(agent.isReachable ? 1 : 0.5)
         }
