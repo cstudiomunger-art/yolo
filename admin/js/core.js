@@ -395,6 +395,37 @@ App.uploadCityGuideAudioFile = async function uploadCityGuideAudioFile(file, gui
   return App.uploadStorageFile("audio-guides", path, file, App.normalizeAudioContentType(file));
 };
 
+/** Upload common/dialect phrase audio directly (→ audio-guides/phrases/{id}.ext). */
+App.uploadPhraseAudioFile = async function uploadPhraseAudioFile(file, phraseId) {
+  if (!phraseId) throw new Error("请先填写内容（生成 id）后再上传音频");
+  const ext = (file.name.split(".").pop() || "m4a").toLowerCase().replace(/[^a-z0-9]/g, "") || "m4a";
+  const path = `phrases/${phraseId}.${ext}`;
+  return App.uploadStorageFile("audio-guides", path, file, App.normalizeAudioContentType(file));
+};
+
+/** Bind phrase (common_phrases / dialect_phrases) direct audio upload. */
+App.setupPhraseAudioControls = function setupPhraseAudioControls(form, ctx = {}) {
+  const phAudioInput = App.formFileInput(form, "_ph_audio_upload");
+  if (!phAudioInput || phAudioInput.dataset.phraseAudioSetup === "1") return;
+  phAudioInput.dataset.phraseAudioSetup = "1";
+
+  const resolvePhraseId = () => form.querySelector('[name="id"]')?.value?.trim() || "";
+
+  App.bindAudioUploadInput(phAudioInput, {
+    form,
+    previewFieldKey: "audio_url",
+    onUpload: async (file) => {
+      const phraseId = resolvePhraseId();
+      if (!phraseId) throw new Error("请先填写中文/EN（生成 id）后再上传音频");
+      const audioUrl = await App.uploadPhraseAudioFile(file, phraseId);
+      form.dataset.pendingAudioUrl = audioUrl;
+      App.setAudioPreviewField(form, "audio_url", audioUrl);
+      App.showToast("音频已上传，请点击「保存」");
+      return { audioUrl };
+    },
+  });
+};
+
 /** Per-attraction audio guide list (city-hub + modals). */
 App.attractionGuidesCache = App.attractionGuidesCache || {};
 

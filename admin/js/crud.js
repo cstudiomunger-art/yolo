@@ -320,6 +320,24 @@
       delete form.dataset.pendingAudioUrl;
     }
 
+    if (ctx.table === "common_phrases" || ctx.table === "dialect_phrases") {
+      if (form?.dataset?.audioUploading === "1") {
+        throw new Error("音频仍在上传中，请稍候再保存");
+      }
+      const entityId = payload.id || row?.[meta.pk];
+      const pending = form?.dataset?.pendingAudioUrl?.trim();
+      if (pending) payload.audio_url = pending;
+      const audioUp = App.formFileInput(form, "_ph_audio_upload");
+      if (audioUp?.files?.[0]) {
+        if (!entityId) throw new Error("请先填写中文/EN（生成 id）后再上传音频");
+        payload.audio_url = await App.uploadPhraseAudioFile(audioUp.files[0], entityId);
+      }
+      delete form?.dataset?.pendingAudioUrl;
+      for (const key of Object.keys(payload)) {
+        if (key.startsWith("_")) delete payload[key];
+      }
+    }
+
     if (ctx.table === "city_guides") {
       if (form?.dataset?.audioUploading === "1") {
         throw new Error("音频仍在上传中，请稍候再保存");

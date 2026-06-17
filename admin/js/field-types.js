@@ -1364,12 +1364,15 @@
     }
 
     const subAreaUpload = form.querySelector('[name="_sa_audio_upload"]');
+    const phraseUpload = form.querySelector('[name="_ph_audio_upload"]');
     if (subAreaUpload && !subAreaUpload.closest(".sub-area-inline-form")) {
       App.setupSubAreaAudioControls(form, {
         ...ctx,
         row: ctx.subAreaRow,
         fixedAttractionId: ctx.fixedAttractionId,
       });
+    } else if (phraseUpload) {
+      App.setupPhraseAudioControls(form, ctx);
     } else {
       const cityGuideUpload = form.querySelector('[name="_cg_audio_upload"]');
       if (cityGuideUpload) {
