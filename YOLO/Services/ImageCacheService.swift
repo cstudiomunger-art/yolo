@@ -70,6 +70,20 @@ actor ImageCacheService {
         return await fetchAndStore(url: url, key: key, coverPath: normalized)
     }
 
+    /// Prime the cache with bytes already in hand (e.g. an image we just uploaded),
+    /// keyed by the same stable key its loader uses, so it renders from disk instantly
+    /// instead of round-tripping a signed URL + re-download.
+    func store(_ data: Data, forKey rawKey: String) {
+        let normalized = normalize(rawKey)
+        guard !normalized.isEmpty, UIImage(data: data) != nil else { return }
+        let key = cacheKey(for: normalized)
+        try? data.write(to: imageFileURL(key: key), options: .atomic)
+        let meta = Meta(savedAt: Date(), coverPath: normalized)
+        if let metaData = try? JSONCoding.makeEncoder().encode(meta) {
+            try? metaData.write(to: metaFileURL(key: key), options: .atomic)
+        }
+    }
+
     func removeAll() {
         guard let contents = try? FileManager.default.contentsOfDirectory(
             at: directory,

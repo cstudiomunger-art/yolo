@@ -531,12 +531,14 @@ private enum ChatImageCache {
 }
 
 /// Renders a private chat image, cached by storage path so scrolling it off and
-/// back on screen neither re-signs the URL nor re-downloads the bytes.
+/// back on screen neither re-signs the URL nor re-downloads the bytes. Tap to preview
+/// full screen.
 private struct ChatImageView: View {
     let path: String
     let service: SupportChatService
 
     @State private var image: UIImage?
+    @State private var showFullScreen = false
 
     init(path: String, service: SupportChatService) {
         self.path = path
@@ -552,13 +554,52 @@ private struct ChatImageView: View {
                 Image(uiImage: image).resizable().scaledToFill()
                     .frame(width: 180, height: 130)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .contentShape(RoundedRectangle(cornerRadius: 14))
+                    .onTapGesture { showFullScreen = true }
             } else {
-                RoundedRectangle(cornerRadius: 14).fill(Color.gray.opacity(0.15)).frame(width: 180, height: 130)
+                RoundedRectangle(cornerRadius: 14).fill(Color.gray.opacity(0.15))
+                    .frame(width: 180, height: 130)
+                    .overlay(ProgressView())
             }
         }
         .task(id: path) {
             if let mem = ChatImageCache.cached(path) { image = mem; return }
             image = await ChatImageCache.image(path: path, service: service)
+        }
+        .fullScreenCover(isPresented: $showFullScreen) {
+            if let image { ChatFullScreenImage(image: image) }
+        }
+    }
+}
+
+/// Full-screen chat image preview with pinch-zoom and double-tap. Uses the already
+/// loaded UIImage, so opening is instant (no re-download).
+private struct ChatFullScreenImage: View {
+    let image: UIImage
+    @Environment(\.dismiss) private var dismiss
+    @State private var scale: CGFloat = 1
+    @GestureState private var pinch: CGFloat = 1
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color.black.ignoresSafeArea()
+            Image(uiImage: image)
+                .resizable().scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .scaleEffect(scale * pinch)
+                .gesture(
+                    MagnificationGesture()
+                        .updating($pinch) { value, state, _ in state = value }
+                        .onEnded { value in scale = min(max(scale * value, 1), 4) }
+                )
+                .onTapGesture(count: 2) { withAnimation { scale = scale > 1 ? 1 : 2.5 } }
+                .ignoresSafeArea()
+            Button { dismiss() } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title)
+                    .foregroundStyle(.white.opacity(0.9))
+                    .padding()
+            }
         }
     }
 }

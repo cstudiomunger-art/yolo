@@ -335,6 +335,9 @@ final class SupportChatService {
         do {
             _ = try await client.storage.from("chat-images")
                 .upload(path, data: data, options: FileOptions(contentType: "image/jpeg", upsert: false))
+            // Prime the on-disk cache with the bytes we already have so the bubble shows
+            // instantly after send, instead of re-signing a URL and downloading it back.
+            await ImageCacheService.shared.store(data, forKey: path)
             let msg = NewMessage(
                 conversation_id: convId, sender_type: "user", sender_id: userId.uuidString.lowercased(),
                 body_original: nil, body_translated: nil, image_url: path
