@@ -64,14 +64,17 @@ struct HomeQuickAccessGrid: View {
                 Text(label)
                     .font(Theme.FontToken.inter(13, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
+                    .lineLimit(1)
                     .multilineTextAlignment(.leading)
                 Text(subtitle)
                     .font(Theme.FontToken.inter(10))
                     .foregroundStyle(Theme.ColorToken.textMuted)
+                    .lineLimit(2)
                     .multilineTextAlignment(.leading)
+                Spacer(minLength: 0)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
+            .frame(maxWidth: .infinity, minHeight: 124, maxHeight: 124, alignment: .topLeading)
             .overlay(
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
                     .stroke(Theme.ColorToken.border, lineWidth: 1)
