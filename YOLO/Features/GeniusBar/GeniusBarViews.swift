@@ -8,6 +8,7 @@ struct GeniusBarHomeView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var openChat = false
     @State private var starting = false
+    @State private var showHistory = false
 
     private var service: SupportChatService { appEnv.supportChat }
 
@@ -48,6 +49,7 @@ struct GeniusBarHomeView: View {
                 Task { await service.stopHomeRealtime() }
             }
             .navigationDestination(isPresented: $openChat) { GeniusBarChatView() }
+            .navigationDestination(isPresented: $showHistory) { GeniusBarHistoryView() }
         }
     }
 
@@ -86,9 +88,27 @@ struct GeniusBarHomeView: View {
                 conversationSection("进行中 · 继续聊", convs: service.activeConversations, history: false)
             }
             if !service.historyConversations.isEmpty {
-                conversationSection("历史会话 · 只读", convs: service.historyConversations, history: true)
+                historyButton
             }
         }
+    }
+
+    private var historyButton: some View {
+        Button { showHistory = true } label: {
+            HStack(spacing: 11) {
+                Image(systemName: "clock.arrow.circlepath").font(.system(size: 17)).foregroundStyle(Theme.ColorToken.textSecondary)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("历史会话").font(Theme.FontToken.inter(13, weight: .medium))
+                    Text("查看已结束的对话记录").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+                }
+                Spacer()
+                Text("\(service.historyConversations.count)").font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
+                Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
+            }
+            .padding(12)
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
     }
 
     private func conversationSection(_ title: String, convs: [SupportConversation], history: Bool) -> some View {
@@ -227,6 +247,53 @@ struct GeniusBarHomeView: View {
             starting = false
             if service.conversation != nil { openChat = true }
         }
+    }
+}
+
+// MARK: - History (read-only list, left-swipe to delete)
+
+struct GeniusBarHistoryView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    @State private var openChat = false
+    private var service: SupportChatService { appEnv.supportChat }
+
+    var body: some View {
+        List {
+            if service.historyConversations.isEmpty {
+                Text("暂无历史会话")
+                    .font(Theme.FontToken.inter(13))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            } else {
+                ForEach(service.historyConversations) { conv in
+                    Button { Task { await service.openConversation(conv); openChat = true } } label: {
+                        HStack(spacing: 11) {
+                            Text(conv.priority == "emergency" ? "🆘" : "💬").font(.system(size: 18))
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(agentName(conv.agentId)).font(Theme.FontToken.inter(14, weight: .medium))
+                                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                                Text("已结束 · 查看记录").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
+                        }
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            Task { await service.deleteMyConversation(conv.id) }
+                        } label: { Label("删除", systemImage: "trash") }
+                    }
+                }
+            }
+        }
+        .listStyle(.plain)
+        .navigationTitle("历史会话")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $openChat) { GeniusBarChatView() }
+    }
+
+    private func agentName(_ agentId: String?) -> String {
+        guard let agentId, let a = service.agents.first(where: { $0.id == agentId }) else { return "客服" }
+        return a.name
     }
 }
 
