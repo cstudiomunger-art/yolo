@@ -15,6 +15,26 @@ actor ImageCacheService {
         directory = OfflineCacheLocations.imagesDirectory
     }
 
+    /// Loads an image by its full remote URL (e.g. a Supabase public avatar URL);
+    /// returns disk image immediately when available, refreshes in background when stale.
+    func image(remoteURLString: String) async -> UIImage? {
+        let normalized = normalize(remoteURLString)
+        guard !normalized.isEmpty, let url = URL(string: normalized) else { return nil }
+
+        let key = cacheKey(for: normalized)
+        let imageURL = imageFileURL(key: key)
+        let metaURL = metaFileURL(key: key)
+
+        if let disk = loadImage(from: imageURL) {
+            if isStale(metaURL: metaURL) {
+                Task { _ = await self.fetchAndStore(url: url, key: key, coverPath: normalized) }
+            }
+            return disk
+        }
+
+        return await fetchAndStore(url: url, key: key, coverPath: normalized)
+    }
+
     /// Loads cover by CMS path; returns disk image immediately when available, refreshes in background when stale.
     func image(coverPath: String) async -> UIImage? {
         let normalized = normalize(coverPath)
@@ -114,5 +134,28 @@ actor ImageCacheService {
         } catch {
             return loadImage(from: imageFileURL(key: key))
         }
+    }
+}
+
+/// Fast, synchronous in-memory cache for the signed-in user's avatar, shared by
+/// every screen that shows it (home header, profile sheet, edit screen) so they
+/// all display the exact same image with no flicker. Backed by `ImageCacheService`
+/// for disk persistence across launches.
+enum AvatarImageCache {
+    private static let memory = NSCache<NSString, UIImage>()
+
+    /// Synchronous lookup — used to seed a view's initial state and avoid a flash of initials.
+    static func cached(_ urlString: String) -> UIImage? {
+        memory.object(forKey: urlString as NSString)
+    }
+
+    /// Returns the avatar from memory, then disk, then network — caching it in memory for reuse.
+    static func image(for urlString: String) async -> UIImage? {
+        if let mem = cached(urlString) { return mem }
+        guard let image = await ImageCacheService.shared.image(remoteURLString: urlString) else {
+            return nil
+        }
+        memory.setObject(image, forKey: urlString as NSString)
+        return image
     }
 }

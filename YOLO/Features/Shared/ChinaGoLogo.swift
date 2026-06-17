@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ChinaGoLogo: View {
     var lightOnDark: Bool = false
@@ -21,6 +22,20 @@ struct ProfileAvatarButton: View {
     var size: CGFloat = 30
     let action: () -> Void
 
+    @State private var loadedImage: UIImage?
+
+    init(avatarUrl: String?, displayName: String? = nil, size: CGFloat = 30, action: @escaping () -> Void) {
+        self.avatarUrl = avatarUrl
+        self.displayName = displayName
+        self.size = size
+        self.action = action
+        // Seed from the shared memory cache so an already-loaded avatar shows
+        // instantly (no flash of initials) and matches every other screen.
+        if let avatarUrl, !avatarUrl.isEmpty, let mem = AvatarImageCache.cached(avatarUrl) {
+            _loadedImage = State(initialValue: mem)
+        }
+    }
+
     var body: some View {
         Button(action: action) {
             avatarContent
@@ -28,24 +43,28 @@ struct ProfileAvatarButton: View {
                 .clipShape(Circle())
         }
         .buttonStyle(.plain)
+        .task(id: avatarUrl) { await load() }
     }
 
     @ViewBuilder
     private var avatarContent: some View {
-        if let urlString = avatarUrl,
-           !urlString.isEmpty,
-           let url = URL(string: urlString) {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let image):
-                    image.resizable().scaledToFill()
-                default:
-                    initialsView
-                }
-            }
+        if let loadedImage {
+            Image(uiImage: loadedImage).resizable().scaledToFill()
         } else {
             initialsView
         }
+    }
+
+    private func load() async {
+        guard let urlString = avatarUrl, !urlString.isEmpty else {
+            loadedImage = nil
+            return
+        }
+        if let mem = AvatarImageCache.cached(urlString) {
+            loadedImage = mem
+            return
+        }
+        loadedImage = await AvatarImageCache.image(for: urlString)
     }
 
     private var initialsView: some View {

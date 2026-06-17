@@ -184,10 +184,15 @@ struct EditProfileView: View {
                 .from("avatars")
                 .upload(path, data: jpegData, options: FileOptions(contentType: "image/jpeg", upsert: true))
 
-            let publicURL = try SupabaseManager.shared.storage
+            // The storage path is fixed (userId/avatar.jpg, upsert), so the public
+            // URL is identical across re-uploads. Append a version query so every
+            // cache layer (our disk/memory cache + URLSession) treats a new upload
+            // as a new image and all screens refresh immediately.
+            let baseURL = try SupabaseManager.shared.storage
                 .from("avatars")
                 .getPublicURL(path: path)
                 .absoluteString
+            let publicURL = "\(baseURL)?v=\(Int(Date().timeIntervalSince1970))"
 
             appEnv.preferences.avatarUrl = publicURL
             appEnv.preferences.avatarStatus = "approved"
