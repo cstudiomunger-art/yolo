@@ -423,7 +423,7 @@ struct GeniusBarChatView: View {
             Text("结束后会进入「历史会话」，需要时可再次咨询（开启新会话）。")
         }
         .task { await resolveIntent() }
-        .onDisappear { service.stopPolling() }
+        .onDisappear { Task { await service.leaveConversation() } }
         .onChange(of: photoItem) { _, item in
             guard let item else { return }
             Task {

@@ -215,6 +215,13 @@ final class SupportChatService {
         do {
             let row: SupportConversation = try await client.from("support_conversations")
                 .insert(payload).select().single().execute().value
+            // User backed out of the chat while we were creating it (the .task that
+            // drives this was cancelled) — discard the empty thread, don't start polling.
+            if Task.isCancelled {
+                conversation = nil
+                await discardEmpty(row.id, userId: uid)
+                return
+            }
             conversation = row
             await loadMessages()
             startPolling()
@@ -490,6 +497,26 @@ final class SupportChatService {
         pollTask?.cancel()
         pollTask = nil
         Task { [weak self] in await self?.stopRealtime() }
+    }
+
+    /// Called when the user leaves the chat screen. Stops live updates, and if they
+    /// opened the conversation but never sent a message, deletes the empty thread so it
+    /// doesn't clutter the inbox / agent console.
+    func leaveConversation() async {
+        let conv = conversation
+        let empty = messages.isEmpty
+        stopPolling()
+        guard let conv, empty else { return }
+        conversation = nil
+        messages = []
+        await discardEmpty(conv.id, userId: conv.userId)
+    }
+
+    /// Remove a just-created/empty conversation (server re-verifies zero messages +
+    /// ownership) and refresh the inbox so it disappears immediately.
+    private func discardEmpty(_ convId: String, userId uid: String) async {
+        _ = try? await client.rpc("delete_empty_conversation", params: ["conv": convId]).execute()
+        if let userId = UUID(uuidString: uid) { await loadMyConversations(userId: userId) }
     }
 }
 
