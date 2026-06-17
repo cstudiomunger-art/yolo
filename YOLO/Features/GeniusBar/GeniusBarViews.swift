@@ -114,6 +114,8 @@ struct GeniusBarHomeView: View {
                 Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
             }
             .padding(12)
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())  // whole button (incl. blank space) tappable, not just text/icons
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
         }
         .buttonStyle(.plain)
