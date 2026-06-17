@@ -128,6 +128,9 @@
       case "ref_visa_policy":
         inner = App.renderRefVisaPolicySelect(name, value, field);
         break;
+      case "payment_match":
+        inner = App.renderPaymentMatch(name, value);
+        break;
       case "ref_cities_multi":
         inner = App.renderRefCitiesMulti(name, value);
         break;
@@ -301,6 +304,43 @@
       html += `<option value="${App.escapeHtml(p.policy_key)}" ${value === p.policy_key ? "selected" : ""}>${App.escapeHtml(label)}</option>`;
     });
     html += `</select>`;
+    return html;
+  };
+
+  // Structured editor for payment_advice_rules.match_json:
+  //   { country?: string[], cards_exclude?: string[], trip?: 'city'|'both'|'remote' }
+  App.renderPaymentMatch = function renderPaymentMatch(name, value) {
+    const v = value && typeof value === "object" ? value : {};
+    const countries = (Array.isArray(v.country) ? v.country : []).map((c) => String(c).toUpperCase());
+    const cards = Array.isArray(v.cards_exclude) ? v.cards_exclude : [];
+    const trip = v.trip || "";
+    const cardOpts = [["visa", "Visa"], ["mc", "Mastercard"], ["jcb", "JCB"], ["unionpay", "银联 UnionPay"], ["amex", "Amex"]];
+
+    let html = `<div class="checkbox-grid" data-name="${name}" data-payment-match="1">`;
+
+    html += `<div class="checkbox-group" data-pm="country" style="width:100%"><span class="checkbox-group-label">国家 country（不选 = 对所有国家显示）</span>`;
+    (App.refCache.countries || []).forEach((c) => {
+      const code = String(c.code).toUpperCase();
+      const checked = countries.includes(code) ? "checked" : "";
+      html += `<label class="checkbox-chip"><input type="checkbox" value="${App.escapeHtml(c.code)}" ${checked} /> ${App.escapeHtml(`${c.flag || ""} ${c.name}`)}</label>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="checkbox-group" data-pm="cards" style="width:100%"><span class="checkbox-group-label">用户「没有」这些卡时才显示 cards_exclude（不选 = 不限）</span>`;
+    cardOpts.forEach(([val, label]) => {
+      const checked = cards.includes(val) ? "checked" : "";
+      html += `<label class="checkbox-chip"><input type="checkbox" value="${val}" ${checked} /> ${label}</label>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="checkbox-group" style="width:100%"><span class="checkbox-group-label">行程类型 trip（不选 = 不限）</span>`;
+    html += `<select data-pm="trip"><option value="">不限</option>`;
+    [["city", "大城市为主"], ["both", "城市 + 乡村"], ["remote", "主要偏远"]].forEach(([val, label]) => {
+      html += `<option value="${val}" ${trip === val ? "selected" : ""}>${label}</option>`;
+    });
+    html += `</select></div>`;
+
+    html += `</div>`;
     return html;
   };
 
@@ -868,6 +908,19 @@
       case "json": {
         const raw = el?.value?.trim() || "[]";
         return JSON.parse(raw);
+      }
+      case "payment_match": {
+        const box = form.querySelector(`[data-name="${field.key}"][data-payment-match]`);
+        if (!box) return {};
+        const country = App.$$(`[data-pm="country"] input:checked`, box).map((i) => i.value);
+        const cards = App.$$(`[data-pm="cards"] input:checked`, box).map((i) => i.value);
+        const tripSel = box.querySelector(`[data-pm="trip"]`);
+        const trip = tripSel ? tripSel.value : "";
+        const out = {};
+        if (country.length) out.country = country;
+        if (cards.length) out.cards_exclude = cards;
+        if (trip) out.trip = trip;
+        return out;
       }
       case "richtext":
         return App.readRichTextValue(form, field.key) || null;

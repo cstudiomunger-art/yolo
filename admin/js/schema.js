@@ -917,7 +917,7 @@
           { value: "card", label: "绑卡" },
           { value: "cash", label: "现金" },
         ] },
-        { key: "match_json", type: "json", label: "匹配条件 JSON", hint: '如 {"country":["IN","BR"]} / {"cards_exclude":["visa","mc","jcb"]} / {"trip":"remote"}' },
+        { key: "match_json", type: "payment_match", label: "匹配条件（不选任何项 = 对所有人显示）" },
         { key: "severity", type: "enum", label: "级别", options: [
           { value: "ok", label: "OK" },
           { value: "warn", label: "警告" },
