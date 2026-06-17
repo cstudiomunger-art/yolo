@@ -130,6 +130,11 @@ struct MainTabView: View {
                 }
             }
         }
+        .task {
+            // Register for push as soon as the main app is shown (post-auth), so users
+            // get notified even if they never open Genius Bar manually.
+            appEnv.enablePushRegistration()
+        }
     }
 
     @ViewBuilder

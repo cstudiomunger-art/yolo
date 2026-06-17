@@ -1,4 +1,5 @@
 import UIKit
+import UserNotifications
 
 /// Holds the latest APNs device token and notifies when it arrives. Registration
 /// degrades gracefully: without the Push Notifications capability + an APNs key,
@@ -14,7 +15,21 @@ final class PushTokenStore {
     }
 }
 
-final class YOLOAppDelegate: NSObject, UIApplicationDelegate {
+/// Routes a tapped support notification to the chat. Set by AppEnvironment.
+final class PushRouter {
+    static let shared = PushRouter()
+    var onOpenChat: (() -> Void)?
+}
+
+final class YOLOAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+
     func application(
         _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
@@ -28,5 +43,24 @@ final class YOLOAppDelegate: NSObject, UIApplicationDelegate {
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
         // No APNs entitlement yet (or simulator) — push stays disabled, chat still works.
+    }
+
+    // Foreground: show the banner + sound even while the app is open.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound, .badge])
+    }
+
+    // Tap a support notification → open Genius Bar.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        Task { @MainActor in PushRouter.shared.onOpenChat?() }
+        completionHandler()
     }
 }

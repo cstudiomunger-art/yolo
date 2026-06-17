@@ -136,6 +136,8 @@ final class AppEnvironment {
             guard let self, let uid = self.auth.userId else { return }
             Task { await self.supportChat.registerDeviceToken(token, userId: uid) }
         }
+        // Tapping a support push opens Genius Bar.
+        PushRouter.shared.onOpenChat = { [weak self] in self?.navigation.presentGeniusBar() }
         UIApplication.shared.registerForRemoteNotifications()
         if let token = PushTokenStore.shared.token, let uid = auth.userId {
             Task { await supportChat.registerDeviceToken(token, userId: uid) }
