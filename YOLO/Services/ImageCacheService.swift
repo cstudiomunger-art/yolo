@@ -35,6 +35,19 @@ actor ImageCacheService {
         return await fetchAndStore(url: url, key: key, coverPath: normalized)
     }
 
+    /// Loads an image cached under an arbitrary stable `key` (e.g. a private
+    /// storage path whose signed download URL changes each time). Disk-first;
+    /// on a miss it resolves the URL via `fetch` and stores the bytes. Content
+    /// is treated as immutable for the key, so no TTL refresh.
+    func image(key rawKey: String, fetch: () async -> URL?) async -> UIImage? {
+        let normalized = normalize(rawKey)
+        guard !normalized.isEmpty else { return nil }
+        let key = cacheKey(for: normalized)
+        if let disk = loadImage(from: imageFileURL(key: key)) { return disk }
+        guard let url = await fetch() else { return nil }
+        return await fetchAndStore(url: url, key: key, coverPath: normalized)
+    }
+
     /// Loads cover by CMS path; returns disk image immediately when available, refreshes in background when stale.
     func image(coverPath: String) async -> UIImage? {
         let normalized = normalize(coverPath)

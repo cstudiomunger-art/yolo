@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import UIKit
 
 // MARK: - Home (pick a human)
 
@@ -213,20 +214,13 @@ struct GeniusBarHomeView: View {
 
     @ViewBuilder
     private func agentAvatar(_ agent: SupportAgent, size: CGFloat) -> some View {
-        if let urlStr = agent.avatarUrl, !urlStr.isEmpty, let url = URL(string: urlStr) {
-            AsyncImage(url: url) { img in
-                img.resizable().scaledToFill()
-            } placeholder: {
-                Circle().fill(Theme.ColorToken.backgroundSubtle)
-            }
-            .frame(width: size, height: size)
-            .clipShape(Circle())
-        } else {
+        CachedAvatarImage(urlString: agent.avatarUrl) {
             Circle().fill(LinearGradient(colors: [Theme.ColorToken.accent, Theme.ColorToken.textPrimary], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .frame(width: size, height: size)
                 .overlay(Text(agent.avatarSeed.isEmpty ? String(agent.name.prefix(1)) : agent.avatarSeed)
                     .font(Theme.FontToken.playfair(20, weight: .bold)).foregroundStyle(.white))
         }
+        .frame(width: size, height: size)
+        .clipShape(Circle())
     }
 
     private func statusColor(_ s: String) -> Color {
@@ -486,24 +480,53 @@ struct GeniusBarChatView: View {
     }
 }
 
-/// Resolves a signed URL for a private chat image and renders it.
+/// In-memory cache for private chat images, keyed by stable storage path (the
+/// signed download URL changes every time, so it can't be the cache key).
+private enum ChatImageCache {
+    private static let memory = NSCache<NSString, UIImage>()
+
+    static func cached(_ path: String) -> UIImage? { memory.object(forKey: path as NSString) }
+
+    static func image(path: String, service: SupportChatService) async -> UIImage? {
+        if let mem = cached(path) { return mem }
+        // Disk-first via ImageCacheService; only sign a fresh URL on a cache miss.
+        let image = await ImageCacheService.shared.image(key: path) {
+            await service.signedImageURL(for: path)
+        }
+        if let image { memory.setObject(image, forKey: path as NSString) }
+        return image
+    }
+}
+
+/// Renders a private chat image, cached by storage path so scrolling it off and
+/// back on screen neither re-signs the URL nor re-downloads the bytes.
 private struct ChatImageView: View {
     let path: String
     let service: SupportChatService
-    @State private var url: URL?
+
+    @State private var image: UIImage?
+
+    init(path: String, service: SupportChatService) {
+        self.path = path
+        self.service = service
+        if let mem = ChatImageCache.cached(path) {
+            _image = State(initialValue: mem)
+        }
+    }
 
     var body: some View {
         Group {
-            if let url {
-                AsyncImage(url: url) { img in
-                    img.resizable().scaledToFill()
-                } placeholder: { Color.gray.opacity(0.15) }
-                .frame(width: 180, height: 130)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+            if let image {
+                Image(uiImage: image).resizable().scaledToFill()
+                    .frame(width: 180, height: 130)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
             } else {
                 RoundedRectangle(cornerRadius: 14).fill(Color.gray.opacity(0.15)).frame(width: 180, height: 130)
             }
         }
-        .task { url = await service.signedImageURL(for: path) }
+        .task(id: path) {
+            if let mem = ChatImageCache.cached(path) { image = mem; return }
+            image = await ChatImageCache.image(path: path, service: service)
+        }
     }
 }

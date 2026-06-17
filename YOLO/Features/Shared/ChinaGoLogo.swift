@@ -16,55 +16,53 @@ struct ChinaGoLogo: View {
     }
 }
 
+/// Loads a remote avatar through the shared `AvatarImageCache` (memory + disk)
+/// so the same image shows instantly and identically across every screen, with
+/// no flash of the `placeholder`. Reused by the user avatar, agent avatars, etc.
+struct CachedAvatarImage<Placeholder: View>: View {
+    let urlString: String?
+    @ViewBuilder let placeholder: () -> Placeholder
+
+    @State private var image: UIImage?
+
+    init(urlString: String?, @ViewBuilder placeholder: @escaping () -> Placeholder) {
+        self.urlString = urlString
+        self.placeholder = placeholder
+        // Seed synchronously from memory to avoid a one-frame flash of the placeholder.
+        if let urlString, !urlString.isEmpty, let mem = AvatarImageCache.cached(urlString) {
+            _image = State(initialValue: mem)
+        }
+    }
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image).resizable().scaledToFill()
+            } else {
+                placeholder()
+            }
+        }
+        .task(id: urlString) {
+            guard let urlString, !urlString.isEmpty else { image = nil; return }
+            if let mem = AvatarImageCache.cached(urlString) { image = mem; return }
+            image = await AvatarImageCache.image(for: urlString)
+        }
+    }
+}
+
 struct ProfileAvatarButton: View {
     var avatarUrl: String?
     var displayName: String?
     var size: CGFloat = 30
     let action: () -> Void
 
-    @State private var loadedImage: UIImage?
-
-    init(avatarUrl: String?, displayName: String? = nil, size: CGFloat = 30, action: @escaping () -> Void) {
-        self.avatarUrl = avatarUrl
-        self.displayName = displayName
-        self.size = size
-        self.action = action
-        // Seed from the shared memory cache so an already-loaded avatar shows
-        // instantly (no flash of initials) and matches every other screen.
-        if let avatarUrl, !avatarUrl.isEmpty, let mem = AvatarImageCache.cached(avatarUrl) {
-            _loadedImage = State(initialValue: mem)
-        }
-    }
-
     var body: some View {
         Button(action: action) {
-            avatarContent
+            CachedAvatarImage(urlString: avatarUrl) { initialsView }
                 .frame(width: size, height: size)
                 .clipShape(Circle())
         }
         .buttonStyle(.plain)
-        .task(id: avatarUrl) { await load() }
-    }
-
-    @ViewBuilder
-    private var avatarContent: some View {
-        if let loadedImage {
-            Image(uiImage: loadedImage).resizable().scaledToFill()
-        } else {
-            initialsView
-        }
-    }
-
-    private func load() async {
-        guard let urlString = avatarUrl, !urlString.isEmpty else {
-            loadedImage = nil
-            return
-        }
-        if let mem = AvatarImageCache.cached(urlString) {
-            loadedImage = mem
-            return
-        }
-        loadedImage = await AvatarImageCache.image(for: urlString)
     }
 
     private var initialsView: some View {
