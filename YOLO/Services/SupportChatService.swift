@@ -142,6 +142,7 @@ final class SupportChatService {
         await loadMessages()
         await markRead(conv.id)
         startPolling()
+        subscribeRealtime()
     }
 
     /// Mark the active conversation read by the user (clears its unread badge).
@@ -202,6 +203,7 @@ final class SupportChatService {
             conversation = row
             await loadMessages()
             startPolling()
+            subscribeRealtime()
         } catch {
             lastError = error.localizedDescription
         }
@@ -327,22 +329,62 @@ final class SupportChatService {
         }
     }
 
-    // MARK: - Polling
+    // MARK: - Realtime + polling fallback
+
+    @ObservationIgnored private var rtChannel: RealtimeChannelV2?
+    @ObservationIgnored private var rtTasks: [Task<Void, Never>] = []
+
+    /// Subscribe to live postgres changes for the active conversation. RLS limits events
+    /// to rows this user may see. Polling (below) stays as a low-frequency safety net.
+    private func subscribeRealtime() {
+        Task { [weak self] in await self?.startRealtime() }
+    }
+
+    private func startRealtime() async {
+        guard AppConfig.isSupabaseConfigured else { return }
+        await stopRealtime()
+        let channel = client.channel("support-chat-rt")
+        let inserts = channel.postgresChange(InsertAction.self, schema: "public", table: "support_messages")
+        let updates = channel.postgresChange(UpdateAction.self, schema: "public", table: "support_messages")
+        let convs = channel.postgresChange(UpdateAction.self, schema: "public", table: "support_conversations")
+        try? await channel.subscribeWithError()
+        rtChannel = channel
+        rtTasks = [
+            Task { [weak self] in for await _ in inserts { await self?.onIncomingMessageChange() } },
+            Task { [weak self] in for await _ in updates { await self?.loadMessages() } },
+            Task { [weak self] in for await _ in convs { await self?.refreshConversationMeta() } },
+        ]
+    }
+
+    private func onIncomingMessageChange() async {
+        await loadMessages()
+        await markReadCurrent()
+    }
+
+    private func stopRealtime() async {
+        rtTasks.forEach { $0.cancel() }
+        rtTasks = []
+        if let ch = rtChannel { await client.realtimeV2.removeChannel(ch) }
+        rtChannel = nil
+    }
 
     private func startPolling() {
         pollTask?.cancel()
         pollTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                // Realtime is primary; this is a 15s safety net (missed events / reconnect).
+                try? await Task.sleep(nanoseconds: 15_000_000_000)
                 if Task.isCancelled { break }
                 await self?.loadMessages()
                 await self?.refreshConversationMeta()
+                await self?.markReadCurrent()
             }
         }
     }
 
-    /// Refresh the active conversation row for the agent's typing marker; keeps the
-    /// user's read marker current while the chat is open.
+    /// Refresh the active conversation row for the agent's typing marker. Must NOT write
+    /// (a write would re-trigger the realtime conversation-update handler → loop); read marker
+    /// is updated separately in markReadCurrent / on new messages.
     private func refreshConversationMeta() async {
         guard let id = conversation?.id else { return }
         let rows: [SupportConversation] = (try? await client.from("support_conversations")
@@ -351,12 +393,16 @@ final class SupportChatService {
             conversation = c
             agentIsTyping = ChatDate.isRecent(c.agentTypingAt)
         }
-        await markRead(id)
+    }
+
+    private func markReadCurrent() async {
+        if let id = conversation?.id { await markRead(id) }
     }
 
     func stopPolling() {
         pollTask?.cancel()
         pollTask = nil
+        Task { [weak self] in await self?.stopRealtime() }
     }
 }
 

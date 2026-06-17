@@ -138,6 +138,7 @@
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
     });
     let agent = null, activeConv = null, pollTimer = null;
+    let listChannel = null, msgChannel = null;
     let statusFilter = "open";
     const notified = {};          // conversation_id → last notified message id
     let audioCtx = null;
@@ -198,7 +199,28 @@
       $("segOpen").onclick = () => { statusFilter = "open"; $("segOpen").classList.add("on"); $("segClosed").classList.remove("on"); loadConversations(); };
       $("segClosed").onclick = () => { statusFilter = "closed"; $("segClosed").classList.add("on"); $("segOpen").classList.remove("on"); loadConversations(); };
       await loadConversations();
-      pollTimer = setInterval(tick, 3000);
+      subscribeListRealtime();
+      pollTimer = setInterval(tick, 15000);   // realtime primary; 15s safety net
+    }
+
+    // Realtime: list of conversations + any message (RLS limits to this agent's rows).
+    function subscribeListRealtime(){
+      if (listChannel) sb.removeChannel(listChannel);
+      listChannel = sb.channel("support-list-rt")
+        .on("postgres_changes", { event:"*", schema:"public", table:"support_conversations" }, () => loadConversations())
+        .on("postgres_changes", { event:"*", schema:"public", table:"support_messages" }, () => loadConversations())
+        .subscribe();
+    }
+    function subscribeMsgRealtime(convId){
+      if (msgChannel) sb.removeChannel(msgChannel);
+      msgChannel = sb.channel("support-msg-" + convId)
+        .on("postgres_changes",
+            { event:"*", schema:"public", table:"support_messages", filter:`conversation_id=eq.${convId}` },
+            () => { loadMessages(); })
+        .on("postgres_changes",
+            { event:"*", schema:"public", table:"support_conversations", filter:`id=eq.${convId}` },
+            () => { refreshActive(); })
+        .subscribe();
     }
 
     function renderAgentAvatar(){
@@ -334,6 +356,7 @@
       await markAgentRead(c.id);
       await loadMessages();
       await loadConversations();
+      subscribeMsgRealtime(c.id);
     }
     $("backBtn").onclick = () => $("console").classList.remove("show-chat");
 
