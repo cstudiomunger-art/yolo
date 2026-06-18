@@ -18,6 +18,7 @@ struct AttractionDetailView: View {
     @State private var fullScreenImagePath: String?
     @State private var showAddToast = false
     @State private var showPaywall = false
+    @State private var copiedField: CopyField?
 
     private let subAreasAnchor = "exploreByArea"
 
@@ -216,20 +217,48 @@ struct AttractionDetailView: View {
                 Spacer(minLength: 8)
                 FavoriteAttractionButton(attraction: display)
             }
-            Text(display.chineseName)
-                .font(Theme.FontToken.inter(13))
-                .foregroundStyle(Theme.ColorToken.textMuted)
+            if !display.chineseName.isEmpty {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(display.chineseName)
+                        .font(Theme.FontToken.inter(13))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                    copyButton(text: display.chineseName, field: .name)
+                }
+            }
             if let en = display.addressEn, !en.isEmpty {
                 Text("📍 \(en)")
                     .font(Theme.FontToken.inter(12))
                     .foregroundStyle(Theme.ColorToken.textMuted)
             }
             if let zh = display.addressZh, !zh.isEmpty {
-                Text(zh)
-                    .font(Theme.FontToken.inter(12))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(zh)
+                        .font(Theme.FontToken.inter(12))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                    copyButton(text: zh, field: .address)
+                }
             }
         }
+    }
+
+    private enum CopyField { case name, address }
+
+    @ViewBuilder
+    private func copyButton(text: String, field: CopyField) -> some View {
+        Button {
+            UIPasteboard.general.string = text
+            withAnimation(.easeInOut(duration: 0.15)) { copiedField = field }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    if copiedField == field { copiedField = nil }
+                }
+            }
+        } label: {
+            Image(systemName: copiedField == field ? "checkmark" : "doc.on.doc")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(copiedField == field ? Color.green : Theme.ColorToken.accent)
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
