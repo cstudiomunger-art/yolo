@@ -118,6 +118,14 @@ struct ItineraryDetailView: View {
             guard !mode.isEditing else { return }
             Task { await loadAttractionCache() }
         }
+        .onChange(of: segment) { _, _ in
+            // Hotels added in the Book tab persist to the store but not into the
+            // parent's editableDays; re-sync on tab switch so they show immediately.
+            guard !editMode.isEditing else { return }
+            if let saved = appEnv.preferences.savedItineraries.first(where: { $0.id == itinerary.id }) {
+                editableDays = saved.days
+            }
+        }
         .sheet(item: $addAttractionContext) { ctx in
             PlanAttractionPickerSheet(cityIds: ctx.cityIds, dayIndex: ctx.dayIndex) { attraction in
                 appendAttraction(attraction, dayIndex: ctx.dayIndex)
