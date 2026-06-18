@@ -162,19 +162,21 @@ struct PlanCreateFlowView: View {
                 Button {
                     toggleCity(city.id)
                 } label: {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(city.emoji ?? "📍")
-                            .font(.title2)
-                        Text(city.name)
-                            .font(Theme.FontToken.inter(13, weight: .medium))
-                            .foregroundStyle(Theme.ColorToken.textPrimary)
-                            .lineLimit(1)
-                        Text(city.chineseName)
-                            .font(Theme.FontToken.inter(10))
-                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    VStack(alignment: .leading, spacing: 0) {
+                        cityCover(city)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(city.name)
+                                .font(Theme.FontToken.inter(13, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.textPrimary)
+                                .lineLimit(1)
+                            Text(city.chineseName)
+                                .font(Theme.FontToken.inter(10))
+                                .foregroundStyle(Theme.ColorToken.textMuted)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
                     .background(
                         selectedCityIds.contains(city.id)
                             ? Theme.ColorToken.backgroundSubtle
@@ -191,6 +193,22 @@ struct PlanCreateFlowView: View {
                 }
                 .buttonStyle(.plain)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func cityCover(_ city: City) -> some View {
+        if let path = city.coverImagePath?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !path.isEmpty {
+            CoverImageView(path: path, height: 88, cornerRadius: 0)
+        } else {
+            ZStack {
+                Theme.ColorToken.backgroundSubtle
+                Text(city.emoji ?? "📍")
+                    .font(.system(size: 30))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 88)
         }
     }
 
