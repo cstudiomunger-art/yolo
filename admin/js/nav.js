@@ -60,10 +60,9 @@
     },
     {
       id: "visa",
-      label: "签证与文化",
+      label: "文化",
       defaultExpanded: false,
       items: [
-        { kind: "table", table: "visa_rules", label: "签证规则（旧·回退）" },
         { kind: "table", table: "culture_tips", label: "文化贴士" },
       ],
     },
