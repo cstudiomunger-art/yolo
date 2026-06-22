@@ -1,112 +1,211 @@
 import Foundation
 
-// Data source for the on-device VisaPolicyEngine. All rows are CMS-managed and
-// decoded from Supabase with the client's convertFromSnakeCase strategy, so Swift
-// properties stay camelCase. Date columns are kept as "yyyy-MM-dd" strings and
-// parsed in the engine (avoids date-decoding pitfalls across PostgREST).
+// Data source + I/O contract for the on-device VisaPolicyEngine (Swift port of the
+// verified delivery-package engine.py). Rows are CMS-managed in the visa_*_v2 Supabase
+// tables and decoded with the client's convertFromSnakeCase strategy, so Swift
+// properties stay camelCase. Date columns are kept as "yyyy-MM-dd" strings and parsed
+// in the engine (avoids PostgREST date-decoding pitfalls).
 
-/// Policy framework row (P1 互免 / P2 单方面 / P3 240h过境 / P4 海南 / P5 团体 / L 兜底).
-struct VisaPolicy: Codable, Identifiable, Hashable {
-    var id: String { policyKey }
-    let policyKey: String
-    let priority: Int
-    let verdict: String          // "green" | "amber" | "red"
-    let maxStayDays: Int?
-    let areaScope: String        // "nationwide" | "transit_ports" | "hainan" | "group" | "none"
-    let clockRule: String?       // "entry_plus_30d" | "entry_plus_10d" | ...
-    let headlineEn: String?
-    let headlineZh: String?
+// MARK: - allowed_area (heterogeneous JSON: "national" or ["110000", ...])
+
+/// `policies.allowed_area` is either the literal string "national" or an array of
+/// GB/T 2260 admin codes (24h transit uses an empty array = port-zone only).
+enum AllowedArea: Codable, Hashable {
+    case national
+    case codes([String])
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        if let s = try? c.decode(String.self) {
+            self = (s == "national") ? .national : .codes([s])
+        } else {
+            self = .codes((try? c.decode([String].self)) ?? [])
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        switch self {
+        case .national: try c.encode("national")
+        case .codes(let a): try c.encode(a)
+        }
+    }
+
+    var isNational: Bool { if case .national = self { return true } else { return false } }
+}
+
+// MARK: - CMS rows (visa_*_v2 tables)
+
+/// Policy framework row (8 verified policies). Nationality-agnostic rule shape.
+struct VisaPolicyV2: Codable, Identifiable, Hashable {
+    let id: String                      // mutual_exempt / unilateral_30d / twov_240h / visa_L ...
+    let policyType: String
+    let nodeKind: String                // "computed" | "info" (visa_L fallback)
+    let universal: Bool                 // 1 → skip grant requirement (24h / cruise)
+    let officialNameZh: String
+    let officialNameEn: String
+    let onwardTicket: Bool
+    let onwardThirdCountry: Bool
+    let groupRequired: Bool
+    let entryPortLimited: Bool
+    let entryPorts: [String]?           // IATA / UN-LOCODE, nil = unrestricted
+    let exitPorts: [String]?            // 240h exit is restricted too
+    let entryMode: [String]?
+    let maxStayDefault: Int?
+    let maxStayUnit: String?            // "days" | "hours"
+    let clockRule: String?              // next_day_0000 | by_hour | entry_day
+    let allowedArea: AllowedArea
+    let passportValidityMonths: Int?
+    let priority: Int                   // tie/fallback order only — NOT the winner picker
+    let sourceUrl: String?
+    let lastVerified: String?
+
+    /// conditions_count contract = sum of the four restriction booleans.
+    var conditionsCount: Int {
+        (onwardTicket ? 1 : 0) + (onwardThirdCountry ? 1 : 0)
+            + (groupRequired ? 1 : 0) + (entryPortLimited ? 1 : 0)
+    }
 }
 
 /// Nationality × policy × validity window. Hit when entry date ∈ [effective, expiry].
-struct VisaPolicyGrant: Codable, Identifiable, Hashable {
+struct VisaGrantV2: Codable, Identifiable, Hashable {
     let id: String
-    let policyKey: String
+    let policyId: String
     let countryCode: String
-    let effectiveDate: String?   // "yyyy-MM-dd", nil = open start
-    let expiryDate: String?      // "yyyy-MM-dd", nil = no end
+    let effectiveDate: String?          // "yyyy-MM-dd", nil/1900-01-01 = no lower bound
+    let expiryDate: String?             // "yyyy-MM-dd", nil = no official end
     let maxStayOverride: Int?
 }
 
-/// City region tag for per-city re-check (mainland / hk / macao / special).
-struct CityVisaTag: Codable, Identifiable, Hashable {
+/// City dimension (GB/T 2260). `appCitySlug` maps the app's content-city ids in.
+struct VisaCityRow: Codable, Identifiable, Hashable {
     var id: String { cityId }
     let cityId: String
-    let regionType: String
-    let isPortOfEntry: Bool
-}
-
-/// Entry port with 240h-transit / Hainan flags.
-struct EntryPort: Codable, Identifiable, Hashable {
-    var id: String { portId }
-    let portId: String
-    let nameEn: String
     let nameZh: String
-    let cityId: String?
+    let nameEn: String
+    let regionType: String              // mainland | special
+    let isEntryPort: Bool
+    let isExitPort: Bool
     let transit240h: Bool
-    let isHainan: Bool
+    let appCitySlug: String?
 }
 
-/// Per-(nationality, region) override for the city re-check.
-struct VisaRuleOverride: Codable, Identifiable, Hashable {
-    let id: String
-    let countryCode: String
-    let regionType: String
-    let visaFree: Bool
-    let stayDays: Int?
+/// Derived city × policy feasibility (read-only; DB computes it, client never recalcs).
+struct CityPolicyFeas: Codable, Hashable {
+    let cityId: String
+    let policyId: String
+    let feasibility: String             // ok | no | permit_required
 }
 
-/// Bundle of all visa data the engine evaluates against (fetched + cached, or bundled).
+/// Overlay permit zone (e.g. Tibet 540000) — reachable but needs a permit.
+struct PermitZone: Codable, Hashable {
+    let adminCode: String
+    let name: String
+    let note: String?
+}
+
+/// Everything the engine evaluates against (fetched + cached, or bundled fallback).
 struct VisaDataSet: Codable, Equatable {
-    var policies: [VisaPolicy]
-    var grants: [VisaPolicyGrant]
-    var cityTags: [CityVisaTag]
-    var ports: [EntryPort]
-    var overrides: [VisaRuleOverride]
+    var policies: [VisaPolicyV2]
+    var grants: [VisaGrantV2]
+    var cities: [VisaCityRow]
+    var matrix: [CityPolicyFeas]
+    var permitZones: [PermitZone]
 
-    static let empty = VisaDataSet(policies: [], grants: [], cityTags: [], ports: [], overrides: [])
+    static let empty = VisaDataSet(policies: [], grants: [], cities: [], matrix: [], permitZones: [])
+
+    // MARK: City-code translation (single source of truth)
+
+    /// Translate an app content-city id ("shanghai") to its GB/T 2260 code ("310000").
+    func adminCode(forAppSlug slug: String) -> String? {
+        cities.first { $0.appCitySlug?.caseInsensitiveCompare(slug) == .orderedSame }?.cityId
+    }
+
+    func city(forAdminCode code: String) -> VisaCityRow? {
+        cities.first { $0.cityId == code }
+    }
+
+    /// Display label for an admin code (falls back to the raw code).
+    func cityName(forAdminCode code: String) -> String {
+        city(forAdminCode: code)?.nameZh ?? code
+    }
+
+    func policy(_ id: String) -> VisaPolicyV2? { policies.first { $0.id == id } }
 }
 
-// MARK: - Query & Verdict
+// MARK: - Engine input contract (delivery doc §2)
 
-/// "Third place" status of the onward leg (decides P3 240h transit eligibility).
-enum OnwardStatus: Equatable {
-    case undecided          // 还没定 → don't judge transit, only look at visa-free
-    case sameAsDeparture    // 往返同国 → not a third place
-    case thirdPlace         // 第三国/港澳 → eligible third place
-}
-
-/// Five hard inputs + trip cities. The trip is the object being judged, not an input.
+/// Six hard inputs + trip cities. The trip is the object being judged, not an input.
 struct VisaQuery: Equatable {
-    let countryCode: String      // passport nationality (ISO-2)
-    let departureCode: String?   // country/region code, nil = unknown
-    let onwardCode: String?      // country/region code, "HK"/"MO", or nil = 还没定
-    let onwardTicketed: Bool
-    let entryPortId: String?
-    let stayDays: Int
-    let entryDate: Date
-    let passportValidMonths: Int? // nil = 跳过 GATE0
-    let cities: [String]
+    let countryCode: String             // passport nationality (ISO-2)
+    let departure: String               // departure country
+    let onward: String?                 // next leg; nil/"undecided" = 未定
+    let entryPort: String?              // entry port code
+    let exitPort: String?               // exit port code (240h restricts exit too)
+    let entryAt: Date                   // precise entry datetime (clock start)
+    let plannedExitAt: Date             // planned departure
+    let cities: [String]                // GB/T 2260 admin codes
+    let ticketed: Bool                  // has an onward ticket
+    let group: Bool                     // entering with a tour group
+    let passportValidMonths: Int?       // GATE0 pre-check; nil = skip
+    let today: Date                     // freshness baseline
 }
 
-enum VisaVerdictColor: String, Equatable {
-    case green, amber, red
-}
+// MARK: - Engine output (four-dim health sheet + plan A/B)
 
-/// Engine output: enough / not-enough + which policy, secondary matches, blocker cities.
-struct VisaVerdict: Equatable {
-    let color: VisaVerdictColor
-    let policyKey: String         // hit policy, "GATE0" if passport too short, "L" if fallback
-    let maxStayDays: Int?
-    let areaScope: String
-    let headlineZh: String
-    /// Other policies the nationality also satisfies (e.g. "你也符合 P3，但 P2 限制更少").
-    let secondaryMatches: [String]
-    /// Cities not covered by the chosen policy → "不够用 · 拖累城市".
-    let blockers: [String]
+enum VisaLevel: String, Equatable { case green, amber, red }
+
+/// One policy's four-dimension health sheet (the V2 UI render structure).
+struct VisaSheet: Equatable, Identifiable {
+    var id: String { policyId }
+    let policyId: String
+    let pass: Bool
+
+    // space
+    let spaceOk: Bool
+    let blockers: [String]              // admin codes out of range
+    // time
+    let timeOk: Bool
+    let latestExitAt: Date?
     let latestExitDate: Date?
-    /// True for cases the engine won't hard-judge (double passport / unknown) → 问真人.
+    let overstayHours: Double
+    // port
+    let portOk: Bool
+    // condition
+    let conditionOk: Bool
+    let conditionReasons: [String]
+}
+
+/// A yellow-verdict option: shrink the trip to stay visa-free (A) or apply for an L visa (B).
+enum VisaPlan: Equatable, Identifiable {
+    /// Plan A — least change that closes the gap: swap blocker cities to same-province
+    /// reachable ones + tighten the planned exit to `newPlannedExitMax`.
+    case modify(policyId: String, swaps: [String: String?], newPlannedExitMax: Date?)
+    /// Plan B — keep the itinerary, apply for an L visa.
+    case applyVisa
+
+    var id: String {
+        switch self {
+        case .modify: return "A"
+        case .applyVisa: return "B"
+        }
+    }
+}
+
+/// Engine judgement: green/amber/red + chosen policy, also-eligible, plans, freshness.
+struct VisaRecommendation: Equatable {
+    let level: VisaLevel
+    let chosenPolicyId: String          // "GATE0" if passport too short
+    let alsoEligible: [String]          // other passing policy ids
+    let sheets: [VisaSheet]
+    let plans: [VisaPlan]
+    let blockers: [String]              // chosen sheet blockers (admin codes)
+    let latestExitDate: Date?
+    let maxStayDays: Int?
+    let freshness: VisaFreshness?
     let needsHumanReview: Bool
 
-    var isEnough: Bool { color != .red && blockers.isEmpty }
+    var isEnough: Bool { level != .red && blockers.isEmpty }
+
+    var chosenSheet: VisaSheet? { sheets.first { $0.policyId == chosenPolicyId } }
 }

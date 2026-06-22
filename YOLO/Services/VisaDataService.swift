@@ -2,10 +2,10 @@ import Foundation
 import Observation
 import Supabase
 
-/// Loads the `VisaDataSet` the on-device `VisaPolicyEngine` evaluates. Mirrors
-/// `PurchaseService.loadPlans`: Supabase is the source of truth; the last good fetch
-/// is cached so offline launches still judge against real config; an in-code bundled
-/// fallback is the last resort (fresh install, no network).
+/// Loads the `VisaDataSet` the on-device `VisaPolicyEngine` evaluates (verified v2
+/// delivery-package data). Mirrors `PurchaseService.loadPlans`: Supabase is the source
+/// of truth; the last good fetch is cached so offline launches still judge against real
+/// config; an in-code bundled subset is the last resort (fresh install, no network).
 @Observable
 @MainActor
 final class VisaDataService {
@@ -13,7 +13,7 @@ final class VisaDataService {
     private(set) var data: VisaDataSet = .empty
     private(set) var isLoading = false
 
-    private static let cacheKey = "yolohappy.cachedVisaDataSet.v1"
+    private static let cacheKey = "yolohappy.cachedVisaDataSet.v2"
 
     func load() async {
         guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else {
@@ -24,15 +24,14 @@ final class VisaDataService {
         defer { isLoading = false }
         do {
             let client = SupabaseManager.shared
-            async let policies: [VisaPolicy] = client.from("visa_policies").select().eq("is_active", value: true).execute().value
-            async let grants: [VisaPolicyGrant] = client.from("visa_policy_grants").select().eq("is_active", value: true).execute().value
-            async let cityTags: [CityVisaTag] = client.from("city_visa_tags").select().eq("is_active", value: true).execute().value
-            async let ports: [EntryPort] = client.from("entry_ports").select().eq("is_active", value: true).execute().value
-            async let overrides: [VisaRuleOverride] = client.from("visa_rule_overrides").select().eq("is_active", value: true).execute().value
+            async let policies: [VisaPolicyV2] = client.from("visa_policies_v2").select().eq("is_active", value: true).execute().value
+            async let grants: [VisaGrantV2] = client.from("visa_policy_grants_v2").select().eq("is_active", value: true).execute().value
+            async let cities: [VisaCityRow] = client.from("visa_cities").select().eq("is_active", value: true).execute().value
+            async let matrix: [CityPolicyFeas] = client.from("visa_city_policy_matrix").select().eq("is_active", value: true).execute().value
+            async let permits: [PermitZone] = client.from("visa_permit_zones").select().eq("is_active", value: true).execute().value
 
             let set = try await VisaDataSet(
-                policies: policies, grants: grants, cityTags: cityTags, ports: ports, overrides: overrides
-            )
+                policies: policies, grants: grants, cities: cities, matrix: matrix, permitZones: permits)
             if set.policies.isEmpty {
                 data = cached() ?? Self.bundledFallback
             } else {
@@ -44,9 +43,14 @@ final class VisaDataService {
         }
     }
 
-    /// Convenience: run a query against the currently-loaded data.
-    func evaluate(_ query: VisaQuery) -> VisaVerdict {
-        VisaPolicyEngine.evaluate(query, data: data)
+    /// Run a query against the currently-loaded data.
+    func evaluate(_ query: VisaQuery) -> VisaRecommendation {
+        VisaPolicyEngine.recommend(query, data: data)
+    }
+
+    /// Translate app content-city ids → GB/T 2260 codes (drops cities not in the维表).
+    func adminCodes(forAppSlugs slugs: [String]) -> [String] {
+        slugs.compactMap { data.adminCode(forAppSlug: $0) ?? (data.city(forAdminCode: $0) != nil ? $0 : nil) }
     }
 
     // MARK: - Cache
@@ -64,49 +68,73 @@ final class VisaDataService {
         return set
     }
 
-    // MARK: - Bundled fallback (mirrors migration 062 seed; verify with legal)
+    // MARK: - Bundled fallback (verified subset; full set comes from Supabase/cache)
 
     static let bundledFallback: VisaDataSet = {
-        let policies: [VisaPolicy] = [
-            VisaPolicy(policyKey: "P1", priority: 1, verdict: "green", maxStayDays: 30, areaScope: "nationwide", clockRule: "entry_plus_30d", headlineEn: "Mutual visa exemption", headlineZh: "互免协定 · 全程免签"),
-            VisaPolicy(policyKey: "P2", priority: 2, verdict: "green", maxStayDays: 30, areaScope: "nationwide", clockRule: "entry_plus_30d", headlineEn: "Unilateral 30-day visa-free", headlineZh: "单方面免签 30 天"),
-            VisaPolicy(policyKey: "P3", priority: 3, verdict: "amber", maxStayDays: 10, areaScope: "transit_ports", clockRule: "entry_plus_10d", headlineEn: "240h transit visa-free", headlineZh: "240 小时过境免签"),
-            VisaPolicy(policyKey: "P4", priority: 4, verdict: "amber", maxStayDays: 30, areaScope: "hainan", clockRule: "entry_plus_30d", headlineEn: "Hainan visa-free", headlineZh: "海南区域免签"),
-            VisaPolicy(policyKey: "P5", priority: 5, verdict: "amber", maxStayDays: nil, areaScope: "group", clockRule: nil, headlineEn: "Group tour visa-free", headlineZh: "团体免签"),
-            VisaPolicy(policyKey: "L", priority: 9, verdict: "red", maxStayDays: nil, areaScope: "none", clockRule: nil, headlineEn: "Tourist (L) visa required", headlineZh: "默认需办 L 旅游签证"),
-        ]
-        func grant(_ id: String, _ key: String, _ cc: String, _ eff: String? = nil, _ exp: String? = nil) -> VisaPolicyGrant {
-            VisaPolicyGrant(id: id, policyKey: key, countryCode: cc, effectiveDate: eff, expiryDate: exp, maxStayOverride: nil)
+        func pol(_ id: String, _ type: String, _ nameZh: String, universal: Bool = false,
+                 onwardTicket: Bool = false, onwardThird: Bool = false, group: Bool = false,
+                 portLimited: Bool = false, entryPorts: [String]? = nil, exitPorts: [String]? = nil,
+                 stay: Int?, unit: String, clock: String, area: AllowedArea, priority: Int,
+                 nodeKind: String = "computed") -> VisaPolicyV2 {
+            VisaPolicyV2(
+                id: id, policyType: type, nodeKind: nodeKind, universal: universal,
+                officialNameZh: nameZh, officialNameEn: id,
+                onwardTicket: onwardTicket, onwardThirdCountry: onwardThird, groupRequired: group,
+                entryPortLimited: portLimited, entryPorts: entryPorts, exitPorts: exitPorts, entryMode: nil,
+                maxStayDefault: stay, maxStayUnit: unit, clockRule: clock, allowedArea: area,
+                passportValidityMonths: 6, priority: priority,
+                sourceUrl: nil, lastVerified: "2026-06-22")
         }
-        let grants: [VisaPolicyGrant] = [
-            grant("p1_sg", "P1", "SG"),
-            grant("p2_gb", "P2", "GB", "2024-11-30", "2025-12-31"),
-            grant("p2_fr", "P2", "FR", "2024-11-30", "2025-12-31"),
-            grant("p2_de", "P2", "DE", "2024-11-30", "2025-12-31"),
-            grant("p2_jp", "P2", "JP", "2024-11-30", "2025-12-31"),
-            grant("p3_us", "P3", "US"), grant("p3_gb", "P3", "GB"), grant("p3_fr", "P3", "FR"),
-            grant("p3_de", "P3", "DE"), grant("p3_jp", "P3", "JP"), grant("p3_sg", "P3", "SG"),
-            grant("p4_us", "P4", "US"), grant("p4_gb", "P4", "GB"), grant("p4_fr", "P4", "FR"),
-            grant("p4_de", "P4", "DE"), grant("p4_jp", "P4", "JP"), grant("p4_sg", "P4", "SG"),
+        // 240h open ports (subset covering the bundled cities) + nationwide省/地级 area subset.
+        let p240Ports = ["PEK", "PKX", "PVG", "SHA", "HGH", "CTU", "TFU", "XIY", "CAN", "SZX"]
+        let p240Area = AllowedArea.codes(["110000", "310000", "320000", "330000", "510100", "610000"])
+        let policies: [VisaPolicyV2] = [
+            pol("mutual_exempt", "互免", "互免签证", stay: 30, unit: "days", clock: "next_day_0000", area: .national, priority: 10),
+            pol("hainan_30d", "区域免签", "海南免签", portLimited: true, entryPorts: ["HAK", "SYX"], exitPorts: ["HAK", "SYX"], stay: 30, unit: "days", clock: "next_day_0000", area: .codes(["460000"]), priority: 15),
+            pol("unilateral_30d", "单方面免签", "单方面免签", stay: 30, unit: "days", clock: "next_day_0000", area: .national, priority: 20),
+            pol("twov_24h", "过境免签", "24小时过境免签", universal: true, onwardTicket: true, onwardThird: true, stay: 24, unit: "hours", clock: "by_hour", area: .codes([]), priority: 25),
+            pol("twov_240h", "过境免签", "240小时过境免签", onwardTicket: true, onwardThird: true, portLimited: true, entryPorts: p240Ports, exitPorts: p240Ports, stay: 240, unit: "hours", clock: "next_day_0000", area: p240Area, priority: 30),
+            pol("group_asean_xsbn", "团体免签", "东盟旅游团西双版纳免签", group: true, portLimited: true, entryPorts: ["JHG", "CNMHN", "MOHAN"], exitPorts: ["JHG", "CNMHN", "MOHAN"], stay: 6, unit: "days", clock: "next_day_0000", area: .codes(["532800"]), priority: 35),
+            pol("cruise_15d", "团体免签", "邮轮团免签", universal: true, group: true, portLimited: true, entryPorts: ["CNSHA", "CNTSN"], exitPorts: ["CNSHA", "CNTSN"], stay: 15, unit: "days", clock: "next_day_0000", area: .codes(["110000", "310000", "320000", "330000"]), priority: 36),
+            pol("visa_L", "普通签证", "普通旅游签证（L签）", stay: 30, unit: "days", clock: "next_day_0000", area: .national, priority: 99, nodeKind: "info"),
         ]
-        let cityTags: [CityVisaTag] = [
-            CityVisaTag(cityId: "beijing", regionType: "mainland", isPortOfEntry: true),
-            CityVisaTag(cityId: "shanghai", regionType: "mainland", isPortOfEntry: true),
-            CityVisaTag(cityId: "xian", regionType: "mainland", isPortOfEntry: true),
-            CityVisaTag(cityId: "chengdu", regionType: "mainland", isPortOfEntry: true),
-            CityVisaTag(cityId: "suzhou", regionType: "mainland", isPortOfEntry: false),
-            CityVisaTag(cityId: "hangzhou", regionType: "mainland", isPortOfEntry: true),
+
+        func grant(_ policy: String, _ cc: String, exp: String? = nil) -> VisaGrantV2 {
+            VisaGrantV2(id: "\(policy)_\(cc)".lowercased(), policyId: policy, countryCode: cc,
+                        effectiveDate: "1900-01-01", expiryDate: exp, maxStayOverride: nil)
+        }
+        // Common unilateral-30d nationalities (expiry 2026-12-31, 临期) + 240h transit list.
+        let uni = ["FR", "DE", "IT", "NL", "ES", "JP", "GB", "AU", "NZ", "KR", "CH", "IE", "AT", "BE", "LU", "PT", "HU", "NO", "FI", "DK", "PL"]
+        let p240 = ["US", "CA", "GB", "FR", "DE", "JP", "AU", "BR", "MX", "RU", "UA", "QA", "NL", "IT", "ES"]
+        var grants: [VisaGrantV2] = []
+        grants += uni.map { grant("unilateral_30d", $0, exp: "2026-12-31") }
+        grants += p240.map { grant("twov_240h", $0) }
+        grants += ["SG"].map { grant("mutual_exempt", $0) }   // 互免示例
+
+        // Bundled app content cities (GB/T 2260) with slug mapping.
+        let cities: [VisaCityRow] = [
+            VisaCityRow(cityId: "110000", nameZh: "北京市", nameEn: "Beijing", regionType: "mainland", isEntryPort: true, isExitPort: true, transit240h: true, appCitySlug: "beijing"),
+            VisaCityRow(cityId: "310000", nameZh: "上海市", nameEn: "Shanghai", regionType: "mainland", isEntryPort: true, isExitPort: true, transit240h: true, appCitySlug: "shanghai"),
+            VisaCityRow(cityId: "610100", nameZh: "西安市", nameEn: "Xi'an", regionType: "mainland", isEntryPort: true, isExitPort: true, transit240h: true, appCitySlug: "xian"),
+            VisaCityRow(cityId: "510100", nameZh: "成都市", nameEn: "Chengdu", regionType: "mainland", isEntryPort: true, isExitPort: true, transit240h: true, appCitySlug: "chengdu"),
+            VisaCityRow(cityId: "320500", nameZh: "苏州市", nameEn: "Suzhou", regionType: "mainland", isEntryPort: false, isExitPort: false, transit240h: true, appCitySlug: "suzhou"),
+            VisaCityRow(cityId: "330100", nameZh: "杭州市", nameEn: "Hangzhou", regionType: "mainland", isEntryPort: true, isExitPort: true, transit240h: true, appCitySlug: "hangzhou"),
         ]
-        let ports: [EntryPort] = [
-            EntryPort(portId: "pek", nameEn: "Beijing Capital Intl", nameZh: "北京首都机场", cityId: "beijing", transit240h: true, isHainan: false),
-            EntryPort(portId: "pvg", nameEn: "Shanghai Pudong Intl", nameZh: "上海浦东机场", cityId: "shanghai", transit240h: true, isHainan: false),
-            EntryPort(portId: "xiy", nameEn: "Xi'an Xianyang Intl", nameZh: "西安咸阳机场", cityId: "xian", transit240h: true, isHainan: false),
-            EntryPort(portId: "ctu", nameEn: "Chengdu Tianfu Intl", nameZh: "成都天府机场", cityId: "chengdu", transit240h: true, isHainan: false),
-            EntryPort(portId: "hgh", nameEn: "Hangzhou Xiaoshan Intl", nameZh: "杭州萧山机场", cityId: "hangzhou", transit240h: true, isHainan: false),
-            EntryPort(portId: "can", nameEn: "Guangzhou Baiyun Intl", nameZh: "广州白云机场", cityId: nil, transit240h: true, isHainan: false),
-            EntryPort(portId: "szx", nameEn: "Shenzhen Bao'an Intl", nameZh: "深圳宝安机场", cityId: nil, transit240h: true, isHainan: false),
-            EntryPort(portId: "hak", nameEn: "Haikou Meilan Intl", nameZh: "海口美兰机场", cityId: nil, transit240h: false, isHainan: true),
-        ]
-        return VisaDataSet(policies: policies, grants: grants, cityTags: cityTags, ports: ports, overrides: [])
+
+        // Matrix for the bundled cities (national policies = ok; 240h/cruise per area).
+        let national = ["mutual_exempt", "unilateral_30d", "visa_L"]
+        let cruiseOk: Set<String> = ["110000", "310000", "320500", "330100"]   // coastal provinces
+        var matrix: [CityPolicyFeas] = []
+        for c in cities {
+            for p in national { matrix.append(CityPolicyFeas(cityId: c.cityId, policyId: p, feasibility: "ok")) }
+            matrix.append(CityPolicyFeas(cityId: c.cityId, policyId: "twov_240h", feasibility: "ok"))
+            matrix.append(CityPolicyFeas(cityId: c.cityId, policyId: "twov_24h", feasibility: "no"))
+            matrix.append(CityPolicyFeas(cityId: c.cityId, policyId: "hainan_30d", feasibility: "no"))
+            matrix.append(CityPolicyFeas(cityId: c.cityId, policyId: "group_asean_xsbn", feasibility: "no"))
+            matrix.append(CityPolicyFeas(cityId: c.cityId, policyId: "cruise_15d", feasibility: cruiseOk.contains(c.cityId) ? "ok" : "no"))
+        }
+
+        let permits = [PermitZone(adminCode: "540000", name: "西藏自治区", note: "需入藏许可，覆盖所有政策")]
+        return VisaDataSet(policies: policies, grants: grants, cities: cities, matrix: matrix, permitZones: permits)
     }()
 }
