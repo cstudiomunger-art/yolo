@@ -75,6 +75,12 @@ struct ItineraryDetailView: View {
             .padding(.horizontal, Theme.screenPadding)
             .padding(.bottom, 12)
 
+            VisaPlanHintBanner(citySlugs: tripCityIds,
+                               start: currentItinerary.startDate,
+                               end: currentItinerary.endDate)
+                .padding(.horizontal, Theme.screenPadding)
+                .padding(.bottom, 12)
+
             HStack(spacing: 0) {
                 detailSeg("Itinerary", segment == .itinerary) { segment = .itinerary }
                 detailSeg("Book Your Trip", segment == .book) { segment = .book }

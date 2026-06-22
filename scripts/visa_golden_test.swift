@@ -99,5 +99,14 @@ let p2ok = !baseRec.isEnough && friendly?.addedCity?.contains("香港") == true
 print("\(p2ok ? "✓" : "✗") Phase2 加城激活240h: base=\(baseRec.level.rawValue) friendly=\(friendly?.addedCity ?? "无")")
 if !p2ok { fails += 1 }
 
+// Phase 2 §1 粗判：法国人行程(北京+上海)默认往返 → 绿牌单方面；美国人同行程 → 非绿(需进检测器细调)。
+let frCoarse = VisaCoarseCheck.recommendation(citySlugs: ["beijing", "shanghai"], start: nil, end: nil,
+                                              countryCode: "FR", data: dataset)
+let usCoarse = VisaCoarseCheck.recommendation(citySlugs: ["beijing", "shanghai"], start: nil, end: nil,
+                                              countryCode: "US", data: dataset)
+let coarseOk = frCoarse?.level == .green && usCoarse != nil && usCoarse?.isEnough == false
+print("\(coarseOk ? "✓" : "✗") Phase2 粗判: FR=\(frCoarse?.level.rawValue ?? "nil") US=\(usCoarse?.level.rawValue ?? "nil")")
+if !coarseOk { fails += 1 }
+
 print(fails == 0 ? "\n✅ Golden 全过（与 engine.py 全量基准一致）" : "\n❌ \(fails) 项不符")
 exit(fails == 0 ? 0 : 1)

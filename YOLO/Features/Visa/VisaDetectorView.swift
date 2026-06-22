@@ -8,6 +8,13 @@ struct VisaDetectorView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
 
+    /// When opened from the Plan hint banner: judge this specific trip (cities + dates).
+    /// nil = use the user's current selection. All other inputs stay editable.
+    var presetCitySlugs: [String]? = nil
+    var presetStart: Date? = nil
+    var presetEnd: Date? = nil
+    @State private var presetsApplied = false
+
     @State private var departure = "GB"
     @State private var onward = "GB"
     @State private var entryPort = "PVG"
@@ -31,7 +38,7 @@ struct VisaDetectorView: View {
         return (c.isEmpty ? "GB" : c).uppercased()
     }
 
-    private var tripSlugs: [String] { appEnv.preferences.selectedCityIds }
+    private var tripSlugs: [String] { presetCitySlugs ?? appEnv.preferences.selectedCityIds }
 
     /// GB/T 2260 codes the engine evaluates (self-test picks are already codes).
     private var activeCodes: [String] {
@@ -70,6 +77,14 @@ struct VisaDetectorView: View {
                 ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } }
             }
             .task { await appEnv.visaData.load() }
+            .onAppear {
+                guard !presetsApplied else { return }
+                presetsApplied = true
+                if let s = presetStart {
+                    entryAt = Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: s) ?? s
+                }
+                if let e = presetEnd { plannedExitAt = e }
+            }
             .sheet(item: Binding(get: { recommendation.map { IdentifiedRec(rec: $0) } }, set: { recommendation = $0?.rec })) { wrapped in
                 VisaVerdictView(recommendation: wrapped.rec, cityCodes: evaluatedCodes,
                                 data: appEnv.visaData.data, routes: routes)
