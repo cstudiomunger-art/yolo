@@ -1,5 +1,13 @@
 import Foundation
 
+// Minimal stand-ins for the app view-model types (real ones live in TravelSafetyModels.swift,
+// which pulls in unrelated emergency types). The harness only exercises the engine logic.
+struct VisaDetail: Codable { let label: String; let value: String }
+struct VisaRule: Codable {
+    let countryCode: String; let countryName: String; let flag: String
+    let visaFree: Bool; let stayDays: Int?; let headline: String; let details: [VisaDetail]
+}
+
 // Standalone regression harness for the Swift VisaPolicyEngine port. Decodes the full
 // verified dataset (visa_dataset.json) and asserts the Swift engine matches engine.py
 // ground truth on representative cases (captured from engine.py on the same visa.db).
@@ -107,6 +115,16 @@ let usCoarse = VisaCoarseCheck.recommendation(citySlugs: ["beijing", "shanghai"]
 let coarseOk = frCoarse?.level == .green && usCoarse != nil && usCoarse?.isEnough == false
 print("\(coarseOk ? "✓" : "✗") Phase2 粗判: FR=\(frCoarse?.level.rawValue ?? "nil") US=\(usCoarse?.level.rawValue ?? "nil")")
 if !coarseOk { fails += 1 }
+
+// 国籍级摘要（替代旧 visa_rules 单国卡）：法国→免签30天；美国→非免签但有条件(240h/海南)；冷门国→需签证。
+let frSum = VisaNationalitySummary.rule(countryCode: "FR", countryName: "France", flag: "🇫🇷", data: dataset)
+let usSum = VisaNationalitySummary.rule(countryCode: "US", countryName: "United States", flag: "🇺🇸", data: dataset)
+let zzSum = VisaNationalitySummary.rule(countryCode: "ZZ", countryName: "Nowhere", flag: "🏳️", data: dataset)
+let sumOk = frSum.visaFree && frSum.stayDays == 30
+    && !usSum.visaFree && !usSum.headline.isEmpty
+    && !zzSum.visaFree && zzSum.headline.isEmpty
+print("\(sumOk ? "✓" : "✗") 国籍摘要: FR=免签\(frSum.stayDays ?? 0)天 US=\(usSum.headline) ZZ=\(zzSum.headline.isEmpty ? "需签证" : zzSum.headline)")
+if !sumOk { fails += 1 }
 
 print(fails == 0 ? "\n✅ Golden 全过（与 engine.py 全量基准一致）" : "\n❌ \(fails) 项不符")
 exit(fails == 0 ? 0 : 1)

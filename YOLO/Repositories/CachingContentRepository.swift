@@ -138,13 +138,6 @@ struct CachingContentRepository: ContentRepositoryProtocol {
         }
     }
 
-    func fetchVisaRule(countryCode: String) async throws -> VisaRule? {
-        let key = ContentCacheKey.visaRule(countryCode: countryCode)
-        return try await cachedOptional(key: key) {
-            try await upstream.fetchVisaRule(countryCode: countryCode)
-        }
-    }
-
     func fetchEmergencyData() async throws -> EmergencyData {
         try await cached(key: ContentCacheKey.emergencyData()) {
             try await upstream.fetchEmergencyData()

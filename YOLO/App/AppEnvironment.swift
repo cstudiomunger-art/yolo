@@ -225,13 +225,22 @@ final class AppEnvironment {
         OfflineCacheLocations.clearPersistentURLCache()
     }
 
+    /// Nationality visa summary for the Home/Profile cards — now derived from the verified
+    /// VisaPolicyEngine data (retired the single-country `visa_rules` table). Name + flag
+    /// come from `passport_countries`; the visa-free verdict comes from the engine grants.
     func refreshVisaRule() async {
         guard !preferences.countryCode.isEmpty else {
             preferences.cachedVisaRule = nil
             return
         }
-        preferences.cachedVisaRule = try? await content.fetchVisaRule(
-            countryCode: preferences.countryCode
-        )
+        await visaData.load()
+        let cc = preferences.countryCode.uppercased()
+        let passport = (try? await content.fetchPassportCountries())?
+            .first { $0.code.caseInsensitiveCompare(cc) == .orderedSame }
+        preferences.cachedVisaRule = VisaNationalitySummary.rule(
+            countryCode: cc,
+            countryName: passport?.name ?? cc,
+            flag: passport?.flag ?? "",
+            data: visaData.data)
     }
 }

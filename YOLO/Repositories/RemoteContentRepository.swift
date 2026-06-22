@@ -250,18 +250,6 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
             .value
     }
 
-    func fetchVisaRule(countryCode: String) async throws -> VisaRule? {
-        let rows: [VisaRule] = try await client
-            .from("visa_rules")
-            .select()
-            .eq("country_code", value: countryCode)
-            .eq("is_active", value: true)
-            .limit(1)
-            .execute()
-            .value
-        return rows.first
-    }
-
     func fetchEmergencyData() async throws -> EmergencyData {
         let rows: [EmergencyData] = try await client
             .from("emergency_config")

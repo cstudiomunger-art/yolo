@@ -20,7 +20,6 @@ protocol ContentRepositoryProtocol: Sendable {
     func fetchSampleItinerary() async throws -> SampleItinerary
     func fetchPlanningItinerary() async throws -> SampleItinerary
     func fetchPassportCountries() async throws -> [PassportCountry]
-    func fetchVisaRule(countryCode: String) async throws -> VisaRule?
     func fetchEmergencyData() async throws -> EmergencyData
     func fetchAppBranding() async throws -> AppBranding
 }
@@ -160,10 +159,6 @@ struct BundledContentRepository: ContentRepositoryProtocol {
                 displayOrder: index
             )
         }
-    }
-
-    func fetchVisaRule(countryCode: String) async throws -> VisaRule? {
-        visaRules.first { $0.countryCode == countryCode }
     }
 
     func fetchEmergencyData() async throws -> EmergencyData { emergencyData }

@@ -112,7 +112,6 @@ enum ContentCacheKey {
     static func hotels(cityId: String) -> String { "hotels_\(cityId.lowercased())" }
     static func homeTips(cityIds: [String]) -> String { "home_tips_\(filterHash(cityIds: cityIds))" }
     static func passportCountries() -> String { "passport_countries" }
-    static func visaRule(countryCode: String) -> String { "visa_rule_\(countryCode.lowercased())" }
     static func emergencyData() -> String { "emergency_data" }
     static func sampleItinerary() -> String { "sample_itinerary" }
     static func planningItinerary() -> String { "planning_itinerary" }
