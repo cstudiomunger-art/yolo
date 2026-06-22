@@ -86,5 +86,18 @@ let t24Ok = abs(l24.timeIntervalSince(exp24)) < 1
 print("\(t24Ok ? "✓" : "✗") timing by_hour(24h): latest=\(ISO8601DateFormatter().string(from: l24))")
 if !t24Ok { fails += 1 }
 
+// Phase 2 路线推荐：美国人往返日本 8 天（基线 amber，不够用）→ 路线层加香港作过境出口
+// → 引擎复核应激活 240h 绿牌（加城 = 二期亮点，引擎验证非猜测）。
+let baseQ = q("US", "JP", "JP", entry: "PVG", exit: "PVG",
+              entryAt: "2026-07-02T15:00", plannedExit: "2026-07-09T10:00",
+              cities: ["110000", "310000"], ticketed: true, group: false)
+let baseRec = VisaPolicyEngine.recommend(baseQ, data: dataset)
+let p2routes = VisaTripChecker.routes(query: baseQ, appCities: ["beijing", "shanghai"],
+                                      data: dataset, recommendation: baseRec)
+let friendly = p2routes.first { $0.kind == .friendly }
+let p2ok = !baseRec.isEnough && friendly?.addedCity?.contains("香港") == true
+print("\(p2ok ? "✓" : "✗") Phase2 加城激活240h: base=\(baseRec.level.rawValue) friendly=\(friendly?.addedCity ?? "无")")
+if !p2ok { fails += 1 }
+
 print(fails == 0 ? "\n✅ Golden 全过（与 engine.py 全量基准一致）" : "\n❌ \(fails) 项不符")
 exit(fails == 0 ? 0 : 1)

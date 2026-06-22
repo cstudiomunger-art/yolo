@@ -263,7 +263,7 @@ struct VisaDetectorView: View {
         let appCities = selfTest
             ? codes.compactMap { appEnv.visaData.data.city(forAdminCode: $0)?.appCitySlug }
             : tripSlugs
-        routes = VisaTripChecker.routes(appCities: appCities, country: country,
+        routes = VisaTripChecker.routes(query: query, appCities: appCities,
                                         data: appEnv.visaData.data, recommendation: rec)
         evaluatedCodes = codes
         recommendation = rec
