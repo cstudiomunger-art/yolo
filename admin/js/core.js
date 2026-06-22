@@ -12,7 +12,8 @@ App.currentView = "city_hub";
 App.cityHubCityId = null;
 App.attractionEditId = null;
 App.editingRow = null;
-App.tableListCtx = { cityId: "", search: "" };
+App.tableListCtx = { cityId: "", search: "", page: 1 };
+App.TABLE_PAGE_SIZE = 50; // client-side list pagination (rows are already fully loaded)
 
 /** Flat-list tables: city filter + optional global rows (city_id empty). */
 App.TABLE_CITY_FILTERS = {

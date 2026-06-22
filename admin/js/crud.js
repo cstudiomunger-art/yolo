@@ -175,6 +175,32 @@
     );
   };
 
+  App.renderPagination = function renderPagination(total, page, totalPages, startIdx, shown) {
+    if (totalPages <= 1) {
+      return total ? `<div class="table-pagination"><span class="table-page-info muted">共 ${total} 条</span></div>` : "";
+    }
+    const btn = (p, label, disabled, active) =>
+      `<button type="button" class="btn btn-sm ${active ? "" : "btn-secondary"} table-page-btn" data-page="${p}" ${disabled ? "disabled" : ""}>${label}</button>`;
+    let html = `<div class="table-pagination">`;
+    html += btn(page - 1, "‹ 上一页", page <= 1, false);
+    const win = 2;
+    const from = Math.max(1, page - win);
+    const to = Math.min(totalPages, page + win);
+    if (from > 1) {
+      html += btn(1, "1", false, page === 1);
+      if (from > 2) html += `<span class="table-page-ellipsis">…</span>`;
+    }
+    for (let p = from; p <= to; p++) html += btn(p, String(p), false, p === page);
+    if (to < totalPages) {
+      if (to < totalPages - 1) html += `<span class="table-page-ellipsis">…</span>`;
+      html += btn(totalPages, String(totalPages), false, page === totalPages);
+    }
+    html += btn(page + 1, "下一页 ›", page >= totalPages, false);
+    html += `<span class="table-page-info muted">第 ${startIdx + 1}–${startIdx + shown} 条 / 共 ${total}（第 ${page}/${totalPages} 页）</span>`;
+    html += `</div>`;
+    return html;
+  };
+
   App.renderTableBody = function renderTableBody(table, rows) {
     const meta = App.TABLES[table];
     const cols = (meta.listColumns || []).filter((c) => !(typeof c === "object" && c.advanced));
@@ -573,6 +599,7 @@
     const meta = App.TABLES[table];
     const main = App.$("#main-content");
     const cityCfg = App.TABLE_CITY_FILTERS[table];
+    App.tableListCtx.page = 1; // fresh page on every table open
 
     if (table === "user_itineraries") {
       try {
@@ -673,16 +700,35 @@
       rows = App.filterTableRowsByCity(table, rows, App.tableListCtx.cityId);
       if (meta.typeFilter) rows = App.filterChecklistRowsByType(rows, App.tableListCtx.typeFilter);
       rows = App.searchTableRows(table, rows, App.tableListCtx.search);
-      let bodyHtml = App.renderTableBody(table, rows);
+
+      // Client-side pagination (rows already fully loaded; this is display-only).
+      const total = rows.length;
+      const pageSize = meta.pageSize || App.TABLE_PAGE_SIZE || 50;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      let page = App.tableListCtx.page || 1;
+      page = Math.min(Math.max(1, page), totalPages);
+      App.tableListCtx.page = page;
+      const startIdx = (page - 1) * pageSize;
+      const pageRows = rows.slice(startIdx, startIdx + pageSize);
+
+      let bodyHtml = App.renderTableBody(table, pageRows);
       if (table === "user_itineraries" && userFilter) {
         bodyHtml =
           `<div class="status-bar info">仅显示用户 <code>${App.escapeHtml(userFilter.slice(0, 8))}…</code>（${App.escapeHtml(App.profileEmail(userFilter))}）的行程。
           <button type="button" class="btn btn-sm btn-secondary" id="clear-user-itin-filter" style="margin-left:8px">显示全部</button></div>` +
           bodyHtml;
       }
+      bodyHtml += App.renderPagination(total, page, totalPages, startIdx, pageRows.length);
       host.innerHTML = bodyHtml;
       const countEl = App.$("#table-row-count", main);
-      if (countEl) countEl.textContent = `共 ${rows.length} 条`;
+      if (countEl) countEl.textContent = `共 ${total} 条`;
+      host.querySelectorAll("[data-page]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          App.tableListCtx.page = Number(btn.dataset.page);
+          applyFilters();
+          host.scrollIntoView({ block: "start", behavior: "smooth" });
+        });
+      });
       App.$("#clear-user-itin-filter", host)?.addEventListener("click", () => {
         sessionStorage.removeItem("yolo.admin.userItinerariesFilter");
         applyFilters();
@@ -701,15 +747,18 @@
 
     App.$("#table-search", main)?.addEventListener("input", (e) => {
       App.tableListCtx.search = e.target.value;
+      App.tableListCtx.page = 1;
       applyFilters();
     });
     App.$("#table-city-filter", main)?.addEventListener("change", (e) => {
       App.tableListCtx.cityId = e.target.value;
+      App.tableListCtx.page = 1;
       sessionStorage.setItem(App.tableFilterStorageKey(table), App.tableListCtx.cityId || "");
       applyFilters();
     });
     App.$("#table-type-filter", main)?.addEventListener("change", (e) => {
       App.tableListCtx.typeFilter = e.target.value;
+      App.tableListCtx.page = 1;
       sessionStorage.setItem(App.tableTypeFilterStorageKey(table), App.tableListCtx.typeFilter || "");
       applyFilters();
     });

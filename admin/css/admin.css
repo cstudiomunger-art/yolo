@@ -1949,3 +1949,28 @@ tr:hover td {
     grid-template-columns: 1fr;
   }
 }
+
+/* Table list pagination (client-side; rows already fully loaded) */
+.table-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 2px 4px;
+}
+.table-page-btn {
+  min-width: 34px;
+}
+.table-page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.table-page-ellipsis {
+  padding: 0 2px;
+  color: var(--muted, #888);
+}
+.table-page-info {
+  margin-left: auto;
+  font-size: 12px;
+  white-space: nowrap;
+}
