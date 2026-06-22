@@ -125,9 +125,6 @@
       case "ref_user":
         inner = App.renderRefUserSelect(name, value, field);
         break;
-      case "ref_visa_policy":
-        inner = App.renderRefVisaPolicySelect(name, value, field);
-        break;
       case "payment_match":
         inner = App.renderPaymentMatch(name, value);
         break;
@@ -292,16 +289,6 @@
     (App.refCache.users || []).forEach((u) => {
       const label = u.email || u.display_name || u.id;
       html += `<option value="${App.escapeHtml(u.id)}" ${value === u.id ? "selected" : ""}>${App.escapeHtml(label)}</option>`;
-    });
-    html += `</select>`;
-    return html;
-  };
-
-  App.renderRefVisaPolicySelect = function renderRefVisaPolicySelect(name, value, field) {
-    let html = `<select name="${name}"><option value="">${field?.emptyLabel || "— 选择政策 —"}</option>`;
-    (App.refCache.policies || []).forEach((p) => {
-      const label = `${p.policy_key} · ${p.headline_zh || ""}`.trim();
-      html += `<option value="${App.escapeHtml(p.policy_key)}" ${value === p.policy_key ? "selected" : ""}>${App.escapeHtml(label)}</option>`;
     });
     html += `</select>`;
     return html;

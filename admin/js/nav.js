@@ -81,18 +81,6 @@
       ],
     },
     {
-      id: "visa_engine",
-      label: "🛂 签证引擎（旧·回退）",
-      defaultExpanded: false,
-      items: [
-        { kind: "table", table: "visa_policies", label: "政策框架 P1-P5（旧）" },
-        { kind: "table", table: "visa_policy_grants", label: "政策适用（旧）" },
-        { kind: "table", table: "city_visa_tags", label: "城市签证标签（旧）" },
-        { kind: "table", table: "entry_ports", label: "入境口岸（旧）" },
-        { kind: "table", table: "visa_rule_overrides", label: "逐城覆盖（旧）" },
-      ],
-    },
-    {
       id: "payment_helper",
       label: "💳 支付助手",
       defaultExpanded: false,
