@@ -63,7 +63,6 @@
       label: "签证与文化",
       defaultExpanded: false,
       items: [
-        { kind: "table", table: "passport_countries", label: "护照国家" },
         { kind: "table", table: "visa_rules", label: "签证规则（旧·回退）" },
         { kind: "table", table: "culture_tips", label: "文化贴士" },
       ],
@@ -73,6 +72,7 @@
       label: "🛂 签证引擎 v2（已核验）",
       defaultExpanded: false,
       items: [
+        { kind: "table", table: "passport_countries", label: "护照国家（国籍列表）" },
         { kind: "table", table: "visa_policies_v2", label: "政策框架 v2（8 政策）" },
         { kind: "table", table: "visa_policy_grants_v2", label: "政策适用 v2（国籍×窗口）" },
         { kind: "table", table: "visa_cities", label: "城市维表（GB/T 2260）" },
