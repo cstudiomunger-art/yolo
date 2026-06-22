@@ -1033,7 +1033,7 @@
         { key: "feasibility", label: "可达性" },
       ],
       fields: [
-        { key: "_derived_note", type: "section", label: "派生只读", hint: "由 allowed_area 纯码匹配生成，不手填。改 allowed_area 后由重算脚本刷新（铁律：派生由规则强制）。" },
+        { key: "_derived_note", type: "section", label: "派生只读 · 自动同步", hint: "由 allowed_area 纯码匹配生成，不手填。改政策 allowed_area / 城市 / 许可区后，数据库触发器自动重算本表（铁律：派生由规则强制）。" },
         { key: "city_id", type: "text", readonly: true, label: "城市码" },
         { key: "policy_id", type: "text", readonly: true, label: "政策" },
         { key: "feasibility", type: "text", readonly: true, label: "可达性", hint: "ok / no / permit_required" },
