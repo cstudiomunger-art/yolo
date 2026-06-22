@@ -125,6 +125,9 @@
       case "ref_user":
         inner = App.renderRefUserSelect(name, value, field);
         break;
+      case "ref_visa_policy_v2":
+        inner = App.renderRefVisaPolicyV2Select(name, value, field);
+        break;
       case "payment_match":
         inner = App.renderPaymentMatch(name, value);
         break;
@@ -290,6 +293,22 @@
       const label = u.email || u.display_name || u.id;
       html += `<option value="${App.escapeHtml(u.id)}" ${value === u.id ? "selected" : ""}>${App.escapeHtml(label)}</option>`;
     });
+    html += `</select>`;
+    return html;
+  };
+
+  // Dynamic policy picker — options come from visa_policies_v2 so new policies appear
+  // automatically (no hardcoded enum to maintain when China adds a visa-free scheme).
+  App.renderRefVisaPolicyV2Select = function renderRefVisaPolicyV2Select(name, value, field) {
+    let html = `<select name="${name}"><option value="">${field?.emptyLabel || "— 选择政策 —"}</option>`;
+    (App.refCache.visaPoliciesV2 || []).forEach((p) => {
+      const label = `${p.id} · ${p.official_name_zh || ""}`.trim();
+      html += `<option value="${App.escapeHtml(p.id)}" ${value === p.id ? "selected" : ""}>${App.escapeHtml(label)}</option>`;
+    });
+    // Keep a stale/unknown value visible so editing an old grant never silently drops it.
+    if (value && !(App.refCache.visaPoliciesV2 || []).some((p) => p.id === value)) {
+      html += `<option value="${App.escapeHtml(value)}" selected>${App.escapeHtml(value)}</option>`;
+    }
     html += `</select>`;
     return html;
   };

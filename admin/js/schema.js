@@ -837,16 +837,7 @@
       ],
       fields: [
         { key: "id", type: "text", required: true, label: "ID", hint: "唯一，如 unilateral_30d_fr" },
-        { key: "policy_id", type: "enum", required: true, label: "政策", options: [
-          { value: "mutual_exempt", label: "互免 mutual_exempt" },
-          { value: "hainan_30d", label: "海南 hainan_30d" },
-          { value: "unilateral_30d", label: "单方面 unilateral_30d" },
-          { value: "twov_24h", label: "24h过境 twov_24h" },
-          { value: "twov_240h", label: "240h过境 twov_240h" },
-          { value: "group_asean_xsbn", label: "东盟团免 group_asean_xsbn" },
-          { value: "cruise_15d", label: "邮轮团免 cruise_15d" },
-          { value: "visa_L", label: "L签 visa_L" },
-        ] },
+        { key: "policy_id", type: "ref_visa_policy_v2", required: true, label: "政策", hint: "下拉自动同步「政策框架 v2」，新建政策后无需改代码即可在此选到" },
         { key: "country_code", type: "ref_country", required: true, label: "国家" },
         { key: "effective_date", type: "text", label: "生效日", hint: "YYYY-MM-DD；空/1900-01-01=无起始下限" },
         { key: "expiry_date", type: "text", label: "截止日", hint: "YYYY-MM-DD，空=官方未设截止（禁填假日期）" },
