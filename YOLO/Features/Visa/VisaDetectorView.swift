@@ -28,6 +28,7 @@ struct VisaDetectorView: View {
     // Self-test (手动选城市测一测) — local only, never written back to the trip.
     @State private var selfTest = false
     @State private var selfTestCodes: Set<String> = []
+    @State private var showCityPicker = false
 
     @State private var verdict: IdentifiedRec?
     @State private var evaluatedCodes: [String] = []
@@ -132,19 +133,33 @@ struct VisaDetectorView: View {
             }
 
             if selfTest {
-                let options = appEnv.visaData.data.cities
-                FlowChips(items: options.map(\.cityId)) { code in
-                    Button {
-                        if selfTestCodes.contains(code) { selfTestCodes.remove(code) } else { selfTestCodes.insert(code) }
-                    } label: {
-                        chip(appEnv.visaData.data.cityName(forAdminCode: code), selected: selfTestCodes.contains(code))
+                Button { showCityPicker = true } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("测算城市").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+                            Text(selfTestCodes.isEmpty ? "点此选择城市" : selfTestSummary)
+                                .font(Theme.FontToken.inter(14, weight: .medium))
+                                .foregroundStyle(selfTestCodes.isEmpty ? Theme.ColorToken.textMuted : Theme.ColorToken.textPrimary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textMuted)
                     }
-                    .buttonStyle(.plain)
+                    .padding(.vertical, 4)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+
                 if selfTestCodes.isEmpty {
                     Text("选几座城市来试算（仅本地，不影响真实行程）")
                         .font(Theme.FontToken.inter(10))
                         .foregroundStyle(Theme.ColorToken.textMuted)
+                } else {
+                    FlowChips(items: selfTestCodes.sorted()) { code in
+                        Button { selfTestCodes.remove(code) } label: {
+                            chip(appEnv.visaData.data.cityName(forAdminCode: code), selected: true)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
             } else if tripSlugs.isEmpty {
                 Text("还没有行程。去 Plan 规划一条，或点上面「手动选城市测一测」。")
@@ -159,6 +174,14 @@ struct VisaDetectorView: View {
         .padding(14)
         .background(Theme.ColorToken.backgroundSubtle)
         .clipShape(RoundedRectangle(cornerRadius: 14))
+        .sheet(isPresented: $showCityPicker) {
+            CitySelectSheet(cities: appEnv.visaData.data.cities, selected: $selfTestCodes)
+        }
+    }
+
+    private var selfTestSummary: String {
+        let names = selfTestCodes.sorted().map { appEnv.visaData.data.cityName(forAdminCode: $0) }
+        return names.count <= 3 ? names.joined(separator: " · ") : "已选 \(names.count) 城"
     }
 
     private var passportRow: some View {
@@ -439,6 +462,54 @@ private struct CountrySelectSheet: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Searchable multi-select city picker for the self-test (手动选城市测一测) — same list
+/// style as the country picker, but toggles multiple cities (does not dismiss on tap).
+private struct CitySelectSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let cities: [VisaCityRow]
+    @Binding var selected: Set<String>
+
+    @State private var search = ""
+
+    private var filtered: [VisaCityRow] {
+        guard !search.isEmpty else { return cities }
+        return cities.filter {
+            $0.nameZh.localizedCaseInsensitiveContains(search) || $0.cityId.contains(search)
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(filtered) { c in
+                        Button {
+                            if selected.contains(c.cityId) { selected.remove(c.cityId) } else { selected.insert(c.cityId) }
+                        } label: {
+                            HStack(spacing: 12) {
+                                Text(c.nameZh).font(Theme.FontToken.inter(14)).foregroundStyle(Theme.ColorToken.textPrimary)
+                                Spacer()
+                                if selected.contains(c.cityId) {
+                                    Image(systemName: "checkmark").foregroundStyle(Theme.ColorToken.accent)
+                                }
+                            }
+                            .padding(.vertical, 14)
+                            .padding(.horizontal, Theme.screenPadding)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        Divider().padding(.leading, Theme.screenPadding)
+                    }
+                }
+            }
+            .searchable(text: $search, prompt: "搜索城市")
+            .navigationTitle("选择测算城市")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
+        }
     }
 }
 
