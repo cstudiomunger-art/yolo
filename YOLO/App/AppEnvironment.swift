@@ -235,12 +235,13 @@ final class AppEnvironment {
         }
         await visaData.load()
         let cc = preferences.countryCode.uppercased()
-        let passport = (try? await content.fetchPassportCountries())?
-            .first { $0.code.caseInsensitiveCompare(cc) == .orderedSame }
+        // Resolve name/flag from the full global ISO list (covers every country the user
+        // can now pick), falling back to a code-derived flag.
+        let country = ISO3166.all.first { $0.code.caseInsensitiveCompare(cc) == .orderedSame }
         preferences.cachedVisaRule = VisaNationalitySummary.rule(
             countryCode: cc,
-            countryName: passport?.name ?? cc,
-            flag: passport?.flag ?? "",
+            countryName: country?.name ?? cc,
+            flag: country?.flag ?? ISO3166.flag(cc),
             data: visaData.data)
     }
 }

@@ -11,8 +11,9 @@ struct CountryPickerView: View {
 
     var mode: Mode = .onboarding
     @State private var search = ""
-    @State private var countries: [PassportCountry] = []
-    @State private var loadError: String?
+    // Full global list (all 249 ISO 3166-1 countries, Chinese names) — same source as the
+    // visa detector's pickers, so nationality is consistent everywhere.
+    private let countries: [PassportCountry] = ISO3166.all
     @State private var draftCountryCode = ""
 
     private var filtered: [PassportCountry] {
@@ -34,24 +35,8 @@ struct CountryPickerView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-
-            if let loadError {
-                Text(loadError)
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, Theme.screenPadding)
-                    .padding(.bottom, 8)
-            }
-
             searchField
-
-            if countries.isEmpty && loadError == nil {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                countryList
-            }
-
+            countryList
             if mode == .onboarding {
                 continueBar
             }
@@ -66,7 +51,6 @@ struct CountryPickerView: View {
                 }
             }
         }
-        .task { await loadCountries() }
     }
 
     private var header: some View {
@@ -166,16 +150,6 @@ struct CountryPickerView: View {
             .padding(.vertical, 12)
         }
         .background(Theme.ColorToken.background)
-    }
-
-    private func loadCountries() async {
-        do {
-            countries = try await appEnv.content.fetchPassportCountries()
-            loadError = nil
-        } catch {
-            loadError = error.localizedDescription
-            countries = []
-        }
     }
 
     private func selectCountry(_ code: String) {
