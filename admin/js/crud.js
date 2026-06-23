@@ -170,6 +170,7 @@
         if (typeof c === "object" && c.ref === "attraction") v = App.attractionLabel(v);
         if (typeof c === "object" && c.ref === "scenario") v = App.scenarioLabel(v);
         if (typeof c === "object" && c.ref === "country") v = App.countryLabel(v);
+        if (typeof c === "object" && c.ref === "visa_country") v = App.visaCountryLabel(v);
         return String(v ?? "").toLowerCase().includes(q);
       })
     );

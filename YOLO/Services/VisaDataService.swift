@@ -83,7 +83,8 @@ final class VisaDataService {
                 officialNameZh: nameZh, officialNameEn: id,
                 onwardTicket: onwardTicket, onwardThirdCountry: onwardThird, groupRequired: group,
                 entryPortLimited: portLimited, entryPorts: entryPorts, exitPorts: exitPorts, entryMode: nil,
-                maxStayDefault: stay, maxStayUnit: unit, clockRule: clock, allowedArea: area,
+                maxStayDefault: stay, maxStayUnit: unit, clockRule: clock, entryCount: nil, allowedArea: area,
+                passportOrdinaryOnly: nil, purpose: nil,
                 passportValidityMonths: 6, priority: priority,
                 sourceUrl: nil, lastVerified: "2026-06-22")
         }
@@ -103,7 +104,8 @@ final class VisaDataService {
 
         func grant(_ policy: String, _ cc: String, exp: String? = nil) -> VisaGrantV2 {
             VisaGrantV2(id: "\(policy)_\(cc)".lowercased(), policyId: policy, countryCode: cc,
-                        effectiveDate: "1900-01-01", expiryDate: exp, maxStayOverride: nil)
+                        effectiveDate: "1900-01-01", expiryDate: exp, maxStayOverride: nil,
+                        entryCountOverride: nil, announcedDate: nil, evidenceQuote: nil)
         }
         // Common unilateral-30d nationalities (expiry 2026-12-31, 临期) + 240h transit list.
         let uni = ["FR", "DE", "IT", "NL", "ES", "JP", "GB", "AU", "NZ", "KR", "CH", "IE", "AT", "BE", "LU", "PT", "HU", "NO", "FI", "DK", "PL"]

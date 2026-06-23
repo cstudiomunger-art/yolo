@@ -160,6 +160,9 @@ struct VisaVerdictView: View {
             entryParam("停留", stayText(p))
             entryParam("活动范围", areaText)
             entryParam("计时", clockText(p))
+            if let ec = entryCountText(p) { entryParam("入境次数", ec) }
+            if let pp = purposeText(p) { entryParam("适用目的", pp) }
+            if p.passportOrdinaryOnly == true { entryParam("护照", "仅普通护照适用") }
             if let lv = p.lastVerified, !lv.isEmpty {
                 entryParam("核验", "核验于 \(lv)")
             }
@@ -202,6 +205,22 @@ struct VisaVerdictView: View {
         case "entry_day": return "入境当日起算"
         default: return "入境次日 0 时起算"
         }
+    }
+
+    private func entryCountText(_ p: VisaPolicyV2) -> String? {
+        switch p.entryCount {
+        case "single": return "单次入境"
+        case "double": return "两次入境"
+        case "multiple": return "多次入境"
+        case "per_entry": return "按每次入境计"
+        default: return nil
+        }
+    }
+
+    private func purposeText(_ p: VisaPolicyV2) -> String? {
+        guard let purpose = p.purpose, !purpose.isEmpty else { return nil }
+        let map = ["tourism": "旅游", "business": "商务", "transit": "过境", "family": "探亲"]
+        return purpose.map { map[$0] ?? $0 }.joined(separator: " · ")
     }
 
     private var areaText: String {

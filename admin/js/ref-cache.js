@@ -12,6 +12,7 @@
     users: [],
     visaPoliciesV2: [],
     ports: [],
+    countriesV2: [],
     loaded: false,
   };
 
@@ -37,14 +38,16 @@
 
     // Pickers backed by newer tables — tolerant so a missing table never breaks core refs.
     try {
-      const [usersRes, visaPolRes, portsRes] = await Promise.all([
+      const [usersRes, visaPolRes, portsRes, countriesV2Res] = await Promise.all([
         App.client.from("profiles").select("id,email,display_name").order("email", { ascending: true }),
         App.client.from("visa_policies_v2").select("id,official_name_zh,policy_type,priority").order("priority", { ascending: true }),
         App.client.from("visa_ports").select("code,name_zh,display_order,is_active").order("display_order", { ascending: true }),
+        App.client.from("visa_countries").select("country_code,name_zh,flag_emoji,is_active").order("country_code", { ascending: true }),
       ]);
       App.refCache.users = usersRes.data || App.refCache.users;
       App.refCache.visaPoliciesV2 = visaPolRes.data || App.refCache.visaPoliciesV2;
       App.refCache.ports = portsRes.data || App.refCache.ports;
+      App.refCache.countriesV2 = countriesV2Res.data || App.refCache.countriesV2;
     } catch (e) {
       // keep whatever was cached
     }
@@ -140,6 +143,13 @@
     const c = App.refCache.countries.find((x) => x.code === code);
     if (!c) return code;
     return `${c.flag || ""} ${c.name}`.trim();
+  };
+
+  App.visaCountryLabel = function visaCountryLabel(code) {
+    if (!code) return "—";
+    const c = (App.refCache.countriesV2 || []).find((x) => x.country_code === code);
+    if (!c) return code;
+    return `${c.flag_emoji || ""} ${c.name_zh || ""}`.trim() || code;
   };
 
   App.attractionsForCity = function attractionsForCity(cityId) {

@@ -123,6 +123,9 @@
       case "ref_country":
         inner = App.renderRefCountrySelect(name, value);
         break;
+      case "ref_visa_country":
+        inner = App.renderRefVisaCountrySelect(name, value);
+        break;
       case "ref_user":
         inner = App.renderRefUserSelect(name, value, field);
         break;
@@ -287,6 +290,21 @@
     App.refCache.countries.forEach((c) => {
       html += `<option value="${App.escapeHtml(c.code)}" ${value === c.code ? "selected" : ""}>${App.escapeHtml(`${c.flag || ""} ${c.name}`.trim())}</option>`;
     });
+    html += `</select>`;
+    return html;
+  };
+
+  App.renderRefVisaCountrySelect = function renderRefVisaCountrySelect(name, value) {
+    const list = App.refCache.countriesV2 || [];
+    let html = `<select name="${name}" data-ref-visa-country="1"><option value="">— 选择国家（ISO 249）—</option>`;
+    list.forEach((c) => {
+      const label = `${c.flag_emoji || ""} ${c.name_zh || ""} · ${c.country_code}`.trim();
+      html += `<option value="${App.escapeHtml(c.country_code)}" ${value === c.country_code ? "selected" : ""}>${App.escapeHtml(label)}</option>`;
+    });
+    // keep an out-of-vocab value visible instead of silently blanking it
+    if (value && !list.some((c) => c.country_code === value)) {
+      html += `<option value="${App.escapeHtml(value)}" selected>⚠️ ${App.escapeHtml(value)}（不在词表）</option>`;
+    }
     html += `</select>`;
     return html;
   };
@@ -1475,6 +1493,7 @@
     if (typeof col === "object" && col.ref === "attraction") return App.attractionLabel(v);
     if (typeof col === "object" && col.ref === "scenario") return App.scenarioLabel(v);
     if (typeof col === "object" && col.ref === "country") return App.countryLabel(v);
+    if (typeof col === "object" && col.ref === "visa_country") return App.visaCountryLabel(v);
     if (typeof col === "object" && col.type === "image_thumb") {
       if (!v) return "—";
       const src = String(v);

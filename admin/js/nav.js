@@ -74,6 +74,7 @@
         { kind: "table", table: "passport_countries", label: "护照国家（国籍列表）" },
         { kind: "table", table: "visa_policies_v2", label: "政策框架 v2（8 政策）" },
         { kind: "table", table: "visa_policy_grants_v2", label: "政策适用 v2（国籍×窗口）" },
+        { kind: "table", table: "visa_countries", label: "国家受控词表（ISO 249）" },
         { kind: "table", table: "visa_cities", label: "城市维表（GB/T 2260）" },
         { kind: "table", table: "visa_ports", label: "口岸维表（IATA）" },
         { kind: "table", table: "visa_permit_zones", label: "许可区（西藏等）" },

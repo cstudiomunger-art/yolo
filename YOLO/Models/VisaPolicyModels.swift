@@ -54,7 +54,10 @@ struct VisaPolicyV2: Codable, Identifiable, Hashable {
     let maxStayDefault: Int?
     let maxStayUnit: String?            // "days" | "hours"
     let clockRule: String?              // next_day_0000 | by_hour | entry_day
+    let entryCount: String?             // single | double | multiple | per_entry (display/data only)
     let allowedArea: AllowedArea
+    let passportOrdinaryOnly: Bool?     // 仅普通护照 (display/data only)
+    let purpose: [String]?              // tourism | business | transit | family (display/data only)
     let passportValidityMonths: Int?
     let priority: Int                   // tie/fallback order only — NOT the winner picker
     let sourceUrl: String?
@@ -75,6 +78,9 @@ struct VisaGrantV2: Codable, Identifiable, Hashable {
     let effectiveDate: String?          // "yyyy-MM-dd", nil/1900-01-01 = no lower bound
     let expiryDate: String?             // "yyyy-MM-dd", nil = no official end
     let maxStayOverride: Int?
+    let entryCountOverride: String?     // per-country entry-count override (display/data only)
+    let announcedDate: String?          // 公告日 "yyyy-MM-dd" (display/data only)
+    let evidenceQuote: String?          // 原文引文 (display/data only)
 }
 
 /// City dimension (GB/T 2260). `appCitySlug` maps the app's content-city ids in.
