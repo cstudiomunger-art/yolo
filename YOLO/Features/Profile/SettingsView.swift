@@ -96,7 +96,7 @@ struct SettingsView: View {
             Button {
                 showCountryPicker = true
             } label: {
-                settingsRow(String(localized: "Nationality"), value: nil)
+                settingsRow(String(localized: "Nationality"), value: nationalityLabel)
             }
             .buttonStyle(.plain)
 
@@ -122,6 +122,14 @@ struct SettingsView: View {
                     .padding(.horizontal, Theme.screenPadding)
             }
         }
+    }
+
+    /// Current nationality as flag + Chinese name (from the global ISO list).
+    private var nationalityLabel: String? {
+        let cc = appEnv.preferences.countryCode.uppercased()
+        guard !cc.isEmpty else { return nil }
+        if let c = ISO3166.all.first(where: { $0.code == cc }) { return "\(c.flag) \(c.name)" }
+        return "\(ISO3166.flag(cc)) \(cc)"
     }
 
     private var cacheSection: some View {
