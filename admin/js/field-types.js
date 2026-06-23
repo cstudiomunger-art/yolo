@@ -19,6 +19,7 @@
       field.type === "ref_cities_multi" ||
       field.type === "ref_countries_multi" ||
       field.type === "ref_attractions_multi" ||
+      field.type === "ref_ports_multi" ||
       field.type === "enum_multi"
     ) {
       return Array.isArray(value) ? value : [];
@@ -139,6 +140,9 @@
         break;
       case "ref_countries_multi":
         inner = App.renderRefCountriesMulti(name, value);
+        break;
+      case "ref_ports_multi":
+        inner = App.renderRefPortsMulti(name, value);
         break;
       case "enum_multi":
         inner = App.renderEnumMulti(name, value, field);
@@ -407,6 +411,25 @@
       html += `<label class="checkbox-chip"><input type="checkbox" value="${App.escapeHtml(c.code)}" ${checked} /> ${App.escapeHtml(`${c.flag || ""} ${c.name}`.trim())}</label>`;
     });
     html += `</div>`;
+    return html;
+  };
+
+  App.renderRefPortsMulti = function renderRefPortsMulti(name, selectedCodes) {
+    const codes = Array.isArray(selectedCodes) ? selectedCodes : [];
+    const ports = App.refCache.ports || [];
+    let html = `<div class="checkbox-grid" data-name="${name}">`;
+    ports.forEach((p) => {
+      const checked = codes.includes(p.code) ? "checked" : "";
+      const inactive = p.is_active === false ? "（停用）" : "";
+      html += `<label class="checkbox-chip"><input type="checkbox" value="${App.escapeHtml(p.code)}" ${checked} /> ${App.escapeHtml(`${p.name_zh || ""} · ${p.code}${inactive}`.trim())}</label>`;
+    });
+    // Keep any code referenced by the policy but absent from visa_ports (so editing never
+    // silently drops it) — surfaces the namespace gap instead of hiding it.
+    codes.filter((c) => !ports.some((p) => p.code === c)).forEach((c) => {
+      html += `<label class="checkbox-chip"><input type="checkbox" value="${App.escapeHtml(c)}" checked /> ⚠️ ${App.escapeHtml(c)}（不在口岸维表）</label>`;
+    });
+    html += `</div>`;
+    if (!ports.length) html += `<div class="field-hint">口岸维表为空，请先在「口岸维表（IATA）」中添加</div>`;
     return html;
   };
 
@@ -885,6 +908,7 @@
       case "ref_cities_multi":
       case "ref_countries_multi":
       case "ref_attractions_multi":
+      case "ref_ports_multi":
       case "enum_multi": {
         const box = form.querySelector(`[data-name="${field.key}"]`);
         if (!box) return [];

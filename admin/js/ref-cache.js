@@ -11,6 +11,7 @@
     countries: [],
     users: [],
     visaPoliciesV2: [],
+    ports: [],
     loaded: false,
   };
 
@@ -36,12 +37,14 @@
 
     // Pickers backed by newer tables — tolerant so a missing table never breaks core refs.
     try {
-      const [usersRes, visaPolRes] = await Promise.all([
+      const [usersRes, visaPolRes, portsRes] = await Promise.all([
         App.client.from("profiles").select("id,email,display_name").order("email", { ascending: true }),
         App.client.from("visa_policies_v2").select("id,official_name_zh,policy_type,priority").order("priority", { ascending: true }),
+        App.client.from("visa_ports").select("code,name_zh,display_order,is_active").order("display_order", { ascending: true }),
       ]);
       App.refCache.users = usersRes.data || App.refCache.users;
       App.refCache.visaPoliciesV2 = visaPolRes.data || App.refCache.visaPoliciesV2;
+      App.refCache.ports = portsRes.data || App.refCache.ports;
     } catch (e) {
       // keep whatever was cached
     }
