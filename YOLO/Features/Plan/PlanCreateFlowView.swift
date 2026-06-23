@@ -65,11 +65,6 @@ struct PlanCreateFlowView: View {
         .background(Theme.ColorToken.background)
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { dismiss() }
-            }
-        }
         .task { await loadCities() }
         .sheet(isPresented: $showArrivalPicker) {
             planDateSheet(
@@ -139,16 +134,22 @@ struct PlanCreateFlowView: View {
                 Text("All cities")
                     .sectionTitleStyle()
                 cityGrid(filteredCities)
-
-                Group {
-                    primaryButton(String(localized: "Continue")) {
-                        step = .dates
-                    }
+            }
+            .padding(Theme.screenPadding)
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 0) {
+                Divider()
+                primaryButton(String(localized: "Continue")) {
+                    step = .dates
                 }
                 .disabled(selectedCityIds.isEmpty)
                 .opacity(selectedCityIds.isEmpty ? 0.45 : 1)
+                .padding(.horizontal, Theme.screenPadding)
+                .padding(.top, 12)
+                .padding(.bottom, 6)
             }
-            .padding(Theme.screenPadding)
+            .background(Theme.ColorToken.background)
         }
     }
 
