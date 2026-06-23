@@ -39,6 +39,7 @@ struct VisaDetectorView: View {
     @State private var countries: [PassportCountry] = VisaDetectorView.fallbackCountries
     @State private var editingCountry: CountryField?
     @State private var editingPort: PortField?
+    @State private var editingPassport = false
 
     private var country: String {
         let c = appEnv.preferences.countryCode
@@ -197,23 +198,44 @@ struct VisaDetectorView: View {
     }
 
     private var passportCard: some View {
-        HStack(spacing: 12) {
-            Text("🛂").font(.system(size: 20))
-                .frame(width: 40, height: 40)
-                .background(Theme.ColorToken.accent.opacity(0.14))
-                .clipShape(RoundedRectangle(cornerRadius: 11))
-            VStack(alignment: .leading, spacing: 2) {
-                Text("护照国籍 · \(country)")
-                    .font(Theme.FontToken.inter(14, weight: .semibold))
-                Text("来自 onboarding（在「我的」里修改）")
-                    .font(Theme.FontToken.inter(10))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
+        Button { editingPassport = true } label: {
+            HStack(spacing: 12) {
+                Text("🛂").font(.system(size: 20))
+                    .frame(width: 40, height: 40)
+                    .background(Theme.ColorToken.accent.opacity(0.14))
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("护照国籍 · \(countryLabel(country))")
+                        .font(Theme.FontToken.inter(14, weight: .semibold))
+                        .foregroundStyle(Theme.ColorToken.textPrimary)
+                    Text("点此修改护照国籍（同步到「我的」）")
+                        .font(Theme.FontToken.inter(10))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textMuted)
             }
-            Spacer()
+            .padding(12)
+            .background(Theme.ColorToken.backgroundSubtle)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .contentShape(Rectangle())
         }
-        .padding(12)
-        .background(Theme.ColorToken.backgroundSubtle)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .buttonStyle(.plain)
+        .sheet(isPresented: $editingPassport) {
+            CountrySelectSheet(
+                title: "护照国籍",
+                countries: countries,
+                includeUndecided: false,
+                selected: country
+            ) { code in
+                appEnv.preferences.countryCode = code
+                editingPassport = false
+                Task {
+                    await appEnv.refreshVisaRule()
+                    await appEnv.profileSync.pushToRemote()
+                }
+            }
+        }
     }
 
     /// A captioned, bordered group of rows — gives the long form scannable hierarchy.
