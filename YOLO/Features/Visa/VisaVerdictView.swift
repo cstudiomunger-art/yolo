@@ -42,6 +42,7 @@ struct VisaVerdictView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     if !isGate0 { citiesChips }
                     verdictCard
+                    if !isGate0, let policy = chosenPolicy { policyEntryCard(policy) }
                     if !isGate0, let sheet = rec.chosenSheet { healthSheet(sheet) }
                     if rec.level == .amber { plansCard }
                     if let fresh = rec.freshness { freshnessBadge(fresh) }
@@ -108,7 +109,6 @@ struct VisaVerdictView: View {
                     Text("最晚须于 \(Self.dateLabel(exit)) 前出境。")
                         .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
                 }
-                metaLine
                 if !rec.alsoEligible.isEmpty {
                     Text("你也符合：" + rec.alsoEligible.map { alsoLabel($0) }.joined(separator: " / ") + "，当前已选限制更少的一条。")
                         .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
@@ -141,19 +141,73 @@ struct VisaVerdictView: View {
         return false
     }
 
-    private var metaLine: some View {
-        Text("policy = \(rec.chosenPolicyId) · "
-             + (rec.maxStayDays.map { "max_stay = \($0)d · " } ?? "")
-             + "area = \(areaLabel)")
-            .font(.system(size: 10, design: .monospaced))
-            .foregroundStyle(Theme.ColorToken.textMuted)
-            .padding(.top, 2)
+    // MARK: - Policy entry card（依据政策 · 条目）
+
+    /// The concrete policy this verdict rests on — official name (zh/en), the key params
+    /// in plain language, the verified date, and the 一级信源 link (source_url, previously
+    /// unused on the client) so the result is traceable to the official notice.
+    private func policyEntryCard(_ p: VisaPolicyV2) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("依据政策 · 条目").font(Theme.FontToken.inter(12, weight: .semibold))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(p.officialNameZh).font(Theme.FontToken.inter(14, weight: .semibold))
+                if !p.officialNameEn.isEmpty {
+                    Text(p.officialNameEn).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                }
+            }
+
+            entryParam("停留", stayText(p))
+            entryParam("活动范围", areaText)
+            entryParam("计时", clockText(p))
+            if let lv = p.lastVerified, !lv.isEmpty {
+                entryParam("核验", "核验于 \(lv)")
+            }
+
+            if let s = p.sourceUrl, let url = URL(string: s) {
+                Link(destination: url) {
+                    Text("查看官方公告 →")
+                        .font(Theme.FontToken.inter(11, weight: .medium))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.ColorToken.textPrimary, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 2)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    private var areaLabel: String {
+    private func entryParam(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text(label).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                .frame(width: 56, alignment: .leading)
+            Text(value).font(Theme.FontToken.inter(11, weight: .medium)).foregroundStyle(Theme.ColorToken.textPrimary)
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func stayText(_ p: VisaPolicyV2) -> String {
+        if p.maxStayUnit == "hours" { return p.maxStayDefault.map { "\($0) 小时" } ?? "—" }
+        return rec.maxStayDays.map { "\($0) 天" } ?? p.maxStayDefault.map { "\($0) 天" } ?? "—"
+    }
+
+    private func clockText(_ p: VisaPolicyV2) -> String {
+        switch p.clockRule {
+        case "by_hour": return "入境精确时刻起算"
+        case "entry_day": return "入境当日起算"
+        default: return "入境次日 0 时起算"
+        }
+    }
+
+    private var areaText: String {
         guard let p = chosenPolicy else { return "—" }
-        if case .national = p.allowedArea { return "national" }
-        if case .codes(let a) = p.allowedArea { return a.isEmpty ? "port-zone" : "\(a.count) 区" }
+        if case .national = p.allowedArea { return "全国（除特别说明区域）" }
+        if case .codes(let a) = p.allowedArea { return a.isEmpty ? "仅口岸限定区" : "限 \(a.count) 个指定地区" }
         return "—"
     }
 
