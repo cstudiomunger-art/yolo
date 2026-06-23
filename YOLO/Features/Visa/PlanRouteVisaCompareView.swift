@@ -9,13 +9,21 @@ struct PlanRouteVisaCompareView: View {
     let routes: [VisaRoute]
     @State private var adopted: VisaRoute.Kind?
 
+    private var hasFriendly: Bool { routes.contains { $0.kind == .friendly } }
+
+    private var introText: String {
+        hasFriendly
+            ? "这条线默认需签证。下面 \(routes.count) 条走法，签证友好那条不用办签、还可能多一座城。"
+            : "这条线默认需签证，且暂未找到免签走法（多因停留超免签时限或城市超范围）。下面 \(routes.count) 条都需办 L 旅游签证。"
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(alignment: .top, spacing: 9) {
                         Text("🛂")
-                        Text("这条线默认需签证。下面 3 条走法，签证友好那条不用办签、还可能多一座城。")
+                        Text(introText)
                             .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
                     }
                     .padding(12)
@@ -28,7 +36,7 @@ struct PlanRouteVisaCompareView: View {
                 }
                 .padding(Theme.screenPadding)
             }
-            .navigationTitle("3 选 1")
+            .navigationTitle("\(routes.count) 选 1")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
         }
