@@ -38,6 +38,7 @@ struct VisaDetectorView: View {
     // Seeded with a small fallback so the picker is never empty before the fetch lands.
     @State private var countries: [PassportCountry] = VisaDetectorView.fallbackCountries
     @State private var editingCountry: CountryField?
+    @State private var editingPort: PortField?
 
     private var country: String {
         let c = appEnv.preferences.countryCode
@@ -204,9 +205,19 @@ struct VisaDetectorView: View {
             Divider()
             countryRow(title: "下一程去哪 / 回哪国", field: .onward, code: onward)
             Divider()
-            portMenu(title: "入境口岸", selection: $entryPort)
+            portRow(title: "入境口岸", field: .entry, code: entryPort)
+                .sheet(item: $editingPort) { field in
+                    PortSelectSheet(
+                        title: field.title,
+                        ports: availablePorts,
+                        selected: field == .entry ? entryPort : exitPort
+                    ) { code in
+                        if field == .entry { entryPort = code } else { exitPort = code }
+                        editingPort = nil
+                    }
+                }
             Divider()
-            portMenu(title: "出境口岸", selection: $exitPort)
+            portRow(title: "出境口岸", field: .exit, code: exitPort)
             Divider()
             datesRow
             Divider()
@@ -252,15 +263,15 @@ struct VisaDetectorView: View {
         return p.isEmpty ? VisaDetectorView.fallbackPorts : p
     }
 
-    private func portMenu(title: String, selection: Binding<String>) -> some View {
-        Menu {
-            ForEach(availablePorts) { p in
-                Button("\(p.nameZh) · \(p.code)") { selection.wrappedValue = p.code }
-            }
-        } label: {
-            let name = availablePorts.first { $0.code == selection.wrappedValue }?.nameZh ?? selection.wrappedValue
-            selectorRow(title: title, value: name)
+    private func portRow(title: String, field: PortField, code: String) -> some View {
+        Button { editingPort = field } label: {
+            selectorRow(title: title, value: portLabel(code))
         }
+        .buttonStyle(.plain)
+    }
+
+    private func portLabel(_ code: String) -> String {
+        availablePorts.first { $0.code == code }?.nameZh ?? code
     }
 
     private var datesRow: some View {
@@ -369,6 +380,13 @@ struct VisaDetectorView: View {
         var title: String { self == .departure ? "从哪国出发" : "下一程去哪 / 回哪国" }
     }
 
+    /// Which port selector the picker sheet is editing.
+    enum PortField: Identifiable {
+        case entry, exit
+        var id: Int { self == .entry ? 0 : 1 }
+        var title: String { self == .entry ? "入境口岸" : "出境口岸" }
+    }
+
     /// Used only until `passport_countries` is fetched (keeps the picker non-empty offline).
     static let fallbackCountries: [PassportCountry] = [
         .init(code: "GB", name: "United Kingdom", flag: "🇬🇧"),
@@ -462,6 +480,55 @@ private struct CountrySelectSheet: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Searchable single-select port picker for entry / exit — same list style as the
+/// country picker (picks one, dismisses). Source list is CMS-managed `visa_ports`.
+private struct PortSelectSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let title: String
+    let ports: [VisaPort]
+    let selected: String
+    let onPick: (String) -> Void
+
+    @State private var search = ""
+
+    private var filtered: [VisaPort] {
+        guard !search.isEmpty else { return ports }
+        return ports.filter {
+            $0.nameZh.localizedCaseInsensitiveContains(search) || $0.code.localizedCaseInsensitiveContains(search)
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    ForEach(filtered) { p in
+                        Button { onPick(p.code) } label: {
+                            HStack(spacing: 12) {
+                                Text(p.nameZh).font(Theme.FontToken.inter(14)).foregroundStyle(Theme.ColorToken.textPrimary)
+                                Text(p.code).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                                Spacer()
+                                if selected.caseInsensitiveCompare(p.code) == .orderedSame {
+                                    Image(systemName: "checkmark").foregroundStyle(Theme.ColorToken.accent)
+                                }
+                            }
+                            .padding(.vertical, 14)
+                            .padding(.horizontal, Theme.screenPadding)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        Divider().padding(.leading, Theme.screenPadding)
+                    }
+                }
+            }
+            .searchable(text: $search, prompt: "搜索口岸 / IATA")
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
+        }
     }
 }
 
