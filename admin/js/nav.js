@@ -75,6 +75,7 @@
         { kind: "table", table: "visa_policies_v2", label: "政策框架 v2（8 政策）" },
         { kind: "table", table: "visa_policy_grants_v2", label: "政策适用 v2（国籍×窗口）" },
         { kind: "table", table: "visa_cities", label: "城市维表（GB/T 2260）" },
+        { kind: "table", table: "visa_ports", label: "口岸维表（IATA）" },
         { kind: "table", table: "visa_permit_zones", label: "许可区（西藏等）" },
         { kind: "table", table: "visa_city_policy_matrix", label: "城市×政策矩阵（只读）" },
       ],

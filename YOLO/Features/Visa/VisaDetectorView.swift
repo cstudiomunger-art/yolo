@@ -223,13 +223,19 @@ struct VisaDetectorView: View {
         return code
     }
 
+    /// CMS-managed ports (`visa_ports`), falling back to the bundled list before the fetch.
+    private var availablePorts: [VisaPort] {
+        let p = appEnv.visaData.data.ports
+        return p.isEmpty ? VisaDetectorView.fallbackPorts : p
+    }
+
     private func portMenu(title: String, selection: Binding<String>) -> some View {
         Menu {
-            ForEach(VisaDetectorView.portOptions) { p in
+            ForEach(availablePorts) { p in
                 Button("\(p.nameZh) · \(p.code)") { selection.wrappedValue = p.code }
             }
         } label: {
-            let name = VisaDetectorView.portOptions.first { $0.code == selection.wrappedValue }?.nameZh ?? selection.wrappedValue
+            let name = availablePorts.first { $0.code == selection.wrappedValue }?.nameZh ?? selection.wrappedValue
             selectorRow(title: title, value: name)
         }
     }
@@ -352,26 +358,24 @@ struct VisaDetectorView: View {
         .init(code: "MO", name: "Macao", flag: "🇲🇴"),
     ]
 
-    struct PortOption: Identifiable { let code: String; let nameZh: String; var id: String { code } }
-
-    /// Curated major international entry/exit ports (IATA, plus TSN for cruise). Engine
-    /// matches by code, so these MUST share the namespace used in `visa_policies_v2` ports.
-    static let portOptions: [PortOption] = [
-        .init(code: "PEK", nameZh: "北京首都机场"),
-        .init(code: "PKX", nameZh: "北京大兴机场"),
-        .init(code: "PVG", nameZh: "上海浦东机场"),
-        .init(code: "SHA", nameZh: "上海虹桥机场"),
-        .init(code: "CAN", nameZh: "广州白云机场"),
-        .init(code: "SZX", nameZh: "深圳宝安机场"),
-        .init(code: "TFU", nameZh: "成都天府机场"),
-        .init(code: "CTU", nameZh: "成都双流机场"),
-        .init(code: "XIY", nameZh: "西安咸阳机场"),
-        .init(code: "HGH", nameZh: "杭州萧山机场"),
-        .init(code: "CKG", nameZh: "重庆江北机场"),
-        .init(code: "TSN", nameZh: "天津滨海机场"),
-        .init(code: "HAK", nameZh: "海口美兰机场"),
-        .init(code: "SYX", nameZh: "三亚凤凰机场"),
-        .init(code: "JHG", nameZh: "西双版纳机场"),
+    /// Used only until `visa_ports` is fetched (keeps the port menu non-empty offline).
+    /// Engine matches by code, so these MUST share the namespace used in `visa_policies_v2`.
+    static let fallbackPorts: [VisaPort] = [
+        .init(code: "PEK", nameZh: "北京首都机场", displayOrder: 0),
+        .init(code: "PKX", nameZh: "北京大兴机场", displayOrder: 1),
+        .init(code: "PVG", nameZh: "上海浦东机场", displayOrder: 2),
+        .init(code: "SHA", nameZh: "上海虹桥机场", displayOrder: 3),
+        .init(code: "CAN", nameZh: "广州白云机场", displayOrder: 4),
+        .init(code: "SZX", nameZh: "深圳宝安机场", displayOrder: 5),
+        .init(code: "TFU", nameZh: "成都天府机场", displayOrder: 6),
+        .init(code: "CTU", nameZh: "成都双流机场", displayOrder: 7),
+        .init(code: "XIY", nameZh: "西安咸阳机场", displayOrder: 8),
+        .init(code: "HGH", nameZh: "杭州萧山机场", displayOrder: 9),
+        .init(code: "CKG", nameZh: "重庆江北机场", displayOrder: 10),
+        .init(code: "TSN", nameZh: "天津滨海机场", displayOrder: 11),
+        .init(code: "HAK", nameZh: "海口美兰机场", displayOrder: 12),
+        .init(code: "SYX", nameZh: "三亚凤凰机场", displayOrder: 13),
+        .init(code: "JHG", nameZh: "西双版纳机场", displayOrder: 14),
     ]
 }
 

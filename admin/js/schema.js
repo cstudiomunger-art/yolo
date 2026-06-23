@@ -873,6 +873,24 @@
         { key: "is_active", type: "bool", label: "启用", defaultTrue: true },
       ],
     },
+    visa_ports: {
+      label: "口岸维表 v2（IATA）",
+      pk: "code",
+      order: "display_order",
+      listColumns: [
+        { key: "code", label: "IATA" },
+        { key: "name_zh", label: "中文名" },
+        { key: "display_order", label: "排序" },
+        { key: "is_active", label: "启用" },
+      ],
+      fields: [
+        { key: "code", type: "text", required: true, label: "IATA 码", hint: "如 上海浦东 PVG、北京首都 PEK；须与政策 entry_ports/exit_ports 同命名空间（IATA），检测器与引擎按此匹配" },
+        { key: "name_zh", type: "text", required: true, label: "中文名" },
+        { key: "name_en", type: "text", label: "英文名" },
+        { key: "display_order", type: "number", label: "排序", hint: "选择器从小到大排列" },
+        { key: "is_active", type: "bool", label: "启用", defaultTrue: true },
+      ],
+    },
     visa_permit_zones: {
       label: "许可区 v2（西藏等）",
       pk: "admin_code",

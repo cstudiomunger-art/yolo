@@ -13,7 +13,7 @@ final class VisaDataService {
     private(set) var data: VisaDataSet = .empty
     private(set) var isLoading = false
 
-    private static let cacheKey = "yolohappy.cachedVisaDataSet.v2"
+    private static let cacheKey = "yolohappy.cachedVisaDataSet.v3"   // v3: + visa_ports
 
     func load() async {
         guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else {
@@ -29,9 +29,11 @@ final class VisaDataService {
             async let cities: [VisaCityRow] = client.from("visa_cities").select().eq("is_active", value: true).execute().value
             async let matrix: [CityPolicyFeas] = client.from("visa_city_policy_matrix").select().eq("is_active", value: true).execute().value
             async let permits: [PermitZone] = client.from("visa_permit_zones").select().eq("is_active", value: true).execute().value
+            async let ports: [VisaPort] = client.from("visa_ports").select().eq("is_active", value: true).order("display_order", ascending: true).execute().value
 
             let set = try await VisaDataSet(
-                policies: policies, grants: grants, cities: cities, matrix: matrix, permitZones: permits)
+                policies: policies, grants: grants, cities: cities, matrix: matrix, permitZones: permits,
+                ports: ports)
             if set.policies.isEmpty {
                 data = cached() ?? Self.bundledFallback
             } else {
@@ -135,6 +137,18 @@ final class VisaDataService {
         }
 
         let permits = [PermitZone(adminCode: "540000", name: "西藏自治区", note: "需入藏许可，覆盖所有政策")]
-        return VisaDataSet(policies: policies, grants: grants, cities: cities, matrix: matrix, permitZones: permits)
+
+        // Bundled port picker (IATA; engine matches policy entry/exit ports by code).
+        // CMS `visa_ports` overrides this once fetched.
+        let portSeed: [(String, String)] = [
+            ("PEK", "北京首都机场"), ("PKX", "北京大兴机场"), ("PVG", "上海浦东机场"),
+            ("SHA", "上海虹桥机场"), ("CAN", "广州白云机场"), ("SZX", "深圳宝安机场"),
+            ("TFU", "成都天府机场"), ("CTU", "成都双流机场"), ("XIY", "西安咸阳机场"),
+            ("HGH", "杭州萧山机场"), ("CKG", "重庆江北机场"), ("TSN", "天津滨海机场"),
+            ("HAK", "海口美兰机场"), ("SYX", "三亚凤凰机场"), ("JHG", "西双版纳机场"),
+        ]
+        let ports = portSeed.enumerated().map { VisaPort(code: $0.element.0, nameZh: $0.element.1, displayOrder: $0.offset) }
+
+        return VisaDataSet(policies: policies, grants: grants, cities: cities, matrix: matrix, permitZones: permits, ports: ports)
     }()
 }

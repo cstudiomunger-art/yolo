@@ -104,6 +104,16 @@ struct PermitZone: Codable, Hashable {
     let note: String?
 }
 
+/// Selectable entry/exit port (CMS-managed in `visa_ports`). The engine matches a query's
+/// port against a policy's `entry_ports/exit_ports` by `code`, so this list MUST share that
+/// namespace (IATA). Editable in admin so ports aren't hardcoded in the app.
+struct VisaPort: Codable, Identifiable, Hashable {
+    var id: String { code }
+    let code: String            // IATA, e.g. PVG
+    let nameZh: String
+    let displayOrder: Int
+}
+
 /// Everything the engine evaluates against (fetched + cached, or bundled fallback).
 struct VisaDataSet: Codable, Equatable {
     var policies: [VisaPolicyV2]
@@ -111,8 +121,9 @@ struct VisaDataSet: Codable, Equatable {
     var cities: [VisaCityRow]
     var matrix: [CityPolicyFeas]
     var permitZones: [PermitZone]
+    var ports: [VisaPort]
 
-    static let empty = VisaDataSet(policies: [], grants: [], cities: [], matrix: [], permitZones: [])
+    static let empty = VisaDataSet(policies: [], grants: [], cities: [], matrix: [], permitZones: [], ports: [])
 
     // MARK: City-code translation (single source of truth)
 
