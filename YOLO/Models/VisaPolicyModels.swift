@@ -88,6 +88,50 @@ struct VisaCityRow: Codable, Identifiable, Hashable {
     let isExitPort: Bool
     let transit240h: Bool
     let appCitySlug: String?
+
+    init(cityId: String, nameZh: String, nameEn: String, regionType: String,
+         isEntryPort: Bool, isExitPort: Bool, transit240h: Bool, appCitySlug: String?) {
+        self.cityId = cityId; self.nameZh = nameZh; self.nameEn = nameEn
+        self.regionType = regionType; self.isEntryPort = isEntryPort; self.isExitPort = isExitPort
+        self.transit240h = transit240h; self.appCitySlug = appCitySlug
+    }
+
+    // Foundation's `.convertFromSnakeCase` (the Supabase client's decoder) mis-maps
+    // `transit_240h` → `transit240H` — it uppercases the letter after the digits — so the
+    // synthesized key `transit240h` never matches and the WHOLE row throws keyNotFound,
+    // which cascades to discard the entire live `visa_cities` fetch (app silently falls
+    // back to the bundled 6-city set). Decode it by both spellings (Supabase: transit240H;
+    // local cache uses plain keys: transit240h); default false (advisory, unused by engine).
+    enum CodingKeys: String, CodingKey {
+        case cityId, nameZh, nameEn, regionType, isEntryPort, isExitPort, appCitySlug
+        case transit240h
+        case transit240HConverted = "transit240H"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        cityId = try c.decode(String.self, forKey: .cityId)
+        nameZh = try c.decode(String.self, forKey: .nameZh)
+        nameEn = try c.decode(String.self, forKey: .nameEn)
+        regionType = try c.decode(String.self, forKey: .regionType)
+        isEntryPort = try c.decode(Bool.self, forKey: .isEntryPort)
+        isExitPort = try c.decode(Bool.self, forKey: .isExitPort)
+        appCitySlug = try c.decodeIfPresent(String.self, forKey: .appCitySlug)
+        transit240h = (try? c.decode(Bool.self, forKey: .transit240h))
+            ?? (try? c.decode(Bool.self, forKey: .transit240HConverted)) ?? false
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(cityId, forKey: .cityId)
+        try c.encode(nameZh, forKey: .nameZh)
+        try c.encode(nameEn, forKey: .nameEn)
+        try c.encode(regionType, forKey: .regionType)
+        try c.encode(isEntryPort, forKey: .isEntryPort)
+        try c.encode(isExitPort, forKey: .isExitPort)
+        try c.encode(transit240h, forKey: .transit240h)
+        try c.encodeIfPresent(appCitySlug, forKey: .appCitySlug)
+    }
 }
 
 /// Derived city × policy feasibility (read-only; DB computes it, client never recalcs).
