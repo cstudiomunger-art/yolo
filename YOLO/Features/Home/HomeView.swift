@@ -82,6 +82,7 @@ struct HomeView: View {
                 HomeQuickAccessGrid(
                     prepCompleted: processedPrepCount,
                     prepTotal: prepTotal,
+                    topSpacing: trips.isEmpty ? 28 : 8,
                     onOpenPrepare: { appEnv.navigation.presentPrepare() },
                     onOpenInfoHub: { appEnv.navigation.presentInfoHub() },
                     onOpenGeniusBar: { appEnv.navigation.presentGeniusBar() },

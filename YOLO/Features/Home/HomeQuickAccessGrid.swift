@@ -4,6 +4,7 @@ import SwiftUI
 struct HomeQuickAccessGrid: View {
     let prepCompleted: Int
     let prepTotal: Int
+    var topSpacing: CGFloat = 8
     var onOpenPrepare: () -> Void = {}
     var onOpenInfoHub: () -> Void = {}
     var onOpenGeniusBar: () -> Void = {}
@@ -53,7 +54,7 @@ struct HomeQuickAccessGrid: View {
             }
             .padding(.horizontal, Theme.screenPadding)
         }
-        .padding(.top, 8)
+        .padding(.top, topSpacing)
     }
 
     private func quickCell(icon: String, label: String, subtitle: String, action: @escaping () -> Void) -> some View {
