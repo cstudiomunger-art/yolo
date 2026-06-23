@@ -34,9 +34,9 @@ struct VisaDetectorView: View {
     @State private var evaluatedCodes: [String] = []
     @State private var routes: [VisaRoute] = []
 
-    // Full country list (passport_countries) — same source as onboarding's picker.
-    // Seeded with a small fallback so the picker is never empty before the fetch lands.
-    @State private var countries: [PassportCountry] = VisaDetectorView.fallbackCountries
+    // Full global country list (all 249 ISO 3166-1 entries, Chinese names) — covers every
+    // country, not just the ~90 visa-relevant nationalities in `passport_countries`.
+    private let countries: [PassportCountry] = ISO3166.all
     @State private var editingCountry: CountryField?
     @State private var editingPort: PortField?
     @State private var editingPassport = false
@@ -89,12 +89,7 @@ struct VisaDetectorView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } }
             }
-            .task {
-                await appEnv.visaData.load()
-                if let loaded = try? await appEnv.content.fetchPassportCountries(), !loaded.isEmpty {
-                    countries = loaded
-                }
-            }
+            .task { await appEnv.visaData.load() }
             .onAppear {
                 guard !presetsApplied else { return }
                 presetsApplied = true
@@ -442,18 +437,6 @@ struct VisaDetectorView: View {
         var id: Int { self == .entry ? 0 : 1 }
         var title: String { self == .entry ? "入境口岸" : "出境口岸" }
     }
-
-    /// Used only until `passport_countries` is fetched (keeps the picker non-empty offline).
-    static let fallbackCountries: [PassportCountry] = [
-        .init(code: "GB", name: "United Kingdom", flag: "🇬🇧"),
-        .init(code: "US", name: "United States", flag: "🇺🇸"),
-        .init(code: "FR", name: "France", flag: "🇫🇷"),
-        .init(code: "DE", name: "Germany", flag: "🇩🇪"),
-        .init(code: "SG", name: "Singapore", flag: "🇸🇬"),
-        .init(code: "JP", name: "Japan", flag: "🇯🇵"),
-        .init(code: "HK", name: "Hong Kong", flag: "🇭🇰"),
-        .init(code: "MO", name: "Macao", flag: "🇲🇴"),
-    ]
 
     /// Used only until `visa_ports` is fetched (keeps the port menu non-empty offline).
     /// Engine matches by code, so these MUST share the namespace used in `visa_policies_v2`.
