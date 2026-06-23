@@ -71,6 +71,7 @@
       label: "🛂 签证引擎 v2（已核验）",
       defaultExpanded: false,
       items: [
+        { kind: "view", view: "visa_hub", label: "🛂 签证工作台（可视化）" },
         { kind: "table", table: "passport_countries", label: "护照国家（国籍列表）" },
         { kind: "table", table: "visa_policies_v2", label: "政策框架 v2（8 政策）" },
         { kind: "table", table: "visa_policy_grants_v2", label: "政策适用 v2（国籍×窗口）" },
@@ -162,7 +163,7 @@
   };
 
   App.syncNavSelectionFromState = function syncNavSelectionFromState() {
-    if (App.currentView === "users_hub" || App.currentView === "membership_hub" || App.currentView === "transactions_hub" || App.currentView === "pricing_hub") {
+    if (App.currentView === "users_hub" || App.currentView === "membership_hub" || App.currentView === "transactions_hub" || App.currentView === "pricing_hub" || App.currentView === "visa_hub") {
       App.navSelection = { kind: "view", view: App.currentView };
     } else if (App.currentView === "table" && App.currentTable) {
       App.navSelection = { kind: "table", table: App.currentTable };

@@ -71,6 +71,11 @@
       return;
     }
 
+    if (App.currentView === "visa_hub") {
+      await App.renderVisaHub();
+      return;
+    }
+
     if (App.currentView === "city_detail" && App.cityHubCityId) {
       await App.loadCityPanel(App.cityHubCityId, App.cityHubPanel || "overview");
       return;
