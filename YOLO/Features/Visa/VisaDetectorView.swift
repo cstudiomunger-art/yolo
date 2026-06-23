@@ -15,8 +15,8 @@ struct VisaDetectorView: View {
     var presetEnd: Date? = nil
     @State private var presetsApplied = false
 
-    @State private var departure = "GB"
-    @State private var onward = "GB"
+    @State private var departure = ""   // defaults to passport country on appear
+    @State private var onward = ""       // empty = 还没定 (undecided)
     @State private var entryPort = "PVG"
     @State private var exitPort = "PVG"
     @State private var entryAt = Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: Date()) ?? Date()
@@ -29,16 +29,35 @@ struct VisaDetectorView: View {
     @State private var selfTest = false
     @State private var selfTestCodes: Set<String> = []
 
-    @State private var recommendation: VisaRecommendation?
+    @State private var verdict: IdentifiedRec?
     @State private var evaluatedCodes: [String] = []
     @State private var routes: [VisaRoute] = []
+
+    // Full country list (passport_countries) — same source as onboarding's picker.
+    // Seeded with a small fallback so the picker is never empty before the fetch lands.
+    @State private var countries: [PassportCountry] = VisaDetectorView.fallbackCountries
+    @State private var editingCountry: CountryField?
 
     private var country: String {
         let c = appEnv.preferences.countryCode
         return (c.isEmpty ? "GB" : c).uppercased()
     }
 
-    private var tripSlugs: [String] { presetCitySlugs ?? appEnv.preferences.selectedCityIds }
+    /// Only a Plan preset or a saved itinerary counts as a real trip. Without one we must
+    /// NOT pass off the leftover global `selectedCityIds` as "我的行程" — show the empty state.
+    private var hasRealTrip: Bool {
+        presetCitySlugs != nil || !appEnv.preferences.savedItineraries.isEmpty
+    }
+
+    private var tripSlugs: [String] {
+        if let preset = presetCitySlugs { return preset }
+        return hasRealTrip ? appEnv.preferences.selectedCityIds : []
+    }
+
+    private var tripSourceTitle: String {
+        if selfTest { return "手动试算（不写回行程）" }
+        return hasRealTrip ? "正在判定：我的行程" : "还没有行程"
+    }
 
     /// GB/T 2260 codes the engine evaluates (self-test picks are already codes).
     private var activeCodes: [String] {
@@ -76,16 +95,22 @@ struct VisaDetectorView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } }
             }
-            .task { await appEnv.visaData.load() }
+            .task {
+                await appEnv.visaData.load()
+                if let loaded = try? await appEnv.content.fetchPassportCountries(), !loaded.isEmpty {
+                    countries = loaded
+                }
+            }
             .onAppear {
                 guard !presetsApplied else { return }
                 presetsApplied = true
+                if departure.isEmpty { departure = country }   // default from passport
                 if let s = presetStart {
                     entryAt = Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: s) ?? s
                 }
                 if let e = presetEnd { plannedExitAt = e }
             }
-            .sheet(item: Binding(get: { recommendation.map { IdentifiedRec(rec: $0) } }, set: { recommendation = $0?.rec })) { wrapped in
+            .sheet(item: $verdict) { wrapped in
                 VisaVerdictView(recommendation: wrapped.rec, cityCodes: evaluatedCodes,
                                 data: appEnv.visaData.data, routes: routes)
             }
@@ -97,8 +122,8 @@ struct VisaDetectorView: View {
     private var tripSourceSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Label(selfTest ? "手动试算（不写回行程）" : "正在判定：我的行程",
-                      systemImage: selfTest ? "slider.horizontal.3" : "location")
+                Label(tripSourceTitle,
+                      systemImage: selfTest ? "slider.horizontal.3" : (hasRealTrip ? "location" : "questionmark.circle"))
                     .font(Theme.FontToken.inter(13, weight: .semibold))
                 Spacer()
                 Button(selfTest ? "用我的行程" : "手动选城市测一测") { selfTest.toggle() }
@@ -152,9 +177,9 @@ struct VisaDetectorView: View {
 
     private var selectorsSection: some View {
         VStack(spacing: 0) {
-            countryMenu(title: "从哪国出发", selection: $departure, includeUndecided: false)
+            countryRow(title: "从哪国出发", field: .departure, code: departure)
             Divider()
-            countryMenu(title: "下一程去哪 / 回哪国", selection: $onward, includeUndecided: true)
+            countryRow(title: "下一程去哪 / 回哪国", field: .onward, code: onward)
             Divider()
             portMenu(title: "入境口岸", selection: $entryPort)
             Divider()
@@ -169,16 +194,33 @@ struct VisaDetectorView: View {
             validityRow
         }
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ColorToken.border, lineWidth: 1))
+        .sheet(item: $editingCountry) { field in
+            CountrySelectSheet(
+                title: field.title,
+                countries: countries,
+                includeUndecided: field == .onward,
+                selected: field == .departure ? departure : onward
+            ) { code in
+                if field == .departure { departure = code } else { onward = code }
+                editingCountry = nil
+            }
+        }
     }
 
-    private func countryMenu(title: String, selection: Binding<String>, includeUndecided: Bool) -> some View {
-        Menu {
-            ForEach(VisaDetectorView.countryOptions(includeUndecided: includeUndecided)) { opt in
-                Button("\(opt.flag) \(opt.name)") { selection.wrappedValue = opt.code }
-            }
-        } label: {
-            selectorRow(title: title, value: VisaDetectorView.label(for: selection.wrappedValue))
+    private func countryRow(title: String, field: CountryField, code: String) -> some View {
+        Button { editingCountry = field } label: {
+            selectorRow(title: title, value: countryLabel(code))
         }
+        .buttonStyle(.plain)
+    }
+
+    /// flag + name for a code, from the loaded full list (empty = undecided).
+    private func countryLabel(_ code: String) -> String {
+        if code.isEmpty { return "❓ 还没定" }
+        if let c = countries.first(where: { $0.code.caseInsensitiveCompare(code) == .orderedSame }) {
+            return "\(c.flag) \(c.name)"
+        }
+        return code
     }
 
     private func portMenu(title: String, selection: Binding<String>) -> some View {
@@ -281,7 +323,7 @@ struct VisaDetectorView: View {
         routes = VisaTripChecker.routes(query: query, appCities: appCities,
                                         data: appEnv.visaData.data, recommendation: rec)
         evaluatedCodes = codes
-        recommendation = rec
+        verdict = IdentifiedRec(rec: rec)
     }
 
     // MARK: - Options
@@ -291,34 +333,29 @@ struct VisaDetectorView: View {
         var label: String { switch self { case .ok: return "≥ 6 个月 ✓"; case .short: return "< 6 个月 ⚠️"; case .skip: return "不确定 / 跳过" } }
     }
 
-    struct CountryOption: Identifiable { let code: String; let flag: String; let name: String; var id: String { code } }
-
-    static func countryOptions(includeUndecided: Bool) -> [CountryOption] {
-        var list: [CountryOption] = [
-            .init(code: "GB", flag: "🇬🇧", name: "United Kingdom"),
-            .init(code: "US", flag: "🇺🇸", name: "United States"),
-            .init(code: "FR", flag: "🇫🇷", name: "France"),
-            .init(code: "DE", flag: "🇩🇪", name: "Germany"),
-            .init(code: "SG", flag: "🇸🇬", name: "Singapore"),
-            .init(code: "JP", flag: "🇯🇵", name: "Japan"),
-            .init(code: "HK", flag: "🇭🇰", name: "Hong Kong"),
-            .init(code: "MO", flag: "🇲🇴", name: "Macao"),
-        ]
-        if includeUndecided { list.append(.init(code: "", flag: "❓", name: "还没定")) }
-        return list
+    /// Which country selector the picker sheet is editing.
+    enum CountryField: Identifiable {
+        case departure, onward
+        var id: Int { self == .departure ? 0 : 1 }
+        var title: String { self == .departure ? "从哪国出发" : "下一程去哪 / 回哪国" }
     }
 
-    static func label(for code: String) -> String {
-        if code.isEmpty { return "❓ 还没定" }
-        if let opt = countryOptions(includeUndecided: false).first(where: { $0.code == code }) {
-            return "\(opt.flag) \(opt.name)"
-        }
-        return code
-    }
+    /// Used only until `passport_countries` is fetched (keeps the picker non-empty offline).
+    static let fallbackCountries: [PassportCountry] = [
+        .init(code: "GB", name: "United Kingdom", flag: "🇬🇧"),
+        .init(code: "US", name: "United States", flag: "🇺🇸"),
+        .init(code: "FR", name: "France", flag: "🇫🇷"),
+        .init(code: "DE", name: "Germany", flag: "🇩🇪"),
+        .init(code: "SG", name: "Singapore", flag: "🇸🇬"),
+        .init(code: "JP", name: "Japan", flag: "🇯🇵"),
+        .init(code: "HK", name: "Hong Kong", flag: "🇭🇰"),
+        .init(code: "MO", name: "Macao", flag: "🇲🇴"),
+    ]
 
     struct PortOption: Identifiable { let code: String; let nameZh: String; var id: String { code } }
 
-    /// Curated major international entry/exit ports (IATA). Engine matches by code.
+    /// Curated major international entry/exit ports (IATA, plus TSN for cruise). Engine
+    /// matches by code, so these MUST share the namespace used in `visa_policies_v2` ports.
     static let portOptions: [PortOption] = [
         .init(code: "PEK", nameZh: "北京首都机场"),
         .init(code: "PKX", nameZh: "北京大兴机场"),
@@ -326,10 +363,12 @@ struct VisaDetectorView: View {
         .init(code: "SHA", nameZh: "上海虹桥机场"),
         .init(code: "CAN", nameZh: "广州白云机场"),
         .init(code: "SZX", nameZh: "深圳宝安机场"),
-        .init(code: "CTU", nameZh: "成都天府机场"),
+        .init(code: "TFU", nameZh: "成都天府机场"),
+        .init(code: "CTU", nameZh: "成都双流机场"),
         .init(code: "XIY", nameZh: "西安咸阳机场"),
         .init(code: "HGH", nameZh: "杭州萧山机场"),
         .init(code: "CKG", nameZh: "重庆江北机场"),
+        .init(code: "TSN", nameZh: "天津滨海机场"),
         .init(code: "HAK", nameZh: "海口美兰机场"),
         .init(code: "SYX", nameZh: "三亚凤凰机场"),
         .init(code: "JHG", nameZh: "西双版纳机场"),
@@ -339,6 +378,64 @@ struct VisaDetectorView: View {
 private struct IdentifiedRec: Identifiable {
     let id = UUID()
     let rec: VisaRecommendation
+}
+
+/// Searchable full-country picker for departure / onward (full `passport_countries`,
+/// same data as onboarding). `includeUndecided` adds a top「还没定」row for the onward leg.
+private struct CountrySelectSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let title: String
+    let countries: [PassportCountry]
+    let includeUndecided: Bool
+    let selected: String
+    let onPick: (String) -> Void
+
+    @State private var search = ""
+
+    private var filtered: [PassportCountry] {
+        guard !search.isEmpty else { return countries }
+        return countries.filter {
+            $0.name.localizedCaseInsensitiveContains(search) || $0.code.localizedCaseInsensitiveContains(search)
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                LazyVStack(spacing: 0) {
+                    if includeUndecided && search.isEmpty {
+                        row(flag: "❓", name: "还没定", code: "")
+                        Divider().padding(.leading, Theme.screenPadding)
+                    }
+                    ForEach(filtered) { c in
+                        row(flag: c.flag, name: c.name, code: c.code)
+                        Divider().padding(.leading, Theme.screenPadding)
+                    }
+                }
+            }
+            .searchable(text: $search, prompt: "搜索国家 / 地区")
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
+        }
+    }
+
+    private func row(flag: String, name: String, code: String) -> some View {
+        Button { onPick(code) } label: {
+            HStack(spacing: 12) {
+                Text(flag).font(.title2)
+                Text(name).font(Theme.FontToken.inter(14)).foregroundStyle(Theme.ColorToken.textPrimary)
+                Spacer()
+                if selected.caseInsensitiveCompare(code) == .orderedSame {
+                    Image(systemName: "checkmark").foregroundStyle(Theme.ColorToken.accent)
+                }
+            }
+            .padding(.vertical, 14)
+            .padding(.horizontal, Theme.screenPadding)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
 }
 
 /// Minimal wrapping flow layout for chips (avoids LazyVGrid sizing for short lists).

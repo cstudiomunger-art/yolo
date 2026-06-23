@@ -95,7 +95,7 @@ final class VisaDataService {
             pol("twov_24h", "过境免签", "24小时过境免签", universal: true, onwardTicket: true, onwardThird: true, stay: 24, unit: "hours", clock: "by_hour", area: .codes([]), priority: 25),
             pol("twov_240h", "过境免签", "240小时过境免签", onwardTicket: true, onwardThird: true, portLimited: true, entryPorts: p240Ports, exitPorts: p240Ports, stay: 240, unit: "hours", clock: "next_day_0000", area: p240Area, priority: 30),
             pol("group_asean_xsbn", "团体免签", "东盟旅游团西双版纳免签", group: true, portLimited: true, entryPorts: ["JHG", "CNMHN", "MOHAN"], exitPorts: ["JHG", "CNMHN", "MOHAN"], stay: 6, unit: "days", clock: "next_day_0000", area: .codes(["532800"]), priority: 35),
-            pol("cruise_15d", "团体免签", "邮轮团免签", universal: true, group: true, portLimited: true, entryPorts: ["CNSHA", "CNTSN"], exitPorts: ["CNSHA", "CNTSN"], stay: 15, unit: "days", clock: "next_day_0000", area: .codes(["110000", "310000", "320000", "330000"]), priority: 36),
+            pol("cruise_15d", "团体免签", "邮轮团免签", universal: true, group: true, portLimited: true, entryPorts: ["PVG", "SHA", "TSN"], exitPorts: ["PVG", "SHA", "TSN"], stay: 15, unit: "days", clock: "next_day_0000", area: .codes(["110000", "310000", "320000", "330000"]), priority: 36),
             pol("visa_L", "普通签证", "普通旅游签证（L签）", stay: 30, unit: "days", clock: "next_day_0000", area: .national, priority: 99, nodeKind: "info"),
         ]
 

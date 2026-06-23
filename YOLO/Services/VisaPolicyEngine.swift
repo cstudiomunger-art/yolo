@@ -13,21 +13,26 @@ enum VisaPolicyEngine {
 
     private static let cn = "CN"
 
-    // Deterministic UTC Gregorian calendar (mirrors engine.py's naive datetimes).
-    private static let cal: Calendar = {
+    // Local-wall-clock Gregorian calendar. The DatePicker emits dates in the device's
+    // timezone, and the policy clock ("入境次日 0 时" etc.) is meant in local wall time —
+    // a UTC calendar would shift every day-boundary by the device offset (e.g. CN +8h:
+    // a 03:00 entry would roll back to the previous calendar day for grant lookup and
+    // mis-place the legal-exit cutoff). Computed each call so a mid-session tz change
+    // (traveler crosses borders) is honored.
+    private static var cal: Calendar {
         var c = Calendar(identifier: .gregorian)
-        c.timeZone = TimeZone(identifier: "UTC")!
+        c.timeZone = TimeZone.current
         return c
-    }()
+    }
 
-    private static let dayFormatter: DateFormatter = {
+    private static var dayFormatter: DateFormatter {
         let f = DateFormatter()
         f.calendar = Calendar(identifier: .gregorian)
         f.locale = Locale(identifier: "en_US_POSIX")
-        f.timeZone = TimeZone(identifier: "UTC")
+        f.timeZone = TimeZone.current
         f.dateFormat = "yyyy-MM-dd"
         return f
-    }()
+    }
 
     // MARK: - Public entry
 
