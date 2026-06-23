@@ -69,28 +69,19 @@ struct VisaDetectorView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 20) {
                     tripSourceSection
-                    passportRow
+                    passportCard
                     selectorsSection
-                    Button(action: runEngine) {
-                        Text("开始判定 · 我这条线够用吗")
-                            .font(Theme.FontToken.inter(13, weight: .semibold))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Theme.ColorToken.textPrimary)
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(activeCodes.isEmpty)
-                    .opacity(activeCodes.isEmpty ? 0.4 : 1)
+                    ctaButton
 
                     Text("行程不是输入——地理范围限制是政策的输出。引擎只收能产生确定判决的硬事实，城市来自你的行程。以边检最终判定为准。")
                         .font(Theme.FontToken.inter(10))
                         .foregroundStyle(Theme.ColorToken.textMuted)
+                        .padding(.top, 2)
                 }
-                .padding(Theme.screenPadding)
+                .padding(.horizontal, Theme.screenPadding)
+                .padding(.vertical, 20)
             }
             .navigationTitle("签证检测")
             .navigationBarTitleDisplayMode(.inline)
@@ -185,58 +176,101 @@ struct VisaDetectorView: View {
         return names.count <= 3 ? names.joined(separator: " · ") : "已选 \(names.count) 城"
     }
 
-    private var passportRow: some View {
-        HStack(spacing: 10) {
-            Text("🛂").font(.system(size: 22))
-            VStack(alignment: .leading, spacing: 1) {
+    private var ctaButton: some View {
+        let ready = !activeCodes.isEmpty
+        return Button(action: runEngine) {
+            HStack(spacing: 8) {
+                Image(systemName: "checkmark.seal.fill").font(.system(size: 14))
+                Text("开始判定 · 我这条线够用吗")
+                    .font(Theme.FontToken.inter(14, weight: .semibold))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(Theme.ColorToken.textPrimary)
+            .foregroundStyle(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .shadow(color: Theme.ColorToken.textPrimary.opacity(ready ? 0.18 : 0), radius: 10, y: 4)
+        }
+        .buttonStyle(.plain)
+        .disabled(!ready)
+        .opacity(ready ? 1 : 0.35)
+    }
+
+    private var passportCard: some View {
+        HStack(spacing: 12) {
+            Text("🛂").font(.system(size: 20))
+                .frame(width: 40, height: 40)
+                .background(Theme.ColorToken.accent.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 11))
+            VStack(alignment: .leading, spacing: 2) {
                 Text("护照国籍 · \(country)")
-                    .font(Theme.FontToken.inter(14, weight: .medium))
+                    .font(Theme.FontToken.inter(14, weight: .semibold))
                 Text("来自 onboarding（在「我的」里修改）")
                     .font(Theme.FontToken.inter(10))
                     .foregroundStyle(Theme.ColorToken.textMuted)
             }
             Spacer()
         }
+        .padding(12)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    /// A captioned, bordered group of rows — gives the long form scannable hierarchy.
+    private func groupCard<C: View>(_ caption: String, @ViewBuilder _ content: () -> C) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(caption)
+                .font(Theme.FontToken.inter(11, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+                .padding(.leading, 2)
+            VStack(spacing: 0) { content() }
+                .background(Theme.ColorToken.background)
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ColorToken.border, lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
     }
 
     private var selectorsSection: some View {
-        VStack(spacing: 0) {
-            countryRow(title: "从哪国出发", field: .departure, code: departure)
-            Divider()
-            countryRow(title: "下一程去哪 / 回哪国", field: .onward, code: onward)
-            Divider()
-            portRow(title: "入境口岸", field: .entry, code: entryPort)
-                .sheet(item: $editingPort) { field in
-                    PortSelectSheet(
-                        title: field.title,
-                        ports: availablePorts,
-                        selected: field == .entry ? entryPort : exitPort
-                    ) { code in
-                        if field == .entry { entryPort = code } else { exitPort = code }
-                        editingPort = nil
+        VStack(spacing: 18) {
+            groupCard("路线 · 从哪来、到哪去") {
+                countryRow(title: "从哪国出发", field: .departure, code: departure)
+                Divider()
+                countryRow(title: "下一程去哪 / 回哪国", field: .onward, code: onward)
+                Divider()
+                portRow(title: "入境口岸", field: .entry, code: entryPort)
+                    .sheet(item: $editingPort) { field in
+                        PortSelectSheet(
+                            title: field.title,
+                            ports: availablePorts,
+                            selected: field == .entry ? entryPort : exitPort
+                        ) { code in
+                            if field == .entry { entryPort = code } else { exitPort = code }
+                            editingPort = nil
+                        }
                     }
+                Divider()
+                portRow(title: "出境口岸", field: .exit, code: exitPort)
+            }
+            .sheet(item: $editingCountry) { field in
+                CountrySelectSheet(
+                    title: field.title,
+                    countries: countries,
+                    includeUndecided: field == .onward,
+                    selected: field == .departure ? departure : onward
+                ) { code in
+                    if field == .departure { departure = code } else { onward = code }
+                    editingCountry = nil
                 }
-            Divider()
-            portRow(title: "出境口岸", field: .exit, code: exitPort)
-            Divider()
-            datesRow
-            Divider()
-            toggleRow(title: "已出续程机票", subtitle: "过境免签需要", isOn: $ticketed)
-            Divider()
-            toggleRow(title: "随旅游团入境", subtitle: "团体/邮轮免签需要", isOn: $group)
-            Divider()
-            validityRow
-        }
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ColorToken.border, lineWidth: 1))
-        .sheet(item: $editingCountry) { field in
-            CountrySelectSheet(
-                title: field.title,
-                countries: countries,
-                includeUndecided: field == .onward,
-                selected: field == .departure ? departure : onward
-            ) { code in
-                if field == .departure { departure = code } else { onward = code }
-                editingCountry = nil
+            }
+
+            groupCard("时间 · 进出时刻") { datesRow }
+
+            groupCard("条件 · 影响免签的开关") {
+                toggleRow(title: "已出续程机票", subtitle: "过境免签需要", isOn: $ticketed)
+                Divider()
+                toggleRow(title: "随旅游团入境", subtitle: "团体/邮轮免签需要", isOn: $group)
+                Divider()
+                validityRow
             }
         }
     }
@@ -301,7 +335,7 @@ struct VisaDetectorView: View {
                 Text(subtitle).font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
             }
             Spacer()
-            Toggle("", isOn: isOn).labelsHidden()
+            Toggle("", isOn: isOn).labelsHidden().tint(Theme.ColorToken.success)
         }
         .padding(14)
     }
