@@ -42,5 +42,6 @@ struct InfoHubView: View {
         .padding(16)
         .frame(maxWidth: .infinity)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.ColorToken.border, lineWidth: 1))
+        .contentShape(Rectangle())   // whole row is tappable, not just the icon/text
     }
 }
