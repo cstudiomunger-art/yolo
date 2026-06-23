@@ -43,7 +43,6 @@ struct VisaVerdictView: View {
                     if !isGate0 { citiesChips }
                     verdictCard
                     if !isGate0, let policy = chosenPolicy { policyEntryCard(policy) }
-                    if !isGate0, let sheet = rec.chosenSheet { healthSheet(sheet) }
                     if rec.level == .amber { plansCard }
                     if let fresh = rec.freshness { freshnessBadge(fresh) }
                     if !rec.isEnough && !routes.isEmpty {
@@ -234,41 +233,6 @@ struct VisaVerdictView: View {
         let p = data.policy(id)
         let stay = p?.maxStayUnit == "days" ? (p?.maxStayDefault).map { "（最长 \($0) 天）" } ?? "" : ""
         return (p?.officialNameZh ?? id) + stay
-    }
-
-    // MARK: - Four-dimension health sheet
-
-    private func healthSheet(_ sheet: VisaSheet) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("体检单 · 四维检查").font(Theme.FontToken.inter(12, weight: .semibold))
-            checkRow("空间 · 城市可达", ok: sheet.spaceOk,
-                     detail: sheet.blockers.isEmpty ? "所选城市均在范围内"
-                        : "超界：" + sheet.blockers.map { data.cityName(forAdminCode: $0) }.joined(separator: "、"))
-            checkRow("时间 · 停留时长", ok: sheet.timeOk,
-                     detail: sheet.timeOk
-                        ? (sheet.latestExitDate.map { "最晚 \(Self.dateLabel($0)) 前出境" } ?? "在停留期内")
-                        : String(format: "超期约 %.0f 小时，请收紧离境", sheet.overstayHours))
-            checkRow("口岸 · 进出口岸", ok: sheet.portOk,
-                     detail: sheet.portOk ? "进出口岸均开放" : "入境或出境口岸不在该政策开放清单内")
-            checkRow("条件 · 续程/团/第三国", ok: sheet.conditionOk,
-                     detail: sheet.conditionOk ? "附加条件已满足"
-                        : sheet.conditionReasons.joined(separator: "；"))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Theme.ColorToken.backgroundSubtle)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func checkRow(_ title: String, ok: Bool, detail: String) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            Text(ok ? "✅" : "⚠️").font(.system(size: 13))
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title).font(Theme.FontToken.inter(12, weight: .medium))
-                Text(detail).font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
-            }
-            Spacer()
-        }
     }
 
     // MARK: - Amber plans A/B
