@@ -26,23 +26,24 @@ struct HomeTripHeroPanel: View {
                     .padding(.horizontal, Theme.screenPadding)
             } else {
                 let displayTrips = trips
+                let multi = displayTrips.count > 1
                 ZStack(alignment: .bottom) {
                     TabView(selection: $page) {
                         ForEach(Array(displayTrips.enumerated()), id: \.element.id) { index, trip in
                             heroCard(tripContent(trip))
                                 .padding(.horizontal, Theme.screenPadding)
-                                .padding(.bottom, 22)
+                                .padding(.bottom, multi ? 22 : 0)
                                 .tag(index)
                         }
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
 
-                    if displayTrips.count > 1 {
+                    if multi {
                         pageIndicator
                             .padding(.bottom, 28)
                     }
                 }
-                .frame(height: carouselHeight)
+                .frame(height: multi ? carouselHeight : 300)
             }
         }
         .padding(.top, 8)
