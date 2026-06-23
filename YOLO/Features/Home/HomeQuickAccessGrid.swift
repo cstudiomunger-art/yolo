@@ -53,7 +53,7 @@ struct HomeQuickAccessGrid: View {
             }
             .padding(.horizontal, Theme.screenPadding)
         }
-        .padding(.top, 20)
+        .padding(.top, 8)
     }
 
     private func quickCell(icon: String, label: String, subtitle: String, action: @escaping () -> Void) -> some View {
