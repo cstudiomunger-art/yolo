@@ -20,9 +20,13 @@ struct VisaRoute: Identifiable {
     /// catalog, adopting the route folds it into the itinerary as a real stop; until then the
     /// add stays advisory (display-only). Forward-compatible: no-op while the slug is absent.
     var addedCitySlug: String? = nil
+    /// For a 过境 card that offers several equivalent exits (香港 / 澳门), the per-hub choices.
+    /// When present the UI shows one button per option (pick the hub) instead of one CTA.
+    var transitOptions: [TransitOption]? = nil
     let note: String
 
     enum Tone { case warn, neutral, ok }
+    struct TransitOption: Identifiable, Hashable { let id = UUID(); let short: String; let slug: String }
 }
 
 enum VisaTripChecker {
@@ -131,29 +135,38 @@ enum VisaTripChecker {
     /// twov_240h. Returns a card PER working hub (港 + 澳), copy/stay-limit derived from the
     /// matched policy so it stays in sync with the CMS.
     private static func activateTransit(query: VisaQuery, appCities: [String], data: VisaDataSet) -> [VisaRoute] {
-        var out: [VisaRoute] = []
+        var working: [(code: String, name: String, short: String, landPort: String, slug: String)] = []
+        var policy: VisaPolicyV2?
         for hub in transitHubs {
             let q2 = query.with(onward: hub.code, ticketed: true)
             let r = VisaPolicyEngine.recommend(q2, data: data)
             guard r.level == .green, r.chosenPolicyId == "twov_240h" else { continue }
-
-            let policy = data.policies.first { $0.id == r.chosenPolicyId }
-            let policyName = policy?.officialNameZh ?? "过境免签"
-            let stayLimit = stayLimitText(policy)   // e.g. "≤ 10 天"
-
-            out.append(VisaRoute(
-                kind: .friendly,
-                title: "✓ 签证友好 · 加\(hub.short)过境",
-                badge: "全程免签 · 多一城", badgeTone: .ok,
-                cities: appCities, addedCity: hub.name, addedCitySlug: hub.slug,
-                note: """
-                根据你的情况：把\(hub.short)加成途经/最后一站，内地段即符合\(policyName)（全程免签、白赚一座城）。
-                • 想去\(hub.short)：可经\(hub.landPort)口岸陆路出境，或订一张飞\(hub.short)的机票。
-                • 想去任意第三国（只要不是你的出发国）：同样免签——请重建行程，把第三国设为「下一程 / 返回国」。
-                ⚠️ 需停留\(stayLimit)、从开放口岸进出、出示离境机票。
-                """))
+            if policy == nil { policy = data.policies.first { $0.id == r.chosenPolicyId } }
+            working.append(hub)
         }
-        return out
+        guard !working.isEmpty else { return [] }
+
+        // Equivalent exits (香港 / 澳门) collapse into ONE card with a button per hub.
+        let policyName = policy?.officialNameZh ?? "过境免签"
+        let stayLimit = stayLimitText(policy)
+        let hubNames = working.map(\.short).joined(separator: "或")
+        let landBullets = working.map { "想去\($0.short)可经\($0.landPort)口岸陆路出境" }.joined(separator: "；")
+        let options = working.map { VisaRoute.TransitOption(short: $0.short, slug: $0.slug) }
+
+        return [VisaRoute(
+            kind: .friendly,
+            title: "✓ 签证友好 · 加一城过境",
+            badge: "全程免签 · 多一城", badgeTone: .ok,
+            cities: appCities,
+            addedCity: working.map(\.short).joined(separator: " / "),
+            addedCitySlug: working.first?.slug,
+            transitOptions: options,
+            note: """
+            根据你的情况：把\(hubNames)加成途经/最后一站，内地段即符合\(policyName)（全程免签、白赚一座城）。
+            • \(landBullets)；也可直接订一张飞往该地的机票。
+            • 想去任意第三国（只要不是你的出发国）：同样免签——请重建行程，把第三国设为「下一程 / 返回国」。
+            ⚠️ 需停留\(stayLimit)、从开放口岸进出、出示离境机票。
+            """)]
     }
 
     /// Stay-limit phrase from the matched policy (hours → "≤ N 天", days → "≤ N 天"). Keeps the

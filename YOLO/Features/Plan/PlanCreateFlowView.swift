@@ -488,17 +488,34 @@ struct PlanCreateFlowView: View {
                 }
             }
             Text(route.note).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
-            // Every route is selectable. Friendly = filled success CTA; original = outline.
-            Button { adoptVisaRoute(route) } label: {
-                Text(route.kind == .friendly ? "按推荐确认并生成" : "选这条 · 办 L 签生成")
-                    .font(Theme.FontToken.inter(12, weight: .semibold))
-                    .frame(maxWidth: .infinity).padding(.vertical, 10)
-                    .foregroundStyle(route.kind == .friendly ? Color.white : Theme.ColorToken.textPrimary)
-                    .background(route.kind == .friendly ? Theme.ColorToken.success : Theme.ColorToken.backgroundSubtle)
-                    .overlay(RoundedRectangle(cornerRadius: 11).stroke(route.kind == .friendly ? Color.clear : Theme.ColorToken.border, lineWidth: 1))
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
+            if let opts = route.transitOptions, !opts.isEmpty {
+                // 过境卡:合并的港/澳一张卡,一个口岸一个按钮。
+                HStack(spacing: 10) {
+                    ForEach(opts) { opt in
+                        Button { adoptTransit(route, option: opt) } label: {
+                            Text("选\(opt.short)")
+                                .font(Theme.FontToken.inter(12, weight: .semibold))
+                                .frame(maxWidth: .infinity).padding(.vertical, 10)
+                                .foregroundStyle(Color.white)
+                                .background(Theme.ColorToken.success)
+                                .clipShape(RoundedRectangle(cornerRadius: 11))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            } else {
+                // Every route is selectable. Friendly = filled success CTA; original = outline.
+                Button { adoptVisaRoute(route) } label: {
+                    Text(route.kind == .friendly ? "按推荐确认并生成" : "选这条 · 办 L 签生成")
+                        .font(Theme.FontToken.inter(12, weight: .semibold))
+                        .frame(maxWidth: .infinity).padding(.vertical, 10)
+                        .foregroundStyle(route.kind == .friendly ? Color.white : Theme.ColorToken.textPrimary)
+                        .background(route.kind == .friendly ? Theme.ColorToken.success : Theme.ColorToken.backgroundSubtle)
+                        .overlay(RoundedRectangle(cornerRadius: 11).stroke(route.kind == .friendly ? Color.clear : Theme.ColorToken.border, lineWidth: 1))
+                        .clipShape(RoundedRectangle(cornerRadius: 11))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
@@ -860,6 +877,17 @@ struct PlanCreateFlowView: View {
            cities.contains(where: { $0.id == slug }),
            !ids.contains(slug) {
             ids.append(slug)
+        }
+        selectedCityIds = Set(ids)
+        startGeneration()
+    }
+
+    /// Adopt a merged transit card with the chosen hub (香港/澳门). Folds the hub in as a real
+    /// stop when it exists in the content catalog (forward-compatible), else advisory.
+    private func adoptTransit(_ route: VisaRoute, option: VisaRoute.TransitOption) {
+        var ids = route.cities
+        if cities.contains(where: { $0.id == option.slug }), !ids.contains(option.slug) {
+            ids.append(option.slug)
         }
         selectedCityIds = Set(ids)
         startGeneration()
