@@ -72,6 +72,9 @@ function buildPayload() {
     if (f.type === "slug" && (v == null || v === "")) {
       v = slugify(f.slugSource ? form[f.slugSource] : "", f.slugPrefix);
     }
+    // On INSERT, omit null/undefined so NOT-NULL columns with a DB default
+    // (e.g. attractions.category → 'sight', priority → 'P1') aren't forced to null.
+    if (isNew && (v === null || v === undefined)) continue;
     payload[f.key] = v;
   }
   // carry over columns present on the original row but absent from schema
