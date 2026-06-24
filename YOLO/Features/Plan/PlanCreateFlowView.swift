@@ -96,6 +96,18 @@ struct PlanCreateFlowView: View {
         .background(Theme.ColorToken.background)
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
+        // On the visa step the system back should return to the dates step (an in-flow step),
+        // not pop the whole create flow.
+        .navigationBarBackButtonHidden(step == .visa)
+        .toolbar {
+            if step == .visa {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { step = .dates } label: {
+                        Image(systemName: "chevron.left").font(.system(size: 17, weight: .semibold))
+                    }
+                }
+            }
+        }
         .task { await loadCities() }
         .sheet(isPresented: $showArrivalPicker) {
             planDateSheet(
