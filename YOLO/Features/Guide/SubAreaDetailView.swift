@@ -9,9 +9,35 @@ struct SubAreaDetailView: View {
     @State private var subArea: SubArea?
     @State private var attraction: Attraction?
     @State private var audioGuide: AudioGuide?
+    @State private var audioGuides: [AudioGuide] = []
+    @State private var subAreas: [SubArea] = []
+    @State private var subAreaAudio: [String: AudioGuide] = [:]
     @State private var isLoading = true
     @State private var fullScreenImagePath: String?
     @State private var showPaywall = false
+
+    /// Attraction-scoped play queue: the attraction's audio guides followed by each sub-area's
+    /// audio, deduplicated by guide id — identical to AttractionDetailView so tapping a sub-area
+    /// audio plays within the whole attraction's playlist (next/previous across all areas).
+    private var attractionAudioQueue: [AudioTrack] {
+        guard let attraction else { return [] }
+        var seen = Set<String>()
+        var tracks: [AudioTrack] = []
+        for g in audioGuides where seen.insert(g.id).inserted {
+            tracks.append(AudioTrack(
+                guide: g, title: g.titleEn, artist: attraction.name,
+                attraction: attraction, subArea: nil, allowsPreview: true
+            ))
+        }
+        for area in subAreas {
+            guard let g = subAreaAudio[area.id], seen.insert(g.id).inserted else { continue }
+            tracks.append(AudioTrack(
+                guide: g, title: g.titleEn, artist: attraction.name,
+                attraction: attraction, subArea: area, allowsPreview: true
+            ))
+        }
+        return tracks
+    }
 
     var body: some View {
         Group {
@@ -91,6 +117,7 @@ struct SubAreaDetailView: View {
                 }
 
                 if let guide = audioGuide, let attraction {
+                    let queue = attractionAudioQueue
                     Text("🎧 Area Audio")
                         .sectionTitleStyle()
                     AudioGuideSection(
@@ -102,7 +129,9 @@ struct SubAreaDetailView: View {
                         ),
                         allowsPreview: true,
                         showsUnlockButton: false,
-                        subArea: area
+                        subArea: area,
+                        queue: queue,
+                        trackIndex: queue.firstIndex(where: { $0.guide.id == guide.id }) ?? 0
                     )
                 }
 
@@ -203,12 +232,24 @@ struct SubAreaDetailView: View {
         isLoading = true
         defer { isLoading = false }
         attraction = try? await appEnv.content.fetchAttraction(id: route.attractionId)
+        async let guidesTask = appEnv.content.fetchAudioGuides(attractionId: route.attractionId)
         let areas = (try? await appEnv.content.fetchSubAreas(attractionId: route.attractionId)) ?? []
+        subAreas = areas
+        audioGuides = (try? await guidesTask) ?? []
         subArea = areas.first { $0.id == route.subAreaId }
-        if let area = subArea, let direct = area.playbackGuide(attractionId: route.attractionId) {
-            audioGuide = direct
-        } else if let gid = subArea?.audioGuideId {
-            audioGuide = try? await appEnv.content.fetchAudioGuide(id: gid)
+
+        // Resolve audio for every area so the playlist spans the whole attraction.
+        var audioMap: [String: AudioGuide] = [:]
+        for area in areas {
+            if let direct = area.playbackGuide(attractionId: route.attractionId) {
+                audioMap[area.id] = direct
+            } else if let gid = area.audioGuideId,
+                      let guide = try? await appEnv.content.fetchAudioGuide(id: gid) {
+                audioMap[area.id] = guide
+                audioMap[gid] = guide
+            }
         }
+        subAreaAudio = audioMap
+        if let area = subArea { audioGuide = audioMap[area.id] }
     }
 }

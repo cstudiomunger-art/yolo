@@ -18,7 +18,7 @@ async function onSubmit() {
   loading.value = true;
   try {
     await auth.login(email.value, password.value);
-    router.push({ name: "dashboard" });
+    router.push({ name: "app" });
   } catch (e) {
     error.value = e?.message || "登录失败";
   } finally {
