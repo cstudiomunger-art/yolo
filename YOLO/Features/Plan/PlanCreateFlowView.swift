@@ -389,8 +389,12 @@ struct PlanCreateFlowView: View {
                             swapCard(plan)
                         }
 
-                        primaryButton(String(localized: "保持原行程继续")) { startGeneration() }
-                            .padding(.top, 4)
+                        // Route cards are each selectable; only show the standalone continue
+                        // button when there are none (GATE0 / passport-validity block).
+                        if visaRoutes.isEmpty {
+                            primaryButton(String(localized: "保持原行程继续")) { startGeneration() }
+                                .padding(.top, 4)
+                        }
 
                         Button {
                             showVisaDetector = true
@@ -472,16 +476,17 @@ struct PlanCreateFlowView: View {
                 }
             }
             Text(route.note).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
-            if route.kind == .friendly {
-                Button { adoptVisaRoute(route) } label: {
-                    Text("按推荐确认并生成")
-                        .font(Theme.FontToken.inter(12, weight: .semibold))
-                        .frame(maxWidth: .infinity).padding(.vertical, 10)
-                        .background(Theme.ColorToken.success).foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 11))
-                }
-                .buttonStyle(.plain)
+            // Every route is selectable. Friendly = filled success CTA; original = outline.
+            Button { adoptVisaRoute(route) } label: {
+                Text(route.kind == .friendly ? "按推荐确认并生成" : "选这条 · 办 L 签生成")
+                    .font(Theme.FontToken.inter(12, weight: .semibold))
+                    .frame(maxWidth: .infinity).padding(.vertical, 10)
+                    .foregroundStyle(route.kind == .friendly ? Color.white : Theme.ColorToken.textPrimary)
+                    .background(route.kind == .friendly ? Theme.ColorToken.success : Theme.ColorToken.backgroundSubtle)
+                    .overlay(RoundedRectangle(cornerRadius: 11).stroke(route.kind == .friendly ? Color.clear : Theme.ColorToken.border, lineWidth: 1))
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
             }
+            .buttonStyle(.plain)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
@@ -820,6 +825,9 @@ struct PlanCreateFlowView: View {
             var rs = VisaTripChecker.routes(query: query, appCities: slugs, data: data, recommendation: rec)
             // Prefer the interactive 换城 card over the auto 删城 route when a swap pool exists.
             if plan != nil { rs.removeAll { $0.kind == .friendly && $0.title.contains("去掉拖累城") } }
+            // Drop the 备选·办L签 card — it's identical to 纯兴趣 (keep original + L visa), and the
+            // 纯兴趣 card is now selectable on its own.
+            rs.removeAll { $0.kind == .applyVisa }
             visaQuery = query
             swapPlan = plan
             swapPicks = []
