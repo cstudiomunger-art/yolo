@@ -72,6 +72,14 @@ a {
   padding: 5px 10px;
   font-size: 13px;
 }
+.btn-danger {
+  background: transparent;
+  color: #d9534f;
+  border-color: rgba(217, 83, 79, 0.5);
+}
+.btn-danger:hover {
+  background: rgba(217, 83, 79, 0.12);
+}
 
 input,
 select,

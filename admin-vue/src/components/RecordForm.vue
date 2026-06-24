@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, computed, ref } from "vue";
 import FieldInput from "@/components/fields/FieldInput.vue";
-import { upsertRow } from "@/lib/crud";
+import { upsertRow, deleteRow } from "@/lib/crud";
 import { slugify } from "@/lib/storage";
 
 const props = defineProps({
@@ -9,10 +9,12 @@ const props = defineProps({
   schema: { type: Object, required: true },
   initial: { type: Object, default: null },
   presets: { type: Object, default: null }, // seed values for a new record
+  deletable: { type: Boolean, default: true }, // show 删除 when editing an existing row
 });
-const emit = defineEmits(["saved", "cancel"]);
+const emit = defineEmits(["saved", "cancel", "deleted"]);
 
 const isNew = !props.initial;
+const deleting = ref(false);
 
 // build initial form: clone existing row, or defaults for a new one
 function buildInitial() {
@@ -120,6 +122,21 @@ async function save() {
   }
 }
 
+async function remove() {
+  if (isNew) return;
+  if (!confirm(`确定删除该「${props.schema.label}」？此操作不可撤销，且会级联删除其下属内容。`)) return;
+  deleting.value = true;
+  error.value = "";
+  try {
+    await deleteRow(props.tableKey, pk, props.initial[pk]);
+    emit("deleted");
+  } catch (e) {
+    error.value = e.message || String(e);
+  } finally {
+    deleting.value = false;
+  }
+}
+
 const hasAdvanced = props.schema.fields.some((f) => f.advanced);
 </script>
 
@@ -128,6 +145,14 @@ const hasAdvanced = props.schema.fields.some((f) => f.advanced);
     <div class="form-head">
       <h2>{{ isNew ? "新建" : "编辑" }} · {{ schema.label }}</h2>
       <div class="actions">
+        <button
+          v-if="!isNew && deletable"
+          class="btn btn-danger btn-sm"
+          :disabled="deleting"
+          @click="remove"
+        >
+          {{ deleting ? "删除中…" : "删除" }}
+        </button>
         <button class="btn btn-secondary btn-sm" @click="emit('cancel')">取消</button>
         <button class="btn btn-sm" :disabled="saving" @click="save">
           {{ saving ? "保存中…" : "保存" }}

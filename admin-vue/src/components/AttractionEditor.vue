@@ -97,6 +97,11 @@ async function removeAudio() {
   await load();
   showToast("已移除");
 }
+
+function onAttractionDeleted() {
+  nav.requestReload();
+  nav.select({ kind: "placeholder", label: "景点已删除 · ← 从左侧选择内容" });
+}
 </script>
 
 <template>
@@ -110,6 +115,7 @@ async function removeAudio() {
       :schema="TABLES.attractions"
       :initial="attraction"
       @saved="() => nav.requestReload()"
+      @deleted="onAttractionDeleted"
       @cancel="() => {}"
     />
 

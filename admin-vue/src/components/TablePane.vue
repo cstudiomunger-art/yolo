@@ -129,6 +129,7 @@ watch(() => [props.tableKey, props.fixedCityId], load);
       :initial="editing._new ? null : editing"
       :presets="editing._new ? editing : null"
       @saved="onSaved"
+      @deleted="onSaved"
       @cancel="onCancel"
     />
 

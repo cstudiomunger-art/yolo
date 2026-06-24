@@ -62,6 +62,11 @@ function onSaved() {
   nav.requestReload();
 }
 
+function onDeleted() {
+  nav.requestReload();
+  nav.select({ kind: "placeholder", label: "已删除 · ← 从左侧选择内容" });
+}
+
 // After creating a NEW record: switch into its edit view and refresh the tree
 // so it appears immediately (no manual page refresh needed).
 function onNewSaved(savedRow) {
@@ -103,6 +108,7 @@ function onNewSaved(savedRow) {
         :schema="schema"
         :initial="row"
         @saved="onSaved"
+        @deleted="onDeleted"
         @cancel="() => {}"
       />
       <div v-else class="muted">未找到记录</div>
