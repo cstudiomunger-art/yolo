@@ -13,7 +13,7 @@ final class VisaDataService {
     private(set) var data: VisaDataSet = .empty
     private(set) var isLoading = false
 
-    private static let cacheKey = "yolohappy.cachedVisaDataSet.v3"   // v3: + visa_ports
+    private static let cacheKey = "yolohappy.cachedVisaDataSet.v4"   // v4: + visa_config
 
     func load() async {
         guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else {
@@ -31,9 +31,12 @@ final class VisaDataService {
             async let permits: [PermitZone] = client.from("visa_permit_zones").select().eq("is_active", value: true).execute().value
             async let ports: [VisaPort] = client.from("visa_ports").select().eq("is_active", value: true).order("display_order", ascending: true).execute().value
 
-            let set = try await VisaDataSet(
+            var set = try await VisaDataSet(
                 policies: policies, grants: grants, cities: cities, matrix: matrix, permitZones: permits,
                 ports: ports)
+            // Config is fetched separately with try? so a missing/empty `visa_config` table (e.g.
+            // migration not yet applied) can't cascade-fail the whole visa dataset load.
+            set.config = try? await client.from("visa_config").select().eq("is_active", value: true).execute().value
             if set.policies.isEmpty {
                 data = cached() ?? Self.bundledFallback
             } else {

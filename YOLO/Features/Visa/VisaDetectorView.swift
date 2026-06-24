@@ -466,7 +466,8 @@ private struct IdentifiedRec: Identifiable {
 
 /// Searchable full-country picker for departure / onward (full `passport_countries`,
 /// same data as onboarding). `includeUndecided` adds a top「还没定」row for the onward leg.
-private struct CountrySelectSheet: View {
+/// Internal (not private) so the Plan create flow can reuse the same picker.
+struct CountrySelectSheet: View {
     @Environment(\.dismiss) private var dismiss
     let title: String
     let countries: [PassportCountry]

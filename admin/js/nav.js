@@ -80,6 +80,7 @@
         { kind: "table", table: "visa_ports", label: "口岸维表（IATA）" },
         { kind: "table", table: "visa_permit_zones", label: "许可区（西藏等）" },
         { kind: "table", table: "visa_city_policy_matrix", label: "城市×政策矩阵（只读）" },
+        { kind: "table", table: "visa_config", label: "引擎参数（护照有效期等）" },
       ],
     },
     {

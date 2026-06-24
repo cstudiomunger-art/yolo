@@ -128,7 +128,7 @@ enum VisaTripChecker {
                     title: "✓ 签证友好 · 加一城过境",
                     badge: "全程免签 · 多一城", badgeTone: .ok,
                     cities: appCities, addedCity: hub.name,
-                    note: "把\(hub.name)加成最后一站：从内地出境到\(hub.name)构成第三地过境 → 满足 240 小时过境免签，内地段全程免签，\(hub.name)对你的护照通常也免签。等于不办签证还白赚一座城（停留需 ≤ 10 天、从开放口岸进出）。")
+                    note: "把\(hub.name)加成最后一站：从内地出境到\(hub.name)构成第三地过境 → 满足 240 小时过境免签，内地段全程免签，\(hub.name)对你的护照通常也免签。等于不办签证还白赚一座城（停留需 ≤ 10 天、从开放口岸进出）。⚠️ 过境免签要求出示离境机票，请提前订好飞往\(hub.name)/第三地的续程机票。")
             }
         }
         return nil

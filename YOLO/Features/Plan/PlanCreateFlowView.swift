@@ -27,6 +27,27 @@ struct PlanCreateFlowView: View {
     @State private var swapPicks: Set<String> = []
     @State private var visaChecking = false
     @State private var showVisaDetector = false
+    // Visa inputs collected on the dates page so the check is accurate (not coarse defaults).
+    @State private var natCode = ""      // 国籍 / 护照国, default from preferences
+    @State private var depCode = ""      // 出发国, default = nationality
+    @State private var onwardCode = ""   // 下一程国 / 回程国, default = nationality; "" = 还没定
+    @State private var editingCountry: PlanCountryField?
+    @State private var passportValidEnough = true   // 护照有效期是否满足最低要求(后台可配, 默认3个月)
+    @State private var hasChinaVisa = false          // 已持中国签证 → 跳过免签核对
+
+    private let visaCountries: [PassportCountry] = ISO3166.all
+
+    private enum PlanCountryField: Int, Identifiable {
+        case nationality, departure, onward
+        var id: Int { rawValue }
+        var title: String {
+            switch self {
+            case .nationality: return "国籍 / 护照"
+            case .departure: return "从哪国出发"
+            case .onward: return "下一程去哪 / 回哪国"
+            }
+        }
+    }
 
     private enum Step {
         case cities
@@ -104,6 +125,9 @@ struct PlanCreateFlowView: View {
         .sheet(isPresented: $showVisaDetector) {
             VisaDetectorView(presetCitySlugs: Array(selectedCityIds),
                              presetStart: arrivalDate, presetEnd: departureDate)
+        }
+        .sheet(item: $editingCountry) { field in
+            countryPickerSheet(field)
         }
     }
 
@@ -250,11 +274,93 @@ struct PlanCreateFlowView: View {
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
 
+                visaInputsSection
+
                 primaryButton(String(localized: "Generate itinerary")) {
                     enterVisaCheck()
                 }
             }
             .padding(Theme.screenPadding)
+        }
+    }
+
+    // 签证相关输入: 国籍 / 出发国 / 下一程国 — 让生成前的签证核对更准(尤其过境 240h 依赖下一程)。
+    private var visaInputsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("签证信息(让签证核对更准)")
+                .font(Theme.FontToken.inter(12, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+            VStack(spacing: 0) {
+                planCountryRow(.nationality, code: natCode)
+                Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                planCountryRow(.departure, code: depCode)
+                Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                planCountryRow(.onward, code: onwardCode)
+                Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                Toggle(isOn: $passportValidEnough) {
+                    Text("护照有效期 ≥ \(minValidityMonths) 个月")
+                        .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+                }
+                .tint(Theme.ColorToken.success)
+                .padding(.vertical, 8)
+                Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                Toggle(isOn: $hasChinaVisa) {
+                    Text("我已持有中国签证")
+                        .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+                }
+                .tint(Theme.ColorToken.success)
+                .padding(.vertical, 8)
+            }
+            .padding(.horizontal, 12)
+            .background(Theme.ColorToken.backgroundSubtle)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            Text("默认按往返同国判定。若下一程是第三国/港澳,可能触发过境免签。护照有效期不足 \(minValidityMonths) 个月将无法免签也无法办签证。")
+                .font(Theme.FontToken.inter(10))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+        }
+    }
+
+    private var minValidityMonths: Int { appEnv.visaData.data.minPassportValidityMonths }
+
+    private func planCountryRow(_ field: PlanCountryField, code: String) -> some View {
+        Button { editingCountry = field } label: {
+            HStack {
+                Text(field.title).font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+                Spacer()
+                Text(planCountryLabel(code)).font(Theme.FontToken.inter(13, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
+            }
+            .contentShape(Rectangle())
+            .padding(.vertical, 12)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func planCountryLabel(_ code: String) -> String {
+        if code.isEmpty { return "❓ 还没定" }
+        if let c = visaCountries.first(where: { $0.code.caseInsensitiveCompare(code) == .orderedSame }) {
+            return "\(c.flag) \(c.name)"
+        }
+        return code
+    }
+
+    @ViewBuilder
+    private func countryPickerSheet(_ field: PlanCountryField) -> some View {
+        CountrySelectSheet(
+            title: field.title,
+            countries: visaCountries,
+            includeUndecided: field == .onward,
+            selected: field == .nationality ? natCode : field == .departure ? depCode : onwardCode
+        ) { code in
+            switch field {
+            case .nationality:
+                natCode = code
+                appEnv.preferences.countryCode = code   // keep profile nationality in sync
+            case .departure: depCode = code
+            case .onward: onwardCode = code
+            }
+            editingCountry = nil
         }
     }
 
@@ -309,10 +415,19 @@ struct PlanCreateFlowView: View {
     }
 
     private func visaVerdictHeader(_ rec: VisaRecommendation) -> some View {
+        let isGate0 = rec.chosenPolicyId == "GATE0"
         let needVisa = rec.level == .red
-        let title = needVisa ? "这条线默认可能需要签证" : "这条线有条件免签，建议核对"
-        var detail = "下面给出更省事的走法，签证友好那条经引擎复核为全程免签。"
-        if let days = rec.maxStayDays { detail = "免签停留上限约 \(days) 天。" + detail }
+        let title: String
+        let detail: String
+        if isGate0 {
+            title = "护照有效期不足"
+            detail = "有效期不足 \(minValidityMonths) 个月，免签和签证都无法办理。请先换发护照再出行。"
+        } else {
+            title = needVisa ? "这条线默认可能需要签证" : "这条线有条件免签，建议核对"
+            var d = "下面给出更省事的走法，签证友好那条经引擎复核为全程免签。"
+            if let days = rec.maxStayDays { d = "免签停留上限约 \(days) 天。" + d }
+            detail = d
+        }
         return HStack(alignment: .top, spacing: 9) {
             Text("🛂")
             VStack(alignment: .leading, spacing: 3) {
@@ -652,6 +767,11 @@ struct PlanCreateFlowView: View {
         selectedCityIds = Set(appEnv.preferences.selectedCityIds)
         departureDate = appEnv.preferences.departureDate
         departureDate = PlanTripDateMath.clampDeparture(departureDate, arrival: arrivalDate)
+        let cc = appEnv.preferences.countryCode.trimmingCharacters(in: .whitespaces).uppercased()
+        natCode = cc
+        depCode = cc
+        onwardCode = cc   // default round-trip; user can pick a third country to enable transit免签
+        await appEnv.visaData.load()   // so the 护照有效期 label reflects the CMS value
     }
 
     private func toggleCity(_ id: String) {
@@ -671,16 +791,29 @@ struct PlanCreateFlowView: View {
         visaRec = nil
         visaRoutes = []
         Task {
-            let cc = appEnv.preferences.countryCode.trimmingCharacters(in: .whitespaces)
-            if cc.isEmpty || cc.uppercased() == "CN" { startGeneration(); return }
+            // Already holds a China visa → visa-free routing is moot, skip the whole check.
+            if hasChinaVisa { startGeneration(); return }
+            let cc = natCode.trimmingCharacters(in: .whitespaces).uppercased()
+            if cc.isEmpty || cc == "CN" { startGeneration(); return }
             await appEnv.visaData.load()
             let data = appEnv.visaData.data
             let slugs = Array(selectedCityIds)
+            // Passport-validity gate: pass nil when sufficient (no GATE0); 0 when the user says
+            // it's below the floor → engine returns GATE0 red (neither visa-free nor a visa works).
+            let validMonths: Int? = passportValidEnough ? nil : 0
             guard let query = VisaCoarseCheck.query(citySlugs: slugs, start: arrivalDate,
-                                                    end: departureDate, countryCode: cc, data: data) else {
+                                                    end: departureDate, countryCode: cc, data: data,
+                                                    departure: depCode, onward: onwardCode,
+                                                    passportValidMonths: validMonths) else {
                 startGeneration(); return
             }
             let rec = VisaPolicyEngine.recommend(query, data: data)
+            // GATE0 (passport validity) — no route helps; show the renew-passport warning only.
+            if rec.chosenPolicyId == "GATE0" {
+                visaQuery = query; visaRec = rec; visaRoutes = []
+                swapPlan = nil; swapPicks = []; visaChecking = false
+                return
+            }
             if rec.isEnough { startGeneration(); return }
             let catalog = cities.map { (slug: $0.id, popularity: $0.attractionCount) }
             let plan = VisaTripChecker.swapPlan(query: query, appCities: slugs, catalog: catalog, data: data, rec: rec)

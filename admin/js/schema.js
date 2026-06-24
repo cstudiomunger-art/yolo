@@ -894,6 +894,24 @@
         { key: "is_active", type: "bool", label: "启用", defaultTrue: true },
       ],
     },
+    visa_config: {
+      label: "引擎参数（可调）",
+      pk: "key",
+      order: "key",
+      listColumns: [
+        { key: "key", label: "键" },
+        { key: "label_zh", label: "名称" },
+        { key: "value_int", label: "整数值" },
+        { key: "is_active", label: "启用" },
+      ],
+      fields: [
+        { key: "key", type: "text", required: true, label: "参数键", hint: "如 passport_validity_months（护照最低有效期·月）。引擎按键读取，勿随意改键名" },
+        { key: "label_zh", type: "text", label: "显示名" },
+        { key: "value_int", type: "number", label: "整数值", hint: "护照最低有效期填月数（默认 3）。低于该值则不能免签、也办不了签证" },
+        { key: "value_text", type: "text", label: "文本值（备用）" },
+        { key: "is_active", type: "bool", label: "启用", defaultTrue: true },
+      ],
+    },
     visa_ports: {
       label: "口岸维表 v2（IATA）",
       pk: "code",

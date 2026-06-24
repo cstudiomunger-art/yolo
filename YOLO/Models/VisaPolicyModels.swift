@@ -164,6 +164,14 @@ struct VisaPort: Codable, Identifiable, Hashable {
     let displayOrder: Int
 }
 
+/// Tunable engine parameter (CMS `visa_config`, key/value). Optional on the data set so old
+/// caches / the bundled fallback decode fine; missing keys fall back to code defaults.
+struct VisaConfigRow: Codable, Hashable {
+    let key: String
+    let valueInt: Int?
+    let valueText: String?
+}
+
 /// Everything the engine evaluates against (fetched + cached, or bundled fallback).
 struct VisaDataSet: Codable, Equatable {
     var policies: [VisaPolicyV2]
@@ -172,8 +180,14 @@ struct VisaDataSet: Codable, Equatable {
     var matrix: [CityPolicyFeas]
     var permitZones: [PermitZone]
     var ports: [VisaPort]
+    var config: [VisaConfigRow]? = nil
 
     static let empty = VisaDataSet(policies: [], grants: [], cities: [], matrix: [], permitZones: [], ports: [])
+
+    /// Minimum passport validity (months) for GATE0. CMS-editable via `visa_config`; default 3.
+    var minPassportValidityMonths: Int {
+        config?.first { $0.key == "passport_validity_months" }?.valueInt ?? 3
+    }
 
     // MARK: City-code translation (single source of truth)
 

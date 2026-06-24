@@ -37,8 +37,9 @@ enum VisaPolicyEngine {
     // MARK: - Public entry
 
     static func recommend(_ query: VisaQuery, data: VisaDataSet) -> VisaRecommendation {
-        // GATE 0 — passport validity ≥ 6 months (engine-external pre-check, delivery doc §2).
-        if let months = query.passportValidMonths, months < 6 {
+        // GATE 0 — passport validity ≥ N months (N = CMS-editable `visa_config`, default 3).
+        // Below the floor → can neither go visa-free nor obtain a visa (renew passport first).
+        if let months = query.passportValidMonths, months < data.minPassportValidityMonths {
             return VisaRecommendation(
                 level: .red, chosenPolicyId: "GATE0", alsoEligible: [], sheets: [], plans: [],
                 blockers: query.cities, latestExitDate: nil, maxStayDays: nil,

@@ -70,9 +70,9 @@ check("A3 SG 往返 互免", mk("SG", dep: "SG", onward: "SG", entry: "PVG", exi
 // A4 IN 散客往返 北京 → 红 visa_L
 check("A4 IN 散客 北京", mk("IN", dep: "IN", onward: "IN", entry: "PEK", exit: "PEK",
     inAt: "2026-07-02T12:00", outAt: "2026-07-10T10:00", cities: [bj], ticketed: false), level: .red, chosen: "visa_L")
-// A5 GB 护照有效期 < 6 月 → 红 GATE0
+// A5 GB 护照有效期 < 阈值(默认3月) → 红 GATE0
 check("A5 GB 护照临期 GATE0", mk("GB", dep: "GB", onward: "GB", entry: "PVG", exit: "PVG",
-    inAt: "2026-07-02T12:00", outAt: "2026-07-14T10:00", cities: [bj, sh], valid: 3), level: .red, chosen: "GATE0")
+    inAt: "2026-07-02T12:00", outAt: "2026-07-14T10:00", cities: [bj, sh], valid: 2), level: .red, chosen: "GATE0")
 // A6 GB 往返但停留 40 天 → 超 30 天上限 → 黄（时间维度 fail）
 check("A6 GB 超期40天", mk("GB", dep: "GB", onward: "GB", entry: "PVG", exit: "PVG",
     inAt: "2026-07-02T12:00", outAt: "2026-08-11T10:00", cities: [bj, sh]), level: .amber)
@@ -168,6 +168,21 @@ let plan2 = VisaTripChecker.swapPlan(query: q2, appCities: ["acity", "ccity"], c
 let d2 = r2.level == .green && r2.isEnough && routes2.isEmpty && plan2 == nil
 d2 ? (pass += 1) : (fail += 1)
 print("\(d2 ? "✓" : "✗") D2 全免签静默放行: base=\(r2.level.rawValue) isEnough=\(r2.isEnough) routes=\(routes2.count) plan=\(plan2 == nil ? "nil" : "有")")
+
+print("\n──────── E. 护照有效期阈值后台可配（visa_config）────────")
+// 默认(无 config) → 阈值 3：valid=3 通过、valid=2 红 GATE0
+let e1 = data.minPassportValidityMonths == 3
+e1 ? (pass += 1) : (fail += 1)
+print("\(e1 ? "✓" : "✗") E1 默认阈值=3: \(data.minPassportValidityMonths)")
+// 后台改为 6 → valid=3 应红 GATE0（合成 config 覆盖）
+var data6 = data
+data6.config = [VisaConfigRow(key: "passport_validity_months", valueInt: 6, valueText: nil)]
+let e2thr = data6.minPassportValidityMonths == 6
+let rE2 = VisaPolicyEngine.recommend(mk("GB", dep: "GB", onward: "GB", entry: "PVG", exit: "PVG",
+    inAt: "2026-07-02T12:00", outAt: "2026-07-14T10:00", cities: [bj, sh], valid: 3), data: data6)
+let e2 = e2thr && rE2.chosenPolicyId == "GATE0"
+e2 ? (pass += 1) : (fail += 1)
+print("\(e2 ? "✓" : "✗") E2 后台阈值=6 → valid3 GATE0: 阈值=\(data6.minPassportValidityMonths) 判=\(rE2.level.rawValue)/\(rE2.chosenPolicyId)")
 
 print("\n════════ 结果：\(pass) 通过 / \(fail) 失败 ════════")
 exit(fail == 0 ? 0 : 1)
