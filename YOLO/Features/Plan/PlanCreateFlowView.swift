@@ -849,10 +849,19 @@ struct PlanCreateFlowView: View {
         }
     }
 
-    /// Adopt a recommended route: swap/drop routes change the selection (mainland cities);
-    /// the 加过境 route keeps the same cities (HK/MO is advisory). Then generate.
+    /// Adopt a recommended route → drive the itinerary. The route's own cities are always
+    /// used; if it advises an extra city (e.g. 港澳 transit) AND that city now exists in the
+    /// content catalog, fold it in as a real stop so the itinerary actually visits it. Until
+    /// the content city exists this is a no-op (the add stays advisory). Generic, so future
+    /// 海南/邮轮 route cards flow through the same path.
     private func adoptVisaRoute(_ route: VisaRoute) {
-        selectedCityIds = Set(route.cities)
+        var ids = route.cities
+        if let slug = route.addedCitySlug,
+           cities.contains(where: { $0.id == slug }),
+           !ids.contains(slug) {
+            ids.append(slug)
+        }
+        selectedCityIds = Set(ids)
         startGeneration()
     }
 

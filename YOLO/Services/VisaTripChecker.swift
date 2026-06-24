@@ -16,6 +16,10 @@ struct VisaRoute: Identifiable {
     let badgeTone: Tone
     let cities: [String]       // app content-city ids (display/write-back order)
     let addedCity: String?     // advisory transit-exit city (display name) for the friendly route
+    /// Content-city slug for `addedCity` (e.g. "hongkong"). When this city exists in the content
+    /// catalog, adopting the route folds it into the itinerary as a real stop; until then the
+    /// add stays advisory (display-only). Forward-compatible: no-op while the slug is absent.
+    var addedCitySlug: String? = nil
     let note: String
 
     enum Tone { case warn, neutral, ok }
@@ -25,9 +29,9 @@ enum VisaTripChecker {
 
     /// HK/MO are valid third-place transit exits that can activate 240h transit visa-free.
     /// `short` = display short name; `landPort` = the bordering mainland city to cross by land.
-    private static let transitHubs: [(code: String, name: String, short: String, landPort: String)] = [
-        ("HK", "香港 Hong Kong", "香港", "深圳"),
-        ("MO", "澳门 Macao", "澳门", "珠海"),
+    private static let transitHubs: [(code: String, name: String, short: String, landPort: String, slug: String)] = [
+        ("HK", "香港 Hong Kong", "香港", "深圳", "hongkong"),
+        ("MO", "澳门 Macao", "澳门", "珠海", "macao"),
     ]
 
     /// `query` carries the exact engine inputs used for the base verdict; we clone it with
@@ -141,7 +145,7 @@ enum VisaTripChecker {
                 kind: .friendly,
                 title: "✓ 签证友好 · 加\(hub.short)过境",
                 badge: "全程免签 · 多一城", badgeTone: .ok,
-                cities: appCities, addedCity: hub.name,
+                cities: appCities, addedCity: hub.name, addedCitySlug: hub.slug,
                 note: """
                 根据你的情况：把\(hub.short)加成途经/最后一站，内地段即符合\(policyName)（全程免签、白赚一座城）。
                 • 想去\(hub.short)：可经\(hub.landPort)口岸陆路出境，或订一张飞\(hub.short)的机票。
