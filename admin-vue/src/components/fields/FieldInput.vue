@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useRefCache } from "@/stores/refCache";
+import { PRACTICAL_INFO_PRESETS } from "@/schema/tables";
 import RichText from "@/components/fields/RichText.vue";
 import ObjectListEditor from "@/components/fields/ObjectListEditor.vue";
 import MultiCheck from "@/components/fields/MultiCheck.vue";
@@ -259,7 +260,12 @@ async function onAudioFile(e) {
     <MultiCheck v-else-if="isMulti" v-model="multiVal" :options="multiOptions" />
 
     <!-- object-list family -->
-    <ObjectListEditor v-else-if="isObjectList" v-model="val" :columns="LIST_COLUMNS[f.type]" />
+    <ObjectListEditor
+      v-else-if="isObjectList"
+      v-model="val"
+      :columns="LIST_COLUMNS[f.type]"
+      :presets="f.type === 'practical_info_list' ? PRACTICAL_INFO_PRESETS : []"
+    />
 
     <!-- image url list (with gallery upload) -->
     <ImageUrlList v-else-if="isType('image_url_list')" v-model="val"
