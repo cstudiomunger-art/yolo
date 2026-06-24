@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from "vue";
+import { supabase } from "@/lib/supabase";
 import { useRefCache } from "@/stores/refCache";
 import { PRACTICAL_INFO_PRESETS } from "@/schema/tables";
 import RichText from "@/components/fields/RichText.vue";
@@ -160,6 +161,22 @@ const enumOptions = computed(() =>
 
 const JSON_TYPES = new Set(["json"]);
 
+async function clearImage() {
+  if (!confirm("确定移除该图片？保存后 App 将不再显示。")) return;
+  const url = props.record[f.key];
+  // best-effort: remove the underlying file from the cover-images bucket
+  try {
+    const marker = "/cover-images/";
+    if (typeof url === "string" && url.includes(marker)) {
+      const path = decodeURIComponent(url.split(marker)[1].split("?")[0]);
+      await supabase.storage.from("cover-images").remove([path]);
+    }
+  } catch (e) {
+    /* ignore — clearing the field reference is what matters */
+  }
+  props.record[f.key] = null;
+}
+
 async function onImageFile(e) {
   const file = e.target.files?.[0];
   if (!file) return;
@@ -282,6 +299,7 @@ async function onAudioFile(e) {
       <img v-if="val" :src="val" alt="" class="img" />
       <span v-else class="muted">（无图）</span>
       <input v-if="isType('image_url')" v-model="val" type="text" placeholder="图片 URL" />
+      <button v-if="val" type="button" class="btn btn-danger btn-sm" @click="clearImage">移除图片</button>
     </div>
 
     <div v-else-if="isType('image_upload')" class="upload">
