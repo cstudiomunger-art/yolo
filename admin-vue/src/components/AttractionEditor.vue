@@ -4,7 +4,10 @@ import { TABLES } from "@/schema/tables";
 import { fetchOne } from "@/lib/crud";
 import { supabase } from "@/lib/supabase";
 import { uploadAudioGuideFile } from "@/lib/storage";
+import { useNav } from "@/stores/nav";
 import RecordForm from "@/components/RecordForm.vue";
+
+const nav = useNav();
 
 /**
  * 解说与详情 = attraction main info + a single audio upload for THIS attraction.
@@ -106,7 +109,7 @@ async function removeAudio() {
       table-key="attractions"
       :schema="TABLES.attractions"
       :initial="attraction"
-      @saved="() => {}"
+      @saved="() => nav.requestReload()"
       @cancel="() => {}"
     />
 

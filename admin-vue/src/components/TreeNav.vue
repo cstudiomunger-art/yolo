@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, watch } from "vue";
 import { useNav } from "@/stores/nav";
 import { useRefCache } from "@/stores/refCache";
 import { TABLES } from "@/schema/tables";
@@ -7,6 +7,27 @@ import { supabase } from "@/lib/supabase";
 
 const nav = useNav();
 const refCache = useRefCache();
+
+// Reload the currently-visible lazy caches after any save/delete so new rows
+// (city / attraction / sub-area) show up without a manual page refresh.
+watch(
+  () => nav.reloadTick,
+  async () => {
+    await refCache.load(true); // cities list + ref lookups
+    if (openCity.value) {
+      const { data } = await supabase
+        .from("attractions").select("id,city_id,name,chinese_name,display_order")
+        .eq("city_id", openCity.value).order("display_order");
+      attractionsByCity[openCity.value] = data || [];
+    }
+    if (openAttraction.value && attrPanel.value === "sub") {
+      const { data } = await supabase
+        .from("sub_areas").select("id,attraction_id,name_en,sort_order")
+        .eq("attraction_id", openAttraction.value).order("sort_order");
+      subAreasByAttraction[openAttraction.value] = data || [];
+    }
+  }
+);
 
 // ---- accordion state (one open per level) ----
 const openGroup = ref("cities"); // top-level group id ('cities' or a group key)

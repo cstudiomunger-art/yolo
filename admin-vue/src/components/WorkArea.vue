@@ -59,6 +59,18 @@ function onSaved() {
       .then((r) => (row.value = r))
       .catch(() => {});
   }
+  nav.requestReload();
+}
+
+// After creating a NEW record: switch into its edit view and refresh the tree
+// so it appears immediately (no manual page refresh needed).
+function onNewSaved(savedRow) {
+  const sel = selection.value;
+  const pk = TABLES[sel.tableKey]?.pk || "id";
+  nav.requestReload();
+  if (savedRow && savedRow[pk]) {
+    nav.select({ kind: "record", tableKey: sel.tableKey, id: savedRow[pk] });
+  }
 }
 </script>
 
@@ -104,7 +116,7 @@ function onSaved() {
       :schema="schema"
       :initial="null"
       :presets="selection.presets || null"
-      @saved="() => {}"
+      @saved="onNewSaved"
       @cancel="() => {}"
     />
 
