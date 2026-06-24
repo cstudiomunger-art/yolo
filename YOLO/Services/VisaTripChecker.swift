@@ -24,7 +24,11 @@ struct VisaRoute: Identifiable {
 enum VisaTripChecker {
 
     /// HK/MO are valid third-place transit exits that can activate 240h transit visa-free.
-    private static let transitHubs: [(code: String, name: String)] = [("HK", "香港 Hong Kong"), ("MO", "澳门 Macao")]
+    /// `short` = display short name; `landPort` = the bordering mainland city to cross by land.
+    private static let transitHubs: [(code: String, name: String, short: String, landPort: String)] = [
+        ("HK", "香港 Hong Kong", "香港", "深圳"),
+        ("MO", "澳门 Macao", "澳门", "珠海"),
+    ]
 
     /// `query` carries the exact engine inputs used for the base verdict; we clone it with
     /// candidate tweaks and re-run the engine to verify each route actually goes green.
@@ -44,10 +48,13 @@ enum VisaTripChecker {
             cities: appCities, addedCity: nil,
             note: "保持原行程，默认需办 L 旅游签证。"))
 
-        // R3 签证友好 — engine-verified least change. 加过境 first, then 删城 fallback.
-        if let friendly = activateTransit(query: query, appCities: appCities, data: data)
-            ?? dropBlockers(query: query, appCities: appCities, data: data, rec: rec) {
-            result.append(friendly)
+        // R3 签证友好 — engine-verified least change. Show a card per working transit hub
+        // (港 + 澳, both verified green); fall back to 删城 only when no transit works.
+        let transit = activateTransit(query: query, appCities: appCities, data: data)
+        if !transit.isEmpty {
+            result.append(contentsOf: transit)
+        } else if let drop = dropBlockers(query: query, appCities: appCities, data: data, rec: rec) {
+            result.append(drop)
         }
 
         // R2 备选 — cities unchanged, apply an L visa (engine plan B).
@@ -116,22 +123,41 @@ enum VisaTripChecker {
     // MARK: - ① 加城：add a HK/MO transit exit to activate 240h (engine-verified)
 
     /// Route-layer's headline move (doc §4②): the engine never adds cities itself, so we
-    /// propose adding HK/MO as the onward leg and let the engine VERIFY it goes green via
-    /// twov_240h. Only works when the mainland cities are in the 240h area and the stay ≤ 240h.
-    private static func activateTransit(query: VisaQuery, appCities: [String], data: VisaDataSet) -> VisaRoute? {
+    /// propose adding HK/MO as the onward leg and let the engine VERIFY each goes green via
+    /// twov_240h. Returns a card PER working hub (港 + 澳), copy/stay-limit derived from the
+    /// matched policy so it stays in sync with the CMS.
+    private static func activateTransit(query: VisaQuery, appCities: [String], data: VisaDataSet) -> [VisaRoute] {
+        var out: [VisaRoute] = []
         for hub in transitHubs {
             let q2 = query.with(onward: hub.code, ticketed: true)
             let r = VisaPolicyEngine.recommend(q2, data: data)
-            if r.level == .green && r.chosenPolicyId == "twov_240h" {
-                return VisaRoute(
-                    kind: .friendly,
-                    title: "✓ 签证友好 · 加一城过境",
-                    badge: "全程免签 · 多一城", badgeTone: .ok,
-                    cities: appCities, addedCity: hub.name,
-                    note: "把\(hub.name)加成最后一站：从内地出境到\(hub.name)构成第三地过境 → 满足 240 小时过境免签，内地段全程免签，\(hub.name)对你的护照通常也免签。等于不办签证还白赚一座城（停留需 ≤ 10 天、从开放口岸进出）。⚠️ 过境免签要求出示离境机票，请提前订好飞往\(hub.name)/第三地的续程机票。")
-            }
+            guard r.level == .green, r.chosenPolicyId == "twov_240h" else { continue }
+
+            let policy = data.policies.first { $0.id == r.chosenPolicyId }
+            let policyName = policy?.officialNameZh ?? "过境免签"
+            let stayLimit = stayLimitText(policy)   // e.g. "≤ 10 天"
+
+            out.append(VisaRoute(
+                kind: .friendly,
+                title: "✓ 签证友好 · 加\(hub.short)过境",
+                badge: "全程免签 · 多一城", badgeTone: .ok,
+                cities: appCities, addedCity: hub.name,
+                note: """
+                根据你的情况：把\(hub.short)加成途经/最后一站，内地段即符合\(policyName)（全程免签、白赚一座城）。
+                • 想去\(hub.short)：可经\(hub.landPort)口岸陆路出境，或订一张飞\(hub.short)的机票。
+                • 想去任意第三国（只要不是你的出发国）：同样免签——请重建行程，把第三国设为「下一程 / 返回国」。
+                ⚠️ 需停留\(stayLimit)、从开放口岸进出、出示离境机票。
+                """))
         }
-        return nil
+        return out
+    }
+
+    /// Stay-limit phrase from the matched policy (hours → "≤ N 天", days → "≤ N 天"). Keeps the
+    /// transit card's "≤ 10 天" honest if the CMS ever changes the window.
+    private static func stayLimitText(_ policy: VisaPolicyV2?) -> String {
+        guard let p = policy, let n = p.maxStayDefault else { return "在免签时限内" }
+        if p.maxStayUnit == "hours" { return "≤ \(n / 24) 天" }
+        return "≤ \(n) 天"
     }
 
     // MARK: - 删城：drop blocker cities (engine-verified)
