@@ -1,0 +1,84 @@
+import { supabase } from "@/lib/supabase";
+
+export const COVER_BUCKET = "cover-images";
+export const AUDIO_BUCKET = "audio-guides";
+
+/** Slugify identical to legacy core.js App.slugify. */
+export function slugify(text, prefix) {
+  const part = String(text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  if (prefix) return `${prefix}_${part}`.replace(/__+/g, "_");
+  return part || "item";
+}
+
+function normalizeAudioContentType(file) {
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  const byExt = {
+    mp3: "audio/mpeg",
+    m4a: "audio/mp4",
+    mp4: "audio/mp4",
+    wav: "audio/wav",
+    aac: "audio/aac",
+  };
+  return byExt[ext] || file.type || "audio/mpeg";
+}
+
+export async function uploadStorageFile(bucket, path, file, contentType) {
+  const ct = contentType || file.type || "application/octet-stream";
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(path, file, { upsert: true, contentType: ct });
+  if (error) {
+    throw new Error(`上传到 ${bucket} 失败：${error.message}（请确认账号在 admin_users 且已建好 Storage 桶/策略）`);
+  }
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+/** Cover image → cover-images/{folder}/{entityId}.{ext} */
+export async function uploadCoverImage(file, folder, entityId) {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `${folder}/${entityId}.${ext}`;
+  return uploadStorageFile(COVER_BUCKET, path, file, file.type || "image/jpeg");
+}
+
+/** Gallery / inline image → cover-images/{folder}/{entityId}/{key}.{ext} */
+export async function uploadGalleryImage(file, folder, entityId, uniqueKey) {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const safeKey = String(uniqueKey || Date.now())
+    .replace(/[^a-zA-Z0-9_-]/g, "_")
+    .slice(0, 64);
+  const path = `${folder}/${entityId}/${safeKey}.${ext}`;
+  return uploadStorageFile(COVER_BUCKET, path, file, file.type || "image/jpeg");
+}
+
+/** Audio guide → audio-guides/{guideId}.{ext} */
+export async function uploadAudioGuideFile(file, guideId) {
+  const ext = (file.name.split(".").pop() || "m4a").toLowerCase().replace(/[^a-z0-9]/g, "") || "m4a";
+  return uploadStorageFile(AUDIO_BUCKET, `${guideId}.${ext}`, file, normalizeAudioContentType(file));
+}
+
+/** Sub-area audio → audio-guides/sub-areas/{subAreaId}.{ext} */
+export async function uploadSubAreaAudioFile(file, subAreaId) {
+  if (!subAreaId) throw new Error("请先填写子区域英文名后再上传音频");
+  const ext = (file.name.split(".").pop() || "m4a").toLowerCase().replace(/[^a-z0-9]/g, "") || "m4a";
+  return uploadStorageFile(AUDIO_BUCKET, `sub-areas/${subAreaId}.${ext}`, file, normalizeAudioContentType(file));
+}
+
+/** City-guide audio → audio-guides/city-guides/{guideId}.{ext} */
+export async function uploadCityGuideAudioFile(file, guideId) {
+  if (!guideId) throw new Error("请先填写指南英文标题后再上传音频");
+  const ext = (file.name.split(".").pop() || "m4a").toLowerCase().replace(/[^a-z0-9]/g, "") || "m4a";
+  return uploadStorageFile(AUDIO_BUCKET, `city-guides/${guideId}.${ext}`, file, normalizeAudioContentType(file));
+}
+
+/** Phrase audio → audio-guides/phrases/{id}.{ext} */
+export async function uploadPhraseAudioFile(file, phraseId) {
+  if (!phraseId) throw new Error("请先填写内容（生成 id）后再上传音频");
+  const ext = (file.name.split(".").pop() || "m4a").toLowerCase().replace(/[^a-z0-9]/g, "") || "m4a";
+  return uploadStorageFile(AUDIO_BUCKET, `phrases/${phraseId}.${ext}`, file, normalizeAudioContentType(file));
+}

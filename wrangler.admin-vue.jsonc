@@ -1,0 +1,14 @@
+{
+  // New Vue 3 CMS — deploy target stays separate from the legacy「yoloadmin」
+  // until feature parity is reached (migration phase P5 flips the cutover).
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "yoloadmin-vue",
+  "compatibility_date": "2026-05-22",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "admin-vue/dist",
+    "html_handling": "auto-trailing-slash"
+  }
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YOLO HAPPY 内容管理</title>
+    <script>
+      // Resolve theme before paint to avoid flash.
+      (function () {
+        try {
+          var pref = localStorage.getItem("yolo.admin.theme") || "system";
+          var resolved = pref;
+          if (pref === "system") {
+            resolved =
+              typeof matchMedia !== "undefined" &&
+              matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+          }
+          document.documentElement.dataset.theme = resolved;
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
