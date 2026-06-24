@@ -10,27 +10,30 @@ struct CoverImageView: View {
     @State private var loadedImage: UIImage?
 
     var body: some View {
-        Group {
-            if let loadedImage {
-                Image(uiImage: loadedImage)
-                    .resizable()
-                    .scaledToFill()
-            } else if let path, MediaURLResolver.coverImageURL(from: path) != nil {
-                ZStack {
+        // A fixed-size box drives the layout so any source aspect ratio (portrait or
+        // landscape) renders at the same width/height; the image fills + crops into it.
+        Color.clear
+            .frame(width: width, height: height)
+            .frame(maxWidth: width == nil ? .infinity : nil)
+            .overlay {
+                if let loadedImage {
+                    Image(uiImage: loadedImage)
+                        .resizable()
+                        .scaledToFill()
+                } else if let path, MediaURLResolver.coverImageURL(from: path) != nil {
+                    ZStack {
+                        placeholder
+                        ProgressView()
+                    }
+                } else {
                     placeholder
-                    ProgressView()
                 }
-            } else {
-                placeholder
             }
-        }
-        .frame(width: width, height: height)
-        .frame(maxWidth: width == nil ? .infinity : nil)
-        .clipped()
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-        .task(id: path) {
-            await loadImage()
-        }
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .task(id: path) {
+                await loadImage()
+            }
     }
 
     private func loadImage() async {
