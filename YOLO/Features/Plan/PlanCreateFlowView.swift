@@ -22,6 +22,9 @@ struct PlanCreateFlowView: View {
     @State private var addAttractionContext: PlanAddAttractionContext?
     @State private var visaRec: VisaRecommendation?
     @State private var visaRoutes: [VisaRoute] = []
+    @State private var visaQuery: VisaQuery?
+    @State private var swapPlan: VisaTripChecker.SwapPlan?
+    @State private var swapPicks: Set<String> = []
     @State private var visaChecking = false
     @State private var showVisaDetector = false
 
@@ -276,6 +279,10 @@ struct PlanCreateFlowView: View {
                             visaRouteCard(route)
                         }
 
+                        if let plan = swapPlan {
+                            swapCard(plan)
+                        }
+
                         primaryButton(String(localized: "保持原行程继续")) { startGeneration() }
                             .padding(.top, 4)
 
@@ -368,6 +375,83 @@ struct PlanCreateFlowView: View {
 
     private func cityDisplayName(_ slug: String) -> String {
         cities.first { $0.id == slug }?.name ?? slug.capitalized
+    }
+
+    // 换城(自选): list the engine-verified qualifying cities and let the user choose which
+    // one(s) to swap in for the blocker city(ies), then re-verify before generating.
+    private func swapCard(_ plan: VisaTripChecker.SwapPlan) -> some View {
+        let ready = swapPicks.count == plan.need
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("✓ 签证友好 · 换城(自选)").font(Theme.FontToken.inter(12, weight: .semibold))
+                Spacer()
+                Text("换城免签 · 城数不变")
+                    .font(Theme.FontToken.inter(9, weight: .semibold))
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .foregroundStyle(Theme.ColorToken.success)
+                    .overlay(Capsule().stroke(Theme.ColorToken.success, lineWidth: 1))
+            }
+            Text("需签证的城市：\(plan.blockerNames)。换成下面任一座免签可达的城市(选 \(plan.need) 座)，经引擎复核为全程免签。")
+                .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
+
+            VStack(spacing: 0) {
+                ForEach(plan.candidates) { cand in
+                    let picked = swapPicks.contains(cand.slug)
+                    Button { toggleSwapPick(cand.slug, need: plan.need) } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: picked ? "checkmark.circle.fill" : "circle")
+                                .font(.system(size: 16))
+                                .foregroundStyle(picked ? Theme.ColorToken.success : Theme.ColorToken.textGhost)
+                            Text(cand.name).font(Theme.FontToken.inter(13))
+                                .foregroundStyle(Theme.ColorToken.textPrimary)
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                        .padding(.vertical, 9)
+                    }
+                    .buttonStyle(.plain)
+                    if cand.id != plan.candidates.last?.id {
+                        Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                    }
+                }
+            }
+            .padding(.horizontal, 12)
+            .background(Theme.ColorToken.backgroundSubtle)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+
+            Button { confirmSwap(plan) } label: {
+                Text(ready ? "按所选换城确认并生成" : "请选择 \(plan.need) 座替换城市")
+                    .font(Theme.FontToken.inter(12, weight: .semibold))
+                    .frame(maxWidth: .infinity).padding(.vertical, 10)
+                    .background(ready ? Theme.ColorToken.success : Theme.ColorToken.textGhost)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
+            }
+            .buttonStyle(.plain)
+            .disabled(!ready)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ColorToken.success, lineWidth: 1.5))
+    }
+
+    private func toggleSwapPick(_ slug: String, need: Int) {
+        if need == 1 {
+            swapPicks = swapPicks.contains(slug) ? [] : [slug]
+        } else if swapPicks.contains(slug) {
+            swapPicks.remove(slug)
+        } else if swapPicks.count < need {
+            swapPicks.insert(slug)
+        }
+    }
+
+    private func confirmSwap(_ plan: VisaTripChecker.SwapPlan) {
+        guard swapPicks.count == plan.need, let q = visaQuery else { return }
+        let picks = Array(swapPicks)
+        guard VisaTripChecker.verifySwap(query: q, keptSlugs: plan.keptSlugs, picks: picks,
+                                         data: appEnv.visaData.data) else { return }
+        selectedCityIds = Set(plan.keptSlugs + picks)
+        startGeneration()
     }
 
     // MARK: - Generating (4.5) / Failed (4.6)
@@ -599,8 +683,14 @@ struct PlanCreateFlowView: View {
             let rec = VisaPolicyEngine.recommend(query, data: data)
             if rec.isEnough { startGeneration(); return }
             let catalog = cities.map { (slug: $0.id, popularity: $0.attractionCount) }
-            visaRoutes = VisaTripChecker.routes(query: query, appCities: slugs, data: data,
-                                                recommendation: rec, catalog: catalog)
+            let plan = VisaTripChecker.swapPlan(query: query, appCities: slugs, catalog: catalog, data: data, rec: rec)
+            var rs = VisaTripChecker.routes(query: query, appCities: slugs, data: data, recommendation: rec)
+            // Prefer the interactive 换城 card over the auto 删城 route when a swap pool exists.
+            if plan != nil { rs.removeAll { $0.kind == .friendly && $0.title.contains("去掉拖累城") } }
+            visaQuery = query
+            swapPlan = plan
+            swapPicks = []
+            visaRoutes = rs
             visaRec = rec
             visaChecking = false
         }
