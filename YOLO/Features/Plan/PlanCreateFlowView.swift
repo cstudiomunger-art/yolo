@@ -20,10 +20,15 @@ struct PlanCreateFlowView: View {
     @State private var draftItinerary: SampleItinerary?
     @State private var attractionCache: [String: Attraction] = [:]
     @State private var addAttractionContext: PlanAddAttractionContext?
+    @State private var visaRec: VisaRecommendation?
+    @State private var visaRoutes: [VisaRoute] = []
+    @State private var visaChecking = false
+    @State private var showVisaDetector = false
 
     private enum Step {
         case cities
         case dates
+        case visa
         case generating
         case failed
         case review
@@ -54,6 +59,8 @@ struct PlanCreateFlowView: View {
                 citiesStep
             case .dates:
                 datesStep
+            case .visa:
+                visaStep
             case .generating:
                 generatingStep
             case .failed:
@@ -91,12 +98,17 @@ struct PlanCreateFlowView: View {
                 addAttractionContext = nil
             }
         }
+        .sheet(isPresented: $showVisaDetector) {
+            VisaDetectorView(presetCitySlugs: Array(selectedCityIds),
+                             presetStart: arrivalDate, presetEnd: departureDate)
+        }
     }
 
     private var navigationTitle: String {
         switch step {
         case .cities: String(localized: "Choose cities")
         case .dates: String(localized: "Travel dates")
+        case .visa: String(localized: "签证核对")
         case .generating: String(localized: "Creating trip")
         case .failed: String(localized: "Something went wrong")
         case .review: String(localized: "Your itinerary")
@@ -236,11 +248,126 @@ struct PlanCreateFlowView: View {
                     .foregroundStyle(Theme.ColorToken.textMuted)
 
                 primaryButton(String(localized: "Generate itinerary")) {
-                    startGeneration()
+                    enterVisaCheck()
                 }
             }
             .padding(Theme.screenPadding)
         }
+    }
+
+    // MARK: - Visa check (在生成前按护照+城市+真实日期判定; 够用静默放行, 不够用给推荐路线)
+
+    private var visaStep: some View {
+        Group {
+            if visaChecking {
+                VStack(spacing: 20) {
+                    Spacer()
+                    ProgressView().scaleEffect(1.3)
+                    Text("正在核对签证…").font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textMuted)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let rec = visaRec {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        visaVerdictHeader(rec)
+
+                        ForEach(visaRoutes) { route in
+                            visaRouteCard(route)
+                        }
+
+                        primaryButton(String(localized: "保持原行程继续")) { startGeneration() }
+                            .padding(.top, 4)
+
+                        Button {
+                            showVisaDetector = true
+                        } label: {
+                            Text("精细核对(出发地 / 口岸 / 续程票)")
+                                .font(Theme.FontToken.inter(12, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.accent)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.plain)
+
+                        Text("按常见默认粗判(往返同国、主要机场进出、已出续程票)。以边检最终判定为准。")
+                            .font(Theme.FontToken.inter(10))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    }
+                    .padding(Theme.screenPadding)
+                }
+            } else {
+                Color.clear
+            }
+        }
+    }
+
+    private func visaVerdictHeader(_ rec: VisaRecommendation) -> some View {
+        let needVisa = rec.level == .red
+        let title = needVisa ? "这条线默认可能需要签证" : "这条线有条件免签，建议核对"
+        var detail = "下面给出更省事的走法，签证友好那条经引擎复核为全程免签。"
+        if let days = rec.maxStayDays { detail = "免签停留上限约 \(days) 天。" + detail }
+        return HStack(alignment: .top, spacing: 9) {
+            Text("🛂")
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(Theme.FontToken.inter(13, weight: .semibold))
+                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                Text(detail).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.ColorToken.warning.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func visaRouteCard(_ route: VisaRoute) -> some View {
+        let tone: Color = {
+            switch route.badgeTone {
+            case .warn: return Theme.ColorToken.warning
+            case .ok: return Theme.ColorToken.success
+            case .neutral: return Theme.ColorToken.textMuted
+            }
+        }()
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(route.title).font(Theme.FontToken.inter(12, weight: .semibold))
+                Spacer()
+                Text(route.badge)
+                    .font(Theme.FontToken.inter(9, weight: .semibold))
+                    .padding(.horizontal, 8).padding(.vertical, 3)
+                    .foregroundStyle(tone)
+                    .overlay(Capsule().stroke(tone, lineWidth: 1))
+            }
+            HStack(spacing: 6) {
+                ForEach(Array(route.cities.enumerated()), id: \.offset) { idx, city in
+                    Text(cityDisplayName(city)).font(Theme.FontToken.playfair(13, weight: .semibold))
+                    if idx < route.cities.count - 1 || route.addedCity != nil {
+                        Image(systemName: "arrow.right").font(.system(size: 9)).foregroundStyle(Theme.ColorToken.textGhost)
+                    }
+                }
+                if let added = route.addedCity {
+                    Text("+ " + added).font(Theme.FontToken.playfair(13, weight: .semibold)).foregroundStyle(Theme.ColorToken.success)
+                }
+            }
+            Text(route.note).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
+            if route.kind == .friendly {
+                Button { adoptVisaRoute(route) } label: {
+                    Text("按推荐确认并生成")
+                        .font(Theme.FontToken.inter(12, weight: .semibold))
+                        .frame(maxWidth: .infinity).padding(.vertical, 10)
+                        .background(Theme.ColorToken.success).foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 11))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(route.kind == .friendly ? Theme.ColorToken.success : Theme.ColorToken.border, lineWidth: route.kind == .friendly ? 1.5 : 1))
+    }
+
+    private func cityDisplayName(_ slug: String) -> String {
+        cities.first { $0.id == slug }?.name ?? slug.capitalized
     }
 
     // MARK: - Generating (4.5) / Failed (4.6)
@@ -449,6 +576,41 @@ struct PlanCreateFlowView: View {
         } else {
             selectedCityIds.insert(id)
         }
+    }
+
+    /// Judge the chosen cities + real dates against the user's passport before generating.
+    /// CN / unknown passport → skip (engine judges foreigners entering China). Green/enough →
+    /// silent pass straight to generation. Not enough → show engine-verified route options.
+    private func enterVisaCheck() {
+        step = .visa
+        visaChecking = true
+        visaRec = nil
+        visaRoutes = []
+        Task {
+            let cc = appEnv.preferences.countryCode.trimmingCharacters(in: .whitespaces)
+            if cc.isEmpty || cc.uppercased() == "CN" { startGeneration(); return }
+            await appEnv.visaData.load()
+            let data = appEnv.visaData.data
+            let slugs = Array(selectedCityIds)
+            guard let query = VisaCoarseCheck.query(citySlugs: slugs, start: arrivalDate,
+                                                    end: departureDate, countryCode: cc, data: data) else {
+                startGeneration(); return
+            }
+            let rec = VisaPolicyEngine.recommend(query, data: data)
+            if rec.isEnough { startGeneration(); return }
+            let catalog = cities.map { (slug: $0.id, popularity: $0.attractionCount) }
+            visaRoutes = VisaTripChecker.routes(query: query, appCities: slugs, data: data,
+                                                recommendation: rec, catalog: catalog)
+            visaRec = rec
+            visaChecking = false
+        }
+    }
+
+    /// Adopt a recommended route: swap/drop routes change the selection (mainland cities);
+    /// the 加过境 route keeps the same cities (HK/MO is advisory). Then generate.
+    private func adoptVisaRoute(_ route: VisaRoute) {
+        selectedCityIds = Set(route.cities)
+        startGeneration()
     }
 
     private func startGeneration() {

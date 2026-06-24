@@ -28,8 +28,13 @@ enum VisaTripChecker {
 
     /// `query` carries the exact engine inputs used for the base verdict; we clone it with
     /// candidate tweaks and re-run the engine to verify each route actually goes green.
+    ///
+    /// `catalog` is the full content-city pool (slug + popularity) used to source 换城
+    /// replacements; defaults to empty so the detector verdict path keeps its old behaviour
+    /// (加过境 / 删城 only). Friendly routes are ranked by loss: 加过境(不丢城) > 换城(等量替换) > 删城(丢城).
     static func routes(query: VisaQuery, appCities: [String], data: VisaDataSet,
-                       recommendation rec: VisaRecommendation) -> [VisaRoute] {
+                       recommendation rec: VisaRecommendation,
+                       catalog: [(slug: String, popularity: Int)] = []) -> [VisaRoute] {
         guard !rec.isEnough else { return [] }
 
         var result: [VisaRoute] = []
@@ -42,11 +47,13 @@ enum VisaTripChecker {
             cities: appCities, addedCity: nil,
             note: "保持原行程，默认需办 L 旅游签证。"))
 
-        // R3 签证友好 — engine-verified least change. 加城 first, then 删城.
-        if let friendly = activateTransit(query: query, appCities: appCities, data: data)
-            ?? dropBlockers(query: query, appCities: appCities, data: data, rec: rec) {
-            result.append(friendly)
-        }
+        // R3 签证友好 — engine-verified, ranked by loss. 加过境(no loss) + 换城(equal swap);
+        // 删城 only as a fallback when neither produced, so we never show > 2 friendly cards.
+        var friendly: [VisaRoute] = []
+        if let r = activateTransit(query: query, appCities: appCities, data: data) { friendly.append(r) }
+        if let r = swapBlockers(query: query, appCities: appCities, catalog: catalog, data: data, rec: rec) { friendly.append(r) }
+        if friendly.isEmpty, let r = dropBlockers(query: query, appCities: appCities, data: data, rec: rec) { friendly.append(r) }
+        result.append(contentsOf: friendly)
 
         // R2 备选 — cities unchanged, apply an L visa (engine plan B).
         result.append(VisaRoute(
@@ -71,7 +78,7 @@ enum VisaTripChecker {
             if r.level == .green && r.chosenPolicyId == "twov_240h" {
                 return VisaRoute(
                     kind: .friendly,
-                    title: "✓ 签证友好 · 推荐",
+                    title: "✓ 签证友好 · 加一城过境",
                     badge: "全程免签 · 多一城", badgeTone: .ok,
                     cities: appCities, addedCity: hub.name,
                     note: "把\(hub.name)加成最后一站：从内地出境到\(hub.name)构成第三地过境 → 满足 240 小时过境免签，内地段全程免签，\(hub.name)对你的护照通常也免签。等于不办签证还白赚一座城（停留需 ≤ 10 天、从开放口岸进出）。")
@@ -80,7 +87,49 @@ enum VisaTripChecker {
         return nil
     }
 
-    // MARK: - ② 删城：drop blocker cities (engine-verified)
+    // MARK: - ② 换城：swap blocker cities for popular visa-free ones (engine-verified)
+
+    /// Equal-count replacement (doc: 替换一个城市): keep the non-blocker cities, then fill
+    /// the freed slots with the most popular catalog cities that are (a) not already in the
+    /// trip, (b) mappable to an admin code, (c) green on their own — finally re-running the
+    /// engine on the whole swapped list to VERIFY it goes green. Keeps the city count intact.
+    private static func swapBlockers(query: VisaQuery, appCities: [String],
+                                     catalog: [(slug: String, popularity: Int)],
+                                     data: VisaDataSet, rec: VisaRecommendation) -> VisaRoute? {
+        guard !rec.blockers.isEmpty, !catalog.isEmpty else { return nil }
+        let blockerSlugs = Set(rec.blockers.compactMap { data.city(forAdminCode: $0)?.appCitySlug?.lowercased() })
+        let keptSlugs = appCities.filter { !blockerSlugs.contains($0.lowercased()) }
+        let need = appCities.count - keptSlugs.count
+        guard need > 0 else { return nil }
+
+        let inTrip = Set(appCities.map { $0.lowercased() })
+        let candidates: [(slug: String, code: String)] = catalog
+            .filter { !inTrip.contains($0.slug.lowercased()) }
+            .sorted { $0.popularity > $1.popularity }
+            .compactMap { item in
+                guard let code = data.adminCode(forAppSlug: item.slug) else { return nil }
+                let r = VisaPolicyEngine.recommend(query.with(cities: [code]), data: data)
+                return r.level == .green ? (item.slug, code) : nil
+            }
+        guard candidates.count >= need else { return nil }
+
+        let picks = Array(candidates.prefix(need))
+        let swappedSlugs = keptSlugs + picks.map { $0.slug }
+        let swappedCodes = swappedSlugs.compactMap { data.adminCode(forAppSlug: $0) }
+        let r = VisaPolicyEngine.recommend(query.with(cities: swappedCodes), data: data)
+        guard r.level == .green else { return nil }
+
+        let fromNames = rec.blockers.map { data.cityName(forAdminCode: $0) }.joined(separator: " · ")
+        let toNames = picks.map { data.cityName(forAdminCode: $0.code) }.joined(separator: " · ")
+        return VisaRoute(
+            kind: .friendly,
+            title: "✓ 签证友好 · 换城",
+            badge: "换城免签 · 城数不变", badgeTone: .ok,
+            cities: swappedSlugs, addedCity: nil,
+            note: "把需签证的城市（\(fromNames)）换成免签可达的（\(toNames)），城市数量不变，经引擎复核为全程免签。")
+    }
+
+    // MARK: - ③ 删城：drop blocker cities (engine-verified)
 
     private static func dropBlockers(query: VisaQuery, appCities: [String], data: VisaDataSet,
                                      rec: VisaRecommendation) -> VisaRoute? {
@@ -96,7 +145,7 @@ enum VisaTripChecker {
         let blockerNames = rec.blockers.map { data.cityName(forAdminCode: $0) }.joined(separator: " · ")
         return VisaRoute(
             kind: .friendly,
-            title: "✓ 签证友好 · 推荐",
+            title: "✓ 签证友好 · 去掉拖累城",
             badge: "去掉拖累城", badgeTone: .ok,
             cities: keptSlugs, addedCity: nil,
             note: "去掉需签证的城市（\(blockerNames)），其余城市免签可达，经引擎复核为全程免签。")

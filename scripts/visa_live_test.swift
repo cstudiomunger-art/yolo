@@ -110,5 +110,61 @@ routes("IN 散客 京沪", mk("IN", dep: "IN", onward: "IN", entry: "PEK", exit:
     inAt: "2026-07-02T12:00", outAt: "2026-07-10T10:00", cities: [bj, sh], ticketed: false),
     slugs: ["beijing", "shanghai"])
 
+// IN 散客（红，每座城都需签证）→ 换城无绿候选 → swap 应优雅返回 nil（无"换城"卡）
+let inCat: [(slug: String, popularity: Int)] = [("beijing", 10), ("shanghai", 9), ("chengdu", 8)]
+let inQ = mk("IN", dep: "IN", onward: "IN", entry: "PEK", exit: "PEK",
+    inAt: "2026-07-02T12:00", outAt: "2026-07-10T10:00", cities: [bj, sh], ticketed: false)
+let inRec = VisaPolicyEngine.recommend(inQ, data: data)
+let inRoutes = VisaTripChecker.routes(query: inQ, appCities: ["beijing", "shanghai"], data: data, recommendation: inRec, catalog: inCat)
+let inNoSwap = !inRoutes.contains { $0.title.contains("换城") }
+inNoSwap ? (pass += 1) : (fail += 1)
+print("\(inNoSwap ? "✓" : "✗") C2 IN 无绿候选→无换城卡: \(inRoutes.count) 条 \(inRoutes.map { $0.title }.joined(separator: " / "))")
+
+print("\n──────── D. 换城策略 + 静默放行（合成数据集，验证新算法）────────")
+func pol(_ id: String, priority: Int) -> VisaPolicyV2 {
+    VisaPolicyV2(id: id, policyType: "test", nodeKind: id == "visa_L" ? "info" : "computed",
+        universal: false, officialNameZh: id, officialNameEn: id,
+        onwardTicket: false, onwardThirdCountry: false, groupRequired: false, entryPortLimited: false,
+        entryPorts: nil, exitPorts: nil, entryMode: nil, maxStayDefault: 30, maxStayUnit: "days",
+        clockRule: "next_day_0000", entryCount: nil, allowedArea: .national, passportOrdinaryOnly: nil,
+        purpose: nil, passportValidityMonths: nil, priority: priority, sourceUrl: nil, lastVerified: nil)
+}
+func city(_ code: String, _ zh: String, _ slug: String) -> VisaCityRow {
+    VisaCityRow(cityId: code, nameZh: zh, nameEn: slug, regionType: "mainland",
+        isEntryPort: true, isExitPort: true, transit240h: false, appCitySlug: slug)
+}
+let synth = VisaDataSet(
+    policies: [pol("uni", priority: 1), pol("visa_L", priority: 99)],
+    grants: [VisaGrantV2(id: "g1", policyId: "uni", countryCode: "XX", effectiveDate: nil,
+        expiryDate: nil, maxStayOverride: nil, entryCountOverride: nil, announcedDate: nil, evidenceQuote: nil)],
+    cities: [city("110000", "甲市", "acity"), city("990000", "乙市", "bcity"), city("120000", "丙市", "ccity")],
+    matrix: [CityPolicyFeas(cityId: "110000", policyId: "uni", feasibility: "ok"),
+             CityPolicyFeas(cityId: "990000", policyId: "uni", feasibility: "no"),
+             CityPolicyFeas(cityId: "120000", policyId: "uni", feasibility: "ok")],
+    permitZones: [], ports: [])
+func synthQ(_ codes: [String]) -> VisaQuery {
+    VisaQuery(countryCode: "XX", departure: "XX", onward: "XX", entryPort: nil, exitPort: nil,
+        entryAt: dt("2026-07-02T12:00"), plannedExitAt: dt("2026-07-10T10:00"), cities: codes,
+        ticketed: true, group: false, passportValidMonths: nil, today: dt("2026-06-23T00:00"))
+}
+let synthCat: [(slug: String, popularity: Int)] = [("acity", 10), ("bcity", 5), ("ccity", 8)]
+
+// D1: 含拖累城（乙市不可达）→ 引擎复核应把乙市换成丙市，城数不变且全程绿
+let q1 = synthQ(["110000", "990000"])
+let r1 = VisaPolicyEngine.recommend(q1, data: synth)
+let routes1 = VisaTripChecker.routes(query: q1, appCities: ["acity", "bcity"], data: synth, recommendation: r1, catalog: synthCat)
+let swap = routes1.first { $0.title.contains("换城") }
+let d1 = r1.level == .amber && !r1.blockers.isEmpty && swap?.cities == ["acity", "ccity"]
+d1 ? (pass += 1) : (fail += 1)
+print("\(d1 ? "✓" : "✗") D1 换城: base=\(r1.level.rawValue) blockers=\(r1.blockers.count) → swap=\(swap?.cities.joined(separator: "+") ?? "无")")
+
+// D2: 全可达（甲+丙）→ isEnough → routes 为空（静默放行）
+let q2 = synthQ(["110000", "120000"])
+let r2 = VisaPolicyEngine.recommend(q2, data: synth)
+let routes2 = VisaTripChecker.routes(query: q2, appCities: ["acity", "ccity"], data: synth, recommendation: r2, catalog: synthCat)
+let d2 = r2.level == .green && r2.isEnough && routes2.isEmpty
+d2 ? (pass += 1) : (fail += 1)
+print("\(d2 ? "✓" : "✗") D2 全免签静默放行: base=\(r2.level.rawValue) isEnough=\(r2.isEnough) routes=\(routes2.count)")
+
 print("\n════════ 结果：\(pass) 通过 / \(fail) 失败 ════════")
 exit(fail == 0 ? 0 : 1)

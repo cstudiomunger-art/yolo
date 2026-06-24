@@ -7,7 +7,10 @@ struct PlanRouteVisaCompareView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
     let routes: [VisaRoute]
-    @State private var adopted: VisaRoute.Kind?
+    /// Optional adopt override (Plan create flow writes the local draft selection instead of
+    /// preferences). Defaults to writing `preferences.selectedCityIds` (detector verdict path).
+    var onAdopt: ((VisaRoute) -> Void)? = nil
+    @State private var adopted: UUID?
 
     private var hasFriendly: Bool { routes.contains { $0.kind == .friendly } }
 
@@ -66,7 +69,7 @@ struct PlanRouteVisaCompareView: View {
             Text(route.note).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
             if route.kind == .friendly {
                 Button { adopt(route) } label: {
-                    Text(adopted == .friendly ? "✓ 已采用" : "采用这条")
+                    Text(adopted == route.id ? "✓ 已采用" : "采用这条")
                         .font(Theme.FontToken.inter(12, weight: .semibold))
                         .frame(maxWidth: .infinity).padding(.vertical, 10)
                         .background(Theme.ColorToken.success).foregroundStyle(.white)
@@ -81,8 +84,12 @@ struct PlanRouteVisaCompareView: View {
     }
 
     private func adopt(_ route: VisaRoute) {
-        appEnv.preferences.selectedCityIds = route.cities
-        adopted = route.kind
+        if let onAdopt {
+            onAdopt(route)
+        } else {
+            appEnv.preferences.selectedCityIds = route.cities
+        }
+        adopted = route.id
     }
 
     private func toneColor(_ t: VisaRoute.Tone) -> Color {
