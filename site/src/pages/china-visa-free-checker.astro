@@ -1,0 +1,153 @@
+---
+import Base from "../layouts/Base.astro";
+import GetTheApp from "../components/GetTheApp.astro";
+import countriesRaw from "../data/countries.json";
+
+const countries = countriesRaw as Array<{ iso2: string; name: string; flag: string; slug: string; hasGrant: boolean }>;
+const visaFree = countries.filter((c) => c.hasGrant);
+
+const title = "China Visa-Free Checker — by passport, instantly";
+const description =
+  "Pick your passport and instantly see if you can enter China visa-free, via transit, or need a visa. Then check your exact trip — cities, dates and transit — with the same engine our app uses.";
+---
+<Base title={title} description={description}>
+  <section class="section-tight vc-hero">
+    <div class="container">
+      <p class="eyebrow">Visa Checker</p>
+      <h1>Can you enter China without a visa?</h1>
+      <p class="lede">Pick your passport for an instant answer. Then run your actual trip — cities, dates, transit — for a precise, four-dimension verdict. No account, no email.</p>
+
+      <div class="card vc-card">
+        <label class="vc-label" for="vc-nationality">Your passport</label>
+        <select id="vc-nationality" class="vc-select"></select>
+        <div id="vc-instant-result" class="vc-result"></div>
+
+        <button id="vc-trip-toggle" class="vc-trip-toggle" aria-expanded="false" style="display:none">
+          ✈️ Planning a specific trip? Check the exact rules →
+        </button>
+
+        <div id="vc-trip" class="vc-trip">
+          <div class="vc-grid2">
+            <div>
+              <label class="vc-label" for="vc-departure">Flying from</label>
+              <select id="vc-departure" class="vc-select"></select>
+            </div>
+            <div>
+              <label class="vc-label" for="vc-onward">Next stop after China</label>
+              <select id="vc-onward" class="vc-select"></select>
+            </div>
+          </div>
+
+          <label class="vc-label">Cities you'll visit</label>
+          <div id="vc-city-chips" class="vc-chips"></div>
+          <select id="vc-city-add" class="vc-select"></select>
+
+          <div class="vc-grid2">
+            <div>
+              <label class="vc-label" for="vc-entry-date">Entry date</label>
+              <input id="vc-entry-date" class="vc-select" type="date" />
+            </div>
+            <div>
+              <label class="vc-label" for="vc-exit-date">Planned exit date</label>
+              <input id="vc-exit-date" class="vc-select" type="date" />
+            </div>
+          </div>
+
+          <div class="vc-grid2">
+            <div>
+              <label class="vc-label" for="vc-entry-port">Entry port</label>
+              <select id="vc-entry-port" class="vc-select"></select>
+            </div>
+            <div>
+              <label class="vc-label" for="vc-exit-port">Exit port</label>
+              <select id="vc-exit-port" class="vc-select"></select>
+            </div>
+          </div>
+
+          <div class="vc-toggles">
+            <label class="vc-check"><input id="vc-ticket" type="checkbox" /> I have a confirmed onward ticket</label>
+            <label class="vc-check"><input id="vc-group" type="checkbox" /> Entering with a tour group</label>
+          </div>
+
+          <button id="vc-run" class="btn btn-primary vc-run">Check my trip</button>
+          <div id="vc-trip-result" class="vc-result"></div>
+        </div>
+      </div>
+
+      <p class="vc-disclaimer ui">
+        This is decision-support, not legal advice. Visa rules change frequently — always confirm
+        against the official Chinese embassy / National Immigration Administration sources before you travel.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container">
+      <h2>Visa-free by passport</h2>
+      <p class="muted">Countries with a visa-free or conditional-exemption relationship with China today. Tap yours for the full breakdown.</p>
+      <div class="vc-country-grid">
+        {visaFree.map((c) => (
+          <a class="vc-country-link" href={`/china-visa-free/${c.slug}`}>
+            <span class="vc-flag">{c.flag}</span>{c.name}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <GetTheApp />
+
+  <script>
+    import "../scripts/visa-widget.ts";
+  </script>
+</Base>
+
+<style>
+  .vc-hero h1 { max-width: 16ch; }
+  .vc-card { padding: 26px; margin-top: 28px; max-width: 640px; }
+  .vc-label { display: block; font-family: var(--font-ui); font-size: 0.8rem; font-weight: 600; color: var(--ink-soft); margin: 14px 0 6px; }
+  .vc-card > .vc-label:first-child { margin-top: 0; }
+  .vc-select {
+    width: 100%; font-family: var(--font-ui); font-size: 0.98rem; padding: 11px 13px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink);
+  }
+  .vc-select:focus { outline: none; border-color: var(--coral); box-shadow: 0 0 0 3px var(--coral-tint); }
+  .vc-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .vc-trip-toggle {
+    display: block; width: 100%; margin-top: 18px; padding: 12px; cursor: pointer;
+    font-family: var(--font-ui); font-weight: 600; font-size: 0.92rem; color: var(--coral-dark);
+    background: var(--coral-tint); border: 1px dashed var(--coral-tint-strong); border-radius: var(--radius-sm);
+  }
+  .vc-trip { display: none; margin-top: 8px; padding-top: 8px; }
+  .vc-trip.open { display: block; }
+  .vc-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .vc-chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-ui); font-size: 0.85rem; background: var(--surface-warm); border: 1px solid var(--border); border-radius: 999px; padding: 4px 6px 4px 12px; }
+  .vc-chip button { border: none; background: var(--border-strong); color: #fff; border-radius: 50%; width: 18px; height: 18px; cursor: pointer; font-size: 12px; line-height: 1; }
+  .vc-toggles { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .vc-check { font-family: var(--font-ui); font-size: 0.92rem; color: var(--ink-soft); display: flex; gap: 8px; align-items: center; }
+  .vc-run { width: 100%; margin-top: 18px; justify-content: center; }
+  .vc-result:empty { display: none; }
+  .vc-disclaimer { font-size: 0.8rem; color: var(--faint); max-width: 640px; margin-top: 16px; }
+  .vc-country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 20px; }
+  .vc-country-link { display: flex; align-items: center; gap: 9px; font-family: var(--font-ui); font-size: 0.92rem; color: var(--ink-soft); padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); }
+  .vc-country-link:hover { border-color: var(--coral); color: var(--coral-dark); text-decoration: none; }
+  .vc-flag { font-size: 1.15rem; }
+
+  /* verdict cards (shared look with per-country pages) */
+  :global(.vc-verdict) { margin-top: 18px; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); }
+  :global(.vc-verdict h3) { margin: 10px 0 6px; font-size: 1.2rem; }
+  :global(.vc-green) { background: var(--green-tint); border-color: #bfe2c8; }
+  :global(.vc-amber) { background: var(--amber-tint); border-color: #ecd7a6; }
+  :global(.vc-red) { background: var(--red-tint); border-color: #eebfb9; }
+  :global(.vc-big) { font-size: 1.05rem; color: var(--ink); }
+  :global(.vc-fine) { font-size: 0.86rem; color: var(--muted); margin: 6px 0 0; }
+  :global(.vc-source) { font-style: italic; }
+  :global(.vc-warn) { color: var(--red); }
+  :global(.vc-facts) { list-style: none; padding: 0; margin: 12px 0 0; }
+  :global(.vc-facts li) { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-top: 1px solid rgba(0,0,0,0.06); font-family: var(--font-ui); font-size: 0.92rem; }
+  :global(.vc-facts li span) { color: var(--muted); }
+  :global(.vc-issues) { margin: 10px 0; padding-left: 18px; font-size: 0.92rem; }
+  :global(.vc-issues li) { margin: 4px 0; }
+
+  @media (max-width: 560px) { .vc-grid2 { grid-template-columns: 1fr; } }
+</style>

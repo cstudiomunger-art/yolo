@@ -1,0 +1,175 @@
+---
+import Base from "../layouts/Base.astro";
+import GetTheApp from "../components/GetTheApp.astro";
+import countriesRaw from "../data/countries.json";
+
+const visaFreeCount = (countriesRaw as Array<{ hasGrant: boolean }>).filter((c) => c.hasGrant).length;
+
+const tools = [
+  {
+    href: "/china-visa-free-checker",
+    emoji: "🛂",
+    tag: "Live tool",
+    title: "Can I enter China visa-free?",
+    blurb: "Pick your passport for an instant verdict — then check your exact trip with the same engine our app uses. Visa-free, transit, or visa needed.",
+    cta: "Check your passport",
+    live: true,
+  },
+  {
+    href: "/forbidden-city-tickets-foreigners",
+    emoji: "🎟️",
+    tag: "Coming soon",
+    title: "Forbidden City tickets for foreigners",
+    blurb: "The real booking rules: when tickets drop, the passport-name format that won't get rejected, and a release-time countdown so you don't miss the window.",
+    cta: "See the rules",
+    live: false,
+  },
+  {
+    href: "/china-hotels-that-accept-foreigners",
+    emoji: "🏨",
+    tag: "Coming soon",
+    title: "Hotels that accept foreigners",
+    blurb: "Not every Chinese hotel can legally check in foreign guests. A filterable list of confirmed foreigner-friendly stays — plus a bilingual line to confirm before you book.",
+    cta: "Find a hotel",
+    live: false,
+  },
+];
+
+const title = "YOLO HAPPY — China's systems, decoded for foreign travelers";
+const description =
+  "Not an OTA. A system navigator. Free tools that decode China's confusing rules for foreign visitors — visa-free eligibility, Forbidden City tickets, foreigner-friendly hotels — so you can operate the local systems yourself.";
+---
+<Base title={title} description={description}>
+  <!-- Hero: the wedge -->
+  <section class="hero">
+    <div class="container">
+      <p class="eyebrow">Not an OTA. A system navigator.</p>
+      <h1>China runs on systems outsiders can't read.<br /><span class="hl">We translate them.</span></h1>
+      <p class="lede">
+        We don't sell you tickets, visas, or hotels. We decode the rules — visa exemptions, real-name
+        booking, foreigner check-in laws — so <strong>you</strong> can work the local systems with confidence.
+      </p>
+      <div class="hero-cta-row">
+        <a class="btn btn-primary" href="/china-visa-free-checker">Try the visa checker</a>
+        <a class="btn btn-ghost" href="#tools">See all tools</a>
+      </div>
+      <div class="trust-row ui">
+        <span>🛂 {visaFreeCount}+ nationalities mapped</span>
+        <span>📑 Sourced from official notices</span>
+        <span>🔄 Re-synced every release</span>
+        <span>🆓 No account, no upsells</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Three pain-point tools -->
+  <section class="section" id="tools">
+    <div class="container">
+      <p class="eyebrow">The hard parts, made usable</p>
+      <h2>Three things every foreign traveler gets stuck on</h2>
+      <p class="lede">Each one is a tool you can use right now — not another travel blog.</p>
+      <div class="grid tool-grid">
+        {tools.map((t) => (
+          <a class={`card tool-card ${t.live ? "is-live" : "is-soon"}`} href={t.href}>
+            <div class="tool-top">
+              <span class="tool-emoji">{t.emoji}</span>
+              <span class={`badge ${t.live ? "badge-green" : ""} tool-tag`}>{t.tag}</span>
+            </div>
+            <h3>{t.title}</h3>
+            <p class="muted">{t.blurb}</p>
+            <span class="tool-cta ui">{t.cta} →</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Why not just an OTA -->
+  <section class="section contrast">
+    <div class="container">
+      <p class="eyebrow">Why we're different</p>
+      <h2>OTAs sell you a booking. We hand you the map.</h2>
+      <div class="grid compare-grid">
+        <div class="compare-col">
+          <p class="compare-head ui">A typical OTA</p>
+          <ul class="compare-list cross">
+            <li>Sells you a hotel — then you find out it can't check in foreigners</li>
+            <li>Lists "things to do" with no idea if you even qualify to enter</li>
+            <li>Earns a commission whether or not the rules actually work for you</li>
+          </ul>
+        </div>
+        <div class="compare-col highlight">
+          <p class="compare-head ui">YOLO HAPPY</p>
+          <ul class="compare-list check">
+            <li>Tells you which rule applies to <em>your</em> passport, route and dates</li>
+            <li>Flags the foreigner-only gotchas before they cost you a night's sleep</li>
+            <li>Makes money from a great app, not from hiding the fine print</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust -->
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">Built to be trusted with your trip</p>
+      <h2>Real sources. Dated. Re-checked.</h2>
+      <div class="grid trust-grid">
+        <div class="card trust-card">
+          <h3>📑 Official sources only</h3>
+          <p class="muted">Every visa policy traces back to a published Chinese government notice — linked and date-stamped on each country page.</p>
+        </div>
+        <div class="card trust-card">
+          <h3>🔄 Synced, not stale</h3>
+          <p class="muted">The checker reads the same verified policy data our iOS app ships, refreshed on every release — not a blog post from 2019.</p>
+        </div>
+        <div class="card trust-card">
+          <h3>🔐 Nothing to hand over</h3>
+          <p class="muted">The tools run in your browser. No passport upload, no account, no email to get an answer.</p>
+        </div>
+      </div>
+      <p class="center" style="margin-top:28px"><a class="btn btn-ghost" href="/about">How we keep it accurate →</a></p>
+    </div>
+  </section>
+
+  <GetTheApp />
+</Base>
+
+<style>
+  .hero { padding: 80px 0 56px; background: linear-gradient(180deg, var(--coral-tint) 0%, var(--bg) 70%); }
+  .hero h1 { max-width: 18ch; }
+  .hero .hl { color: var(--coral); }
+  .hero .lede { margin-top: 18px; max-width: 56ch; }
+  .hero-cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 28px 0 26px; }
+  .trust-row { display: flex; flex-wrap: wrap; gap: 18px; font-size: 0.85rem; color: var(--muted); }
+
+  .tool-grid { grid-template-columns: repeat(3, 1fr); margin-top: 28px; }
+  .tool-card { padding: 24px; display: flex; flex-direction: column; text-decoration: none; color: inherit; transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s; }
+  .tool-card:hover { text-decoration: none; transform: translateY(-3px); box-shadow: 0 12px 32px rgba(26,26,26,0.10); border-color: var(--coral-tint-strong); }
+  .tool-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .tool-emoji { font-size: 1.8rem; }
+  .tool-tag { background: var(--surface-warm); color: var(--muted); }
+  .is-soon { opacity: 0.92; }
+  .tool-cta { margin-top: auto; padding-top: 14px; color: var(--coral-dark); font-weight: 600; font-size: 0.92rem; }
+
+  .contrast { background: var(--surface-warm); }
+  .compare-grid { grid-template-columns: 1fr 1fr; margin-top: 26px; }
+  .compare-col { padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); }
+  .compare-col.highlight { border-color: var(--coral); box-shadow: var(--shadow-coral); }
+  .compare-head { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 14px; }
+  .highlight .compare-head { color: var(--coral-dark); }
+  .compare-list { list-style: none; padding: 0; margin: 0; }
+  .compare-list li { position: relative; padding: 9px 0 9px 28px; font-size: 0.96rem; color: var(--ink-soft); border-top: 1px solid var(--border); }
+  .compare-list li::before { position: absolute; left: 0; top: 9px; font-weight: 700; }
+  .cross li::before { content: "✕"; color: #b9442f; }
+  .check li::before { content: "✓"; color: var(--green); }
+
+  .trust-grid { grid-template-columns: repeat(3, 1fr); margin-top: 26px; }
+  .trust-card { padding: 22px; }
+  .trust-card h3 { font-size: 1.05rem; }
+
+  @media (max-width: 860px) {
+    .tool-grid, .trust-grid, .compare-grid { grid-template-columns: 1fr; }
+  }
+</style>

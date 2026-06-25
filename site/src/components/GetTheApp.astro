@@ -1,0 +1,42 @@
+---
+// Persistent conversion block — present on every page (the funnel's whole point).
+import { SITE } from "../lib/site";
+const { variant = "band" } = Astro.props;
+---
+{variant === "band" ? (
+  <section class="getapp-band">
+    <div class="container getapp-inner">
+      <div>
+        <p class="eyebrow">Get the app</p>
+        <h2>The tool solved one problem. The app handles the whole trip.</h2>
+        <p class="muted">Per-trip visa judgements, audio guides, prep checklists, and a real human concierge — offline-ready, in your language.</p>
+      </div>
+      <div class="getapp-actions">
+        <a class="btn btn-primary" href={SITE.appStoreUrl}>Download for iPhone</a>
+        <span class="getapp-note ui">Free to download · No OTA upsells</span>
+      </div>
+    </div>
+  </section>
+) : (
+  <a class="getapp-inline ui" href={SITE.appStoreUrl}>
+    <span class="getapp-inline-icon">📱</span>
+    <span><strong>Get YOLO HAPPY</strong> — your whole China trip, decoded</span>
+    <span class="getapp-inline-arrow">→</span>
+  </a>
+)}
+
+<style>
+  .getapp-band { background: var(--ink); color: #fff; border-radius: var(--radius-lg); margin: 0 24px; }
+  .getapp-band .container { padding-top: 48px; padding-bottom: 48px; }
+  .getapp-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+  .getapp-band h2 { color: #fff; max-width: 18ch; }
+  .getapp-band .muted { color: rgba(255,255,255,0.72); max-width: 44ch; }
+  .getapp-band .eyebrow { color: var(--coral-tint-strong); }
+  .getapp-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+  .getapp-note { font-size: 0.82rem; color: rgba(255,255,255,0.6); }
+
+  .getapp-inline { display: flex; align-items: center; gap: 12px; background: var(--coral-tint); border: 1px solid var(--coral-tint-strong); border-radius: var(--radius); padding: 16px 20px; color: var(--ink); font-size: 0.98rem; text-decoration: none; }
+  .getapp-inline:hover { text-decoration: none; border-color: var(--coral); }
+  .getapp-inline-icon { font-size: 1.3rem; }
+  .getapp-inline-arrow { margin-left: auto; color: var(--coral-dark); font-weight: 700; }
+</style>

@@ -1,0 +1,77 @@
+---
+import Base from "../layouts/Base.astro";
+import GetTheApp from "../components/GetTheApp.astro";
+
+const title = "About YOLO HAPPY — why you can trust our China travel data";
+const description =
+  "We're a system navigator, not an OTA. How we source visa and travel rules from official Chinese government notices, keep them dated and re-checked, and why we never ask for your passport.";
+---
+<Base title={title} description={description}>
+  <section class="section-tight">
+    <div class="container narrow">
+      <p class="eyebrow">About</p>
+      <h1>We decode China's rules. We don't sell you bookings.</h1>
+      <p class="lede">
+        YOLO HAPPY is a travel companion for foreign visitors to China. Our job is to make the country's
+        systems — visas, real-name booking, foreigner check-in, payments — readable and actionable, so you
+        travel with confidence instead of guesswork.
+      </p>
+
+      <h2>Why trust us with something as serious as a visa?</h2>
+      <p>It's a fair question — getting this wrong can end a trip at the border. So here's exactly how the data works:</p>
+
+      <div class="grid trust-grid">
+        <div class="card t-card">
+          <h3>📑 Sourced from official notices</h3>
+          <p class="muted">Every visa-free policy traces to a published notice from China's Ministry of Foreign Affairs or National Immigration Administration. Each country page links the original source.</p>
+        </div>
+        <div class="card t-card">
+          <h3>📅 Dated and re-verified</h3>
+          <p class="muted">Policies carry a "last verified" date. When China updates an exemption — and it changes often — we re-check and re-sync, rather than leaving a stale blog post up.</p>
+        </div>
+        <div class="card t-card">
+          <h3>⚙️ One verified engine</h3>
+          <p class="muted">The web checker and the iOS app evaluate the <em>same</em> verified policy dataset with the same logic. No divergent "website version" giving a different answer.</p>
+        </div>
+        <div class="card t-card">
+          <h3>🔐 Your data stays yours</h3>
+          <p class="muted">The tools run in your browser. We never ask you to upload a passport or create an account just to get an answer.</p>
+        </div>
+      </div>
+
+      <h2>What "not an OTA" actually means</h2>
+      <p>
+        Online travel agencies make money when you book through them — so their incentive is to get you to
+        check out, not to warn you that the hotel can't legally host foreigners or that your nationality needs
+        a visa. We make money from a paid app that's genuinely useful for your whole trip. That means we can
+        tell you the inconvenient truth: sometimes the answer is "you need a visa" or "book directly, not here."
+      </p>
+
+      <div class="card honest-card">
+        <h3>Honest limits</h3>
+        <p>We work hard to be accurate, but rules change without notice and edge cases exist. Treat our tools as
+        strong decision-support, not legal advice — and always confirm against the official embassy or immigration
+        source before you commit money or travel. We link those sources so you can.</p>
+      </div>
+
+      <h2>The app</h2>
+      <p>
+        The website solves single problems for free. The <strong>YOLO HAPPY</strong> iOS app handles the whole
+        journey: per-trip visa judgements, offline audio guides, prep checklists tuned to your nationality,
+        payment help, and a real human concierge — in your language.
+      </p>
+    </div>
+  </section>
+
+  <GetTheApp />
+</Base>
+
+<style>
+  .narrow { max-width: 760px; }
+  .trust-grid { grid-template-columns: 1fr 1fr; margin: 20px 0 32px; }
+  .t-card { padding: 20px; }
+  .t-card h3 { font-size: 1.02rem; }
+  .honest-card { padding: 22px; margin: 8px 0 28px; background: var(--surface-warm); }
+  .honest-card h3 { font-size: 1.05rem; }
+  @media (max-width: 620px) { .trust-grid { grid-template-columns: 1fr; } }
+</style>

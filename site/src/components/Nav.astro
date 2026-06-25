@@ -1,0 +1,38 @@
+---
+import { NAV, SITE } from "../lib/site";
+const path = Astro.url.pathname;
+---
+<header class="site-nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark">YOLO</span><span class="brand-rest">&nbsp;HAPPY</span>
+    </a>
+    <nav class="nav-links ui">
+      {NAV.map((item) => (
+        <a href={item.href} class={path === item.href ? "active" : ""}>{item.label}</a>
+      ))}
+    </nav>
+    <a class="btn btn-primary nav-cta" href={SITE.appStoreUrl}>Get the app</a>
+  </div>
+</header>
+
+<style>
+  .site-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(250, 249, 247, 0.85);
+    backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; gap: 24px; height: 64px; }
+  .brand { font-family: var(--font-ui); font-weight: 700; letter-spacing: -0.01em; font-size: 1.05rem; color: var(--ink); text-decoration: none; }
+  .brand-mark { color: var(--coral); }
+  .brand-rest { color: var(--ink); font-weight: 600; }
+  .nav-links { display: flex; gap: 22px; margin-left: auto; }
+  .nav-links a { color: var(--ink-soft); font-size: 0.92rem; font-weight: 500; text-decoration: none; }
+  .nav-links a:hover, .nav-links a.active { color: var(--coral-dark); }
+  .nav-cta { padding: 9px 18px; font-size: 0.9rem; }
+  @media (max-width: 760px) {
+    .nav-links { display: none; }
+    .nav-inner { gap: 12px; }
+  }
+</style>

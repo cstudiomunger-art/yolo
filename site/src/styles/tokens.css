@@ -1,0 +1,43 @@
+/* YOLO HAPPY — web brand tokens.
+   Warm white + coral + Poppins/Lora. The single source of truth for the marketing
+   site's look; the iOS app's sand accent is intentionally separate for now. */
+:root {
+  /* surfaces */
+  --bg: #faf9f7;
+  --surface: #ffffff;
+  --surface-warm: #f5f0e8;
+  --border: #e8e2da;
+  --border-strong: #d8cfc2;
+
+  /* ink */
+  --ink: #1a1a1a;
+  --ink-soft: #44413d;
+  --muted: #6b6b6b;
+  --faint: #9a948c;
+
+  /* brand — coral */
+  --coral: #c45c26;
+  --coral-dark: #a8491c;
+  --coral-tint: #fbefe7;
+  --coral-tint-strong: #f6dccb;
+
+  /* verdict semantics */
+  --green: #2f8f4e;
+  --green-tint: #e9f4ec;
+  --amber: #c98a1e;
+  --amber-tint: #fbf1de;
+  --red: #c0392b;
+  --red-tint: #fae9e7;
+
+  /* type */
+  --font-display: "Lora", Georgia, "Times New Roman", serif;
+  --font-ui: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  /* shape */
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 22px;
+  --shadow: 0 1px 2px rgba(26, 26, 26, 0.04), 0 8px 28px rgba(26, 26, 26, 0.06);
+  --shadow-coral: 0 8px 24px rgba(196, 92, 38, 0.22);
+  --maxw: 1080px;
+}

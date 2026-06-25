@@ -1,0 +1,57 @@
+---
+import Base from "../layouts/Base.astro";
+import GetTheApp from "../components/GetTheApp.astro";
+
+const title = "Forbidden City Tickets for Foreigners — booking rules & release times";
+const description =
+  "How foreigners actually book Forbidden City (Palace Museum) tickets: when tickets are released, the passport real-name rules, why bookings get rejected, and how to time the daily drop. Interactive tool coming soon.";
+---
+<Base title={title} description={description} ogType="article">
+  <section class="section-tight">
+    <div class="container narrow">
+      <p class="eyebrow">🎟️ Forbidden City · for foreign visitors</p>
+      <h1>Forbidden City tickets for foreigners, decoded</h1>
+      <p class="lede">The Palace Museum sells out days ahead and the booking flow assumes you have a Chinese ID. Here's how foreign passport holders actually get in.</p>
+
+      <div class="card soon-banner">
+        <span class="badge">Interactive tool coming soon</span>
+        <p>We're building a live <strong>release-time countdown + passport-name format checker</strong> so your booking doesn't get rejected. Want it first? <a href="/china-visa-free-checker">Try our visa checker</a> meanwhile, or get the app.</p>
+      </div>
+
+      <h2>What trips up foreign visitors</h2>
+      <ul class="rules">
+        <li><strong>Real-name, passport-based.</strong> Each ticket is tied to one passport. The name must match your passport's machine-readable line — not your everyday spelling.</li>
+        <li><strong>Tickets release on a fixed schedule.</strong> A set number open several days in advance and sell out fast, especially in peak season and on Mondays-adjacent days (the museum closes most Mondays).</li>
+        <li><strong>The official channel expects a Chinese phone/ID.</strong> Foreigners can still book, but the flow and payment step are where most people get stuck.</li>
+        <li><strong>One entry, timed.</strong> Your slot is date- and sometimes time-bound; a mismatch at the gate means no entry.</li>
+      </ul>
+
+      <h2>What the tool will do</h2>
+      <div class="grid feature-grid">
+        <div class="card feature"><h3>⏱️ Release countdown</h3><p class="muted">A live timer to the next ticket drop in Beijing time, so you're ready the moment they open.</p></div>
+        <div class="card feature"><h3>🪪 Passport-name checker</h3><p class="muted">Paste your passport name; we flag the format issues that get bookings auto-rejected.</p></div>
+        <div class="card feature"><h3>📋 Step-by-step booking</h3><p class="muted">The exact foreigner path through the official channel, with the payment workaround.</p></div>
+      </div>
+
+      <div class="trust-note card">
+        <p><strong>Not an OTA.</strong> We don't resell tickets at a markup — we show you how to book directly at face value. <a href="/about">Why that matters →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <GetTheApp />
+</Base>
+
+<style>
+  .narrow { max-width: 760px; }
+  .soon-banner { padding: 22px; margin: 18px 0 34px; background: var(--coral-tint); border-color: var(--coral-tint-strong); }
+  .soon-banner p { margin: 12px 0 0; }
+  .rules { padding-left: 20px; }
+  .rules li { margin: 10px 0; color: var(--ink-soft); }
+  .feature-grid { grid-template-columns: repeat(3, 1fr); margin: 18px 0 30px; }
+  .feature { padding: 18px; }
+  .feature h3 { font-size: 1rem; }
+  .trust-note { padding: 20px; background: var(--surface-warm); }
+  .trust-note p { margin: 0; }
+  @media (max-width: 720px) { .feature-grid { grid-template-columns: 1fr; } }
+</style>

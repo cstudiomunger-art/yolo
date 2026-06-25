@@ -1,0 +1,150 @@
+---
+import Base from "../../layouts/Base.astro";
+import GetTheApp from "../../components/GetTheApp.astro";
+import rawData from "../../data/visa-data.json";
+import countriesRaw from "../../data/countries.json";
+import { summarize } from "../../lib/visa-summary";
+import type { VisaDataSet } from "../../lib/visa-types";
+
+const data = rawData as unknown as VisaDataSet;
+type Country = { iso2: string; name: string; flag: string; slug: string; hasGrant: boolean };
+const countries = countriesRaw as Country[];
+
+export async function getStaticPaths() {
+  // getStaticPaths runs in an isolated scope — only imports are in scope here, not the
+  // frontmatter consts below. High-traffic source markets that need a visa today still
+  // deserve a definitive page ("can [nationality] travel to china visa free" is high-intent
+  // even when the answer is "no — here's what to do instead").
+  const curatedRequired = ["IN", "PH", "ID", "VN", "NG", "PK", "BD", "EG", "TR", "ZA", "SA", "KE", "GH", "TW", "US", "CA"];
+  const all = countriesRaw as Country[];
+  const list = all.filter((c) => c.hasGrant || curatedRequired.includes(c.iso2));
+  return list.map((c) => ({ params: { country: c.slug }, props: { country: c } }));
+}
+
+const { country } = Astro.props as { country: Country };
+const sum = summarize(country.iso2, data, new Date());
+
+const verb =
+  sum.verdict === "visa_free" ? "can enter China visa-free" :
+  sum.verdict === "conditional" ? "may enter China without a visa under certain conditions" :
+  "need a visa to enter China";
+
+const title = `Can ${country.name} passport holders travel to China visa-free?`;
+const description =
+  sum.verdict === "visa_free"
+    ? `${country.name} citizens ${verb} for up to ${sum.stay_days ?? "30"} days. See the policy, stay limit, conditions and official sources — updated from verified data.`
+    : sum.verdict === "conditional"
+      ? `${country.name} travelers ${verb} (transit / regional exemptions). See exactly which apply and check your specific trip.`
+      : `${country.name} passport holders ${verb}. See your transit options and how to apply — plus a free per-trip checker.`;
+
+const otherVisaFree = countries.filter((c) => c.hasGrant && c.iso2 !== country.iso2).slice(0, 12);
+const badgeClass = sum.verdict === "visa_free" ? "badge-green" : sum.verdict === "conditional" ? "badge-amber" : "badge-red";
+const toneClass = sum.verdict === "visa_free" ? "vc-green" : sum.verdict === "conditional" ? "vc-amber" : "vc-red";
+const badgeText = sum.verdict === "visa_free" ? "Visa-free" : sum.verdict === "conditional" ? "Conditional visa-free" : "Visa required";
+const allPolicies = [...sum.nationwide, ...sum.conditional];
+---
+<Base title={title} description={description} ogType="article">
+  <section class="section-tight">
+    <div class="container narrow">
+      <a class="back ui" href="/china-visa-free-checker">← All passports</a>
+      <p class="eyebrow">{country.flag} {country.name} → China</p>
+      <h1>{title}</h1>
+
+      <div class={`vc-verdict ${toneClass} hero-verdict`}>
+        <span class={`badge ${badgeClass}`}>{badgeText}</span>
+        {sum.verdict === "visa_free" && (
+          <p class="vc-big">Yes — {country.name} ordinary-passport holders can enter China visa-free for up to <strong>{sum.stay_days} days</strong> under <strong>{sum.headline}</strong>.</p>
+        )}
+        {sum.verdict === "conditional" && (
+          <p class="vc-big">{country.name} travelers can enter without a visa only under specific exemptions — see the conditions below, then check your exact route.</p>
+        )}
+        {sum.verdict === "visa_required" && (
+          <p class="vc-big">{country.name} passport holders currently need a visa for ordinary travel to China. A short airport transit may be exempt — check your itinerary below.</p>
+        )}
+        <a class="btn btn-primary hero-cta" href={`/china-visa-free-checker?country=${country.slug}`}>Check my specific trip →</a>
+      </div>
+
+      {allPolicies.length > 0 && (
+        <>
+          <h2>How {country.name} citizens can enter</h2>
+          <div class="grid policy-grid">
+            {allPolicies.map((p) => (
+              <div class="card policy-card">
+                <div class="policy-head">
+                  <strong>{p.name_en}</strong>
+                  <span class="chip">{p.type}</span>
+                </div>
+                <p class="policy-stay">
+                  {p.stay_days != null && <>Up to <strong>{p.stay_days} days</strong></>}
+                  {p.stay_hours != null && <>Up to <strong>{p.stay_hours} hours</strong></>}
+                </p>
+                {p.conditions.length > 0 ? (
+                  <ul class="policy-cond">{p.conditions.map((c) => <li>{c}</li>)}</ul>
+                ) : (
+                  <p class="muted small">No special conditions for ordinary tourism.</p>
+                )}
+                <div class="policy-meta ui">
+                  {p.expiry_date && <span>Valid through {p.expiry_date}</span>}
+                  {p.last_verified && <span>Verified {p.last_verified}</span>}
+                  {p.source_url && <a href={p.source_url} target="_blank" rel="noopener">Official source ↗</a>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {sum.verdict === "visa_required" && (
+        <div class="card info-card">
+          <h3>Your options</h3>
+          <ul>
+            <li><strong>24-hour airport transit</strong> may let you connect through a Chinese airport without a visa, if you don't leave the transit area.</li>
+            <li><strong>Apply for a tourist (L) visa</strong> at your nearest Chinese embassy or visa center.</li>
+            <li>Run your exact itinerary in the <a href={`/china-visa-free-checker?country=${country.slug}`}>checker</a> — some routes qualify even when your nationality doesn't broadly.</li>
+          </ul>
+        </div>
+      )}
+
+      <div class="trust-note card">
+        <p><strong>Why you can trust this:</strong> every policy above comes from official Chinese government notices (linked), tracked and date-stamped. We're not an OTA — we don't sell you visas, tickets, or hotels. We just decode the rules so you can act on them. <a href="/about">More on our data →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <GetTheApp />
+
+  <section class="section-tight">
+    <div class="container narrow">
+      <h2 class="small-h">Check another passport</h2>
+      <div class="other-grid">
+        {otherVisaFree.map((c) => (
+          <a class="vc-country-link" href={`/china-visa-free/${c.slug}`}><span class="vc-flag">{c.flag}</span>{c.name}</a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .narrow { max-width: 760px; }
+  .back { font-family: var(--font-ui); font-size: 0.85rem; color: var(--muted); display: inline-block; margin-bottom: 14px; }
+  .hero-verdict { margin: 18px 0 36px; padding: 24px; }
+  .hero-cta { margin-top: 16px; }
+  .policy-grid { grid-template-columns: 1fr 1fr; margin: 18px 0 32px; }
+  .policy-card { padding: 18px; }
+  .policy-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+  .policy-stay { margin: 0 0 8px; color: var(--ink-soft); }
+  .policy-cond { margin: 0; padding-left: 18px; font-size: 0.9rem; color: var(--ink-soft); }
+  .policy-cond li { margin: 3px 0; }
+  .policy-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; font-size: 0.78rem; color: var(--faint); }
+  .small { font-size: 0.9rem; }
+  .info-card, .trust-note { padding: 22px; margin: 8px 0 28px; }
+  .trust-note { background: var(--coral-tint); border-color: var(--coral-tint-strong); }
+  .trust-note p { margin: 0; font-size: 0.95rem; }
+  .small-h { font-size: 1.2rem; }
+  .other-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; margin-top: 16px; }
+  .vc-country-link { display: flex; align-items: center; gap: 9px; font-family: var(--font-ui); font-size: 0.9rem; color: var(--ink-soft); padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); }
+  .vc-country-link:hover { border-color: var(--coral); color: var(--coral-dark); text-decoration: none; }
+  .vc-flag { font-size: 1.15rem; }
+  @media (max-width: 560px) { .policy-grid { grid-template-columns: 1fr; } }
+</style>

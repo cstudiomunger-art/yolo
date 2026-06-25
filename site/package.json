@@ -1,0 +1,20 @@
+{
+  "name": "yolo-happy-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fetch:visa": "node scripts/fetch-visa-data.mjs",
+    "dev": "npm run fetch:visa && astro dev",
+    "build": "npm run fetch:visa && astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.2.5",
+    "@astrojs/sitemap": "^3.2.1"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.25.12": true,
+    "sharp@0.34.5": true
+  }
+}

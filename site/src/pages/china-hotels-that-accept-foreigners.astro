@@ -1,0 +1,74 @@
+---
+import Base from "../layouts/Base.astro";
+import GetTheApp from "../components/GetTheApp.astro";
+
+const title = "China Hotels That Accept Foreigners — how to avoid being turned away";
+const description =
+  "Not every Chinese hotel can legally check in foreign guests. Learn why, how to confirm before you book, and use our bilingual confirmation message. Filterable foreigner-friendly hotel finder coming soon.";
+
+const template = `您好，请问贵酒店可以接待外国人入住吗？我持外国护照。谢谢！
+Hello, can your hotel accept foreign guests? I hold a foreign passport. Thank you!`;
+---
+<Base title={title} description={description} ogType="article">
+  <section class="section-tight">
+    <div class="container narrow">
+      <p class="eyebrow">🏨 Accommodation · for foreign visitors</p>
+      <h1>China hotels that accept foreigners</h1>
+      <p class="lede">Some Chinese hotels aren't registered to host foreign guests and will turn you away at check-in — even with a confirmed booking. Here's how to never get caught out.</p>
+
+      <div class="card soon-banner">
+        <span class="badge">Filterable finder coming soon</span>
+        <p>We're building a searchable list of <strong>confirmed foreigner-friendly hotels</strong> by city. Until it's live, use the confirmation message below before you pay.</p>
+      </div>
+
+      <h2>Why this happens</h2>
+      <p>Hosting foreign guests requires a hotel to be set up to register them with the local police (the temporary-residence registration). Many budget hotels, guesthouses, and some chains simply aren't — so they decline foreign check-ins regardless of your reservation.</p>
+
+      <h2>Confirm before you book — copy this</h2>
+      <p class="muted">Send this to the hotel (via the booking platform chat or phone) and wait for a clear yes:</p>
+      <div class="copy-card">
+        <pre id="tpl">{template}</pre>
+        <button class="btn btn-primary copy-btn" data-copy="tpl">Copy bilingual message</button>
+      </div>
+
+      <h2>Quick rules of thumb</h2>
+      <ul class="rules">
+        <li><strong>International chains</strong> and 4–5 star hotels are almost always able to register foreigners.</li>
+        <li><strong>Budget/local guesthouses</strong> are the most likely to decline — always confirm first.</li>
+        <li>If you're turned away, ask them to recommend a nearby <em>涉外</em> (foreigner-licensed) hotel.</li>
+        <li>Do the police registration within 24 hours of arrival — hotels do it for you; if you stay privately, you must do it yourself.</li>
+      </ul>
+
+      <div class="trust-note card">
+        <p><strong>Not an OTA.</strong> We don't take a cut of your booking — we just keep you from being stranded at midnight. <a href="/about">Our model →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <GetTheApp />
+
+  <script>
+    document.querySelectorAll<HTMLButtonElement>("button[data-copy]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const el = document.getElementById(btn.dataset.copy!);
+        if (!el) return;
+        await navigator.clipboard.writeText(el.textContent ?? "");
+        const old = btn.textContent;
+        btn.textContent = "Copied ✓";
+        setTimeout(() => (btn.textContent = old), 1600);
+      });
+    });
+  </script>
+</Base>
+
+<style>
+  .narrow { max-width: 760px; }
+  .soon-banner { padding: 22px; margin: 18px 0 34px; background: var(--coral-tint); border-color: var(--coral-tint-strong); }
+  .soon-banner p { margin: 12px 0 0; }
+  .copy-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin: 12px 0 8px; }
+  .copy-card pre { font-family: var(--font-ui); font-size: 0.95rem; white-space: pre-wrap; margin: 0 0 14px; color: var(--ink); line-height: 1.6; }
+  .rules { padding-left: 20px; }
+  .rules li { margin: 10px 0; color: var(--ink-soft); }
+  .trust-note { padding: 20px; margin-top: 18px; background: var(--surface-warm); }
+  .trust-note p { margin: 0; }
+</style>
