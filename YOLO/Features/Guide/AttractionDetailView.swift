@@ -229,14 +229,22 @@ struct AttractionDetailView: View {
                 Text("📍 \(en)")
                     .font(Theme.FontToken.inter(12))
                     .foregroundStyle(Theme.ColorToken.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             if let zh = display.addressZh, !zh.isEmpty {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(zh)
-                        .font(Theme.FontToken.inter(12))
-                        .foregroundStyle(Theme.ColorToken.textMuted)
-                    copyButton(text: zh, field: .address)
+                Button {
+                    UIPasteboard.general.string = zh
+                    withAnimation(.easeInOut(duration: 0.15)) { copiedField = .address }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            if copiedField == .address { copiedField = nil }
+                        }
+                    }
+                } label: {
+                    addressLabel(zh)
                 }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -259,6 +267,24 @@ struct AttractionDetailView: View {
                 .foregroundStyle(copiedField == field ? Color.green : Theme.ColorToken.accent)
         }
         .buttonStyle(.plain)
+    }
+
+    /// Address text with the copy icon flowing inline at the end, so a long
+    /// address wraps to multiple lines and the icon follows the last character.
+    private func addressLabel(_ text: String) -> some View {
+        let copied = copiedField == .address
+        return (
+            Text(text)
+                .foregroundColor(Theme.ColorToken.textMuted)
+            + Text("  ")
+            + Text(Image(systemName: copied ? "checkmark" : "doc.on.doc"))
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(copied ? Color.green : Theme.ColorToken.accent)
+        )
+        .font(Theme.FontToken.inter(12))
+        .multilineTextAlignment(.leading)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
