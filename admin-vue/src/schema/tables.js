@@ -453,10 +453,10 @@ const App = {};
         { key: "external_links", type: "link_list", label: "外链（按钮 + URL）" },
         {
           key: "reminder_days_before",
-          type: "number",
+          type: "reminder_days",
           label: "提前提醒天数",
           allowNull: true,
-          hint: "出发前 N 天 9:00 推送该条提醒（仅对适用且未完成的条目）。留空 = 不单独提醒，仍受全局提醒覆盖。",
+          hint: "出发前 N 天 9:00 推送该条提醒（仅对适用且未完成的条目）。「不提醒」= 不单独提醒，仍受全局提醒覆盖。",
         },
         { key: "estimated_minutes", type: "number", label: "预计分钟", allowNull: true },
         {

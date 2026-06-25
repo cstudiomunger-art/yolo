@@ -317,6 +317,29 @@ async function onAudioFile(e) {
       <span v-if="uploading" class="muted">上传中…</span>
     </div>
 
+    <!-- advance reminder days: presets + custom -->
+    <div v-else-if="isType('reminder_days')" class="rdays">
+      <div class="chips">
+        <button type="button" class="chip" :class="{ on: val == null }" @click="val = null">不提醒</button>
+        <button
+          v-for="p in [3, 5, 7, 10, 15, 30, 45]"
+          :key="p"
+          type="button"
+          class="chip"
+          :class="{ on: Number(val) === p }"
+          @click="val = p"
+        >{{ p }} 天</button>
+      </div>
+      <input
+        class="custom"
+        type="number"
+        min="1"
+        :value="val ?? ''"
+        @input="val = $event.target.value === '' ? null : Number($event.target.value)"
+        placeholder="自定义天数"
+      />
+    </div>
+
     <!-- JSON fallback (json type + any unhandled) -->
     <template v-else-if="JSON_TYPES.has(f.type) || true">
       <textarea v-model="jsonText" rows="6" class="mono" spellcheck="false"></textarea>
@@ -342,4 +365,8 @@ async function onAudioFile(e) {
 .preview .audio { width: 100%; }
 .muted { color: var(--muted); font-size: 13px; }
 .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+.rdays .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.rdays .chip { padding: 5px 12px; border: 1px solid var(--border); border-radius: 16px; background: transparent; color: var(--text); font-size: 13px; cursor: pointer; }
+.rdays .chip.on { border-color: var(--accent); background: rgba(196, 92, 38, 0.12); color: var(--accent); }
+.rdays .custom { width: auto; min-width: 140px; }
 </style>

@@ -72,6 +72,10 @@ const GROUPS = [
     { label: "助手回复", table: "assistant_replies" },
   ] },
   { id: "culture", label: "文化", leaves: [{ label: "文化贴士", table: "culture_tips" }] },
+  { id: "prep", label: "🧳 行前清单", leaves: [
+    { label: "🧳 行前清单工作台", hubId: "checklist" },
+    { label: "清单全局设置", table: "checklist_settings" },
+  ] },
   { id: "visa", label: "🛂 签证引擎 v2", leaves: [
     { label: "🛂 签证工作台", hubId: "visa" },
     { label: "护照国家（国籍）", table: "passport_countries" },
