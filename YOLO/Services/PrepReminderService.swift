@@ -37,12 +37,23 @@ enum PrepReminderService {
     private static let itemPrefix = "yolohappy.prep.item."
     private static let tripRemindersKey = UserDefaultsKeys.tripPrepRemindersEnabled
 
+    private static let advanceRemindersKey = UserDefaultsKeys.prepAdvanceRemindersEnabled
+
     static var tripRemindersEnabled: Bool {
         get {
             if UserDefaults.standard.object(forKey: tripRemindersKey) == nil { return true }
             return UserDefaults.standard.bool(forKey: tripRemindersKey)
         }
         set { UserDefaults.standard.set(newValue, forKey: tripRemindersKey) }
+    }
+
+    /// 「提前提醒」：按每条清单各自的 reminderDaysBefore 在出发前提醒。默认开启。
+    static var advanceRemindersEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: advanceRemindersKey) == nil { return true }
+            return UserDefaults.standard.bool(forKey: advanceRemindersKey)
+        }
+        set { UserDefaults.standard.set(newValue, forKey: advanceRemindersKey) }
     }
 
     static func scheduleIfNeeded(
@@ -86,7 +97,7 @@ enum PrepReminderService {
     /// departure − N days, 9:00. Callers pass only applicable + still-pending items.
     static func scheduleItemReminders(items: [ChecklistItem], departureDate: Date) async {
         await cancelItemReminders()
-        guard tripRemindersEnabled else { return }
+        guard advanceRemindersEnabled else { return }
 
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()

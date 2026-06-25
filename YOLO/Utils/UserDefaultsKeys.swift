@@ -18,6 +18,7 @@ enum UserDefaultsKeys {
     static let introOnboardingDone = prefix + "introOnboardingDone"
     static let notificationOnboardingDone = prefix + "notificationOnboardingDone"
     static let tripPrepRemindersEnabled = prefix + "tripPrepRemindersEnabled"
+    static let prepAdvanceRemindersEnabled = prefix + "prepAdvanceRemindersEnabled"
     static let cachedAppSettings = prefix + "cachedAppSettings.v6"
     static let offlineCacheMigrated = prefix + "offlineCacheMigratedToAppSupport.v1"
     static let downloadedAudioGuideIds = prefix + "downloadedAudioGuideIds"

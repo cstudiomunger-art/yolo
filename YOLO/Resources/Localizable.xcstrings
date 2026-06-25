@@ -3021,6 +3021,26 @@
           }
         }
       }
+    },
+    "Advance reminders": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提前提醒"
+          }
+        }
+      }
+    },
+    "Remind me ahead of time for key prep items": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关键事项按各自时间提前提醒我"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

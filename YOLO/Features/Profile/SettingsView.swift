@@ -88,6 +88,18 @@ struct SettingsView: View {
                 .tint(Theme.ColorToken.success)
                 .padding(.horizontal, rowPadding)
                 .padding(.vertical, 11)
+
+                rowDivider
+
+                Toggle(isOn: advanceRemindersBinding) {
+                    rowLabel(
+                        String(localized: "Advance reminders"),
+                        subtitle: String(localized: "Remind me ahead of time for key prep items")
+                    )
+                }
+                .tint(Theme.ColorToken.success)
+                .padding(.horizontal, rowPadding)
+                .padding(.vertical, 11)
             }
         }
     }
@@ -356,10 +368,21 @@ struct SettingsView: View {
                 PrepReminderService.tripRemindersEnabled = enabled
                 if !enabled {
                     PrepReminderService.cancelReminder()
-                    Task {
-                        await PrepReminderService.cancelItemReminders()
-                        await TripReminderService.cancelAll()
-                    }
+                    Task { await TripReminderService.cancelAll() }
+                } else {
+                    Task { await appEnv.rescheduleTripReminders() }
+                }
+            }
+        )
+    }
+
+    private var advanceRemindersBinding: Binding<Bool> {
+        Binding(
+            get: { PrepReminderService.advanceRemindersEnabled },
+            set: { enabled in
+                PrepReminderService.advanceRemindersEnabled = enabled
+                if !enabled {
+                    Task { await PrepReminderService.cancelItemReminders() }
                 } else {
                     Task { await appEnv.rescheduleTripReminders() }
                 }
