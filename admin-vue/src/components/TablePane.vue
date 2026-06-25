@@ -22,15 +22,32 @@ const loading = ref(false);
 const error = ref("");
 const cityFilter = ref("");
 const search = ref("");
+const typeFilter = ref(""); // checklist_items: entry / universal / city
+const page = ref(1);
 const editing = ref(null); // row, or { _new:true }
 
+const PAGE_SIZE = 50;
+const CHECKLIST_TYPES = [
+  { value: "entry", label: "入境/签证" },
+  { value: "universal", label: "通用" },
+  { value: "city", label: "城市" },
+];
+
 const isSingle = computed(() => schema.value?.single === true);
+const isChecklist = computed(() => props.tableKey === "checklist_items");
+
+// persisted (non-fixed) filters per table, mirroring the legacy admin
+const cityStoreKey = computed(() => `cms_city_filter_${props.tableKey}`);
+const typeStoreKey = computed(() => `cms_type_filter_${props.tableKey}`);
 
 async function load() {
   error.value = "";
   loading.value = true;
   editing.value = null;
-  cityFilter.value = props.fixedCityId || "";
+  page.value = 1;
+  // city-locked panels force the city; otherwise restore the persisted filter
+  cityFilter.value = props.fixedCityId || (showCityFilter.value ? localStorage.getItem(cityStoreKey.value) || "" : "");
+  typeFilter.value = isChecklist.value ? localStorage.getItem(typeStoreKey.value) || "" : "";
   try {
     await refCache.load();
     if (isSingle.value) {
@@ -65,11 +82,31 @@ const filteredRows = computed(() => {
     if (props.tableKey === "reading_list") r = r.filter((row) => readingListMatch(row, city));
     else if (hasCityFilter(props.tableKey)) r = filterRowsByCity(props.tableKey, r, city, attractionCity);
   }
+  if (isChecklist.value && typeFilter.value) {
+    r = r.filter((row) => (row.type || "city") === typeFilter.value);
+  }
   if (search.value) r = filterRowsBySearch(r, search.value);
   return r;
 });
 
 const showCityFilter = computed(() => !props.fixedCityId && hasCityFilter(props.tableKey));
+
+// ── pagination (client-side; rows are already fully loaded) ──
+const pageCount = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / PAGE_SIZE)));
+const pagedRows = computed(() =>
+  filteredRows.value.slice((page.value - 1) * PAGE_SIZE, page.value * PAGE_SIZE)
+);
+
+// reset to page 1 whenever a filter narrows the result
+watch([search, cityFilter, typeFilter], () => { page.value = 1; });
+
+// persist non-fixed filters
+watch(cityFilter, (v) => {
+  if (showCityFilter.value) localStorage.setItem(cityStoreKey.value, v || "");
+});
+watch(typeFilter, (v) => {
+  if (isChecklist.value) localStorage.setItem(typeStoreKey.value, v || "");
+});
 
 function createPresets() {
   const p = {};
@@ -141,10 +178,19 @@ watch(() => [props.tableKey, props.fixedCityId], load);
             {{ (c.emoji || "") + " " + (c.chinese_name || c.name) }}
           </option>
         </select>
+        <select v-if="isChecklist" v-model="typeFilter">
+          <option value="">全部类型</option>
+          <option v-for="t in CHECKLIST_TYPES" :key="t.value" :value="t.value">{{ t.label }}</option>
+        </select>
         <input v-model="search" type="search" placeholder="搜索…" />
         <span class="count">{{ filteredRows.length }} 条</span>
       </div>
-      <TableList :schema="schema" :rows="filteredRows" @edit="onEdit" @remove="onRemove" />
+      <TableList :schema="schema" :rows="pagedRows" @edit="onEdit" @remove="onRemove" />
+      <div v-if="pageCount > 1" class="pager">
+        <button class="btn btn-secondary btn-sm" :disabled="page <= 1" @click="page--">← 上一页</button>
+        <span class="muted">第 {{ page }} / {{ pageCount }} 页</span>
+        <button class="btn btn-secondary btn-sm" :disabled="page >= pageCount" @click="page++">下一页 →</button>
+      </div>
     </template>
   </div>
 </template>
@@ -156,4 +202,6 @@ watch(() => [props.tableKey, props.fixedCityId], load);
 .filters { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; }
 .filters select, .filters input { width: auto; min-width: 180px; }
 .count { color: var(--muted); font-size: 13px; }
+.pager { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 16px; }
+.pager .muted { color: var(--muted); font-size: 13px; }
 </style>

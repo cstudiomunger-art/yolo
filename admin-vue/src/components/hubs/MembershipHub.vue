@@ -1,7 +1,9 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { supabase } from "@/lib/supabase";
+import { useRefCache } from "@/stores/refCache";
 
+const refCache = useRefCache();
 const tab = ref("plans");
 const toast = ref("");
 const error = ref("");
@@ -51,12 +53,33 @@ async function removePlan(p) {
 
 // ── transactions ──
 const txns = ref([]);
+const txSearch = ref("");
+const txFilter = ref(""); // event_type
+const EVENT_LABELS = {
+  INITIAL_PURCHASE: "首次购买", RENEWAL: "续费", REFUND: "退款",
+  CANCELLATION: "取消", EXPIRATION: "到期", NON_RENEWING_PURCHASE: "单次购买",
+};
 async function loadTxns() {
+  await refCache.load();
   const { data, error: e } = await supabase
-    .from("user_iap_transactions").select("*").order("created_at", { ascending: false }).limit(200);
+    .from("user_iap_transactions")
+    .select("id,user_id,event_type,product_id,plan_id,price_usd,currency,purchased_at,created_at")
+    .order("purchased_at", { ascending: false }).limit(500);
   if (e) error.value = e.message;
   txns.value = data || [];
 }
+const filteredTxns = computed(() => {
+  let r = txns.value;
+  if (txFilter.value) r = r.filter((t) => t.event_type === txFilter.value);
+  const q = txSearch.value.trim().toLowerCase();
+  if (q) {
+    r = r.filter((t) => {
+      const blob = [refCache.userLabel(t.user_id), t.product_id, t.plan_id].filter(Boolean).join(" ").toLowerCase();
+      return blob.includes(q);
+    });
+  }
+  return r;
+});
 
 // ── refunds ──
 const refunds = ref([]);
@@ -145,18 +168,25 @@ onMounted(loadPlans);
 
     <!-- transactions -->
     <section v-else-if="tab === 'txns'">
+      <div class="bar txbar">
+        <input v-model="txSearch" class="search" type="search" placeholder="搜邮箱 / 商品 ID…" />
+        <select v-model="txFilter">
+          <option value="">全部类型</option>
+          <option v-for="(label, ev) in EVENT_LABELS" :key="ev" :value="ev">{{ label }}</option>
+        </select>
+        <span class="muted">{{ filteredTxns.length }} 条</span>
+      </div>
       <table class="data-table">
-        <thead><tr><th>时间</th><th>用户</th><th>产品</th><th>类型</th><th>金额</th><th>状态</th></tr></thead>
+        <thead><tr><th>时间</th><th>用户</th><th>商品</th><th>类型</th><th>金额</th></tr></thead>
         <tbody>
-          <tr v-for="t in txns" :key="t.id">
-            <td>{{ (t.created_at || "").slice(0, 19).replace("T", " ") }}</td>
-            <td class="muted">{{ t.user_id }}</td>
-            <td>{{ t.product_id || t.plan_id }}</td>
-            <td>{{ t.transaction_type || t.type }}</td>
-            <td>{{ t.price || t.amount || "" }}</td>
-            <td>{{ t.status }}</td>
+          <tr v-for="t in filteredTxns" :key="t.id">
+            <td>{{ (t.purchased_at || t.created_at || "").slice(0, 19).replace("T", " ") }}</td>
+            <td class="muted">{{ refCache.userLabel(t.user_id) }}</td>
+            <td><code>{{ t.product_id || t.plan_id || "—" }}</code></td>
+            <td>{{ EVENT_LABELS[t.event_type] || t.event_type }}</td>
+            <td>{{ t.price_usd != null ? "$" + Number(t.price_usd).toFixed(2) : "—" }}</td>
           </tr>
-          <tr v-if="!txns.length"><td colspan="6" class="center muted">暂无交易</td></tr>
+          <tr v-if="!filteredTxns.length"><td colspan="5" class="center muted">暂无交易</td></tr>
         </tbody>
       </table>
     </section>
@@ -191,6 +221,9 @@ onMounted(loadPlans);
 .tabs button { background: transparent; border: none; padding: 9px 16px; cursor: pointer; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; }
 .tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
 .bar { margin-bottom: 12px; }
+.txbar { display: flex; gap: 10px; align-items: center; }
+.txbar .search, .txbar select { width: auto; min-width: 180px; }
+.data-table code { font-size: 12px; }
 .form-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .form-head h2 { margin: 0; font-size: 18px; }
 .form-head .btn { margin-left: 8px; }

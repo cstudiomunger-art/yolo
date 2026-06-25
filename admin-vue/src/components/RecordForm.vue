@@ -62,7 +62,12 @@ const entityId = computed(() => {
 });
 
 const visibleFields = computed(() =>
-  props.schema.fields.filter((f) => showAdvanced.value || !f.advanced)
+  props.schema.fields.filter((f) => {
+    if (!showAdvanced.value && f.advanced) return false;
+    // conditional visibility: only show when another field has one of the listed values
+    if (f.showWhen && !f.showWhen.values.includes(form[f.showWhen.field])) return false;
+    return true;
+  })
 );
 
 function buildPayload() {

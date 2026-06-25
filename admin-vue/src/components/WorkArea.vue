@@ -11,6 +11,7 @@ import VisaWorkbench from "@/components/hubs/VisaWorkbench.vue";
 import PricingHub from "@/components/hubs/PricingHub.vue";
 import MembershipHub from "@/components/hubs/MembershipHub.vue";
 import UsersHub from "@/components/hubs/UsersHub.vue";
+import SupportWorkbench from "@/components/hubs/SupportWorkbench.vue";
 
 const HUBS = {
   visa: VisaWorkbench,
@@ -18,6 +19,7 @@ const HUBS = {
   membership: MembershipHub,
   transactions: MembershipHub, // shares the membership hub (交易/退款 tabs)
   users: UsersHub,
+  support: SupportWorkbench,
 };
 
 const nav = useNav();

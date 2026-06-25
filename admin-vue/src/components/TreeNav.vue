@@ -88,9 +88,10 @@ const GROUPS = [
     { label: "外链", table: "payment_helper_links" },
   ] },
   { id: "support", label: "💬 客服管理", leaves: [
+    { label: "💬 客服工作台", hubId: "support" },
     { label: "客服坐席", table: "support_agents" },
-    { label: "会话监控", table: "support_conversations" },
-    { label: "消息监控", table: "support_messages" },
+    { label: "会话监控（原始表）", table: "support_conversations" },
+    { label: "消息监控（原始表）", table: "support_messages" },
   ] },
   { id: "practical", label: "🧭 实用信息", leaves: [
     { label: "交通攻略", table: "transport_tips" },
