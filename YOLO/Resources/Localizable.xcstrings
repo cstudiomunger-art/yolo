@@ -1,3757 +1,3030 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "" : {
-
-    },
-    "  " : {
-
-    },
-    "  +%lld more" : {
-
-    },
-    " · %lld days" : {
-
-    },
-    "— 暂不能帮" : {
-
-    },
-    "· %@" : {
-
-    },
-    "· 把离境收紧到 %@ 前" : {
-
-    },
-    "›" : {
-
-    },
-    "/ %lld done" : {
-
-    },
-    "%@  %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@  %2$@"
+  "sourceLanguage": "en",
+  "strings": {
+    "": {},
+    "  ": {},
+    "  +%lld more": {},
+    " · %lld days": {},
+    "— 暂不能帮": {},
+    "· %@": {},
+    "· 把离境收紧到 %@ 前": {},
+    "›": {},
+    "/ %lld done": {},
+    "%@  %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@  %2$@"
           }
         }
       }
     },
-    "%@ — %lld days planned. Open YOLO HAPPY to review." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ — %2$lld days planned. Open YOLO HAPPY to review."
+    "%@ — %lld days planned. Open YOLO HAPPY to review.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ — %2$lld days planned. Open YOLO HAPPY to review."
           }
         }
       }
     },
-    "%@ · %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · %2$@"
+    "%@ · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ · %2$@"
           }
         }
       }
     },
-    "%@ · %lld days" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ · %2$lld days"
+    "%@ · %lld days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ · %2$lld days"
           }
         }
       }
     },
-    "%@ · 12 min" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · 12 分钟"
+    "%@ · 12 min": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · 12 分钟"
           }
         }
       }
     },
-    "%@ / %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ / %2$@"
+    "%@ / %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ / %2$@"
           }
         }
       }
     },
-    "%@ %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$@"
+    "%@ %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ %2$@"
           }
         }
       }
     },
-    "%@ %@ ⌄" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$@ ⌄"
+    "%@ %@ ⌄": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ %2$@ ⌄"
           }
         }
       }
     },
-    "%@ %@ Passport" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$@ Passport"
+    "%@ %@ Passport": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ %2$@ Passport"
           }
         }
       }
-    },
-    "%@ →" : {
-
-    },
-    "%@ 特色贴士" : {
-
     },
-    "%lld" : {
-
-    },
-    "%lld / %lld %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld / %2$lld %3$@"
+    "%@ →": {},
+    "%@ 特色贴士": {},
+    "%lld": {},
+    "%lld / %lld %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld / %2$lld %3$@"
           }
         }
       }
-    },
-    "%lld activity days" : {
-
-    },
-    "%lld attractions" : {
-
-    },
-    "%lld attractions " : {
-
     },
-    "%lld attractions · in your plan" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程内 %lld 个景点"
+    "%lld activity days": {},
+    "%lld attractions": {},
+    "%lld attractions ": {},
+    "%lld attractions · in your plan": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行程内 %lld 个景点"
           }
         }
       }
     },
-    "%lld attractions →" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 个景点 →"
+    "%lld attractions →": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个景点 →"
           }
         }
       }
     },
-    "%lld available" : {
-
-    },
-    "%lld days" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 天"
+    "%lld available": {},
+    "%lld days": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 天"
           }
         }
       }
-    },
-    "%lld days total" : {
-
     },
-    "%lld favorites" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已收藏 %lld 个"
+    "%lld days total": {},
+    "%lld favorites": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已收藏 %lld 个"
           }
         }
       }
-    },
-    "%lld items left" : {
-
-    },
-    "%lld min" : {
-
     },
-    "%lld of %lld prepared" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已完成 %1$lld / %2$lld 项准备"
+    "%lld items left": {},
+    "%lld min": {},
+    "%lld of %lld prepared": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已完成 %1$lld / %2$lld 项准备"
           }
         }
       }
     },
-    "%lld of %lld tasks done" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已完成 %1$lld / %2$lld 项"
+    "%lld of %lld tasks done": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已完成 %1$lld / %2$lld 项"
           }
         }
       }
     },
-    "%lld sec left in preview" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "试听剩余 %lld 秒"
+    "%lld sec left in preview": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "试听剩余 %lld 秒"
           }
         }
       }
     },
-    "%lld 选 1" : {
-
-    },
-    "%lld-day free trial" : {
-
-    },
-    "%lld-day stay permitted" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "允许停留 %lld 天"
+    "%lld 选 1": {},
+    "%lld-day free trial": {},
+    "%lld-day stay permitted": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许停留 %lld 天"
           }
         }
       }
     },
-    "%lld/%lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld/%2$lld"
+    "%lld/%lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld/%2$lld"
           }
         }
       }
     },
-    "%lld/%lld prep complete" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld/%2$lld prep complete"
+    "%lld/%lld prep complete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld/%2$lld prep complete"
           }
         }
       }
-    },
-    "%lld%% 就绪" : {
-
-    },
-    "•" : {
-
     },
-    "• %@" : {
-
-    },
-    "• All attraction guides\n• Unlimited AI planning\n• Offline download" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "• 全部景点导览\n• 无限 AI 规划\n• 离线下载"
+    "%lld%% 就绪": {},
+    "•": {},
+    "• %@": {},
+    "• All attraction guides\n• Unlimited AI planning\n• Offline download": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "• 全部景点导览\n• 无限 AI 规划\n• 离线下载"
           }
         }
       }
-    },
-    "※ 边界文案待团队最终确认" : {
-
     },
-    "← %@" : {
-
-    },
-    "← Change city" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "← 更换城市"
+    "※ 边界文案待团队最终确认": {},
+    "← %@": {},
+    "← Change city": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "← 更换城市"
           }
         }
       }
     },
-    "← Guide · Attractions" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "← 指南 · 景点"
+    "← Guide · Attractions": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "← 指南 · 景点"
           }
         }
       }
-    },
-    "← Home" : {
-
     },
-    "← Plan" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "← 行程"
+    "← Home": {},
+    "← Plan": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "← 行程"
           }
         }
       }
-    },
-    "← Prepare" : {
-
-    },
-    "→" : {
-
-    },
-    "+ Add to Day %lld" : {
-
-    },
-    "+%lld more days" : {
-
     },
-    "+%lld more tips — unlock" : {
-
-    },
-    "< 6 个月 ⚠️" : {
-
-    },
-    ">" : {
-
-    },
-    "~40 minutes of setup remaining" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "约剩 40 分钟设置"
+    "← Prepare": {},
+    "→": {},
+    "+ Add to Day %lld": {},
+    "+%lld more days": {},
+    "+%lld more tips — unlock": {},
+    "< 6 个月 ⚠️": {},
+    ">": {},
+    "~40 minutes of setup remaining": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "约剩 40 分钟设置"
           }
         }
       }
     },
-    "≥ 6 个月 ✓" : {
-
-    },
-    "⏸ Pause" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⏸ 暂停"
+    "≥ 6 个月 ✓": {},
+    "⏸ Pause": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏸ 暂停"
           }
         }
       }
     },
-    "⏸ Pause preview" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⏸ 暂停试听"
+    "⏸ Pause preview": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⏸ 暂停试听"
           }
         }
       }
-    },
-    "▴" : {
-
     },
-    "▶ Play" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "▶ 播放"
+    "▴": {},
+    "▶ Play": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "▶ 播放"
           }
         }
       }
     },
-    "▶ Preview (%lld min free)" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "▶ 免费试听 %lld 分钟"
+    "▶ Preview (%lld min free)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "▶ 免费试听 %lld 分钟"
           }
         }
       }
-    },
-    "▶ 听" : {
-
-    },
-    "▾" : {
-
     },
-    "★ %@" : {
-
-    },
-    "★ Best Value" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "★ 最划算"
+    "▶ 听": {},
+    "▾": {},
+    "★ %@": {},
+    "★ Best Value": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "★ 最划算"
           }
         }
       }
-    },
-    "⚠️" : {
-
-    },
-    "⚠️ 24 小时过境：仅限口岸限定区域活动，出区需办临时入境许可，不可自由前往其他城市。" : {
-
-    },
-    "⚠️ No English-speaking staff" : {
-
     },
-    "⚡ Quick Plan" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⚡ 快速规划"
+    "⚠️": {},
+    "⚠️ 24 小时过境：仅限口岸限定区域活动，出区需办临时入境许可，不可自由前往其他城市。": {},
+    "⚠️ No English-speaking staff": {},
+    "⚡ Quick Plan": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚡ 快速规划"
           }
         }
       }
     },
-    "🇨🇳 %@" : {
-
-    },
-    "✅" : {
-
-    },
-    "✅ Registered for foreign guests" : {
-
-    },
-    "✅ Save to Plan" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✅ 保存到行程"
+    "🇨🇳 %@": {},
+    "✅": {},
+    "✅ Registered for foreign guests": {},
+    "✅ Save to Plan": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ 保存到行程"
           }
         }
       }
     },
-    "✅ Showing foreigner-friendly hotels only" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✅ 仅显示对外宾友好的酒店"
+    "✅ Showing foreigner-friendly hotels only": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✅ 仅显示对外宾友好的酒店"
           }
         }
       }
-    },
-    "✓" : {
-
     },
-    "✓ Downloaded" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✓ 已下载"
+    "✓": {},
+    "✓ Downloaded": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✓ 已下载"
           }
         }
       }
     },
-    "✓ 已采用" : {
-
-    },
-    "✓ 我们能帮" : {
-
-    },
-    "✓ 签证友好 · 换城(自选)" : {
-
-    },
-    "✕ 收起" : {
-
-    },
-    "✦" : {
-
-    },
-    "✨" : {
-
-    },
-    "✨ Active" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "✨ 已激活"
+    "✓ 已采用": {},
+    "✓ 我们能帮": {},
+    "✓ 签证友好 · 换城(自选)": {},
+    "✕ 收起": {},
+    "✦": {},
+    "✨": {},
+    "✨ Active": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✨ 已激活"
           }
         }
       }
     },
-    "⬆ Share" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⬆ 分享"
+    "⬆ Share": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⬆ 分享"
           }
         }
       }
     },
-    "⬇ Download for offline" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "⬇ 离线下载"
+    "⬇ Download for offline": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⬇ 离线下载"
           }
         }
       }
-    },
-    "🎉 You're all set!" : {
-
-    },
-    "🎧" : {
-
     },
-    "🎧 Area Audio" : {
-
-    },
-    "🎧 Audio" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🎧 语音"
+    "🎉 You're all set!": {},
+    "🎧": {},
+    "🎧 Area Audio": {},
+    "🎧 Audio": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🎧 语音"
           }
         }
       }
-    },
-    "🎧 Audio Guide" : {
-
     },
-    "🎧 Audio Guide available" : {
-
-    },
-    "🎧 Audio guide unlocked!" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🎧 语音导览已解锁！"
+    "🎧 Audio Guide": {},
+    "🎧 Audio Guide available": {},
+    "🎧 Audio guide unlocked!": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🎧 语音导览已解锁！"
           }
         }
       }
-    },
-    "💡" : {
-
     },
-    "💬" : {
-
-    },
-    "💬 General Help" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "💬 一般帮助"
+    "💡": {},
+    "💬": {},
+    "💬 General Help": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "💬 一般帮助"
           }
         }
       }
-    },
-    "💬 常用语" : {
-
-    },
-    "💴" : {
-
-    },
-    "📍" : {
-
     },
-    "📍 %@" : {
-
-    },
-    "📚 Read Before You Go" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "📚 行前阅读"
+    "💬 常用语": {},
+    "💴": {},
+    "📍": {},
+    "📍 %@": {},
+    "📚 Read Before You Go": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "📚 行前阅读"
           }
         }
       }
     },
-    "📝 %@" : {
-
-    },
-    "🔄 Redo" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🔄 重做"
+    "📝 %@": {},
+    "🔄 Redo": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🔄 重做"
           }
         }
       }
-    },
-    "🔒" : {
-
     },
-    "🔒 Full guide locked" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🔒 完整导览已锁定"
+    "🔒": {},
+    "🔒 Full guide locked": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🔒 完整导览已锁定"
           }
         }
       }
-    },
-    "🔒 信息仅用于紧急求助，我们不收集你的数据。建议参照 iPhone「健康」填写，翻译好打印一张放兜里。" : {
-
-    },
-    "🔔" : {
-
-    },
-    "🔗 购票链接（外部 · 不留痕）" : {
-
-    },
-    "🗣 方言彩蛋 · 长按卡片给本地人看大字" : {
-
     },
-    "🗣️ 给商家看这句话 →" : {
-
-    },
-    "🗺" : {
-
-    },
-    "🗺 Trip Planning" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🗺 行程规划"
+    "🔒 信息仅用于紧急求助，我们不收集你的数据。建议参照 iPhone「健康」填写，翻译好打印一张放兜里。": {},
+    "🔔": {},
+    "🔗 购票链接（外部 · 不留痕）": {},
+    "🗣 方言彩蛋 · 长按卡片给本地人看大字": {},
+    "🗣️ 给商家看这句话 →": {},
+    "🗺": {},
+    "🗺 Trip Planning": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🗺 行程规划"
           }
         }
       }
     },
-    "🗺 Your Trip Cities" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🗺 行程城市"
+    "🗺 Your Trip Cities": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🗺 行程城市"
           }
         }
       }
     },
-    "🤖 Plan with AI Chat" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🤖 AI 对话规划"
+    "🤖 Plan with AI Chat": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🤖 AI 对话规划"
           }
         }
       }
     },
-    "🛂" : {
-
-    },
-    "🛍 Pack Before You Go" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🛍 行前采购"
+    "🛂": {},
+    "🛍 Pack Before You Go": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🛍 行前采购"
           }
         }
       }
-    },
-    "🟡" : {
-
     },
-    "🟢" : {
-
-    },
-    "$19.99/year · 3-day free trial" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "$19.99/年 · 3 天免费试用"
+    "🟡": {},
+    "🟢": {},
+    "$19.99/year · 3-day free trial": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "$19.99/年 · 3 天免费试用"
           }
         }
       }
-    },
-    "2–30 characters. Shown to other users." : {
-
     },
-    "3 min free preview · Unlock full guide" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "免费试听 3 分钟 · 解锁完整导览"
+    "2–30 characters. Shown to other users.": {},
+    "3 min free preview · Unlock full guide": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费试听 3 分钟 · 解锁完整导览"
           }
         }
       }
     },
-    "24 小时过境免签按入境精确时刻计时；其余按入境次日 0 时起算。" : {
-
-    },
-    "48 MB" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "48 MB"
+    "24 小时过境免签按入境精确时刻计时；其余按入境次日 0 时起算。": {},
+    "48 MB": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "48 MB"
           }
         }
       }
-    },
-    "① 挂号（门诊大厅自助机/窗口，带护照）→ ② 候诊（按叫号）→ ③ 医生问诊开单 → ④ 缴费（自助机/窗口）→ ⑤ 检查/取药。\n大城市三甲医院多设国际部/外宾门诊，有英文导诊；急症直接去「急诊」。" : {
-
     },
-    "About" : {
-
-    },
-    "About ChinaGo" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关于 ChinaGo"
+    "① 挂号（门诊大厅自助机/窗口，带护照）→ ② 候诊（按叫号）→ ③ 医生问诊开单 → ④ 缴费（自助机/窗口）→ ⑤ 检查/取药。\n大城市三甲医院多设国际部/外宾门诊，有英文导诊；急症直接去「急诊」。": {},
+    "About": {},
+    "About ChinaGo": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关于 ChinaGo"
           }
         }
       }
     },
-    "About YOLO HAPPY" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关于 YOLO HAPPY"
+    "About YOLO HAPPY": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关于 YOLO HAPPY"
           }
         }
       }
     },
-    "Account" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "账号"
+    "Account": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账号"
           }
         }
       }
     },
-    "Account created. Check your email and tap the confirmation link." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "账号已创建。请前往邮箱点击确认链接。"
+    "Account created. Check your email and tap the confirmation link.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "账号已创建。请前往邮箱点击确认链接。"
           }
         }
       }
-    },
-    "Account deletion is not available in this build." : {
-
-    },
-    "ACTIVE" : {
-
-    },
-    "Active Membership" : {
-
-    },
-    "Activity name" : {
-
-    },
-    "Add activity" : {
-
-    },
-    "Add attraction" : {
-
-    },
-    "Add day" : {
-
     },
-    "Add to favorites" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "加入收藏"
+    "Account deletion is not available in this build.": {},
+    "ACTIVE": {},
+    "Active Membership": {},
+    "Activity name": {},
+    "Add activity": {},
+    "Add attraction": {},
+    "Add day": {},
+    "Add to favorites": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加入收藏"
           }
         }
       }
     },
-    "Add your destination to see city-specific prep" : {
-
-    },
-    "Added to Day %lld" : {
-
-    },
-    "Agree to terms and privacy policy" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "同意服务条款与隐私政策"
+    "Add your destination to see city-specific prep": {},
+    "Added to Day %lld": {},
+    "Agree to terms and privacy policy": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同意服务条款与隐私政策"
           }
         }
       }
     },
-    "Agreed to terms and privacy policy" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已同意服务条款与隐私政策"
+    "Agreed to terms and privacy policy": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已同意服务条款与隐私政策"
           }
         }
       }
     },
-    "AI-generated, China-aware" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AI 生成 · 适配中国"
+    "AI-generated, China-aware": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 生成 · 适配中国"
           }
         }
       }
     },
-    "AI-powered · China booking rules built in" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AI 驱动 · 内置中国预订规则"
+    "AI-powered · China booking rules built in": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 驱动 · 内置中国预订规则"
           }
         }
       }
     },
-    "All cities" : {
-
-    },
-    "All Cities" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "全部城市"
+    "All cities": {},
+    "All Cities": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部城市"
           }
         }
       }
-    },
-    "Almost ready…" : {
-
     },
-    "Already have an account?" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已有账号？"
+    "Almost ready…": {},
+    "Already have an account?": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已有账号？"
           }
         }
       }
     },
-    "An account with this email already exists. Try signing in instead." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "该邮箱已注册，请直接登录。"
+    "An account with this email already exists. Try signing in instead.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "该邮箱已注册，请直接登录。"
           }
         }
       }
     },
-    "Anyone with the link can view this trip read-only in a browser or the app." : {
-
-    },
-    "Apple sign-in failed. Please try again." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apple 登录失败，请重试。"
+    "Anyone with the link can view this trip read-only in a browser or the app.": {},
+    "Apple sign-in failed. Please try again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple 登录失败，请重试。"
           }
         }
       }
     },
-    "Ask Assistant" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "问助手"
+    "Ask Assistant": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "问助手"
           }
         }
       }
     },
-    "Assistant" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "助手"
+    "Assistant": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "助手"
           }
         }
       }
     },
-    "Attractions" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "景点"
+    "Attractions": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "景点"
           }
         }
       }
-    },
-    "audio + full article" : {
-
     },
-    "Audio attraction tours" : {
-
-    },
-    "Audio not available yet." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "音频暂不可用，请稍后再试。"
+    "audio + full article": {},
+    "Audio attraction tours": {},
+    "Audio not available yet.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音频暂不可用，请稍后再试。"
           }
         }
       }
     },
-    "Audio tours, 30+ sites" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "语音导览 · 30+ 景点"
+    "Audio tours, 30+ sites": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语音导览 · 30+ 景点"
           }
         }
       }
-    },
-    "Audio transcript" : {
-
     },
-    "Back" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "返回"
+    "Audio transcript": {},
+    "Back": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返回"
           }
         }
       }
     },
-    "Back to dates" : {
-
-    },
-    "Back to sign in" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "返回登录"
+    "Back to dates": {},
+    "Back to sign in": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返回登录"
           }
         }
       }
-    },
-    "BEST VALUE" : {
-
-    },
-    "Booking trace · 行程留痕" : {
-
     },
-    "Buy This Guide · $1.99" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "购买本导览 · $1.99"
+    "BEST VALUE": {},
+    "Booking trace · 行程留痕": {},
+    "Buy This Guide · $1.99": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "购买本导览 · $1.99"
           }
         }
       }
     },
-    "By continuing, you agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "继续即表示你同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
+    "By continuing, you agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续即表示你同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
           }
         }
       }
-    },
-    "Cache Cleared" : {
-
-    },
-    "Cache Size" : {
-
-    },
-    "Cached cities, attractions, tips" : {
-
-    },
-    "Cached cover images have been removed." : {
-
     },
-    "Cached guide cover photos" : {
-
-    },
-    "Cancel" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消"
+    "Cache Cleared": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缓存已清除"
           }
         }
       }
-    },
-    "cancel anytime" : {
-
     },
-    "Cancelled" : {
-
-    },
-    "Change nationality" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "更改国籍"
+    "Cache Size": {},
+    "Cached cities, attractions, tips": {},
+    "Cached cover images have been removed.": {},
+    "Cached guide cover photos": {},
+    "Cancel": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
           }
         }
       }
-    },
-    "Chapters" : {
-
     },
-    "Check the admin: city, 启用, and 接待外国客人 must match this trip." : {
-
-    },
-    "Check today's plan in YOLO HAPPY" : {
-
-    },
-    "Check your email and tap the confirmation link to finish signing in." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请前往邮箱点击确认链接以完成登录。"
+    "cancel anytime": {},
+    "Cancelled": {},
+    "Change nationality": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更改国籍"
           }
         }
       }
     },
-    "Check your email for a password reset link." : {
-
-    },
-    "Check your email to confirm your account before signing in." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请先查收确认邮件并点击链接，再回到此处登录。"
+    "Chapters": {},
+    "Check the admin: city, 启用, and 接待外国客人 must match this trip.": {},
+    "Check today's plan in YOLO HAPPY": {},
+    "Check your email and tap the confirmation link to finish signing in.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请前往邮箱点击确认链接以完成登录。"
           }
         }
       }
     },
-    "Checklist" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "清单"
+    "Check your email for a password reset link.": {},
+    "Check your email to confirm your account before signing in.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请先查收确认邮件并点击链接，再回到此处登录。"
           }
         }
       }
-    },
-    "China travel companion" : {
-
     },
-    "ChinaGo Pro" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChinaGo Pro"
+    "Checklist": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清单"
           }
         }
       }
     },
-    "ChinaGo Pro (demo)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChinaGo Pro（演示）"
+    "China travel companion": {},
+    "ChinaGo Pro": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChinaGo Pro"
           }
         }
       }
     },
-    "Choose a membership plan" : {
-
-    },
-    "Choose a new password for your account." : {
-
-    },
-    "Choose cities" : {
-
-    },
-    "Choose cities and dates — AI builds a day-by-day itinerary you can edit." : {
-
-    },
-    "Cities" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "城市"
+    "ChinaGo Pro (demo)": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChinaGo Pro（演示）"
           }
         }
       }
     },
-    "City Guides" : {
-
-    },
-    "City not found" : {
-
-    },
-    "Clear Cache" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "清除缓存"
+    "Choose a membership plan": {},
+    "Choose a new password for your account.": {},
+    "Choose cities": {},
+    "Choose cities and dates — AI builds a day-by-day itinerary you can edit.": {},
+    "Cities": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "城市"
           }
         }
       }
-    },
-    "Clear Cover Images" : {
-
-    },
-    "Clear Downloaded Audio" : {
-
     },
-    "Clear Offline Content" : {
-
-    },
-    "Clear Temporary Cache" : {
-
-    },
-    "Close" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关闭"
+    "City Guides": {},
+    "City not found": {},
+    "Clear Cache": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除缓存"
           }
         }
       }
-    },
-    "Coming soon — we're adding content for %@" : {
-
-    },
-    "complete" : {
-
     },
-    "Conditional visa-free" : {
-
-    },
-    "Confirm password" : {
-
-    },
-    "Confirmation email sent. Check your inbox." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "确认邮件已发送，请查收收件箱。"
+    "Clear Cover Images": {},
+    "Clear Downloaded Audio": {},
+    "Clear Offline Content": {},
+    "Clear Temporary Cache": {},
+    "Close": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
           }
         }
       }
-    },
-    "Connect to the internet to open shared trips." : {
-
-    },
-    "Content coming soon" : {
-
     },
-    "Content coming soon for this area" : {
-
-    },
-    "Content coming soon for this attraction" : {
-
-    },
-    "Content Mode" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "内容模式"
+    "Coming soon — we're adding content for %@": {},
+    "complete": {},
+    "Conditional visa-free": {},
+    "Confirm password": {},
+    "Confirmation email sent. Check your inbox.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确认邮件已发送，请查收收件箱。"
           }
         }
       }
     },
-    "Content: %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "内容：%@"
+    "Connect to the internet to open shared trips.": {},
+    "Content coming soon": {},
+    "Content coming soon for this area": {},
+    "Content coming soon for this attraction": {},
+    "Content Mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内容模式"
           }
         }
       }
     },
-    "Continue" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "继续"
+    "Content: %@": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内容：%@"
           }
         }
       }
     },
-    "Continue with %@ →" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "继续 · %@ →"
+    "Continue": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续"
           }
         }
       }
     },
-    "Continue with email" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用邮箱登录"
+    "Continue with %@ →": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续 · %@ →"
           }
         }
       }
     },
-    "Continue with Google" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "通过 Google 继续"
+    "Continue with email": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用邮箱登录"
           }
         }
       }
-    },
-    "Copied!" : {
-
-    },
-    "Copy Link" : {
-
-    },
-    "Cost estimate" : {
-
-    },
-    "Could not create share image. Please try again." : {
-
-    },
-    "Could not delete account. Please try again." : {
-
     },
-    "Could not generate your itinerary." : {
-
-    },
-    "Could not load hotels" : {
-
-    },
-    "Could not load the selected image." : {
-
-    },
-    "Create a trip poster you can send to friends." : {
-
-    },
-    "Create Account" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "创建账号"
+    "Continue with Google": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过 Google 继续"
           }
         }
       }
     },
-    "Creating image…" : {
-
-    },
-    "Creating trip" : {
-
-    },
-    "Cultural Tips" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "文化贴士"
+    "Copied!": {},
+    "Copy Link": {},
+    "Cost estimate": {},
+    "Could not create share image. Please try again.": {},
+    "Could not delete account. Please try again.": {},
+    "Could not generate your itinerary.": {},
+    "Could not load hotels": {},
+    "Could not load the selected image.": {},
+    "Create a trip poster you can send to friends.": {},
+    "Create Account": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建账号"
           }
         }
       }
     },
-    "Cultural tips & audio attraction tours" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "文化贴士与景点语音导览"
+    "Creating image…": {},
+    "Creating trip": {},
+    "Cultural Tips": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文化贴士"
           }
         }
       }
     },
-    "Curated options, English staff noted" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "精选推荐 · 标注英语服务"
+    "Cultural tips & audio attraction tours": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文化贴士与景点语音导览"
           }
         }
       }
-    },
-    "Daily schedule" : {
-
-    },
-    "Date label" : {
-
     },
-    "Dates" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "日期"
+    "Curated options, English staff noted": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "精选推荐 · 标注英语服务"
           }
         }
       }
     },
-    "Day · in progress" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "进行中"
+    "Daily schedule": {},
+    "Date label": {},
+    "Dates": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日期"
           }
         }
       }
     },
-    "Day %lld · %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Day %1$lld · %2$@"
+    "Day · in progress": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "进行中"
           }
         }
       }
     },
-    "Day %lld of %lld" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "第 %lld 天 / 共 %lld 天"
+    "Day %lld · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Day %1$lld · %2$@"
           }
         }
       }
     },
-    "Day 1 Preview — %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "第 1 天预览 — %@"
+    "Day %lld of %lld": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 %lld 天 / 共 %lld 天"
           }
         }
       }
     },
-    "Days until departure" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "距离出发"
+    "Day 1 Preview — %@": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "第 1 天预览 — %@"
           }
         }
       }
     },
-    "Days until start" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "距开始天数"
+    "Days until departure": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "距离出发"
           }
         }
       }
     },
-    "Delete" : {
-
-    },
-    "Delete account" : {
-
-    },
-    "Delete account?" : {
-
-    },
-    "Delete this trip?" : {
-
-    },
-    "Departure" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "出发"
+    "Days until start": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "距开始天数"
           }
         }
       }
     },
-    "Departure date" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "出发日期"
+    "Delete": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
           }
         }
       }
     },
-    "Details" : {
-
-    },
-    "Display name" : {
-
-    },
-    "Don't have an account?" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "还没有账号？"
+    "Delete account": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除账号"
           }
         }
       }
     },
-    "Don't miss important reminders" : {
-
-    },
-    "Done" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "完成"
+    "Delete account?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除账号？"
           }
         }
       }
     },
-    "Done ✓" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已完成 ✓"
+    "Delete this trip?": {},
+    "Departure": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出发"
           }
         }
       }
-    },
-    "Done reorder" : {
-
     },
-    "Double tap to change departure date" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "双击可修改出发日期"
+    "Departure date": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出发日期"
           }
         }
       }
     },
-    "Downloaded audio files have been removed." : {
-
-    },
-    "Drag days" : {
-
-    },
-    "Drag to reorder days and activities. Tap Done when finished." : {
-
-    },
-    "Edit" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "编辑"
+    "Details": {},
+    "Display name": {},
+    "Don't have an account?": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有账号？"
           }
         }
       }
-    },
-    "Edit Profile" : {
-
     },
-    "Edit Profile →" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "编辑资料 →"
+    "Don't miss important reminders": {},
+    "Done": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
           }
         }
       }
     },
-    "Edit Trip" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "编辑行程"
+    "Done ✓": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已完成 ✓"
           }
         }
       }
     },
-    "Email" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "邮箱"
+    "Done reorder": {},
+    "Double tap to change departure date": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "双击可修改出发日期"
           }
         }
       }
     },
-    "Email not confirmed. Check your sign-up confirmation email before signing in." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "邮箱尚未确认。请查收注册确认邮件后再登录。"
+    "Downloaded audio files have been removed.": {},
+    "Drag days": {},
+    "Drag to reorder days and activities. Tap Done when finished.": {},
+    "Edit": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑"
           }
         }
       }
     },
-    "Emergency" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "紧急求助"
+    "Edit Profile": {},
+    "Edit Profile →": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑资料 →"
           }
         }
       }
     },
-    "Emergency · Visa · Pay · Transport" : {
-
-    },
-    "Enable Notifications" : {
-
-    },
-    "End date" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "结束日期"
+    "Edit Trip": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑行程"
           }
         }
       }
     },
-    "Ended" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已结束"
+    "Email": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "邮箱"
           }
         }
       }
     },
-    "Enter a valid email address." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请输入有效的邮箱地址。"
+    "Email not confirmed. Check your sign-up confirmation email before signing in.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "邮箱尚未确认。请查收注册确认邮件后再登录。"
           }
         }
       }
     },
-    "Enter your account email. We will send a link to reset your password." : {
-
-    },
-    "Enter your email and password. We'll create your account if you're new." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "输入邮箱和密码。如果你是新用户，我们会自动为你创建账号。"
+    "Emergency": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "紧急求助"
           }
         }
       }
-    },
-    "Estimated budget" : {
-
     },
-    "Excludes start and end days" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不含开始日与结束日"
+    "Emergency · Visa · Pay · Transport": {},
+    "Enable Notifications": {},
+    "End date": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "结束日期"
           }
         }
       }
     },
-    "Expired" : {
-
-    },
-    "Explore All Cities" : {
-
-    },
-    "Explore as guest" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "先逛逛"
+    "Ended": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已结束"
           }
         }
       }
-    },
-    "Explore by Area" : {
-
     },
-    "Forbidden City tickets sell out 3 weeks in advance during your dates." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "故宫门票在你出行日期前约 3 周就会售罄。"
+    "Enter a valid email address.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入有效的邮箱地址。"
           }
         }
       }
     },
-    "Forgot password" : {
-
-    },
-    "Forgot password?" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "忘记密码？"
+    "Enter your account email. We will send a link to reset your password.": {},
+    "Enter your email and password. We'll create your account if you're new.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入邮箱和密码。如果你是新用户，我们会自动为你创建账号。"
           }
         }
       }
     },
-    "Free" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "免费"
+    "Estimated budget": {},
+    "Excludes start and end days": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不含开始日与结束日"
           }
         }
       }
-    },
-    "Free preview ended. " : {
-
-    },
-    "From $%lld/night" : {
-
-    },
-    "Full Guide locked — audio + full article" : {
-
     },
-    "Full list →" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "完整列表 →"
+    "Expired": {},
+    "Explore All Cities": {},
+    "Explore as guest": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "先逛逛"
           }
         }
       }
     },
-    "Generate itinerary" : {
-
-    },
-    "Generate New Itinerary" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "生成新行程"
+    "Explore by Area": {},
+    "Forbidden City tickets sell out 3 weeks in advance during your dates.": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "故宫门票在你出行日期前约 3 周就会售罄。"
           }
         }
       }
-    },
-    "Genius Bar" : {
-
-    },
-    "Genius Bar · real people" : {
-
-    },
-    "Get Started" : {
-
     },
-    "Go to sign in" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "去登录"
+    "Forgot password": {},
+    "Forgot password?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忘记密码？"
           }
         }
       }
     },
-    "Going to multiple cities? Tap to select more." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "去多个城市？点选以添加更多。"
+    "Free": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免费"
           }
         }
       }
     },
-    "Good afternoon," : {
-
-    },
-    "Good evening," : {
-
-    },
-    "Good morning," : {
-
-    },
-    "Guest" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "访客"
+    "Free preview ended. ": {},
+    "From $%lld/night": {},
+    "Full Guide locked — audio + full article": {},
+    "Full list →": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完整列表 →"
           }
         }
       }
     },
-    "Guide" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "指南"
+    "Generate itinerary": {},
+    "Generate New Itinerary": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "生成新行程"
           }
         }
       }
-    },
-    "HAPPY" : {
-
     },
-    "Has audio guide" : {
-
-    },
-    "Hello, world!" : {
-
-    },
-    "Hide password" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "隐藏密码"
+    "Genius Bar": {},
+    "Genius Bar · real people": {},
+    "Get Started": {},
+    "Go to sign in": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "去登录"
           }
         }
       }
     },
-    "Home" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "首页"
+    "Going to multiple cities? Tap to select more.": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "去多个城市？点选以添加更多。"
           }
         }
       }
     },
-    "How to Book →" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如何预订 →"
+    "Good afternoon,": {},
+    "Good evening,": {},
+    "Good morning,": {},
+    "Guest": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "访客"
           }
         }
       }
     },
-    "ⓘ 你习惯的 911 在中国分三个号" : {
-
-    },
-    "I agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我已阅读并同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
+    "Guide": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指南"
           }
         }
       }
     },
-    "If you don't see the email, check your spam folder or try resending." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "若未收到邮件，请检查垃圾箱或尝试重新发送。"
+    "HAPPY": {},
+    "Has audio guide": {},
+    "Hello, world!": {},
+    "Hide password": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏密码"
           }
         }
       }
-    },
-    "Image" : {
-
     },
-    "Included with %@ audio guide" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "包含在 %@ 语音导览中"
+    "Home": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "首页"
           }
         }
       }
     },
-    "Incorrect email or password. Please try again." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "邮箱或密码错误，请重试。"
+    "How to Book →": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如何预订 →"
           }
         }
       }
     },
-    "Introduction" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "简介"
+    "ⓘ 你习惯的 911 在中国分三个号": {},
+    "I agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我已阅读并同意[服务条款](yolo://legal/terms)与[隐私政策](yolo://legal/privacy)"
           }
         }
       }
     },
-    "Language" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "语言"
+    "If you don't see the email, check your spam folder or try resending.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "若未收到邮件，请检查垃圾箱或尝试重新发送。"
           }
         }
       }
-    },
-    "Lifetime access" : {
-
-    },
-    "Link" : {
-
-    },
-    "Link sharing requires a signed-in Supabase account." : {
-
-    },
-    "Live · AI" : {
-
     },
-    "Live Services" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "真实服务"
+    "Image": {},
+    "Included with %@ audio guide": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "包含在 %@ 语音导览中"
           }
         }
       }
     },
-    "Loading audio…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在加载音频…"
+    "Incorrect email or password. Please try again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "邮箱或密码错误，请重试。"
           }
         }
       }
     },
-    "Loading preview…" : {
-
-    },
-    "Loading trip…" : {
-
-    },
-    "Local Experiences to Try" : {
-
-    },
-    "Made with YOLO HAPPY app" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用 YOLO HAPPY 制作"
+    "Introduction": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "简介"
           }
         }
       }
     },
-    "Manage →" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "管理 →"
+    "Language": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言"
           }
         }
       }
-    },
-    "Manage in App Store →" : {
-
-    },
-    "Maps →" : {
-
-    },
-    "Mark as Done" : {
-
-    },
-    "Mark as Skipped" : {
-
-    },
-    "Marked as Done" : {
-
     },
-    "Matching attractions…" : {
-
-    },
-    "Max 10" : {
-
-    },
-    "Maybe Later" : {
-
-    },
-    "Membership" : {
-
-    },
-    "Membership & Purchases" : {
-
-    },
-    "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当前为 Mock 模式，未连接 Supabase。请在 Secrets.xcconfig 中配置 SUPABASE_URL 与 SUPABASE_ANON_KEY。"
+    "Lifetime access": {},
+    "Link": {},
+    "Link sharing requires a signed-in Supabase account.": {},
+    "Live · AI": {},
+    "Live Services": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "真实服务"
           }
         }
       }
-    },
-    "Mock 模式（未连接 Supabase）" : {
-
-    },
-    "My Booking Trace · 行程留痕" : {
-
     },
-    "My Favorites" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我的收藏"
+    "Loading audio…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在加载音频…"
           }
         }
       }
     },
-    "My Saved Trip" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已保存行程"
+    "Loading preview…": {},
+    "Loading trip…": {},
+    "Local Experiences to Try": {},
+    "Made with YOLO HAPPY app": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 YOLO HAPPY 制作"
           }
         }
       }
     },
-    "Name must be 30 characters or fewer." : {
-
-    },
-    "Name must be at least 2 characters." : {
-
-    },
-    "Nationality" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "国籍"
+    "Manage →": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理 →"
           }
         }
       }
-    },
-    "New password" : {
-
-    },
-    "Next" : {
-
     },
-    "No active membership" : {
-
-    },
-    "No favorites yet" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "还没有收藏的景点"
+    "Manage in App Store →": {},
+    "Maps →": {},
+    "Mark as Done": {},
+    "Mark as Skipped": {},
+    "Marked as Done": {},
+    "Matching attractions…": {},
+    "Max 10": {},
+    "Maybe Later": {},
+    "Membership": {},
+    "Membership & Purchases": {},
+    "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前为 Mock 模式，未连接 Supabase。请在 Secrets.xcconfig 中配置 SUPABASE_URL 与 SUPABASE_ANON_KEY。"
           }
         }
       }
-    },
-    "No hotels found for this city." : {
-
-    },
-    "No plans available. Please try again later." : {
-
-    },
-    "No purchases yet" : {
-
     },
-    "No shared itinerary matches this link." : {
-
-    },
-    "of %lld tasks complete" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "共 %lld 项 · 已完成"
+    "Mock 模式（未连接 Supabase）": {},
+    "My Booking Trace · 行程留痕": {},
+    "My Favorites": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我的收藏"
           }
         }
       }
-    },
-    "Official refund channels" : {
-
-    },
-    "Offline audio guides" : {
-
-    },
-    "Offline CMS content cache has been removed." : {
-
-    },
-    "OK" : {
-
-    },
-    "one-time · %@" : {
-
-    },
-    "One-time · this attraction · yours forever" : {
-
-    },
-    "One-time Purchase" : {
-
     },
-    "Open →" : {
-
-    },
-    "Open checklist" : {
-
-    },
-    "Or buy just this guide" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "或单独购买本导览"
+    "My Saved Trip": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已保存行程"
           }
         }
       }
     },
-    "or continue with email" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "或使用邮箱登录"
+    "Name must be 30 characters or fewer.": {},
+    "Name must be at least 2 characters.": {},
+    "Nationality": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "国籍"
           }
         }
       }
     },
-    "Or tell us what happened" : {
-
-    },
-    "Pack Before You Go" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行前采购"
+    "New password": {},
+    "Next": {},
+    "No active membership": {},
+    "No favorites yet": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有收藏的景点"
           }
         }
       }
     },
-    "Password" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "密码"
+    "No hotels found for this city.": {},
+    "No plans available. Please try again later.": {},
+    "No purchases yet": {},
+    "No shared itinerary matches this link.": {},
+    "of %lld tasks complete": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共 %lld 项 · 已完成"
           }
         }
       }
     },
-    "Password must be at least %lld characters." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "密码至少需要 %lld 个字符。"
+    "Official refund channels": {},
+    "Offline audio guides": {},
+    "Offline CMS content cache has been removed.": {},
+    "OK": {},
+    "one-time · %@": {},
+    "One-time · this attraction · yours forever": {},
+    "One-time Purchase": {},
+    "Open →": {},
+    "Open checklist": {},
+    "Or buy just this guide": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或单独购买本导览"
           }
         }
       }
     },
-    "Password reset email sent. Check your inbox." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重置密码邮件已发送，请查收收件箱。"
+    "or continue with email": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或使用邮箱登录"
           }
         }
       }
     },
-    "Password updated successfully." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "密码已更新成功。"
+    "Or tell us what happened": {},
+    "Pack Before You Go": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行前采购"
           }
         }
       }
     },
-    "Passwords do not match." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "两次输入的密码不一致。"
+    "Password": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密码"
           }
         }
       }
-    },
-    "Phrases & Dialect" : {
-
     },
-    "Pick your trip start and end dates. Activity days exclude both travel days." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择行程开始与结束日期。活动天数不含首尾两天。"
+    "Password must be at least %lld characters.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密码至少需要 %lld 个字符。"
           }
         }
       }
     },
-    "Plan" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程"
+    "Password reset email sent. Check your inbox.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置密码邮件已发送，请查收收件箱。"
           }
         }
       }
     },
-    "Plan a Trip →" : {
-
-    },
-    "Plan a trip to see cities" : {
-
-    },
-    "Plan My First Trip" : {
-
-    },
-    "Plan My Trip" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "规划我的行程"
+    "Password updated successfully.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密码已更新成功。"
           }
         }
       }
     },
-    "Plan Trip" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "规划行程"
+    "Passwords do not match.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "两次输入的密码不一致。"
           }
         }
       }
-    },
-    "Plan your China trip" : {
-
     },
-    "Planning your days…" : {
-
-    },
-    "Planning:" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "规划中："
+    "Phrases & Dialect": {},
+    "Pick your trip start and end dates. Activity days exclude both travel days.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择行程开始与结束日期。活动天数不含首尾两天。"
           }
         }
       }
     },
-    "Playlist" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "播放列表"
+    "Plan": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行程"
           }
         }
       }
     },
-    "Please wait %lld seconds before requesting another email." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请等待 %lld 秒后再请求发送邮件。"
+    "Plan a Trip →": {},
+    "Plan a trip to see cities": {},
+    "Plan My First Trip": {},
+    "Plan My Trip": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "规划我的行程"
           }
         }
       }
-    },
-    "Popular" : {
-
     },
-    "Popular destinations" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "热门目的地"
+    "Plan Trip": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "规划行程"
           }
         }
       }
     },
-    "Practical Info" : {
-
-    },
-    "Prep Checklist" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行前清单"
+    "Plan your China trip": {},
+    "Planning your days…": {},
+    "Planning:": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "规划中："
           }
         }
       }
-    },
-    "Prep checklist alerts before departure" : {
-
     },
-    "Prep Complete" : {
-
-    },
-    "Prep List →" : {
-
-    },
-    "Preparation" : {
-
-    },
-    "Prepare" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "准备"
+    "Playlist": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放列表"
           }
         }
       }
-    },
-    "Preparing link…" : {
-
     },
-    "Preview" : {
-
-    },
-    "Preview · unlock the full guide" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "试听 · 解锁完整导览"
+    "Please wait %lld seconds before requesting another email.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请等待 %lld 秒后再请求发送邮件。"
           }
         }
       }
-    },
-    "Privacy Policy" : {
-
     },
-    "Profile" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "个人资料"
+    "Popular": {},
+    "Popular destinations": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门目的地"
           }
         }
       }
-    },
-    "Purchase" : {
-
-    },
-    "Purchase History" : {
-
     },
-    "Quick Access" : {
-
-    },
-    "Quick Actions" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "快捷入口"
+    "Practical Info": {},
+    "Prep Checklist": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行前清单"
           }
         }
       }
     },
-    "Quick Plan" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "快速规划"
+    "Prep checklist alerts before departure": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出发前的准备清单提醒"
           }
         }
       }
-    },
-    "Read less ▲" : {
-
-    },
-    "Read more ▼" : {
-
-    },
-    "Read-only · shared with YOLO HAPPY" : {
-
     },
-    "Reading List" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "阅读清单"
+    "Prep Complete": {},
+    "Prep List →": {},
+    "Preparation": {},
+    "Prepare": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "准备"
           }
         }
       }
     },
-    "Real-time help" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "实时帮助"
+    "Preparing link…": {},
+    "Preview": {},
+    "Preview · unlock the full guide": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "试听 · 解锁完整导览"
           }
         }
       }
     },
-    "Real-time help · %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "实时帮助 · %@"
+    "Privacy Policy": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐私政策"
           }
         }
       }
     },
-    "Recommended Routes" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "推荐路线"
+    "Profile": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "个人资料"
           }
         }
       }
     },
-    "Refresh from CMS" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从 CMS 刷新"
+    "Purchase": {},
+    "Purchase History": {},
+    "Quick Access": {},
+    "Quick Actions": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快捷入口"
           }
         }
       }
     },
-    "Refund" : {
-
-    },
-    "Refund Request" : {
-
-    },
-    "Refunds are processed by Apple. Most requests are resolved within 2 business days." : {
-
-    },
-    "Remove" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移除"
+    "Quick Plan": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快速规划"
           }
         }
       }
-    },
-    "Remove activity" : {
-
     },
-    "Remove from favorites" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消收藏"
+    "Read less ▲": {},
+    "Read more ▼": {},
+    "Read-only · shared with YOLO HAPPY": {},
+    "Reading List": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阅读清单"
           }
         }
       }
-    },
-    "Remove this day" : {
-
-    },
-    "Renewal" : {
-
-    },
-    "Renews in %lld days" : {
-
-    },
-    "Reorder" : {
-
     },
-    "Report a Problem (Apple)" : {
-
-    },
-    "Request a refund" : {
-
-    },
-    "Request a Refund" : {
-
-    },
-    "Request refund via Apple" : {
-
-    },
-    "Request submitted" : {
-
-    },
-    "Resend confirmation email" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重发确认邮件"
+    "Real-time help": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实时帮助"
           }
         }
       }
     },
-    "Resend reset link" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重发重置链接"
+    "Real-time help · %@": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实时帮助 · %@"
           }
         }
       }
-    },
-    "Restore" : {
-
     },
-    "Restore Purchases" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "恢复购买"
+    "Recommended Routes": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推荐路线"
           }
         }
       }
-    },
-    "Restore this item?" : {
-
-    },
-    "Retry" : {
-
     },
-    "Route summary" : {
-
-    },
-    "Save" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "保存"
+    "Refresh from CMS": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 CMS 刷新"
           }
         }
       }
     },
-    "Save trip" : {
-
-    },
-    "Saved" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "收藏"
+    "Refund": {},
+    "Refund Request": {},
+    "Refunds are processed by Apple. Most requests are resolved within 2 business days.": {},
+    "Remove": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除"
           }
         }
       }
-    },
-    "Saved trips · %lld" : {
-
     },
-    "Say it right · 方言彩蛋" : {
-
-    },
-    "Search attractions" : {
-
-    },
-    "Search cities" : {
-
-    },
-    "Search country..." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "搜索国家或地区…"
+    "Remove activity": {},
+    "Remove from favorites": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消收藏"
           }
         }
       }
     },
-    "Search foreigner-friendly hotels" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "搜索对外宾友好的酒店"
+    "Remove this day": {},
+    "Renewal": {},
+    "Renews in %lld days": {},
+    "Reorder": {},
+    "Report a Problem (Apple)": {},
+    "Request a refund": {},
+    "Request a Refund": {},
+    "Request refund via Apple": {},
+    "Request submitted": {},
+    "Resend confirmation email": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重发确认邮件"
           }
         }
       }
-    },
-    "Select one or more cities for your trip." : {
-
     },
-    "Select your nationality" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择您的国籍"
+    "Resend reset link": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重发重置链接"
           }
         }
       }
     },
-    "Select your passport country" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择您的护照国家"
+    "Restore": {},
+    "Restore Purchases": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复购买"
           }
         }
       }
     },
-    "Send" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "发送"
+    "Restore this item?": {},
+    "Retry": {},
+    "Route summary": {},
+    "Save": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
           }
         }
       }
     },
-    "Send Feedback" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "发送反馈"
+    "Save trip": {},
+    "Saved": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收藏"
           }
         }
       }
     },
-    "Send reset link" : {
-
-    },
-    "Session temp files and HTTP cache" : {
-
-    },
-    "Set your nationality in Profile" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请在个人资料中设置国籍"
+    "Saved trips · %lld": {},
+    "Say it right · 方言彩蛋": {},
+    "Search attractions": {},
+    "Search cities": {},
+    "Search country...": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索国家或地区…"
           }
         }
       }
     },
-    "Settings" : {
-
-    },
-    "Share" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "分享"
+    "Search foreigner-friendly hotels": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索对外宾友好的酒店"
           }
         }
       }
-    },
-    "Share as" : {
-
     },
-    "Share Image" : {
-
-    },
-    "Share Itinerary" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "分享行程"
+    "Select one or more cities for your trip.": {},
+    "Select your nationality": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择您的国籍"
           }
         }
       }
-    },
-    "Share Link" : {
-
     },
-    "Shared trip" : {
-
-    },
-    "Show password" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示密码"
+    "Select your passport country": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择您的护照国家"
           }
         }
       }
     },
-    "Sign In" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "登录"
+    "Send": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发送"
           }
         }
       }
-    },
-    "Sign in / Register →" : {
-
     },
-    "Sign in to plan your China trip" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "登录后开始规划你的中国之旅"
+    "Send Feedback": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发送反馈"
           }
         }
       }
     },
-    "Sign Out" : {
-
-    },
-    "Sign Up" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "注册"
+    "Send reset link": {},
+    "Session temp files and HTTP cache": {},
+    "Set your nationality in Profile": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在个人资料中设置国籍"
           }
         }
       }
     },
-    "Sign up successful. Check your email and tap the confirmation link." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "注册成功。请查收确认邮件并点击链接完成验证。"
+    "Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置"
           }
         }
       }
-    },
-    "Skip" : {
-
-    },
-    "Skipped" : {
-
-    },
-    "Something went wrong" : {
-
     },
-    "🆘" : {
-
-    },
-    "🆘 救援" : {
-
-    },
-    "Start date" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开始日期"
+    "Share": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享"
           }
         }
       }
     },
-    "Start Free Trial" : {
-
-    },
-    "Start Free Trial →" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开始免费试用 →"
+    "Share as": {},
+    "Share Image": {},
+    "Share Itinerary": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分享行程"
           }
         }
       }
-    },
-    "Start your prep checklist before you go" : {
-
     },
-    "Starts in %lld days" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 天后开始"
+    "Share Link": {},
+    "Shared trip": {},
+    "Show password": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示密码"
           }
         }
       }
     },
-    "Static · AI" : {
-
-    },
-    "Static Demo" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "静态演示"
+    "Sign In": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录"
           }
         }
       }
-    },
-    "Storage bucket not set up yet. Run: supabase db push" : {
-
-    },
-    "Submit Request" : {
-
-    },
-    "Subscribe" : {
-
     },
-    "Subscribe · %@" : {
-
-    },
-    "Syncing…" : {
-
-    },
-    "Talk to a Human" : {
-
-    },
-    "Tell us your dates and cities" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "告诉我们日期与城市"
+    "Sign in / Register →": {},
+    "Sign in to plan your China trip": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录后开始规划你的中国之旅"
           }
         }
       }
     },
-    "Tell us your dates, cities & style" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "告诉我们日期、城市与风格"
+    "Sign Out": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出登录"
           }
         }
       }
-    },
-    "Temporary files and HTTP cache have been removed." : {
-
     },
-    "Terms of Service" : {
-
-    },
-    "then %@ · cancel anytime" : {
-
-    },
-    "These are experience ideas — no specific venues." : {
-
-    },
-    "This cannot be undone." : {
-
-    },
-    "This link may have expired or sharing was turned off." : {
-
-    },
-    "This name is not allowed." : {
-
-    },
-    "This permanently removes your account and cloud trips. This cannot be undone." : {
-
-    },
-    "Tips for Western Visitors" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "西方游客贴士"
+    "Sign Up": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "注册"
           }
         }
       }
     },
-    "Title" : {
-
-    },
-    "Too many attempts. Please try again later." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "操作过于频繁，请稍后再试。"
+    "Sign up successful. Check your email and tap the confirmation link.": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "注册成功。请查收确认邮件并点击链接完成验证。"
           }
         }
       }
     },
-    "Too many password reset emails sent. Wait a few minutes, check your inbox and spam folder, then try again." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重置密码邮件发送过于频繁。请等待几分钟，并检查收件箱与垃圾箱中是否已有邮件，然后再试。"
+    "Skip": {},
+    "Skipped": {},
+    "Something went wrong": {},
+    "🆘": {},
+    "🆘 救援": {},
+    "Start date": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始日期"
           }
         }
       }
     },
-    "Travel Assistant" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "旅行助手"
+    "Start Free Trial": {},
+    "Start Free Trial →": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始免费试用 →"
           }
         }
       }
     },
-    "Travel dates" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "旅行日期"
+    "Start your prep checklist before you go": {},
+    "Starts in %lld days": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 天后开始"
           }
         }
       }
     },
-    "Travel style" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "旅行风格"
+    "Static · AI": {},
+    "Static Demo": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "静态演示"
           }
         }
       }
-    },
-    "Traveler" : {
-
     },
-    "Trip ended" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程已结束"
+    "Storage bucket not set up yet. Run: supabase db push": {},
+    "Submit Request": {},
+    "Subscribe": {},
+    "Subscribe · %@": {},
+    "Syncing…": {},
+    "Talk to a Human": {},
+    "Tell us your dates and cities": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "告诉我们日期与城市"
           }
         }
       }
-    },
-    "Trip not found" : {
-
-    },
-    "Trip overview" : {
-
-    },
-    "Trip reminders" : {
-
-    },
-    "Trip saved" : {
-
-    },
-    "Try again" : {
-
-    },
-    "Try Again" : {
-
     },
-    "Turn on Live content in app settings (远程内容) to load hotels from the CMS." : {
-
-    },
-    "Unable to load city content. Check your connection." : {
-
-    },
-    "Unable to load content. Pull to refresh." : {
-
-    },
-    "Unable to send password reset email. Please try again." : {
-
-    },
-    "Unlock" : {
-
-    },
-    "Unlock all attraction guides, text content, and more." : {
-
-    },
-    "Unlock Audio Guide" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "解锁语音导览"
+    "Tell us your dates, cities & style": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "告诉我们日期、城市与风格"
           }
         }
       }
     },
-    "Unlock Full Audio Guide" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "解锁完整语音导览"
+    "Temporary files and HTTP cache have been removed.": {},
+    "Terms of Service": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务条款"
           }
         }
       }
-    },
-    "Unlock Guide · %@" : {
-
-    },
-    "Unlock the full Guide to keep listening & reading." : {
-
     },
-    "UNLOCK THE GUIDE" : {
-
-    },
-    "Unlock the Guide →" : {
-
-    },
-    "Unlock this Guide" : {
-
-    },
-    "Unlock visitor tips →" : {
-
-    },
-    "Update password" : {
-
-    },
-    "Upgrade to unlock all content" : {
-
-    },
-    "Uploading…" : {
-
-    },
-    "Use a different email" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用其他邮箱"
+    "then %@ · cancel anytime": {},
+    "These are experience ideas — no specific venues.": {},
+    "This cannot be undone.": {},
+    "This link may have expired or sharing was turned off.": {},
+    "This name is not allowed.": {},
+    "This permanently removes your account and cloud trips. This cannot be undone.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此操作将永久删除你的账号与云端行程，且无法撤销。"
           }
         }
       }
     },
-    "v1.0.0" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "v1.0.0"
+    "Tips for Western Visitors": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "西方游客贴士"
           }
         }
       }
-    },
-    "Valid until: " : {
-
     },
-    "Version %@" : {
-
-    },
-    "View →" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "查看 →"
+    "Title": {},
+    "Too many attempts. Please try again later.": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作过于频繁，请稍后再试。"
           }
         }
       }
     },
-    "View all →" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "查看全部 →"
+    "Too many password reset emails sent. Wait a few minutes, check your inbox and spam folder, then try again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置密码邮件发送过于频繁。请等待几分钟，并检查收件箱与垃圾箱中是否已有邮件，然后再试。"
           }
         }
       }
-    },
-    "View in Guide →" : {
-
-    },
-    "View Itinerary" : {
-
     },
-    "View Plans →" : {
-
-    },
-    "Visa required" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "需签证"
+    "Travel Assistant": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旅行助手"
           }
         }
       }
     },
-    "Visa-free" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "免签"
+    "Travel dates": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旅行日期"
           }
         }
       }
-    },
-    "Visitor Tips" : {
-
     },
-    "We'll customise your preparation checklist." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我们将为你定制行前准备清单。"
+    "Travel style": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旅行风格"
           }
         }
       }
-    },
-    "We'll remind you when your trip is approaching and key prep items are overdue." : {
-
-    },
-    "We'll review your request and follow up by email." : {
-
     },
-    "We'll show visa rules and travel tips for your country" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "我们将根据您的国籍展示签证政策与出行建议"
+    "Traveler": {},
+    "Trip ended": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行程已结束"
           }
         }
       }
     },
-    "We've received your request. Refunds are typically processed by Apple within 48 hours." : {
-
-    },
-    "Welcome back!" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "欢迎回家！"
+    "Trip not found": {},
+    "Trip overview": {},
+    "Trip reminders": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行程提醒"
           }
         }
       }
     },
-    "What's next?" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "接下来做什么？"
+    "Trip saved": {},
+    "Try again": {},
+    "Try Again": {},
+    "Turn on Live content in app settings (远程内容) to load hotels from the CMS.": {},
+    "Unable to load city content. Check your connection.": {},
+    "Unable to load content. Pull to refresh.": {},
+    "Unable to send password reset email. Please try again.": {},
+    "Unlock": {},
+    "Unlock all attraction guides, text content, and more.": {},
+    "Unlock Audio Guide": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解锁语音导览"
           }
         }
       }
     },
-    "Where are you going?" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "你要去哪些城市？"
+    "Unlock Full Audio Guide": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解锁完整语音导览"
           }
         }
       }
-    },
-    "YOLO" : {
-
     },
-    "YOLO HAPPY" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "YOLO HAPPY"
+    "Unlock Guide · %@": {},
+    "Unlock the full Guide to keep listening & reading.": {},
+    "UNLOCK THE GUIDE": {},
+    "Unlock the Guide →": {},
+    "Unlock this Guide": {},
+    "Unlock visitor tips →": {},
+    "Update password": {},
+    "Upgrade to unlock all content": {},
+    "Uploading…": {},
+    "Use a different email": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用其他邮箱"
           }
         }
       }
     },
-    "YOLO HAPPY Feedback" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "YOLO HAPPY 反馈"
+    "v1.0.0": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "v1.0.0"
           }
         }
       }
     },
-    "YOLO HAPPY Pro" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "YOLO HAPPY Pro"
+    "Valid until: ": {},
+    "Version %@": {},
+    "View →": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看 →"
           }
         }
       }
     },
-    "YOLO HAPPY Pro (demo)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "YOLO HAPPY Pro（演示）"
+    "View all →": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看全部 →"
           }
         }
       }
     },
-    "You're ready for China." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "你已经准备好出发。"
+    "View in Guide →": {},
+    "View Itinerary": {},
+    "View Plans →": {},
+    "Visa required": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需签证"
           }
         }
       }
-    },
-    "Your benefits" : {
-
-    },
-    "Your China adventure starts here" : {
-
     },
-    "Your itinerary" : {
-
-    },
-    "Your purchase history will appear here after your first transaction." : {
-
-    },
-    "Your Trip" : {
-
-    },
-    "Your trip “%@” has ended. Tap to revisit your itinerary." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程「%@」已结束，点按回顾你的行程。"
+    "Visa-free": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "免签"
           }
         }
       }
     },
-    "Your Trip ★" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "你的行程 ★"
+    "Visitor Tips": {},
+    "We'll customise your preparation checklist.": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我们将为你定制行前准备清单。"
           }
         }
       }
-    },
-    "Your Trip Destinations" : {
-
-    },
-    "Your trip starts in %lld days. Enjoy China!" : {
-
-    },
-    "Your trip starts tomorrow" : {
-
-    },
-    "不用做假订单。用支付宝官方「我的→银行卡→验证卡片」（预授权 1 元、不扣款），或把落地后第一笔真实小额消费当验证。" : {
-
-    },
-    "不确定 / 跳过" : {
-
-    },
-    "两个方案" : {
-
-    },
-    "中国急救 120 · 报警 110 · 火警 119" : {
-
-    },
-    "为你一个人裁好的" : {
-
-    },
-    "主线一条直线：填卡号 → 短信验证 → 完成。" : {
-
-    },
-    "交通" : {
-
-    },
-    "会话已结束 · 再次咨询将开启新会话" : {
-
-    },
-    "你有哪些卡？（可多选）" : {
-
-    },
-    "你现在的处境？" : {
-
-    },
-    "你的随身支付卡" : {
-
-    },
-    "依据政策 · 条目" : {
-
-    },
-    "保存图片" : {
-
-    },
-    "保持原行程继续" : {
-
-    },
-    "先问你在哪个时刻——最慌的人能一秒拿到帮助。" : {
-
-    },
-    "入境日期时间" : {
-
-    },
-    "关闭" : {
-
-    },
-    "再次咨询 TA" : {
-
-    },
-    "最晚须于 %@ 前出境。" : {
-
-    },
-    "出发前准备" : {
-
-    },
-    "删除" : {
-
-    },
-    "删除记录" : {
-
-    },
-    "别慌，一步步换" : {
-
-    },
-    "加入哪一天？" : {
-
-    },
-    "加入行程" : {
-
-    },
-    "务必出发前装好支付宝 + 微信。到了中国可能上不了 Google Play、收不到验证码。" : {
-
-    },
-    "历史会话" : {
-
-    },
-    "去机场或市区大银行 ATM 取 500 元（认 Visa/Mastercard/UnionPay 标识）。手机支付万一卡住，现金立刻兜底。" : {
-
-    },
-    "发消息…（中英都行，自动翻译）" : {
-
-    },
-    "取消" : {
-
-    },
-    "可在「实用信息 · Genius Bar」找真人，带着判定结果咨询。" : {
-
-    },
-    "在华紧急支援" : {
-
-    },
-    "填写…" : {
-
-    },
-    "复制中文版" : {
-
-    },
-    "好" : {
-
-    },
-    "完成" : {
-
-    },
-    "实用信息" : {
-
-    },
-    "对方正在输入…" : {
-
-    },
-    "对话" : {
-
-    },
-    "已加入" : {
-
-    },
-    "已登录：%@" : {
-
-    },
-    "已经在中国" : {
-
-    },
-    "已结束 · 查看记录" : {
-
-    },
-    "平台内的预订与选择，聚合在这里" : {
-
-    },
-    "开始判定 · 我这条线够用吗" : {
-
     },
-    "当前国籍" : {
-
-    },
-    "急救卡 First-Aid Card" : {
-
-    },
-    "急救卡模板（可打印随身带）" : {
-
-    },
-    "慢性病史 History: %@" : {
-
-    },
-    "我已持有中国签证" : {
-
-    },
-    "手动选城市测一测" : {
-
-    },
-    "把屏幕转给本地人看 · 大字模式" : {
-
-    },
-    "护照剩余有效期不足 6 个月，需先换发护照，后续政策均不再适用。" : {
-
-    },
-    "护照国籍 · %@" : {
-
-    },
-    "护照有效期 ≥ %lld 个月" : {
-
-    },
-    "拖累城市：%@。可在下方方案 A 或「签证友好路线」调整。" : {
-
-    },
-    "按常见默认粗判(往返同国、主要机场进出、已出续程票)。以边检最终判定为准。" : {
-
-    },
-    "按常见默认粗判（往返同国、主要机场进出）。点开可改出发地/口岸/续程票并看签证友好路线。" : {
-
-    },
-    "按所选换城确认并生成" : {
-
-    },
-    "按推荐确认并生成" : {
-
-    },
-    "换城免签 · 城数不变" : {
-
-    },
-    "搜索口岸 / IATA" : {
-
-    },
-    "搜索国家 / 地区" : {
-
-    },
-    "搜索城市" : {
-
-    },
-    "支付助手" : {
-
-    },
-    "文化贴士" : {
-
-    },
-    "方案 A · 改行程保免签" : {
-
-    },
-    "方案 B · 一城不动办 L 签" : {
-
-    },
-    "显示译文" : {
-
-    },
-    "暂无历史会话" : {
-
-    },
-    "未收录你国使馆信息。请搜索「%@ 驻华大使馆」获取电话。" : {
-
-    },
-    "查看官方公告 →" : {
-
-    },
-    "查看已结束的对话记录" : {
-
-    },
-    "检测器只回答够不够用，不在此盖章收尾。绑卡 / 行前事项在「行前清单」里完成。以边检最终判定为准。" : {
-
-    },
-    "正在接通…" : {
-
-    },
-    "正在核对签证…" : {
-
-    },
-    "没成功？找真人帮你（绑卡） →" : {
-
-    },
-    "测算城市" : {
-
-    },
-    "点此修改护照国籍（同步到「我的」）" : {
-
-    },
-    "用我的行程" : {
-
-    },
-    "登录后才能开始对话。" : {
-
-    },
-    "看签证友好路线 →" : {
-
-    },
-    "真诚是我们的护城河，不是机器人。我们是真心想帮你。" : {
-
-    },
-    "离线可用 · Works offline" : {
-
-    },
-    "离线可用 · 没网也能调出" : {
-
-    },
-    "签证信息(让签证核对更准)" : {
-
-    },
-    "签证核对" : {
-
-    },
-    "签证检测" : {
-
-    },
-    "签证结论" : {
-
-    },
-    "精细核对(出发地 / 口岸 / 续程票)" : {
-
-    },
-    "紧急 · Emergency" : {
-
-    },
-    "紧急情况也能找到我们团队的活人" : {
-
-    },
-    "紧急支援会话" : {
-
-    },
-    "紧急联系人 ICE: %@" : {
-
-    },
-    "结束会话" : {
-
-    },
-    "结束后会进入「历史会话」，需要时可再次咨询（开启新会话）。" : {
-
-    },
-    "结束这次会话？" : {
-
-    },
-    "给商家看" : {
-
-    },
-    "继续和 TA 聊" : {
-
-    },
-    "翻译" : {
-
-    },
-    "翻译中…" : {
-
-    },
-    "血型 Blood type: %@" : {
-
-    },
-    "行前答疑 · 帮你找帮手 · 付款绑卡协助 · 在华紧急联络支援" : {
-
-    },
-    "行程不改，办一张 L 旅游签证（约 4–7 个工作日 + 签证费）。" : {
-
-    },
-    "行程不是输入——地理范围限制是政策的输出。引擎只收能产生确定判决的硬事实，城市来自你的行程。以边检最终判定为准。" : {
-
-    },
-    "表达 / 方言" : {
-
-    },
-    "规则详情" : {
-
-    },
-    "计划离境日期时间" : {
-
-    },
-    "请选择 %lld 座替换城市" : {
-
-    },
-    "读出来 Speak" : {
-
-    },
-    "过敏 Allergies: %@" : {
-
+    "We'll remind you when your trip is approaching and key prep items are overdue.": {},
+    "We'll review your request and follow up by email.": {},
+    "We'll show visa rules and travel tips for your country": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我们将根据您的国籍展示签证政策与出行建议"
+          }
+        }
+      }
     },
-    "还没有行程。去 Plan 规划一条，或点上面「手动选城市测一测」。" : {
-
+    "We've received your request. Refunds are typically processed by Apple within 48 hours.": {},
+    "Welcome back!": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欢迎回家！"
+          }
+        }
+      }
     },
-    "这条线有条件免签，建议核对" : {
-
+    "What's next?": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接下来做什么？"
+          }
+        }
+      }
     },
-    "这条线默认可能需要签证" : {
-
+    "Where are you going?": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你要去哪些城市？"
+          }
+        }
+      }
     },
-    "这趟主要去哪？" : {
-
+    "YOLO": {},
+    "YOLO HAPPY": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YOLO HAPPY"
+          }
+        }
+      }
     },
-    "迷路 / 被偷报警 / 找不到帮手 — 远程支援" : {
-
+    "YOLO HAPPY Feedback": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YOLO HAPPY 反馈"
+          }
+        }
+      }
     },
-    "退出登录" : {
-
+    "YOLO HAPPY Pro": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YOLO HAPPY Pro"
+          }
+        }
+      }
     },
-    "选%@" : {
-
+    "YOLO HAPPY Pro (demo)": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "YOLO HAPPY Pro（演示）"
+          }
+        }
+      }
     },
-    "选一位伙伴和你聊（点头像即开始）：" : {
-
+    "You're ready for China.": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你已经准备好出发。"
+          }
+        }
+      }
     },
-    "选几座城市来试算（仅本地，不影响真实行程）" : {
-
+    "Your benefits": {},
+    "Your China adventure starts here": {},
+    "Your itinerary": {},
+    "Your purchase history will appear here after your first transaction.": {},
+    "Your Trip": {},
+    "Your trip “%@” has ended. Tap to revisit your itinerary.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "行程「%@」已结束，点按回顾你的行程。"
+          }
+        }
+      }
     },
-    "选择测算城市" : {
-
+    "Your Trip ★": {
+      "extractionState": "stale",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你的行程 ★"
+          }
+        }
+      }
     },
-    "选这条 · 办 L 签生成" : {
-
+    "Your Trip Destinations": {},
+    "Your trip starts in %lld days. Enjoy China!": {},
+    "Your trip starts tomorrow": {},
+    "不用做假订单。用支付宝官方「我的→银行卡→验证卡片」（预授权 1 元、不扣款），或把落地后第一笔真实小额消费当验证。": {},
+    "不确定 / 跳过": {},
+    "两个方案": {},
+    "中国急救 120 · 报警 110 · 火警 119": {},
+    "为你一个人裁好的": {},
+    "主线一条直线：填卡号 → 短信验证 → 完成。": {},
+    "交通": {},
+    "会话已结束 · 再次咨询将开启新会话": {},
+    "你有哪些卡？（可多选）": {},
+    "你现在的处境？": {},
+    "你的随身支付卡": {},
+    "依据政策 · 条目": {},
+    "保存图片": {},
+    "保持原行程继续": {},
+    "先问你在哪个时刻——最慌的人能一秒拿到帮助。": {},
+    "入境日期时间": {},
+    "关闭": {},
+    "再次咨询 TA": {},
+    "最晚须于 %@ 前出境。": {},
+    "出发前准备": {},
+    "删除": {},
+    "删除记录": {},
+    "别慌，一步步换": {},
+    "加入哪一天？": {},
+    "加入行程": {},
+    "务必出发前装好支付宝 + 微信。到了中国可能上不了 Google Play、收不到验证码。": {},
+    "历史会话": {},
+    "去机场或市区大银行 ATM 取 500 元（认 Visa/Mastercard/UnionPay 标识）。手机支付万一卡住，现金立刻兜底。": {},
+    "发消息…（中英都行，自动翻译）": {},
+    "取消": {},
+    "可在「实用信息 · Genius Bar」找真人，带着判定结果咨询。": {},
+    "在华紧急支援": {},
+    "填写…": {},
+    "复制中文版": {},
+    "好": {},
+    "完成": {},
+    "实用信息": {},
+    "对方正在输入…": {},
+    "对话": {},
+    "已加入": {},
+    "已登录：%@": {},
+    "已经在中国": {},
+    "已结束 · 查看记录": {},
+    "平台内的预订与选择，聚合在这里": {},
+    "开始判定 · 我这条线够用吗": {},
+    "当前国籍": {},
+    "急救卡 First-Aid Card": {},
+    "急救卡模板（可打印随身带）": {},
+    "慢性病史 History: %@": {},
+    "我已持有中国签证": {},
+    "手动选城市测一测": {},
+    "把屏幕转给本地人看 · 大字模式": {},
+    "护照剩余有效期不足 6 个月，需先换发护照，后续政策均不再适用。": {},
+    "护照国籍 · %@": {},
+    "护照有效期 ≥ %lld 个月": {},
+    "拖累城市：%@。可在下方方案 A 或「签证友好路线」调整。": {},
+    "按常见默认粗判(往返同国、主要机场进出、已出续程票)。以边检最终判定为准。": {},
+    "按常见默认粗判（往返同国、主要机场进出）。点开可改出发地/口岸/续程票并看签证友好路线。": {},
+    "按所选换城确认并生成": {},
+    "按推荐确认并生成": {},
+    "换城免签 · 城数不变": {},
+    "搜索口岸 / IATA": {},
+    "搜索国家 / 地区": {},
+    "搜索城市": {},
+    "支付助手": {},
+    "文化贴士": {},
+    "方案 A · 改行程保免签": {},
+    "方案 B · 一城不动办 L 签": {},
+    "显示译文": {},
+    "暂无历史会话": {},
+    "未收录你国使馆信息。请搜索「%@ 驻华大使馆」获取电话。": {},
+    "查看官方公告 →": {},
+    "查看已结束的对话记录": {},
+    "检测器只回答够不够用，不在此盖章收尾。绑卡 / 行前事项在「行前清单」里完成。以边检最终判定为准。": {},
+    "正在接通…": {},
+    "正在核对签证…": {},
+    "没成功？找真人帮你（绑卡） →": {},
+    "测算城市": {},
+    "点此修改护照国籍（同步到「我的」）": {},
+    "用我的行程": {},
+    "登录后才能开始对话。": {},
+    "看签证友好路线 →": {},
+    "真诚是我们的护城河，不是机器人。我们是真心想帮你。": {},
+    "离线可用 · Works offline": {},
+    "离线可用 · 没网也能调出": {},
+    "签证信息(让签证核对更准)": {},
+    "签证核对": {},
+    "签证检测": {},
+    "签证结论": {},
+    "精细核对(出发地 / 口岸 / 续程票)": {},
+    "紧急 · Emergency": {},
+    "紧急情况也能找到我们团队的活人": {},
+    "紧急支援会话": {},
+    "紧急联系人 ICE: %@": {},
+    "结束会话": {},
+    "结束后会进入「历史会话」，需要时可再次咨询（开启新会话）。": {},
+    "结束这次会话？": {},
+    "给商家看": {},
+    "继续和 TA 聊": {},
+    "翻译": {},
+    "翻译中…": {},
+    "血型 Blood type: %@": {},
+    "行前答疑 · 帮你找帮手 · 付款绑卡协助 · 在华紧急联络支援": {},
+    "行程不改，办一张 L 旅游签证（约 4–7 个工作日 + 签证费）。": {},
+    "行程不是输入——地理范围限制是政策的输出。引擎只收能产生确定判决的硬事实，城市来自你的行程。以边检最终判定为准。": {},
+    "表达 / 方言": {},
+    "规则详情": {},
+    "计划离境日期时间": {},
+    "请选择 %lld 座替换城市": {},
+    "读出来 Speak": {},
+    "过敏 Allergies: %@": {},
+    "还没有行程。去 Plan 规划一条，或点上面「手动选城市测一测」。": {},
+    "这条线有条件免签，建议核对": {},
+    "这条线默认可能需要签证": {},
+    "这趟主要去哪？": {},
+    "迷路 / 被偷报警 / 找不到帮手 — 远程支援": {},
+    "退出登录": {},
+    "选%@": {},
+    "选一位伙伴和你聊（点头像即开始）：": {},
+    "选几座城市来试算（仅本地，不影响真实行程）": {},
+    "选择测算城市": {},
+    "选这条 · 办 L 签生成": {},
+    "采用这条": {},
+    "重大医疗诊断 · 涉政法律事务 — 请优先联系官方机构（110 / 120 / 使领馆）": {},
+    "长按可删除历史记录（仅从你这里移除）": {},
+    "问真人确认": {},
+    "隐藏译文": {},
+    "需签证的城市：%@。换成下面任一座免签可达的城市(选 %lld 座)，经引擎复核为全程免签。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "需签证的城市：%1$@。换成下面任一座免签可达的城市(选 %2$lld 座)，经引擎复核为全程免签。"
+          }
+        }
+      }
     },
-    "采用这条" : {
-
+    "需要真人帮忙？Genius Bar": {},
+    "高铁 / 门票等外部购票入口为跳转链接，不记录在行程留痕中。": {},
+    "默认按往返同国判定。若下一程是第三国/港澳,可能触发过境免签。护照有效期不足 %lld 个月将无法免签也无法办签证。": {},
+    "Notifications": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通知"
+          }
+        }
+      }
     },
-    "重大医疗诊断 · 涉政法律事务 — 请优先联系官方机构（110 / 120 / 使领馆）" : {
-
+    "Preferences": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "偏好"
+          }
+        }
+      }
     },
-    "长按可删除历史记录（仅从你这里移除）" : {
-
+    "Content": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内容"
+          }
+        }
+      }
     },
-    "问真人确认" : {
-
+    "Check for Content Updates": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查内容更新"
+          }
+        }
+      }
     },
-    "隐藏译文" : {
-
+    "Get the latest spots, guides & audio": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取最新景点、攻略与音频"
+          }
+        }
+      }
     },
-    "需签证的城市：%@。换成下面任一座免签可达的城市(选 %lld 座)，经引擎复核为全程免签。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "需签证的城市：%1$@。换成下面任一座免签可达的城市(选 %2$lld 座)，经引擎复核为全程免签。"
+    "Storage": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存储"
           }
         }
       }
     },
-    "需要真人帮忙？Genius Bar" : {
-
+    "Offline content, cover images & audio": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "离线内容、封面图与音频"
+          }
+        }
+      }
     },
-    "高铁 / 门票等外部购票入口为跳转链接，不记录在行程留痕中。" : {
-
+    "All cached content has been removed.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已清除所有缓存内容。"
+          }
+        }
+      }
     },
-    "默认按往返同国判定。若下一程是第三国/港澳,可能触发过境免签。护照有效期不足 %lld 个月将无法免签也无法办签证。" : {
-
+    "Support": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "支持"
+          }
+        }
+      }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

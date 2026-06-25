@@ -1,8 +1,8 @@
 import SwiftUI
 import UIKit
 
-/// App settings — cache, language, notifications, legal, account.
-/// Extracted from ProfileSheetView to keep the profile sheet focused on identity and membership.
+/// App settings — notifications, preferences, content refresh, storage, legal, account.
+/// iOS-style grouped cards: each section is a rounded card with a muted header above it.
 struct SettingsView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
@@ -11,21 +11,29 @@ struct SettingsView: View {
     @State private var showCountryPicker = false
     @State private var showAbout = false
     @State private var cacheSizeLabel = "…"
+    @State private var isClearingCache = false
     @State private var cacheClearedMessage: String?
     @State private var showDeleteAccountConfirm = false
     @State private var isDeletingAccount = false
     @State private var deleteAccountError: String?
+
+    /// Card geometry shared by headers, rows and dividers so everything lines up.
+    private let cardInset: CGFloat = 16
+    private let rowPadding: CGFloat = 16
 
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
                 notificationsSection
                 preferencesSection
-                cacheSection
+                contentSection
+                storageSection
                 legalSection
                 accountSection
             }
+            .padding(.bottom, 28)
         }
+        .background(Theme.ColorToken.backgroundSubtle)
         .navigationTitle(String(localized: "Settings"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showLanguagePicker) {
@@ -68,218 +76,273 @@ struct SettingsView: View {
     // MARK: - Sections
 
     private var notificationsSection: some View {
-        Toggle(isOn: tripRemindersBinding) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(String(localized: "Trip reminders"))
-                    .font(Theme.FontToken.inter(13))
-                Text(String(localized: "Prep checklist alerts before departure"))
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
+        VStack(spacing: 0) {
+            sectionHeader(String(localized: "Notifications"))
+            card {
+                Toggle(isOn: tripRemindersBinding) {
+                    rowLabel(
+                        String(localized: "Trip reminders"),
+                        subtitle: String(localized: "Prep checklist alerts before departure")
+                    )
+                }
+                .tint(Theme.ColorToken.success)
+                .padding(.horizontal, rowPadding)
+                .padding(.vertical, 11)
             }
-        }
-        .padding(.vertical, 12)
-        .padding(.horizontal, Theme.screenPadding)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
         }
     }
 
     private var preferencesSection: some View {
-        Group {
-            Button {
-                showLanguagePicker = true
-            } label: {
-                settingsRow(String(localized: "Language"), value: appEnv.preferences.appLanguage.displayName)
-            }
-            .buttonStyle(.plain)
-
-            Button {
-                showCountryPicker = true
-            } label: {
-                settingsRow(String(localized: "Nationality"), value: nationalityLabel)
-            }
-            .buttonStyle(.plain)
-
-            settingsRow(String(localized: "Content Mode"), value: appEnv.contentMode.contentModeLabel)
-
-            Button {
-                Task { await appEnv.refreshContentMode(clearSettingsCache: true) }
-            } label: {
-                HStack {
-                    Text(String(localized: "Refresh from CMS"))
-                    Spacer()
-                    if appEnv.contentMode.isRefreshing { ProgressView() }
+        VStack(spacing: 0) {
+            sectionHeader(String(localized: "Preferences"))
+            card {
+                navRow(String(localized: "Language"), value: appEnv.preferences.appLanguage.displayName) {
+                    showLanguagePicker = true
                 }
-                .padding(.vertical, 14)
-                .padding(.horizontal, Theme.screenPadding)
-            }
-            .buttonStyle(.plain)
-
-            if let error = appEnv.contentMode.lastRefreshError {
-                Text(error)
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, Theme.screenPadding)
+                rowDivider
+                navRow(String(localized: "Nationality"), value: nationalityLabel) {
+                    showCountryPicker = true
+                }
             }
         }
     }
 
-    /// Current nationality as flag + Chinese name (from the global ISO list).
-    private var nationalityLabel: String? {
-        let cc = appEnv.preferences.countryCode.uppercased()
-        guard !cc.isEmpty else { return nil }
-        if let c = ISO3166.all.first(where: { $0.code == cc }) { return "\(c.flag) \(c.name)" }
-        return "\(ISO3166.flag(cc)) \(cc)"
+    private var contentSection: some View {
+        VStack(spacing: 0) {
+            sectionHeader(String(localized: "Content"))
+            card {
+                Button {
+                    Task { await appEnv.refreshContentMode(clearSettingsCache: true) }
+                } label: {
+                    HStack(spacing: 8) {
+                        rowLabel(
+                            String(localized: "Check for Content Updates"),
+                            subtitle: contentUpdateSubtitle
+                        )
+                        Spacer()
+                        if appEnv.contentMode.isRefreshing {
+                            ProgressView()
+                        } else {
+                            chevron
+                        }
+                    }
+                    .padding(.horizontal, rowPadding)
+                    .padding(.vertical, 11)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(appEnv.contentMode.isRefreshing)
+            }
+            if let error = appEnv.contentMode.lastRefreshError {
+                footnote(error, color: .red)
+            }
+        }
     }
 
-    private var cacheSection: some View {
-        Group {
-            settingsRow(String(localized: "Cache Size"), value: cacheSizeLabel)
+    /// Friendly subtitle; in DEBUG we append the raw content-mode label for diagnostics.
+    private var contentUpdateSubtitle: String {
+        let base = String(localized: "Get the latest spots, guides & audio")
+        #if DEBUG
+        return "\(base) · \(appEnv.contentMode.contentModeLabel)"
+        #else
+        return base
+        #endif
+    }
 
-            cacheClearButton(
-                String(localized: "Clear Temporary Cache"),
-                detail: String(localized: "Session temp files and HTTP cache")
-            ) {
-                await CacheService.clear(.temporary)
-                cacheClearedMessage = String(localized: "Temporary files and HTTP cache have been removed.")
-            }
-
-            cacheClearButton(
-                String(localized: "Clear Offline Content"),
-                detail: String(localized: "Cached cities, attractions, tips")
-            ) {
-                await CacheService.clear(.offlineContent)
-                cacheClearedMessage = String(localized: "Offline CMS content cache has been removed.")
-            }
-
-            cacheClearButton(
-                String(localized: "Clear Cover Images"),
-                detail: String(localized: "Cached guide cover photos")
-            ) {
-                await CacheService.clear(.coverImages)
-                cacheClearedMessage = String(localized: "Cached cover images have been removed.")
-            }
-
-            cacheClearButton(
-                String(localized: "Clear Downloaded Audio"),
-                detail: String(localized: "Offline audio guides")
-            ) {
-                await CacheService.clear(.downloadedAudio)
-                cacheClearedMessage = String(localized: "Downloaded audio files have been removed.")
+    private var storageSection: some View {
+        VStack(spacing: 0) {
+            sectionHeader(String(localized: "Storage"))
+            card {
+                Button {
+                    Task {
+                        isClearingCache = true
+                        await CacheService.clear(.all)
+                        await refreshCacheSizeLabel()
+                        isClearingCache = false
+                        cacheClearedMessage = String(localized: "All cached content has been removed.")
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        rowLabel(
+                            String(localized: "Clear Cache"),
+                            subtitle: String(localized: "Offline content, cover images & audio")
+                        )
+                        Spacer()
+                        if isClearingCache {
+                            ProgressView()
+                        } else {
+                            Text(cacheSizeLabel)
+                                .font(Theme.FontToken.inter(14))
+                                .foregroundStyle(Theme.ColorToken.textMuted)
+                        }
+                    }
+                    .padding(.horizontal, rowPadding)
+                    .padding(.vertical, 11)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .disabled(isClearingCache)
             }
         }
     }
 
     private var legalSection: some View {
-        Group {
-            NavigationLink {
-                LegalDocumentView(kind: .privacy)
-            } label: {
-                settingsRow(String(localized: "Privacy Policy"), value: nil)
-            }
-
-            NavigationLink {
-                LegalDocumentView(kind: .terms)
-            } label: {
-                settingsRow(String(localized: "Terms of Service"), value: nil)
-            }
-
-            Button { openFeedbackEmail() } label: {
-                settingsRow(String(localized: "Send Feedback"), value: nil)
-            }
-            .buttonStyle(.plain)
-
-            Button {
-                showAbout = true
-            } label: {
-                settingsRow(
+        VStack(spacing: 0) {
+            sectionHeader(String(localized: "Support"))
+            card {
+                NavigationLink {
+                    LegalDocumentView(kind: .privacy)
+                } label: {
+                    navRowLabel(String(localized: "Privacy Policy"), value: nil)
+                }
+                .buttonStyle(.plain)
+                rowDivider
+                NavigationLink {
+                    LegalDocumentView(kind: .terms)
+                } label: {
+                    navRowLabel(String(localized: "Terms of Service"), value: nil)
+                }
+                .buttonStyle(.plain)
+                rowDivider
+                navRow(String(localized: "Send Feedback"), value: nil) { openFeedbackEmail() }
+                rowDivider
+                navRow(
                     String(localized: "About YOLO HAPPY"),
                     value: "v\(appEnv.contentMode.branding.aboutVersion)"
-                )
+                ) { showAbout = true }
             }
-            .buttonStyle(.plain)
         }
     }
 
     private var accountSection: some View {
         Group {
             if appEnv.auth.isAuthenticated {
-                Button(String(localized: "Sign Out")) {
-                    Task { await appEnv.signOutAndReset() }
-                }
-                .font(Theme.FontToken.inter(14))
-                .foregroundStyle(.red)
-                .padding(.vertical, 14)
-                .padding(.horizontal, Theme.screenPadding)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .overlay(alignment: .bottom) {
-                    Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
-                }
-
-                Button(String(localized: "Delete account")) {
-                    showDeleteAccountConfirm = true
-                }
-                .font(Theme.FontToken.inter(14))
-                .foregroundStyle(.red)
-                .padding(.vertical, 14)
-                .padding(.horizontal, Theme.screenPadding)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .disabled(isDeletingAccount)
-                .overlay(alignment: .bottom) {
-                    Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
-                }
-
-                if let err = deleteAccountError {
-                    Text(err)
-                        .font(Theme.FontToken.inter(11))
-                        .foregroundStyle(.red)
-                        .padding(.horizontal, Theme.screenPadding)
+                VStack(spacing: 0) {
+                    sectionHeader(String(localized: "Account"))
+                    card {
+                        Button {
+                            Task { await appEnv.signOutAndReset() }
+                        } label: {
+                            destructiveRowLabel(String(localized: "Sign Out"))
+                        }
+                        .buttonStyle(.plain)
+                        rowDivider
+                        Button {
+                            showDeleteAccountConfirm = true
+                        } label: {
+                            destructiveRowLabel(String(localized: "Delete account"))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isDeletingAccount)
+                    }
+                    if let err = deleteAccountError {
+                        footnote(err, color: .red)
+                    }
                 }
             }
         }
+    }
+
+    // MARK: - Row builders
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(Theme.FontToken.inter(12, weight: .medium))
+            .foregroundStyle(Theme.ColorToken.textMuted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, cardInset + rowPadding)
+            .padding(.top, 24)
+            .padding(.bottom, 8)
+    }
+
+    private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(spacing: 0) { content() }
+            .background(Theme.ColorToken.background)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(Theme.ColorToken.borderLight, lineWidth: 1)
+            )
+            .padding(.horizontal, cardInset)
+    }
+
+    private var rowDivider: some View {
+        Rectangle()
+            .fill(Theme.ColorToken.borderLight)
+            .frame(height: 1)
+            .padding(.leading, rowPadding)
+    }
+
+    private var chevron: some View {
+        Image(systemName: "chevron.right")
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(Theme.ColorToken.textGhost)
+    }
+
+    /// Title with optional muted subtitle, used inside toggles and action rows.
+    private func rowLabel(_ title: String, subtitle: String?) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title).font(Theme.FontToken.inter(15))
+            if let subtitle {
+                Text(subtitle)
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// A tappable navigation row: label, optional trailing value, chevron.
+    private func navRow(_ label: String, value: String?, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            navRowLabel(label, value: value)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func navRowLabel(_ label: String, value: String?) -> some View {
+        HStack(spacing: 8) {
+            Text(label).font(Theme.FontToken.inter(15))
+            Spacer()
+            if let value {
+                Text(value)
+                    .font(Theme.FontToken.inter(14))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            chevron
+        }
+        .padding(.horizontal, rowPadding)
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
+    }
+
+    private func destructiveRowLabel(_ label: String) -> some View {
+        Text(label)
+            .font(Theme.FontToken.inter(15))
+            .foregroundStyle(.red)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, rowPadding)
+            .padding(.vertical, 14)
+            .contentShape(Rectangle())
+    }
+
+    private func footnote(_ text: String, color: Color) -> some View {
+        Text(text)
+            .font(Theme.FontToken.inter(11))
+            .foregroundStyle(color)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, cardInset + rowPadding)
+            .padding(.top, 6)
     }
 
     // MARK: - Helpers
 
-    private func settingsRow(_ label: String, value: String?) -> some View {
-        HStack {
-            Text(label).font(Theme.FontToken.inter(14))
-            Spacer()
-            if let value {
-                Text(value).font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textMuted)
-            }
-            Text("›").foregroundStyle(Theme.ColorToken.textGhost)
-        }
-        .padding(.vertical, 14)
-        .padding(.horizontal, Theme.screenPadding)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
-        }
-    }
-
-    private func cacheClearButton(
-        _ label: String,
-        detail: String,
-        action: @escaping () async -> Void
-    ) -> some View {
-        Button {
-            Task {
-                await action()
-                await refreshCacheSizeLabel()
-            }
-        } label: {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(label).font(Theme.FontToken.inter(14))
-                Text(detail).font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 12)
-            .padding(.horizontal, Theme.screenPadding)
-            .overlay(alignment: .bottom) {
-                Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
-            }
-        }
-        .buttonStyle(.plain)
+    /// Current nationality as flag + localized name (from the global ISO list).
+    private var nationalityLabel: String? {
+        let cc = appEnv.preferences.countryCode.uppercased()
+        guard !cc.isEmpty else { return nil }
+        if let c = ISO3166.all.first(where: { $0.code == cc }) { return "\(c.flag) \(c.name)" }
+        return "\(ISO3166.flag(cc)) \(cc)"
     }
 
     private func refreshCacheSizeLabel() async {
