@@ -35,6 +35,7 @@ const openCity = ref(null);
 const attractionsOpen = ref(false); // 景点 node under the open city
 const openAttraction = ref(null);
 const attrPanel = ref(null); // 'sub' | 'audio' | null — accordion under the open attraction
+const openChecklistCities = ref(false); // 行前清单「城市」子节点折叠
 
 // ---- lazy caches ----
 const attractionsByCity = reactive({});
@@ -72,10 +73,6 @@ const GROUPS = [
     { label: "助手回复", table: "assistant_replies" },
   ] },
   { id: "culture", label: "文化", leaves: [{ label: "文化贴士", table: "culture_tips" }] },
-  { id: "prep", label: "🧳 行前清单", leaves: [
-    { label: "🧳 行前清单工作台", hubId: "checklist" },
-    { label: "清单全局设置", table: "checklist_settings" },
-  ] },
   { id: "visa", label: "🛂 签证引擎 v2", leaves: [
     { label: "🛂 签证工作台", hubId: "visa" },
     { label: "护照国家（国籍）", table: "passport_countries" },
@@ -188,6 +185,16 @@ function pickLeaf(leaf) {
   else nav.select({ kind: "placeholder", label: `「${leaf.label}」待迁移` });
 }
 
+// ---- 行前清单：按 入境/通用/城市 过滤工作台 ----
+function pickChecklist(type, city) {
+  nav.select({ kind: "hub", hubId: "checklist", filterType: type || null, filterCity: city || null });
+}
+function checklistActive(type, city) {
+  const s = nav.selection;
+  if (s.kind !== "hub" || s.hubId !== "checklist") return false;
+  return (s.filterType || "") === (type || "") && (s.filterCity || "") === (city || "");
+}
+
 function isActive(sel) {
   const s = nav.selection;
   return Object.keys(sel).every((k) => s[k] === sel[k]);
@@ -264,6 +271,38 @@ function isActive(sel) {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- 行前清单 group (按类型/城市分类折叠) -->
+    <div class="grp">
+      <button class="grp-head" @click="toggleGroup('prep')">
+        <span class="caret" :class="{ open: openGroup === 'prep' }">▶</span> 🧳 行前清单
+      </button>
+      <div v-show="openGroup === 'prep'" class="grp-body">
+        <button class="row lvl1 leaf" :class="{ active: checklistActive() }" @click="pickChecklist()">📋 总览（全部）</button>
+        <button class="row lvl1 leaf" :class="{ active: checklistActive('entry') }" @click="pickChecklist('entry')">入境与签证</button>
+        <button class="row lvl1 leaf" :class="{ active: checklistActive('universal') }" @click="pickChecklist('universal')">通用准备</button>
+
+        <button class="row lvl1" @click="openChecklistCities = !openChecklistCities">
+          <span class="caret" :class="{ open: openChecklistCities }">▶</span> 城市
+        </button>
+        <div v-show="openChecklistCities" class="children">
+          <button class="row lvl2 leaf" :class="{ active: checklistActive('city') }" @click="pickChecklist('city')">全部城市</button>
+          <button
+            v-for="c in refCache.cities"
+            :key="c.id"
+            class="row lvl2 leaf"
+            :class="{ active: checklistActive('city', c.id) }"
+            @click="pickChecklist('city', c.id)"
+          >{{ (c.emoji || "") + " " + (c.chinese_name || c.name) }}</button>
+        </div>
+
+        <button
+          class="row lvl1 leaf"
+          :class="{ active: isActive({ kind: 'table', tableKey: 'checklist_settings' }) }"
+          @click="nav.select({ kind: 'table', tableKey: 'checklist_settings' })"
+        >⚙️ 清单全局设置</button>
       </div>
     </div>
 

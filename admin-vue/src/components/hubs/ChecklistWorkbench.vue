@@ -2,11 +2,17 @@
 import { ref, computed, onMounted } from "vue";
 import { supabase } from "@/lib/supabase";
 import { useRefCache } from "@/stores/refCache";
+import { useNav } from "@/stores/nav";
 import { TABLES } from "@/schema/tables";
 import RecordForm from "@/components/RecordForm.vue";
 
 const refCache = useRefCache();
+const nav = useNav();
 const schema = TABLES.checklist_items;
+
+// sidebar-driven filter: 入境/通用/城市(可指定城市)
+const filterType = computed(() => nav.selection.filterType || null);
+const filterCity = computed(() => nav.selection.filterCity || null);
 
 const items = ref([]);
 const loading = ref(false);
@@ -53,32 +59,47 @@ function primaryCity(it) {
   return (Array.isArray(it.target_cities) && it.target_cities[0]) || it.city_id || "other";
 }
 
-// grouped: entry, universal, then one group per city
+// grouped: entry, universal, then one group per city — narrowed by sidebar filter
 const groups = computed(() => {
   const entry = sorted.value.filter((i) => i.type === "entry");
   const universal = sorted.value.filter((i) => i.type === "universal");
   const cityItems = sorted.value.filter((i) => i.type === "city");
 
-  const out = [
-    { key: "entry", label: "入境与签证 · Entry Requirements", type: "entry", items: entry },
-    { key: "universal", label: "通用准备 · Essential Prep", type: "universal", items: universal },
-  ];
+  const entryGroup = { key: "entry", label: "入境与签证 · Entry Requirements", type: "entry", items: entry };
+  const universalGroup = { key: "universal", label: "通用准备 · Essential Prep", type: "universal", items: universal };
 
   const byCity = {};
   cityItems.forEach((it) => {
     const cid = primaryCity(it);
     (byCity[cid] = byCity[cid] || []).push(it);
   });
-  Object.entries(byCity).forEach(([cid, list]) => {
-    out.push({
-      key: "city:" + cid,
-      label: "城市 · " + (cid === "other" ? "未指定城市" : refCache.cityLabel(cid)),
-      type: "city",
-      cityId: cid === "other" ? null : cid,
-      items: list,
-    });
-  });
-  return out;
+  const cityGroups = Object.entries(byCity).map(([cid, list]) => ({
+    key: "city:" + cid,
+    label: "城市 · " + (cid === "other" ? "未指定城市" : refCache.cityLabel(cid)),
+    type: "city",
+    cityId: cid === "other" ? null : cid,
+    items: list,
+  }));
+
+  // apply sidebar filter
+  const t = filterType.value;
+  if (t === "entry") return [entryGroup];
+  if (t === "universal") return [universalGroup];
+  if (t === "city") {
+    if (filterCity.value) {
+      const found = cityGroups.find((g) => g.key === "city:" + filterCity.value);
+      // 即便该城市暂无条目,也给一个空组以便「新建」
+      return [found || {
+        key: "city:" + filterCity.value,
+        label: "城市 · " + refCache.cityLabel(filterCity.value),
+        type: "city",
+        cityId: filterCity.value,
+        items: [],
+      }];
+    }
+    return cityGroups;
+  }
+  return [entryGroup, universalGroup, ...cityGroups];
 });
 
 const totalActive = computed(() => items.value.filter((i) => i.is_active).length);
