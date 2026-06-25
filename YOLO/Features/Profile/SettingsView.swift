@@ -356,7 +356,10 @@ struct SettingsView: View {
                 PrepReminderService.tripRemindersEnabled = enabled
                 if !enabled {
                     PrepReminderService.cancelReminder()
-                    Task { await TripReminderService.cancelAll() }
+                    Task {
+                        await PrepReminderService.cancelItemReminders()
+                        await TripReminderService.cancelAll()
+                    }
                 } else {
                     Task { await appEnv.rescheduleTripReminders() }
                 }

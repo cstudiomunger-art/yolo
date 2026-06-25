@@ -28,6 +28,8 @@ struct ChecklistItem: Identifiable, Codable, Hashable {
     let targetNationalities: [String]
     let targetCities: [String]
     let priority: String
+    /// 出发前 N 天提醒该条；nil = 不单独提醒（仍受全局提醒覆盖）。
+    let reminderDaysBefore: Int?
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -46,6 +48,7 @@ struct ChecklistItem: Identifiable, Codable, Hashable {
         targetNationalities = (try? c.decode([String].self, forKey: .targetNationalities)) ?? []
         targetCities = (try? c.decode([String].self, forKey: .targetCities)) ?? []
         priority = try c.decodeIfPresent(String.self, forKey: .priority) ?? "recommended"
+        reminderDaysBefore = try c.decodeIfPresent(Int.self, forKey: .reminderDaysBefore)
         if let decodedType = try c.decodeIfPresent(ChecklistItemType.self, forKey: .type) {
             type = decodedType
         } else {
@@ -56,7 +59,7 @@ struct ChecklistItem: Identifiable, Codable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case id, cityId, phase, groupTitle, titleEn, estimatedMinutes, displayTags, culturalTip
         case sortOrder, type, whyImportant, howToComplete, externalLinks
-        case targetNationalities, targetCities, priority
+        case targetNationalities, targetCities, priority, reminderDaysBefore
     }
 
     private static func inferredType(cityId: String?, groupTitle: String) -> ChecklistItemType {

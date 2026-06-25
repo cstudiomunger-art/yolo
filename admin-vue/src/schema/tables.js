@@ -403,6 +403,7 @@ const App = {};
         { key: "target_nationalities", label: "目标国籍", ref: "countries" },
         { key: "target_cities", label: "目标城市", ref: "cities" },
         { key: "priority", label: "优先级", format: "checklist_priority" },
+        { key: "reminder_days_before", label: "提醒(天)" },
         { key: "sort_order", label: "排序" },
         { key: "is_active", label: "启用" },
       ],
@@ -450,6 +451,13 @@ const App = {};
         { key: "why_important", type: "richtext", label: "为何重要" },
         { key: "how_to_complete", type: "richtext", label: "如何完成" },
         { key: "external_links", type: "link_list", label: "外链（按钮 + URL）" },
+        {
+          key: "reminder_days_before",
+          type: "number",
+          label: "提前提醒天数",
+          allowNull: true,
+          hint: "出发前 N 天 9:00 推送该条提醒（仅对适用且未完成的条目）。留空 = 不单独提醒，仍受全局提醒覆盖。",
+        },
         { key: "estimated_minutes", type: "number", label: "预计分钟", allowNull: true },
         {
           key: "display_tags",

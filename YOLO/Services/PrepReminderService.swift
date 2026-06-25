@@ -34,6 +34,7 @@ struct ChecklistSettings: Codable, Sendable {
 @MainActor
 enum PrepReminderService {
     private static let notificationId = "yolohappy.prep.reminder"
+    private static let itemPrefix = "yolohappy.prep.item."
     private static let tripRemindersKey = UserDefaultsKeys.tripPrepRemindersEnabled
 
     static var tripRemindersEnabled: Bool {
@@ -79,6 +80,51 @@ enum PrepReminderService {
 
     static func cancelReminder() {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [notificationId])
+    }
+
+    /// Per-item advance reminders: each item with `reminderDaysBefore` fires at
+    /// departure − N days, 9:00. Callers pass only applicable + still-pending items.
+    static func scheduleItemReminders(items: [ChecklistItem], departureDate: Date) async {
+        await cancelItemReminders()
+        guard tripRemindersEnabled else { return }
+
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        guard settings.authorizationStatus == .authorized else { return }
+
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        let departureDay = calendar.startOfDay(for: departureDate)
+
+        for item in items {
+            guard let days = item.reminderDaysBefore, days > 0 else { continue }
+            guard let fireDay = calendar.date(byAdding: .day, value: -days, to: departureDay),
+                  fireDay >= today else { continue }
+
+            var components = calendar.dateComponents([.year, .month, .day], from: fireDay)
+            components.hour = 9
+            components.minute = 0
+
+            let daysUntilDeparture = calendar.dateComponents([.day], from: today, to: departureDay).day ?? days
+            let content = UNMutableNotificationContent()
+            content.title = item.titleEn
+            content.body = String(
+                format: String(localized: "%lld days until your trip — tap to get this prep done."),
+                daysUntilDeparture
+            )
+            content.sound = .default
+
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            let request = UNNotificationRequest(identifier: itemPrefix + item.id, content: content, trigger: trigger)
+            try? await center.add(request)
+        }
+    }
+
+    static func cancelItemReminders() async {
+        let center = UNUserNotificationCenter.current()
+        let pending = await center.pendingNotificationRequests()
+        let ids = pending.map(\.identifier).filter { $0.hasPrefix(itemPrefix) }
+        center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
     static func bannerText(

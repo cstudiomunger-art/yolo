@@ -123,6 +123,22 @@ final class AppEnvironment {
             departureDate: preferences.departureDate,
             remindersEnabled: PrepReminderService.tripRemindersEnabled
         )
+
+        // Per-item prep reminders (出发前 N 天)。fetchChecklistItems 已按国籍/城市适用性预筛；
+        // 这里再筛出「设置了提醒天数且仍未完成」的条目。
+        let cityIds = active.map { SampleItinerary.orderedCityIds(from: $0) } ?? []
+        let items = (try? await content.fetchChecklistItems(
+            cityIds: cityIds,
+            countryCode: preferences.countryCode
+        )) ?? []
+        let dueItems = items.filter { item in
+            (item.reminderDaysBefore ?? 0) > 0
+            && preferences.checklistStatus(for: item.id, type: item.type) == .pending
+        }
+        await PrepReminderService.scheduleItemReminders(
+            items: dueItems,
+            departureDate: preferences.departureDate
+        )
     }
 
     func handleIncomingURL(_ url: URL) async {
