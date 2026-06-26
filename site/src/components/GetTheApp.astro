@@ -39,4 +39,11 @@ const { variant = "band" } = Astro.props;
   .getapp-inline:hover { text-decoration: none; border-color: var(--coral); }
   .getapp-inline-icon { font-size: 1.3rem; }
   .getapp-inline-arrow { margin-left: auto; color: var(--coral-dark); font-weight: 700; }
+
+  @media (max-width: 640px) {
+    .getapp-band { margin: 0 16px; border-radius: var(--radius); }
+    .getapp-band .container { padding-top: 36px; padding-bottom: 36px; }
+    .getapp-actions { width: 100%; }
+    .getapp-actions .btn { width: 100%; justify-content: center; }
+  }
 </style>
