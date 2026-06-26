@@ -1,0 +1,170 @@
+---
+import Base from "../../../layouts/Base.astro";
+import GetTheApp from "../../../components/GetTheApp.astro";
+import { SITE } from "../../../lib/site";
+import {
+  attractions,
+  cityById,
+  subAreasForAttraction,
+  audioTeaseCount,
+  blockKind,
+  blockImage,
+} from "../../../lib/guides";
+
+export async function getStaticPaths() {
+  const { attractions } = await import("../../../lib/guides");
+  return attractions.map((a) => ({ params: { city: a.city_id, attraction: a.id } }));
+}
+
+const { attraction: attractionId } = Astro.params;
+const a = attractions.find((x) => x.id === attractionId)!;
+const city = cityById(a.city_id);
+const subs = subAreasForAttraction(a.id);
+const audio = audioTeaseCount(a);
+
+const gallery = (a.cover_images && a.cover_images.length ? a.cover_images : a.cover_image_path ? [a.cover_image_path] : []);
+const address = a.address_en || a.address_zh;
+
+const plainSummary = (a.short_description || a.summary || "").replace(/<[^>]+>/g, "").trim();
+const title = `${a.name}${city ? `, ${city.name}` : ""} — visitor guide`;
+const description =
+  (plainSummary || `${a.name}: ticket price, opening hours, how to get there and tips for foreign visitors.`).slice(0, 155);
+---
+<Base title={title} description={description} ogType="article">
+  <section class="section-tight">
+    <div class="container narrow">
+      <a class="back ui" href={city ? `/guides/${city.id}` : "/guides"}>← {city ? city.name : "Guides"}</a>
+      <p class="eyebrow">{city ? city.name : ""} {a.chinese_name && a.chinese_name !== a.name ? `· ${a.chinese_name}` : ""}</p>
+      <h1>{a.name}</h1>
+
+      {gallery.length > 0 && (
+        <div class={`gallery g-${Math.min(gallery.length, 3)}`}>
+          {gallery.slice(0, 5).map((src) => <img src={src} alt={a.name} loading="lazy" />)}
+        </div>
+      )}
+
+      <!-- Practical info -->
+      {(a.practical_info?.length || address) && (
+        <div class="card facts">
+          {a.practical_info?.map((p) => (
+            <div class="fact">
+              <span class="fact-label ui">{p.icon ? `${p.icon} ` : ""}{p.label}</span>
+              <span class="fact-val">{p.value}</span>
+            </div>
+          ))}
+          {address && (
+            <div class="fact">
+              <span class="fact-label ui">📍 Address</span>
+              <span class="fact-val">
+                {address}
+                <a class="map-link" href={`https://maps.google.com/?q=${encodeURIComponent(address)}`} target="_blank" rel="noopener">Map ↗</a>
+              </span>
+            </div>
+          )}
+          {a.requires_advance_booking && <div class="fact"><span class="fact-label ui">⚠️ Booking</span><span class="fact-val">Advance reservation required</span></div>}
+        </div>
+      )}
+
+      <!-- Audio teaser: the one thing we keep in the app -->
+      {audio > 0 && (
+        <a class="audio-cta" href={SITE.appStoreUrl}>
+          <span class="audio-ico">🎧</span>
+          <span><strong>{audio} audio walking guide{audio > 1 ? "s" : ""}</strong> for {a.name} — listen on the spot in the YOLO HAPPY app.</span>
+          <span class="audio-arrow">→</span>
+        </a>
+      )}
+
+      {(a.introduction || a.summary) && (
+        <div class="prose" set:html={a.introduction || a.summary} />
+      )}
+
+      <!-- Tips for foreign visitors -->
+      {a.western_visitor_tips?.length > 0 && (
+        <div class="tips card">
+          <h2 class="tips-h">Tips for international visitors</h2>
+          <ul>{a.western_visitor_tips.map((t) => <li>{t}</li>)}</ul>
+        </div>
+      )}
+
+      <!-- Sub-areas (everything except audio) -->
+      {subs.length > 0 && (
+        <section class="subs">
+          <h2 class="sec">Inside {a.name}</h2>
+          {subs.map((s) => (
+            <article class="sub">
+              <div class="sub-head">
+                <h3>{s.name_en}{s.name_zh && s.name_zh !== s.name_en ? <span class="muted zh"> · {s.name_zh}</span> : null}</h3>
+                {s.has_audio && <span class="audio-tag ui">🎧 In app</span>}
+              </div>
+              {s.cover_image_path && <img class="sub-img" src={s.cover_image_path} alt={s.name_en} loading="lazy" />}
+              {s.body && <div class="prose" set:html={s.body} />}
+              {s.content_blocks?.map((b) => {
+                const kind = blockKind(b);
+                if (kind === "image") { const src = blockImage(b); return src ? <img class="sub-img" src={src} alt={b.title || s.name_en} loading="lazy" /> : null; }
+                if (kind === "heading") return <h4 class="block-h">{b.title}</h4>;
+                return b.body ? <div class="prose" set:html={b.body} /> : null;
+              })}
+            </article>
+          ))}
+        </section>
+      )}
+
+      {a.nearby_places?.length > 0 && (
+        <div class="nearby">
+          <h2 class="sec">Nearby</h2>
+          <ul class="nearby-list ui">{a.nearby_places.map((n) => <li>{n.name} <span class="muted">· {n.distance}</span></li>)}</ul>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <GetTheApp />
+</Base>
+
+<style>
+  .narrow { max-width: 760px; }
+  .back { font-family: var(--font-ui); font-size: 0.85rem; color: var(--muted); display: inline-block; margin-bottom: 12px; }
+  h1 { max-width: 20ch; }
+  .gallery { display: grid; gap: 8px; margin: 18px 0 24px; border-radius: var(--radius); overflow: hidden; }
+  .gallery img { width: 100%; height: 100%; object-fit: cover; background: var(--surface-warm); }
+  .gallery.g-1 { grid-template-columns: 1fr; }
+  .gallery.g-1 img { aspect-ratio: 16 / 9; }
+  .gallery.g-2 { grid-template-columns: 1fr 1fr; }
+  .gallery.g-2 img, .gallery.g-3 img { aspect-ratio: 4 / 3; }
+  .gallery.g-3 { grid-template-columns: 2fr 1fr; grid-auto-rows: 1fr; }
+  .gallery.g-3 img:first-child { grid-row: span 2; aspect-ratio: auto; }
+
+  .facts { padding: 6px 20px; margin: 0 0 22px; }
+  .fact { display: flex; gap: 16px; padding: 12px 0; border-top: 1px solid var(--border); }
+  .fact:first-child { border-top: none; }
+  .fact-label { flex: 0 0 130px; font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+  .fact-val { font-size: 0.95rem; color: var(--ink); }
+  .map-link { margin-left: 10px; font-size: 0.82rem; font-family: var(--font-ui); }
+
+  .audio-cta { display: flex; align-items: center; gap: 12px; background: var(--ink); color: #fff; border-radius: var(--radius); padding: 14px 18px; margin: 0 0 26px; text-decoration: none; font-size: 0.95rem; }
+  .audio-cta:hover { text-decoration: none; }
+  .audio-cta strong { color: #fff; }
+  .audio-ico { font-size: 1.4rem; }
+  .audio-arrow { margin-left: auto; color: var(--coral-tint-strong); font-weight: 700; }
+
+  .prose { max-width: 70ch; color: var(--ink-soft); }
+  .prose :global(p) { margin: 0 0 1em; }
+  .prose :global(img) { max-width: 100%; border-radius: var(--radius-sm); }
+
+  .tips { padding: 20px 24px; margin: 24px 0; background: var(--coral-tint); border-color: var(--coral-tint-strong); }
+  .tips-h { font-size: 1.15rem; margin-bottom: 8px; }
+  .tips ul { margin: 0; padding-left: 20px; }
+  .tips li { margin: 7px 0; color: var(--ink-soft); }
+
+  .sec { margin-top: 36px; }
+  .subs .sub { padding: 22px 0; border-top: 1px solid var(--border); }
+  .sub-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .sub-head h3 { margin: 0 0 8px; font-size: 1.2rem; }
+  .zh { font-size: 0.9rem; font-weight: 400; }
+  .sub-img { width: 100%; border-radius: var(--radius-sm); margin: 6px 0 12px; object-fit: cover; background: var(--surface-warm); }
+  .block-h { font-size: 1.05rem; margin: 14px 0 6px; }
+  .audio-tag { font-size: 0.74rem; color: var(--coral-dark); background: var(--surface); border: 1px solid var(--coral-tint-strong); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+
+  .nearby-list { list-style: none; padding: 0; }
+  .nearby-list li { padding: 8px 0; border-top: 1px solid var(--border); font-size: 0.95rem; }
+</style>

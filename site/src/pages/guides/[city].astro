@@ -1,0 +1,81 @@
+---
+import Base from "../../layouts/Base.astro";
+import GetTheApp from "../../components/GetTheApp.astro";
+import { cities, attractionsForCity, cityCover, audioTeaseCount } from "../../lib/guides";
+
+export async function getStaticPaths() {
+  const { cities } = await import("../../lib/guides");
+  return cities.map((c) => ({ params: { city: c.id } }));
+}
+
+const { city: cityId } = Astro.params;
+const city = cities.find((c) => c.id === cityId)!;
+const attractions = attractionsForCity(city.id);
+
+const title = `${city.name} Travel Guide — top attractions for foreign visitors`;
+const description = `Plan ${city.name}, China: top attractions with ticket prices, opening hours, how to get there and tips for international travelers.${city.best_time_to_visit ? ` Best time to visit: ${city.best_time_to_visit}.` : ""}`;
+---
+<Base title={title} description={description} ogType="article">
+  <section class="section-tight">
+    <div class="container">
+      <a class="back ui" href="/guides">← All cities</a>
+      <p class="eyebrow">{city.emoji ? `${city.emoji} ` : ""}{city.name} {city.chinese_name ? `· ${city.chinese_name}` : ""}</p>
+      <h1>{city.name} travel guide</h1>
+
+      <div class="city-facts ui">
+        {city.best_time_to_visit && <span class="chip">📅 Best time · {city.best_time_to_visit}</span>}
+        {city.avg_days_recommended ? <span class="chip">🗓️ Suggested · {city.avg_days_recommended} days</span> : null}
+        <span class="chip">📍 {attractions.length} attraction{attractions.length === 1 ? "" : "s"}</span>
+      </div>
+
+      {city.description && <div class="prose" set:html={city.description} />}
+
+      <h2 class="sec">Top attractions</h2>
+      {attractions.length === 0 ? (
+        <p class="muted">Detailed attraction guides for {city.name} are coming soon. Get the app for what's available today.</p>
+      ) : (
+        <div class="grid attr-grid">
+          {attractions.map((a) => {
+            const audio = audioTeaseCount(a);
+            return (
+              <a class="card attr-card" href={`/guides/${city.id}/${a.id}`}>
+                {a.cover_image_path && <img src={a.cover_image_path} alt={a.name} loading="lazy" />}
+                <div class="attr-body">
+                  <h3>{a.name}</h3>
+                  {a.chinese_name && a.chinese_name !== a.name && <span class="muted zh">{a.chinese_name}</span>}
+                  <p class="attr-meta ui">
+                    {a.ticket_price && <span>🎫 {a.ticket_price}</span>}
+                    {a.recommended_duration && <span>· 🕐 {a.recommended_duration}</span>}
+                  </p>
+                  {audio > 0 && <span class="audio-tag ui">🎧 {audio} audio guide{audio > 1 ? "s" : ""} in app</span>}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <GetTheApp />
+</Base>
+
+<style>
+  .back { font-family: var(--font-ui); font-size: 0.85rem; color: var(--muted); display: inline-block; margin-bottom: 14px; }
+  h1 { max-width: 18ch; }
+  .city-facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 24px; }
+  .prose { max-width: 70ch; color: var(--ink-soft); }
+  .prose :global(p) { margin: 0 0 1em; }
+  .sec { margin-top: 40px; }
+  .attr-grid { grid-template-columns: repeat(3, 1fr); margin-top: 22px; }
+  .attr-card { overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+  .attr-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(26,26,26,0.10); text-decoration: none; }
+  .attr-card img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; background: var(--surface-warm); }
+  .attr-body { padding: 15px 16px; display: flex; flex-direction: column; gap: 4px; }
+  .attr-body h3 { margin: 0; font-size: 1.1rem; }
+  .zh { font-size: 0.85rem; }
+  .attr-meta { margin: 4px 0 0; font-size: 0.85rem; color: var(--muted); }
+  .audio-tag { margin-top: 8px; font-size: 0.78rem; color: var(--coral-dark); background: var(--coral-tint); border-radius: 999px; padding: 3px 10px; align-self: flex-start; }
+  @media (max-width: 820px) { .attr-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .attr-grid { grid-template-columns: 1fr; } }
+</style>

@@ -4,8 +4,10 @@
   "type": "module",
   "scripts": {
     "fetch:visa": "node scripts/fetch-visa-data.mjs",
-    "dev": "npm run fetch:visa && astro dev",
-    "build": "npm run fetch:visa && astro build",
+    "fetch:content": "node scripts/fetch-content-data.mjs",
+    "fetch": "npm run fetch:visa && npm run fetch:content",
+    "dev": "npm run fetch && astro dev",
+    "build": "npm run fetch && astro build",
     "preview": "astro preview"
   },
   "dependencies": {

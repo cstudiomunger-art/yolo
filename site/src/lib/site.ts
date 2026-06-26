@@ -10,6 +10,7 @@ export const SITE = {
 
 export const NAV = [
   { href: "/china-visa-free-checker", label: "Visa Checker" },
+  { href: "/guides", label: "City Guides" },
   { href: "/forbidden-city-tickets-foreigners", label: "Forbidden City" },
   { href: "/china-hotels-that-accept-foreigners", label: "Hotels" },
   { href: "/about", label: "About" },

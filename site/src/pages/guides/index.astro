@@ -1,0 +1,55 @@
+---
+import Base from "../../layouts/Base.astro";
+import GetTheApp from "../../components/GetTheApp.astro";
+import { cities, attractionsForCity, cityCover } from "../../lib/guides";
+
+const title = "China City Guides — attractions, hours & tips for foreign travelers";
+const description =
+  "Plain-English guides to China's cities and their top attractions: what to see, ticket prices, opening hours, how to get there, and tips written for international visitors.";
+
+const list = cities.map((c) => ({ city: c, count: attractionsForCity(c.id).length }));
+---
+<Base title={title} description={description}>
+  <section class="section-tight">
+    <div class="container">
+      <p class="eyebrow">City Guides</p>
+      <h1>China, city by city — written for foreign travelers</h1>
+      <p class="lede">What's worth your time, what it costs, when it's open, and how to actually get in — minus the tourist-trap fluff. Audio walking guides live in the app.</p>
+
+      <div class="grid city-grid">
+        {list.map(({ city, count }) => (
+          <a class="card city-card" href={`/guides/${city.id}`}>
+            {cityCover(city) && <img src={cityCover(city)} alt={city.name} loading="lazy" />}
+            <div class="city-body">
+              <div class="city-head">
+                <h3>{city.emoji ? `${city.emoji} ` : ""}{city.name}</h3>
+                {city.chinese_name && <span class="muted zh">{city.chinese_name}</span>}
+              </div>
+              <p class="city-meta ui">
+                {count > 0 ? <span>{count} attraction{count > 1 ? "s" : ""}</span> : <span>Guide coming soon</span>}
+                {city.best_time_to_visit && <span>· Best: {city.best_time_to_visit}</span>}
+              </p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <GetTheApp />
+</Base>
+
+<style>
+  h1 { max-width: 18ch; }
+  .city-grid { grid-template-columns: repeat(3, 1fr); margin-top: 30px; }
+  .city-card { overflow: hidden; text-decoration: none; color: inherit; transition: transform 0.12s ease, box-shadow 0.12s ease; display: flex; flex-direction: column; }
+  .city-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(26,26,26,0.10); text-decoration: none; }
+  .city-card img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; background: var(--surface-warm); }
+  .city-body { padding: 16px 18px; }
+  .city-head { display: flex; align-items: baseline; gap: 10px; }
+  .city-head h3 { margin: 0; font-size: 1.25rem; }
+  .zh { font-size: 0.9rem; }
+  .city-meta { margin: 8px 0 0; font-size: 0.85rem; color: var(--muted); display: flex; gap: 6px; flex-wrap: wrap; }
+  @media (max-width: 820px) { .city-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .city-grid { grid-template-columns: 1fr; } }
+</style>
