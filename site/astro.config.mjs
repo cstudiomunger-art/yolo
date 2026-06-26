@@ -13,4 +13,23 @@ export default defineConfig({
   site: SITE_URL,
   integrations: [sitemap()],
   build: { inlineStylesheets: "auto" },
+  // Content-Security-Policy via <meta>: Astro auto-hashes its own inline scripts/styles
+  // (the visa widget, ticket countdown, passport checker, scoped styles), so we get a
+  // strict script-src without 'unsafe-inline'. frame-ancestors lives in _headers (X-Frame
+  // -Options) since meta CSP ignores it.
+  experimental: {
+    csp: {
+      directives: [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "object-src 'none'",
+        "form-action 'self'",
+        "img-src 'self' https://*.supabase.co data:",
+        "font-src https://fonts.gstatic.com",
+        "connect-src 'self'",
+      ],
+      scriptDirective: { resources: ["'self'"] },
+      styleDirective: { resources: ["'self'", "https://fonts.googleapis.com"] },
+    },
+  },
 });

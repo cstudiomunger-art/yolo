@@ -2,6 +2,7 @@
 import Base from "../../layouts/Base.astro";
 import GetTheApp from "../../components/GetTheApp.astro";
 import PassportNameChecker from "../../components/PassportNameChecker.astro";
+import ReleaseCountdown from "../../components/ReleaseCountdown.astro";
 import { ticketAttractions, type TicketAttraction } from "../../lib/tickets";
 
 export async function getStaticPaths() {
@@ -28,6 +29,15 @@ const description =
           <span class="badge">Detailed guide coming soon</span>
           <p>We're writing the step-by-step foreigner booking path for {t.name}. Meanwhile, the passport-name checker below works today, and the app covers what's live.</p>
         </div>
+      )}
+
+      {t.release_time && (
+        <ReleaseCountdown
+          releaseTime={t.release_time}
+          advanceDays={t.advance_days}
+          note={t.release_note}
+          officialUrl={t.official_url}
+        />
       )}
 
       <!-- The working tool, on every attraction page -->

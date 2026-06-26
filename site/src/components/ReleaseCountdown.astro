@@ -1,0 +1,50 @@
+---
+// Live countdown to the next daily ticket-release moment (Beijing time, UTC+8 — China
+// has no DST, so a fixed offset is correct worldwide). Data-driven: rendered by the
+// attraction page only when release_time is set. Pure display; no user input.
+interface Props {
+  releaseTime: string; // "HH:MM" Beijing time
+  advanceDays: number | null;
+  note: string | null;
+  officialUrl: string | null;
+}
+const { releaseTime, advanceDays, note, officialUrl } = Astro.props;
+---
+<div class="rc card" data-release={releaseTime} data-advance={advanceDays ?? ""}>
+  <div class="rc-head">
+    <span class="rc-eyebrow ui">⏱️ Next ticket release</span>
+    <span class="rc-time ui">Daily · {releaseTime} Beijing time</span>
+  </div>
+  <div class="rc-clock ui" aria-live="off">
+    <div class="rc-unit"><span class="rc-d">--</span><label>days</label></div>
+    <div class="rc-sep">:</div>
+    <div class="rc-unit"><span class="rc-h">--</span><label>hrs</label></div>
+    <div class="rc-sep">:</div>
+    <div class="rc-unit"><span class="rc-m">--</span><label>min</label></div>
+    <div class="rc-sep">:</div>
+    <div class="rc-unit"><span class="rc-s">--</span><label>sec</label></div>
+  </div>
+  <p class="rc-covers ui"></p>
+  {note && <p class="rc-note">{note}</p>}
+  {officialUrl && <a class="btn btn-primary rc-cta" href={officialUrl} target="_blank" rel="noopener nofollow">Book on the official site ↗</a>}
+</div>
+
+<script>
+  import "../scripts/release-countdown.ts";
+</script>
+
+<style>
+  .rc { padding: 22px; margin: 22px 0; }
+  .rc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .rc-eyebrow { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--coral); }
+  .rc-time { font-size: 0.85rem; color: var(--muted); }
+  .rc-clock { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0 6px; }
+  .rc-unit { display: flex; flex-direction: column; align-items: center; min-width: 56px; background: var(--surface-warm); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 6px; }
+  .rc-unit span { font-size: 1.9rem; font-weight: 700; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .rc-unit label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-top: 6px; }
+  .rc-sep { font-size: 1.6rem; font-weight: 700; color: var(--border-strong); padding-top: 10px; }
+  .rc-covers { font-size: 0.88rem; color: var(--ink-soft); margin: 8px 0 0; }
+  .rc-note { font-size: 0.8rem; color: var(--faint); font-style: italic; margin: 8px 0 0; }
+  .rc-cta { margin-top: 16px; }
+  @media (max-width: 480px) { .rc-unit { min-width: 0; flex: 1; } .rc-clock { gap: 4px; } .rc-sep { display: none; } }
+</style>

@@ -13,7 +13,8 @@ export interface TicketAttraction {
   status: "live" | "coming-soon";
   blurb: string;
   advance_days: number | null;
-  release_time: string | null; // e.g. "20:00 Asia/Shanghai"; null → no countdown shown
+  release_time: string | null; // "HH:MM" Beijing time (UTC+8); null → no countdown shown
+  release_note: string | null; // caveat / source shown under the countdown
   closed: string | null;
   official_url: string | null;
   passport_required: boolean;

@@ -61,6 +61,9 @@ strong { font-weight: 600; color: var(--ink); }
 .grid { display: grid; gap: 22px; }
 .muted { color: var(--muted); }
 .center { text-align: center; }
+.mt-28 { margin-top: 28px; }
+.lede-center { margin: 0 auto 28px; }
+.is-hidden { display: none; }
 hr.rule { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 @media (max-width: 640px) {

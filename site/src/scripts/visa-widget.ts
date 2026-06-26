@@ -252,11 +252,11 @@ function init() {
     const tripToggle = $("vc-trip-toggle")!;
     if (!v) {
       instant.innerHTML = "";
-      tripToggle.style.display = "none";
+      tripToggle.classList.add("is-hidden");
       return;
     }
     instant.innerHTML = renderInstant(summarize(v, data));
-    tripToggle.style.display = "";
+    tripToggle.classList.remove("is-hidden");
     if (dep && !dep.value) dep.value = v;
   };
   nat.addEventListener("change", onNationality);
