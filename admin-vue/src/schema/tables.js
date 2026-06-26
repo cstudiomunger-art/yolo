@@ -1110,6 +1110,33 @@ const App = {};
         { key: "is_active", type: "bool", label: "启用" },
       ],
     },
+    payment_articles: {
+      label: "详细图文",
+      pk: "id",
+      order: "display_order",
+      listColumns: [
+        { key: "node_key", label: "挂载位置" },
+        { key: "title_zh", label: "标题" },
+        { key: "is_published", label: "已发布" },
+        { key: "is_active", label: "启用" },
+      ],
+      fields: [
+        { key: "id", type: "slug", slugSource: "title_en", slugPrefix: "art", required: true },
+        { key: "node_key", type: "enum", required: true, label: "挂载位置", options: [
+          { value: "plan", label: "方案页 plan" },
+          { value: "bind", label: "绑卡 bind" },
+          { value: "use", label: "如何付款 use" },
+          { value: "home", label: "入口 home" },
+        ] },
+        { key: "title_zh", type: "text", required: true, label: "标题 中文" },
+        { key: "title_en", type: "text", label: "标题 EN" },
+        { key: "body_md_zh", type: "textarea", label: "正文 中文（Markdown）" },
+        { key: "body_md_en", type: "textarea", label: "正文 EN（Markdown）" },
+        { key: "display_order", type: "number", label: "排序" },
+        { key: "is_published", type: "bool", label: "已发布" },
+        { key: "is_active", type: "bool", label: "启用" },
+      ],
+    },
     payment_merchant_phrases: {
       label: "支付商家短语",
       pk: "id",

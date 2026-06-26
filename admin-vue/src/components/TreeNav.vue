@@ -87,6 +87,7 @@ const GROUPS = [
     { label: "支付建议规则", table: "payment_advice_rules" },
     { label: "卡受理矩阵", table: "payment_card_networks" },
     { label: "就绪检查清单", table: "payment_checklist_items" },
+    { label: "详细图文", table: "payment_articles" },
     { label: "商家短语", table: "payment_merchant_phrases" },
     { label: "外链", table: "payment_helper_links" },
   ] },

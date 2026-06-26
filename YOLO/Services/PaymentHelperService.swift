@@ -49,7 +49,8 @@ final class PaymentHelperService {
             async let links: [PaymentHelperLink] = client.from("payment_helper_links").select().eq("is_active", value: true).order("sort_order").execute().value
             async let cards: [CardNetwork] = client.from("payment_card_networks").select().eq("is_active", value: true).order("sort_order").execute().value
             async let checklist: [PaymentChecklistItem] = client.from("payment_checklist_items").select().eq("is_active", value: true).order("item_order").execute().value
-            let loaded = try await PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: links, cardNetworks: cards, checklistItems: checklist)
+            async let articles: [PaymentArticle] = client.from("payment_articles").select().eq("is_active", value: true).eq("is_published", value: true).order("display_order").execute().value
+            let loaded = try await PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: links, cardNetworks: cards, checklistItems: checklist, articles: articles)
             if loaded.adviceRules.isEmpty && loaded.merchantPhrases.isEmpty {
                 content = cached() ?? Self.bundledFallback
             } else {
@@ -98,6 +99,13 @@ final class PaymentHelperService {
     /// Readiness checklist rows (data-driven; bundled fallback when empty/offline).
     var checklistItems: [PaymentChecklistItem] {
         content.checklistItems.isEmpty ? Self.bundledFallback.checklistItems : content.checklistItems
+    }
+
+    /// Published detailed articles anchored to a node, ordered.
+    func articles(for nodeKey: String) -> [PaymentArticle] {
+        content.articles
+            .filter { $0.nodeKey == nodeKey }
+            .sorted { ($0.displayOrder ?? 0) < ($1.displayOrder ?? 0) }
     }
 
     /// Whether WeChat card-binding is viable — any selected card has `wechat_ok`.
@@ -181,6 +189,6 @@ final class PaymentHelperService {
             PaymentChecklistItem(id: "backup_cash", itemOrder: 3, labelZh: "备用卡 + 现金计划", labelEn: "Backup card + cash plan", weight: 25, condition: nil),
             PaymentChecklistItem(id: "verified", itemOrder: 4, labelZh: "通道已 1 元验证", labelEn: "Channel 1-yuan verified", weight: 25, condition: nil),
         ]
-        return PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: [], cardNetworks: cardNetworks, checklistItems: checklist)
+        return PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: [], cardNetworks: cardNetworks, checklistItems: checklist, articles: [])
     }()
 }

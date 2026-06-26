@@ -58,6 +58,17 @@ struct PaymentHelperLink: Codable, Identifiable, Hashable {
     let sortOrder: Int?
 }
 
+/// A per-node detailed article (详细图文), Markdown body, anchored to a node_key.
+struct PaymentArticle: Codable, Identifiable, Hashable {
+    let id: String
+    let nodeKey: String         // 'plan' | 'bind' | 'use' | 'home'
+    let titleZh: String
+    let titleEn: String?
+    let bodyMdZh: String?
+    let bodyMdEn: String?
+    let displayOrder: Int?
+}
+
 /// Bundle of payment-helper CMS content (fetched + cached, or in-code bundled).
 struct PaymentHelperContent: Codable, Equatable {
     var adviceRules: [PaymentAdviceRule]
@@ -65,8 +76,9 @@ struct PaymentHelperContent: Codable, Equatable {
     var links: [PaymentHelperLink]
     var cardNetworks: [CardNetwork]
     var checklistItems: [PaymentChecklistItem]
+    var articles: [PaymentArticle]
 
-    static let empty = PaymentHelperContent(adviceRules: [], merchantPhrases: [], links: [], cardNetworks: [], checklistItems: [])
+    static let empty = PaymentHelperContent(adviceRules: [], merchantPhrases: [], links: [], cardNetworks: [], checklistItems: [], articles: [])
 }
 
 /// The three situations the helper branches on.

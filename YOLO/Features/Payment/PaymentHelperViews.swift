@@ -120,6 +120,7 @@ struct PaymentHelperFlowView: View {
             adviceCard(title: "📱 注册时", dimension: "sms")
             adviceCard(title: "💳 绑卡策略", dimension: "card")
             adviceCard(title: "💴 现金", dimension: "cash")
+            articleSection("plan")
             primaryButton(lane == .china ? "去绑卡 →" : "开始准备 · 一步步来 →", enabled: true) { step = .steps }
         }
     }
@@ -177,6 +178,7 @@ struct PaymentHelperFlowView: View {
                     }
                 }
             }
+            articleSection("bind")
             cardBox(title: "⑤ 验证通道（安全版）") {
                 Text("不用做假订单。用支付宝官方「我的→银行卡→验证卡片」（预授权 1 元、不扣款），或把落地后第一笔真实小额消费当验证。")
                     .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
@@ -191,6 +193,7 @@ struct PaymentHelperFlowView: View {
                         .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
                 }
             }
+            articleSection("use")
             primaryButton("完成 · 看我的随身支付卡 →", enabled: true) { step = .card }
         }
     }
@@ -227,6 +230,37 @@ struct PaymentHelperFlowView: View {
                 Text(tone == .warn ? "⚠️" : (tone == .ok ? "✓" : "💴"))
                 Text(rule?.bodyZh ?? "—")
                     .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+            }
+        }
+    }
+
+    // 某节点的「📄 详细图文」入口列表（articles_by_node）；无则不渲染。
+    @ViewBuilder
+    private func articleSection(_ nodeKey: String) -> some View {
+        let arts = service.articles(for: nodeKey)
+        if !arts.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("📄 详细图文")
+                    .font(Theme.FontToken.inter(12, weight: .semibold))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+                ForEach(arts) { art in
+                    NavigationLink {
+                        PaymentArticleView(article: art)
+                    } label: {
+                        HStack {
+                            Text(art.titleZh)
+                                .font(Theme.FontToken.inter(13, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.textPrimary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 11)).foregroundStyle(Theme.ColorToken.textMuted)
+                        }
+                        .padding(.vertical, 10).padding(.horizontal, 13)
+                        .frame(maxWidth: .infinity)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
     }
@@ -402,6 +436,88 @@ struct PaymentMerchantPhraseView: View {
         u.voice = AVSpeechSynthesisVoice(language: "zh-CN")
         u.rate = 0.45
         synthesizer.speak(u)
+    }
+}
+
+// MARK: - Detailed article (per-node 详细图文, Markdown)
+
+struct PaymentArticleView: View {
+    let article: PaymentArticle
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(article.titleZh).font(Theme.FontToken.playfair(22, weight: .semibold))
+                PaymentMarkdownView(markdown: article.bodyMdZh ?? "")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(Theme.screenPadding)
+        }
+        .navigationTitle("详细图文")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Minimal block-level Markdown renderer: headings / bullets / quote / image / paragraph.
+/// Block lines use SwiftUI's inline-markdown `AttributedString` for **bold** etc.
+struct PaymentMarkdownView: View {
+    let markdown: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(Array(lines.enumerated()), id: \.offset) { _, line in
+                blockView(for: line)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var lines: [String] { markdown.components(separatedBy: "\n") }
+
+    @ViewBuilder
+    private func blockView(for raw: String) -> some View {
+        let line = raw.trimmingCharacters(in: .whitespaces)
+        if line.isEmpty {
+            Spacer().frame(height: 2)
+        } else if line.hasPrefix("### ") {
+            Text(inline(String(line.dropFirst(4)))).font(Theme.FontToken.inter(14, weight: .semibold))
+        } else if line.hasPrefix("## ") {
+            Text(inline(String(line.dropFirst(3)))).font(Theme.FontToken.inter(16, weight: .semibold))
+        } else if line.hasPrefix("# ") {
+            Text(inline(String(line.dropFirst(2)))).font(Theme.FontToken.playfair(18, weight: .semibold))
+        } else if line.hasPrefix("> ") {
+            HStack(alignment: .top, spacing: 8) {
+                Rectangle().fill(Theme.ColorToken.accent).frame(width: 3)
+                Text(inline(String(line.dropFirst(2)))).font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+            }
+        } else if line.hasPrefix("- ") || line.hasPrefix("* ") {
+            HStack(alignment: .top, spacing: 6) {
+                Text("•").font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+                Text(inline(String(line.dropFirst(2)))).font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } else if let img = imageURL(line) {
+            AsyncImage(url: img) { phase in
+                if let image = phase.image {
+                    image.resizable().scaledToFit().clipShape(RoundedRectangle(cornerRadius: 10))
+                } else {
+                    Color.clear.frame(height: 1)
+                }
+            }
+        } else {
+            Text(inline(line)).font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+        }
+    }
+
+    private func inline(_ s: String) -> AttributedString {
+        (try? AttributedString(markdown: s)) ?? AttributedString(s)
+    }
+
+    /// Parse `![alt](url)` → URL.
+    private func imageURL(_ line: String) -> URL? {
+        guard line.hasPrefix("!["), let open = line.firstIndex(of: "("), line.hasSuffix(")") else { return nil }
+        let urlStr = String(line[line.index(after: open)..<line.index(before: line.endIndex)])
+        return URL(string: urlStr)
     }
 }
 
