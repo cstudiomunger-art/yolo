@@ -25,7 +25,7 @@ final class PaymentHelperService {
         }
     }
 
-    private static let cacheKey = "yolohappy.cachedPaymentContent.v1"
+    private static let cacheKey = "yolohappy.cachedPaymentContent.v2"
     private static let cardsKey = "yolohappy.paymentCardTypes.v1"
     private static let tripKey = "yolohappy.paymentTripKind.v1"
 
@@ -189,6 +189,33 @@ final class PaymentHelperService {
             PaymentChecklistItem(id: "backup_cash", itemOrder: 3, labelZh: "备用卡 + 现金计划", labelEn: "Backup card + cash plan", weight: 25, condition: nil),
             PaymentChecklistItem(id: "verified", itemOrder: 4, labelZh: "通道已 1 元验证", labelEn: "Channel 1-yuan verified", weight: 25, condition: nil),
         ]
-        return PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: [], cardNetworks: cardNetworks, checklistItems: checklist, articles: [])
+        // Mirrors migration 094 seed — so the 📄 articles stay available offline.
+        let articles: [PaymentArticle] = [
+            PaymentArticle(id: "plan_selfcheck", nodeKey: "plan", titleZh: "出发前 10 分钟自检", titleEn: "Pre-trip 10-minute check",
+                bodyMdZh: """
+                出发前，请逐条确认：
+
+                - 支付宝已安装并能打开。
+                - 微信已安装并能正常登录。
+                - 两个 App 至少各绑定一张银行卡，或至少有一个 App 已成功绑定。
+                - 你的银行卡已开通海外交易。
+                - 你知道银行 App 或客服电话在哪里。
+                - 你准备了至少 500 元人民币现金，或知道落地后在哪里取。
+                - 你的手机能在中国上网，或已购买 eSIM / 漫游 / 本地 SIM。
+                - 酒店、高铁、热门景点、接送机等关键项目已尽量预付。
+                - 护照信息和所有预订信息一致。
+                """, bodyMdEn: nil, displayOrder: 0),
+            PaymentArticle(id: "plan_cards", nodeKey: "plan", titleZh: "该带哪些实体卡 / Wise、Revolut 有用吗", titleEn: "Which physical cards to bring",
+                bodyMdZh: """
+                **主力**：带至少 2 张不同银行的卡（一张信用卡 + 一张借记卡），优先 Visa / Mastercard / JCB——支付宝、微信都能尝试绑定。
+
+                **银联 / Amex / Diners / Discover**：支付宝多可绑、微信一般不收，作备用。
+
+                **Wise、Revolut 等**：本质通常是 Visa / Mastercard 借记卡，能否绑定取决于卡组织、发卡地区、银行风控和平台验证。可以尝试，但**一定要准备备用卡**。
+
+                > Apple Pay / Google Pay / PayPal 在中国大陆线下覆盖有限，不要作为主要支付方式。
+                """, bodyMdEn: nil, displayOrder: 1),
+        ]
+        return PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: [], cardNetworks: cardNetworks, checklistItems: checklist, articles: articles)
     }()
 }
