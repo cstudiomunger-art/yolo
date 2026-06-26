@@ -67,6 +67,7 @@ struct PaymentHelperFlowView: View {
 
     private enum Step { case questions, plan, steps, card }
     @State private var step: Step = .questions
+    @State private var showTrouble = false   // 绑卡侧门：内联排查，不打断主线
 
     private var service: PaymentHelperService { appEnv.paymentHelper }
     private var country: String { (appEnv.preferences.countryCode ?? "").uppercased() }
@@ -145,15 +146,35 @@ struct PaymentHelperFlowView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("主线一条直线：填卡号 → 短信验证 → 完成。")
                         .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
-                    Button {
-                        appEnv.navigation.presentedModal = nil
-                        appEnv.navigation.presentGeniusBar()
-                    } label: {
-                        Text("没成功？找真人帮你（绑卡） →")
-                            .font(Theme.FontToken.inter(12, weight: .medium))
-                            .foregroundStyle(Theme.ColorToken.accent)
+                    Button { withAnimation { showTrouble.toggle() } } label: {
+                        HStack(spacing: 4) {
+                            Text(showTrouble ? "收起排查" : "没成功？对症排查")
+                                .font(Theme.FontToken.inter(12, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.accent)
+                            Image(systemName: showTrouble ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 10)).foregroundStyle(Theme.ColorToken.accent)
+                        }
                     }
                     .buttonStyle(.plain)
+                    if showTrouble {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("侧门，不是新路——处理完回到这一步原地，主线不打断。")
+                                .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                            troubleRow("发卡行拒绝交易", "打开银行 App 确认交易，或联系客服说「需开通中国大陆线上交易」；换另一张卡也行。")
+                            troubleRow("姓名 / 空格不符", "严格按护照拼音填，例：护照 Zhang San 就别写 Zhangsan。")
+                            troubleRow("3D 验证失败", "换一张借记卡，或换不同卡组织（Visa ↔ Mastercard）。")
+                            Button {
+                                appEnv.navigation.presentedModal = nil
+                                appEnv.navigation.presentGeniusBar()
+                            } label: {
+                                Text("还不行？找真人帮你（绑卡） →")
+                                    .font(Theme.FontToken.inter(12, weight: .medium))
+                                    .foregroundStyle(Theme.ColorToken.accent)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(.top, 2)
+                    }
                 }
             }
             cardBox(title: "⑤ 验证通道（安全版）") {
@@ -208,6 +229,15 @@ struct PaymentHelperFlowView: View {
                     .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
             }
         }
+    }
+
+    // 绑卡侧门一行：失败原因 → 解法（取自规格 steps_by_node.trouble）。
+    private func troubleRow(_ reason: String, _ fix: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("· \(reason)").font(Theme.FontToken.inter(12, weight: .semibold))
+            Text(fix).font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func checkRow(_ text: String, done: Bool) -> some View {
