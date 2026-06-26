@@ -11,7 +11,9 @@ interface Props {
   ogType?: string;
 }
 const { title, description, canonical, ogType = "website" } = Astro.props;
-const canonicalUrl = new URL(canonical ?? Astro.url.pathname, SITE.domain).href;
+// Prefer the configured `site` (SITE_URL env) so canonical/OG track the real domain.
+const base = Astro.site?.href ?? SITE.domain;
+const canonicalUrl = new URL(canonical ?? Astro.url.pathname, base).href;
 const fullTitle = title.includes(SITE.name) ? title : `${title} · ${SITE.name}`;
 ---
 <!doctype html>
