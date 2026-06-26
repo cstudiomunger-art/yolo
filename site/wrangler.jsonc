@@ -9,7 +9,7 @@
   //   Deploy command : npx wrangler deploy
   // assets-only Worker (no server script); paths are relative to this config.
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "yolo-site",
+  "name": "yolo-pc",
   "compatibility_date": "2026-05-22",
   "observability": {
     "enabled": true
