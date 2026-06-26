@@ -100,8 +100,8 @@ struct PaymentHelperFlowView: View {
                 }
             }
             Text("你有哪些卡？（可多选）").font(Theme.FontToken.inter(15, weight: .semibold))
-            chipsRow(CardOrg.allCases, isOn: { service.cardTypes.contains($0) }, label: { $0.label }) { card in
-                if service.cardTypes.contains(card) { service.cardTypes.remove(card) } else { service.cardTypes.insert(card) }
+            chipsRow(service.cardNetworks, isOn: { service.cardTypes.contains($0.id) }, label: { $0.nameZh }) { card in
+                if service.cardTypes.contains(card.id) { service.cardTypes.remove(card.id) } else { service.cardTypes.insert(card.id) }
             }
             Text("这趟主要去哪？").font(Theme.FontToken.inter(15, weight: .semibold)).padding(.top, 4)
             chipsRow(TripKind.allCases, isOn: { service.tripKind == $0 }, label: { $0.label }) { trip in
@@ -156,19 +156,22 @@ struct PaymentHelperFlowView: View {
 
     private var cardView: some View {
         let wxOk = service.weChatBindingViable
-        let pct = wxOk ? 100 : 75
+        let pct = service.readinessPercent
         return VStack(alignment: .leading, spacing: 14) {
             Text("你的随身支付卡").font(Theme.FontToken.playfair(20, weight: .semibold))
             Text("\(pct)% 就绪")
                 .font(Theme.FontToken.playfair(34, weight: .bold))
                 .foregroundStyle(Theme.ColorToken.success)
-            checkRow("支付宝已绑卡", done: true)
-            checkRow(wxOk ? "微信支付已绑卡" : "微信支付 ·（你的卡不支持，跳过）", done: wxOk)
-            checkRow("备用卡 + 现金计划", done: true)
-            checkRow("通道已 1 元验证", done: true)
+            ForEach(service.checklistItems) { item in
+                let done = service.checklistItemDone(item)
+                let label = (item.condition == "has_wechat" && !done)
+                    ? "\(item.labelZh) ·（你的卡不支持，跳过）"
+                    : item.labelZh
+                checkRow(label, done: done)
+            }
             calloutView(wxOk
-                ? "100% 就绪。到了中国直接扫码即可。"
-                : "75% 也够用。你的卡不支持微信，但支付宝 + 现金已能覆盖绝大多数场景。",
+                ? "\(pct)% 就绪。到了中国直接扫码即可。"
+                : "\(pct)% 也够用。你的卡不支持微信，但支付宝 + 现金已能覆盖绝大多数场景。",
                 tone: wxOk ? .ok : .info)
         }
     }

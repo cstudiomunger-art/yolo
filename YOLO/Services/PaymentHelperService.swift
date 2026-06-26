@@ -13,9 +13,10 @@ final class PaymentHelperService {
     private(set) var isLoading = false
 
     // User self-reported answers (persisted locally; country comes from onboarding).
-    var cardTypes: Set<CardOrg> {
+    // Card ids reference `payment_card_networks.id` (data-driven, no fixed enum).
+    var cardTypes: Set<String> {
         didSet {
-            UserDefaults.standard.set(cardTypes.map(\.rawValue), forKey: Self.cardsKey)
+            UserDefaults.standard.set(Array(cardTypes), forKey: Self.cardsKey)
         }
     }
     var tripKind: TripKind? {
@@ -30,7 +31,7 @@ final class PaymentHelperService {
 
     init() {
         let raw = UserDefaults.standard.stringArray(forKey: Self.cardsKey) ?? []
-        cardTypes = Set(raw.compactMap(CardOrg.init(rawValue:)))
+        cardTypes = Set(raw)
         tripKind = UserDefaults.standard.string(forKey: Self.tripKey).flatMap(TripKind.init(rawValue:))
     }
 
@@ -46,7 +47,9 @@ final class PaymentHelperService {
             async let rules: [PaymentAdviceRule] = client.from("payment_advice_rules").select().eq("is_active", value: true).order("sort_order").execute().value
             async let phrases: [MerchantPhrase] = client.from("payment_merchant_phrases").select().eq("is_active", value: true).order("sort_order").execute().value
             async let links: [PaymentHelperLink] = client.from("payment_helper_links").select().eq("is_active", value: true).order("sort_order").execute().value
-            let loaded = try await PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: links)
+            async let cards: [CardNetwork] = client.from("payment_card_networks").select().eq("is_active", value: true).order("sort_order").execute().value
+            async let checklist: [PaymentChecklistItem] = client.from("payment_checklist_items").select().eq("is_active", value: true).order("item_order").execute().value
+            let loaded = try await PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: links, cardNetworks: cards, checklistItems: checklist)
             if loaded.adviceRules.isEmpty && loaded.merchantPhrases.isEmpty {
                 content = cached() ?? Self.bundledFallback
             } else {
@@ -61,7 +64,7 @@ final class PaymentHelperService {
     // MARK: - Tailored advice (pruning logic, data-driven copy)
 
     func advice(for dimension: String, country: String) -> PaymentAdviceRule? {
-        let cards = Set(cardTypes.map(\.rawValue))
+        let cards = cardTypes
         let matching = content.adviceRules
             .filter { $0.dimension == dimension && matches($0.matchJson, country: country, cards: cards) }
         // Prefer the most specific match (has any condition) over a catch-all default.
@@ -87,9 +90,37 @@ final class PaymentHelperService {
         return n
     }
 
-    /// Whether WeChat card-binding is viable (needs Visa/MC/JCB).
+    /// Card receivability matrix (data-driven; bundled fallback when empty/offline).
+    var cardNetworks: [CardNetwork] {
+        content.cardNetworks.isEmpty ? Self.bundledFallback.cardNetworks : content.cardNetworks
+    }
+
+    /// Readiness checklist rows (data-driven; bundled fallback when empty/offline).
+    var checklistItems: [PaymentChecklistItem] {
+        content.checklistItems.isEmpty ? Self.bundledFallback.checklistItems : content.checklistItems
+    }
+
+    /// Whether WeChat card-binding is viable — any selected card has `wechat_ok`.
     var weChatBindingViable: Bool {
-        !cardTypes.isDisjoint(with: [.visa, .mc, .jcb])
+        cardNetworks.contains { cardTypes.contains($0.id) && $0.wechatOk }
+    }
+
+    /// Whether a given checklist row counts as "done" for this user.
+    func checklistItemDone(_ item: PaymentChecklistItem) -> Bool {
+        switch item.condition {
+        case nil, "": return true
+        case "has_wechat": return weChatBindingViable
+        default: return true
+        }
+    }
+
+    /// Readiness percent = sum(done weights) / sum(weights), from the checklist.
+    var readinessPercent: Int {
+        let items = checklistItems
+        let total = items.reduce(0) { $0 + $1.weight }
+        guard total > 0 else { return 0 }
+        let done = items.filter(checklistItemDone).reduce(0) { $0 + $1.weight }
+        return Int((Double(done) / Double(total) * 100).rounded())
     }
 
     var merchantPhrases: [MerchantPhrase] {
@@ -135,6 +166,21 @@ final class PaymentHelperService {
             MerchantPhrase(id: "cash_ok", cn: "可以用现金吗？", en: "Can I pay with cash?", sortOrder: 2),
             MerchantPhrase(id: "split_two", cn: "可以分两笔支付吗？", en: "Can I split it into two payments?", sortOrder: 3),
         ]
-        return PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: [])
+        let cardNetworks: [CardNetwork] = [
+            CardNetwork(id: "visa", nameZh: "Visa", nameEn: "Visa", alipayOk: true, wechatOk: true, note: nil, sortOrder: 0),
+            CardNetwork(id: "mc", nameZh: "Mastercard", nameEn: "Mastercard", alipayOk: true, wechatOk: true, note: nil, sortOrder: 1),
+            CardNetwork(id: "jcb", nameZh: "JCB", nameEn: "JCB", alipayOk: true, wechatOk: true, note: nil, sortOrder: 2),
+            CardNetwork(id: "amex", nameZh: "美国运通", nameEn: "American Express", alipayOk: true, wechatOk: false, note: nil, sortOrder: 3),
+            CardNetwork(id: "unionpay", nameZh: "银联", nameEn: "UnionPay", alipayOk: true, wechatOk: false, note: nil, sortOrder: 4),
+            CardNetwork(id: "diners", nameZh: "大来卡", nameEn: "Diners Club", alipayOk: true, wechatOk: false, note: nil, sortOrder: 5),
+            CardNetwork(id: "discover", nameZh: "发现卡", nameEn: "Discover", alipayOk: true, wechatOk: false, note: nil, sortOrder: 6),
+        ]
+        let checklist: [PaymentChecklistItem] = [
+            PaymentChecklistItem(id: "alipay_bound", itemOrder: 1, labelZh: "支付宝已绑卡", labelEn: "Alipay card added", weight: 25, condition: nil),
+            PaymentChecklistItem(id: "wechat_bound", itemOrder: 2, labelZh: "微信支付已绑卡", labelEn: "WeChat card added", weight: 25, condition: "has_wechat"),
+            PaymentChecklistItem(id: "backup_cash", itemOrder: 3, labelZh: "备用卡 + 现金计划", labelEn: "Backup card + cash plan", weight: 25, condition: nil),
+            PaymentChecklistItem(id: "verified", itemOrder: 4, labelZh: "通道已 1 元验证", labelEn: "Channel 1-yuan verified", weight: 25, condition: nil),
+        ]
+        return PaymentHelperContent(adviceRules: rules, merchantPhrases: phrases, links: [], cardNetworks: cardNetworks, checklistItems: checklist)
     }()
 }

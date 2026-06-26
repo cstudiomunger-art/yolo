@@ -25,6 +25,30 @@ struct MerchantPhrase: Codable, Identifiable, Hashable {
     let sortOrder: Int?
 }
 
+/// One card organization in the receivability matrix (drives WeChat-binding pruning).
+/// Data-driven per the folder spec — ops edit the table, no app release needed.
+struct CardNetwork: Codable, Identifiable, Hashable {
+    let id: String              // 'visa' | 'mc' | 'jcb' | 'amex' | 'unionpay' | 'diners' | 'discover'
+    let nameZh: String
+    let nameEn: String?
+    let alipayOk: Bool
+    let wechatOk: Bool
+    let note: String?
+    let sortOrder: Int?
+}
+
+/// One row of the "随身支付卡" readiness checklist.
+/// `condition == nil` → always counts as done; `"has_wechat"` → done only when a
+/// WeChat-capable card is selected. Readiness % = sum(done weights) / sum(weights).
+struct PaymentChecklistItem: Codable, Identifiable, Hashable {
+    let id: String
+    let itemOrder: Int?
+    let labelZh: String
+    let labelEn: String?
+    let weight: Int
+    let condition: String?
+}
+
 struct PaymentHelperLink: Codable, Identifiable, Hashable {
     let id: String
     let labelEn: String?
@@ -39,29 +63,16 @@ struct PaymentHelperContent: Codable, Equatable {
     var adviceRules: [PaymentAdviceRule]
     var merchantPhrases: [MerchantPhrase]
     var links: [PaymentHelperLink]
+    var cardNetworks: [CardNetwork]
+    var checklistItems: [PaymentChecklistItem]
 
-    static let empty = PaymentHelperContent(adviceRules: [], merchantPhrases: [], links: [])
+    static let empty = PaymentHelperContent(adviceRules: [], merchantPhrases: [], links: [], cardNetworks: [], checklistItems: [])
 }
 
 /// The three situations the helper branches on.
 enum PaymentLane: String, CaseIterable, Identifiable {
     case prep, china, rescue
     var id: String { rawValue }
-}
-
-/// Card organizations the user can hold (drives the WeChat-binding pruning).
-enum CardOrg: String, CaseIterable, Identifiable {
-    case visa, mc, jcb, unionpay, amex
-    var id: String { rawValue }
-    var label: String {
-        switch self {
-        case .visa: return "Visa"
-        case .mc: return "Mastercard"
-        case .jcb: return "JCB"
-        case .unionpay: return "银联 UnionPay"
-        case .amex: return "Amex"
-        }
-    }
 }
 
 enum TripKind: String, CaseIterable, Identifiable {
