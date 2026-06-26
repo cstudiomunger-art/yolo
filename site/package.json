@@ -8,7 +8,8 @@
     "fetch": "npm run fetch:visa && npm run fetch:content",
     "dev": "npm run fetch && astro dev",
     "build": "npm run fetch && astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "deploy": "npm run build && npx wrangler deploy"
   },
   "dependencies": {
     "astro": "^5.2.5",

@@ -1,0 +1,22 @@
+{
+  // Marketing / acquisition-funnel site (Astro static build).
+  //
+  // Deployed via Cloudflare Workers Builds (dashboard Git integration), same style as
+  // yoloadmin-vue. Self-contained inside site/ so the CF project just points its
+  // "root directory" at this folder:
+  //   Root directory : site
+  //   Build command  : npm run build
+  //   Deploy command : npx wrangler deploy
+  // assets-only Worker (no server script); paths are relative to this config.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "yolo-site",
+  "compatibility_date": "2026-05-22",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
