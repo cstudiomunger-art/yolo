@@ -131,7 +131,17 @@ struct PaymentHelperFlowView: View {
                         .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
                 }
             }
-            cardBox(title: "③ 绑定银行卡") {
+            cardBox(title: "③ 注册账号 + 实名认证") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("用境外手机号注册支付宝和微信；收不到验证码就改用邮箱注册（Gmail/Outlook）或支付宝国际版。")
+                        .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+                    Text("实名认证：按护照机读区填姓名、护照号、有效期，再上传护照照片 / 人脸验证。")
+                        .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+                    Text("微信注册：仅 Visa/MC/JCB 可绑，且银行预留手机号要与微信号一致。")
+                        .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
+                }
+            }
+            cardBox(title: "④ 绑定银行卡") {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("主线一条直线：填卡号 → 短信验证 → 完成。")
                         .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
@@ -146,9 +156,19 @@ struct PaymentHelperFlowView: View {
                     .buttonStyle(.plain)
                 }
             }
-            cardBox(title: "④ 验证通道（安全版）") {
+            cardBox(title: "⑤ 验证通道（安全版）") {
                 Text("不用做假订单。用支付宝官方「我的→银行卡→验证卡片」（预授权 1 元、不扣款），或把落地后第一笔真实小额消费当验证。")
                     .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+            }
+            cardBox(title: "⑥ 到店怎么付（两步）") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("第 1 步 · 被扫（优先）：打开支付宝/微信「付款码」，出示给商家扫。")
+                        .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+                    Text("第 2 步 · 主扫：用「扫一扫」扫商家收款码，输入金额 → 确认 → 完成。")
+                        .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+                    Text("失败多半是商家码不支持外卡或是个人收款码——让商家改扫你的付款码，或换另一个 App，再不行用现金。")
+                        .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
+                }
             }
             primaryButton("完成 · 看我的随身支付卡 →", enabled: true) { step = .card }
         }
