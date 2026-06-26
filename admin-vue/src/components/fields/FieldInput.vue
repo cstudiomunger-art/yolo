@@ -9,6 +9,7 @@ import MultiCheck from "@/components/fields/MultiCheck.vue";
 import ImageUrlList from "@/components/fields/ImageUrlList.vue";
 import PaymentMatch from "@/components/fields/PaymentMatch.vue";
 import ItineraryBuilder from "@/components/fields/ItineraryBuilder.vue";
+import MarkdownField from "@/components/fields/MarkdownField.vue";
 import {
   uploadCoverImage,
   uploadSubAreaAudioFile,
@@ -290,6 +291,10 @@ async function onAudioFile(e) {
 
     <!-- payment match object -->
     <PaymentMatch v-else-if="isType('payment_match')" v-model="val" />
+
+    <!-- markdown editor with inline image upload -->
+    <MarkdownField v-else-if="isType('markdown')" v-model="val"
+      :entity-id="entityId" :folder="f.uploadFolder || 'payment-articles'" />
 
     <!-- itinerary builder -->
     <ItineraryBuilder v-else-if="isType('itinerary_builder')" v-model="val" />
