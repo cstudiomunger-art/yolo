@@ -1,53 +1,135 @@
 ---
 import Base from "../layouts/Base.astro";
 import GetTheApp from "../components/GetTheApp.astro";
+import { hotelsByCity, totalHotels, cityCount, text, mapHref } from "../lib/hotels";
 
-const title = "China Hotels That Accept Foreigners — how to avoid being turned away";
+const title = "China Hotels That Accept Foreigners — filterable directory";
 const description =
-  "Not every Chinese hotel can legally check in foreign guests. Learn why, how to confirm before you book, and use our bilingual confirmation message. Filterable foreigner-friendly hotel finder coming soon.";
+  `A filterable directory of ${totalHotels}+ confirmed foreigner-friendly hotels across ${cityCount} Chinese cities — by city, price, stars and English-speaking staff. Plus a bilingual line to confirm before you book.`;
 
+const stars = (n: number) => "★".repeat(Math.max(0, Math.min(5, n)));
 const template = `您好，请问贵酒店可以接待外国人入住吗？我持外国护照。谢谢！
 Hello, can your hotel accept foreign guests? I hold a foreign passport. Thank you!`;
 ---
-<Base title={title} description={description} ogType="article">
+<Base title={title} description={description}>
   <section class="section-tight">
-    <div class="container narrow">
-      <p class="eyebrow">🏨 Accommodation · for foreign visitors</p>
+    <div class="container">
+      <p class="eyebrow">🏨 Foreigner-friendly hotels</p>
       <h1>China hotels that accept foreigners</h1>
-      <p class="lede">Some Chinese hotels aren't registered to host foreign guests and will turn you away at check-in — even with a confirmed booking. Here's how to never get caught out.</p>
+      <p class="lede">Some Chinese hotels aren't registered to host foreign guests and will turn you away at check-in — even with a confirmed booking. Here's a directory of stays that do, filterable for what matters.</p>
 
-      <div class="card soon-banner">
-        <span class="badge">Filterable finder coming soon</span>
-        <p>We're building a searchable list of <strong>confirmed foreigner-friendly hotels</strong> by city. Until it's live, use the confirmation message below before you pay.</p>
+      <!-- Filterable directory -->
+      <div id="hotel-finder">
+        <div class="hf-bar card">
+          <div class="hf-field">
+            <label for="hf-city">City</label>
+            <select id="hf-city">
+              <option value="">All cities</option>
+              {hotelsByCity.map((c) => <option value={c.city_id}>{c.name} ({c.hotels.length})</option>)}
+            </select>
+          </div>
+          <div class="hf-field">
+            <label for="hf-stars">Stars</label>
+            <select id="hf-stars">
+              <option value="0">Any</option>
+              <option value="3">3★ & up</option>
+              <option value="4">4★ & up</option>
+              <option value="5">5★ only</option>
+            </select>
+          </div>
+          <div class="hf-field">
+            <label for="hf-price">Max price / night</label>
+            <select id="hf-price">
+              <option value="0">Any</option>
+              <option value="50">≤ $50</option>
+              <option value="100">≤ $100</option>
+              <option value="200">≤ $200</option>
+              <option value="400">≤ $400</option>
+            </select>
+          </div>
+          <div class="hf-checks">
+            <label class="hf-check"><input id="hf-foreigners" type="checkbox" /> Accepts foreigners</label>
+            <label class="hf-check"><input id="hf-english" type="checkbox" /> English-speaking staff</label>
+          </div>
+        </div>
+
+        <p class="hf-result ui"><strong id="hf-count">{totalHotels}</strong> hotels</p>
+        <p id="hf-empty" class="muted hf-empty" hidden>No hotels match these filters — try widening them.</p>
+
+        {hotelsByCity.map((c) => (
+          <section class="hotel-city-group" data-city-group={c.city_id}>
+            <h2 class="hf-city-h">{c.name}</h2>
+            <div class="grid hotel-grid">
+              {c.hotels.map((h) => (
+                <article
+                  class="card hotel-card"
+                  data-city={h.city_id}
+                  data-foreigners={h.accepts_foreigners ? "1" : "0"}
+                  data-english={h.has_english_staff ? "1" : "0"}
+                  data-stars={h.stars}
+                  data-price={h.price_min_usd}
+                >
+                  {h.cover_image_path && <img class="hotel-img" src={h.cover_image_path} alt={h.name} loading="lazy" />}
+                  <div class="hotel-body">
+                    <div class="hotel-head">
+                      <h3>{h.name}</h3>
+                      <span class="hotel-stars" aria-label={`${h.stars} stars`}>{stars(h.stars)}</span>
+                    </div>
+                    {h.chinese_name && <p class="hotel-zh muted">{h.chinese_name}</p>}
+                    <div class="hotel-tags">
+                      {h.price_min_usd > 0 && <span class="chip">from ${h.price_min_usd}/night</span>}
+                      {h.accepts_foreigners && <span class="badge badge-green">✓ Accepts foreigners</span>}
+                      {h.has_english_staff && <span class="badge badge-amber">🗣 English staff</span>}
+                    </div>
+                    {text(h.location_note) && <p class="hotel-note">📍 {text(h.location_note)}</p>}
+                    {text(h.english_staff_note) && <p class="hotel-note muted">{text(h.english_staff_note)}</p>}
+                    {(h.address_en || h.address_zh) && (
+                      <p class="hotel-addr ui">{h.address_en || h.address_zh}
+                        {mapHref(h) && <a class="hotel-map" href={mapHref(h)} target="_blank" rel="noopener nofollow">Map ↗</a>}
+                      </p>
+                    )}
+                    {h.booking_links?.length > 0 && (
+                      <div class="hotel-links ui">
+                        {h.booking_links.map((b) => <a href={b.url} target="_blank" rel="noopener nofollow">{b.label} ↗</a>)}
+                      </div>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
+    </div>
+  </section>
 
-      <h2>Why this happens</h2>
-      <p>Hosting foreign guests requires a hotel to be set up to register them with the local police (the temporary-residence registration). Many budget hotels, guesthouses, and some chains simply aren't — so they decline foreign check-ins regardless of your reservation.</p>
+  <!-- SEO content + the bilingual confirmation tool -->
+  <section class="section-tight alt">
+    <div class="container narrow">
+      <h2>Why some hotels can't host foreigners</h2>
+      <p>Hosting foreign guests requires a hotel to be set up to register them with the local police (temporary-residence registration). Many budget hotels and guesthouses simply aren't — so they decline foreign check-ins regardless of your reservation.</p>
 
       <h2>Confirm before you book — copy this</h2>
-      <p class="muted">Send this to the hotel (via the booking platform chat or phone) and wait for a clear yes:</p>
+      <p class="muted">Send this to any hotel (via the booking platform chat or phone) and wait for a clear yes:</p>
       <div class="copy-card">
         <pre id="tpl">{template}</pre>
         <button class="btn btn-primary copy-btn" data-copy="tpl">Copy bilingual message</button>
       </div>
 
-      <h2>Quick rules of thumb</h2>
+      <h2>Rules of thumb</h2>
       <ul class="rules">
         <li><strong>International chains</strong> and 4–5 star hotels are almost always able to register foreigners.</li>
         <li><strong>Budget/local guesthouses</strong> are the most likely to decline — always confirm first.</li>
         <li>If you're turned away, ask them to recommend a nearby <em>涉外</em> (foreigner-licensed) hotel.</li>
-        <li>Do the police registration within 24 hours of arrival — hotels do it for you; if you stay privately, you must do it yourself.</li>
+        <li>Police registration must be done within 24 hours of arrival — hotels do it for you.</li>
       </ul>
-
-      <div class="trust-note card">
-        <p><strong>Not an OTA.</strong> We don't take a cut of your booking — we just keep you from being stranded at midnight. <a href="/about">Our model →</a></p>
-      </div>
     </div>
   </section>
 
   <GetTheApp />
 
   <script>
+    import "../scripts/hotels-filter.ts";
     document.querySelectorAll<HTMLButtonElement>("button[data-copy]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const el = document.getElementById(btn.dataset.copy!);
@@ -62,13 +144,39 @@ Hello, can your hotel accept foreign guests? I hold a foreign passport. Thank yo
 </Base>
 
 <style>
+  h1 { max-width: 18ch; }
+  .hf-bar { display: flex; flex-wrap: wrap; gap: 16px 22px; align-items: flex-end; padding: 18px 20px; margin: 26px 0 18px; }
+  .hf-field { display: flex; flex-direction: column; gap: 6px; }
+  .hf-field label { font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+  .hf-field select { font-family: var(--font-ui); font-size: 0.92rem; padding: 9px 12px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); }
+  .hf-field select:focus { outline: none; border-color: var(--coral); box-shadow: 0 0 0 3px var(--coral-tint); }
+  .hf-checks { display: flex; flex-direction: column; gap: 8px; }
+  .hf-check { font-family: var(--font-ui); font-size: 0.88rem; color: var(--ink-soft); display: flex; align-items: center; gap: 7px; }
+  .hf-result { font-size: 0.9rem; color: var(--muted); margin: 0 0 18px; }
+  .hf-empty { padding: 20px 0; }
+
+  .hf-city-h { font-size: 1.3rem; margin: 28px 0 14px; }
+  .hotel-grid { grid-template-columns: repeat(2, 1fr); }
+  .hotel-card[hidden] { display: none; }
+  .hotel-card { overflow: hidden; display: flex; flex-direction: column; }
+  .hotel-img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--surface-warm); }
+  .hotel-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 7px; }
+  .hotel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .hotel-head h3 { margin: 0; font-size: 1.12rem; }
+  .hotel-stars { color: var(--coral); font-size: 0.85rem; white-space: nowrap; }
+  .hotel-zh { margin: 0; font-size: 0.85rem; }
+  .hotel-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0; }
+  .hotel-note { margin: 2px 0; font-size: 0.88rem; color: var(--ink-soft); }
+  .hotel-addr { margin: 4px 0 0; font-size: 0.82rem; color: var(--muted); }
+  .hotel-map { margin-left: 8px; font-weight: 600; }
+  .hotel-links { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: 0.85rem; font-weight: 600; }
+
+  .alt { background: var(--surface-warm); }
   .narrow { max-width: 760px; }
-  .soon-banner { padding: 22px; margin: 18px 0 34px; background: var(--coral-tint); border-color: var(--coral-tint-strong); }
-  .soon-banner p { margin: 12px 0 0; }
   .copy-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin: 12px 0 8px; }
   .copy-card pre { font-family: var(--font-ui); font-size: 0.95rem; white-space: pre-wrap; margin: 0 0 14px; color: var(--ink); line-height: 1.6; }
   .rules { padding-left: 20px; }
-  .rules li { margin: 10px 0; color: var(--ink-soft); }
-  .trust-note { padding: 20px; margin-top: 18px; background: var(--surface-warm); }
-  .trust-note p { margin: 0; }
+  .rules li { margin: 9px 0; color: var(--ink-soft); }
+
+  @media (max-width: 700px) { .hotel-grid { grid-template-columns: 1fr; } }
 </style>

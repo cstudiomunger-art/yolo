@@ -7,4 +7,5 @@ src/data/countries.json
 src/data/guides.json
 # Generated from Supabase (ticket_attractions) or the committed *.seed.json fallback.
 src/data/ticket-attractions.json
+src/data/hotels.json
 .DS_Store

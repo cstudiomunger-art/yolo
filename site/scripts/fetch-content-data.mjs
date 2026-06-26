@@ -71,6 +71,21 @@ async function main() {
   }
   await writeFile(resolve(DATA_DIR, "ticket-attractions.json"), JSON.stringify(tickets) + "\n");
   console.log(`[fetch:content] ticket_attractions=${tickets.length} (source: ${ticketSource})`);
+
+  // Hotels — foreigner-friendly hotel directory (filterable on the site).
+  const hotelCols =
+    "id,city_id,name,chinese_name,cover_image_path,address_en,address_zh,latitude,longitude," +
+    "stars,price_min_usd,has_english_staff,english_staff_note,language_tip,location_note," +
+    "booking_platforms,booking_links,accepts_foreigners,sort_order";
+  let hotels = [];
+  try {
+    hotels = await fetchTable(`hotels?select=${hotelCols}&is_active=eq.true&order=city_id.asc,sort_order.asc`);
+  } catch {
+    hotels = [];
+  }
+  await writeFile(resolve(DATA_DIR, "hotels.json"), JSON.stringify(hotels) + "\n");
+  const hotelCities = new Set(hotels.map((h) => h.city_id)).size;
+  console.log(`[fetch:content] hotels=${hotels.length} across ${hotelCities} cities`);
 }
 
 main().catch((e) => {
