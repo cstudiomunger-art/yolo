@@ -1,0 +1,76 @@
+---
+import Base from "../../layouts/Base.astro";
+import GetTheApp from "../../components/GetTheApp.astro";
+import PassportNameChecker from "../../components/PassportNameChecker.astro";
+import { ticketAttractions, type TicketAttraction } from "../../lib/tickets";
+
+export async function getStaticPaths() {
+  const { ticketAttractions } = await import("../../lib/tickets");
+  return ticketAttractions.map((t) => ({ params: { attraction: t.slug }, props: { t } }));
+}
+
+const { t } = Astro.props as { t: TicketAttraction };
+
+const title = `${t.name} Tickets for Foreigners — how to book on a foreign passport`;
+const description =
+  `${t.blurb} Real-name booking rules, what trips foreigners up, and a free passport-name format checker.`.slice(0, 158);
+---
+<Base title={title} description={description} ogType="article">
+  <section class="section-tight">
+    <div class="container narrow">
+      <a class="back ui" href="/attraction-tickets">← All attraction tickets</a>
+      <p class="eyebrow">🎟️ {t.name_zh} · {t.city}</p>
+      <h1>{t.name} tickets, for foreign visitors</h1>
+      <p class="lede">{t.blurb}</p>
+
+      {t.status === "coming-soon" && (
+        <div class="card soon-banner">
+          <span class="badge">Detailed guide coming soon</span>
+          <p>We're writing the step-by-step foreigner booking path for {t.name}. Meanwhile, the passport-name checker below works today, and the app covers what's live.</p>
+        </div>
+      )}
+
+      <!-- The working tool, on every attraction page -->
+      <h2 class="sec">Check your passport name first</h2>
+      <p class="muted">{t.passport_note ?? "Bookings are rejected when the name doesn't exactly match your passport. Check yours below."}</p>
+      <PassportNameChecker />
+
+      {t.rules.length > 0 && (
+        <>
+          <h2 class="sec">What trips foreign visitors up</h2>
+          <ul class="rules">{t.rules.map((r) => <li>{r}</li>)}</ul>
+        </>
+      )}
+
+      <div class="card facts">
+        {t.closed && <div class="fact"><span class="fact-label ui">📅 Closed</span><span>{t.closed}</span></div>}
+        {t.advance_days != null && <div class="fact"><span class="fact-label ui">⏳ Booking window</span><span>Opens ~{t.advance_days} days ahead</span></div>}
+        {t.passport_required && <div class="fact"><span class="fact-label ui">🪪 ID</span><span>Passport required, real-name booking</span></div>}
+        {t.official_url && <div class="fact"><span class="fact-label ui">🔗 Official</span><a href={t.official_url} target="_blank" rel="noopener nofollow">Official site ↗</a></div>}
+      </div>
+
+      <div class="trust-note card">
+        <p><strong>Not an OTA.</strong> We don't resell tickets at a markup — we show you how to book directly at face value. <a href="/about">Why that matters →</a> Always confirm details on the official site before you travel.</p>
+      </div>
+    </div>
+  </section>
+
+  <GetTheApp />
+</Base>
+
+<style>
+  .narrow { max-width: 760px; }
+  .back { font-family: var(--font-ui); font-size: 0.85rem; color: var(--muted); display: inline-block; margin-bottom: 12px; }
+  h1 { max-width: 20ch; }
+  .sec { margin-top: 38px; }
+  .soon-banner { padding: 20px; margin: 20px 0 0; background: var(--coral-tint); border-color: var(--coral-tint-strong); }
+  .soon-banner p { margin: 10px 0 0; }
+  .rules { padding-left: 20px; }
+  .rules li { margin: 9px 0; color: var(--ink-soft); }
+  .facts { padding: 6px 20px; margin: 22px 0; }
+  .fact { display: flex; gap: 16px; padding: 12px 0; border-top: 1px solid var(--border); font-size: 0.95rem; }
+  .fact:first-child { border-top: none; }
+  .fact-label { flex: 0 0 150px; font-family: var(--font-ui); font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+  .trust-note { padding: 20px; background: var(--surface-warm); }
+  .trust-note p { margin: 0; font-size: 0.95rem; }
+</style>

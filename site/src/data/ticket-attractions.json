@@ -1,0 +1,67 @@
+[
+  {
+    "slug": "forbidden-city",
+    "name": "Forbidden City",
+    "name_zh": "故宫 · Palace Museum",
+    "city": "Beijing",
+    "status": "live",
+    "blurb": "China's most-visited museum sells out days ahead, and the official booking flow assumes you have a Chinese ID. Here's how foreign passport holders actually get a ticket.",
+    "advance_days": null,
+    "release_time": null,
+    "closed": "Most Mondays (except public holidays)",
+    "official_url": "https://en.dpm.org.cn/",
+    "passport_required": true,
+    "rules": [
+      "Real-name and passport-based: each ticket is tied to one passport, and the name must match your passport exactly.",
+      "Tickets are released a set number of days in advance and sell out fast in peak season — book the moment they open.",
+      "Closed most Mondays — plan your day around it.",
+      "Bring the physical passport you booked with; it is checked against your ticket at the gate."
+    ],
+    "passport_note": "Enter your name exactly as printed in the machine-readable zone of your passport — Latin letters only, surname and given names."
+  },
+  {
+    "slug": "great-wall-mutianyu",
+    "name": "Great Wall (Mutianyu)",
+    "name_zh": "慕田峪长城",
+    "city": "Beijing",
+    "status": "coming-soon",
+    "blurb": "Timed-entry tickets, shuttle buses and cable cars — which to pre-book and how, for foreign visitors.",
+    "advance_days": null,
+    "release_time": null,
+    "closed": null,
+    "official_url": null,
+    "passport_required": true,
+    "rules": [],
+    "passport_note": null
+  },
+  {
+    "slug": "terracotta-army",
+    "name": "Terracotta Army",
+    "name_zh": "兵马俑",
+    "city": "Xi'an",
+    "status": "coming-soon",
+    "blurb": "Real-name, passport-based booking for the Emperor Qinshihuang's Mausoleum site — the foreigner path, step by step.",
+    "advance_days": null,
+    "release_time": null,
+    "closed": null,
+    "official_url": null,
+    "passport_required": true,
+    "rules": [],
+    "passport_note": null
+  },
+  {
+    "slug": "chengdu-panda-base",
+    "name": "Chengdu Panda Base",
+    "name_zh": "成都大熊猫繁育研究基地",
+    "city": "Chengdu",
+    "status": "coming-soon",
+    "blurb": "Daily ticket caps sell out at sunrise. When they release, how to book on a foreign passport, and the best arrival time.",
+    "advance_days": null,
+    "release_time": null,
+    "closed": null,
+    "official_url": null,
+    "passport_required": true,
+    "rules": [],
+    "passport_note": null
+  }
+]

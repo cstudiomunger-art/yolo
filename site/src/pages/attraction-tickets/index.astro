@@ -1,0 +1,56 @@
+---
+import Base from "../../layouts/Base.astro";
+import GetTheApp from "../../components/GetTheApp.astro";
+import PassportNameChecker from "../../components/PassportNameChecker.astro";
+import { ticketAttractions } from "../../lib/tickets";
+
+const title = "China Attraction Tickets for Foreigners — booking rules, decoded";
+const description =
+  "How foreign passport holders actually book China's hardest tickets — Forbidden City, Great Wall, Terracotta Army and more. Real-name rules, release timing, and a free passport-name format checker so your booking isn't rejected.";
+---
+<Base title={title} description={description}>
+  <section class="section-tight">
+    <div class="container">
+      <p class="eyebrow">Attraction Tickets</p>
+      <h1>China's tickets, decoded for foreign passports</h1>
+      <p class="lede">Top attractions use real-name, passport-based booking on a Chinese-ID-first flow — and sell out fast. Check your passport name format here, then open the attraction you need.</p>
+
+      <h2 class="sec">Passport-name format checker</h2>
+      <p class="muted">The #1 reason foreigners' bookings get rejected is a name that doesn't match the passport. Paste yours and we'll flag the issues — instantly, in your browser.</p>
+      <PassportNameChecker />
+
+      <h2 class="sec">By attraction</h2>
+      <div class="grid t-grid">
+        {ticketAttractions.map((t) => (
+          <a class={`card t-card ${t.status === "live" ? "is-live" : "is-soon"}`} href={`/attraction-tickets/${t.slug}`}>
+            <div class="t-top">
+              <h3>{t.name}</h3>
+              <span class={`badge ${t.status === "live" ? "badge-green" : ""} t-tag`}>{t.status === "live" ? "Guide live" : "Coming soon"}</span>
+            </div>
+            <span class="t-zh muted">{t.name_zh} · {t.city}</span>
+            <p class="muted t-blurb">{t.blurb}</p>
+            <span class="t-cta ui">See booking rules →</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <GetTheApp />
+</Base>
+
+<style>
+  h1 { max-width: 18ch; }
+  .sec { margin-top: 44px; }
+  .t-grid { grid-template-columns: repeat(2, 1fr); margin-top: 20px; }
+  .t-card { padding: 22px; display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: inherit; transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s; }
+  .t-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(26,26,26,0.10); border-color: var(--coral-tint-strong); text-decoration: none; }
+  .t-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .t-top h3 { margin: 0; font-size: 1.2rem; }
+  .t-tag { background: var(--surface-warm); color: var(--muted); }
+  .t-zh { font-size: 0.85rem; }
+  .t-blurb { margin: 6px 0 0; font-size: 0.95rem; }
+  .is-soon { opacity: 0.94; }
+  .t-cta { margin-top: auto; padding-top: 12px; color: var(--coral-dark); font-weight: 600; font-size: 0.9rem; }
+  @media (max-width: 720px) { .t-grid { grid-template-columns: 1fr; } }
+</style>
