@@ -30,6 +30,11 @@ function initOne(root: HTMLElement) {
   const sEl = root.querySelector<HTMLElement>(".rc-s");
   const covers = root.querySelector<HTMLElement>(".rc-covers");
   const pad = (n: number) => String(n).padStart(2, "0");
+  // Only write when the value actually changed — avoids re-setting unchanged text every
+  // second, which made browser auto-translate re-translate the node and flicker.
+  const setText = (el: HTMLElement | null, val: string) => {
+    if (el && el.textContent !== val) el.textContent = val;
+  };
 
   function tick() {
     const target = nextRelease(hh, mm);
@@ -38,13 +43,13 @@ function initOne(root: HTMLElement) {
     const h = Math.floor(diff / 3_600_000); diff -= h * 3_600_000;
     const m = Math.floor(diff / 60_000); diff -= m * 60_000;
     const s = Math.floor(diff / 1000);
-    if (dEl) dEl.textContent = String(d);
-    if (hEl) hEl.textContent = pad(h);
-    if (mEl) mEl.textContent = pad(m);
-    if (sEl) sEl.textContent = pad(s);
+    setText(dEl, String(d));
+    setText(hEl, pad(h));
+    setText(mEl, pad(m));
+    setText(sEl, pad(s));
     if (covers && !Number.isNaN(advance)) {
       const travelDate = beijingDateLabel(target + advance * 86_400_000);
-      covers.textContent = `This release opens tickets dated around ${travelDate}. Be ready and book the moment it opens.`;
+      setText(covers, `This release opens tickets dated around ${travelDate}. Be ready and book the moment it opens.`);
     }
   }
   tick();
