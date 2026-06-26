@@ -252,7 +252,7 @@ async function onAudioFile(e) {
       <option v-for="o in enumOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
     </select>
 
-    <RichText v-else-if="isType('richtext')" v-model="val" />
+    <RichText v-else-if="isType('richtext')" v-model="val" :entity-id="entityId" />
 
     <input v-else-if="isType('tags', 'string_list')" v-model="csv" type="text" placeholder="逗号分隔" />
 
