@@ -5,4 +5,6 @@ dist/
 src/data/visa-data.json
 src/data/countries.json
 src/data/guides.json
+# Generated from Supabase (ticket_attractions) or the committed *.seed.json fallback.
+src/data/ticket-attractions.json
 .DS_Store

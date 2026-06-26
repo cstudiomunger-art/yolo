@@ -8,7 +8,7 @@
 // Content is rendered as-is (whatever language the CMS holds). Cover images are already
 // stored as full public URLs, so no resolution is needed.
 
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, readFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
@@ -50,6 +50,27 @@ async function main() {
     `[fetch:content] cities=${cities.length} attractions=${attractions.length} ` +
       `sub_areas=${subAreas.length} (with audio teaser=${withAudio})`
   );
+
+  // Ticket attractions — CMS-managed (ticket_attractions table). Falls back to the
+  // committed seed if the table isn't there yet (migration not applied) or is empty,
+  // so the build never breaks during rollout.
+  const ticketCols =
+    "slug,name,name_zh,city,status,blurb,advance_days,release_time,release_note," +
+    "closed,official_url,passport_required,rules,passport_note";
+  let tickets = [];
+  let ticketSource = "supabase";
+  try {
+    tickets = await fetchTable(`ticket_attractions?select=${ticketCols}&is_active=eq.true&order=display_order`);
+  } catch {
+    tickets = [];
+  }
+  if (!Array.isArray(tickets) || tickets.length === 0) {
+    const seed = await readFile(resolve(DATA_DIR, "ticket-attractions.seed.json"), "utf8");
+    tickets = JSON.parse(seed);
+    ticketSource = "seed (table missing/empty)";
+  }
+  await writeFile(resolve(DATA_DIR, "ticket-attractions.json"), JSON.stringify(tickets) + "\n");
+  console.log(`[fetch:content] ticket_attractions=${tickets.length} (source: ${ticketSource})`);
 }
 
 main().catch((e) => {

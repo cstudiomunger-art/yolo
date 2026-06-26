@@ -99,6 +99,9 @@ const GROUPS = [
     { label: "常用语", table: "common_phrases" },
     { label: "方言彩蛋", table: "dialect_phrases" },
   ] },
+  { id: "site", label: "🌐 官网内容", leaves: [
+    { label: "🎟️ 门票（外宾购票页）", table: "ticket_attractions" },
+  ] },
   { id: "tools", label: "工具 · 跨城", leaves: [
     { label: "行程模板", table: "content_itineraries" },
     { label: "全表：城市", table: "cities" },
