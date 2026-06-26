@@ -16,20 +16,26 @@ import type { VisaDataSet, VisaQuery } from "../lib/visa-types";
 const data = rawData as unknown as VisaDataSet;
 const countries = countriesRaw as Array<{ iso2: string; name: string; flag: string; slug: string; hasGrant: boolean }>;
 
-const policyName = (id: string) => data.policies.find((p) => p.id === id)?.official_name_en ?? id;
-const cityName = (code: string) => data.cities.find((c) => c.city_id === code)?.name_en ?? code;
+// Escape every value sourced from the Supabase snapshot before it lands in innerHTML.
+// Defense-in-depth: these label fields (policy/city/port names) are admin-editable, so
+// treat them as untrusted at the HTML sink.
+const esc = (s: unknown): string =>
+  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+
+const policyName = (id: string) => esc(data.policies.find((p) => p.id === id)?.official_name_en ?? id);
+const cityName = (code: string) => esc(data.cities.find((c) => c.city_id === code)?.name_en ?? code);
 const portLabel = (code: string) => {
   const p = data.ports.find((x) => x.code === code);
-  return p ? `${p.code} · ${p.name_zh}` : code;
+  return p ? `${esc(p.code)} · ${esc(p.name_zh)}` : esc(code);
 };
-const countryName = (iso2: string) => countries.find((c) => c.iso2 === iso2)?.name ?? iso2;
+const countryName = (iso2: string) => esc(countries.find((c) => c.iso2 === iso2)?.name ?? iso2);
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;
 const fmtDate = (d: Date | null) =>
   d ? d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—";
 
 function countryOptions(includeUndecided = false): string {
-  const opts = countries.map((c) => `<option value="${c.iso2}">${c.flag} ${c.name}</option>`);
+  const opts = countries.map((c) => `<option value="${esc(c.iso2)}">${esc(c.flag)} ${esc(c.name)}</option>`);
   if (includeUndecided) opts.unshift(`<option value="undecided">Undecided / round-trip</option>`);
   return opts.join("");
 }
@@ -38,19 +44,19 @@ function countryOptions(includeUndecided = false): string {
 
 function renderInstant(sum: NationalitySummary): string {
   const cn = countryName(sum.country_code);
-  const flag = countries.find((c) => c.iso2 === sum.country_code)?.flag ?? "";
+  const flag = esc(countries.find((c) => c.iso2 === sum.country_code)?.flag ?? "");
   if (sum.verdict === "visa_free") {
     return `
       <div class="vc-verdict vc-green">
         <span class="badge badge-green">Visa-free</span>
         <h3>${flag} ${cn} passport holders can enter China visa-free</h3>
-        <p class="vc-big">Up to <strong>${sum.stay_days ?? "—"} days</strong> · ${sum.headline}</p>
+        <p class="vc-big">Up to <strong>${sum.stay_days ?? "—"} days</strong> · ${esc(sum.headline)}</p>
         ${conditionalNote(sum)}
         <p class="vc-fine">Nationwide, for ordinary passports. A specific trip can still have limits — check yours below.</p>
       </div>`;
   }
   if (sum.verdict === "conditional") {
-    const names = sum.conditional.map((p) => p.name_en).join(", ");
+    const names = sum.conditional.map((p) => esc(p.name_en)).join(", ");
     return `
       <div class="vc-verdict vc-amber">
         <span class="badge badge-amber">Conditional visa-free</span>

@@ -9,6 +9,7 @@ import {
   audioTeaseCount,
   blockKind,
   blockImage,
+  clean,
 } from "../../../lib/guides";
 
 export async function getStaticPaths() {
@@ -75,7 +76,7 @@ const description =
       )}
 
       {(a.introduction || a.summary) && (
-        <div class="prose" set:html={a.introduction || a.summary} />
+        <div class="prose" set:html={clean(a.introduction || a.summary)} />
       )}
 
       <!-- Tips for foreign visitors -->
@@ -97,12 +98,12 @@ const description =
                 {s.has_audio && <span class="audio-tag ui">🎧 In app</span>}
               </div>
               {s.cover_image_path && <img class="sub-img" src={s.cover_image_path} alt={s.name_en} loading="lazy" />}
-              {s.body && <div class="prose" set:html={s.body} />}
+              {s.body && <div class="prose" set:html={clean(s.body)} />}
               {s.content_blocks?.map((b) => {
                 const kind = blockKind(b);
                 if (kind === "image") { const src = blockImage(b); return src ? <img class="sub-img" src={src} alt={b.title || s.name_en} loading="lazy" /> : null; }
                 if (kind === "heading") return <h4 class="block-h">{b.title}</h4>;
-                return b.body ? <div class="prose" set:html={b.body} /> : null;
+                return b.body ? <div class="prose" set:html={clean(b.body)} /> : null;
               })}
             </article>
           ))}

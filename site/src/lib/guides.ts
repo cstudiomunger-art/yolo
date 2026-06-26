@@ -2,6 +2,32 @@
 // Audio fields are already stripped by the fetch script; here we just shape and nest.
 
 import raw from "../data/guides.json";
+import sanitizeHtml from "sanitize-html";
+
+// CMS body fields (introduction / description / sub-area body / content blocks) are
+// rendered with set:html, so they must be sanitized. This runs at BUILD only (SSG) —
+// sanitize-html never reaches the client bundle. Defense-in-depth against stored XSS
+// even though CMS writes are admin-only (RLS is_admin()).
+export function clean(html: string | null | undefined): string {
+  if (!html) return "";
+  return sanitizeHtml(html, {
+    allowedTags: [
+      "p", "br", "hr", "strong", "b", "em", "i", "u", "s", "blockquote",
+      "ul", "ol", "li", "h2", "h3", "h4", "h5", "span", "a", "img", "figure", "figcaption",
+    ],
+    allowedAttributes: {
+      a: ["href", "title", "target", "rel"],
+      img: ["src", "alt", "title", "loading"],
+      span: [],
+    },
+    allowedSchemes: ["https", "http", "mailto"],
+    // Force safe link behavior; strip on* handlers / style / class via allowlist above.
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { rel: "noopener nofollow ugc", target: "_blank" }),
+    },
+    disallowedTagsMode: "discard",
+  });
+}
 
 export interface City {
   id: string;
