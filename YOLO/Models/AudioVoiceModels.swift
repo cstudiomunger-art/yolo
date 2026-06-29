@@ -139,5 +139,27 @@ enum AudioPlaybackResolver {
             isMainGuide: baseGuide.isMainGuide
         )
     }
+
+    /// Extracts the voice-variant id from a composite guide id (`baseId__variantId`).
+    static func variantId(from compositeGuideId: String, baseGuideId: String) -> String? {
+        let prefix = baseGuideId + "__"
+        guard compositeGuideId.hasPrefix(prefix) else { return nil }
+        let variantId = String(compositeGuideId.dropFirst(prefix.count))
+        return variantId.isEmpty ? nil : variantId
+    }
+
+    /// Whether `track` is the same logical audio as the inline section (`baseGuideId` + optional `voiceOwner`).
+    static func trackMatchesSection(
+        track: AudioTrack,
+        baseGuideId: String,
+        voiceOwner: AudioVoiceOwner?
+    ) -> Bool {
+        if let voiceOwner {
+            guard track.voiceOwner == voiceOwner, track.baseGuide?.id == baseGuideId else { return false }
+            return true
+        }
+        if track.baseGuide?.id == baseGuideId { return true }
+        return track.guide.id == baseGuideId
+    }
 }
 

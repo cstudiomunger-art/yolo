@@ -27,7 +27,14 @@ struct CityGuideAudioSection: View {
         )
     }
 
-    private var isActive: Bool { player.currentTrackId == playbackGuide.id }
+    private var isActive: Bool {
+        guard let track = player.currentTrack else { return false }
+        return AudioPlaybackResolver.trackMatchesSection(
+            track: track,
+            baseGuideId: audioGuide.id,
+            voiceOwner: voiceOwner
+        )
+    }
     private var isPlayingThis: Bool { isActive && player.isPlaying }
     private var displayMode: AudioQueuePlayer.Mode { isActive ? player.mode : .idle }
     private var canPlayThis: Bool { isActive ? player.canPlay : true }
@@ -133,7 +140,11 @@ struct CityGuideAudioSection: View {
             await loadVoiceVariants()
         }
         .onAppear {
+            syncVoiceFromPlayer()
             if isActive { scrubProgress = player.progress }
+        }
+        .onChange(of: player.currentTrackId) { _, _ in
+            syncVoiceFromPlayer()
         }
         .onChange(of: player.progress) { _, newValue in
             if isActive, !isScrubbing { scrubProgress = newValue }
@@ -203,5 +214,18 @@ struct CityGuideAudioSection: View {
         selectedVariantId = variant.id
         appEnv.preferences.setPreferredVoiceVariantId(variant.id, for: voiceOwner)
         scrubProgress = 0
+    }
+
+    private func syncVoiceFromPlayer() {
+        guard let track = player.currentTrack,
+              AudioPlaybackResolver.trackMatchesSection(
+                  track: track,
+                  baseGuideId: audioGuide.id,
+                  voiceOwner: voiceOwner
+              ),
+              let variantId = AudioPlaybackResolver.variantId(from: track.guide.id, baseGuideId: audioGuide.id)
+        else { return }
+        guard selectedVariantId != variantId else { return }
+        selectedVariantId = variantId
     }
 }

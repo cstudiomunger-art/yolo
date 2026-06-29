@@ -162,6 +162,31 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
         ul, ol { margin: 0.4em 0; padding-left: 1.2em; }
         a { color: #c45c26; }
         img { max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0; display: block; }
+        h2 { font-size: 1.15em; font-weight: 600; margin: 1em 0 0.5em; }
+        h3 { font-size: 1.05em; font-weight: 600; margin: 0.8em 0 0.4em; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 1em 0; }
+        blockquote {
+          margin: 0.6em 0;
+          padding: 8px 12px;
+          border-left: 3px solid #c45c26;
+          background: #f7f6f3;
+          color: inherit;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 0.6em 0;
+          font-size: 0.92em;
+        }
+        th, td {
+          border: 1px solid #ddd;
+          padding: 6px 8px;
+          text-align: left;
+          vertical-align: top;
+          word-break: break-word;
+        }
+        th { background: #f0efeb; font-weight: 600; }
+        tr:nth-child(even) td { background: #faf9f7; }
         </style>
         </head><body>\(displayHtml)</body></html>
         """

@@ -74,16 +74,8 @@ struct AudioTrackVoiceSwitcher: View {
 
     private var selectedVariantId: String? {
         guard let base = track.baseGuide else { return nil }
-        let composite = track.guide.id
-        let marker = "__"
-        if let range = composite.range(of: marker),
-           composite.hasPrefix(base.id + marker) {
-            return String(composite[range.upperBound...])
-        }
-        if let owner = track.voiceOwner {
-            return appEnv.preferences.preferredVoiceVariantId(for: owner)
-        }
-        return nil
+        return AudioPlaybackResolver.variantId(from: track.guide.id, baseGuideId: base.id)
+            ?? track.voiceOwner.flatMap { appEnv.preferences.preferredVoiceVariantId(for: $0) }
     }
 
     var body: some View {
