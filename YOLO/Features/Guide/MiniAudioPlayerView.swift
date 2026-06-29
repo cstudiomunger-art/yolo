@@ -102,6 +102,12 @@ struct MiniAudioPlayerView: View {
 
             scrubRow
 
+            if let track = player.currentTrack {
+                AudioTrackVoiceSwitcher(track: track) { variant in
+                    player.applyVoiceVariant(variant, at: player.currentIndex)
+                }
+            }
+
             if player.currentTrackIsPreview {
                 Text(String(localized: "Preview · unlock the full guide"))
                     .font(Theme.FontToken.inter(10))
@@ -211,32 +217,38 @@ struct MiniAudioPlayerView: View {
                 ForEach(Array(player.queue.enumerated()), id: \.element.id) { index, track in
                     let isCurrent = index == player.currentIndex
                     let locked = !(player.resolveAccess?(track).hasFullAccess ?? true)
-                    Button {
-                        player.playTrack(at: index)
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: isCurrent ? (player.isPlaying ? "speaker.wave.2.fill" : "pause.fill") : "music.note")
-                                .font(.system(size: 11))
-                                .foregroundStyle(isCurrent ? Theme.ColorToken.accent : Theme.ColorToken.textMuted)
-                                .frame(width: 16)
-                            Text(track.title)
-                                .font(Theme.FontToken.inter(12, weight: isCurrent ? .semibold : .regular))
-                                .foregroundStyle(isCurrent ? Theme.ColorToken.textPrimary : Theme.ColorToken.textSecondary)
-                                .lineLimit(1)
-                            Spacer()
-                            if locked {
-                                Image(systemName: "lock.fill")
-                                    .font(.system(size: 9))
+                    HStack(spacing: 6) {
+                        Button {
+                            player.playTrack(at: index)
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: isCurrent ? (player.isPlaying ? "speaker.wave.2.fill" : "pause.fill") : "music.note")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(isCurrent ? Theme.ColorToken.accent : Theme.ColorToken.textMuted)
+                                    .frame(width: 16)
+                                Text(track.title)
+                                    .font(Theme.FontToken.inter(12, weight: isCurrent ? .semibold : .regular))
+                                    .foregroundStyle(isCurrent ? Theme.ColorToken.textPrimary : Theme.ColorToken.textSecondary)
+                                    .lineLimit(1)
+                                Spacer()
+                                if locked {
+                                    Image(systemName: "lock.fill")
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(Theme.ColorToken.textMuted)
+                                }
+                                Text(formatTime(max(track.guide.durationSeconds, 0)))
+                                    .font(Theme.FontToken.inter(10))
                                     .foregroundStyle(Theme.ColorToken.textMuted)
                             }
-                            Text(formatTime(max(track.guide.durationSeconds, 0)))
-                                .font(Theme.FontToken.inter(10))
-                                .foregroundStyle(Theme.ColorToken.textMuted)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.vertical, 8)
-                        .contentShape(Rectangle())
+                        .buttonStyle(.plain)
+
+                        AudioTrackVoiceSwitcher(track: track) { variant in
+                            player.applyVoiceVariant(variant, at: index)
+                        }
                     }
-                    .buttonStyle(.plain)
+                    .padding(.vertical, 8)
 
                     if index < player.queue.count - 1 {
                         Divider()

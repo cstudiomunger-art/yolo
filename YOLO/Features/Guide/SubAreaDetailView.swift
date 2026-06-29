@@ -33,16 +33,23 @@ struct SubAreaDetailView: View {
             guard seen.insert(play.id).inserted else { continue }
             tracks.append(AudioTrack(
                 guide: play, title: g.titleEn, artist: attraction.name,
-                attraction: attraction, subArea: nil, allowsPreview: true
+                attraction: attraction, subArea: nil, allowsPreview: true,
+                voiceOwner: AudioVoiceOwner(type: .audioGuide, id: g.id),
+                baseGuide: g
             ))
         }
         for area in subAreas {
             guard let base = subAreaAudio[area.id] else { continue }
             let play = resolvedGuide(for: base)
             guard seen.insert(play.id).inserted else { continue }
+            let owner = area.playbackGuide(attractionId: route.attractionId) != nil
+                ? AudioVoiceOwner(type: .subArea, id: area.id)
+                : AudioVoiceOwner(type: .audioGuide, id: base.id)
             tracks.append(AudioTrack(
                 guide: play, title: base.titleEn, artist: attraction.name,
-                attraction: attraction, subArea: area, allowsPreview: true
+                attraction: attraction, subArea: area, allowsPreview: true,
+                voiceOwner: owner,
+                baseGuide: base
             ))
         }
         return tracks

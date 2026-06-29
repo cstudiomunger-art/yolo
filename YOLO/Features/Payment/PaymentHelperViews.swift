@@ -268,7 +268,17 @@ struct PaymentFlowNodeView: View {
             }
             .buttonStyle(.plain)
         } else if canProceed, nodeKey == .card {
-            EmptyView()
+            Button {
+                appEnv.navigation.dismissModal()
+            } label: {
+                Text("完成 · 关闭支付助手")
+                    .font(Theme.FontToken.inter(14, weight: .semibold))
+                    .frame(maxWidth: .infinity).padding(.vertical, 14)
+                    .background(Theme.ColorToken.success).foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 8)
         } else if !canProceed {
             Text(blockedReason)
                 .font(Theme.FontToken.inter(13))

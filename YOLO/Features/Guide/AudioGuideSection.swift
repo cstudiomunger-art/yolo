@@ -88,7 +88,9 @@ struct AudioGuideSection: View {
             attraction: attraction,
             subArea: subArea,
             allowsPreview: allowsPreview,
-            isFree: false
+            isFree: false,
+            voiceOwner: voiceOwner,
+            baseGuide: guide
         )
     }
 
@@ -103,27 +105,27 @@ struct AudioGuideSection: View {
     private var effectiveIndex: Int { queue.isEmpty ? 0 : trackIndex }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
                 Text("🎧")
                 Text(guide.titleEn)
                     .font(Theme.FontToken.inter(14, weight: .medium))
-                Spacer()
+                    .lineLimit(2)
+                Spacer(minLength: 4)
+                if voiceVariants.count > 1 {
+                    AudioVoicePicker(
+                        variants: voiceVariants,
+                        selectedVariantId: selectedVariantId ?? AudioPlaybackResolver.selectedVariant(
+                            from: voiceVariants,
+                            preferredVariantId: selectedVariantId
+                        )?.id
+                    ) { variant in
+                        selectVoice(variant)
+                    }
+                }
                 Text("\(max(playbackGuide.durationSeconds / 60, 1)) min")
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
-            }
-
-            if voiceVariants.count > 1 {
-                AudioVoicePicker(
-                    variants: voiceVariants,
-                    selectedVariantId: selectedVariantId ?? AudioPlaybackResolver.selectedVariant(
-                        from: voiceVariants,
-                        preferredVariantId: selectedVariantId
-                    )?.id
-                ) { variant in
-                    selectVoice(variant)
-                }
             }
 
             if let includedWithLabel {
@@ -305,7 +307,7 @@ struct AudioGuideSection: View {
 
     @ViewBuilder
     private var unlockedControls: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             Button {
                 startOrToggle()
             } label: {
@@ -318,11 +320,13 @@ struct AudioGuideSection: View {
             scrubSlider(maxSeconds: displayDuration)
         }
 
-        Text("\(formatTime(Int(scrubProgress))) / \(formatTime(displayDuration))")
-            .font(Theme.FontToken.inter(10))
-            .foregroundStyle(Theme.ColorToken.textMuted)
-
-        downloadRow
+        HStack {
+            Text("\(formatTime(Int(scrubProgress))) / \(formatTime(displayDuration))")
+                .font(Theme.FontToken.inter(10))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+            Spacer()
+            downloadRow
+        }
     }
 
     @ViewBuilder
@@ -354,13 +358,15 @@ struct AudioGuideSection: View {
     private var downloadRow: some View {
         if isDownloading {
             ProgressView()
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .scaleEffect(0.8)
         } else if isDownloaded {
-            HStack {
-                Text(String(localized: "✓ Downloaded"))
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark.circle")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.ColorToken.accent)
+                Text(String(localized: "Downloaded"))
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.accent)
-                Spacer()
                 Button(String(localized: "Remove")) {
                     AudioDownloadService.shared.removeDownload(guideId: playbackGuide.id)
                     player.reloadIfCurrent(guideId: playbackGuide.id)
@@ -373,9 +379,13 @@ struct AudioGuideSection: View {
             Button {
                 Task { await downloadAudio() }
             } label: {
-                Text(String(localized: "⬇ Download for offline"))
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                HStack(spacing: 5) {
+                    Image(systemName: "arrow.down.to.line")
+                        .font(.system(size: 12, weight: .medium))
+                    Text(String(localized: "Download for offline"))
+                        .font(Theme.FontToken.inter(11))
+                }
+                .foregroundStyle(Theme.ColorToken.textPrimary)
             }
             .buttonStyle(.plain)
         }

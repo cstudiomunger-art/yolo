@@ -41,33 +41,35 @@ struct CityGuideAudioSection: View {
             title: playbackGuide.titleEn,
             artist: guide.titleEn,
             allowsPreview: false,
-            isFree: true
+            isFree: true,
+            voiceOwner: voiceOwner,
+            baseGuide: audioGuide
         )
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline) {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 8) {
                 Text("🎧")
                 Text(audioGuide.titleEn)
                     .font(Theme.FontToken.inter(14, weight: .medium))
-                Spacer()
+                    .lineLimit(2)
+                Spacer(minLength: 4)
+                if voiceVariants.count > 1 {
+                    AudioVoicePicker(
+                        variants: voiceVariants,
+                        selectedVariantId: selectedVariantId ?? AudioPlaybackResolver.selectedVariant(
+                            from: voiceVariants,
+                            preferredVariantId: selectedVariantId
+                        )?.id
+                    ) { variant in
+                        selectVoice(variant)
+                    }
+                }
                 if playbackGuide.durationSeconds > 0 {
                     Text("\(max(playbackGuide.durationSeconds / 60, 1)) min")
                         .font(Theme.FontToken.inter(11))
                         .foregroundStyle(Theme.ColorToken.textMuted)
-                }
-            }
-
-            if voiceVariants.count > 1 {
-                AudioVoicePicker(
-                    variants: voiceVariants,
-                    selectedVariantId: selectedVariantId ?? AudioPlaybackResolver.selectedVariant(
-                        from: voiceVariants,
-                        preferredVariantId: selectedVariantId
-                    )?.id
-                ) { variant in
-                    selectVoice(variant)
                 }
             }
 

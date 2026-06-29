@@ -66,20 +66,27 @@ struct AttractionDetailView: View {
                 artist: display.name,
                 attraction: display,
                 subArea: nil,
-                allowsPreview: true
+                allowsPreview: true,
+                voiceOwner: AudioVoiceOwner(type: .audioGuide, id: g.id),
+                baseGuide: g
             ))
         }
         for area in subAreas {
             guard let base = subAreaAudio[area.id] else { continue }
             let play = resolvedGuide(for: base)
             guard seen.insert(play.id).inserted else { continue }
+            let owner = area.playbackGuide(attractionId: display.id) != nil
+                ? AudioVoiceOwner(type: .subArea, id: area.id)
+                : AudioVoiceOwner(type: .audioGuide, id: base.id)
             tracks.append(AudioTrack(
                 guide: play,
                 title: base.titleEn,
                 artist: display.name,
                 attraction: display,
                 subArea: area,
-                allowsPreview: true
+                allowsPreview: true,
+                voiceOwner: owner,
+                baseGuide: base
             ))
         }
         return tracks

@@ -18,6 +18,10 @@ struct AudioTrack: Identifiable, Equatable {
     let allowsPreview: Bool
     /// Free content (e.g. city guide audio) bypasses the paywall entirely.
     let isFree: Bool
+    /// When set, the track supports multi-voice narration switching.
+    let voiceOwner: AudioVoiceOwner?
+    /// Unresolved base guide used to rebuild playback when the voice variant changes.
+    let baseGuide: AudioGuide?
 
     var id: String { guide.id }
 
@@ -30,7 +34,9 @@ struct AudioTrack: Identifiable, Equatable {
         attraction: Attraction? = nil,
         subArea: SubArea? = nil,
         allowsPreview: Bool = true,
-        isFree: Bool = false
+        isFree: Bool = false,
+        voiceOwner: AudioVoiceOwner? = nil,
+        baseGuide: AudioGuide? = nil
     ) {
         self.guide = guide
         self.title = title
@@ -39,6 +45,8 @@ struct AudioTrack: Identifiable, Equatable {
         self.subArea = subArea
         self.allowsPreview = allowsPreview
         self.isFree = isFree
+        self.voiceOwner = voiceOwner
+        self.baseGuide = baseGuide
     }
 }
 
@@ -146,6 +154,33 @@ final class AudioQueuePlayer {
         }
         currentIndex = index
         loadCurrent(autoPlay: true)
+    }
+
+    /// Swap the narration voice for a queue item and reload playback when it is the active track.
+    func applyVoiceVariant(_ variant: AudioVoiceVariant, at index: Int) {
+        guard queue.indices.contains(index),
+              let base = queue[index].baseGuide else { return }
+        let newGuide = AudioPlaybackResolver.guide(from: base, variant: variant)
+        guard queue[index].guide.id != newGuide.id else { return }
+
+        let old = queue[index]
+        queue[index] = AudioTrack(
+            guide: newGuide,
+            title: old.title,
+            artist: old.artist,
+            attraction: old.attraction,
+            subArea: old.subArea,
+            allowsPreview: old.allowsPreview,
+            isFree: old.isFree,
+            voiceOwner: old.voiceOwner,
+            baseGuide: base
+        )
+
+        if index == currentIndex {
+            let wasPlaying = isPlaying
+            pendingSeek = 0
+            loadCurrent(autoPlay: wasPlaying)
+        }
     }
 
     /// X button: stop everything and hide the floating player.

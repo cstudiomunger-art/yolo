@@ -39,8 +39,10 @@ struct GuideHomeView: View {
                 }
             }
             .padding(.horizontal, Theme.screenPadding)
-            .padding(.vertical, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 16)
         }
+        .contentMargins(.bottom, Theme.tabBarHeight + 12, for: .scrollContent)
     }
 
     // MARK: - Header & sections

@@ -1,3 +1,34 @@
+# Changelog — 2026-06-29
+
+---
+
+## 音频播放模块布局优化 & 音色切换
+
+### 功能
+- **紧凑布局**：音频卡片间距收紧；音色选择并入标题行；播放时间与离线下载合并为一行，整体高度明显降低
+- **音色下拉按钮**：多音色由横向标签改为单个胶囊按钮，点击展开菜单列表切换（当前项带 ✓）
+- **播放列表音色切换**：迷你播放器进度条下方及播放列表每行均可切换音色；`AudioTrack` 携带 `voiceOwner` / `baseGuide`，`AudioQueuePlayer.applyVoiceVariant` 支持队列内换声
+- **离线下载图标**：彩色 emoji 替换为系统黑白图标 `arrow.down.to.line`；已下载状态使用 `checkmark.circle`
+
+### 其他
+- **支付助手**：银行卡绑定流程末步新增「完成 · 关闭支付助手」按钮
+- **Guide 首页**：ScrollView 底部增加 Tab Bar 安全边距，避免内容被遮挡
+
+### 主要改动文件
+| 文件 | 改动内容 |
+|------|----------|
+| `Features/Guide/AudioVoicePicker.swift` | 下拉菜单式音色选择器；新增 `AudioTrackVoiceSwitcher` |
+| `Features/Guide/AudioGuideSection.swift` | 紧凑布局；离线下载图标 |
+| `Features/Guide/AudioPlayerView.swift` | `AudioTrack` 扩展；`applyVoiceVariant` |
+| `Features/Guide/MiniAudioPlayerView.swift` | 播放器与播放列表音色切换 |
+| `Features/Guide/AttractionDetailView.swift` / `SubAreaDetailView.swift` | 队列条目携带音色元数据 |
+| `Features/Guide/CityGuideAudioSection.swift` | 与城市指南一致的紧凑布局 |
+| `Features/Payment/PaymentHelperViews.swift` | 完成关闭按钮 |
+| `Features/Guide/GuideHomeView.swift` | Tab Bar 底部边距 |
+| `Resources/Localizable.xcstrings` | 「离线下载」「已下载」等文案 |
+
+---
+
 # Changelog — 2026-06-02
 
 ---
