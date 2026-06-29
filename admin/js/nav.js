@@ -109,6 +109,7 @@
       defaultExpanded: false,
       items: [
         { kind: "table", table: "transport_tips", label: "交通攻略" },
+        { kind: "table", table: "internet_access_guides", label: "科学上网指南" },
         { kind: "table", table: "common_phrases", label: "常用语" },
         { kind: "table", table: "dialect_phrases", label: "方言彩蛋" },
       ],

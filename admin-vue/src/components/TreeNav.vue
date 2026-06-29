@@ -104,6 +104,7 @@ const GROUPS = [
   ] },
   { id: "practical", label: "🧭 实用信息", leaves: [
     { label: "交通攻略", table: "transport_tips" },
+    { label: "科学上网指南", table: "internet_access_guides" },
     { label: "常用语", table: "common_phrases" },
     { label: "方言彩蛋", table: "dialect_phrases" },
   ] },

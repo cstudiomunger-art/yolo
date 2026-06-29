@@ -1169,6 +1169,23 @@
         { key: "is_active", type: "bool", label: "启用" },
       ],
     },
+    internet_access_guides: {
+      label: "科学上网指南",
+      pk: "id",
+      listColumns: [
+        { key: "title_zh", label: "标题" },
+        { key: "title_en", label: "标题 EN" },
+        { key: "is_active", label: "启用" },
+      ],
+      fields: [
+        { key: "id", type: "text", required: true, label: "ID", hint: "固定 legal_guide，勿随意改" },
+        { key: "title_zh", type: "text", required: true, label: "标题 中文" },
+        { key: "title_en", type: "text", label: "标题 EN" },
+        { key: "body_zh", type: "richtext", label: "正文 中文" },
+        { key: "body_en", type: "richtext", label: "正文 EN" },
+        { key: "is_active", type: "bool", label: "启用" },
+      ],
+    },
     common_phrases: {
       label: "常用语",
       pk: "id",

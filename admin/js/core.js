@@ -861,6 +861,7 @@ App.fillTableDefaults = function fillTableDefaults(payload, table) {
     payment_merchant_phrases: { en: "", sort_order: 0, is_active: true },
     payment_helper_links: { label_en: "", label_zh: "", lane: "prep", sort_order: 0, is_active: true },
     transport_tips: { category: "rail", title_en: "", title_zh: "", body_en: "", body_zh: "", city_id: null, sort_order: 0, is_active: true },
+    internet_access_guides: { title_en: "", title_zh: "", body_en: "", body_zh: "", is_active: true },
     common_phrases: { pinyin: "", en: "", audio_url: "", sort_order: 0, is_active: true },
     dialect_phrases: { emoji: "", pinyin: "", en: "", audio_url: "", sort_order: 0, is_active: true },
   };

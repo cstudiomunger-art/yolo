@@ -11,6 +11,14 @@ struct TransportTip: Codable, Identifiable, Hashable {
     let sortOrder: Int?
 }
 
+struct InternetAccessGuide: Codable, Identifiable, Hashable {
+    let id: String
+    let titleZh: String?
+    let titleEn: String?
+    let bodyZh: String?
+    let bodyEn: String?
+}
+
 struct CommonPhrase: Codable, Identifiable, Hashable {
     let id: String
     let cn: String
@@ -35,6 +43,7 @@ struct InfoHubContent: Codable, Equatable {
     var transport: [TransportTip]
     var common: [CommonPhrase]
     var dialect: [DialectPhrase]
+    var internetAccess: InternetAccessGuide?
 
-    static let empty = InfoHubContent(transport: [], common: [], dialect: [])
+    static let empty = InfoHubContent(transport: [], common: [], dialect: [], internetAccess: nil)
 }

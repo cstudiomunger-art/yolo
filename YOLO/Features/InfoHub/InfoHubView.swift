@@ -14,6 +14,8 @@ struct InfoHubView: View {
                     actionCard("🚨", "紧急", "报警 110 · 使馆按国籍 · 急救卡") { appEnv.navigation.presentEmergency() }
                     actionCard("🛂", "签证", "你这条线够不够用 · 规则说明") { appEnv.navigation.presentVisaChecker() }
                     actionCard("💳", "支付", "绑卡 / 外卡 / 现金 三级方案") { appEnv.navigation.presentPaymentHelper() }
+                    NavigationLink { InternetAccessGuideView() } label: { cardBody("🌐", "科学上网", "合法渠道 · SIM 卡 · 漫游") }
+                        .buttonStyle(.plain)
                     NavigationLink { TransportView() } label: { cardBody("🚄", "交通", "高铁怎么买 · 打车 · 地铁") }
                         .buttonStyle(.plain)
                 }

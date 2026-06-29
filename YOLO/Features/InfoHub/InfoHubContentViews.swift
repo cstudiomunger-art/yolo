@@ -1,6 +1,47 @@
 import SwiftUI
 import AVFoundation
 
+// MARK: - Internet access guide
+
+struct InternetAccessGuideView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+
+    private var guide: InternetAccessGuide {
+        appEnv.infoHub.content.internetAccess
+            ?? InfoHubContentService.bundledFallback.internetAccess
+            ?? InternetAccessGuide(id: "legal_guide", titleZh: "科学上网指南", titleEn: nil, bodyZh: nil, bodyEn: "")
+    }
+
+    private var title: String {
+        let zh = guide.titleZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let en = guide.titleEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !zh.isEmpty { return zh }
+        return en.isEmpty ? "科学上网" : en
+    }
+
+    private var bodyHTML: String {
+        let zh = guide.bodyZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let en = guide.bodyEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !zh.isEmpty { return zh }
+        return en
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(title)
+                    .font(Theme.FontToken.playfair(22, weight: .semibold))
+                HTMLContentView(content: bodyHTML, fontSize: 14, lineSpacing: 5)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(Theme.screenPadding)
+        }
+        .navigationTitle("科学上网")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await appEnv.infoHub.load() }
+    }
+}
+
 // MARK: - Transport
 
 struct TransportView: View {
