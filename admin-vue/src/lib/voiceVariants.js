@@ -171,8 +171,24 @@ export async function setDefaultVariant(variantId, ownerType, ownerId) {
 }
 
 export function newVariantId(ownerType, ownerId, voiceLabel) {
-  const slug = slugify(voiceLabel, "v");
-  return `avv_${ownerType.replace("_", "")}_${ownerId}_${slug}`.slice(0, 120);
+  const slug = slugify(voiceLabel, "");
+  const unique = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const part = slug && /[a-z0-9]/.test(slug) ? `${slug}_${unique}` : `l${unique}`;
+  const typeShort = ownerType.replace(/_/g, "");
+  return `avv_${typeShort}_${ownerId}_${part}`.slice(0, 120);
+}
+
+/** Case-sensitive trimmed label match within the same owner. */
+export function hasDuplicateVoiceLabel(variants, label, exceptId = null) {
+  const normalized = String(label || "").trim();
+  if (!normalized) return false;
+  return variants.some(
+    (v) => v.id !== exceptId && String(v.voice_label || "").trim() === normalized
+  );
+}
+
+export function duplicateVoiceLabelMessage(label) {
+  return `音色名称「${label}」已存在，请换一个名称`;
 }
 
 export function readAudioDuration(file) {

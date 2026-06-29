@@ -8,6 +8,8 @@ import {
   setDefaultVariant,
   newVariantId,
   readAudioDuration,
+  hasDuplicateVoiceLabel,
+  duplicateVoiceLabelMessage,
 } from "@/lib/voiceVariants";
 
 const props = defineProps({
@@ -62,29 +64,43 @@ async function addVariant() {
     return;
   }
   err.value = "";
-  const id = newVariantId(props.ownerType, props.ownerId, label);
-  const isFirst = variants.value.length === 0;
-  const payload = {
-    id,
-    owner_type: props.ownerType,
-    owner_id: props.ownerId,
-    voice_label: label,
-    audio_url: "",
-    duration_seconds: 0,
-    segments: [],
-    sort_order: variants.value.length,
-    is_default: isFirst,
-    is_active: true,
-  };
-  const { error: e } = await supabase.from("audio_voice_variants").upsert(payload);
-  if (e) {
-    err.value = e.message;
-    return;
+  try {
+    // Refresh so we don't treat an imported/migrated default row as "first".
+    variants.value = await ensureLegacyVoiceVariants(props.ownerType, props.ownerId);
+    if (hasDuplicateVoiceLabel(variants.value, label)) {
+      err.value = duplicateVoiceLabelMessage(label);
+      return;
+    }
+    const id = newVariantId(props.ownerType, props.ownerId, label);
+    const isFirst = variants.value.length === 0;
+    const payload = {
+      id,
+      owner_type: props.ownerType,
+      owner_id: props.ownerId,
+      voice_label: label,
+      audio_url: "",
+      duration_seconds: 0,
+      segments: [],
+      sort_order: variants.value.length,
+      is_default: isFirst,
+      is_active: true,
+    };
+    const { error: e } = await supabase.from("audio_voice_variants").insert(payload);
+    if (e) {
+      if (e.code === "23505") {
+        await load();
+        err.value = duplicateVoiceLabelMessage(label);
+        return;
+      }
+      throw e;
+    }
+    newLabel.value = "";
+    await load();
+    if (isFirst) await syncParentAudioFromDefault(props.ownerType, props.ownerId);
+    emit("changed");
+  } catch (e) {
+    err.value = e.message || String(e);
   }
-  newLabel.value = "";
-  await load();
-  if (isFirst) await syncParentAudioFromDefault(props.ownerType, props.ownerId);
-  emit("changed");
 }
 
 async function onUpload(variant, e) {
@@ -121,11 +137,21 @@ async function saveLabel(variant) {
     err.value = "音色名称不能为空";
     return;
   }
+  if (hasDuplicateVoiceLabel(variants.value, label, variant.id)) {
+    err.value = duplicateVoiceLabelMessage(label);
+    await load();
+    return;
+  }
   const { error: e } = await supabase
     .from("audio_voice_variants")
     .update({ voice_label: label, updated_at: new Date().toISOString() })
     .eq("id", variant.id);
   if (e) {
+    if (e.code === "23505") {
+      err.value = duplicateVoiceLabelMessage(label);
+      await load();
+      return;
+    }
     err.value = e.message;
     return;
   }
@@ -164,6 +190,9 @@ async function removeVariant(variant) {
 <template>
   <div class="voice-variants">
     <p v-if="hint" class="hint">{{ hint }}</p>
+    <p v-else-if="ownerId && !loading && variants.length" class="hint">
+      修改音色名称：直接编辑每行左侧输入框，点击框外或按 Enter 保存。「默认播放」表示 App 优先使用此条，与名称无关。
+    </p>
     <p v-if="!ownerId" class="muted">请先保存记录后再管理音色。</p>
     <p v-else-if="loading" class="muted">加载音色…</p>
 
@@ -180,9 +209,10 @@ async function removeVariant(variant) {
           placeholder="音色名称"
           :disabled="!canEdit"
           @blur="saveLabel(v)"
+          @keyup.enter="saveLabel(v)"
         />
         <span class="dur">{{ formatDuration(v.duration_seconds) }}</span>
-        <span v-if="v.is_default" class="badge">默认</span>
+        <span v-if="v.is_default" class="badge" title="App 未选音色时优先播放此条">默认播放</span>
         <audio v-if="v.audio_url" :src="v.audio_url" controls class="preview"></audio>
         <span v-else class="muted">未上传</span>
         <label v-if="canEdit" class="uploader">
@@ -205,7 +235,7 @@ async function removeVariant(variant) {
     </div>
 
     <div v-if="canEdit && ownerId" class="add-row">
-      <input v-model="newLabel" type="text" placeholder="新音色名称，如 男声 · 沉稳" />
+      <input v-model="newLabel" type="text" placeholder="新音色名称（不可与已有重复），如 男声 · 沉稳" />
       <button type="button" class="btn btn-sm" @click="addVariant">添加音色</button>
     </div>
 
