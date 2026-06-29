@@ -61,6 +61,13 @@ struct CachingContentRepository: ContentRepositoryProtocol {
         }
     }
 
+    func fetchVoiceVariants(ownerType: AudioVoiceOwnerType, ownerId: String) async throws -> [AudioVoiceVariant] {
+        let key = ContentCacheKey.voiceVariants(ownerType: ownerType, ownerId: ownerId)
+        return try await cached(key: key) {
+            try await upstream.fetchVoiceVariants(ownerType: ownerType, ownerId: ownerId)
+        }
+    }
+
     func fetchChecklistItems(cityIds: [String], countryCode: String) async throws -> [ChecklistItem] {
         let key = ContentCacheKey.checklist(cityIds: cityIds, countryCode: countryCode)
         return try await cached(key: key) {

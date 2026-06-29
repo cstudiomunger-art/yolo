@@ -5,6 +5,7 @@ struct AudioGuideSection: View {
 
     let attraction: Attraction
     let guide: AudioGuide
+    var voiceOwner: AudioVoiceOwner? = nil
     var includedWithLabel: String?
     var allowsPreview: Bool = true
     /// Hide the inline "Unlock Audio Guide" button when the host screen already provides an
@@ -26,15 +27,26 @@ struct AudioGuideSection: View {
     @State private var showUnlockedToast = false
     @State private var scrubProgress: Double = 0
     @State private var isScrubbing = false
+    @State private var voiceVariants: [AudioVoiceVariant] = []
+    @State private var selectedVariantId: String?
 
     private var player: AudioQueuePlayer { appEnv.audioPlayer }
 
+    private var playbackGuide: AudioGuide {
+        guard let voiceOwner, !voiceVariants.isEmpty else { return guide }
+        return AudioPlaybackResolver.resolve(
+            baseGuide: guide,
+            variants: voiceVariants,
+            preferredVariantId: selectedVariantId
+        )
+    }
+
     /// Whether this guide is the track currently loaded in the global player.
-    private var isActive: Bool { player.currentTrackId == guide.id }
+    private var isActive: Bool { player.currentTrackId == playbackGuide.id }
     private var isPlayingThis: Bool { isActive && player.isPlaying }
     private var displayMode: AudioQueuePlayer.Mode { isActive ? player.mode : .idle }
     private var canPlayThis: Bool { isActive ? player.canPlay : true }
-    private var displayDuration: Int { isActive ? player.durationSeconds : max(guide.durationSeconds, 1) }
+    private var displayDuration: Int { isActive ? player.durationSeconds : max(playbackGuide.durationSeconds, 1) }
 
     private var freeTrialSeconds: Double {
         Double(appEnv.contentMode.branding.freeAudioPreviewSeconds)
@@ -59,18 +71,18 @@ struct AudioGuideSection: View {
     }
 
     private var isDownloaded: Bool {
-        AudioDownloadService.shared.isDownloaded(guideId: guide.id)
+        AudioDownloadService.shared.isDownloaded(guideId: playbackGuide.id)
     }
 
     private var previewCapSeconds: Int {
         if isActive { return Int(player.previewMaxSeconds.rounded()) }
-        return min(max(guide.durationSeconds, 1), Int(freeTrialSeconds))
+        return min(max(playbackGuide.durationSeconds, 1), Int(freeTrialSeconds))
     }
 
     /// This guide as a standalone queue entry (used when no attraction queue is provided).
     private var selfTrack: AudioTrack {
         AudioTrack(
-            guide: guide,
+            guide: playbackGuide,
             title: guide.titleEn,
             artist: attraction.name,
             attraction: attraction,
@@ -80,7 +92,14 @@ struct AudioGuideSection: View {
         )
     }
 
-    private var effectiveQueue: [AudioTrack] { queue.isEmpty ? [selfTrack] : queue }
+    private var effectiveQueue: [AudioTrack] {
+        guard !queue.isEmpty else { return [selfTrack] }
+        var tracks = queue
+        if voiceOwner != nil, tracks.indices.contains(trackIndex) {
+            tracks[trackIndex] = selfTrack
+        }
+        return tracks
+    }
     private var effectiveIndex: Int { queue.isEmpty ? 0 : trackIndex }
 
     var body: some View {
@@ -90,9 +109,21 @@ struct AudioGuideSection: View {
                 Text(guide.titleEn)
                     .font(Theme.FontToken.inter(14, weight: .medium))
                 Spacer()
-                Text("\(max(guide.durationSeconds / 60, 1)) min")
+                Text("\(max(playbackGuide.durationSeconds / 60, 1)) min")
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+
+            if voiceVariants.count > 1 {
+                AudioVoicePicker(
+                    variants: voiceVariants,
+                    selectedVariantId: selectedVariantId ?? AudioPlaybackResolver.selectedVariant(
+                        from: voiceVariants,
+                        preferredVariantId: selectedVariantId
+                    )?.id
+                ) { variant in
+                    selectVoice(variant)
+                }
             }
 
             if let includedWithLabel {
@@ -119,11 +150,14 @@ struct AudioGuideSection: View {
                 lockedControls
             }
 
-            if guide.segments.count > 1 {
+            if playbackGuide.segments.count > 1 {
                 chapterList
             }
         }
         .guideContentCardStyle()
+        .task(id: voiceOwner?.preferenceKey) {
+            await loadVoiceVariants()
+        }
         .sheet(isPresented: $showPurchase) {
             MembershipPlansView(
                 attraction: attraction,
@@ -328,8 +362,8 @@ struct AudioGuideSection: View {
                     .foregroundStyle(Theme.ColorToken.accent)
                 Spacer()
                 Button(String(localized: "Remove")) {
-                    AudioDownloadService.shared.removeDownload(guideId: guide.id)
-                    player.reloadIfCurrent(guideId: guide.id)
+                    AudioDownloadService.shared.removeDownload(guideId: playbackGuide.id)
+                    player.reloadIfCurrent(guideId: playbackGuide.id)
                     accessRefresh = UUID()
                 }
                 .font(Theme.FontToken.inter(10))
@@ -370,7 +404,7 @@ struct AudioGuideSection: View {
 
     @ViewBuilder
     private var chapterList: some View {
-        let segments = guide.segments.sorted { $0.startSeconds < $1.startSeconds }
+        let segments = playbackGuide.segments.sorted { $0.startSeconds < $1.startSeconds }
         VStack(alignment: .leading, spacing: 6) {
             Text(String(localized: "Chapters"))
                 .font(Theme.FontToken.inter(11, weight: .medium))
@@ -406,11 +440,31 @@ struct AudioGuideSection: View {
         downloadError = nil
         defer { isDownloading = false }
         do {
-            try await AudioDownloadService.shared.download(guide: guide)
-            player.reloadIfCurrent(guideId: guide.id)
+            try await AudioDownloadService.shared.download(guide: playbackGuide)
+            player.reloadIfCurrent(guideId: playbackGuide.id)
             accessRefresh = UUID()
         } catch {
             downloadError = error.localizedDescription
         }
+    }
+
+    private func loadVoiceVariants() async {
+        guard let voiceOwner else {
+            voiceVariants = []
+            selectedVariantId = nil
+            return
+        }
+        let loaded = await AudioVoicePlaybackSupport.loadVariants(owner: voiceOwner, content: appEnv.content)
+        voiceVariants = loaded
+        selectedVariantId = appEnv.preferences.preferredVoiceVariantId(for: voiceOwner)
+    }
+
+    private func selectVoice(_ variant: AudioVoiceVariant) {
+        if isActive { player.close() }
+        selectedVariantId = variant.id
+        if let voiceOwner {
+            appEnv.preferences.setPreferredVoiceVariantId(variant.id, for: voiceOwner)
+        }
+        scrubProgress = 0
     }
 }

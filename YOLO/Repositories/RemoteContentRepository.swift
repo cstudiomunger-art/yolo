@@ -123,6 +123,18 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
         return try await bundledFallback.fetchAudioGuide(id: id)
     }
 
+    func fetchVoiceVariants(ownerType: AudioVoiceOwnerType, ownerId: String) async throws -> [AudioVoiceVariant] {
+        try await client
+            .from("audio_voice_variants")
+            .select()
+            .eq("owner_type", value: ownerType.rawValue)
+            .eq("owner_id", value: ownerId)
+            .eq("is_active", value: true)
+            .order("sort_order", ascending: true)
+            .execute()
+            .value
+    }
+
     func fetchChecklistItems(cityIds: [String], countryCode: String) async throws -> [ChecklistItem] {
         let all: [ChecklistItem] = try await client
             .from("checklist_items")

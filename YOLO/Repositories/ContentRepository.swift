@@ -9,6 +9,7 @@ protocol ContentRepositoryProtocol: Sendable {
     func fetchAttraction(id: String) async throws -> Attraction?
     func fetchAudioGuides(attractionId: String) async throws -> [AudioGuide]
     func fetchAudioGuide(id: String) async throws -> AudioGuide?
+    func fetchVoiceVariants(ownerType: AudioVoiceOwnerType, ownerId: String) async throws -> [AudioVoiceVariant]
     func fetchChecklistItems(cityIds: [String], countryCode: String) async throws -> [ChecklistItem]
     func fetchChecklistSettings() async throws -> ChecklistSettings
     func fetchSubAreas(attractionId: String) async throws -> [SubArea]
@@ -96,6 +97,10 @@ struct BundledContentRepository: ContentRepositoryProtocol {
 
     func fetchAudioGuide(id: String) async throws -> AudioGuide? {
         audioGuides.first { $0.id == id }
+    }
+
+    func fetchVoiceVariants(ownerType: AudioVoiceOwnerType, ownerId: String) async throws -> [AudioVoiceVariant] {
+        []
     }
 
     func fetchChecklistItems(cityIds: [String], countryCode: String) async throws -> [ChecklistItem] {

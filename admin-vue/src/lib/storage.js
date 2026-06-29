@@ -76,6 +76,15 @@ export async function uploadCityGuideAudioFile(file, guideId) {
   return uploadStorageFile(AUDIO_BUCKET, `city-guides/${guideId}.${ext}`, file, normalizeAudioContentType(file));
 }
 
+/** Voice variant → audio-guides/voices/{ownerType}/{ownerId}/{variantId}.{ext} */
+export async function uploadVoiceVariantFile(file, ownerType, ownerId, variantId) {
+  if (!ownerId) throw new Error("请先保存记录并填写 ID 后再上传音频");
+  if (!variantId) throw new Error("缺少音色 ID");
+  const ext = (file.name.split(".").pop() || "m4a").toLowerCase().replace(/[^a-z0-9]/g, "") || "m4a";
+  const path = `voices/${ownerType}/${ownerId}/${variantId}.${ext}`;
+  return uploadStorageFile(AUDIO_BUCKET, path, file, normalizeAudioContentType(file));
+}
+
 /** Phrase audio → audio-guides/phrases/{id}.{ext} */
 export async function uploadPhraseAudioFile(file, phraseId) {
   if (!phraseId) throw new Error("请先填写内容（生成 id）后再上传音频");

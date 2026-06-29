@@ -10,6 +10,7 @@ import ImageUrlList from "@/components/fields/ImageUrlList.vue";
 import PaymentMatch from "@/components/fields/PaymentMatch.vue";
 import ItineraryBuilder from "@/components/fields/ItineraryBuilder.vue";
 import MarkdownField from "@/components/fields/MarkdownField.vue";
+import VoiceVariantsEditor from "@/components/fields/VoiceVariantsEditor.vue";
 import {
   uploadCoverImage,
   uploadSubAreaAudioFile,
@@ -321,6 +322,14 @@ async function onAudioFile(e) {
       <input type="file" accept="audio/*" @change="onAudioFile" :disabled="uploading" />
       <span v-if="uploading" class="muted">上传中…</span>
     </div>
+
+    <VoiceVariantsEditor
+      v-else-if="isType('voice_variants')"
+      :owner-type="f.ownerType"
+      :owner-id="entityId"
+      :hint="f.hint"
+      :can-edit="!!entityId"
+    />
 
     <!-- advance reminder days: presets + custom -->
     <div v-else-if="isType('reminder_days')" class="rdays">

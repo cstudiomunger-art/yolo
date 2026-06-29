@@ -182,6 +182,25 @@ final class UserPreferencesStore {
     /// Filled from CMS via `AppEnvironment.refreshVisaRule()`.
     var cachedVisaRule: VisaRule?
 
+    /// Last-selected narration voice per content owner (`ownerType:ownerId` → variant id).
+    private(set) var preferredAudioVoiceVariantIds: [String: String] = [:] {
+        didSet {
+            if let data = try? JSONEncoder().encode(preferredAudioVoiceVariantIds) {
+                UserDefaults.standard.set(data, forKey: Keys.preferredAudioVoiceVariantIds)
+            }
+        }
+    }
+
+    func preferredVoiceVariantId(for owner: AudioVoiceOwner) -> String? {
+        preferredAudioVoiceVariantIds[owner.preferenceKey]
+    }
+
+    func setPreferredVoiceVariantId(_ variantId: String, for owner: AudioVoiceOwner) {
+        var map = preferredAudioVoiceVariantIds
+        map[owner.preferenceKey] = variantId
+        preferredAudioVoiceVariantIds = map
+    }
+
     var daysUntilDeparture: Int {
         let start = Calendar.current.startOfDay(for: .now)
         let end = Calendar.current.startOfDay(for: departureDate)
@@ -213,6 +232,7 @@ final class UserPreferencesStore {
         displayName = UserDefaults.standard.string(forKey: Keys.displayName)
         avatarUrl = UserDefaults.standard.string(forKey: Keys.avatarUrl)
         avatarStatus = UserDefaults.standard.string(forKey: Keys.avatarStatus) ?? "none"
+        preferredAudioVoiceVariantIds = Self.loadPreferredVoiceVariantIds()
         appLanguage = AppLanguage.resolved(fromStoredValue: UserDefaults.standard.string(forKey: Keys.appLanguage))
         hasCompletedIntroOnboarding = UserDefaults.standard.bool(forKey: Keys.introOnboardingDone)
         hasCompletedNotificationOnboarding = UserDefaults.standard.bool(forKey: Keys.notificationOnboardingDone)
@@ -253,6 +273,7 @@ final class UserPreferencesStore {
             Keys.notificationOnboardingDone,
             Keys.guestMode,
             Keys.favoriteAttractions,
+            Keys.preferredAudioVoiceVariantIds,
         ] {
             UserDefaults.standard.removeObject(forKey: key)
         }
@@ -273,6 +294,7 @@ final class UserPreferencesStore {
         clearItinerarySessionState()
         purchasedAttractionIds = []
         favoriteAttractions = []
+        preferredAudioVoiceVariantIds = [:]
         appLanguage = AppLanguage.resolved(fromStoredValue: nil)
         cachedVisaRule = nil
     }
@@ -626,6 +648,13 @@ final class UserPreferencesStore {
     private func notifySyncableChange() {
         guard !suppressSyncNotification else { return }
         onSyncableChange?()
+    }
+
+    private static func loadPreferredVoiceVariantIds() -> [String: String] {
+        guard let data = UserDefaults.standard.data(forKey: Keys.preferredAudioVoiceVariantIds),
+              let decoded = try? JSONDecoder().decode([String: String].self, from: data)
+        else { return [:] }
+        return decoded
     }
 
     private static func formatDateOnly(_ date: Date) -> String {

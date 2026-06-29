@@ -9,20 +9,36 @@ struct CityGuideAudioSection: View {
     @State private var scrubProgress: Double = 0
     @State private var isScrubbing = false
     @State private var transcriptExpanded = false
+    @State private var voiceVariants: [AudioVoiceVariant] = []
+    @State private var selectedVariantId: String?
+
+    private var voiceOwner: AudioVoiceOwner {
+        AudioVoiceOwner(type: .cityGuide, id: guide.id)
+    }
 
     private var player: AudioQueuePlayer { appEnv.audioPlayer }
-    private var isActive: Bool { player.currentTrackId == audioGuide.id }
+
+    private var playbackGuide: AudioGuide {
+        guard !voiceVariants.isEmpty else { return audioGuide }
+        return AudioPlaybackResolver.resolve(
+            baseGuide: audioGuide,
+            variants: voiceVariants,
+            preferredVariantId: selectedVariantId
+        )
+    }
+
+    private var isActive: Bool { player.currentTrackId == playbackGuide.id }
     private var isPlayingThis: Bool { isActive && player.isPlaying }
     private var displayMode: AudioQueuePlayer.Mode { isActive ? player.mode : .idle }
     private var canPlayThis: Bool { isActive ? player.canPlay : true }
     private var displayDuration: Int {
-        isActive ? player.durationSeconds : max(audioGuide.durationSeconds, 1)
+        isActive ? player.durationSeconds : max(playbackGuide.durationSeconds, 1)
     }
 
     private var selfTrack: AudioTrack {
         AudioTrack(
-            guide: audioGuide,
-            title: audioGuide.titleEn,
+            guide: playbackGuide,
+            title: playbackGuide.titleEn,
             artist: guide.titleEn,
             allowsPreview: false,
             isFree: true
@@ -36,10 +52,22 @@ struct CityGuideAudioSection: View {
                 Text(audioGuide.titleEn)
                     .font(Theme.FontToken.inter(14, weight: .medium))
                 Spacer()
-                if audioGuide.durationSeconds > 0 {
-                    Text("\(max(audioGuide.durationSeconds / 60, 1)) min")
+                if playbackGuide.durationSeconds > 0 {
+                    Text("\(max(playbackGuide.durationSeconds / 60, 1)) min")
                         .font(Theme.FontToken.inter(11))
                         .foregroundStyle(Theme.ColorToken.textMuted)
+                }
+            }
+
+            if voiceVariants.count > 1 {
+                AudioVoicePicker(
+                    variants: voiceVariants,
+                    selectedVariantId: selectedVariantId ?? AudioPlaybackResolver.selectedVariant(
+                        from: voiceVariants,
+                        preferredVariantId: selectedVariantId
+                    )?.id
+                ) { variant in
+                    selectVoice(variant)
                 }
             }
 
@@ -99,6 +127,9 @@ struct CityGuideAudioSection: View {
             }
         }
         .guideContentCardStyle()
+        .task(id: guide.id) {
+            await loadVoiceVariants()
+        }
         .onAppear {
             if isActive { scrubProgress = player.progress }
         }
@@ -155,5 +186,20 @@ struct CityGuideAudioSection: View {
         let m = seconds / 60
         let s = seconds % 60
         return String(format: "%d:%02d", m, s)
+    }
+
+    private func loadVoiceVariants() async {
+        voiceVariants = await AudioVoicePlaybackSupport.loadVariants(
+            owner: voiceOwner,
+            content: appEnv.content
+        )
+        selectedVariantId = appEnv.preferences.preferredVoiceVariantId(for: voiceOwner)
+    }
+
+    private func selectVoice(_ variant: AudioVoiceVariant) {
+        if isActive { player.close() }
+        selectedVariantId = variant.id
+        appEnv.preferences.setPreferredVoiceVariantId(variant.id, for: voiceOwner)
+        scrubProgress = 0
     }
 }

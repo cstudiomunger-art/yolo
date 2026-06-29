@@ -103,6 +103,9 @@ enum ContentCacheKey {
     static func attraction(id: String) -> String { "attraction_\(id.lowercased())" }
     static func audioGuides(attractionId: String) -> String { "audio_guides_\(attractionId.lowercased())" }
     static func audioGuide(id: String) -> String { "audio_guide_\(id.lowercased())" }
+    static func voiceVariants(ownerType: AudioVoiceOwnerType, ownerId: String) -> String {
+        "voice_variants_\(ownerType.rawValue)_\(ownerId.lowercased())"
+    }
     static func subAreas(attractionId: String) -> String { "sub_areas_\(attractionId.lowercased())" }
     static func checklist(cityIds: [String], countryCode: String) -> String {
         "checklist_\(filterHash(cityIds: cityIds, countryCode: countryCode))"

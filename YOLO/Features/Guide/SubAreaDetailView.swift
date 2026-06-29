@@ -12,9 +12,14 @@ struct SubAreaDetailView: View {
     @State private var audioGuides: [AudioGuide] = []
     @State private var subAreas: [SubArea] = []
     @State private var subAreaAudio: [String: AudioGuide] = [:]
+    @State private var resolvedGuides: [String: AudioGuide] = [:]
     @State private var isLoading = true
     @State private var fullScreenImagePath: String?
     @State private var showPaywall = false
+
+    private func resolvedGuide(for base: AudioGuide) -> AudioGuide {
+        resolvedGuides[base.id] ?? base
+    }
 
     /// Attraction-scoped play queue: the attraction's audio guides followed by each sub-area's
     /// audio, deduplicated by guide id — identical to AttractionDetailView so tapping a sub-area
@@ -23,16 +28,20 @@ struct SubAreaDetailView: View {
         guard let attraction else { return [] }
         var seen = Set<String>()
         var tracks: [AudioTrack] = []
-        for g in audioGuides where seen.insert(g.id).inserted {
+        for g in audioGuides {
+            let play = resolvedGuide(for: g)
+            guard seen.insert(play.id).inserted else { continue }
             tracks.append(AudioTrack(
-                guide: g, title: g.titleEn, artist: attraction.name,
+                guide: play, title: g.titleEn, artist: attraction.name,
                 attraction: attraction, subArea: nil, allowsPreview: true
             ))
         }
         for area in subAreas {
-            guard let g = subAreaAudio[area.id], seen.insert(g.id).inserted else { continue }
+            guard let base = subAreaAudio[area.id] else { continue }
+            let play = resolvedGuide(for: base)
+            guard seen.insert(play.id).inserted else { continue }
             tracks.append(AudioTrack(
-                guide: g, title: g.titleEn, artist: attraction.name,
+                guide: play, title: base.titleEn, artist: attraction.name,
                 attraction: attraction, subArea: area, allowsPreview: true
             ))
         }
@@ -116,13 +125,15 @@ struct SubAreaDetailView: View {
                     }
                 }
 
-                if let guide = audioGuide, let attraction {
+                if let base = audioGuide, let attraction, let area = subArea {
+                    let play = resolvedGuide(for: base)
                     let queue = attractionAudioQueue
                     Text("🎧 Area Audio")
                         .sectionTitleStyle()
                     AudioGuideSection(
                         attraction: attraction,
-                        guide: guide,
+                        guide: base,
+                        voiceOwner: AudioVoiceOwner(type: .subArea, id: area.id),
                         includedWithLabel: String(
                             format: String(localized: "Included with %@ audio guide"),
                             route.attractionName
@@ -131,7 +142,7 @@ struct SubAreaDetailView: View {
                         showsUnlockButton: false,
                         subArea: area,
                         queue: queue,
-                        trackIndex: queue.firstIndex(where: { $0.guide.id == guide.id }) ?? 0
+                        trackIndex: queue.firstIndex(where: { $0.guide.id == play.id }) ?? 0
                     )
                 }
 
@@ -240,16 +251,41 @@ struct SubAreaDetailView: View {
 
         // Resolve audio for every area so the playlist spans the whole attraction.
         var audioMap: [String: AudioGuide] = [:]
+        var resolved: [String: AudioGuide] = [:]
         for area in areas {
             if let direct = area.playbackGuide(attractionId: route.attractionId) {
                 audioMap[area.id] = direct
+                let owner = AudioVoiceOwner(type: .subArea, id: area.id)
+                resolved[direct.id] = await AudioVoicePlaybackSupport.resolveGuide(
+                    base: direct,
+                    owner: owner,
+                    content: appEnv.content,
+                    preferences: appEnv.preferences
+                )
             } else if let gid = area.audioGuideId,
                       let guide = try? await appEnv.content.fetchAudioGuide(id: gid) {
                 audioMap[area.id] = guide
                 audioMap[gid] = guide
+                let owner = AudioVoiceOwner(type: .audioGuide, id: guide.id)
+                resolved[guide.id] = await AudioVoicePlaybackSupport.resolveGuide(
+                    base: guide,
+                    owner: owner,
+                    content: appEnv.content,
+                    preferences: appEnv.preferences
+                )
             }
         }
+        for g in audioGuides {
+            let owner = AudioVoiceOwner(type: .audioGuide, id: g.id)
+            resolved[g.id] = await AudioVoicePlaybackSupport.resolveGuide(
+                base: g,
+                owner: owner,
+                content: appEnv.content,
+                preferences: appEnv.preferences
+            )
+        }
         subAreaAudio = audioMap
+        resolvedGuides = resolved
         if let area = subArea { audioGuide = audioMap[area.id] }
     }
 }
