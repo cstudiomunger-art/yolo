@@ -1533,6 +1533,51 @@ const App = {};
         { key: "is_active", type: "bool", label: "启用" },
       ],
     },
+    city_hospitals: {
+      label: "紧急 · 医院",
+      pk: "id",
+      order: "sort_order",
+      listColumns: [
+        { key: "name_en", label: "名称" },
+        { key: "phone", label: "电话" },
+        { key: "city_id", label: "城市", ref: "city" },
+        { key: "is_active", label: "启用" },
+      ],
+      fields: [
+        { key: "id", type: "slug", slugSource: "name_en", slugPrefix: "hosp", slugPrefixField: "city_id", required: true },
+        { key: "city_id", type: "ref_city", required: true, label: "城市" },
+        { key: "name_en", type: "text", required: true, label: "名称（英文）" },
+        { key: "name_zh", type: "text", label: "名称（中文）" },
+        { key: "phone", type: "text", required: true, label: "电话" },
+        { key: "address_en", type: "text", label: "地址（英文）" },
+        { key: "address_zh", type: "text", label: "地址（中文）" },
+        { key: "has_international_dept", type: "bool", label: "有国际部/外宾门诊" },
+        { key: "note", type: "textarea", label: "备注" },
+        { key: "sort_order", type: "number" },
+        { key: "is_active", type: "bool", label: "启用", defaultTrue: true },
+      ],
+    },
+    city_embassies: {
+      label: "紧急 · 使馆",
+      pk: "id",
+      order: "sort_order",
+      listColumns: [
+        { key: "country_code", label: "国籍", ref: "country" },
+        { key: "embassy_phone", label: "使馆电话" },
+        { key: "city_id", label: "城市", ref: "city" },
+        { key: "is_active", label: "启用" },
+      ],
+      fields: [
+        { key: "id", type: "slug", slugSource: "country_code", slugPrefix: "emb", slugPrefixField: "city_id", required: true },
+        { key: "city_id", type: "ref_city", required: true, label: "城市" },
+        { key: "country_code", type: "ref_country", required: true, label: "国籍" },
+        { key: "location_label", type: "text", required: true, label: "展示标签", hint: "如 驻华大使馆 · 北京 / 驻沪总领事馆" },
+        { key: "embassy_phone", type: "text", required: true, label: "使馆电话" },
+        { key: "consular_hotline", type: "text", label: "领事保护 24h 热线" },
+        { key: "sort_order", type: "number" },
+        { key: "is_active", type: "bool", label: "启用", defaultTrue: true },
+      ],
+    },
   };
 
   App.PRACTICAL_INFO_PRESETS = [

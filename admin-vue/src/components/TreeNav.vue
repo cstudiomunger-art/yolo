@@ -47,6 +47,8 @@ const CITY_PANELS = [
   { id: "overview", label: "城市概览" },
   { id: "city_guides", label: "城市指南", table: "city_guides" },
   { id: "hotels", label: "酒店", table: "hotels" },
+  { id: "city_hospitals", label: "紧急 · 医院", table: "city_hospitals" },
+  { id: "city_embassies", label: "紧急 · 使馆", table: "city_embassies" },
   { id: "checklist_items", label: "行前清单", table: "checklist_items" },
   { id: "home_tips", label: "首页提示", table: "home_tips" },
   { id: "shopping_items", label: "购物清单", table: "shopping_items" },
@@ -107,6 +109,8 @@ const GROUPS = [
     { label: "科学上网指南", table: "internet_access_guides" },
     { label: "常用语", table: "common_phrases" },
     { label: "方言彩蛋", table: "dialect_phrases" },
+    { label: "紧急 · 医院", table: "city_hospitals" },
+    { label: "紧急 · 使馆", table: "city_embassies" },
   ] },
   { id: "site", label: "🌐 官网内容", leaves: [
     { label: "🎟️ 门票（外宾购票页）", table: "ticket_attractions" },

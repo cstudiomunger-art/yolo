@@ -276,6 +276,44 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
         return data
     }
 
+    func fetchCityHospitals(cityId: String) async throws -> [CityHospital] {
+        let normalizedCityId = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        do {
+            let rows: [CityHospital] = try await client
+                .from("city_hospitals")
+                .select()
+                .eq("city_id", value: normalizedCityId)
+                .eq("is_active", value: true)
+                .order("sort_order", ascending: true)
+                .execute()
+                .value
+            return rows
+        } catch {
+            let fallback = try await bundledFallback.fetchCityHospitals(cityId: normalizedCityId)
+            if !fallback.isEmpty { return fallback }
+            throw error
+        }
+    }
+
+    func fetchCityEmbassies(cityId: String) async throws -> [CityEmbassy] {
+        let normalizedCityId = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        do {
+            let rows: [CityEmbassy] = try await client
+                .from("city_embassies")
+                .select()
+                .eq("city_id", value: normalizedCityId)
+                .eq("is_active", value: true)
+                .order("sort_order", ascending: true)
+                .execute()
+                .value
+            return rows
+        } catch {
+            let fallback = try await bundledFallback.fetchCityEmbassies(cityId: normalizedCityId)
+            if !fallback.isEmpty { return fallback }
+            throw error
+        }
+    }
+
     func fetchChecklistSettings() async throws -> ChecklistSettings {
         let rows: [ChecklistSettings] = try await client
             .from("checklist_settings")

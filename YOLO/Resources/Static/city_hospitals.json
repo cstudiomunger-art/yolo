@@ -1,0 +1,26 @@
+[
+  {
+    "id": "beijing-union-medical",
+    "city_id": "beijing",
+    "name_en": "Peking Union Medical College Hospital",
+    "name_zh": "北京协和医院",
+    "phone": "+86 10 6915 6114",
+    "address_en": "1 Shuaifuyuan Wangfujing, Dongcheng District",
+    "address_zh": "东城区帅府园1号",
+    "has_international_dept": true,
+    "note": "International Medical Services (IMS); English-speaking staff at main campus.",
+    "sort_order": 0
+  },
+  {
+    "id": "beijing-united-family",
+    "city_id": "beijing",
+    "name_en": "Beijing United Family Hospital",
+    "name_zh": "北京和睦家医院",
+    "phone": "+86 10 5927 7000",
+    "address_en": "2 Jiangtai Road, Chaoyang District",
+    "address_zh": "朝阳区将台路2号",
+    "has_international_dept": true,
+    "note": "Private hospital; full English service; good for expats.",
+    "sort_order": 1
+  }
+]

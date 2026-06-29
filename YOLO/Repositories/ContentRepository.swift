@@ -22,6 +22,8 @@ protocol ContentRepositoryProtocol: Sendable {
     func fetchPlanningItinerary() async throws -> SampleItinerary
     func fetchPassportCountries() async throws -> [PassportCountry]
     func fetchEmergencyData() async throws -> EmergencyData
+    func fetchCityHospitals(cityId: String) async throws -> [CityHospital]
+    func fetchCityEmbassies(cityId: String) async throws -> [CityEmbassy]
     func fetchAppBranding() async throws -> AppBranding
 }
 
@@ -41,6 +43,8 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     private let planningItinerary: SampleItinerary?
     private let visaRules: [VisaRule]
     private let emergencyData: EmergencyData
+    private let cityHospitals: [CityHospital]
+    private let cityEmbassies: [CityEmbassy]
     private let appBranding: AppBranding
 
     init() {
@@ -60,6 +64,8 @@ struct BundledContentRepository: ContentRepositoryProtocol {
         let visaBundle = BundledJSONLoader.load(VisaRulesBundle.self, resource: "visa-rules")
         visaRules = visaBundle.rules
         emergencyData = BundledJSONLoader.load(EmergencyData.self, resource: "emergency-data")
+        cityHospitals = BundledJSONLoader.load([CityHospital].self, resource: "city_hospitals")
+        cityEmbassies = BundledJSONLoader.load([CityEmbassy].self, resource: "city_embassies")
         appBranding = BundledJSONLoader.load(AppBranding.self, resource: "app_branding")
     }
 
@@ -167,6 +173,20 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     }
 
     func fetchEmergencyData() async throws -> EmergencyData { emergencyData }
+
+    func fetchCityHospitals(cityId: String) async throws -> [CityHospital] {
+        let normalized = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return cityHospitals
+            .filter { $0.cityId.lowercased() == normalized }
+            .sorted { $0.sortOrder < $1.sortOrder }
+    }
+
+    func fetchCityEmbassies(cityId: String) async throws -> [CityEmbassy] {
+        let normalized = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return cityEmbassies
+            .filter { $0.cityId.lowercased() == normalized }
+            .sorted { $0.sortOrder < $1.sortOrder }
+    }
 
     func fetchAppBranding() async throws -> AppBranding { appBranding }
 }

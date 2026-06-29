@@ -1,0 +1,38 @@
+[
+  {
+    "id": "beijing-gb",
+    "city_id": "beijing",
+    "country_code": "GB",
+    "location_label": "驻华大使馆 · 北京",
+    "embassy_phone": "+86 10 5192 4000",
+    "consular_hotline": "+86 10 5192 4000",
+    "sort_order": 0
+  },
+  {
+    "id": "beijing-us",
+    "city_id": "beijing",
+    "country_code": "US",
+    "location_label": "驻华大使馆 · 北京",
+    "embassy_phone": "+86 10 8531 3000",
+    "consular_hotline": "+86 10 8531 3000",
+    "sort_order": 1
+  },
+  {
+    "id": "beijing-au",
+    "city_id": "beijing",
+    "country_code": "AU",
+    "location_label": "驻华大使馆 · 北京",
+    "embassy_phone": "+86 10 5140 4111",
+    "consular_hotline": "+61 2 6261 3305",
+    "sort_order": 2
+  },
+  {
+    "id": "beijing-ca",
+    "city_id": "beijing",
+    "country_code": "CA",
+    "location_label": "驻华大使馆 · 北京",
+    "embassy_phone": "+86 10 5139 4000",
+    "consular_hotline": "+1 613 996 8885",
+    "sort_order": 3
+  }
+]

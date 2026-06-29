@@ -48,3 +48,45 @@ struct EmergencyData: Codable {
         case contacts, embassyNote, helpPhrases
     }
 }
+
+struct CityHospital: Identifiable, Codable, Hashable {
+    let id: String
+    let cityId: String
+    let nameEn: String
+    let nameZh: String
+    let phone: String
+    let addressEn: String
+    let addressZh: String
+    let hasInternationalDept: Bool
+    let note: String
+    let sortOrder: Int
+
+    var displayName: String {
+        let en = nameEn.trimmingCharacters(in: .whitespacesAndNewlines)
+        let zh = nameZh.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !en.isEmpty, !zh.isEmpty, en != zh { return "\(en) · \(zh)" }
+        if !en.isEmpty { return en }
+        return zh
+    }
+
+    var displayAddress: String? {
+        let en = addressEn.trimmingCharacters(in: .whitespacesAndNewlines)
+        let zh = addressZh.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !en.isEmpty, !zh.isEmpty, en != zh { return "\(en) · \(zh)" }
+        if !en.isEmpty { return en }
+        if !zh.isEmpty { return zh }
+        return nil
+    }
+}
+
+struct CityEmbassy: Identifiable, Codable, Hashable {
+    let id: String
+    let cityId: String
+    let countryCode: String
+    let locationLabel: String
+    let embassyPhone: String
+    let consularHotline: String
+    let sortOrder: Int
+
+    var normalizedCountryCode: String { countryCode.uppercased() }
+}

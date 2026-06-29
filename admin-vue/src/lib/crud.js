@@ -47,6 +47,8 @@ const CITY_FILTERS = {
   home_tips: { field: "city_id", includeGlobal: true },
   shopping_items: { field: "city_id", includeGlobal: true },
   hotels: { field: "city_id" },
+  city_hospitals: { field: "city_id" },
+  city_embassies: { field: "city_id" },
 };
 
 export function hasCityFilter(tableKey) {

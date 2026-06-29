@@ -9,6 +9,12 @@ struct EmergencyView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var data: EmergencyData?
+    @State private var hospitals: [CityHospital] = []
+    @State private var embassies: [CityEmbassy] = []
+    @State private var passportCountries: [PassportCountry] = []
+    @State private var allCities: [City] = []
+    @State private var cityNames: [String: String] = [:]
+    @State private var selectedCityId = ""
     @State private var selectedNationality: String = ""
     @State private var card = FirstAidCard.load()
     @State private var shareItems: [Any]?
@@ -16,6 +22,45 @@ struct EmergencyView: View {
     private var country: String {
         let cc = appEnv.preferences.countryCode.uppercased()
         return cc.isEmpty ? "GB" : cc
+    }
+
+    private var tripCityIds: [String] {
+        if let trip = appEnv.preferences.activeItinerary {
+            let ordered = SampleItinerary.orderedCityIds(from: trip)
+            if !ordered.isEmpty { return ordered }
+        }
+        let selected = appEnv.preferences.selectedCityIds
+        if !selected.isEmpty { return selected }
+        return ["beijing"]
+    }
+
+    private var pickerCityIds: [String] {
+        if !allCities.isEmpty { return allCities.map(\.id) }
+        return tripCityIds
+    }
+
+    private var selectedEmbassy: CityEmbassy? {
+        embassies.first { $0.normalizedCountryCode == selectedNationality.uppercased() }
+    }
+
+    private var embassyMenuOptions: [(code: String, flag: String, name: String)] {
+        embassies.map { entry in
+            let passport = passportCountries.first { $0.code.uppercased() == entry.normalizedCountryCode }
+            return (
+                entry.normalizedCountryCode,
+                passport?.flag ?? "🏛",
+                passport?.name ?? entry.normalizedCountryCode
+            )
+        }
+    }
+
+    private func cityLabel(_ cityId: String) -> String {
+        if let city = allCities.first(where: { $0.id == cityId }) {
+            let emoji = city.emoji ?? ""
+            let label = "\(emoji) \(city.name)".trimmingCharacters(in: .whitespaces)
+            return label.isEmpty ? city.name : label
+        }
+        return cityNames[cityId] ?? cityId.capitalized
     }
 
     var body: some View {
@@ -34,9 +79,9 @@ struct EmergencyView: View {
             .navigationTitle("紧急 · Emergency")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
-            .task {
-                if selectedNationality.isEmpty { selectedNationality = country }
-                data = try? await appEnv.content.fetchEmergencyData()
+            .task { await loadContent() }
+            .onChange(of: selectedCityId) { _, _ in
+                Task { await loadCityResources() }
             }
             .sheet(isPresented: Binding(get: { shareItems != nil }, set: { if !$0 { shareItems = nil } })) {
                 if let shareItems { ActivityView(items: shareItems) }
@@ -122,9 +167,26 @@ struct EmergencyView: View {
     private var medicalSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             blockLabel("🏥 医疗 & 药品")
-            disclosure(icon: "🩺", title: "就医流程：挂号 → 候诊 → 取药", subtitle: "外国人友好医院清单") {
+            cityPickerCard
+            disclosure(icon: "🩺", title: "就医流程：挂号 → 候诊 → 取药", subtitle: hospitals.isEmpty ? "通用就医指引" : "外国人友好医院清单") {
                 Text("① 挂号（门诊大厅自助机/窗口，带护照）→ ② 候诊（按叫号）→ ③ 医生问诊开单 → ④ 缴费（自助机/窗口）→ ⑤ 检查/取药。\n大城市三甲医院多设国际部/外宾门诊，有英文导诊；急症直接去「急诊」。")
                     .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
+            }
+            if !hospitals.isEmpty {
+                disclosure(icon: "🏥", title: "推荐医院 · \(cityLabel(selectedCityId))", subtitle: "\(hospitals.count) 家") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(hospitals) { hospital in
+                            hospitalRow(hospital)
+                        }
+                    }
+                }
+            } else {
+                Text("暂无 \(cityLabel(selectedCityId)) 的推荐医院，请切换城市或拨打 120。")
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
             }
             disclosure(icon: "💊", title: "常见药中英对照", subtitle: "感冒 / 止痛 / 肠胃 / 过敏") {
                 VStack(alignment: .leading, spacing: 4) {
@@ -145,31 +207,77 @@ struct EmergencyView: View {
         }
     }
 
+    private func hospitalRow(_ hospital: CityHospital) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(hospital.displayName)
+                        .font(Theme.FontToken.inter(12, weight: .medium))
+                    if hospital.hasInternationalDept {
+                        Text("国际部 / International")
+                            .font(Theme.FontToken.inter(10))
+                            .foregroundStyle(Theme.ColorToken.accent)
+                    }
+                    if let address = hospital.displayAddress {
+                        Text(address)
+                            .font(Theme.FontToken.inter(10))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    }
+                    if !hospital.note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text(hospital.note)
+                            .font(Theme.FontToken.inter(10))
+                            .foregroundStyle(Theme.ColorToken.textSecondary)
+                    }
+                }
+                Spacer(minLength: 8)
+                if !hospital.phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Link(hospital.phone, destination: telURL(hospital.phone))
+                        .font(Theme.FontToken.playfair(13, weight: .semibold))
+                        .foregroundStyle(Theme.ColorToken.textPrimary)
+                }
+            }
+        }
+        .padding(.top, 8)
+        .overlay(alignment: .top) { Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1) }
+    }
+
     // MARK: - Embassy by nationality
 
     private var embassySection: some View {
-        let info = EmbassyDirectory.entry(for: selectedNationality)
+        let menu = embassyMenuOptions
+        let selectedOption = menu.first { $0.code == selectedNationality.uppercased() }
         return VStack(alignment: .leading, spacing: 8) {
             blockLabel("🏛 使馆 · 按你的国籍")
             VStack(spacing: 10) {
+                cityPickerRow
                 HStack {
                     Text("当前国籍").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
                     Spacer()
-                    Menu {
-                        ForEach(EmbassyDirectory.all) { e in
-                            Button("\(e.flag) \(e.name)") { selectedNationality = e.code }
+                    if menu.isEmpty {
+                        Text("\(selectedOption?.flag ?? "🏛") \(selectedOption?.name ?? selectedNationality) ⌄")
+                            .font(Theme.FontToken.inter(12, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    } else {
+                        Menu {
+                            ForEach(menu, id: \.code) { option in
+                                Button("\(option.flag) \(option.name)") { selectedNationality = option.code }
+                            }
+                        } label: {
+                            Text("\(selectedOption?.flag ?? "🏛") \(selectedOption?.name ?? selectedNationality) ⌄")
+                                .font(Theme.FontToken.inter(12, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.accent)
                         }
-                    } label: {
-                        Text("\(info.flag) \(info.name) ⌄").font(Theme.FontToken.inter(12, weight: .medium)).foregroundStyle(Theme.ColorToken.accent)
                     }
                 }
-                if let embassy = info.embassy {
-                    embassyRow("驻华大使馆 · 北京", embassy)
-                    if let hotline = info.consularHotline {
+                if let embassy = selectedEmbassy, !embassy.embassyPhone.isEmpty {
+                    embassyRow(embassy.locationLabel, embassy.embassyPhone)
+                    let hotline = embassy.consularHotline.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !hotline.isEmpty, hotline != embassy.embassyPhone {
                         embassyRow("领事保护 24h 热线", hotline)
                     }
                 } else {
-                    Text("未收录你国使馆信息。请搜索「\(info.name) 驻华大使馆」获取电话。")
+                    let countryName = selectedOption?.name ?? selectedNationality
+                    Text("未收录你国在\(cityLabel(selectedCityId))的使馆信息。请搜索「\(countryName) \(cityLabel(selectedCityId)) 领事馆」获取电话。")
                         .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if let note = data?.embassyNote, !note.isEmpty {
@@ -182,16 +290,76 @@ struct EmergencyView: View {
         }
     }
 
+    private var cityPickerCard: some View {
+        cityPickerRow
+            .padding(12)
+            .background(Theme.ColorToken.backgroundSubtle)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private var cityPickerRow: some View {
+        HStack {
+            Text("查看城市").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+            Spacer()
+            Menu {
+                ForEach(pickerCityIds, id: \.self) { cityId in
+                    Button(cityLabel(cityId)) { selectedCityId = cityId }
+                }
+            } label: {
+                Text("\(cityLabel(selectedCityId)) ⌄")
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.accent)
+            }
+        }
+    }
+
     private func embassyRow(_ label: String, _ phone: String) -> some View {
         HStack {
             Text(label).font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
             Spacer()
-            Link(phone, destination: URL(string: "tel://\(phone.filter { $0.isNumber || $0 == "+" })")!)
+            Link(phone, destination: telURL(phone))
                 .font(Theme.FontToken.playfair(13, weight: .semibold))
                 .foregroundStyle(Theme.ColorToken.textPrimary)
         }
         .padding(.top, 8)
         .overlay(alignment: .top) { Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1) }
+    }
+
+    private func telURL(_ phone: String) -> URL {
+        URL(string: "tel://\(phone.filter { $0.isNumber || $0 == "+" })")!
+    }
+
+    @MainActor
+    private func loadContent() async {
+        if selectedNationality.isEmpty { selectedNationality = country }
+        data = try? await appEnv.content.fetchEmergencyData()
+        passportCountries = (try? await appEnv.content.fetchPassportCountries()) ?? []
+        if let cities = try? await appEnv.content.fetchCities() {
+            allCities = cities
+            cityNames = Dictionary(uniqueKeysWithValues: cities.map { ($0.id, $0.name) })
+        }
+        if selectedCityId.isEmpty {
+            let preferred = tripCityIds.first { pickerCityIds.contains($0) }
+                ?? pickerCityIds.first
+                ?? "beijing"
+            selectedCityId = preferred
+        }
+        await loadCityResources()
+    }
+
+    @MainActor
+    private func loadCityResources() async {
+        guard !selectedCityId.isEmpty else { return }
+        hospitals = (try? await appEnv.content.fetchCityHospitals(cityId: selectedCityId)) ?? []
+        embassies = (try? await appEnv.content.fetchCityEmbassies(cityId: selectedCityId)) ?? []
+        let availableCodes = Set(embassies.map(\.normalizedCountryCode))
+        if !availableCodes.isEmpty, !availableCodes.contains(selectedNationality.uppercased()) {
+            if availableCodes.contains(country) {
+                selectedNationality = country
+            } else if let first = embassies.first {
+                selectedNationality = first.normalizedCountryCode
+            }
+        }
     }
 
     // MARK: - First-aid card
@@ -322,31 +490,6 @@ struct FirstAidCard: Equatable {
         if let data = try? JSONEncoder().encode(dict) {
             UserDefaults.standard.set(data, forKey: Self.key)
         }
-    }
-}
-
-// MARK: - Embassy directory (seed content from design; verify numbers before launch)
-
-struct EmbassyEntry: Identifiable {
-    let code: String
-    let flag: String
-    let name: String
-    let embassy: String?
-    let consularHotline: String?
-    var id: String { code }
-}
-
-enum EmbassyDirectory {
-    static let all: [EmbassyEntry] = [
-        EmbassyEntry(code: "GB", flag: "🇬🇧", name: "United Kingdom", embassy: "+86 10 5192 4000", consularHotline: "+86 10 5192 4000"),
-        EmbassyEntry(code: "US", flag: "🇺🇸", name: "United States", embassy: "+86 10 8531 3000", consularHotline: "+86 10 8531 4000"),
-        EmbassyEntry(code: "AU", flag: "🇦🇺", name: "Australia", embassy: "+86 10 5140 4111", consularHotline: "+61 2 6261 3305"),
-        EmbassyEntry(code: "CA", flag: "🇨🇦", name: "Canada", embassy: "+86 10 5139 4000", consularHotline: "+1 613 996 8885"),
-    ]
-
-    static func entry(for code: String) -> EmbassyEntry {
-        if let e = all.first(where: { $0.code == code.uppercased() }) { return e }
-        return EmbassyEntry(code: code, flag: "🏛", name: code, embassy: nil, consularHotline: nil)
     }
 }
 
