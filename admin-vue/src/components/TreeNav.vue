@@ -84,7 +84,12 @@ const GROUPS = [
     { label: "引擎参数", table: "visa_config" },
   ] },
   { id: "payment", label: "💳 支付助手", leaves: [
-    { label: "支付建议规则", table: "payment_advice_rules" },
+    { label: "💳 支付工作台", hubId: "payment" },
+    { label: "国家（q1）", table: "payment_countries" },
+    { label: "现金建议（q3）", table: "payment_cash_rules" },
+    { label: "流程步骤", table: "payment_flow_steps" },
+    { label: "救援阶梯", table: "payment_rescue_rungs" },
+    { label: "屏幕文案", table: "payment_node_texts" },
     { label: "卡受理矩阵", table: "payment_card_networks" },
     { label: "就绪检查清单", table: "payment_checklist_items" },
     { label: "详细图文", table: "payment_articles" },

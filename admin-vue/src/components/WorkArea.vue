@@ -13,6 +13,7 @@ import MembershipHub from "@/components/hubs/MembershipHub.vue";
 import UsersHub from "@/components/hubs/UsersHub.vue";
 import SupportWorkbench from "@/components/hubs/SupportWorkbench.vue";
 import ChecklistWorkbench from "@/components/hubs/ChecklistWorkbench.vue";
+import PaymentWorkbench from "@/components/hubs/PaymentWorkbench.vue";
 
 const HUBS = {
   visa: VisaWorkbench,
@@ -22,6 +23,7 @@ const HUBS = {
   users: UsersHub,
   support: SupportWorkbench,
   checklist: ChecklistWorkbench,
+  payment: PaymentWorkbench,
 };
 
 const nav = useNav();
