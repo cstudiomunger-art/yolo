@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 import { supabase } from "@/lib/supabase";
 import { uploadVoiceVariantFile } from "@/lib/storage";
 import {
-  fetchVoiceVariants,
+  ensureLegacyVoiceVariants,
   syncParentAudioFromDefault,
   setDefaultVariant,
   newVariantId,
@@ -33,7 +33,7 @@ async function load() {
   loading.value = true;
   err.value = "";
   try {
-    variants.value = await fetchVoiceVariants(props.ownerType, props.ownerId);
+    variants.value = await ensureLegacyVoiceVariants(props.ownerType, props.ownerId);
   } catch (e) {
     err.value = e.message || String(e);
   } finally {
@@ -166,6 +166,10 @@ async function removeVariant(variant) {
     <p v-if="hint" class="hint">{{ hint }}</p>
     <p v-if="!ownerId" class="muted">请先保存记录后再管理音色。</p>
     <p v-else-if="loading" class="muted">加载音色…</p>
+
+    <div v-else-if="variants.length === 0" class="legacy-hint">
+      <p class="muted">尚无音频。请添加音色名称并上传文件；若父记录已有旧版音频，打开本页时会自动导入为「默认」音色。</p>
+    </div>
 
     <div v-else class="list">
       <div v-for="v in variants" :key="v.id" class="row">

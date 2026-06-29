@@ -102,7 +102,7 @@ function onAttractionDeleted() {
 
     <div class="audio-sec">
       <h2>🎧 音频导览</h2>
-      <p class="hint">可为该景点上传多个音色解说。选择文件即上传并保存；请标记一个默认音色（同步至 App 旧版）。</p>
+      <p class="hint">可为该景点上传多个音色解说。已有单文件音频会自动导入为「默认」音色；请标记一个默认音色（同步至 App 旧版）。</p>
       <button v-if="!guideOwnerId" type="button" class="btn btn-sm" @click="prepareVoiceEditor">初始化音频导览</button>
       <VoiceVariantsEditor
         v-else

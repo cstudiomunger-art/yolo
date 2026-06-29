@@ -20,7 +20,7 @@ const deleting = ref(false);
 function buildInitial() {
   const base = {};
   for (const f of props.schema.fields) {
-    if (f.type === "section" || f.type === "image_upload" || f.type === "audio_upload") continue;
+    if (f.type === "section" || f.type === "image_upload" || f.type === "audio_upload" || f.type === "voice_variants") continue;
     if (props.initial && f.key in props.initial) {
       base[f.key] = props.initial[f.key];
     } else if (f.type === "bool") {
@@ -74,7 +74,7 @@ function buildPayload() {
   const payload = {};
   for (const f of props.schema.fields) {
     if (f.key.startsWith("_")) continue; // transient upload controls
-    if (["section", "image_upload", "audio_upload"].includes(f.type)) continue;
+    if (["section", "image_upload", "audio_upload", "voice_variants"].includes(f.type)) continue;
     let v = form[f.key];
     if (f.type === "slug" && (v == null || v === "")) {
       v = slugify(f.slugSource ? form[f.slugSource] : "", f.slugPrefix);
