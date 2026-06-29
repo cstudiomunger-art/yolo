@@ -17,6 +17,8 @@ struct PaymentHelperHomeView: View {
                     laneButton(.prep, emoji: "🧭", title: "我还没出发", subtitle: "在家慢慢准备")
                     laneButton(.china, emoji: "✈️", title: "我已经在中国了", subtitle: "跳过出发前步骤")
                     laneButton(.rescue, emoji: "🆘", title: "我正卡在付款，付不了", subtitle: "现在就要解决 · 离线可用", warm: true)
+                    PaymentArticleSection(nodeKey: "home", service: service)
+                    PaymentLinksSection(lane: nil, service: service)
                 }
                 .padding(Theme.screenPadding)
             }
@@ -100,6 +102,11 @@ struct PaymentFlowNodeView: View {
             }
             .padding(Theme.screenPadding)
         }
+        .onAppear {
+            if nodeKey == .q1 {
+                service.prefillCountryIfNeeded(fallback: appEnv.preferences.countryCode ?? "")
+            }
+        }
     }
 
     @ViewBuilder
@@ -176,15 +183,16 @@ struct PaymentFlowNodeView: View {
     private var stepsNodeView: some View {
         let key = nodeKey.rawValue
         let tools = service.tools(for: key)
+        let stableOnly = nodeKey == .verify
         if tools.count > 1 {
             Picker("App", selection: $selectedTool) {
                 Text("支付宝").tag("alipay")
                 Text("微信").tag("wechat")
             }
             .pickerStyle(.segmented)
-            PaymentStepsList(steps: service.steps(for: key, tool: selectedTool))
+            PaymentStepsList(steps: service.steps(for: key, tool: selectedTool, includeVolatile: !stableOnly))
         } else {
-            PaymentStepsList(steps: service.steps(for: key))
+            PaymentStepsList(steps: service.steps(for: key, includeVolatile: !stableOnly))
         }
         if nodeKey == .bind {
             bindTroubleSection
@@ -237,19 +245,32 @@ struct PaymentFlowNodeView: View {
         return VStack(alignment: .leading, spacing: 14) {
             Text("\(pct)% 就绪")
                 .font(Theme.FontToken.playfair(34, weight: .bold))
-                .foregroundStyle(Theme.ColorToken.success)
+                .foregroundStyle(pct >= 100 ? Theme.ColorToken.success : Theme.ColorToken.warning)
+            Text("逐项勾选你已完成的准备（诚实自报即可）")
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(Theme.ColorToken.textMuted)
             ForEach(service.checklistItems) { item in
-                let done = service.checklistItemDone(item)
-                let label = (item.condition == "has_wechat" && !done)
+                let skipped = item.condition == "has_wechat" && !wxOk
+                let label = skipped
                     ? "\(item.labelZh) ·（你的卡不支持，跳过）"
                     : item.labelZh
-                PaymentCheckRow(label, done: done)
+                let done = skipped || service.isChecklistSelfReported(item.id)
+                Button {
+                    guard !skipped else { return }
+                    service.toggleChecklistSelfReport(item.id)
+                } label: {
+                    PaymentCheckRow(label, done: done)
+                }
+                .buttonStyle(.plain)
+                .disabled(skipped)
             }
             PaymentCallout(
-                text: wxOk
-                    ? "\(pct)% 就绪。到了中国直接扫码即可。"
-                    : "\(pct)% 也够用。你的卡不支持微信，但支付宝 + 现金已能覆盖绝大多数场景。",
-                tone: wxOk ? .ok : .info
+                text: pct >= 100
+                    ? (wxOk
+                        ? "全部就绪。到了中国直接扫码即可。"
+                        : "全部就绪。你的卡不支持微信，但支付宝 + 现金已能覆盖绝大多数场景。")
+                    : "还有 \(100 - pct)% 未勾选——回到前面步骤补完，或先勾选你已做好的项。",
+                tone: pct >= 100 ? .ok : .info
             )
         }
     }
@@ -268,17 +289,7 @@ struct PaymentFlowNodeView: View {
             }
             .buttonStyle(.plain)
         } else if canProceed, nodeKey == .card {
-            Button {
-                appEnv.navigation.dismissModal()
-            } label: {
-                Text("完成 · 关闭支付助手")
-                    .font(Theme.FontToken.inter(14, weight: .semibold))
-                    .frame(maxWidth: .infinity).padding(.vertical, 14)
-                    .background(Theme.ColorToken.success).foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-            .buttonStyle(.plain)
-            .padding(.top, 8)
+            PaymentFinishButton(title: "完成 · 关闭支付助手")
         } else if !canProceed {
             Text(blockedReason)
                 .font(Theme.FontToken.inter(13))
@@ -398,6 +409,63 @@ struct PaymentStepsList: View {
     }
 }
 
+// MARK: - Articles & links sections
+
+struct PaymentLinksSection: View {
+    let lane: String?
+    let service: PaymentHelperService
+
+    var body: some View {
+        let links = service.links(for: lane)
+        if !links.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("🔗 参考链接")
+                    .font(Theme.FontToken.inter(12, weight: .semibold))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+                ForEach(links) { link in
+                    if let url = URL(string: link.url) {
+                        Link(destination: url) {
+                            HStack {
+                                Text(link.labelZh ?? link.labelEn ?? link.url)
+                                    .font(Theme.FontToken.inter(13, weight: .medium))
+                                    .foregroundStyle(Theme.ColorToken.accent)
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.system(size: 11))
+                                    .foregroundStyle(Theme.ColorToken.textMuted)
+                            }
+                            .padding(.vertical, 10).padding(.horizontal, 13)
+                            .frame(maxWidth: .infinity)
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Finish button (dismiss full-screen payment helper)
+
+struct PaymentFinishButton: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    var title: String = "完成 · 关闭支付助手"
+
+    var body: some View {
+        Button {
+            appEnv.navigation.dismissModal()
+        } label: {
+            Text(title)
+                .font(Theme.FontToken.inter(14, weight: .semibold))
+                .frame(maxWidth: .infinity).padding(.vertical, 14)
+                .background(Theme.ColorToken.success).foregroundStyle(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 8)
+    }
+}
+
 // MARK: - Articles section
 
 struct PaymentArticleSection: View {
@@ -458,6 +526,8 @@ struct PaymentRescueView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
                 .buttonStyle(.plain)
+                PaymentLinksSection(lane: "rescue", service: service)
+                PaymentFinishButton()
             }
             .padding(Theme.screenPadding)
         }
@@ -548,6 +618,7 @@ struct PaymentMerchantPhraseView: View {
                     .padding(16)
                     .overlay(RoundedRectangle(cornerRadius: 16).stroke(Theme.ColorToken.border, lineWidth: 1))
                 }
+                PaymentFinishButton()
             }
             .padding(Theme.screenPadding)
         }
@@ -653,11 +724,12 @@ struct PaymentMarkdownView: View {
 
 // MARK: - Shared UI helpers
 
-enum PaymentCalloutTone { case ok, warn, info
+enum PaymentCalloutTone { case ok, warn, info, blue
     static func from(_ tone: String?) -> PaymentCalloutTone {
         switch tone {
         case "warm", "warn": return .warn
         case "jade", "ok": return .ok
+        case "blue": return .blue
         default: return .info
         }
     }
@@ -671,6 +743,7 @@ struct PaymentCallout: View {
         let color: Color = switch tone {
         case .ok: Theme.ColorToken.success
         case .warn: Theme.ColorToken.warning
+        case .blue: Theme.ColorToken.accent
         case .info: Theme.ColorToken.accent
         }
         return HStack(alignment: .top, spacing: 8) {

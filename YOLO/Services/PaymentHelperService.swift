@@ -32,11 +32,34 @@ final class PaymentHelperService {
     private static let cardsKey = "yolohappy.paymentCardTypes.v1"
     private static let tripKey = "yolohappy.paymentTripKind.v1"
     private static let countryKey = "yolohappy.paymentCountryCode.v1"
+    private static let checklistKey = "yolohappy.paymentChecklistSelfReport.v1"
+
+    /// User self-reported readiness on the 随身支付卡 screen (spec: 自报 toggles).
+    private(set) var checklistSelfReportDone: Set<String> = []
 
     init() {
         cardTypes = Set(UserDefaults.standard.stringArray(forKey: Self.cardsKey) ?? [])
         tripKind = UserDefaults.standard.string(forKey: Self.tripKey).flatMap(TripKind.init(rawValue:))
         selectedCountryCode = UserDefaults.standard.string(forKey: Self.countryKey)
+        checklistSelfReportDone = Set(UserDefaults.standard.stringArray(forKey: Self.checklistKey) ?? [])
+    }
+
+    func prefillCountryIfNeeded(fallback: String) {
+        guard selectedCountryCode == nil, !fallback.isEmpty else { return }
+        let code = fallback.lowercased()
+        if countries.contains(where: { $0.countryCode.lowercased() == code }) {
+            selectedCountryCode = code
+        }
+    }
+
+    func toggleChecklistSelfReport(_ id: String) {
+        if checklistSelfReportDone.contains(id) { checklistSelfReportDone.remove(id) }
+        else { checklistSelfReportDone.insert(id) }
+        UserDefaults.standard.set(Array(checklistSelfReportDone), forKey: Self.checklistKey)
+    }
+
+    func isChecklistSelfReported(_ id: String) -> Bool {
+        checklistSelfReportDone.contains(id)
     }
 
     // MARK: - Load
@@ -103,6 +126,15 @@ final class PaymentHelperService {
         resolved.merchantPhrases.isEmpty ? Self.bundledFallback.merchantPhrases : resolved.merchantPhrases
     }
 
+    /// CMS links filtered by lane (`prep` / `china` / `rescue`); empty lane matches all.
+    func links(for lane: String? = nil) -> [PaymentHelperLink] {
+        let all = content.links.isEmpty ? Self.bundledFallback.links : content.links
+        guard let lane else { return all.sorted { ($0.sortOrder ?? 0) < ($1.sortOrder ?? 0) } }
+        return all
+            .filter { ($0.lane ?? "prep") == lane }
+            .sorted { ($0.sortOrder ?? 0) < ($1.sortOrder ?? 0) }
+    }
+
     var rescueRungs: [PaymentRescueRung] {
         let rungs = resolved.rescueRungs.isEmpty ? Self.bundledFallback.rescueRungs : resolved.rescueRungs
         return rungs.sorted { ($0.rungOrder ?? 0) < ($1.rungOrder ?? 0) }
@@ -149,7 +181,8 @@ final class PaymentHelperService {
     }
 
     func articles(for nodeKey: String) -> [PaymentArticle] {
-        content.articles
+        let pool = content.articles.isEmpty ? Self.bundledFallback.articles : content.articles
+        return pool
             .filter { $0.nodeKey == nodeKey }
             .sorted { ($0.displayOrder ?? 0) < ($1.displayOrder ?? 0) }
     }
@@ -211,19 +244,24 @@ final class PaymentHelperService {
         cardNetworks.contains { cardTypes.contains($0.id) && $0.wechatOk }
     }
 
+    private func isChecklistSkipped(_ item: PaymentChecklistItem) -> Bool {
+        item.condition == "has_wechat" && !weChatBindingViable
+    }
+
+    private var applicableChecklistItems: [PaymentChecklistItem] {
+        checklistItems.filter { !isChecklistSkipped($0) }
+    }
+
     func checklistItemDone(_ item: PaymentChecklistItem) -> Bool {
-        switch item.condition {
-        case nil, "": return true
-        case "has_wechat": return weChatBindingViable
-        default: return true
-        }
+        if isChecklistSkipped(item) { return true }
+        return isChecklistSelfReported(item.id)
     }
 
     var readinessPercent: Int {
-        let items = checklistItems
+        let items = applicableChecklistItems
         let total = items.reduce(0) { $0 + $1.weight }
         guard total > 0 else { return 0 }
-        let done = items.filter(checklistItemDone).reduce(0) { $0 + $1.weight }
+        let done = items.filter { isChecklistSelfReported($0.id) }.reduce(0) { $0 + $1.weight }
         return Int((Double(done) / Double(total) * 100).rounded())
     }
 
