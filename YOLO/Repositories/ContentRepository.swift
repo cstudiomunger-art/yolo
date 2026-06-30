@@ -22,6 +22,7 @@ protocol ContentRepositoryProtocol: Sendable {
     func fetchPlanningItinerary() async throws -> SampleItinerary
     func fetchPassportCountries() async throws -> [PassportCountry]
     func fetchEmergencyData() async throws -> EmergencyData
+    func fetchEmergencyGuides() async throws -> [EmergencyGuide]
     func fetchCityHospitals(cityId: String) async throws -> [CityHospital]
     func fetchCityEmbassies(cityId: String) async throws -> [CityEmbassy]
     func fetchAppBranding() async throws -> AppBranding
@@ -43,6 +44,7 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     private let planningItinerary: SampleItinerary?
     private let visaRules: [VisaRule]
     private let emergencyData: EmergencyData
+    private let emergencyGuides: [EmergencyGuide]
     private let cityHospitals: [CityHospital]
     private let cityEmbassies: [CityEmbassy]
     private let appBranding: AppBranding
@@ -64,6 +66,7 @@ struct BundledContentRepository: ContentRepositoryProtocol {
         let visaBundle = BundledJSONLoader.load(VisaRulesBundle.self, resource: "visa-rules")
         visaRules = visaBundle.rules
         emergencyData = BundledJSONLoader.load(EmergencyData.self, resource: "emergency-data")
+        emergencyGuides = BundledJSONLoader.load([EmergencyGuide].self, resource: "emergency_guides")
         cityHospitals = BundledJSONLoader.load([CityHospital].self, resource: "city_hospitals")
         cityEmbassies = BundledJSONLoader.load([CityEmbassy].self, resource: "city_embassies")
         appBranding = BundledJSONLoader.load(AppBranding.self, resource: "app_branding")
@@ -173,6 +176,10 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     }
 
     func fetchEmergencyData() async throws -> EmergencyData { emergencyData }
+
+    func fetchEmergencyGuides() async throws -> [EmergencyGuide] {
+        emergencyGuides.sorted { ($0.sortOrder ?? 0) < ($1.sortOrder ?? 0) }
+    }
 
     func fetchCityHospitals(cityId: String) async throws -> [CityHospital] {
         let normalized = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()

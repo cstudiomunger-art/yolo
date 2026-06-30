@@ -16,6 +16,13 @@ struct MembershipCenterView: View {
         return purchase.availablePlans.first { $0.id == planId }
     }
 
+    /// Expiry to display: an admin grant uses its own expiry (nil = lifetime), otherwise the
+    /// RevenueCat subscription expiry.
+    private var effectiveMembershipExpiry: Date? {
+        if prefs.membershipOverrideKind == .grant { return prefs.membershipOverrideExpiresAt }
+        return prefs.subscriptionExpiresAt
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
@@ -67,14 +74,15 @@ struct MembershipCenterView: View {
 
     private var subscriptionStatusCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if purchase.isProActive, let plan = currentPlan {
+            if purchase.isProActive {
                 HStack(spacing: 8) {
                     Text("✨")
-                    Text(plan.localizedName(preferChinese: appEnv.preferences.appLanguage == .chinese))
+                    Text(currentPlan?.localizedName(preferChinese: appEnv.preferences.appLanguage == .chinese)
+                         ?? String(localized: "Active Membership"))
                         .font(Theme.FontToken.playfair(18, weight: .semibold))
                 }
 
-                if let expires = prefs.subscriptionExpiresAt {
+                if let expires = effectiveMembershipExpiry {
                     Text(String(localized: "Valid until: ") + expires.formatted(date: .long, time: .omitted))
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textMuted)
@@ -89,16 +97,18 @@ struct MembershipCenterView: View {
                         .foregroundStyle(Theme.ColorToken.accent)
                 }
 
-                Button {
-                    if let url = URL(string: "itms-apps://apps.apple.com/account/subscriptions") {
-                        UIApplication.shared.open(url)
+                if prefs.membershipOverrideKind != .grant {
+                    Button {
+                        if let url = URL(string: "itms-apps://apps.apple.com/account/subscriptions") {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Text(String(localized: "Manage in App Store →"))
+                            .font(Theme.FontToken.inter(11))
+                            .foregroundStyle(Theme.ColorToken.accent)
                     }
-                } label: {
-                    Text(String(localized: "Manage in App Store →"))
-                        .font(Theme.FontToken.inter(11))
-                        .foregroundStyle(Theme.ColorToken.accent)
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             } else {
                 Text(String(localized: "No active membership"))
                     .font(Theme.FontToken.inter(14, weight: .medium))

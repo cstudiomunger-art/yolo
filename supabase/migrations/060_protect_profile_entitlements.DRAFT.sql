@@ -1,4 +1,4 @@
--- ⚠️ 草案 / 暂勿在生产执行 —— 见文件底部「上线前提」。
+-- ⚠️ 草案 —— 已由 105_protect_profile_entitlements.sql 取代并上线，保留本文件仅作历史参考。
 --
 -- 目的：堵住付费墙的服务端漏洞。
 -- 现状：profiles 的 "Users can update own profile" 策略不限制列，会员/购买状态

@@ -151,6 +151,12 @@ struct CachingContentRepository: ContentRepositoryProtocol {
         }
     }
 
+    func fetchEmergencyGuides() async throws -> [EmergencyGuide] {
+        try await cached(key: ContentCacheKey.emergencyGuides()) {
+            try await upstream.fetchEmergencyGuides()
+        }
+    }
+
     func fetchCityHospitals(cityId: String) async throws -> [CityHospital] {
         let key = ContentCacheKey.cityHospitals(cityId: cityId)
         return try await cached(key: key) {

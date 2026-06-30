@@ -17,7 +17,9 @@ function showToast(m) { toast.value = m; setTimeout(() => (toast.value = ""), 18
 const PROFILE_COLS =
   "id,email,display_name,avatar_url,avatar_status,country_code," +
   "has_completed_onboarding,departure_date,purchased_attraction_ids," +
-  "subscription_plan_id,subscription_expires_at,rc_customer_id,active_itinerary_id,created_at,updated_at";
+  "subscription_plan_id,subscription_expires_at,rc_customer_id," +
+  "membership_override,membership_override_expires_at,membership_override_note," +
+  "active_itinerary_id,created_at,updated_at";
 
 const EVENT_LABELS = {
   INITIAL_PURCHASE: "首次购买", RENEWAL: "续费", REFUND: "退款",
@@ -37,10 +39,20 @@ async function loadList() {
 
 // ── helpers ──
 function planName(id) { const p = plans.value.find((x) => x.id === id); return p ? (p.name_zh || p.name_en) : (id || "—"); }
-function isActiveMember(p) {
+// RevenueCat / 订阅本身的有效性（不含后台覆盖）
+function subActive(p) {
   if (!p.subscription_plan_id) return false;
   if (!p.subscription_expires_at) return true;
   return new Date(p.subscription_expires_at) > new Date();
+}
+// 实际生效的会员状态：后台 override 优先，否则看订阅。与 App 判定一致。
+function isActiveMember(p) {
+  if (p.membership_override === "ban") return false;
+  if (p.membership_override === "grant") {
+    if (!p.membership_override_expires_at) return true;
+    return new Date(p.membership_override_expires_at) > new Date();
+  }
+  return subActive(p);
 }
 function daysUntil(d) { return d ? Math.ceil((new Date(d).getTime() - Date.now()) / 86400000) : null; }
 function fmtDate(d) { return d ? new Date(d).toLocaleDateString("zh-CN") : "—"; }
@@ -137,6 +149,35 @@ function cancelSub() {
   applyMemberPatch({ subscription_plan_id: null, subscription_expires_at: null });
 }
 
+// ── 后台会员覆盖（override，优先于 App Store / RevenueCat）──
+const overrideDays = ref("365");
+function grantOverride() {
+  const days = parseInt(overrideDays.value || "0", 10);
+  const expires = days > 0 ? new Date(Date.now() + days * 86400000).toISOString() : null;
+  if (!confirm(`强制开通会员，有效期：${days > 0 ? days + " 天" : "永久"}？\n该状态优先于 App Store 订阅，用户登录 App 后立即生效。`)) return;
+  applyMemberPatch({
+    membership_override: "grant",
+    membership_override_expires_at: expires,
+    membership_override_note: detail.value.membership_override_note?.trim() || null,
+  });
+}
+function banUser() {
+  if (!confirm("封禁该用户会员？\n即使其在 App Store 拥有有效订阅，App 内也将锁定全部付费内容。")) return;
+  applyMemberPatch({
+    membership_override: "ban",
+    membership_override_expires_at: null,
+    membership_override_note: detail.value.membership_override_note?.trim() || null,
+  });
+}
+function clearOverride() {
+  if (!confirm("清除后台覆盖？将回到按 App Store / RevenueCat 订阅自动判定。")) return;
+  applyMemberPatch({
+    membership_override: null,
+    membership_override_expires_at: null,
+    membership_override_note: null,
+  });
+}
+
 async function setRefundStatus(r, status) {
   if (!confirm(`将退款申请标记为「${status === "approved" ? "通过" : "拒绝"}」？`)) return;
   const { error: e } = await supabase.from("user_refund_requests").update({ status }).eq("id", r.id);
@@ -154,6 +195,7 @@ async function saveDetail() {
     subscription_plan_id: d.subscription_plan_id || null,
     subscription_expires_at: d.subscription_expires_at || null,
     rc_customer_id: d.rc_customer_id?.trim() || null,
+    membership_override_note: d.membership_override_note?.trim() || null,
     has_completed_onboarding: !!d.has_completed_onboarding,
     departure_date: d.departure_date || null,
     active_itinerary_id: d.active_itinerary_id?.trim() || null,
@@ -216,6 +258,21 @@ onMounted(async () => { await refCache.load(); await loadList(); });
             <template v-else>—</template>
           </div>
           <div class="status-row"><span class="lbl">单购景点</span>{{ (detail.purchased_attraction_ids || []).length }} 个</div>
+          <div class="status-row"><span class="lbl">后台覆盖</span>
+            <template v-if="detail.membership_override === 'ban'">
+              <span class="badge red">● 已封禁</span>
+              <span class="muted small">即使有订阅也锁定全部付费内容</span>
+            </template>
+            <template v-else-if="detail.membership_override === 'grant'">
+              <span class="badge green">● 强制开通</span>
+              <span v-if="detail.membership_override_expires_at">至 {{ fmtDateTime(detail.membership_override_expires_at) }}</span>
+              <span v-else class="badge blue">永久</span>
+            </template>
+            <span v-else class="muted">无（按 App Store 订阅自动判定）</span>
+          </div>
+          <div v-if="detail.membership_override_note" class="status-row">
+            <span class="lbl">覆盖备注</span>{{ detail.membership_override_note }}
+          </div>
         </div>
 
         <div class="quick">
@@ -233,6 +290,25 @@ onMounted(async () => { await refCache.load(); await loadList(); });
           <button class="btn btn-secondary btn-sm" @click="extendDays(30)">续 30 天</button>
           <button class="btn btn-secondary btn-sm" @click="extendDays(365)">续 1 年</button>
           <button class="btn btn-danger btn-sm" @click="cancelSub">取消会员</button>
+        </div>
+
+        <div class="override-box">
+          <div class="override-head">后台覆盖（优先于 App Store / RevenueCat）</div>
+          <p class="muted small">订阅真相在 Apple，直接改上面的「订阅到期」会被 App 下次同步覆盖。要强制开通或封禁，请用这里 —— App 端会优先采用，且用户无法改。</p>
+          <div class="quick">
+            <select v-model="overrideDays">
+              <option value="30">+30 天</option>
+              <option value="90">+90 天</option>
+              <option value="365">+365 天</option>
+              <option value="0">永久</option>
+            </select>
+            <button class="btn btn-sm" @click="grantOverride">强制开通（赠送）</button>
+            <button class="btn btn-danger btn-sm" @click="banUser">封禁会员</button>
+            <button class="btn btn-secondary btn-sm" @click="clearOverride">清除覆盖</button>
+          </div>
+          <label class="f full mt">覆盖备注（仅后台可见）
+            <input v-model="detail.membership_override_note" type="text" placeholder="封禁 / 赠送原因" />
+          </label>
         </div>
 
         <p class="muted small mt">手动调整（高级）：编辑下列字段后点「保存用户资料」。修改后 App 下次拉取 profile 或重新登录时生效。</p>
@@ -336,7 +412,9 @@ onMounted(async () => { await refCache.load(); await loadList(); });
             </td>
             <td>{{ p.country_code || "—" }}</td>
             <td>
-              <span v-if="p.subscription_plan_id" class="badge" :class="isActiveMember(p) ? 'green' : 'gray'">{{ planName(p.subscription_plan_id) }}{{ isActiveMember(p) ? "" : " · 失效" }}</span>
+              <span v-if="p.membership_override === 'ban'" class="badge red">封禁</span>
+              <span v-else-if="p.membership_override === 'grant'" class="badge green">赠送{{ isActiveMember(p) ? "" : " · 失效" }}</span>
+              <span v-else-if="p.subscription_plan_id" class="badge" :class="isActiveMember(p) ? 'green' : 'gray'">{{ planName(p.subscription_plan_id) }}{{ isActiveMember(p) ? "" : " · 失效" }}</span>
               <span v-else class="badge gray">免费</span>
             </td>
             <td>
@@ -415,6 +493,10 @@ onMounted(async () => { await refCache.load(); await loadList(); });
 .status-row .lbl { color: var(--muted); width: 72px; display: inline-block; }
 .quick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .quick select { width: auto; min-width: 140px; }
+
+.override-box { margin-top: 14px; padding: 12px 14px; border: 1px dashed var(--border); border-radius: 10px; background: var(--surface2); }
+.override-head { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.override-box .quick { margin-top: 10px; }
 
 .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 1100; }
 .toast.on { opacity: 1; }

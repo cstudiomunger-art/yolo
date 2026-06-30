@@ -1,0 +1,52 @@
+[
+  {
+    "id": "consular_protection",
+    "kind": "consular",
+    "number": "",
+    "title_en": "Consular Protection & Emergency Help",
+    "title_zh": "",
+    "body_en": "<p><strong>If your life is in danger, call 110, 120, or 119 first.</strong></p><p>This guide explains which number to call, what to do, and how to find your embassy via official government channels — we do not list specific embassy phone numbers here.</p><h2>Key numbers (nationwide)</h2><ul><li><strong>110</strong> — police / safety / police report</li><li><strong>120</strong> — ambulance</li><li><strong>119</strong> — fire &amp; rescue</li><li><strong>122</strong> — traffic accidents</li></ul><h2>Language barrier</h2><p>Operators mostly speak Chinese. Ask hotel staff or a passer-by to call for you. State your location first.</p><h2>Find your embassy</h2><p>Search <strong>&lt;your country&gt; embassy China</strong> or your foreign ministry website for 驻华使领馆.</p>",
+    "body_zh": "",
+    "sort_order": 0
+  },
+  {
+    "id": "number_110",
+    "kind": "emergency_number",
+    "number": "110",
+    "title_en": "Police 110 — When & How to Call",
+    "title_zh": "",
+    "body_en": "<p><strong>110</strong> is China's national police number — free, 24h, nationwide.</p><h2>When to call</h2><ul><li>Theft, robbery, assault, missing person</li><li>Need a police report (《报案证明》)</li></ul><h2>How to call</h2><ol><li>Give your location first</li><li>Ask a Chinese-speaker to call if needed</li><li>If detained, say: 我要联系我国大使馆 / 领事馆</li></ol>",
+    "body_zh": "",
+    "sort_order": 1
+  },
+  {
+    "id": "number_120",
+    "kind": "emergency_number",
+    "number": "120",
+    "title_en": "Ambulance 120 — Medical Emergency",
+    "title_zh": "",
+    "body_en": "<p><strong>120</strong> is China's ambulance number — free, 24h, nationwide.</p><h2>When to call</h2><ul><li>Sudden serious illness or injury</li><li>Cannot reach hospital safely alone</li></ul><h2>At hospital</h2><p>Go to 急诊; major hospitals may have 国际部 / 外宾门诊. Call your insurance 24h line.</p>",
+    "body_zh": "",
+    "sort_order": 2
+  },
+  {
+    "id": "number_119",
+    "kind": "emergency_number",
+    "number": "119",
+    "title_en": "Fire 119 — Fire & Rescue",
+    "title_zh": "",
+    "body_en": "<p><strong>119</strong> is China's fire and rescue number.</p><h2>When to call</h2><ul><li>Fire, smoke, explosion</li><li>Trapped persons; hazmat leaks</li></ul><p>Evacuate first, then call. For injuries also call 120.</p>",
+    "body_zh": "",
+    "sort_order": 3
+  },
+  {
+    "id": "number_122",
+    "kind": "emergency_number",
+    "number": "122",
+    "title_en": "Traffic 122 — Road Accidents",
+    "title_zh": "",
+    "body_en": "<p><strong>122</strong> is China's traffic accident hotline. You may also call <strong>110</strong>.</p><ol><li>Move to safety</li><li>State location and injuries</li><li>Keep police report for insurance</li></ol>",
+    "body_zh": "",
+    "sort_order": 4
+  }
+]

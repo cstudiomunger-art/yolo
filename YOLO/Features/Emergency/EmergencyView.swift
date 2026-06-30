@@ -1,28 +1,21 @@
 import SwiftUI
 import UIKit
 
-/// Emergency hub — one screen reachable when panicking. Mirrors the 00_首页与实用信息中心
-/// design: one-tap calls (110/120/119), the "911 splits into three" note, medical &
-/// meds, embassy by nationality, and a fillable first-aid card.
+/// Emergency hub — one-tap emergency numbers (with how-to guides), consular protection tutorial,
+/// per-city hospitals, and a fillable first-aid card.
 struct EmergencyView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
 
     @State private var data: EmergencyData?
+    @State private var guides: [EmergencyGuide] = []
     @State private var hospitals: [CityHospital] = []
-    @State private var embassies: [CityEmbassy] = []
-    @State private var passportCountries: [PassportCountry] = []
     @State private var allCities: [City] = []
     @State private var cityNames: [String: String] = [:]
     @State private var selectedCityId = ""
-    @State private var selectedNationality: String = ""
+    @State private var presentedNumber: EmergencyNumberPresentation?
     @State private var card = FirstAidCard.load()
     @State private var shareItems: [Any]?
-
-    private var country: String {
-        let cc = appEnv.preferences.countryCode.uppercased()
-        return cc.isEmpty ? "GB" : cc
-    }
 
     private var tripCityIds: [String] {
         if let trip = appEnv.preferences.activeItinerary {
@@ -39,18 +32,21 @@ struct EmergencyView: View {
         return tripCityIds
     }
 
-    private var selectedEmbassy: CityEmbassy? {
-        embassies.first { $0.normalizedCountryCode == selectedNationality.uppercased() }
+    private var emergencyContacts: [EmergencyContact] {
+        let fromData = data?.contacts.filter { !$0.number.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } ?? []
+        if !fromData.isEmpty { return fromData }
+        return [
+            EmergencyContact(label: "Police", number: "110", note: "24/7 emergency"),
+            EmergencyContact(label: "Ambulance", number: "120", note: "Medical emergency"),
+            EmergencyContact(label: "Fire", number: "119", note: nil),
+            EmergencyContact(label: "Traffic", number: "122", note: "Road accidents"),
+        ]
     }
 
-    private var embassyMenuOptions: [(code: String, flag: String, name: String)] {
-        embassies.map { entry in
-            let passport = passportCountries.first { $0.code.uppercased() == entry.normalizedCountryCode }
-            return (
-                entry.normalizedCountryCode,
-                passport?.flag ?? "🏛",
-                passport?.name ?? entry.normalizedCountryCode
-            )
+    private func guide(forNumber number: String) -> EmergencyGuide? {
+        let normalized = number.trimmingCharacters(in: .whitespacesAndNewlines)
+        return guides.first {
+            ($0.number ?? "").trimmingCharacters(in: .whitespacesAndNewlines) == normalized
         }
     }
 
@@ -86,6 +82,13 @@ struct EmergencyView: View {
             .sheet(isPresented: Binding(get: { shareItems != nil }, set: { if !$0 { shareItems = nil } })) {
                 if let shareItems { ActivityView(items: shareItems) }
             }
+            .sheet(item: $presentedNumber) { presentation in
+                EmergencyNumberGuideSheet(
+                    presentation: presentation,
+                    guide: guide(forNumber: presentation.number),
+                    fallbackNote: emergencyContacts.first { $0.number == presentation.number }?.note
+                )
+            }
         }
     }
 
@@ -114,10 +117,13 @@ struct EmergencyView: View {
     private var callBlock: some View {
         VStack(alignment: .leading, spacing: 12) {
             blockLabel("🚨 紧急电话 · 一键拨号")
-            HStack(spacing: 10) {
-                callButton(number: "110", label: "警察 Police")
-                callButton(number: "120", label: "急救 Medical")
-                callButton(number: "119", label: "火警 Fire")
+            Text("Tap a number to read when & how to call, then dial.")
+                .font(Theme.FontToken.inter(10))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                ForEach(emergencyContacts) { contact in
+                    callButton(contact: contact)
+                }
             }
         }
         .padding(16)
@@ -126,11 +132,13 @@ struct EmergencyView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
-    private func callButton(number: String, label: String) -> some View {
-        Link(destination: URL(string: "tel://\(number)")!) {
+    private func callButton(contact: EmergencyContact) -> some View {
+        Button {
+            presentedNumber = EmergencyNumberPresentation(number: contact.number, label: contact.label)
+        } label: {
             VStack(spacing: 4) {
-                Text(number).font(Theme.FontToken.playfair(26, weight: .bold)).foregroundStyle(Theme.ColorToken.warning)
-                Text(label).font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+                Text(contact.number).font(Theme.FontToken.playfair(26, weight: .bold)).foregroundStyle(Theme.ColorToken.warning)
+                Text(contact.label).font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
@@ -138,6 +146,7 @@ struct EmergencyView: View {
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.warning.opacity(0.4), lineWidth: 1))
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
+        .buttonStyle(.plain)
     }
 
     private var splitCallout: some View {
@@ -241,52 +250,34 @@ struct EmergencyView: View {
         .overlay(alignment: .top) { Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1) }
     }
 
-    // MARK: - Embassy by nationality
+    // MARK: - Consular protection tutorial
 
     private var embassySection: some View {
-        let menu = embassyMenuOptions
-        let selectedOption = menu.first { $0.code == selectedNationality.uppercased() }
-        return VStack(alignment: .leading, spacing: 8) {
-            blockLabel("🏛 使馆 · 按你的国籍")
-            VStack(spacing: 10) {
-                cityPickerRow
-                HStack {
-                    Text("当前国籍").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
-                    Spacer()
-                    if menu.isEmpty {
-                        Text("\(selectedOption?.flag ?? "🏛") \(selectedOption?.name ?? selectedNationality) ⌄")
-                            .font(Theme.FontToken.inter(12, weight: .medium))
+        VStack(alignment: .leading, spacing: 8) {
+            blockLabel("🏛 领事保护 · 紧急求助")
+            NavigationLink {
+                EmergencyGuideDetailView(guideId: "consular_protection", guides: guides)
+            } label: {
+                HStack(spacing: 12) {
+                    Text("📖").font(.system(size: 22))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Consular Protection Guide")
+                            .font(Theme.FontToken.inter(13, weight: .semibold))
+                            .foregroundStyle(Theme.ColorToken.textPrimary)
+                        Text("What to do · language tips · find your embassy via official channels")
+                            .font(Theme.FontToken.inter(10))
                             .foregroundStyle(Theme.ColorToken.textMuted)
-                    } else {
-                        Menu {
-                            ForEach(menu, id: \.code) { option in
-                                Button("\(option.flag) \(option.name)") { selectedNationality = option.code }
-                            }
-                        } label: {
-                            Text("\(selectedOption?.flag ?? "🏛") \(selectedOption?.name ?? selectedNationality) ⌄")
-                                .font(Theme.FontToken.inter(12, weight: .medium))
-                                .foregroundStyle(Theme.ColorToken.accent)
-                        }
+                            .multilineTextAlignment(.leading)
                     }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
                 }
-                if let embassy = selectedEmbassy, !embassy.embassyPhone.isEmpty {
-                    embassyRow(embassy.locationLabel, embassy.embassyPhone)
-                    let hotline = embassy.consularHotline.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !hotline.isEmpty, hotline != embassy.embassyPhone {
-                        embassyRow("领事保护 24h 热线", hotline)
-                    }
-                } else {
-                    let countryName = selectedOption?.name ?? selectedNationality
-                    Text("未收录你国在\(cityLabel(selectedCityId))的使馆信息。请搜索「\(countryName) \(cityLabel(selectedCityId)) 领事馆」获取电话。")
-                        .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    if let note = data?.embassyNote, !note.isEmpty {
-                        HTMLContentView(content: note, fontSize: 11)
-                    }
-                }
+                .padding(14)
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ColorToken.border, lineWidth: 1))
             }
-            .padding(14)
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ColorToken.border, lineWidth: 1))
+            .buttonStyle(.plain)
         }
     }
 
@@ -313,27 +304,14 @@ struct EmergencyView: View {
         }
     }
 
-    private func embassyRow(_ label: String, _ phone: String) -> some View {
-        HStack {
-            Text(label).font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
-            Spacer()
-            Link(phone, destination: telURL(phone))
-                .font(Theme.FontToken.playfair(13, weight: .semibold))
-                .foregroundStyle(Theme.ColorToken.textPrimary)
-        }
-        .padding(.top, 8)
-        .overlay(alignment: .top) { Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1) }
-    }
-
     private func telURL(_ phone: String) -> URL {
         URL(string: "tel://\(phone.filter { $0.isNumber || $0 == "+" })")!
     }
 
     @MainActor
     private func loadContent() async {
-        if selectedNationality.isEmpty { selectedNationality = country }
         data = try? await appEnv.content.fetchEmergencyData()
-        passportCountries = (try? await appEnv.content.fetchPassportCountries()) ?? []
+        guides = (try? await appEnv.content.fetchEmergencyGuides()) ?? []
         if let cities = try? await appEnv.content.fetchCities() {
             allCities = cities
             cityNames = Dictionary(uniqueKeysWithValues: cities.map { ($0.id, $0.name) })
@@ -351,15 +329,6 @@ struct EmergencyView: View {
     private func loadCityResources() async {
         guard !selectedCityId.isEmpty else { return }
         hospitals = (try? await appEnv.content.fetchCityHospitals(cityId: selectedCityId)) ?? []
-        embassies = (try? await appEnv.content.fetchCityEmbassies(cityId: selectedCityId)) ?? []
-        let availableCodes = Set(embassies.map(\.normalizedCountryCode))
-        if !availableCodes.isEmpty, !availableCodes.contains(selectedNationality.uppercased()) {
-            if availableCodes.contains(country) {
-                selectedNationality = country
-            } else if let first = embassies.first {
-                selectedNationality = first.normalizedCountryCode
-            }
-        }
     }
 
     // MARK: - First-aid card

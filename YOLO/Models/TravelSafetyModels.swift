@@ -90,3 +90,31 @@ struct CityEmbassy: Identifiable, Codable, Hashable {
 
     var normalizedCountryCode: String { countryCode.uppercased() }
 }
+
+struct EmergencyGuide: Identifiable, Codable, Hashable {
+    let id: String
+    let kind: String
+    let number: String?
+    let titleEn: String?
+    let titleZh: String?
+    let bodyEn: String?
+    let bodyZh: String?
+    let sortOrder: Int?
+
+    var displayTitle: String {
+        let en = titleEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let zh = titleZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !en.isEmpty { return en }
+        if !zh.isEmpty { return zh }
+        return id
+    }
+
+    var displayBodyHTML: String {
+        let en = bodyEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let zh = bodyZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !en.isEmpty { return en }
+        return zh
+    }
+
+    var isConsular: Bool { kind == "consular" }
+}

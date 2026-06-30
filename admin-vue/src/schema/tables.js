@@ -1481,6 +1481,31 @@ const App = {};
         { key: "is_active", type: "bool", label: "启用" },
       ],
     },
+    emergency_guides: {
+      label: "紧急教程",
+      pk: "id",
+      order: "sort_order",
+      listColumns: [
+        { key: "title_en", label: "标题 EN" },
+        { key: "kind", label: "类型" },
+        { key: "number", label: "号码" },
+        { key: "is_active", label: "启用" },
+      ],
+      fields: [
+        { key: "id", type: "text", required: true, label: "ID", hint: "如 consular_protection / number_110" },
+        { key: "kind", type: "enum", required: true, label: "类型", options: [
+          { value: "consular", label: "领事保护教程" },
+          { value: "emergency_number", label: "紧急号码教程" },
+        ] },
+        { key: "number", type: "text", label: "号码", hint: "emergency_number 时填 110/120/119/122；consular 留空" },
+        { key: "title_zh", type: "text", label: "标题 中文" },
+        { key: "title_en", type: "text", required: true, label: "标题 EN" },
+        { key: "body_zh", type: "richtext", label: "正文 中文" },
+        { key: "body_en", type: "richtext", required: true, label: "正文 EN" },
+        { key: "sort_order", type: "number" },
+        { key: "is_active", type: "bool", label: "启用", defaultTrue: true },
+      ],
+    },
     common_phrases: {
       label: "常用语",
       pk: "id",

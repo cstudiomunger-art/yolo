@@ -27,6 +27,7 @@ struct MembershipPlan: Identifiable, Codable, Sendable {
         var visitorTips: Bool
 
         static let none = AccessFlags(audioGuides: false, textContent: false, visitorTips: false)
+        static let full = AccessFlags(audioGuides: true, textContent: true, visitorTips: true)
 
         init(audioGuides: Bool, textContent: Bool, visitorTips: Bool) {
             self.audioGuides = audioGuides

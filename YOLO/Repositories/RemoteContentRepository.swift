@@ -276,6 +276,22 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
         return data
     }
 
+    func fetchEmergencyGuides() async throws -> [EmergencyGuide] {
+        do {
+            return try await client
+                .from("emergency_guides")
+                .select()
+                .eq("is_active", value: true)
+                .order("sort_order", ascending: true)
+                .execute()
+                .value
+        } catch {
+            let fallback = try await bundledFallback.fetchEmergencyGuides()
+            if !fallback.isEmpty { return fallback }
+            throw error
+        }
+    }
+
     func fetchCityHospitals(cityId: String) async throws -> [CityHospital] {
         let normalizedCityId = cityId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         do {

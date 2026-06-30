@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		603FB6122FB848A0008F13B4 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 603FB6112FB848A0008F13B4 /* Supabase */; };
+		603FB6222FB84920008F13B4 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 603FB6212FB84920008F13B4 /* RevenueCat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				603FB6122FB848A0008F13B4 /* Supabase in Frameworks */,
+				603FB6222FB84920008F13B4 /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,6 +75,7 @@
 			name = YOLO;
 			packageProductDependencies = (
 				603FB6112FB848A0008F13B4 /* Supabase */,
+				603FB6212FB84920008F13B4 /* RevenueCat */,
 			);
 			productName = YOLO;
 			productReference = 602065AB2F9E523D0041D9E3 /* YOLO.app */;
@@ -105,6 +108,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				603FB60F2FB847C6008F13B4 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				603FB6202FB84920008F13B4 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 602065AC2F9E523D0041D9E3 /* Products */;
@@ -374,6 +378,14 @@
 				minimumVersion = 2.5.1;
 			};
 		};
+		603FB6202FB84920008F13B4 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -381,6 +393,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 603FB60F2FB847C6008F13B4 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		603FB6212FB84920008F13B4 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 603FB6202FB84920008F13B4 /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCat;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

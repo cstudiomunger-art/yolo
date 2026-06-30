@@ -99,16 +99,6 @@
         }
       }
     },
-    "%@ %@ ⌄" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$@ ⌄"
-          }
-        }
-      }
-    },
     "%@ %@ Passport" : {
       "localizations" : {
         "en" : {
@@ -623,6 +613,9 @@
     "📍 %@" : {
 
     },
+    "📖" : {
+
+    },
     "📚 Read Before You Go" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1096,6 +1089,9 @@
         }
       }
     },
+    "Call %@ now" : {
+
+    },
     "Cancel" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1275,6 +1271,9 @@
     "Connect to the internet to open shared trips." : {
 
     },
+    "Consular Protection Guide" : {
+
+    },
     "Content" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1292,6 +1291,9 @@
 
     },
     "Content coming soon for this attraction" : {
+
+    },
+    "Content is not available offline. Refresh from CMS when online." : {
 
     },
     "Content Mode" : {
@@ -1710,6 +1712,9 @@
     "Emergency · Visa · Pay · Transport" : {
 
     },
+    "Emergency Guide" : {
+
+    },
     "Enable Notifications" : {
 
     },
@@ -1924,6 +1929,9 @@
           }
         }
       }
+    },
+    "Guide not found." : {
+
     },
     "HAPPY" : {
 
@@ -2177,6 +2185,9 @@
           }
         }
       }
+    },
+    "Nationwide emergency number. Tap below to call." : {
+
     },
     "New password" : {
 
@@ -3071,6 +3082,9 @@
     "Talk to a Human" : {
 
     },
+    "Tap a number to read when & how to call, then dial." : {
+
+    },
     "Tell us your dates and cities" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3430,6 +3444,9 @@
         }
       }
     },
+    "What to do · language tips · find your embassy via official channels" : {
+
+    },
     "What's next?" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3671,12 +3688,6 @@
     "开始判定 · 我这条线够用吗" : {
 
     },
-    "当前国籍" : {
-
-    },
-    "当前城市" : {
-
-    },
     "微信" : {
 
     },
@@ -3758,18 +3769,14 @@
     "显示译文" : {
 
     },
+    "暂无 %@ 的推荐医院，请切换城市或拨打 120。" : {
+
+    },
     "暂无历史会话" : {
 
     },
-    "未收录你国在%@的使馆信息。请搜索「%@ %@ 领事馆」获取电话。" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "未收录你国在%1$@的使馆信息。请搜索「%2$@ %3$@ 领事馆」获取电话。"
-          }
-        }
-      }
+    "查看城市" : {
+
     },
     "查看官方公告 →" : {
 

@@ -159,6 +159,20 @@ final class UserPreferencesStore {
         }
     }
 
+    /// Admin membership override (beats RevenueCat). nil = follow RC, "grant", "ban".
+    /// Set only from the remote profile; the App never originates this value.
+    var membershipOverride: String? {
+        didSet {
+            UserDefaults.standard.set(membershipOverride, forKey: Keys.membershipOverride)
+        }
+    }
+
+    var membershipOverrideExpiresAt: Date? {
+        didSet {
+            UserDefaults.standard.set(membershipOverrideExpiresAt?.timeIntervalSince1970, forKey: Keys.membershipOverrideExpiresAt)
+        }
+    }
+
     var displayName: String? {
         didSet {
             UserDefaults.standard.set(displayName, forKey: Keys.displayName)
@@ -229,6 +243,12 @@ final class UserPreferencesStore {
         } else {
             subscriptionExpiresAt = nil
         }
+        membershipOverride = UserDefaults.standard.string(forKey: Keys.membershipOverride)
+        if let ovExp = UserDefaults.standard.object(forKey: Keys.membershipOverrideExpiresAt) as? TimeInterval {
+            membershipOverrideExpiresAt = Date(timeIntervalSince1970: ovExp)
+        } else {
+            membershipOverrideExpiresAt = nil
+        }
         displayName = UserDefaults.standard.string(forKey: Keys.displayName)
         avatarUrl = UserDefaults.standard.string(forKey: Keys.avatarUrl)
         avatarStatus = UserDefaults.standard.string(forKey: Keys.avatarStatus) ?? "none"
@@ -265,6 +285,8 @@ final class UserPreferencesStore {
             Keys.purchasedAttractionIds,
             Keys.subscriptionPlanId,
             Keys.subscriptionExpiresAt,
+            Keys.membershipOverride,
+            Keys.membershipOverrideExpiresAt,
             Keys.displayName,
             Keys.avatarUrl,
             Keys.avatarStatus,
@@ -288,6 +310,8 @@ final class UserPreferencesStore {
         checklistStatuses = [:]
         subscriptionPlanId = nil
         subscriptionExpiresAt = nil
+        membershipOverride = nil
+        membershipOverrideExpiresAt = nil
         displayName = nil
         avatarUrl = nil
         avatarStatus = "none"
@@ -557,7 +581,8 @@ final class UserPreferencesStore {
     // MARK: - Purchases & subscription
 
     func hasAccessToAttraction(_ attractionId: String, iapProductId: String?) -> Bool {
-        if isSubscriptionActive { return true }
+        if isMembershipBanned { return false }
+        if isMembershipActive { return true }
         if purchasedAttractionIds.contains(attractionId) { return true }
         return false
     }
@@ -568,6 +593,39 @@ final class UserPreferencesStore {
     var isSubscriptionActive: Bool {
         guard subscriptionPlanId != nil, let exp = subscriptionExpiresAt else { return false }
         return exp > .now
+    }
+
+    // MARK: - Membership override (admin, beats RevenueCat)
+
+    enum MembershipOverrideKind {
+        case grant, ban, none
+    }
+
+    var membershipOverrideKind: MembershipOverrideKind {
+        switch membershipOverride?.lowercased() {
+        case "grant": return .grant
+        case "ban", "block", "banned": return .ban
+        default: return .none
+        }
+    }
+
+    /// True when an admin has explicitly banned this user (locks all paid content).
+    var isMembershipBanned: Bool { membershipOverrideKind == .ban }
+
+    /// True when an admin grant is currently in effect (nil expiry = lifetime grant).
+    var isOverrideGrantActive: Bool {
+        guard membershipOverrideKind == .grant else { return false }
+        if let exp = membershipOverrideExpiresAt { return exp > .now }
+        return true
+    }
+
+    /// Effective membership: admin override wins, otherwise fall back to the RevenueCat subscription.
+    var isMembershipActive: Bool {
+        switch membershipOverrideKind {
+        case .ban: return false
+        case .grant: return isOverrideGrantActive
+        case .none: return isSubscriptionActive
+        }
     }
 
     func purchaseAttraction(_ attractionId: String) {
@@ -603,9 +661,19 @@ final class UserPreferencesStore {
             )
         }
         purchasedAttractionIds = Set(row.purchasedAttractionIds)
-        subscriptionPlanId = row.subscriptionPlanId
-        if let expStr = row.subscriptionExpiresAt {
-            subscriptionExpiresAt = Self.parseISO8601(expStr)
+        membershipOverride = row.membershipOverride
+        if let ovExpStr = row.membershipOverrideExpiresAt {
+            membershipOverrideExpiresAt = Self.parseISO8601(ovExpStr)
+        } else {
+            membershipOverrideExpiresAt = nil
+        }
+        // Subscription truth on device is RevenueCat when configured; remote subscription_*
+        // columns are admin/webhook-only and must not clobber local RC state on profile pull.
+        if !AppConfig.isRevenueCatConfigured {
+            subscriptionPlanId = row.subscriptionPlanId
+            if let expStr = row.subscriptionExpiresAt {
+                subscriptionExpiresAt = Self.parseISO8601(expStr)
+            }
         }
         if let name = row.displayName, !name.isEmpty { displayName = name }
         if let url = row.avatarUrl, !url.isEmpty { avatarUrl = url }
@@ -614,6 +682,22 @@ final class UserPreferencesStore {
         if let activeId = row.activeItineraryId {
             activeItineraryId = activeId
         }
+    }
+
+    func makeClientPushRow(userId: UUID, email: String?) -> ClientProfilePushRow {
+        ClientProfilePushRow(
+            id: userId,
+            email: email,
+            displayName: displayName,
+            avatarUrl: avatarUrl,
+            avatarStatus: avatarStatus,
+            countryCode: countryCode.isEmpty ? "GB" : countryCode,
+            hasCompletedOnboarding: hasCompletedOnboarding,
+            departureDate: Self.formatDateOnly(departureDate),
+            selectedCityIds: selectedCityIds,
+            completedChecklistIds: Array(completedChecklistIds),
+            activeItineraryId: activeItineraryId
+        )
     }
 
     func makeProfileRow(userId: UUID, email: String?) -> UserProfileRow {
@@ -632,6 +716,10 @@ final class UserPreferencesStore {
             subscriptionPlanId: subscriptionPlanId,
             subscriptionExpiresAt: subscriptionExpiresAt.map { Self.formatISO8601($0) },
             rcCustomerId: nil,
+            // override columns are admin-owned & DB-protected; we round-trip the last-known
+            // values so the App never blanks them, but the trigger ignores client writes anyway.
+            membershipOverride: membershipOverride,
+            membershipOverrideExpiresAt: membershipOverrideExpiresAt.map { Self.formatISO8601($0) },
             savedItineraries: [],
             activeItineraryId: activeItineraryId
         )

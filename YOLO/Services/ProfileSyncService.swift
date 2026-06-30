@@ -52,10 +52,10 @@ final class ProfileSyncService {
                 if remote.hasCompletedOnboarding {
                     preferences.applyRemoteProfile(remote)
                 } else if preferences.hasCompletedOnboarding {
-                    try await repository.upsert(preferences.makeProfileRow(userId: userId, email: auth.userEmail))
+                    try await repository.upsertClientProfile(preferences.makeClientPushRow(userId: userId, email: auth.userEmail))
                 }
             } else if preferences.hasCompletedOnboarding {
-                try await repository.upsert(preferences.makeProfileRow(userId: userId, email: auth.userEmail))
+                try await repository.upsertClientProfile(preferences.makeClientPushRow(userId: userId, email: auth.userEmail))
             }
 
             try await runItinerarySync {
@@ -79,7 +79,7 @@ final class ProfileSyncService {
         defer { isSyncing = false }
 
         do {
-            try await repository.upsert(preferences.makeProfileRow(userId: userId, email: auth.userEmail))
+            try await repository.upsertClientProfile(preferences.makeClientPushRow(userId: userId, email: auth.userEmail))
             try await runItinerarySync {
                 try await self.pushItineraries(userId: userId, preferences: preferences)
             }

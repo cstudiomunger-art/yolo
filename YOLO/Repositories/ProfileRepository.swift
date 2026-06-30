@@ -20,4 +20,12 @@ struct ProfileRepository: Sendable {
             .upsert(row)
             .execute()
     }
+
+    /// Upsert only client-writable profile fields (no entitlements).
+    func upsertClientProfile(_ row: ClientProfilePushRow) async throws {
+        try await client
+            .from("profiles")
+            .upsert(row)
+            .execute()
+    }
 }
