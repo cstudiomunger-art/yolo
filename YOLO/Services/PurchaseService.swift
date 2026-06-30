@@ -46,6 +46,7 @@ final class PurchaseService {
         guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else {
             availablePlans = cachedPlans() ?? Self.bundledFallbackPlans
             await refreshCustomerInfoIfNeeded()
+            await profileSync?.refreshRemoteMembershipState()
             return
         }
         isLoadingPlans = true
@@ -68,6 +69,7 @@ final class PurchaseService {
             availablePlans = cachedPlans() ?? Self.bundledFallbackPlans
         }
         await refreshCustomerInfoIfNeeded()
+        await profileSync?.refreshRemoteMembershipState()
     }
 
     private func cachePlans(_ plans: [MembershipPlan]) {
@@ -112,6 +114,23 @@ final class PurchaseService {
     /// Whether the user has an active entitlement (admin override beats RevenueCat).
     var isProActive: Bool {
         preferences?.isMembershipActive ?? false
+    }
+
+    var isMembershipBanned: Bool {
+        preferences?.isMembershipBanned ?? false
+    }
+
+    /// Plan name for profile UI — uses RC plan id, or the annual plan when admin-granted.
+    func displayMembershipPlanName(preferChinese: Bool) -> String {
+        if let planId = preferences?.subscriptionPlanId,
+           let plan = availablePlans.first(where: { $0.id == planId }) {
+            return plan.localizedName(preferChinese: preferChinese)
+        }
+        if preferences?.isOverrideGrantActive == true,
+           let plan = availablePlans.first(where: { $0.planType == .subscription }) {
+            return plan.localizedName(preferChinese: preferChinese)
+        }
+        return String(localized: "Active Membership")
     }
 
     /// Whether a content type is unlocked for an attraction or sub-area.
@@ -270,6 +289,7 @@ final class PurchaseService {
             prefs.subscriptionPlanId = nil
             prefs.subscriptionExpiresAt = nil
         }
+        await profileSync?.refreshRemoteMembershipState()
         await profileSync?.schedulePush()
     }
 

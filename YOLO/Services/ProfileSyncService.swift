@@ -69,6 +69,20 @@ final class ProfileSyncService {
         }
     }
 
+    /// Pulls admin membership override (and purchased attractions) from Supabase.
+    /// Lightweight — call on foreground so ban/grant changes take effect without re-login.
+    func refreshRemoteMembershipState() async {
+        guard let preferences, let auth, auth.isAuthenticated, let userId = auth.userId else { return }
+        guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else { return }
+
+        do {
+            guard let remote = try await repository.fetch(userId: userId) else { return }
+            preferences.applyRemoteMembershipOverride(remote)
+        } catch {
+            lastSyncError = error.localizedDescription
+        }
+    }
+
     func pushToRemote() async {
         guard let preferences, let auth, auth.isAuthenticated, let userId = auth.userId else { return }
         guard !preferences.needsNationalityOnboarding else { return }

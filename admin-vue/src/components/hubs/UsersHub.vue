@@ -100,7 +100,35 @@ const giftDays = ref("365");
 
 const subPlans = computed(() => plans.value.filter((p) => p.plan_type === "subscription"));
 const detailActive = computed(() => (detail.value ? isActiveMember(detail.value) : false));
-const detailDaysLeft = computed(() => (detail.value ? daysUntil(detail.value.subscription_expires_at) : null));
+const detailDaysLeft = computed(() => {
+  if (!detail.value) return null;
+  const exp = detail.value.membership_override === "grant"
+    ? detail.value.membership_override_expires_at
+    : detail.value.subscription_expires_at;
+  return daysUntil(exp);
+});
+const detailStatusBadge = computed(() => {
+  if (!detail.value) return { cls: "gray", text: "—" };
+  const d = detail.value;
+  if (d.membership_override === "ban") return { cls: "red", text: "● 已封禁" };
+  if (d.membership_override === "grant") {
+    return detailActive.value
+      ? { cls: "green", text: "● 强制会员（赠送）" }
+      : { cls: "red", text: "● 赠送已过期" };
+  }
+  if (detailActive.value) return { cls: "green", text: "● 有效会员（App Store）" };
+  if (d.subscription_plan_id) return { cls: "red", text: "● 订阅已过期" };
+  return { cls: "gray", text: "○ 免费用户" };
+});
+/** 后台订阅已失效但未设 ban —— App 仍可能因 RevenueCat 显示会员 */
+const needsBanWarning = computed(() => {
+  if (!detail.value) return false;
+  const d = detail.value;
+  return d.membership_override !== "ban"
+    && d.membership_override !== "grant"
+    && !isActiveMember(d)
+    && (!!d.rc_customer_id || !!d.subscription_plan_id);
+});
 
 const expiresLocal = computed({
   get() { const v = detail.value?.subscription_expires_at; return v ? new Date(v).toISOString().slice(0, 16) : ""; },
@@ -135,18 +163,40 @@ function giftApply() {
   if (!giftPlan.value) return showToast("请先选择订阅计划");
   const days = parseInt(giftDays.value || "0", 10);
   const expires = days > 0 ? new Date(Date.now() + days * 86400000).toISOString() : null;
-  if (!confirm(`设为「${planName(giftPlan.value)}」会员，有效期：${days > 0 ? days + " 天" : "永久"}？`)) return;
-  applyMemberPatch({ subscription_plan_id: giftPlan.value, subscription_expires_at: expires });
+  if (!confirm(`设为「${planName(giftPlan.value)}」会员，有效期：${days > 0 ? days + " 天" : "永久"}？\nApp 端将强制开通（优先于 App Store 订阅）。`)) return;
+  applyMemberPatch({
+    membership_override: "grant",
+    membership_override_expires_at: expires,
+    subscription_plan_id: giftPlan.value,
+    subscription_expires_at: expires,
+    membership_override_note: detail.value.membership_override_note?.trim() || null,
+  });
 }
 function extendDays(days) {
-  if (!detail.value.subscription_plan_id) return showToast("该用户暂无订阅计划，请先赠送/设置会员");
-  const cur = detail.value.subscription_expires_at;
+  if (!detail.value.subscription_plan_id && detail.value.membership_override !== "grant") {
+    return showToast("该用户暂无订阅计划，请先赠送/设置会员");
+  }
+  const cur = detail.value.membership_override === "grant"
+    ? detail.value.membership_override_expires_at
+    : detail.value.subscription_expires_at;
   const base = cur && new Date(cur) > new Date() ? new Date(cur) : new Date();
-  applyMemberPatch({ subscription_expires_at: new Date(base.getTime() + days * 86400000).toISOString() });
+  const expires = new Date(base.getTime() + days * 86400000).toISOString();
+  const planId = detail.value.subscription_plan_id || giftPlan.value || subPlans.value[0]?.id || "annual";
+  applyMemberPatch({
+    subscription_plan_id: planId,
+    subscription_expires_at: expires,
+    membership_override: "grant",
+    membership_override_expires_at: expires,
+  });
 }
 function cancelSub() {
-  if (!confirm("确认取消该用户会员？将清空订阅计划与到期时间（单购景点不受影响）。")) return;
-  applyMemberPatch({ subscription_plan_id: null, subscription_expires_at: null });
+  if (!confirm("确认取消该用户会员？\n将封禁 App 内全部付费内容（即使 App Store 仍有有效订阅）。")) return;
+  applyMemberPatch({
+    subscription_plan_id: null,
+    subscription_expires_at: null,
+    membership_override: "ban",
+    membership_override_expires_at: null,
+  });
 }
 
 // ── 后台会员覆盖（override，优先于 App Store / RevenueCat）──
@@ -154,10 +204,13 @@ const overrideDays = ref("365");
 function grantOverride() {
   const days = parseInt(overrideDays.value || "0", 10);
   const expires = days > 0 ? new Date(Date.now() + days * 86400000).toISOString() : null;
-  if (!confirm(`强制开通会员，有效期：${days > 0 ? days + " 天" : "永久"}？\n该状态优先于 App Store 订阅，用户登录 App 后立即生效。`)) return;
+  const planId = giftPlan.value || subPlans.value[0]?.id || "annual";
+  if (!confirm(`强制开通会员，有效期：${days > 0 ? days + " 天" : "永久"}？\nApp 端将立即生效（优先于 App Store 订阅）。`)) return;
   applyMemberPatch({
     membership_override: "grant",
     membership_override_expires_at: expires,
+    subscription_plan_id: planId,
+    subscription_expires_at: expires,
     membership_override_note: detail.value.membership_override_note?.trim() || null,
   });
 }
@@ -202,9 +255,21 @@ async function saveDetail() {
     purchased_attraction_ids: d.purchased_attraction_ids || [],
     updated_at: new Date().toISOString(),
   };
+  const now = new Date();
+  const subExpired = patch.subscription_expires_at && new Date(patch.subscription_expires_at) <= now;
+  const subCancelled = !patch.subscription_plan_id;
+  const subActive = patch.subscription_plan_id && (!patch.subscription_expires_at || new Date(patch.subscription_expires_at) > now);
+  if (subActive) {
+    patch.membership_override = null;
+    patch.membership_override_expires_at = null;
+  } else if ((subExpired || subCancelled) && d.membership_override !== "grant") {
+    patch.membership_override = "ban";
+    patch.membership_override_expires_at = null;
+  }
   const { error: e } = await supabase.from("profiles").update(patch).eq("id", d.id);
   savingDetail.value = false;
   if (e) { showToast("失败：" + e.message); return; }
+  Object.assign(detail.value, patch);
   showToast("用户资料已保存");
   await loadList();
 }
@@ -240,15 +305,29 @@ onMounted(async () => { await refCache.load(); await loadList(); });
 
       <section class="card">
         <h3>会员与订阅</h3>
+        <div v-if="needsBanWarning" class="warn-banner">
+          ⚠️ 后台订阅已失效，但 App 仍可能按 App Store / RevenueCat 判定为会员。
+          请点 <strong>封禁会员</strong> 或 <strong>取消会员</strong>，不要只改「订阅到期」。
+        </div>
         <div class="status-card">
           <div class="status-head">
-            <span class="badge" :class="detailActive ? 'green' : (detail.subscription_plan_id ? 'red' : 'gray')">
-              {{ detailActive ? "● 有效会员" : (detail.subscription_plan_id ? "● 会员已过期" : "○ 免费用户") }}
-            </span>
-            <strong v-if="detail.subscription_plan_id">{{ planName(detail.subscription_plan_id) }}</strong>
+            <span class="badge" :class="detailStatusBadge.cls">{{ detailStatusBadge.text }}</span>
+            <strong v-if="detail.subscription_plan_id || detail.membership_override === 'grant'">
+              {{ planName(detail.subscription_plan_id || subPlans[0]?.id || "annual") }}
+            </strong>
+          </div>
+          <div class="status-row"><span class="lbl">App 实际</span>
+            <span class="badge" :class="detailActive ? 'green' : 'red'">{{ detailActive ? "有效会员" : "非会员" }}</span>
+            <span class="muted small">（与 App 判定一致）</span>
           </div>
           <div class="status-row"><span class="lbl">到期</span>
-            <template v-if="detail.subscription_expires_at">
+            <template v-if="detail.membership_override === 'grant' && detail.membership_override_expires_at">
+              {{ fmtDateTime(detail.membership_override_expires_at) }}
+              <span class="badge" :class="detailActive ? (detailDaysLeft <= 7 ? 'yellow' : 'blue') : 'red'">
+                {{ detailActive ? `剩 ${detailDaysLeft} 天` : "已过期" }}
+              </span>
+            </template>
+            <template v-else-if="detail.subscription_expires_at">
               {{ fmtDateTime(detail.subscription_expires_at) }}
               <span class="badge" :class="detailActive ? (detailDaysLeft <= 7 ? 'yellow' : 'blue') : 'red'">
                 {{ detailActive ? `剩 ${detailDaysLeft} 天` : "已过期" }}
@@ -497,6 +576,11 @@ onMounted(async () => { await refCache.load(); await loadList(); });
 .override-box { margin-top: 14px; padding: 12px 14px; border: 1px dashed var(--border); border-radius: 10px; background: var(--surface2); }
 .override-head { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
 .override-box .quick { margin-top: 10px; }
+.warn-banner {
+  margin-bottom: 12px; padding: 10px 12px; border-radius: 8px;
+  background: rgba(212, 154, 22, 0.12); border: 1px solid rgba(212, 154, 22, 0.35);
+  font-size: 13px; line-height: 1.5;
+}
 
 .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 1100; }
 .toast.on { opacity: 1; }

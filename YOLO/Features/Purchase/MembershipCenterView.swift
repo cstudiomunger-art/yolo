@@ -11,23 +11,28 @@ struct MembershipCenterView: View {
     private var purchase: PurchaseService { appEnv.purchase }
     private var prefs: UserPreferencesStore { appEnv.preferences }
 
-    private var currentPlan: MembershipPlan? {
-        guard let planId = prefs.subscriptionPlanId else { return nil }
-        return purchase.availablePlans.first { $0.id == planId }
+    private var displayPlan: MembershipPlan? {
+        if let planId = prefs.subscriptionPlanId,
+           let plan = purchase.availablePlans.first(where: { $0.id == planId }) {
+            return plan
+        }
+        if prefs.isOverrideGrantActive || prefs.isMembershipActive {
+            return purchase.availablePlans.first(where: { $0.planType == .subscription })
+        }
+        return nil
     }
 
     /// Expiry to display: an admin grant uses its own expiry (nil = lifetime), otherwise the
     /// RevenueCat subscription expiry.
     private var effectiveMembershipExpiry: Date? {
-        if prefs.membershipOverrideKind == .grant { return prefs.membershipOverrideExpiresAt }
-        return prefs.subscriptionExpiresAt
+        prefs.effectiveMembershipExpiry
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 subscriptionStatusCard
-                if let plan = currentPlan, !plan.featureLines.isEmpty {
+                if let plan = displayPlan, !plan.featureLines.isEmpty {
                     benefitsSection(plan: plan)
                 }
                 actionsSection
@@ -36,6 +41,7 @@ struct MembershipCenterView: View {
         }
         .navigationTitle(String(localized: "Membership"))
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: appEnv.membershipRevision) { _, _ in }
         .navigationDestination(isPresented: $showHistory) {
             PurchaseHistoryView()
                 .environment(appEnv)
@@ -74,11 +80,18 @@ struct MembershipCenterView: View {
 
     private var subscriptionStatusCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if purchase.isProActive {
+            if purchase.isMembershipBanned {
+                Text(String(localized: "Membership suspended"))
+                    .font(Theme.FontToken.inter(14, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.warning)
+                Text(String(localized: "Your access has been suspended. Contact support if you believe this is a mistake."))
+                    .font(Theme.FontToken.inter(12))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            } else if purchase.isProActive {
                 HStack(spacing: 8) {
                     Text("✨")
-                    Text(currentPlan?.localizedName(preferChinese: appEnv.preferences.appLanguage == .chinese)
-                         ?? String(localized: "Active Membership"))
+                    Text(displayPlan?.localizedName(preferChinese: appEnv.preferences.appLanguage == .chinese)
+                         ?? purchase.displayMembershipPlanName(preferChinese: appEnv.preferences.appLanguage == .chinese))
                         .font(Theme.FontToken.playfair(18, weight: .semibold))
                 }
 

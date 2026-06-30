@@ -207,6 +207,10 @@ struct AudioGuideSection: View {
             accessRefresh = UUID()
             if isActive { player.refreshCurrentTrackAccess() }
         }
+        .onChange(of: appEnv.membershipRevision) { _, _ in
+            accessRefresh = UUID()
+            if isActive { player.refreshCurrentTrackAccess() }
+        }
         .overlay(alignment: .bottom) {
             if showUnlockedToast {
                 Text(String(localized: "🎧 Audio guide unlocked!"))

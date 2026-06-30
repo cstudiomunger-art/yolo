@@ -6,6 +6,7 @@ struct RootView: View {
 
     @State private var showSplash = true
     @State private var lastForegroundRefresh: Date = .distantPast
+    @State private var lastMembershipRefresh: Date = .distantPast
 
     var body: some View {
         Group {
@@ -29,6 +30,10 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 let now = Date()
+                if appEnv.auth.isAuthenticated, now.timeIntervalSince(lastMembershipRefresh) > 15 {
+                    lastMembershipRefresh = now
+                    Task { await appEnv.refreshRemoteMembershipState() }
+                }
                 guard now.timeIntervalSince(lastForegroundRefresh) > 300 else { return }
                 lastForegroundRefresh = now
                 Task {

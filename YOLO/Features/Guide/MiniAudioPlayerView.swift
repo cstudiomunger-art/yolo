@@ -63,6 +63,9 @@ struct MiniAudioPlayerView: View {
         .onChange(of: appEnv.purchase.isProActive) { _, _ in
             player.refreshCurrentTrackAccess()
         }
+        .onChange(of: appEnv.membershipRevision) { _, _ in
+            player.refreshCurrentTrackAccess()
+        }
     }
 
     // MARK: - Expanded control bar

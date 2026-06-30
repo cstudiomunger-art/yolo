@@ -19,6 +19,7 @@ struct AttractionDetailView: View {
     @State private var fullScreenImagePath: String?
     @State private var showAddToast = false
     @State private var showPaywall = false
+    @State private var accessRevision = 0
     @State private var copiedField: CopyField?
 
     private let subAreasAnchor = "exploreByArea"
@@ -27,7 +28,8 @@ struct AttractionDetailView: View {
     private var cityName: String { route.presentation.browseCityName ?? "Guide" }
 
     private var hasFullAccess: Bool {
-        hasContentAccess(\.audioGuides)
+        _ = accessRevision
+        return hasContentAccess(\.audioGuides)
     }
 
     private func hasContentAccess(_ flag: KeyPath<MembershipPlan.AccessFlags, Bool>) -> Bool {
@@ -138,6 +140,9 @@ struct AttractionDetailView: View {
         }
         .onChange(of: appEnv.contentRevision) { _, _ in
             Task { await loadDetail(attractionId: listPreview.id) }
+        }
+        .onChange(of: appEnv.membershipRevision) { _, _ in
+            accessRevision += 1
         }
         .fullScreenCover(isPresented: Binding(
             get: { fullScreenImagePath != nil },

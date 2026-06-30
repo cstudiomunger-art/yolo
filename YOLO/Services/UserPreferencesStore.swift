@@ -173,6 +173,12 @@ final class UserPreferencesStore {
         }
     }
 
+    /// Incremented when admin override is applied from the server — use to refresh paywalled UI.
+    private(set) var membershipStateVersion = 0
+
+    /// Called after `membershipStateVersion` changes (bound in AppEnvironment).
+    var onMembershipStateChanged: (() -> Void)?
+
     var displayName: String? {
         didSet {
             UserDefaults.standard.set(displayName, forKey: Keys.displayName)
@@ -628,6 +634,12 @@ final class UserPreferencesStore {
         }
     }
 
+    /// Expiry date to show in profile UI (grant override expiry takes precedence over RC).
+    var effectiveMembershipExpiry: Date? {
+        if membershipOverrideKind == .grant { return membershipOverrideExpiresAt }
+        return subscriptionExpiresAt
+    }
+
     func purchaseAttraction(_ attractionId: String) {
         var set = purchasedAttractionIds
         set.insert(attractionId)
@@ -660,13 +672,7 @@ final class UserPreferencesStore {
                 uniqueKeysWithValues: done.map { ($0, ChecklistStatusEntry(status: .done, type: .universal)) }
             )
         }
-        purchasedAttractionIds = Set(row.purchasedAttractionIds)
-        membershipOverride = row.membershipOverride
-        if let ovExpStr = row.membershipOverrideExpiresAt {
-            membershipOverrideExpiresAt = Self.parseISO8601(ovExpStr)
-        } else {
-            membershipOverrideExpiresAt = nil
-        }
+        applyRemoteMembershipOverride(row)
         // Subscription truth on device is RevenueCat when configured; remote subscription_*
         // columns are admin/webhook-only and must not clobber local RC state on profile pull.
         if !AppConfig.isRevenueCatConfigured {
@@ -681,6 +687,32 @@ final class UserPreferencesStore {
         // Trips are synced via `user_itineraries` (021), not profiles.saved_itineraries JSON.
         if let activeId = row.activeItineraryId {
             activeItineraryId = activeId
+        }
+    }
+
+    /// Applies admin membership override from the server. Beats RevenueCat on the device.
+    func applyRemoteMembershipOverride(_ row: UserProfileRow) {
+        suppressSyncNotification = true
+        defer { suppressSyncNotification = false }
+
+        let prevOverride = membershipOverride
+        let prevExp = membershipOverrideExpiresAt
+        let wasActive = isMembershipActive
+
+        membershipOverride = row.membershipOverride
+        if let ovExpStr = row.membershipOverrideExpiresAt {
+            membershipOverrideExpiresAt = Self.parseISO8601(ovExpStr)
+        } else {
+            membershipOverrideExpiresAt = nil
+        }
+        purchasedAttractionIds = Set(row.purchasedAttractionIds)
+
+        let changed = membershipOverride != prevOverride
+            || membershipOverrideExpiresAt != prevExp
+            || isMembershipActive != wasActive
+        if changed {
+            membershipStateVersion += 1
+            onMembershipStateChanged?()
         }
     }
 

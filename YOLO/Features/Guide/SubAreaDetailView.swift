@@ -16,6 +16,7 @@ struct SubAreaDetailView: View {
     @State private var isLoading = true
     @State private var fullScreenImagePath: String?
     @State private var showPaywall = false
+    @State private var accessRevision = 0
 
     private func resolvedGuide(for base: AudioGuide) -> AudioGuide {
         resolvedGuides[base.id] ?? base
@@ -101,6 +102,9 @@ struct SubAreaDetailView: View {
             }
         }
         .task(id: route.subAreaId) { await load() }
+        .onChange(of: appEnv.membershipRevision) { _, _ in
+            accessRevision += 1
+        }
         .fullScreenCover(isPresented: Binding(
             get: { fullScreenImagePath != nil },
             set: { if !$0 { fullScreenImagePath = nil } }
@@ -189,6 +193,7 @@ struct SubAreaDetailView: View {
 
     /// Whether both the audio and text of a sub-area are unlocked (a single purchase unlocks both).
     private func subAreaHasFullAccess(_ area: SubArea) -> Bool {
+        _ = accessRevision
         if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
         let audioOK = appEnv.purchase.hasContentAccess(
             \.audioGuides, requiresPurchase: area.requiresPurchase,
@@ -235,6 +240,7 @@ struct SubAreaDetailView: View {
 
     /// Text access for a sub-area: free items always open; otherwise member / single / parent purchase.
     private func subAreaTextAccess(_ area: SubArea) -> Bool {
+        _ = accessRevision
         if !appEnv.contentMode.effectiveUseRemoteIAP { return true }
         return appEnv.purchase.hasContentAccess(
             \.textContent,

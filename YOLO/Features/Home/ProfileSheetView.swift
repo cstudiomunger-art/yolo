@@ -142,10 +142,19 @@ struct ProfileSheetView: View {
         } label: {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
-                    if appEnv.purchase.isProActive {
-                        Text("✨ " + membershipTitle)
+                    if appEnv.purchase.isMembershipBanned {
+                        Text(String(localized: "Membership suspended"))
                             .font(Theme.FontToken.inter(13, weight: .medium))
-                        if let expires = appEnv.preferences.subscriptionExpiresAt {
+                            .foregroundStyle(Theme.ColorToken.warning)
+                        Text(String(localized: "Contact support"))
+                            .font(Theme.FontToken.inter(11))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    } else if appEnv.purchase.isProActive {
+                        Text("✨ " + appEnv.purchase.displayMembershipPlanName(
+                            preferChinese: appEnv.preferences.appLanguage == .chinese
+                        ))
+                            .font(Theme.FontToken.inter(13, weight: .medium))
+                        if let expires = appEnv.preferences.effectiveMembershipExpiry {
                             Text(String(localized: "Valid until: ") + expires.formatted(date: .abbreviated, time: .omitted))
                                 .font(Theme.FontToken.inter(11))
                                 .foregroundStyle(Theme.ColorToken.textMuted)
@@ -168,14 +177,7 @@ struct ProfileSheetView: View {
             .padding(.horizontal, Theme.screenPadding)
         }
         .buttonStyle(.plain)
-    }
-
-    private var membershipTitle: String {
-        guard let planId = appEnv.preferences.subscriptionPlanId,
-              let plan = appEnv.purchase.availablePlans.first(where: { $0.id == planId }) else {
-            return String(localized: "Active Membership")
-        }
-        return plan.localizedName(preferChinese: appEnv.preferences.appLanguage == .chinese)
+        .onChange(of: appEnv.membershipRevision) { _, _ in }
     }
 
     // MARK: - Navigation buttons

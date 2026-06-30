@@ -25,6 +25,8 @@ final class AppEnvironment {
     private(set) var content: any ContentRepositoryProtocol
     /// 内容源或 CMS 配置变更时递增，用于驱动各 Tab 重新加载远程数据。
     private(set) var contentRevision = 0
+    /// 后台会员 override 变更时递增，用于刷新付费墙 / 会员 UI。
+    private(set) var membershipRevision = 0
 
     @ObservationIgnored private var contentRefreshTask: Task<Void, Never>?
 
@@ -76,6 +78,9 @@ final class AppEnvironment {
                 await self.profileSync.syncItineraries()
                 await self.rescheduleTripReminders()
             }
+        }
+        resolvedPreferences.onMembershipStateChanged = { [weak self] in
+            self?.membershipRevision += 1
         }
     }
 
@@ -196,11 +201,16 @@ final class AppEnvironment {
     }
 
     func syncAfterSignIn() async {
+        await profileSync.refreshRemoteMembershipState()
         if let userId = auth.userId {
             await purchase.login(userId: userId)
         }
         await profileSync.syncAfterSignIn()
         await purchase.loadPlans()
+    }
+
+    func refreshRemoteMembershipState() async {
+        await profileSync.refreshRemoteMembershipState()
     }
 
     func reloadRepositories() {
