@@ -728,6 +728,9 @@ final class UserPreferencesStore {
             departureDate: Self.formatDateOnly(departureDate),
             selectedCityIds: selectedCityIds,
             completedChecklistIds: Array(completedChecklistIds),
+            subscriptionPlanId: subscriptionPlanId,
+            subscriptionExpiresAt: subscriptionExpiresAt.map { Self.formatISO8601($0) },
+            rcCustomerId: userId.uuidString,
             activeItineraryId: activeItineraryId
         )
     }

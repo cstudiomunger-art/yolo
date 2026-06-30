@@ -290,7 +290,7 @@ final class PurchaseService {
             prefs.subscriptionExpiresAt = nil
         }
         await profileSync?.refreshRemoteMembershipState()
-        await profileSync?.schedulePush()
+        await profileSync?.pushToRemote()
     }
 
     private func refreshCustomerInfoIfNeeded() async {

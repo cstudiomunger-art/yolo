@@ -30,9 +30,9 @@ struct UserProfileRow: Codable, Sendable {
     // raw values here would break decoding (every field would read as nil/throw).
 }
 
-/// Profile fields the App is allowed to push to Supabase. Excludes subscription,
-/// purchased attractions, and membership override — those are admin / webhook only
-/// (see migration 105_protect_profile_entitlements).
+/// Profile fields the App pushes to Supabase.
+/// Subscription columns mirror RevenueCat for admin display only — App access still
+/// comes from on-device RC + admin override (DB trigger blocks override writes).
 struct ClientProfilePushRow: Codable, Sendable {
     let id: UUID
     var email: String?
@@ -44,5 +44,8 @@ struct ClientProfilePushRow: Codable, Sendable {
     var departureDate: String?
     var selectedCityIds: [String]
     var completedChecklistIds: [String]
+    var subscriptionPlanId: String?
+    var subscriptionExpiresAt: String?
+    var rcCustomerId: String?
     var activeItineraryId: String?
 }
