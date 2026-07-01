@@ -289,8 +289,8 @@ final class PurchaseService {
             prefs.subscriptionPlanId = nil
             prefs.subscriptionExpiresAt = nil
         }
+        await profileSync?.pushMembershipMirrorToRemote()
         await profileSync?.refreshRemoteMembershipState()
-        await profileSync?.pushToRemote()
     }
 
     private func refreshCustomerInfoIfNeeded() async {

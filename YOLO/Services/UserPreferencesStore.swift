@@ -768,6 +768,10 @@ final class UserPreferencesStore {
         ISO8601DateFormatter().string(from: date)
     }
 
+    static func formatISO8601ForSync(_ date: Date) -> String {
+        formatISO8601(date)
+    }
+
     private func notifySyncableChange() {
         guard !suppressSyncNotification else { return }
         onSyncableChange?()

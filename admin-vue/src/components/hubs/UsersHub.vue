@@ -336,6 +336,13 @@ onMounted(async () => { await refCache.load(); await loadList(); });
             <span v-else-if="detail.subscription_plan_id" class="badge blue">永久 / 终身</span>
             <template v-else>—</template>
           </div>
+          <div class="status-row"><span class="lbl">App Store</span>
+            <template v-if="subActive(detail)">
+              <span class="badge green">{{ planName(detail.subscription_plan_id) }}</span>
+              <span v-if="detail.subscription_expires_at" class="muted small">至 {{ fmtDateTime(detail.subscription_expires_at) }}</span>
+            </template>
+            <span v-else class="muted">无有效订阅记录</span>
+          </div>
           <div class="status-row"><span class="lbl">单购景点</span>{{ (detail.purchased_attraction_ids || []).length }} 个</div>
           <div class="status-row"><span class="lbl">后台覆盖</span>
             <template v-if="detail.membership_override === 'ban'">

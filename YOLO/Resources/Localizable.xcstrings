@@ -1274,6 +1274,9 @@
     "Consular Protection Guide" : {
 
     },
+    "Contact support" : {
+
+    },
     "Content" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2131,6 +2134,9 @@
 
     },
     "Membership & Purchases" : {
+
+    },
+    "Membership suspended" : {
 
     },
     "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig." : {
@@ -3525,6 +3531,9 @@
           }
         }
       }
+    },
+    "Your access has been suspended. Contact support if you believe this is a mistake." : {
+
     },
     "Your benefits" : {
 

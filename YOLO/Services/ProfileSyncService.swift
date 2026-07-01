@@ -83,6 +83,26 @@ final class ProfileSyncService {
         }
     }
 
+    /// Push RevenueCat subscription state to Supabase for admin display.
+    /// Bypasses nationality-onboarding guard — membership sync must not be blocked by onboarding.
+    func pushMembershipMirrorToRemote() async {
+        guard let preferences, let auth, auth.isAuthenticated, let userId = auth.userId else { return }
+        guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else { return }
+
+        do {
+            try await repository.patchMembershipMirror(
+                userId: userId,
+                planId: preferences.subscriptionPlanId,
+                expiresAt: preferences.subscriptionExpiresAt.map { UserPreferencesStore.formatISO8601ForSync($0) },
+                rcCustomerId: userId.uuidString
+            )
+            lastSyncError = nil
+        } catch {
+            lastSyncError = error.localizedDescription
+            TelemetryService.shared.recordError(error, context: "membership_mirror_push")
+        }
+    }
+
     func pushToRemote() async {
         guard let preferences, let auth, auth.isAuthenticated, let userId = auth.userId else { return }
         guard !preferences.needsNationalityOnboarding else { return }

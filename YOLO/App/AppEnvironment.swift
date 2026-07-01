@@ -207,9 +207,12 @@ final class AppEnvironment {
         }
         await profileSync.syncAfterSignIn()
         await purchase.loadPlans()
+        await profileSync.pushMembershipMirrorToRemote()
+        await profileSync.refreshRemoteMembershipState()
     }
 
     func refreshRemoteMembershipState() async {
+        await profileSync.pushMembershipMirrorToRemote()
         await profileSync.refreshRemoteMembershipState()
     }
 
