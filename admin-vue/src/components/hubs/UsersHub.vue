@@ -174,14 +174,15 @@ function validateFutureExpiry(iso) {
   }
   return true;
 }
-/** 后台订阅已失效但未设 ban —— App 仍可能因 RevenueCat 显示会员 */
+/** 后台订阅镜像已过期、未设 ban/grant 时提示：App 仍可能按 RC 显示会员 */
 const needsBanWarning = computed(() => {
   if (!detail.value) return false;
   const d = detail.value;
-  return d.membership_override !== "ban"
-    && d.membership_override !== "grant"
-    && !isActiveMember(d)
-    && (!!d.rc_customer_id || !!d.subscription_plan_id);
+  if (d.membership_override === "ban" || d.membership_override === "grant") return false;
+  if (isActiveMember(d)) return false;
+  if (!d.subscription_plan_id) return false;
+  if (!d.subscription_expires_at) return false;
+  return new Date(d.subscription_expires_at) <= new Date();
 });
 
 
@@ -203,12 +204,12 @@ async function openDetail(p) {
 }
 function closeDetail() { detail.value = null; }
 
-async function applyMemberPatch(patch) {
+async function applyMemberPatch(patch, successMsg) {
   const { error: e } = await supabase.from("profiles").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", detail.value.id);
   if (e) { showToast("失败：" + e.message); return; }
   Object.assign(detail.value, patch);
   syncExpiryDraftFromDetail();
-  showToast("会员状态已更新");
+  showToast(successMsg || "会员状态已更新");
   await loadList();
 }
 function grantMembership() {
@@ -261,7 +262,7 @@ function clearOverride() {
     membership_override_note: null,
     subscription_plan_id: null,
     subscription_expires_at: null,
-  });
+  }, "已恢复自动判定，App 端以 RevenueCat 为准");
 }
 
 async function setRefundStatus(r, status) {
