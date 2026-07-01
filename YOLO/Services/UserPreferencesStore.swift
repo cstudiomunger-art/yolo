@@ -757,8 +757,8 @@ final class UserPreferencesStore {
         )
     }
 
-    /// Maps server profile → local override. When RevenueCat is configured the App ignores
-    /// remote `subscription_*` for access; treat an active admin subscription as `grant`.
+    /// Maps server profile → local override. Only explicit admin override columns apply;
+    /// remote `subscription_*` is an RC mirror for the CMS and must not imply grant.
     private static func resolveRemoteMembershipOverride(_ row: UserProfileRow) -> (String?, Date?) {
         let kind = row.membershipOverride?.lowercased()
         if kind == "ban" {
@@ -768,18 +768,7 @@ final class UserPreferencesStore {
             let exp = row.membershipOverrideExpiresAt.flatMap { parseISO8601($0) }
             return ("grant", exp)
         }
-        if AppConfig.isRevenueCatConfigured, isRemoteSubscriptionActive(row) {
-            let exp = row.subscriptionExpiresAt.flatMap { parseISO8601($0) }
-            return ("grant", exp)
-        }
         return (nil, nil)
-    }
-
-    private static func isRemoteSubscriptionActive(_ row: UserProfileRow) -> Bool {
-        guard row.subscriptionPlanId != nil else { return false }
-        guard let expStr = row.subscriptionExpiresAt else { return true }
-        guard let exp = parseISO8601(expStr) else { return false }
-        return exp > .now
     }
 
     private static func parseISO8601(_ string: String) -> Date? {

@@ -254,11 +254,13 @@ function cancelMembership() {
   });
 }
 function clearOverride() {
-  if (!confirm("清除后台覆盖，改由 App Store / RevenueCat 自动判定？")) return;
+  if (!confirm("清除后台覆盖？\n将删除赠送/封禁标记及后台订阅记录，改由 App Store / RevenueCat 自动判定。")) return;
   applyMemberPatch({
     membership_override: null,
     membership_override_expires_at: null,
     membership_override_note: null,
+    subscription_plan_id: null,
+    subscription_expires_at: null,
   });
 }
 
