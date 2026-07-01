@@ -38,7 +38,9 @@ function fmtDisplay(iso) {
 
 function syncFromValue(v) {
   if (v == null || v === "") {
-    isPermanent.value = props.allowPermanent && props.permanentActive;
+    if (props.permanentActive) isPermanent.value = true;
+    else if (!props.allowPermanent) isPermanent.value = false;
+    // allowPermanent 且用户刚勾选「永久」时保留 isPermanent，勿被 watch 冲掉
     const now = new Date();
     view.value = { year: now.getFullYear(), month: now.getMonth() };
     hour.value = 23;
@@ -88,7 +90,7 @@ function emitValue(date) {
 }
 
 function selectDay(day) {
-  if (isPermanent.value) isPermanent.value = false;
+  isPermanent.value = false;
   const d = new Date(view.value.year, view.value.month, day);
   if (props.minDate && d < startOfDay(props.minDate)) return;
   emitValue(d);

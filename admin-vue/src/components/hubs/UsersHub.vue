@@ -61,6 +61,12 @@ function effectiveExpiry(p) {
   if (p.membership_override === "grant") return p.membership_override_expires_at;
   return p.subscription_expires_at;
 }
+function isExpiredMembership(p) {
+  const exp = effectiveExpiry(p);
+  if (!exp) return false;
+  return (p.subscription_plan_id || p.membership_override === "grant")
+    && new Date(exp) <= new Date();
+}
 function fmtDate(d) { return d ? new Date(d).toLocaleDateString("zh-CN") : "—"; }
 function fmtDateTime(d) { return d ? new Date(d).toLocaleString("zh-CN") : "—"; }
 
@@ -70,7 +76,7 @@ const stats = computed(() => {
   return {
     total: r.length,
     members: r.filter(isActiveMember).length,
-    expired: r.filter((p) => p.subscription_plan_id && p.subscription_expires_at && new Date(p.subscription_expires_at) <= now).length,
+    expired: r.filter(isExpiredMembership).length,
     single: r.filter((p) => (p.purchased_attraction_ids || []).length > 0).length,
   };
 });
@@ -82,7 +88,7 @@ const filtered = computed(() => {
   if (q) list = list.filter((p) => [p.email, p.display_name, p.id, p.country_code].filter(Boolean).join(" ").toLowerCase().includes(q));
   const f = statusFilter.value;
   if (f === "active_member") list = list.filter(isActiveMember);
-  else if (f === "expired") list = list.filter((p) => p.subscription_plan_id && p.subscription_expires_at && new Date(p.subscription_expires_at) <= now);
+  else if (f === "expired") list = list.filter(isExpiredMembership);
   else if (f === "purchased") list = list.filter((p) => (p.purchased_attraction_ids || []).length > 0);
   else if (f === "onboarded") list = list.filter((p) => p.has_completed_onboarding);
   return list;
@@ -136,6 +142,7 @@ const hasOverride = computed(() => {
 });
 const canEditExpiry = computed(() => {
   if (!detail.value) return false;
+  if (detail.value.membership_override === "ban") return false;
   return detail.value.membership_override === "grant"
     || !!detail.value.subscription_plan_id;
 });
@@ -197,14 +204,7 @@ async function applyMemberPatch(patch) {
   const { error: e } = await supabase.from("profiles").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", detail.value.id);
   if (e) { showToast("失败：" + e.message); return; }
   Object.assign(detail.value, patch);
-  if ("membership_override_expires_at" in patch || "subscription_expires_at" in patch) {
-    const exp = patch.membership_override_expires_at ?? patch.subscription_expires_at ?? null;
-    if (patch.membership_override === "grant" && exp == null) {
-      expiryDraft.value = null;
-    } else {
-      expiryDraft.value = exp ?? defaultGiftExpiry();
-    }
-  }
+  syncExpiryDraftFromDetail();
   showToast("会员状态已更新");
   await loadList();
 }
@@ -298,6 +298,7 @@ async function saveDetail() {
   savingDetail.value = false;
   if (e) { showToast("失败：" + e.message); return; }
   Object.assign(detail.value, patch);
+  syncExpiryDraftFromDetail();
   showToast("用户资料已保存");
   await loadList();
 }
