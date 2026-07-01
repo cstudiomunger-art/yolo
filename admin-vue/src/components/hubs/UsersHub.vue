@@ -62,6 +62,7 @@ function effectiveExpiry(p) {
   return p.subscription_expires_at;
 }
 function isExpiredMembership(p) {
+  if (p.membership_override === "ban") return false;
   const exp = effectiveExpiry(p);
   if (!exp) return false;
   return (p.subscription_plan_id || p.membership_override === "grant")
@@ -71,7 +72,6 @@ function fmtDate(d) { return d ? new Date(d).toLocaleDateString("zh-CN") : "—"
 function fmtDateTime(d) { return d ? new Date(d).toLocaleString("zh-CN") : "—"; }
 
 const stats = computed(() => {
-  const now = new Date();
   const r = profiles.value;
   return {
     total: r.length,
@@ -83,7 +83,6 @@ const stats = computed(() => {
 
 const filtered = computed(() => {
   let list = profiles.value;
-  const now = new Date();
   const q = search.value.trim().toLowerCase();
   if (q) list = list.filter((p) => [p.email, p.display_name, p.id, p.country_code].filter(Boolean).join(" ").toLowerCase().includes(q));
   const f = statusFilter.value;
@@ -117,7 +116,11 @@ const savingDetail = ref(false);
 const giftPlan = ref("");
 /** 开通 / 调整到期共用的日历值（ISO 或 null=永久） */
 const expiryDraft = ref(null);
-const minExpiryDate = new Date();
+const minExpiryDate = computed(() => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+});
 
 const subPlans = computed(() => plans.value.filter((p) => p.plan_type === "subscription"));
 const detailActive = computed(() => (detail.value ? isActiveMember(detail.value) : false));
@@ -209,11 +212,13 @@ async function applyMemberPatch(patch) {
   await loadList();
 }
 function grantMembership() {
+  if (!subPlans.value.length) return showToast("暂无可用订阅计划");
   const planId = giftPlan.value || subPlans.value[0]?.id || "annual";
   const expires = expiryDraft.value;
   const label = planName(planId);
   const dur = expires ? fmtDateTime(expires) : "永久";
   if (!validateFutureExpiry(expires)) return;
+  if (expires == null && !confirm("设为永久会员？到期后不会自动失效。")) return;
   if (!confirm(`为「${label}」开通会员，到期：${dur}？\nApp 将立即解锁付费内容。`)) return;
   applyMemberPatch({
     membership_override: "grant",
@@ -229,6 +234,7 @@ function saveMembershipExpiry() {
   const planId = detail.value.subscription_plan_id || giftPlan.value || subPlans.value[0]?.id || "annual";
   const dur = expires ? fmtDateTime(expires) : "永久";
   if (!validateFutureExpiry(expires)) return;
+  if (expires == null && !confirm("设为永久会员？到期后不会自动失效。")) return;
   if (!confirm(`将会员到期更新为：${dur}？`)) return;
   applyMemberPatch({
     subscription_plan_id: planId,
@@ -271,9 +277,11 @@ async function saveDetail() {
     display_name: d.display_name?.trim() || null,
     country_code: d.country_code?.trim() || "GB",
     subscription_plan_id: d.subscription_plan_id || null,
-    subscription_expires_at: d.subscription_plan_id || d.membership_override === "grant"
-      ? expiryDraft.value
-      : (d.subscription_expires_at || null),
+    subscription_expires_at: d.membership_override === "ban"
+      ? (d.subscription_expires_at || null)
+      : (d.subscription_plan_id || d.membership_override === "grant"
+        ? expiryDraft.value
+        : (d.subscription_expires_at || null)),
     rc_customer_id: d.rc_customer_id?.trim() || null,
     membership_override_note: d.membership_override_note?.trim() || null,
     has_completed_onboarding: !!d.has_completed_onboarding,

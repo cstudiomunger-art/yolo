@@ -66,6 +66,8 @@ watch(
   (on) => {
     if (on && props.allowPermanent && (props.modelValue == null || props.modelValue === "")) {
       isPermanent.value = true;
+    } else if (!on && props.modelValue) {
+      isPermanent.value = false;
     }
   },
   { immediate: true }
@@ -235,9 +237,9 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
         </div>
         <div class="dtp-time">
           <span class="muted small">时刻</span>
-          <input type="number" min="0" max="23" v-model.number="hour" @change="onTimeChange" />
+          <input type="number" min="0" max="23" v-model.number="hour" @input="onTimeChange" />
           <span>:</span>
-          <input type="number" min="0" max="59" v-model.number="minute" @change="onTimeChange" />
+          <input type="number" min="0" max="59" v-model.number="minute" @input="onTimeChange" />
         </div>
       </div>
       <p v-else class="dtp-perm-hint muted small">不设置到期时间，会员永久有效</p>
