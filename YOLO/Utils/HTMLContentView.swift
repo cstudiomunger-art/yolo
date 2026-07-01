@@ -149,6 +149,9 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
+        html, body {
+          background: transparent;
+        }
         body {
           font-family: -apple-system, sans-serif;
           font-size: \(fontSize)px;
@@ -158,6 +161,8 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
           padding: 0;
           -webkit-text-size-adjust: 100%;
         }
+        /* Strip pasted inline backgrounds (Word/web → Quill); re-apply below where intentional */
+        * { background-color: transparent !important; }
         p { margin: 0 0 0.6em 0; }
         ul, ol { margin: 0.4em 0; padding-left: 1.2em; }
         a { color: #c45c26; }
@@ -169,7 +174,7 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
           margin: 0.6em 0;
           padding: 8px 12px;
           border-left: 3px solid #c45c26;
-          background: #f7f6f3;
+          background-color: #f7f6f3 !important;
           color: inherit;
         }
         table {
@@ -185,8 +190,8 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
           vertical-align: top;
           word-break: break-word;
         }
-        th { background: #f0efeb; font-weight: 600; }
-        tr:nth-child(even) td { background: #faf9f7; }
+        th { background-color: #f0efeb !important; font-weight: 600; }
+        tr:nth-child(even) td { background-color: #faf9f7 !important; }
         </style>
         </head><body>\(displayHtml)</body></html>
         """
