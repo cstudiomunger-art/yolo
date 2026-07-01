@@ -259,9 +259,10 @@ async function saveDetail() {
   const subExpired = patch.subscription_expires_at && new Date(patch.subscription_expires_at) <= now;
   const subCancelled = !patch.subscription_plan_id;
   const subActive = patch.subscription_plan_id && (!patch.subscription_expires_at || new Date(patch.subscription_expires_at) > now);
-  if (subActive) {
-    patch.membership_override = null;
-    patch.membership_override_expires_at = null;
+  // App 在 RevenueCat 已配置时只认 membership_override=grant，不认 subscription_* 列。
+  if (subActive && d.membership_override !== "ban") {
+    patch.membership_override = "grant";
+    patch.membership_override_expires_at = patch.subscription_expires_at || null;
   } else if ((subExpired || subCancelled) && d.membership_override !== "grant") {
     patch.membership_override = "ban";
     patch.membership_override_expires_at = null;
@@ -397,7 +398,7 @@ onMounted(async () => { await refCache.load(); await loadList(); });
           </label>
         </div>
 
-        <p class="muted small mt">手动调整（高级）：编辑下列字段后点「保存用户资料」。修改后 App 下次拉取 profile 或重新登录时生效。</p>
+        <p class="muted small mt">手动调整（高级）：编辑下列字段后点「保存用户资料」。保存有效订阅会自动写入「强制开通」覆盖，App 才会解锁付费内容。</p>
         <div class="fgrid">
           <label class="f">订阅计划
             <select v-model="detail.subscription_plan_id">

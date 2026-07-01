@@ -41,6 +41,7 @@ struct MembershipCenterView: View {
         }
         .navigationTitle(String(localized: "Membership"))
         .navigationBarTitleDisplayMode(.inline)
+        .task { await appEnv.refreshRemoteMembershipState() }
         .onChange(of: appEnv.membershipRevision) { _, _ in }
         .navigationDestination(isPresented: $showHistory) {
             PurchaseHistoryView()

@@ -212,8 +212,8 @@ final class AppEnvironment {
     }
 
     func refreshRemoteMembershipState() async {
-        await profileSync.pushMembershipMirrorToRemote()
         await profileSync.refreshRemoteMembershipState()
+        await profileSync.pushMembershipMirrorToRemote()
     }
 
     func reloadRepositories() {
