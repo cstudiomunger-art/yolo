@@ -1,9 +1,7 @@
 {
   "contacts": [
     { "label": "Police", "number": "110", "note": "24/7 emergency" },
-    { "label": "Ambulance", "number": "120", "note": "Medical emergency" },
-    { "label": "Fire", "number": "119", "note": null },
-    { "label": "Traffic accidents", "number": "122", "note": null }
+    { "label": "Ambulance", "number": "120", "note": "Medical emergency" }
   ],
   "embassy_note": "Contact your embassy for lost passport assistance."
 }

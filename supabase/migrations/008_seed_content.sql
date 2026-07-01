@@ -430,7 +430,7 @@ ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, flag = EXCLUDED.flag, dis
 
 -- emergency_config
 INSERT INTO emergency_config (id, embassy_note, contacts)
-VALUES ('global', 'Contact your embassy for lost passport assistance.', '[{"label":"Police","number":"110","note":"24/7 emergency"},{"label":"Ambulance","number":"120","note":"Medical emergency"},{"label":"Fire","number":"119","note":null},{"label":"Traffic accidents","number":"122","note":null}]'::jsonb)
+VALUES ('global', 'Contact your embassy for lost passport assistance.', '[{"label":"Police","number":"110","note":"24/7 emergency"},{"label":"Ambulance","number":"120","note":"Medical emergency"}]'::jsonb)
 ON CONFLICT (id) DO UPDATE SET embassy_note = EXCLUDED.embassy_note, contacts = EXCLUDED.contacts, updated_at = NOW();
 
 -- content_itineraries (sample)

@@ -47,7 +47,7 @@ const CITY_PANELS = [
   { id: "overview", label: "城市概览" },
   { id: "city_guides", label: "城市指南", table: "city_guides" },
   { id: "hotels", label: "酒店", table: "hotels" },
-  { id: "city_hospitals", label: "紧急 · 医院", table: "city_hospitals" },
+  { id: "city_hospitals", label: "推荐医院", table: "city_hospitals" },
   { id: "checklist_items", label: "行前清单", table: "checklist_items" },
   { id: "home_tips", label: "首页提示", table: "home_tips" },
   { id: "shopping_items", label: "购物清单", table: "shopping_items" },
@@ -66,8 +66,13 @@ const GROUPS = [
   ] },
   { id: "config", label: "全局配置", leaves: [
     { label: "应用配置", table: "app_settings" },
+  ] },
+  { id: "emergency", label: "🆘 紧急", leaves: [
     { label: "紧急联系", table: "emergency_config" },
-    { label: "紧急教程", table: "emergency_guides" },
+    { label: "帮助列表", table: "emergency_help_items" },
+    { label: "医疗与药品", table: "emergency_medical_items" },
+    { label: "推荐医院（按城市）", table: "city_hospitals" },
+    { label: "使馆电话（按城市）", table: "city_embassies" },
   ] },
   { id: "assistant", label: "助手", leaves: [
     { label: "助手场景", table: "assistant_scenarios" },
@@ -109,8 +114,6 @@ const GROUPS = [
     { label: "科学上网指南", table: "internet_access_guides" },
     { label: "常用语", table: "common_phrases" },
     { label: "方言彩蛋", table: "dialect_phrases" },
-    { label: "紧急教程", table: "emergency_guides" },
-    { label: "紧急 · 医院", table: "city_hospitals" },
   ] },
   { id: "site", label: "🌐 官网内容", leaves: [
     { label: "🎟️ 门票（外宾购票页）", table: "ticket_attractions" },

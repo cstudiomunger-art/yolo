@@ -345,11 +345,14 @@ flowchart LR
 
 ### 3.6 Emergency
 
-| App 位置 | 后台 |
-|----------|------|
-| 紧急号码、备注 | **紧急联系** `emergency_config.contacts` |
-| 中英短语 | `help_phrases` |
-| 使馆说明 | `embassy_note` |
+| App 位置 | 后台（🆘 紧急） |
+|----------|----------------|
+| 110 / 120 拨号 | **紧急联系** → `emergency_config.contacts`（仅 110、120） |
+| 帮助列表（无标题） | **帮助列表** → `emergency_help_items` |
+| 医疗与药品列表 | **医疗与药品** → `emergency_medical_items` |
+| 推荐城市医院 | **推荐医院（按城市）** → `city_hospitals` |
+
+列表项点击进入富文本详情；`sort_order` 控制顺序，`is_active` 控制上下线。
 
 ---
 

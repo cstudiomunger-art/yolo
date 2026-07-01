@@ -276,17 +276,33 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
         return data
     }
 
-    func fetchEmergencyGuides() async throws -> [EmergencyGuide] {
+    func fetchEmergencyHelpItems() async throws -> [EmergencyContentItem] {
         do {
             return try await client
-                .from("emergency_guides")
+                .from("emergency_help_items")
                 .select()
                 .eq("is_active", value: true)
                 .order("sort_order", ascending: true)
                 .execute()
                 .value
         } catch {
-            let fallback = try await bundledFallback.fetchEmergencyGuides()
+            let fallback = try await bundledFallback.fetchEmergencyHelpItems()
+            if !fallback.isEmpty { return fallback }
+            throw error
+        }
+    }
+
+    func fetchEmergencyMedicalItems() async throws -> [EmergencyContentItem] {
+        do {
+            return try await client
+                .from("emergency_medical_items")
+                .select()
+                .eq("is_active", value: true)
+                .order("sort_order", ascending: true)
+                .execute()
+                .value
+        } catch {
+            let fallback = try await bundledFallback.fetchEmergencyMedicalItems()
             if !fallback.isEmpty { return fallback }
             throw error
         }

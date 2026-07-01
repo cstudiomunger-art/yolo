@@ -91,14 +91,15 @@ struct CityEmbassy: Identifiable, Codable, Hashable {
     var normalizedCountryCode: String { countryCode.uppercased() }
 }
 
-struct EmergencyGuide: Identifiable, Codable, Hashable {
+struct EmergencyContentItem: Identifiable, Codable, Hashable {
     let id: String
-    let kind: String
-    let number: String?
     let titleEn: String?
     let titleZh: String?
+    let subtitleEn: String?
+    let subtitleZh: String?
     let bodyEn: String?
     let bodyZh: String?
+    let icon: String?
     let sortOrder: Int?
 
     var displayTitle: String {
@@ -109,12 +110,22 @@ struct EmergencyGuide: Identifiable, Codable, Hashable {
         return id
     }
 
-    var displayBodyHTML: String {
-        let en = bodyEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let zh = bodyZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    var displaySubtitle: String {
+        let en = subtitleEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let zh = subtitleZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !en.isEmpty { return en }
         return zh
     }
 
-    var isConsular: Bool { kind == "consular" }
+    var displayBodyHTML: String {
+        let zh = bodyZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let en = bodyEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !en.isEmpty { return en }
+        return zh
+    }
+
+    var displayIcon: String {
+        let trimmed = icon?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? "📄" : trimmed
+    }
 }

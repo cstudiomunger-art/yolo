@@ -610,9 +610,6 @@
     "📍 %@" : {
 
     },
-    "📖" : {
-
-    },
     "📚 Read Before You Go" : {
       "localizations" : {
         "zh-Hans" : {
@@ -649,9 +646,6 @@
           }
         }
       }
-    },
-    "🔒 信息仅用于紧急求助，我们不收集你的数据。建议参照 iPhone「健康」填写，翻译好打印一张放兜里。" : {
-
     },
     "🔔" : {
 
@@ -761,9 +755,6 @@
           }
         }
       }
-    },
-    "① 挂号（门诊大厅自助机/窗口，带护照）→ ② 候诊（按叫号）→ ③ 医生问诊开单 → ④ 缴费（自助机/窗口）→ ⑤ 检查/取药。\n大城市三甲医院多设国际部/外宾门诊，有英文导诊；急症直接去「急诊」。" : {
-
     },
     "About" : {
 
@@ -1086,9 +1077,6 @@
         }
       }
     },
-    "Call %@ now" : {
-
-    },
     "Cancel" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1266,9 +1254,6 @@
       }
     },
     "Connect to the internet to open shared trips." : {
-
-    },
-    "Consular Protection Guide" : {
 
     },
     "Contact support" : {
@@ -1712,9 +1697,6 @@
     "Emergency · Visa · Pay · Transport" : {
 
     },
-    "Emergency Guide" : {
-
-    },
     "Enable Notifications" : {
 
     },
@@ -1930,9 +1912,6 @@
         }
       }
     },
-    "Guide not found." : {
-
-    },
     "HAPPY" : {
 
     },
@@ -1974,7 +1953,7 @@
         }
       }
     },
-    "ⓘ 你习惯的 911 在中国分三个号" : {
+    "ⓘ 你习惯的 911 在中国分两个号" : {
 
     },
     "I agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
@@ -2188,9 +2167,6 @@
           }
         }
       }
-    },
-    "Nationwide emergency number. Tap below to call." : {
-
     },
     "New password" : {
 
@@ -3084,7 +3060,7 @@
     "Talk to a Human" : {
 
     },
-    "Tap a number to read when & how to call, then dial." : {
+    "Tap a number to call. Your phone will ask you to confirm." : {
 
     },
     "Tell us your dates and cities" : {
@@ -3446,9 +3422,6 @@
         }
       }
     },
-    "What to do · language tips · find your embassy via official channels" : {
-
-    },
     "What's next?" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3582,9 +3555,6 @@
     "两个方案" : {
 
     },
-    "中国急救 120 · 报警 110 · 火警 119" : {
-
-    },
     "交通" : {
 
     },
@@ -3595,9 +3565,6 @@
 
     },
     "依据政策 · 条目" : {
-
-    },
-    "保存图片" : {
 
     },
     "保持原行程继续" : {
@@ -3648,13 +3615,7 @@
     "在华紧急支援" : {
 
     },
-    "填写…" : {
-
-    },
     "备选方案（以平台实时为准）" : {
-
-    },
-    "复制中文版" : {
 
     },
     "好" : {
@@ -3696,15 +3657,6 @@
     "微信" : {
 
     },
-    "急救卡 First-Aid Card" : {
-
-    },
-    "急救卡模板（可打印随身带）" : {
-
-    },
-    "慢性病史 History: %@" : {
-
-    },
     "我已持有中国签证" : {
 
     },
@@ -3739,6 +3691,9 @@
 
     },
     "换城免签 · 城数不变" : {
+
+    },
+    "推荐医院 · %@" : {
 
     },
     "搜索口岸 / IATA" : {
@@ -3852,9 +3807,6 @@
     "紧急支援会话" : {
 
     },
-    "紧急联系人 ICE: %@" : {
-
-    },
     "结束会话" : {
 
     },
@@ -3874,9 +3826,6 @@
 
     },
     "翻译中…" : {
-
-    },
-    "血型 Blood type: %@" : {
 
     },
     "行前答疑 · 帮你找帮手 · 付款绑卡协助 · 在华紧急联络支援" : {
@@ -3904,9 +3853,6 @@
 
     },
     "读出来" : {
-
-    },
-    "过敏 Allergies: %@" : {
 
     },
     "还不行？找真人帮你（绑卡） →" : {
