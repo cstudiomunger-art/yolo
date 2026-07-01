@@ -7,6 +7,8 @@ const props = defineProps({
   label: { type: String, default: "" },
   minDate: { type: Date, default: null },
   inline: { type: Boolean, default: false },
+  /** 父组件告知当前为永久会员（modelValue 为 null 时展示「永久」勾选） */
+  permanentActive: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -20,10 +22,6 @@ const hour = ref(23);
 const minute = ref(59);
 
 const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
-
-function pad(n) {
-  return String(n).padStart(2, "0");
-}
 
 function fmtDisplay(iso) {
   if (!iso) return "永久";
@@ -40,7 +38,7 @@ function fmtDisplay(iso) {
 
 function syncFromValue(v) {
   if (v == null || v === "") {
-    isPermanent.value = props.allowPermanent;
+    isPermanent.value = props.allowPermanent && props.permanentActive;
     const now = new Date();
     view.value = { year: now.getFullYear(), month: now.getMonth() };
     hour.value = 23;
@@ -58,6 +56,16 @@ function syncFromValue(v) {
 watch(
   () => props.modelValue,
   (v) => syncFromValue(v),
+  { immediate: true }
+);
+
+watch(
+  () => props.permanentActive,
+  (on) => {
+    if (on && props.allowPermanent && (props.modelValue == null || props.modelValue === "")) {
+      isPermanent.value = true;
+    }
+  },
   { immediate: true }
 );
 
@@ -88,6 +96,8 @@ function selectDay(day) {
 
 function onTimeChange() {
   if (isPermanent.value || !props.modelValue) return;
+  hour.value = Math.min(23, Math.max(0, Number(hour.value) || 0));
+  minute.value = Math.min(59, Math.max(0, Number(minute.value) || 0));
   const cur = new Date(props.modelValue);
   if (Number.isNaN(cur.getTime())) return;
   emitValue(cur);
@@ -96,12 +106,13 @@ function onTimeChange() {
 function setPermanent(on) {
   isPermanent.value = on;
   if (on) emit("update:modelValue", null);
-  else if (!props.modelValue) addDays(365);
+  else addDays(365);
 }
 
 function addDays(n) {
-  const base = props.modelValue ? new Date(props.modelValue) : new Date();
-  if (base < new Date() && !props.modelValue) base.setTime(Date.now());
+  const now = new Date();
+  let base = props.modelValue ? new Date(props.modelValue) : new Date(now);
+  if (base < now) base = new Date(now);
   base.setDate(base.getDate() + n);
   base.setHours(23, 59, 0, 0);
   view.value = { year: base.getFullYear(), month: base.getMonth() };

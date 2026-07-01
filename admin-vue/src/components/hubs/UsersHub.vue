@@ -56,6 +56,11 @@ function isActiveMember(p) {
   return subActive(p);
 }
 function daysUntil(d) { return d ? Math.ceil((new Date(d).getTime() - Date.now()) / 86400000) : null; }
+function effectiveExpiry(p) {
+  if (!p) return null;
+  if (p.membership_override === "grant") return p.membership_override_expires_at;
+  return p.subscription_expires_at;
+}
 function fmtDate(d) { return d ? new Date(d).toLocaleDateString("zh-CN") : "—"; }
 function fmtDateTime(d) { return d ? new Date(d).toLocaleString("zh-CN") : "—"; }
 
@@ -104,7 +109,8 @@ function defaultGiftExpiry() {
 
 const savingDetail = ref(false);
 const giftPlan = ref("");
-const giftExpiresAt = ref(null);
+/** 开通 / 调整到期共用的日历值（ISO 或 null=永久） */
+const expiryDraft = ref(null);
 const minExpiryDate = new Date();
 
 const subPlans = computed(() => plans.value.filter((p) => p.plan_type === "subscription"));
@@ -123,28 +129,41 @@ const detailStatusBadge = computed(() => {
   if (d.subscription_plan_id) return { cls: "red", text: "订阅已过期" };
   return { cls: "gray", text: "免费用户" };
 });
-const detailExpiry = computed(() => {
-  if (!detail.value) return null;
-  const d = detail.value;
-  if (d.membership_override === "grant") return d.membership_override_expires_at;
-  return d.subscription_expires_at;
-});
+const detailExpiry = computed(() => effectiveExpiry(detail.value));
 const hasOverride = computed(() => {
   const o = detail.value?.membership_override;
   return o === "ban" || o === "grant";
 });
-/** 会员结束时间（调整到期 / 保存资料共用） */
-const membershipExpiresAt = computed({
-  get() {
-    if (!detail.value) return null;
-    return detailExpiry.value;
-  },
-  set(v) {
-    if (!detail.value) return;
-    detail.value.subscription_expires_at = v;
-    detail.value.membership_override_expires_at = v;
-  },
+const canEditExpiry = computed(() => {
+  if (!detail.value) return false;
+  return detail.value.membership_override === "grant"
+    || !!detail.value.subscription_plan_id;
 });
+const serverPermanentGrant = computed(() => {
+  if (!detail.value) return false;
+  return detail.value.membership_override === "grant"
+    && detail.value.membership_override_expires_at == null
+    && detail.value.subscription_expires_at == null;
+});
+
+function syncExpiryDraftFromDetail() {
+  if (!detail.value) return;
+  if (serverPermanentGrant.value) {
+    expiryDraft.value = null;
+    return;
+  }
+  const cur = effectiveExpiry(detail.value);
+  expiryDraft.value = cur ?? defaultGiftExpiry();
+}
+
+function validateFutureExpiry(iso) {
+  if (iso == null) return true;
+  if (new Date(iso) <= new Date()) {
+    showToast("到期时间须在未来");
+    return false;
+  }
+  return true;
+}
 /** 后台订阅已失效但未设 ban —— App 仍可能因 RevenueCat 显示会员 */
 const needsBanWarning = computed(() => {
   if (!detail.value) return false;
@@ -164,10 +183,7 @@ async function openDetail(p) {
   data.purchased_attraction_ids = data.purchased_attraction_ids || [];
   detail.value = data;
   giftPlan.value = data.subscription_plan_id || subPlans.value[0]?.id || "";
-  const curExp = data.membership_override === "grant"
-    ? data.membership_override_expires_at
-    : data.subscription_expires_at;
-  giftExpiresAt.value = curExp || defaultGiftExpiry();
+  syncExpiryDraftFromDetail();
   const [tx, rf] = await Promise.all([
     supabase.from("user_iap_transactions").select("id,event_type,product_id,price_usd,purchased_at").eq("user_id", p.id).order("purchased_at", { ascending: false }).limit(20),
     supabase.from("user_refund_requests").select("id,reason,status,created_at").eq("user_id", p.id).order("created_at", { ascending: false }),
@@ -181,15 +197,23 @@ async function applyMemberPatch(patch) {
   const { error: e } = await supabase.from("profiles").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", detail.value.id);
   if (e) { showToast("失败：" + e.message); return; }
   Object.assign(detail.value, patch);
+  if ("membership_override_expires_at" in patch || "subscription_expires_at" in patch) {
+    const exp = patch.membership_override_expires_at ?? patch.subscription_expires_at ?? null;
+    if (patch.membership_override === "grant" && exp == null) {
+      expiryDraft.value = null;
+    } else {
+      expiryDraft.value = exp ?? defaultGiftExpiry();
+    }
+  }
   showToast("会员状态已更新");
   await loadList();
 }
 function grantMembership() {
   const planId = giftPlan.value || subPlans.value[0]?.id || "annual";
-  const expires = giftExpiresAt.value;
+  const expires = expiryDraft.value;
   const label = planName(planId);
   const dur = expires ? fmtDateTime(expires) : "永久";
-  if (expires && new Date(expires) <= new Date()) return showToast("到期时间须在未来");
+  if (!validateFutureExpiry(expires)) return;
   if (!confirm(`为「${label}」开通会员，到期：${dur}？\nApp 将立即解锁付费内容。`)) return;
   applyMemberPatch({
     membership_override: "grant",
@@ -200,13 +224,11 @@ function grantMembership() {
   });
 }
 function saveMembershipExpiry() {
-  if (!detail.value.subscription_plan_id && detail.value.membership_override !== "grant") {
-    return showToast("请先开通会员");
-  }
-  const expires = membershipExpiresAt.value;
+  if (!canEditExpiry.value) return showToast("请先开通会员");
+  const expires = expiryDraft.value;
   const planId = detail.value.subscription_plan_id || giftPlan.value || subPlans.value[0]?.id || "annual";
   const dur = expires ? fmtDateTime(expires) : "永久";
-  if (expires && new Date(expires) <= new Date()) return showToast("到期时间须在未来");
+  if (!validateFutureExpiry(expires)) return;
   if (!confirm(`将会员到期更新为：${dur}？`)) return;
   applyMemberPatch({
     subscription_plan_id: planId,
@@ -249,7 +271,9 @@ async function saveDetail() {
     display_name: d.display_name?.trim() || null,
     country_code: d.country_code?.trim() || "GB",
     subscription_plan_id: d.subscription_plan_id || null,
-    subscription_expires_at: d.subscription_expires_at || null,
+    subscription_expires_at: d.subscription_plan_id || d.membership_override === "grant"
+      ? expiryDraft.value
+      : (d.subscription_expires_at || null),
     rc_customer_id: d.rc_customer_id?.trim() || null,
     membership_override_note: d.membership_override_note?.trim() || null,
     has_completed_onboarding: !!d.has_completed_onboarding,
@@ -343,7 +367,25 @@ onMounted(async () => { await refCache.load(); await loadList(); });
           </div>
         </div>
 
-        <div class="member-grant">
+        <div class="member-schedule">
+          <div class="member-expiry-head">
+            <span class="member-expiry-title">会员到期时间</span>
+            <div class="member-schedule-actions">
+              <button class="btn btn-sm" @click="grantMembership">开通会员</button>
+              <button
+                v-if="canEditExpiry"
+                class="btn btn-secondary btn-sm"
+                @click="saveMembershipExpiry"
+              >保存到期</button>
+            </div>
+          </div>
+          <DateTimePicker
+            v-model="expiryDraft"
+            allow-permanent
+            inline
+            :permanent-active="serverPermanentGrant"
+            :min-date="minExpiryDate"
+          />
           <div class="member-actions">
             <label class="member-field">
               <span>订阅计划</span>
@@ -351,30 +393,9 @@ onMounted(async () => { await refCache.load(); await loadList(); });
                 <option v-for="p in subPlans" :key="p.id" :value="p.id">{{ p.name_zh || p.name_en }}</option>
               </select>
             </label>
-            <button class="btn btn-sm" @click="grantMembership">开通会员</button>
             <button class="btn btn-danger btn-sm" @click="cancelMembership">取消会员</button>
             <button v-if="hasOverride" class="btn btn-secondary btn-sm" @click="clearOverride">恢复自动判定</button>
           </div>
-          <DateTimePicker
-            v-model="giftExpiresAt"
-            allow-permanent
-            inline
-            label="赠送到期时间"
-            :min-date="minExpiryDate"
-          />
-        </div>
-
-        <div class="member-expiry-edit">
-          <div class="member-expiry-head">
-            <span class="member-expiry-title">会员结束时间</span>
-            <button class="btn btn-secondary btn-sm" @click="saveMembershipExpiry">保存到期</button>
-          </div>
-          <DateTimePicker
-            v-model="membershipExpiresAt"
-            allow-permanent
-            inline
-            :min-date="minExpiryDate"
-          />
         </div>
 
         <label class="member-note">
@@ -490,8 +511,15 @@ onMounted(async () => { await refCache.load(); await loadList(); });
               <span v-else class="badge gray">免费</span>
             </td>
             <td>
-              <span v-if="p.subscription_expires_at && new Date(p.subscription_expires_at) < new Date()" class="badge red">已到期 {{ fmtDate(p.subscription_expires_at) }}</span>
-              <template v-else>{{ fmtDate(p.subscription_expires_at) }}</template>
+              <template v-if="effectiveExpiry(p)">
+                <span
+                  v-if="new Date(effectiveExpiry(p)) <= new Date()"
+                  class="badge red"
+                >已到期 {{ fmtDate(effectiveExpiry(p)) }}</span>
+                <template v-else>{{ fmtDate(effectiveExpiry(p)) }}</template>
+              </template>
+              <span v-else-if="p.membership_override === 'grant' || p.subscription_plan_id" class="badge blue">永久</span>
+              <span v-else class="muted">—</span>
             </td>
             <td><span v-if="(p.purchased_attraction_ids || []).length" class="badge blue">{{ p.purchased_attraction_ids.length }} 个</span><span v-else class="muted">0</span></td>
             <td><span v-if="AVATAR_STATUS[p.avatar_status]" class="badge" :class="AVATAR_STATUS[p.avatar_status].cls">{{ AVATAR_STATUS[p.avatar_status].label }}</span><span v-else class="muted">—</span></td>
@@ -585,6 +613,8 @@ onMounted(async () => { await refCache.load(); await loadList(); });
 .member-grant {
   margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
 }
+.member-schedule { margin-bottom: 14px; }
+.member-schedule-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .member-expiry-edit { margin-bottom: 12px; }
 .member-expiry-head {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
