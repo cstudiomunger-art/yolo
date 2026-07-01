@@ -54,7 +54,6 @@ struct EmergencyView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     geniusCard
                     callBlock
-                    splitCallout
                     helpSection
                     medicalSection
                 }
@@ -121,27 +120,6 @@ struct EmergencyView: View {
             .background(Theme.ColorToken.background)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.warning.opacity(0.4), lineWidth: 1))
             .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-    }
-
-    private var splitCallout: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("ⓘ 你习惯的 911 在中国分两个号").font(Theme.FontToken.inter(10, weight: .semibold)).foregroundStyle(Theme.ColorToken.accent)
-            calloutRow("Police 报警", "110")
-            calloutRow("Ambulance 急救", "120")
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(Theme.ColorToken.backgroundSubtle)
-        .overlay(alignment: .leading) { Rectangle().fill(Theme.ColorToken.accent).frame(width: 2) }
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    private func calloutRow(_ name: String, _ num: String) -> some View {
-        HStack {
-            Text(name).font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
-            Spacer()
-            Text(num).font(Theme.FontToken.inter(12, weight: .medium))
         }
     }
 
