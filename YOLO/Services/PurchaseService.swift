@@ -202,7 +202,7 @@ final class PurchaseService {
 
         guard AppConfig.isRevenueCatConfigured else {
             preferences?.purchaseAttraction(attractionId)
-            await profileSync?.schedulePush()
+            profileSync?.schedulePush()
             return
         }
 
@@ -211,7 +211,7 @@ final class PurchaseService {
             let result = try await Purchases.shared.purchase(package: package)
             guard !result.userCancelled else { return }
             preferences?.purchaseAttraction(attractionId)
-            await profileSync?.schedulePush()
+            profileSync?.schedulePush()
         } catch {
             if Self.isPurchaseCancelled(error) { return }
             lastError = error.localizedDescription
@@ -324,7 +324,7 @@ final class PurchaseService {
         guard let prefs = preferences else { return }
         prefs.subscriptionPlanId = plan.id
         prefs.subscriptionExpiresAt = expiryDate(for: plan)
-        await profileSync?.schedulePush()
+        profileSync?.schedulePush()
     }
 
     private func expiryDate(for plan: MembershipPlan) -> Date? {

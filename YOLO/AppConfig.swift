@@ -1,7 +1,7 @@
 import Foundation
 
 enum AppConfig {
-    static var isSupabaseConfigured: Bool {
+    nonisolated static var isSupabaseConfigured: Bool {
         guard let raw = plistString(forKey: "SUPABASE_URL"),
               !raw.isEmpty,
               URL(string: raw) != nil,
@@ -13,7 +13,7 @@ enum AppConfig {
         return true
     }
 
-    static var supabaseURL: URL {
+    nonisolated static var supabaseURL: URL {
         guard let raw = plistString(forKey: "SUPABASE_URL"),
               let url = URL(string: raw)
         else {
@@ -54,7 +54,7 @@ enum AppConfig {
         return false
     }
 
-    private static func plistString(forKey key: String) -> String? {
+    nonisolated private static func plistString(forKey key: String) -> String? {
         guard let value = Bundle.main.object(forInfoDictionaryKey: key) else { return nil }
         if let string = value as? String { return string }
         if let number = value as? NSNumber { return number.stringValue }
@@ -85,7 +85,7 @@ enum AppConfig {
             ?? URL(string: "https://yolo.cstudiomunger.workers.dev/auth/confirm")!
     }
 
-    private static func plistBool(forKey key: String) -> Bool? {
+    nonisolated private static func plistBool(forKey key: String) -> Bool? {
         guard let value = Bundle.main.object(forInfoDictionaryKey: key) else { return nil }
         if let bool = value as? Bool { return bool }
         if let string = value as? String {

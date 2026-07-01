@@ -50,7 +50,7 @@ struct CityGuideDetailView: View {
             }
         }
         .overlay(alignment: .top) {
-            if let loadError, !isLoading {
+            if loadError != nil, !isLoading {
                 Text("Unable to load content. Pull to refresh.")
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(.white)

@@ -78,24 +78,66 @@ struct PlanView: View {
     }
 
     private var planRootContent: some View {
-        Group {
+        VStack(spacing: 0) {
+            planHeader
             if savedTrips.isEmpty {
                 emptyState
             } else {
                 tripList
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Theme.ColorToken.background)
-        .navigationTitle(String(localized: "Plan"))
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarHidden(true)
         .navigationDestination(for: PlanRoute.self) { route in
             planDestination(for: route)
         }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                newTripButton
+    }
+
+    private var planHeader: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .top, spacing: 8) {
+                Text(String(localized: "Plan"))
+                    .font(Theme.FontToken.playfair(30, weight: .bold))
+                Spacer(minLength: 8)
+                newTripHeaderButton
             }
+            Text(String(localized: "Plan your China trip"))
+                .font(Theme.FontToken.inter(13))
+                .foregroundStyle(Theme.ColorToken.textMuted)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, Theme.screenPadding)
+        .padding(.top, 24)
+        .padding(.bottom, 4)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(Theme.ColorToken.border)
+                .frame(height: 1)
+        }
+    }
+
+    private var newTripHeaderButton: some View {
+        Button {
+            path.append(PlanRoute.create)
+        } label: {
+            VStack(spacing: 2) {
+                Image(systemName: "plus")
+                    .font(.system(size: 20, weight: .medium))
+                Text(String(localized: "Plan Trip"))
+                    .font(Theme.FontToken.inter(10, weight: .medium))
+            }
+            .foregroundStyle(
+                appEnv.preferences.canSaveMoreItineraries
+                    ? Theme.ColorToken.accent
+                    : Theme.ColorToken.textMuted
+            )
+            .frame(minWidth: 32)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(!appEnv.preferences.canSaveMoreItineraries)
+        .accessibilityLabel(String(localized: "Plan Trip"))
     }
 
     private var showDeleteAlert: Binding<Bool> {
@@ -197,6 +239,7 @@ struct PlanView: View {
             }
         }
         .listStyle(.plain)
+        .contentMargins(.bottom, Theme.tabBarHeight + 12, for: .scrollContent)
     }
 
     private func tripRow(_ trip: SampleItinerary) -> some View {
@@ -280,15 +323,6 @@ struct PlanView: View {
         )) ?? []
         let cities = (try? await appEnv.content.fetchCities()) ?? []
         prepItems = PrepChecklistAssembler.assemble(allItems: all, context: ctx, cities: cities).allItems
-    }
-
-    private var newTripButton: some View {
-        Button {
-            path.append(PlanRoute.create)
-        } label: {
-            Image(systemName: "plus")
-        }
-        .disabled(!appEnv.preferences.canSaveMoreItineraries)
     }
 
     private func consumePlanGeneratorDeepLink() {

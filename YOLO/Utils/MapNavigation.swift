@@ -14,10 +14,17 @@ enum MapNavigation {
         let title = trimmed(name) ?? trimmed(addressZh) ?? trimmed(addressEn) ?? "Destination"
 
         if let coordinate = coordinate(latitude: latitude, longitude: longitude) {
-            let placemark = MKPlacemark(coordinate: coordinate)
-            let item = MKMapItem(placemark: placemark)
-            item.name = title
-            item.openInMaps(launchOptions: nil)
+            if #available(iOS 26.0, *) {
+                let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                let item = MKMapItem(location: location, address: nil)
+                item.name = title
+                item.openInMaps(launchOptions: nil)
+            } else {
+                let placemark = MKPlacemark(coordinate: coordinate)
+                let item = MKMapItem(placemark: placemark)
+                item.name = title
+                item.openInMaps(launchOptions: nil)
+            }
             return
         }
 

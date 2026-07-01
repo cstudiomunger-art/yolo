@@ -16,7 +16,11 @@ final class AuthSessionStore {
     @ObservationIgnored
     private var observeTask: Task<Void, Never>?
 
-    init(client: SupabaseClient = SupabaseManager.shared) {
+    convenience init() {
+        self.init(client: SupabaseManager.shared)
+    }
+
+    init(client: SupabaseClient) {
         observeTask = Task { @MainActor in
             for await (event, session) in client.auth.authStateChanges {
                 switch event {

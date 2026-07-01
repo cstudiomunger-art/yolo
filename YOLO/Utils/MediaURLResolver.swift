@@ -2,7 +2,7 @@ import Foundation
 
 /// Resolves CMS media paths to playable HTTPS URLs (Supabase Storage + optional CDN bases).
 enum MediaURLResolver {
-    static func audioURL(from raw: String) -> URL? {
+    nonisolated static func audioURL(from raw: String) -> URL? {
         resolve(raw, bucket: "audio-guides")
     }
 
@@ -14,11 +14,11 @@ enum MediaURLResolver {
         return audioURL(from: guide.audioUrl)
     }
 
-    static func coverImageURL(from raw: String) -> URL? {
+    nonisolated static func coverImageURL(from raw: String) -> URL? {
         resolve(raw, bucket: "cover-images")
     }
 
-    private static func resolve(_ raw: String, bucket: String) -> URL? {
+    nonisolated private static func resolve(_ raw: String, bucket: String) -> URL? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 

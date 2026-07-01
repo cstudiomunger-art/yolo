@@ -33,7 +33,7 @@ struct AudioGuideSection: View {
     private var player: AudioQueuePlayer { appEnv.audioPlayer }
 
     private var playbackGuide: AudioGuide {
-        guard let voiceOwner, !voiceVariants.isEmpty else { return guide }
+        guard voiceOwner != nil, !voiceVariants.isEmpty else { return guide }
         return AudioPlaybackResolver.resolve(
             baseGuide: guide,
             variants: voiceVariants,

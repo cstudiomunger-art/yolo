@@ -52,7 +52,7 @@ final class AppEnvironment {
         bindAudioPlayer()
         resolvedPreferences.onSyncableChange = { [weak self] in
             guard let self else { return }
-            Task { await self.profileSync.schedulePush() }
+            Task { self.profileSync.schedulePush() }
         }
         resolvedPreferences.onChecklistStatusChanged = { [weak self] itemId, type, status in
             guard let self else { return }

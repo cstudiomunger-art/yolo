@@ -121,8 +121,7 @@ struct ItineraryEditorView: View {
     }
 
     private func activityEditor(dayIndex: Int, actIndex: Int) -> some View {
-        let activity = editableDays[dayIndex].activities[actIndex]
-        return VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 8) {
             TextField("Activity name", text: activityNameBinding(dayIndex: dayIndex, actIndex: actIndex))
             TextField("Details", text: activityDetailBinding(dayIndex: dayIndex, actIndex: actIndex), axis: .vertical)
                 .lineLimit(2...4)
@@ -171,7 +170,7 @@ struct ItineraryEditorView: View {
         Binding(
             get: { editableDays[dayIndex].costEstimate ?? "" },
             set: { newValue in
-                var d = editableDays[dayIndex]
+                let d = editableDays[dayIndex]
                 editableDays[dayIndex] = d.withCostEstimate(newValue.isEmpty ? nil : newValue)
             }
         )

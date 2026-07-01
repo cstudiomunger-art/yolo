@@ -2,19 +2,19 @@ import Foundation
 
 /// Shared JSON codec for bundled Static/*.json and Supabase (snake_case columns).
 enum JSONCoding {
-    static func makeDecoder() -> JSONDecoder {
+    nonisolated static func makeDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
     }
 
-    static func makeEncoder() -> JSONEncoder {
+    nonisolated static func makeEncoder() -> JSONEncoder {
         let encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase
         return encoder
     }
 
-    static func describe(_ error: DecodingError) -> String {
+    nonisolated static func describe(_ error: DecodingError) -> String {
         switch error {
         case .keyNotFound(let key, let context):
             return "缺少字段 \(key.stringValue)（\(context.codingPath.map(\.stringValue).joined(separator: "."))）"
@@ -29,7 +29,7 @@ enum JSONCoding {
         }
     }
 
-    static func describe(_ error: Error) -> String {
+    nonisolated static func describe(_ error: Error) -> String {
         if let decoding = error as? DecodingError {
             return describe(decoding)
         }

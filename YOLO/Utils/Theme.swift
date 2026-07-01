@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 enum Theme {
     enum ColorToken {
@@ -32,6 +33,15 @@ enum Theme {
 
     static let screenPadding: CGFloat = 28
     static let tabBarHeight: CGFloat = 76
+
+    enum DisplayScale {
+        @MainActor
+        static var primary: CGFloat {
+            UIApplication.shared.connectedScenes
+                .compactMap { ($0 as? UIWindowScene)?.screen.scale }
+                .first ?? 2.0
+        }
+    }
 }
 
 extension Color {

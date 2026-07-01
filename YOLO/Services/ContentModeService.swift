@@ -113,7 +113,7 @@ final class ContentModeService {
         useRemoteIAP = false
         backend = .bundled
         useRemoteAI = false
-        branding = (try? BundledJSONLoader.load(AppBranding.self, resource: "app_branding")) ?? .fallback
+        branding = BundledJSONLoader.load(AppBranding.self, resource: "app_branding")
         aiSettings = .fallback
         if AppConfig.forceBundled {
             lastRefreshError = "当前为静态演示模式（FORCE_BUNDLED / Mock）。请在 Secrets.xcconfig 关闭 USE_MOCK 与 FORCE_BUNDLED。"
@@ -165,7 +165,7 @@ final class ContentModeService {
     private func saveSettingsToDisk(_ settings: AppSettingsRemote) {
         let url = OfflineCacheLocations.appSettingsFile
         let parent = url.deletingLastPathComponent()
-        OfflineCacheLocations.ensureDirectory(parent)
+        _ = OfflineCacheLocations.ensureDirectory(parent)
         guard let data = try? JSONCoding.makeEncoder().encode(settings) else { return }
         try? data.write(to: url, options: .atomic)
     }

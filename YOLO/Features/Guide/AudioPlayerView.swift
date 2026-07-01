@@ -260,7 +260,7 @@ final class AudioQueuePlayer {
         player = AVPlayer(playerItem: item)
 
         statusObservation = item.observe(\.status, options: [.initial, .new]) { [weak self] item, _ in
-            Task { @MainActor in
+            DispatchQueue.main.async {
                 self?.handleItemStatus(item)
             }
         }
@@ -270,7 +270,7 @@ final class AudioQueuePlayer {
             object: item,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            DispatchQueue.main.async {
                 self?.handleTrackFinished()
             }
         }

@@ -467,7 +467,7 @@ final class SupportChatService {
                 // reconnect/missed-event reconcile (60s); only fall back to a fast
                 // 15s cadence when realtime is down — this keeps per-client DB load
                 // low at scale instead of every client refetching every 15s.
-                let healthy = await self?.realtimeActive ?? false
+                let healthy = self?.realtimeActive ?? false
                 let seconds: UInt64 = healthy ? 60 : 15
                 try? await Task.sleep(nanoseconds: seconds * 1_000_000_000)
                 if Task.isCancelled { break }

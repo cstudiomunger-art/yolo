@@ -46,21 +46,23 @@ struct UserItineraryRow: Codable, Sendable {
         return trip
     }
 
-    private static func dateOnlyFormatter() -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter
+    nonisolated private static func formatDateOnly(_ date: Date) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let components = calendar.dateComponents([.year, .month, .day], from: date)
+        guard let year = components.year, let month = components.month, let day = components.day else { return "" }
+        return String(format: "%04d-%02d-%02d", year, month, day)
     }
 
-    private static func formatDateOnly(_ date: Date) -> String {
-        dateOnlyFormatter().string(from: date)
-    }
-
-    private static func parseDateOnly(_ string: String) -> Date? {
-        dateOnlyFormatter().date(from: string)
+    nonisolated private static func parseDateOnly(_ string: String) -> Date? {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let parts = string.split(separator: "-")
+        guard parts.count == 3,
+              let year = Int(parts[0]),
+              let month = Int(parts[1]),
+              let day = Int(parts[2]) else { return nil }
+        return calendar.date(from: DateComponents(year: year, month: month, day: day))
     }
 
     private static func extractCityIds(from trip: SampleItinerary) -> [String] {

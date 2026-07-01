@@ -4,9 +4,6 @@
     "" : {
 
     },
-    "  " : {
-
-    },
     "  +%lld more" : {
 
     },
@@ -2408,7 +2405,6 @@
       }
     },
     "Plan Trip" : {
-      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {

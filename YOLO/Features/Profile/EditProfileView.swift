@@ -151,7 +151,7 @@ struct EditProfileView: View {
         isSavingName = true
         defer { isSavingName = false }
         appEnv.preferences.displayName = trimmed
-        await appEnv.profileSync.schedulePush()
+        appEnv.profileSync.schedulePush()
         dismiss()
     }
 
@@ -196,7 +196,7 @@ struct EditProfileView: View {
 
             appEnv.preferences.avatarUrl = publicURL
             appEnv.preferences.avatarStatus = "approved"
-            await appEnv.profileSync.schedulePush()
+            appEnv.profileSync.schedulePush()
         } catch {
             avatarError = error.localizedDescription
         }

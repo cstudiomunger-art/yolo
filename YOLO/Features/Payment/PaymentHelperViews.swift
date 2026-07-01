@@ -89,7 +89,7 @@ struct PaymentFlowNodeView: View {
     let nodes: [PaymentNodeKey]
 
     private var service: PaymentHelperService { appEnv.paymentHelper }
-    private var country: String { service.effectiveCountryCode(fallback: appEnv.preferences.countryCode ?? "") }
+    private var country: String { service.effectiveCountryCode(fallback: appEnv.preferences.countryCode) }
     @State private var showTrouble = false
     @State private var selectedTool = "alipay"
 
@@ -104,7 +104,7 @@ struct PaymentFlowNodeView: View {
         }
         .onAppear {
             if nodeKey == .q1 {
-                service.prefillCountryIfNeeded(fallback: appEnv.preferences.countryCode ?? "")
+                service.prefillCountryIfNeeded(fallback: appEnv.preferences.countryCode)
             }
         }
     }
@@ -307,7 +307,7 @@ struct PaymentFlowNodeView: View {
 
     private var canProceed: Bool {
         switch nodeKey {
-        case .q1: return service.selectedCountryCode != nil || !(appEnv.preferences.countryCode ?? "").isEmpty
+        case .q1: return service.selectedCountryCode != nil || !appEnv.preferences.countryCode.isEmpty
         case .q2: return !service.cardTypes.isEmpty
         case .q3: return service.tripKind != nil
         default: return true

@@ -4,15 +4,15 @@ import Foundation
 enum OfflineCacheLocations {
     private static let migrationFlagKey = UserDefaultsKeys.offlineCacheMigrated
 
-    static var applicationSupport: URL {
+    nonisolated static var applicationSupport: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
     }
 
-    static var contentDirectory: URL {
+    nonisolated static var contentDirectory: URL {
         ensureDirectory(applicationSupport.appendingPathComponent("chinago-content", isDirectory: true))
     }
 
-    static var imagesDirectory: URL {
+    nonisolated static var imagesDirectory: URL {
         ensureDirectory(applicationSupport.appendingPathComponent("chinago-images", isDirectory: true))
     }
 
@@ -87,7 +87,7 @@ enum OfflineCacheLocations {
         }
     }
 
-    static func ensureDirectory(_ url: URL) -> URL {
+    nonisolated static func ensureDirectory(_ url: URL) -> URL {
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }
@@ -101,7 +101,7 @@ enum OfflineCacheLocations {
                   includingPropertiesForKeys: nil
               ) else { return }
 
-        ensureDirectory(destination)
+        _ = ensureDirectory(destination)
         for file in files {
             let target = destination.appendingPathComponent(file.lastPathComponent)
             if FileManager.default.fileExists(atPath: target.path) { continue }

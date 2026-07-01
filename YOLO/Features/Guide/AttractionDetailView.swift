@@ -153,7 +153,7 @@ struct AttractionDetailView: View {
             }
         }
         .overlay(alignment: .top) {
-            if let loadError, !isLoading {
+            if loadError != nil, !isLoading {
                 Text("Unable to load content. Pull to refresh.")
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(.white)
@@ -299,14 +299,13 @@ struct AttractionDetailView: View {
     /// address wraps to multiple lines and the icon follows the last character.
     private func addressLabel(_ text: String) -> some View {
         let copied = copiedField == .address
-        return (
+        return HStack(alignment: .firstTextBaseline, spacing: 4) {
             Text(text)
                 .foregroundColor(Theme.ColorToken.textMuted)
-            + Text("  ")
-            + Text(Image(systemName: copied ? "checkmark" : "doc.on.doc"))
+            Image(systemName: copied ? "checkmark" : "doc.on.doc")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(copied ? Color.green : Theme.ColorToken.accent)
-        )
+        }
         .font(Theme.FontToken.inter(12))
         .multilineTextAlignment(.leading)
         .fixedSize(horizontal: false, vertical: true)

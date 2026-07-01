@@ -62,7 +62,7 @@ struct AppleSignInButton: View {
                         credentials: .init(provider: .apple, idToken: idToken, nonce: nonce)
                     )
                     if let fullName {
-                        try? await SupabaseManager.shared.auth.update(
+                        _ = try? await SupabaseManager.shared.auth.update(
                             user: UserAttributes(data: ["full_name": .string(fullName)])
                         )
                     }

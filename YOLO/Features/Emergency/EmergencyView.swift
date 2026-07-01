@@ -395,7 +395,7 @@ struct EmergencyView: View {
             .frame(width: 360, alignment: .leading)
             .background(Color.white)
         )
-        renderer.scale = UIScreen.main.scale
+        renderer.scale = Theme.DisplayScale.primary
         return renderer.uiImage
     }
 

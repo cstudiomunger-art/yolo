@@ -108,7 +108,7 @@ enum ItineraryShareImageRenderer {
     static func render(itinerary: SampleItinerary, scale: CGFloat? = nil) -> UIImage? {
         let card = ItineraryShareCardView(itinerary: itinerary)
         let renderer = ImageRenderer(content: card)
-        renderer.scale = scale ?? UIScreen.main.scale
+        renderer.scale = scale ?? Theme.DisplayScale.primary
         return renderer.uiImage
     }
 }
