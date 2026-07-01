@@ -7,6 +7,7 @@ const props = defineProps({
   label: { type: String, default: "" },
   minDate: { type: Date, default: null },
   inline: { type: Boolean, default: false },
+  compact: { type: Boolean, default: false },
   /** 父组件告知当前为永久会员（modelValue 为 null 时展示「永久」勾选） */
   permanentActive: { type: Boolean, default: false },
 });
@@ -192,13 +193,13 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 </script>
 
 <template>
-  <div ref="root" class="dtp" :class="{ inline }">
+  <div ref="root" class="dtp" :class="{ inline, compact }">
     <span v-if="label" class="dtp-label">{{ label }}</span>
 
     <div v-if="!inline" class="dtp-trigger-row">
       <button type="button" class="dtp-trigger" @click.stop="toggleOpen">
         <span class="dtp-trigger-text">{{ fmtDisplay(modelValue) }}</span>
-        <span class="dtp-trigger-icon" aria-hidden="true">📅</span>
+        <span class="dtp-trigger-icon" aria-hidden="true">▾</span>
       </button>
     </div>
 
@@ -254,7 +255,11 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 
 <style scoped>
 .dtp { position: relative; }
-.dtp.inline { width: 100%; }
+.dtp.inline { width: auto; }
+.dtp.compact .dtp-trigger {
+  min-width: 200px;
+  max-width: 260px;
+}
 .dtp-label {
   display: block;
   font-size: 12px;
@@ -268,34 +273,38 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  min-width: 200px;
-  padding: 8px 10px;
+  min-width: 220px;
+  padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--surface);
+  background: var(--bg);
   color: var(--text);
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   text-align: left;
 }
 .dtp-trigger:hover { border-color: var(--accent); }
-.dtp-trigger-icon { opacity: 0.7; font-size: 14px; }
+.dtp-trigger-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dtp-trigger-icon { opacity: 0.55; font-size: 13px; flex-shrink: 0; }
 
 .dtp-panel {
-  margin-top: 8px;
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  z-index: 20;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 30;
+  width: 268px;
 }
 .dtp:not(.inline) .dtp-panel {
   position: absolute;
   left: 0;
-  top: 100%;
-  min-width: 280px;
-  margin-top: 4px;
+  top: calc(100% + 4px);
+}
+.dtp.inline .dtp-panel {
+  margin-top: 6px;
+  box-shadow: none;
+  background: var(--surface2);
 }
 
 .dtp-presets {
@@ -308,17 +317,19 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
   border: 1px solid var(--border);
   background: var(--surface2);
   color: var(--text);
-  border-radius: 16px;
-  padding: 4px 10px;
-  font-size: 12px;
+  border-radius: 14px;
+  padding: 3px 9px;
+  font-size: 11px;
   cursor: pointer;
+  line-height: 1.4;
 }
-.chip:hover { border-color: var(--accent); }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip.perm {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   cursor: pointer;
+  font-size: 11px;
 }
 .chip.perm input { width: auto; margin: 0; }
 
@@ -326,75 +337,84 @@ onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
-.dtp-cal-head .month { font-weight: 600; font-size: 14px; }
+.dtp-cal-head .month { font-weight: 600; font-size: 13px; }
 .nav {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--surface2);
   color: var(--text);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
+  padding: 0;
 }
 .nav:hover { border-color: var(--accent); }
 
-.dtp-weekdays {
+.dtp-weekdays,
+.dtp-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, 32px);
   gap: 2px;
+  justify-content: center;
+}
+.dtp-weekdays {
   margin-bottom: 4px;
   text-align: center;
   font-size: 11px;
   color: var(--muted);
 }
-.dtp-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
+.dtp-weekdays span { line-height: 24px; }
+
 .day {
-  aspect-ratio: 1;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border: none;
   border-radius: 8px;
   background: transparent;
   color: var(--text);
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 32px;
+  text-align: center;
   cursor: pointer;
 }
 .day.off { visibility: hidden; pointer-events: none; }
 .day:hover:not(.disabled):not(.off) { background: var(--surface2); }
-.day.today { font-weight: 700; color: var(--accent); }
+.day.today { font-weight: 600; color: var(--accent); }
 .day.selected {
   background: var(--accent);
   color: #fff;
   font-weight: 600;
 }
-.day.disabled { opacity: 0.35; cursor: not-allowed; }
+.day.disabled { opacity: 0.3; cursor: not-allowed; }
 
 .dtp-time {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid var(--border);
+  font-size: 12px;
 }
 .dtp-time input {
-  width: 52px;
+  width: 44px;
+  padding: 4px 6px;
   text-align: center;
   margin-top: 0;
+  font-size: 12px;
 }
-.dtp-perm-hint { margin: 4px 0 0; }
+.dtp-perm-hint { margin: 2px 0 0; font-size: 12px; }
 .dtp-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid var(--border);
 }
 </style>

@@ -377,33 +377,31 @@ onMounted(async () => { await refCache.load(); await loadList(); });
         </div>
 
         <div class="member-schedule">
-          <div class="member-expiry-head">
-            <span class="member-expiry-title">会员到期时间</span>
-            <div class="member-schedule-actions">
-              <button class="btn btn-sm" @click="grantMembership">开通会员</button>
-              <button
-                v-if="canEditExpiry"
-                class="btn btn-secondary btn-sm"
-                @click="saveMembershipExpiry"
-              >保存到期</button>
-            </div>
-          </div>
-          <DateTimePicker
-            v-model="expiryDraft"
-            allow-permanent
-            inline
-            :permanent-active="serverPermanentGrant"
-            :min-date="minExpiryDate"
-          />
-          <div class="member-actions">
+          <div class="member-toolbar">
             <label class="member-field">
               <span>订阅计划</span>
               <select v-model="giftPlan">
                 <option v-for="p in subPlans" :key="p.id" :value="p.id">{{ p.name_zh || p.name_en }}</option>
               </select>
             </label>
-            <button class="btn btn-danger btn-sm" @click="cancelMembership">取消会员</button>
-            <button v-if="hasOverride" class="btn btn-secondary btn-sm" @click="clearOverride">恢复自动判定</button>
+            <DateTimePicker
+              v-model="expiryDraft"
+              allow-permanent
+              compact
+              label="到期时间"
+              :permanent-active="serverPermanentGrant"
+              :min-date="minExpiryDate"
+            />
+            <div class="member-toolbar-actions">
+              <button class="btn btn-sm" @click="grantMembership">开通会员</button>
+              <button
+                v-if="canEditExpiry"
+                class="btn btn-secondary btn-sm"
+                @click="saveMembershipExpiry"
+              >保存到期</button>
+              <button class="btn btn-danger btn-sm" @click="cancelMembership">取消会员</button>
+              <button v-if="hasOverride" class="btn btn-secondary btn-sm" @click="clearOverride">恢复自动判定</button>
+            </div>
           </div>
         </div>
 
@@ -615,20 +613,25 @@ onMounted(async () => { await refCache.load(); await loadList(); });
 .member-plan { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
 .member-expiry { font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .member-mirror { margin-top: 8px; }
-.member-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 12px; }
-.member-actions select { width: auto; min-width: 140px; }
-.member-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
-.member-field select { margin-top: 0; }
-.member-grant {
-  margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
-}
 .member-schedule { margin-bottom: 14px; }
-.member-schedule-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.member-expiry-edit { margin-bottom: 12px; }
-.member-expiry-head {
-  display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+.member-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: flex-end;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border-radius: 10px;
 }
-.member-expiry-title { font-size: 13px; font-weight: 600; }
+.member-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+.member-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); min-width: 140px; }
+.member-field select { margin-top: 0; }
 .member-note {
   display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); margin-bottom: 12px;
 }
