@@ -1,0 +1,15 @@
+---
+description: 每次代码改动结束后自动创建 git commit
+alwaysApply: true
+---
+
+# 改动后提交
+
+完成一轮代码修改后（功能、修复、重构），在回复用户之前：
+
+1. 用 `git status` / `git diff` 确认变更范围
+2. 只 stage 与本次任务相关的文件；不要提交 `Secrets.xcconfig`、`.env`、含密钥的配置、以及 `xcuserdata` 等本地 IDE 文件，除非用户明确要求
+3. 写简洁的 commit message（说明 why，1–2 句），用 HEREDOC 格式提交
+4. 用户未要求时不要 `git push`；若用户要求上传 GitHub 再 push
+
+若本次对话没有产生可提交的文件变更，则无需空提交。
