@@ -280,11 +280,9 @@ async function saveDetail() {
     display_name: d.display_name?.trim() || null,
     country_code: d.country_code?.trim() || "GB",
     subscription_plan_id: d.subscription_plan_id || null,
-    subscription_expires_at: d.membership_override === "ban"
-      ? (d.subscription_expires_at || null)
-      : (d.subscription_plan_id || d.membership_override === "grant"
-        ? expiryDraft.value
-        : (d.subscription_expires_at || null)),
+    subscription_expires_at: d.membership_override === "grant"
+      ? expiryDraft.value
+      : (d.subscription_expires_at || null),
     rc_customer_id: d.rc_customer_id?.trim() || null,
     membership_override_note: d.membership_override_note?.trim() || null,
     has_completed_onboarding: !!d.has_completed_onboarding,
@@ -293,15 +291,13 @@ async function saveDetail() {
     purchased_attraction_ids: d.purchased_attraction_ids || [],
     updated_at: new Date().toISOString(),
   };
-  const now = new Date();
-  const subExpired = patch.subscription_expires_at && new Date(patch.subscription_expires_at) <= now;
-  const subCancelled = !patch.subscription_plan_id;
-  const subActive = patch.subscription_plan_id && (!patch.subscription_expires_at || new Date(patch.subscription_expires_at) > now);
-  // App 在 RevenueCat 已配置时只认 membership_override=grant，不认 subscription_* 列。
-  if (subActive && d.membership_override !== "ban") {
+  // 会员覆盖仅由「开通 / 保存到期 / 取消 / 恢复自动判定」写入，保存资料不得改写。
+  if (d.membership_override === "grant") {
     patch.membership_override = "grant";
-    patch.membership_override_expires_at = patch.subscription_expires_at || null;
-  } else if ((subExpired || subCancelled) && d.membership_override !== "grant") {
+    patch.membership_override_expires_at = expiryDraft.value;
+    patch.subscription_plan_id = patch.subscription_plan_id || giftPlan.value || subPlans.value[0]?.id || null;
+    patch.subscription_expires_at = expiryDraft.value;
+  } else if (d.membership_override === "ban") {
     patch.membership_override = "ban";
     patch.membership_override_expires_at = null;
   }
