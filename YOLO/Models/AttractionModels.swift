@@ -57,7 +57,10 @@ struct Attraction: Identifiable, Hashable, Codable {
         recommendedDuration = try c.decodeIfPresent(String.self, forKey: .recommendedDuration)
         openingHours = try c.decodeIfPresent(String.self, forKey: .openingHours)
         closedDays = try c.decodeIfPresent(String.self, forKey: .closedDays)
-        closedWeekdays = Self.decodeStringArray(from: c, forKey: .closedWeekdays).map { $0.lowercased() }
+        let structuredWeekdays = Self.decodeStringArray(from: c, forKey: .closedWeekdays).map { $0.lowercased() }
+        closedWeekdays = structuredWeekdays.isEmpty
+            ? Self.parseWeekdays(fromClosedDays: closedDays)
+            : structuredWeekdays
         openTime = try c.decodeIfPresent(String.self, forKey: .openTime)
         closeTime = try c.decodeIfPresent(String.self, forKey: .closeTime)
         lastEntryTime = try c.decodeIfPresent(String.self, forKey: .lastEntryTime)
@@ -198,6 +201,25 @@ struct Attraction: Identifiable, Hashable, Codable {
             items.append(PracticalInfoItem(icon: "🚇", label: "Metro", value: v))
         }
         return items
+    }
+
+    private static func parseWeekdays(fromClosedDays text: String?) -> [String] {
+        let raw = (text ?? "").lowercased()
+        guard !raw.isEmpty else { return [] }
+        var days: [String] = []
+        let map: [(String, String)] = [
+            ("mon", "mon"), ("monday", "mon"),
+            ("tue", "tue"), ("tuesday", "tue"),
+            ("wed", "wed"), ("wednesday", "wed"),
+            ("thu", "thu"), ("thursday", "thu"),
+            ("fri", "fri"), ("friday", "fri"),
+            ("sat", "sat"), ("saturday", "sat"),
+            ("sun", "sun"), ("sunday", "sun"),
+        ]
+        for (token, key) in map where raw.contains(token) {
+            if !days.contains(key) { days.append(key) }
+        }
+        return days
     }
 }
 

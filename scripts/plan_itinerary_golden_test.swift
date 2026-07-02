@@ -8,6 +8,8 @@ import Foundation
 //     YOLO/Models/ItineraryModels.swift \
 //     YOLO/Models/AttractionModels.swift \
 //     YOLO/Features/Plan/CityTravelHints.swift \
+//     YOLO/Features/Plan/PlanItineraryDuration.swift \
+//     YOLO/Features/Plan/PlanItineraryVisitHours.swift \
 //     YOLO/Features/Plan/PlanItineraryNormalizer.swift \
 //     YOLO/Features/Plan/PlanItineraryAssembler.swift \
 //     scripts/html_plain_stub.swift \
@@ -25,6 +27,8 @@ enum PlanItineraryGoldenTest {
         fails += testExperienceDayOccupiesSlot()
         fails += testNormalizeSplitsIncompatibleSameDay()
         fails += testRouteConsistency()
+        fails += testClosedWeekdayFallbackParsing()
+        fails += testAfternoonOnlySlotRule()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -168,6 +172,28 @@ enum PlanItineraryGoldenTest {
         }
         print(fail == 0 ? "✓ route/title/visitOrder consistency" : "")
         return fail
+    }
+
+    private static func testClosedWeekdayFallbackParsing() -> Int {
+        let json = """
+        {"id":"museum","cityId":"beijing","name":"National Museum","closedDays":"Most Mondays"}
+        """
+        let attraction = try! JSONDecoder().decode(Attraction.self, from: Data(json.utf8))
+        let ok = attraction.closedWeekdays.contains("mon")
+        print(ok ? "✓ closedDays fallback parses weekdays" : "✗ closedDays fallback should parse monday => mon")
+        return ok ? 0 : 1
+    }
+
+    private static func testAfternoonOnlySlotRule() -> Int {
+        let json = """
+        {"id":"night_museum","cityId":"shanghai","name":"Night Museum","openTime":"13:00","closeTime":"20:00"}
+        """
+        let attraction = try! JSONDecoder().decode(Attraction.self, from: Data(json.utf8))
+        let allowed = PlanItineraryVisitHours.allowedHalfDaySlots(attraction)
+        let ok = allowed == [.afternoon] &&
+            PlanItineraryVisitHours.pickTimeSlot(attraction, preferred: .morning) == .afternoon
+        print(ok ? "✓ afternoon-only slot rule" : "✗ expected afternoon-only slot behavior")
+        return ok ? 0 : 1
     }
 
     // MARK: - Fixtures

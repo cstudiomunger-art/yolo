@@ -120,9 +120,7 @@ enum PlanItineraryNormalizer {
                 return
             }
         }
-        if let index = days.indices.last(where: { !days[$0].isExperienceSuggestions && days[$0].activities.count < maxPerDay }) {
-            days[index] = days[index].withActivities(days[index].activities + [activity])
-        }
+        // No compatible day found: silently drop instead of forcing a mixed-city day.
     }
 
     private static func insertTravelDays(into days: inout [ItineraryDay]) {

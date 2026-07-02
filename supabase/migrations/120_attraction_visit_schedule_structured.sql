@@ -30,6 +30,6 @@ WHERE (closed_weekdays IS NULL OR cardinality(closed_weekdays) = 0)
 -- Backfill opening/closing time from legacy opening_hours text (HH:MM-HH:MM pattern).
 UPDATE attractions
 SET
-  open_time = COALESCE(open_time, regexp_replace(opening_hours, '^.*?([0-2]?\d:[0-5]\d).*$','\1')),
-  close_time = COALESCE(close_time, regexp_replace(opening_hours, '^.*?[0-2]?\d:[0-5]\d[^0-9]*([0-2]?\d:[0-5]\d).*$','\1'))
-WHERE opening_hours ~ '([0-2]?\d:[0-5]\d).*([0-2]?\d:[0-5]\d)';
+  open_time = COALESCE(open_time, (regexp_match(opening_hours, '([0-2]?\d:[0-5]\d)'))[1]),
+  close_time = COALESCE(close_time, (regexp_match(opening_hours, '([0-2]?\d:[0-5]\d)[^0-9]+([0-2]?\d:[0-5]\d)'))[2])
+WHERE opening_hours ~ '([0-2]?\d:[0-5]\d)[^0-9]+([0-2]?\d:[0-5]\d)';
