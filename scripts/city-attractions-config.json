@@ -1,0 +1,142 @@
+{
+  "cities": {
+    "beijing": {
+      "folder": "/Users/vesperal/Desktop/北京",
+      "city_id": "beijing",
+      "migration": "114_seed_beijing_attractions.sql",
+      "attraction_count": 9
+    },
+    "chongqing": {
+      "folder": "/Users/vesperal/Desktop/重庆",
+      "city_id": "chongqing",
+      "migration": "115_seed_chongqing_attractions.sql",
+      "attraction_count": 17
+    },
+    "nanjing": {
+      "folder": "/Users/vesperal/Desktop/南京",
+      "city_id": "nanjing",
+      "migration": "116_seed_nanjing_attractions.sql",
+      "attraction_count": 12
+    },
+    "hangzhou": {
+      "folder": "/Users/vesperal/Desktop/杭州",
+      "city_id": "hangzhou",
+      "migration": "117_seed_hangzhou_attractions.sql",
+      "attraction_count": 15
+    },
+    "suzhou": {
+      "folder": "/Users/vesperal/Desktop/苏州",
+      "city_id": "suzhou",
+      "migration": "118_seed_suzhou_attractions.sql",
+      "attraction_count": 13
+    }
+  },
+  "new_cities": [
+    {
+      "id": "nanjing",
+      "name": "Nanjing",
+      "chinese_name": "南京",
+      "emoji": "🏛️",
+      "description": "Ming tombs, city walls, and modern Chinese history.",
+      "best_for": ["History", "Culture"],
+      "season_note": null,
+      "best_time_to_visit": "Mar–May, Sep–Nov",
+      "avg_days_recommended": 3,
+      "display_order": 6
+    },
+    {
+      "id": "chongqing",
+      "name": "Chongqing",
+      "chinese_name": "重庆",
+      "emoji": "🌶️",
+      "description": "Mountain city hotpot, river views, and dramatic skylines.",
+      "best_for": ["Food", "Sightseeing", "Nightlife"],
+      "season_note": "Humid summers; foggy winters",
+      "best_time_to_visit": "Mar–May, Sep–Nov",
+      "avg_days_recommended": 3,
+      "display_order": 7
+    }
+  ],
+  "png_aliases": {
+    "南京中山陵景区": "南京中山陵",
+    "侵华日军南京大屠杀遇难同胞纪念馆": "南京遇难同胞纪念馆",
+    "老门东历史文化街区": "老东门",
+    "甘熙宅第（南京民俗博物馆）": "甘熙宅第",
+    "晨光1865科技创意产业园": "晨光1865科技创意产业园区",
+    "留园景区": "留园",
+    "耦园": "藕园"
+  },
+  "no_cover": ["西湖文化广场"],
+  "attractions": [
+    {"city": "beijing", "md": "故宫", "id": "beijing_forbidden_city", "category": "palace", "priority": "P0", "order": 0},
+    {"city": "beijing", "md": "天坛", "id": "beijing_temple_of_heaven", "category": "temple", "priority": "P0", "order": 1},
+    {"city": "beijing", "md": "颐和园", "id": "beijing_summer_palace", "category": "garden", "priority": "P0", "order": 2},
+    {"city": "beijing", "md": "国博", "id": "beijing_national_museum", "category": "museum", "priority": "P0", "order": 3},
+    {"city": "beijing", "md": "慕田峪长城", "id": "beijing_mutianyu_great_wall", "category": "wall", "priority": "P0", "order": 4},
+    {"city": "beijing", "md": "十三陵", "id": "beijing_ming_tombs", "category": "sight", "priority": "P1", "order": 5},
+    {"city": "beijing", "md": "雍和宫", "id": "beijing_lama_temple", "category": "temple", "priority": "P1", "order": 6},
+    {"city": "beijing", "md": "恭王府", "id": "beijing_prince_gong_mansion", "category": "palace", "priority": "P1", "order": 7},
+    {"city": "beijing", "md": "北海公园", "id": "beijing_beihai_park", "category": "park", "priority": "P1", "order": 8},
+
+    {"city": "chongqing", "md": "洪崖洞民俗风貌区", "id": "chongqing_hongya_cave", "category": "sight", "priority": "P0", "order": 0},
+    {"city": "chongqing", "md": "解放碑", "id": "chongqing_jiefangbei", "category": "sight", "priority": "P0", "order": 1},
+    {"city": "chongqing", "md": "李子坝轻轨穿楼", "id": "chongqing_liziba_monorail", "category": "sight", "priority": "P0", "order": 2},
+    {"city": "chongqing", "md": "长江索道", "id": "chongqing_yangtze_cableway", "category": "sight", "priority": "P1", "order": 3},
+    {"city": "chongqing", "md": "磁器口古镇", "id": "chongqing_ciqikou_old_town", "category": "market", "priority": "P1", "order": 4},
+    {"city": "chongqing", "md": "武隆喀斯特旅游区", "id": "chongqing_wulong_karst", "category": "park", "priority": "P0", "order": 5},
+    {"city": "chongqing", "md": "大足石刻", "id": "chongqing_dazu_rock_carvings", "category": "temple", "priority": "P0", "order": 6},
+    {"city": "chongqing", "md": "来福士", "id": "chongqing_raffles_city", "category": "sight", "priority": "P1", "order": 7},
+    {"city": "chongqing", "md": "鹅岭二厂文创公园", "id": "chongqing_eling_2nd_factory", "category": "sight", "priority": "P1", "order": 8},
+    {"city": "chongqing", "md": "山城步道", "id": "chongqing_mountain_trails", "category": "sight", "priority": "P1", "order": 9},
+    {"city": "chongqing", "md": "十八梯", "id": "chongqing_shibati", "category": "sight", "priority": "P1", "order": 10},
+    {"city": "chongqing", "md": "白象居", "id": "chongqing_baixiangju", "category": "sight", "priority": "P1", "order": 11},
+    {"city": "chongqing", "md": "观音桥", "id": "chongqing_guanyinqiao", "category": "market", "priority": "P1", "order": 12},
+    {"city": "chongqing", "md": "九街", "id": "chongqing_jiujie", "category": "market", "priority": "P1", "order": 13},
+    {"city": "chongqing", "md": "八一好吃街", "id": "chongqing_bayi_food_street", "category": "market", "priority": "P1", "order": 14},
+    {"city": "chongqing", "md": "金佛山", "id": "chongqing_jinfo_mountain", "category": "park", "priority": "P1", "order": 15},
+    {"city": "chongqing", "md": "重庆动物园", "id": "chongqing_zoo", "category": "park", "priority": "P2", "order": 16},
+
+    {"city": "nanjing", "md": "南京中山陵景区", "id": "nanjing_sun_yat_sen_mausoleum", "category": "sight", "priority": "P0", "order": 0},
+    {"city": "nanjing", "md": "南京博物院", "id": "nanjing_museum", "category": "museum", "priority": "P0", "order": 1},
+    {"city": "nanjing", "md": "南京夫子庙-秦淮河风光带", "id": "nanjing_confucius_temple_qinhuai", "category": "sight", "priority": "P0", "order": 2},
+    {"city": "nanjing", "md": "南京明孝陵", "id": "nanjing_ming_xiaoling", "category": "sight", "priority": "P0", "order": 3},
+    {"city": "nanjing", "md": "总统府", "id": "nanjing_presidential_palace", "category": "museum", "priority": "P0", "order": 4},
+    {"city": "nanjing", "md": "侵华日军南京大屠杀遇难同胞纪念馆", "id": "nanjing_massacre_memorial", "category": "museum", "priority": "P0", "order": 5},
+    {"city": "nanjing", "md": "南京明城墙", "id": "nanjing_city_wall", "category": "wall", "priority": "P1", "order": 6},
+    {"city": "nanjing", "md": "南京牛首山文化旅游区", "id": "nanjing_niushoushan", "category": "temple", "priority": "P1", "order": 7},
+    {"city": "nanjing", "md": "老门东历史文化街区", "id": "nanjing_laomendong", "category": "market", "priority": "P1", "order": 8},
+    {"city": "nanjing", "md": "甘熙宅第（南京民俗博物馆）", "id": "nanjing_ganxi_mansion", "category": "museum", "priority": "P1", "order": 9},
+    {"city": "nanjing", "md": "晨光1865科技创意产业园", "id": "nanjing_1865_creative_park", "category": "sight", "priority": "P2", "order": 10},
+    {"city": "nanjing", "md": "石臼湖", "id": "nanjing_shijiu_lake", "category": "park", "priority": "P2", "order": 11},
+
+    {"city": "hangzhou", "md": "西湖", "id": "hangzhou_west_lake", "category": "park", "priority": "P0", "order": 0},
+    {"city": "hangzhou", "md": "灵隐寺", "id": "hangzhou_lingyin_temple", "category": "temple", "priority": "P0", "order": 1},
+    {"city": "hangzhou", "md": "雷峰塔", "id": "hangzhou_leifeng_pagoda", "category": "temple", "priority": "P0", "order": 2},
+    {"city": "hangzhou", "md": "西溪国家湿地公园", "id": "hangzhou_xixi_wetland", "category": "park", "priority": "P1", "order": 3},
+    {"city": "hangzhou", "md": "千岛湖景区", "id": "hangzhou_qiandao_lake", "category": "park", "priority": "P0", "order": 4},
+    {"city": "hangzhou", "md": "浙江省博物馆", "id": "hangzhou_zhejiang_museum", "category": "museum", "priority": "P1", "order": 5},
+    {"city": "hangzhou", "md": "京杭大运河", "id": "hangzhou_grand_canal", "category": "sight", "priority": "P1", "order": 6},
+    {"city": "hangzhou", "md": "大运河拱宸桥", "id": "hangzhou_gongchen_bridge", "category": "sight", "priority": "P1", "order": 7},
+    {"city": "hangzhou", "md": "六和塔", "id": "hangzhou_liuhe_pagoda", "category": "temple", "priority": "P1", "order": 8},
+    {"city": "hangzhou", "md": "法喜寺", "id": "hangzhou_faxi_temple", "category": "temple", "priority": "P1", "order": 9},
+    {"city": "hangzhou", "md": "良渚古城", "id": "hangzhou_liangzhu_ancient_city", "category": "museum", "priority": "P1", "order": 10},
+    {"city": "hangzhou", "md": "河坊街", "id": "hangzhou_hefang_street", "category": "market", "priority": "P1", "order": 11},
+    {"city": "hangzhou", "md": "小河直街", "id": "hangzhou_xiaohe_street", "category": "market", "priority": "P1", "order": 12},
+    {"city": "hangzhou", "md": "丝绸博物馆", "id": "hangzhou_silk_museum", "category": "museum", "priority": "P2", "order": 13},
+    {"city": "hangzhou", "md": "西湖文化广场", "id": "hangzhou_west_lake_cultural_plaza", "category": "museum", "priority": "P2", "order": 14},
+
+    {"city": "suzhou", "md": "拙政园", "id": "suzhou_humble_administrators_garden", "category": "garden", "priority": "P0", "order": 0},
+    {"city": "suzhou", "md": "留园景区", "id": "suzhou_lingering_garden", "category": "garden", "priority": "P0", "order": 1},
+    {"city": "suzhou", "md": "狮子林", "id": "suzhou_lion_grove_garden", "category": "garden", "priority": "P0", "order": 2},
+    {"city": "suzhou", "md": "沧浪亭景区", "id": "suzhou_canglang_pavilion", "category": "garden", "priority": "P1", "order": 3},
+    {"city": "suzhou", "md": "网师园", "id": "suzhou_master_of_nets_garden", "category": "garden", "priority": "P1", "order": 4},
+    {"city": "suzhou", "md": "环秀山庄", "id": "suzhou_huanxiu_mountain_villa", "category": "garden", "priority": "P1", "order": 5},
+    {"city": "suzhou", "md": "耦园", "id": "suzhou_ou_garden", "category": "garden", "priority": "P1", "order": 6},
+    {"city": "suzhou", "md": "艺圃", "id": "suzhou_yi_garden", "category": "garden", "priority": "P1", "order": 7},
+    {"city": "suzhou", "md": "退思园", "id": "suzhou_tuisi_garden", "category": "garden", "priority": "P1", "order": 8},
+    {"city": "suzhou", "md": "苏州博物馆", "id": "suzhou_museum", "category": "museum", "priority": "P0", "order": 9},
+    {"city": "suzhou", "md": "平江路历史街区", "id": "suzhou_pingjiang_road", "category": "market", "priority": "P1", "order": 10},
+    {"city": "suzhou", "md": "周庄古镇", "id": "suzhou_zhouzhuang_ancient_town", "category": "sight", "priority": "P0", "order": 11},
+    {"city": "suzhou", "md": "同里古镇", "id": "suzhou_tongli_ancient_town", "category": "sight", "priority": "P1", "order": 12}
+  ]
+}

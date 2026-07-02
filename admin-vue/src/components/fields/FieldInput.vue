@@ -17,6 +17,7 @@ import {
   uploadAudioGuideFile,
   uploadCityGuideAudioFile,
   uploadPhraseAudioFile,
+  resolveCoverImageUrl,
 } from "@/lib/storage";
 
 const props = defineProps({
@@ -104,6 +105,11 @@ const LIST_COLUMNS = {
   ],
 };
 const isObjectList = computed(() => Boolean(LIST_COLUMNS[f.type]));
+
+const imagePreviewSrc = computed(() => {
+  if (!isType("image_preview", "image_thumb", "image_url")) return "";
+  return resolveCoverImageUrl(val.value);
+});
 
 // ---- multi-check options ----
 const multiOptions = computed(() => {
@@ -302,8 +308,9 @@ async function onAudioFile(e) {
 
     <!-- image preview / url -->
     <div v-else-if="isType('image_preview', 'image_thumb', 'image_url')" class="preview">
-      <img v-if="val" :src="val" alt="" class="img" />
-      <span v-else class="muted">（无图）</span>
+      <img v-if="imagePreviewSrc" :src="imagePreviewSrc" alt="" class="img" />
+      <span v-else-if="!val" class="muted">（无图）</span>
+      <span v-else class="muted">（无法预览，请检查 cover_image_path）</span>
       <input v-if="isType('image_url')" v-model="val" type="text" placeholder="图片 URL" />
       <button v-if="val" type="button" class="btn btn-danger btn-sm" @click="clearImage">移除图片</button>
     </div>

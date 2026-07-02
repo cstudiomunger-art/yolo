@@ -39,6 +39,23 @@ export async function uploadStorageFile(bucket, path, file, contentType) {
   return data.publicUrl;
 }
 
+/** Resolve cover_image_path for preview: full URL passthrough, relative → public Storage URL. */
+export function resolveCoverImageUrl(raw, bucket = COVER_BUCKET) {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed) return "";
+
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  let path = trimmed;
+  const prefix = `${bucket}/`;
+  if (path.startsWith(prefix)) path = path.slice(prefix.length);
+  path = path.replace(/^\/+/, "");
+  if (!path) return "";
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
+}
+
 /** Cover image → cover-images/{folder}/{entityId}.{ext} */
 export async function uploadCoverImage(file, folder, entityId) {
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
