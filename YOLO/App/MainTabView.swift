@@ -118,7 +118,7 @@ struct MainTabView: View {
             case .paymentHelper:
                 PaymentHelperHomeView()
             case .geniusBar:
-                GeniusBarHomeView()
+                GeniusBarGateView()
             case .phrases:
                 NavigationStack {
                     PhrasesView()

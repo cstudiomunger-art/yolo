@@ -1,834 +1,1828 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "": {},
-    "  +%lld more": {},
-    " · %lld days": {},
-    "· %@": {},
-    "›": {},
-    "/ %lld done": {},
-    "%@  %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@  %2$@"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "  +%lld more" : {
+
+    },
+    " · %lld days" : {
+
+    },
+    "— We can't help with" : {
+
+    },
+    "· %@" : {
+
+    },
+    "· Move exit date up to before %@" : {
+
+    },
+    "›" : {
+
+    },
+    "/ %lld done" : {
+
+    },
+    "%@  %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@  %2$@"
           }
         }
       }
     },
-    "%@ — %lld days planned. Open YOLO HAPPY to review.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ — %2$lld days planned. Open YOLO HAPPY to review."
+    "%@ — %lld days planned. Open YOLO HAPPY to review." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ — %2$lld days planned. Open YOLO HAPPY to review."
           }
         }
       }
     },
-    "%@ · %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ · %2$@"
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
           }
         }
       }
     },
-    "%@ · %lld days": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ · %2$lld days"
+    "%@ · %lld days" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$lld days"
           }
         }
       }
     },
-    "%@ · 12 min": {
-      "extractionState": "stale"
-    },
-    "%@ / %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ / %2$@"
+    "%@ / %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
           }
         }
       }
     },
-    "%@ %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ %2$@"
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
           }
         }
       }
     },
-    "%@ %@ Passport": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ %2$@ Passport"
+    "%@ %@ Passport" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@ Passport"
           }
         }
       }
     },
-    "%@ →": {},
-    "%@ ⌄": {},
-    "%lld": {},
-    "%lld / %lld %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$lld / %2$lld %3$@"
+    "%@ →" : {
+
+    },
+    "%@ ⌄" : {
+
+    },
+    "%@ Tips" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld / %lld %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld / %2$lld %3$@"
           }
         }
       }
     },
-    "%lld activity days": {},
-    "%lld attractions": {},
-    "%lld attractions ": {},
-    "%lld attractions · in your plan": {
-      "extractionState": "stale"
+    "%lld activity days" : {
+
     },
-    "%lld attractions →": {},
-    "%lld available": {},
-    "%lld days": {},
-    "%lld days total": {},
-    "%lld days until your trip — tap to get this prep done.": {},
-    "%lld favorites": {
-      "extractionState": "stale"
+    "%lld attractions" : {
+
     },
-    "%lld items left": {},
-    "%lld min": {},
-    "%lld of %lld prepared": {
-      "extractionState": "stale"
+    "%lld attractions " : {
+
     },
-    "%lld of %lld tasks done": {
-      "extractionState": "stale"
+    "%lld attractions →" : {
+
     },
-    "%lld sec left in preview": {},
-    "%lld-day free trial": {},
-    "%lld-day stay permitted": {},
-    "%lld/%lld": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$lld/%2$lld"
+    "%lld available" : {
+
+    },
+    "%lld days" : {
+
+    },
+    "%lld days total" : {
+
+    },
+    "%lld days until your trip — tap to get this prep done." : {
+
+    },
+    "%lld items left" : {
+
+    },
+    "%lld min" : {
+
+    },
+    "%lld sec left in preview" : {
+
+    },
+    "%lld-day free trial" : {
+
+    },
+    "%lld-day stay permitted" : {
+
+    },
+    "%lld/%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld"
           }
         }
       }
     },
-    "%lld/%lld prep complete": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$lld/%2$lld prep complete"
+    "%lld/%lld prep complete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld/%2$lld prep complete"
           }
         }
       }
     },
-    "•": {},
-    "• %@": {},
-    "• All attraction guides\n• Unlimited AI planning\n• Offline download": {
-      "extractionState": "stale"
+    "%lld%% ready" : {
+
     },
-    "← %@": {},
-    "← Change city": {
-      "extractionState": "stale"
+    "•" : {
+
     },
-    "← Guide · Attractions": {
-      "extractionState": "stale"
+    "• %@" : {
+
     },
-    "← Home": {},
-    "← Plan": {},
-    "← Prepare": {},
-    "→": {},
-    "+ Add to Day %lld": {},
-    "+%lld more days": {},
-    "+%lld more tips — unlock": {},
-    ">": {},
-    "~40 minutes of setup remaining": {
-      "extractionState": "stale"
+    "※ Boundary copy pending final team review" : {
+
     },
-    "⏸ Pause": {},
-    "⏸ Pause preview": {},
-    "▴": {},
-    "▶ Play": {},
-    "▶ Preview (%lld min free)": {},
-    "▾": {},
-    "★ %@": {},
-    "★ Best Value": {
-      "extractionState": "stale"
+    "← %@" : {
+
     },
-    "⚠️": {},
-    "⚠️ No English-speaking staff": {},
-    "⚡ Quick Plan": {
-      "extractionState": "stale"
+    "← Home" : {
+
     },
-    "🇨🇳 %@": {},
-    "✅": {},
-    "✅ Registered for foreign guests": {},
-    "✅ Save to Plan": {
-      "extractionState": "stale"
+    "← Plan" : {
+
     },
-    "✅ Showing foreigner-friendly hotels only": {},
-    "✓": {},
-    "✓ Downloaded": {
-      "extractionState": "stale"
+    "← Prepare" : {
+
     },
-    "✦": {},
-    "✨": {},
-    "✨ Active": {
-      "extractionState": "stale"
+    "→" : {
+
     },
-    "⬆ Share": {},
-    "⬇ Download for offline": {
-      "extractionState": "stale"
+    "+ Add to Day %lld" : {
+
     },
-    "🎉 You're all set!": {},
-    "🎧": {},
-    "🎧 Area Audio": {},
-    "🎧 Audio": {
-      "extractionState": "stale"
+    "+%lld more days" : {
+
     },
-    "🎧 Audio Guide": {},
-    "🎧 Audio Guide available": {},
-    "🎧 Audio guide unlocked!": {},
-    "💡": {},
-    "💬": {},
-    "💬 General Help": {
-      "extractionState": "stale"
+    "+%lld more tips — unlock" : {
+
     },
-    "💴": {},
-    "📍": {},
-    "📍 %@": {},
-    "📚 Read Before You Go": {},
-    "📝 %@": {},
-    "🔄 Redo": {
-      "extractionState": "stale"
+    "< 6 months ⚠️" : {
+
     },
-    "🔒": {},
-    "🔒 Full guide locked": {},
-    "🔔": {},
-    "🗺": {},
-    "🗺 Trip Planning": {
-      "extractionState": "stale"
+    ">" : {
+
     },
-    "🗺 Your Trip Cities": {
-      "extractionState": "stale"
+    "≥ 6 months ✓" : {
+
     },
-    "🤖 Plan with AI Chat": {
-      "extractionState": "stale"
+    "⏸ Pause" : {
+
     },
-    "🛂": {},
-    "🛍 Pack Before You Go": {
-      "extractionState": "stale"
+    "⏸ Pause preview" : {
+
     },
-    "🟡": {},
-    "🟢": {},
-    "$19.99/year · 3-day free trial": {
-      "extractionState": "stale"
+    "▴" : {
+
     },
-    "2–30 characters. Shown to other users.": {},
-    "3 min free preview · Unlock full guide": {},
-    "48 MB": {
-      "extractionState": "stale"
+    "▶ Listen" : {
+
     },
-    "About": {},
-    "About ChinaGo": {
-      "extractionState": "stale"
+    "▶ Play" : {
+
     },
-    "About YOLO HAPPY": {},
-    "Account": {},
-    "Account created. Check your email and tap the confirmation link.": {},
-    "Account deletion is not available in this build.": {},
-    "ACTIVE": {},
-    "Active Membership": {},
-    "Activity name": {},
-    "Add activity": {},
-    "Add attraction": {},
-    "Add day": {},
-    "Add to favorites": {},
-    "Add your destination to see city-specific prep": {},
-    "Added to Day %lld": {},
-    "Advance reminders": {},
-    "Agree to terms and privacy policy": {},
-    "Agreed to terms and privacy policy": {},
-    "AI-generated, China-aware": {
-      "extractionState": "stale"
+    "▶ Preview (%lld min free)" : {
+
     },
-    "AI-powered · China booking rules built in": {
-      "extractionState": "stale"
+    "▾" : {
+
     },
-    "All cached content has been removed.": {},
-    "All cities": {},
-    "All Cities": {
-      "extractionState": "stale"
+    "★ %@" : {
+
     },
-    "Almost ready…": {},
-    "Already have an account?": {
-      "extractionState": "stale"
+    "⚠️" : {
+
     },
-    "An account with this email already exists. Try signing in instead.": {},
-    "Anyone with the link can view this trip read-only in a browser or the app.": {},
-    "App": {},
-    "Apple sign-in failed. Please try again.": {},
-    "Ask Assistant": {
-      "extractionState": "stale"
+    "⚠️ 24-hour transit: activity limited to the port zone. Leaving the zone requires a temporary entry permit; you cannot freely visit other cities." : {
+
     },
-    "Assistant": {
-      "extractionState": "stale"
+    "⚠️ No English-speaking staff" : {
+
     },
-    "Attractions": {},
-    "audio + full article": {},
-    "Audio attraction tours": {},
-    "Audio not available yet.": {},
-    "Audio tours, 30+ sites": {
-      "extractionState": "stale"
+    "🇨🇳 %@" : {
+
     },
-    "Audio transcript": {},
-    "Back": {},
-    "Back to dates": {},
-    "Back to sign in": {
-      "extractionState": "stale"
+    "✅" : {
+
     },
-    "BEST VALUE": {},
-    "Buy This Guide · $1.99": {
-      "extractionState": "stale"
+    "✅ Registered for foreign guests" : {
+
     },
-    "By continuing, you agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)": {
-      "extractionState": "stale"
+    "✅ Showing foreigner-friendly hotels only" : {
+
     },
-    "Cache Cleared": {},
-    "Cancel": {},
-    "cancel anytime": {},
-    "Cancelled": {},
-    "Change nationality": {
-      "extractionState": "stale"
+    "✓" : {
+
     },
-    "Chapters": {},
-    "Check for Content Updates": {},
-    "Check today's plan in YOLO HAPPY": {},
-    "Check your email and tap the confirmation link to finish signing in.": {},
-    "Check your email for a password reset link.": {},
-    "Check your email to confirm your account before signing in.": {},
-    "Checklist": {
-      "extractionState": "stale"
+    "✓ Adopted" : {
+
     },
-    "China travel companion": {},
-    "ChinaGo Pro": {
-      "extractionState": "stale"
+    "✓ Visa-friendly · Swap cities (your choice)" : {
+
     },
-    "ChinaGo Pro (demo)": {
-      "extractionState": "stale"
+    "✓ We can help" : {
+
     },
-    "Choose a membership plan": {},
-    "Choose a new password for your account.": {},
-    "Choose cities": {},
-    "Choose cities and dates — AI builds a day-by-day itinerary you can edit.": {},
-    "Cities": {
-      "extractionState": "stale"
+    "✕ Close" : {
+
     },
-    "City Guides": {},
-    "City not found": {},
-    "Clear Cache": {},
-    "Close": {},
-    "Coming soon — we're adding content for %@": {},
-    "complete": {},
-    "Conditional visa-free": {},
-    "Confirm password": {},
-    "Confirmation email sent. Check your inbox.": {},
-    "Connect to the internet to open shared trips.": {},
-    "Contact support": {},
-    "Content": {},
-    "Content coming soon": {},
-    "Content coming soon for this area": {},
-    "Content coming soon for this attraction": {},
-    "Content is not available offline. Refresh from CMS when online.": {},
-    "Content Mode": {
-      "extractionState": "stale"
+    "✦" : {
+
     },
-    "Content: %@": {
-      "extractionState": "stale"
+    "✨" : {
+
     },
-    "Continue": {},
-    "Continue with %@ →": {
-      "extractionState": "stale"
+    "⬆ Share" : {
+
     },
-    "Continue with email": {},
-    "Continue with Google": {},
-    "Copied!": {},
-    "Copy Link": {},
-    "Cost estimate": {},
-    "Could not create share image. Please try again.": {},
-    "Could not delete account. Please try again.": {},
-    "Could not generate your itinerary.": {},
-    "Could not load hotels": {},
-    "Could not load the selected image.": {},
-    "Create a trip poster you can send to friends.": {},
-    "Create Account": {
-      "extractionState": "stale"
+    "🎉 You're all set!" : {
+
     },
-    "Creating image…": {},
-    "Creating trip": {},
-    "Cultural Tips": {},
-    "Cultural tips & audio attraction tours": {
-      "extractionState": "stale"
+    "🎧" : {
+
     },
-    "Curated options, English staff noted": {},
-    "Daily schedule": {},
-    "Date label": {},
-    "Dates": {},
-    "Day · in progress": {},
-    "Day %lld · %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Day %1$lld · %2$@"
+    "🎧 Area Audio" : {
+
+    },
+    "🎧 Audio Guide" : {
+
+    },
+    "🎧 Audio Guide available" : {
+
+    },
+    "🎧 Audio guide unlocked!" : {
+
+    },
+    "💡" : {
+
+    },
+    "💬" : {
+
+    },
+    "💬 Common phrases" : {
+
+    },
+    "💴" : {
+
+    },
+    "📄 Detailed guides" : {
+
+    },
+    "📍" : {
+
+    },
+    "📍 %@" : {
+
+    },
+    "📚 Read Before You Go" : {
+
+    },
+    "📝 %@" : {
+
+    },
+    "🔒" : {
+
+    },
+    "🔒 Full guide locked" : {
+
+    },
+    "🔔" : {
+
+    },
+    "🔗 Reference links" : {
+
+    },
+    "🔗 Ticket links (external · not tracked)" : {
+
+    },
+    "🗣 Dialect gems · long-press a card for large text" : {
+
+    },
+    "🗣️ Show this phrase to the merchant →" : {
+
+    },
+    "🗺" : {
+
+    },
+    "🛂" : {
+
+    },
+    "🟡" : {
+
+    },
+    "🟢" : {
+
+    },
+    "2–30 characters. Shown to other users." : {
+
+    },
+    "3 min free preview · Unlock full guide" : {
+
+    },
+    "24-hour transit visa waiver is counted from exact entry time; others from midnight after entry." : {
+
+    },
+    "About" : {
+
+    },
+    "About YOLO HAPPY" : {
+
+    },
+    "Account" : {
+
+    },
+    "Account created. Check your email and tap the confirmation link." : {
+
+    },
+    "Account deletion is not available in this build." : {
+
+    },
+    "ACTIVE" : {
+
+    },
+    "Active Membership" : {
+
+    },
+    "Activity name" : {
+
+    },
+    "Add activity" : {
+
+    },
+    "Add attraction" : {
+
+    },
+    "Add day" : {
+
+    },
+    "Add to favorites" : {
+
+    },
+    "Add to trip" : {
+
+    },
+    "Add to which day?" : {
+
+    },
+    "Add your destination to see city-specific prep" : {
+
+    },
+    "Added" : {
+
+    },
+    "Added to Day %lld" : {
+
+    },
+    "Adopt this route" : {
+
+    },
+    "Advance reminders" : {
+
+    },
+    "Agree to terms and privacy policy" : {
+
+    },
+    "Agreed to terms and privacy policy" : {
+
+    },
+    "Alipay" : {
+
+    },
+    "All cached content has been removed." : {
+
+    },
+    "All cities" : {
+
+    },
+    "Almost ready…" : {
+
+    },
+    "Already in China" : {
+
+    },
+    "Alternatives (subject to live platform rules)" : {
+
+    },
+    "An account with this email already exists. Try signing in instead." : {
+
+    },
+    "Anyone with the link can view this trip read-only in a browser or the app." : {
+
+    },
+    "App" : {
+
+    },
+    "Apple sign-in failed. Please try again." : {
+
+    },
+    "Attractions" : {
+
+    },
+    "audio + full article" : {
+
+    },
+    "Audio attraction tours" : {
+
+    },
+    "Audio not available yet." : {
+
+    },
+    "Audio transcript" : {
+
+    },
+    "Authenticity is our moat — we're not bots. We genuinely want to help." : {
+
+    },
+    "Back" : {
+
+    },
+    "Back to dates" : {
+
+    },
+    "Based on common defaults (round-trip same country, major airports, onward ticket issued). Final decision rests with border control." : {
+
+    },
+    "Based on common defaults (round-trip same country, major airports). Tap to adjust departure/port/onward ticket and see visa-friendly routes." : {
+
+    },
+    "BEST VALUE" : {
+
+    },
+    "Booking trace" : {
+
+    },
+    "Cache Cleared" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "cancel anytime" : {
+
+    },
+    "Cancelled" : {
+
+    },
+    "Chapters" : {
+
+    },
+    "Chat" : {
+
+    },
+    "Chat again" : {
+
+    },
+    "Chat ended · starting again opens a new conversation" : {
+
+    },
+    "Chat with our team for trip help, payment issues, and emergency support in China." : {
+
+    },
+    "Check for Content Updates" : {
+
+    },
+    "Check off what you've already done (self-report is fine)" : {
+
+    },
+    "Check the admin: city, enabled status, and foreign-guest acceptance must match this trip." : {
+
+    },
+    "Check today's plan in YOLO HAPPY" : {
+
+    },
+    "Check your email and tap the confirmation link to finish signing in." : {
+
+    },
+    "Check your email for a password reset link." : {
+
+    },
+    "Check your email to confirm your account before signing in." : {
+
+    },
+    "Checking visa requirements…" : {
+
+    },
+    "China travel companion" : {
+
+    },
+    "Choose %@" : {
+
+    },
+    "Choose a membership plan" : {
+
+    },
+    "Choose a new password for your account." : {
+
+    },
+    "Choose cities" : {
+
+    },
+    "Choose cities and dates — AI builds a day-by-day itinerary you can edit." : {
+
+    },
+    "Choose this · Apply for L visa & generate" : {
+
+    },
+    "Cities holding you back: %@. Adjust in Plan A below or via visa-friendly routes." : {
+
+    },
+    "Cities requiring a visa: %@. Swap any below for a visa-free alternative (pick %lld), engine-verified as fully visa-free." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Cities requiring a visa: %1$@. Swap any below for a visa-free alternative (pick %2$lld), engine-verified as fully visa-free."
           }
         }
       }
     },
-    "Day %lld of %lld": {},
-    "Day 1 Preview — %@": {
-      "extractionState": "stale"
+    "City Guides" : {
+
     },
-    "Days until departure": {},
-    "Days until start": {},
-    "Delete": {},
-    "Delete account": {},
-    "Delete account?": {},
-    "Delete this trip?": {},
-    "Departure": {},
-    "Departure date": {},
-    "Details": {},
-    "Display name": {},
-    "Don't have an account?": {
-      "extractionState": "stale"
+    "City not found" : {
+
     },
-    "Don't miss important reminders": {},
-    "Done": {},
-    "Done ✓": {
-      "extractionState": "stale"
+    "Clear Cache" : {
+
     },
-    "Done reorder": {},
-    "Double tap to change departure date": {},
-    "Download for offline": {},
-    "Downloaded": {},
-    "Drag days": {},
-    "Drag to reorder days and activities. Tap Done when finished.": {},
-    "Edit": {},
-    "Edit Profile": {},
-    "Edit Profile →": {
-      "extractionState": "stale"
+    "Close" : {
+
     },
-    "Edit Trip": {},
-    "Email": {},
-    "Email not confirmed. Check your sign-up confirmation email before signing in.": {},
-    "Emergency": {
-      "extractionState": "stale"
+    "Coming soon — we're adding content for %@" : {
+
     },
-    "Emergency · Visa · Pay · Transport": {},
-    "Enable Notifications": {},
-    "End date": {},
-    "Ended": {},
-    "Enter a valid email address.": {},
-    "Enter your account email. We will send a link to reset your password.": {},
-    "Enter your email and password. We'll create your account if you're new.": {},
-    "Estimated budget": {},
-    "Excludes start and end days": {},
-    "Expired": {},
-    "Explore All Cities": {},
-    "Explore as guest": {},
-    "Explore by Area": {},
-    "Forbidden City tickets sell out 3 weeks in advance during your dates.": {
-      "extractionState": "stale"
+    "complete" : {
+
     },
-    "Forgot password": {},
-    "Forgot password?": {},
-    "Free": {},
-    "Free preview ended. ": {},
-    "From $%lld/night": {},
-    "Full Guide locked — audio + full article": {},
-    "Full list →": {},
-    "Generate itinerary": {},
-    "Generate New Itinerary": {
-      "extractionState": "stale"
+    "Conditional visa-free" : {
+
     },
-    "Genius Bar": {},
-    "Genius Bar · real people": {},
-    "Get Started": {},
-    "Get the latest spots, guides & audio": {},
-    "Go to sign in": {
-      "extractionState": "stale"
+    "Conditional visa-free entry — verify details" : {
+
     },
-    "Going to multiple cities? Tap to select more.": {
-      "extractionState": "stale"
+    "Confirm password" : {
+
     },
-    "Good afternoon,": {},
-    "Good evening,": {},
-    "Good morning,": {},
-    "Guest": {},
-    "Guide": {},
-    "HAPPY": {},
-    "Has audio guide": {},
-    "Hello, world!": {},
-    "Hide password": {},
-    "Home": {
-      "extractionState": "stale"
+    "Confirm recommendation & generate" : {
+
     },
-    "How to Book →": {
-      "extractionState": "stale"
+    "Confirm swap & generate" : {
+
     },
-    "I agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)": {},
-    "If you don't see the email, check your spam folder or try resending.": {},
-    "Image": {},
-    "Included with %@ audio guide": {},
-    "Incorrect email or password. Please try again.": {},
-    "Introduction": {},
-    "Language": {},
-    "Lifetime access": {},
-    "Link": {},
-    "Link sharing requires a signed-in Supabase account.": {},
-    "Live · AI": {},
-    "Live Services": {
-      "extractionState": "stale"
+    "Confirm with an expert" : {
+
     },
-    "Loading audio…": {},
-    "Loading preview…": {},
-    "Loading trip…": {},
-    "Local Experiences to Try": {},
-    "Made with YOLO HAPPY app": {},
-    "Manage →": {
-      "extractionState": "stale"
+    "Confirmation email sent. Check your inbox." : {
+
     },
-    "Manage in App Store →": {},
-    "Maps →": {},
-    "Mark as Done": {},
-    "Mark as Skipped": {},
-    "Marked as Done": {},
-    "Matching attractions…": {},
-    "Max 10": {},
-    "Maybe Later": {},
-    "Membership": {},
-    "Membership & Purchases": {},
-    "Membership suspended": {},
-    "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig.": {},
-    "My Favorites": {},
-    "My Saved Trip": {
-      "extractionState": "stale"
+    "Connect to the internet to open shared trips." : {
+
     },
-    "Name must be 30 characters or fewer.": {},
-    "Name must be at least 2 characters.": {},
-    "Nationality": {},
-    "New password": {},
-    "Next": {},
-    "No active membership": {},
-    "No favorites yet": {},
-    "No hotels found for this city.": {},
-    "No plans available. Please try again later.": {},
-    "No purchases yet": {},
-    "No shared itinerary matches this link.": {},
-    "Notifications": {},
-    "of %lld tasks complete": {
-      "extractionState": "stale"
+    "Connecting…" : {
+
     },
-    "Official refund channels": {},
-    "Offline content, cover images & audio": {},
-    "OK": {},
-    "one-time · %@": {},
-    "One-time · this attraction · yours forever": {},
-    "One-time Purchase": {},
-    "Open →": {},
-    "Open checklist": {},
-    "Or buy just this guide": {
-      "extractionState": "stale"
+    "Contact support" : {
+
     },
-    "or continue with email": {
-      "extractionState": "stale"
+    "Content" : {
+
     },
-    "Or tell us what happened": {},
-    "Pack Before You Go": {
-      "extractionState": "stale"
+    "Content coming soon" : {
+
     },
-    "Password": {},
-    "Password must be at least %lld characters.": {},
-    "Password reset email sent. Check your inbox.": {},
-    "Password updated successfully.": {},
-    "Passwords do not match.": {},
-    "Phrases & Dialect": {},
-    "Pick your trip start and end dates. Activity days exclude both travel days.": {},
-    "Plan": {},
-    "Plan a Trip →": {},
-    "Plan a trip to see cities": {},
-    "Plan My First Trip": {},
-    "Plan My Trip": {
-      "extractionState": "stale"
+    "Content coming soon for this area" : {
+
     },
-    "Plan Trip": {},
-    "Plan your China trip": {},
-    "Planning your days…": {},
-    "Planning:": {
-      "extractionState": "stale"
+    "Content coming soon for this attraction" : {
+
     },
-    "Playlist": {},
-    "Please wait %lld seconds before requesting another email.": {},
-    "Popular": {},
-    "Popular destinations": {
-      "extractionState": "stale"
+    "Content is not available offline. Refresh from CMS when online." : {
+
     },
-    "Practical Info": {},
-    "Preferences": {},
-    "Prep Checklist": {},
-    "Prep checklist alerts before departure": {},
-    "Prep Complete": {},
-    "Prep List →": {},
-    "Preparation": {},
-    "Prepare": {},
-    "Preparing link…": {},
-    "Preview": {},
-    "Preview · unlock the full guide": {},
-    "Privacy Policy": {},
-    "Profile": {},
-    "Purchase": {},
-    "Purchase History": {},
-    "Quick Access": {},
-    "Quick Actions": {
-      "extractionState": "stale"
+    "Continue" : {
+
     },
-    "Quick Plan": {
-      "extractionState": "stale"
+    "Continue chatting" : {
+
     },
-    "Read less ▲": {},
-    "Read more ▼": {},
-    "Read-only · shared with YOLO HAPPY": {},
-    "Reading List": {},
-    "Real-time help": {
-      "extractionState": "stale"
+    "Continue with email" : {
+
     },
-    "Real-time help · %@": {
-      "extractionState": "stale"
+    "Continue with Google" : {
+
     },
-    "Recommended Routes": {
-      "extractionState": "stale"
+    "Copied!" : {
+
     },
-    "Refresh from CMS": {
-      "extractionState": "stale"
+    "Copy Link" : {
+
     },
-    "Refund": {},
-    "Refund Request": {},
-    "Refunds are processed by Apple. Most requests are resolved within 2 business days.": {},
-    "Remind me ahead of time for key prep items": {},
-    "Remove": {},
-    "Remove activity": {},
-    "Remove from favorites": {},
-    "Remove this day": {},
-    "Renewal": {},
-    "Renews in %lld days": {},
-    "Reorder": {},
-    "Report a Problem (Apple)": {},
-    "Request a refund": {},
-    "Request a Refund": {},
-    "Request refund via Apple": {},
-    "Request submitted": {},
-    "Resend confirmation email": {},
-    "Resend reset link": {},
-    "Restore": {},
-    "Restore Purchases": {
-      "extractionState": "stale"
+    "Cost estimate" : {
+
     },
-    "Restore this item?": {},
-    "Retry": {},
-    "Route summary": {},
-    "Save": {},
-    "Save trip": {},
-    "Saved": {},
-    "Saved trips · %lld": {},
-    "Search attractions": {},
-    "Search cities": {},
-    "Search country...": {},
-    "Search foreigner-friendly hotels": {},
-    "Select one or more cities for your trip.": {},
-    "Select your nationality": {},
-    "Select your passport country": {
-      "extractionState": "stale"
+    "Could not create share image. Please try again." : {
+
     },
-    "Send": {
-      "extractionState": "stale"
+    "Could not delete account. Please try again." : {
+
     },
-    "Send Feedback": {},
-    "Send reset link": {},
-    "Set your nationality in Profile": {},
-    "Settings": {},
-    "Share": {
-      "extractionState": "stale"
+    "Could not generate your itinerary." : {
+
     },
-    "Share as": {},
-    "Share Image": {},
-    "Share Itinerary": {},
-    "Share Link": {},
-    "Shared trip": {},
-    "Show password": {},
-    "Sign In": {
-      "extractionState": "stale"
+    "Could not load hotels" : {
+
     },
-    "Sign in / Register →": {},
-    "Sign in to plan your China trip": {},
-    "Sign Out": {},
-    "Sign Up": {
-      "extractionState": "stale"
+    "Could not load the selected image." : {
+
     },
-    "Sign up successful. Check your email and tap the confirmation link.": {
-      "extractionState": "stale"
+    "Create a trip poster you can send to friends." : {
+
     },
-    "Skip": {},
-    "Skipped": {},
-    "Something went wrong": {},
-    "🆘": {},
-    "Start date": {},
-    "Start Free Trial": {},
-    "Start Free Trial →": {
-      "extractionState": "stale"
+    "Creating image…" : {
+
     },
-    "Start your prep checklist before you go": {},
-    "Starts in %lld days": {},
-    "Static · AI": {},
-    "Static Demo": {},
-    "Storage": {},
-    "Storage bucket not set up yet. Run: supabase db push": {},
-    "Submit Request": {},
-    "Subscribe": {},
-    "Subscribe · %@": {},
-    "Support": {},
-    "Syncing…": {},
-    "Talk to a Human": {},
-    "Tap a number to call. Your phone will ask you to confirm.": {},
-    "Tell us your dates and cities": {
-      "extractionState": "stale"
+    "Creating trip" : {
+
     },
-    "Tell us your dates, cities & style": {
-      "extractionState": "stale"
+    "Cultural Tips" : {
+
     },
-    "Terms of Service": {},
-    "then %@ · cancel anytime": {},
-    "These are experience ideas — no specific venues.": {},
-    "This cannot be undone.": {},
-    "This link may have expired or sharing was turned off.": {},
-    "This name is not allowed.": {},
-    "This permanently removes your account and cloud trips. This cannot be undone.": {},
-    "Tips for Western Visitors": {
-      "extractionState": "stale"
+    "Culture Tips" : {
+
     },
-    "Title": {},
-    "Too many attempts. Please try again later.": {
-      "extractionState": "stale"
+    "Curated options, English staff noted" : {
+
     },
-    "Too many password reset emails sent. Wait a few minutes, check your inbox and spam folder, then try again.": {},
-    "Travel Assistant": {
-      "extractionState": "stale"
+    "Daily schedule" : {
+
     },
-    "Travel dates": {},
-    "Travel style": {
-      "extractionState": "stale"
+    "Date label" : {
+
     },
-    "Traveler": {},
-    "Trip ended": {},
-    "Trip not found": {},
-    "Trip overview": {},
-    "Trip reminders": {},
-    "Trip saved": {},
-    "Try again": {},
-    "Try Again": {},
-    "Unable to load city content. Check your connection.": {},
-    "Unable to load content. Pull to refresh.": {},
-    "Unable to send password reset email. Please try again.": {},
-    "Unlock": {},
-    "Unlock all attraction guides, text content, and more.": {},
-    "Unlock Audio Guide": {},
-    "Unlock Full Audio Guide": {
-      "extractionState": "stale"
+    "Dates" : {
+
     },
-    "Unlock Guide · %@": {},
-    "Unlock the full Guide to keep listening & reading.": {},
-    "UNLOCK THE GUIDE": {},
-    "Unlock the Guide →": {},
-    "Unlock this Guide": {},
-    "Unlock visitor tips →": {},
-    "Update password": {},
-    "Upgrade to unlock all content": {},
-    "Uploading…": {},
-    "Use a different email": {},
-    "v1.0.0": {
-      "extractionState": "stale"
+    "Day · in progress" : {
+
     },
-    "Valid until: ": {},
-    "Version %@": {},
-    "View →": {
-      "extractionState": "stale"
+    "Day %lld · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Day %1$lld · %2$@"
+          }
+        }
+      }
     },
-    "View all →": {
-      "extractionState": "stale"
+    "Day %lld of %lld" : {
+
     },
-    "View in Guide →": {},
-    "View Itinerary": {},
-    "View Plans →": {},
-    "Visa required": {},
-    "Visa-free": {},
-    "Visitor Tips": {},
-    "Voice": {},
-    "We'll customise your preparation checklist.": {
-      "extractionState": "stale"
+    "Days until departure" : {
+
     },
-    "We'll remind you when your trip is approaching and key prep items are overdue.": {},
-    "We'll review your request and follow up by email.": {},
-    "We'll show visa rules and travel tips for your country": {},
-    "We've received your request. Refunds are typically processed by Apple within 48 hours.": {},
-    "Welcome back!": {},
-    "What's next?": {
-      "extractionState": "stale"
+    "Days until start" : {
+
     },
-    "Where are you going?": {
-      "extractionState": "stale"
+    "Defaults assume round-trip to the same country. A third country or HK/Macau as next stop may qualify for transit visa-free. Passport validity under %lld months blocks both visa-free entry and visa applications." : {
+
     },
-    "YOLO": {},
-    "YOLO HAPPY": {},
-    "YOLO HAPPY Feedback": {
-      "extractionState": "stale"
+    "Delete" : {
+
     },
-    "YOLO HAPPY Pro": {
-      "extractionState": "stale"
+    "Delete account" : {
+
     },
-    "YOLO HAPPY Pro (demo)": {
-      "extractionState": "stale"
+    "Delete account?" : {
+
     },
-    "You're ready for China.": {
-      "extractionState": "stale"
+    "Delete this trip?" : {
+
     },
-    "Your access has been suspended. Contact support if you believe this is a mistake.": {},
-    "Your benefits": {},
-    "Your China adventure starts here": {},
-    "Your itinerary": {},
-    "Your purchase history will appear here after your first transaction.": {},
-    "Your Trip": {},
-    "Your trip “%@” has ended. Tap to revisit your itinerary.": {},
-    "Your Trip ★": {
-      "extractionState": "stale"
+    "Departure" : {
+
     },
-    "Your Trip Destinations": {},
-    "Your trip starts in %lld days. Enjoy China!": {},
-    "Your trip starts tomorrow": {}
+    "Departure date" : {
+
+    },
+    "Detailed check (departure / port / onward ticket)" : {
+
+    },
+    "Detailed guide" : {
+
+    },
+    "Details" : {
+
+    },
+    "Didn't work? Troubleshoot" : {
+
+    },
+    "Display name" : {
+
+    },
+    "Don't miss important reminders" : {
+
+    },
+    "Done" : {
+
+    },
+    "Done reorder" : {
+
+    },
+    "Double tap to change departure date" : {
+
+    },
+    "Download for offline" : {
+
+    },
+    "Downloaded" : {
+
+    },
+    "Drag days" : {
+
+    },
+    "Drag to reorder days and activities. Tap Done when finished." : {
+
+    },
+    "Edit" : {
+
+    },
+    "Edit Profile" : {
+
+    },
+    "Edit Trip" : {
+
+    },
+    "Email" : {
+
+    },
+    "Email not confirmed. Check your sign-up confirmation email before signing in." : {
+
+    },
+    "Emergency" : {
+
+    },
+    "Emergency · Visa · Pay · Transport" : {
+
+    },
+    "Emergency situations — reach our team directly" : {
+
+    },
+    "Emergency support chat" : {
+
+    },
+    "Emergency support in China" : {
+
+    },
+    "Enable Notifications" : {
+
+    },
+    "End chat" : {
+
+    },
+    "End date" : {
+
+    },
+    "End this chat?" : {
+
+    },
+    "Ended" : {
+
+    },
+    "Ended · View history" : {
+
+    },
+    "Enter a valid email address." : {
+
+    },
+    "Enter your account email. We will send a link to reset your password." : {
+
+    },
+    "Enter your email and password. We'll create your account if you're new." : {
+
+    },
+    "Entry date & time" : {
+
+    },
+    "Estimated budget" : {
+
+    },
+    "Excludes start and end days" : {
+
+    },
+    "Expired" : {
+
+    },
+    "Explore All Cities" : {
+
+    },
+    "Explore as guest" : {
+
+    },
+    "Explore by Area" : {
+
+    },
+    "Find a live expert under Practical Info · Genius Bar and bring this verdict with you." : {
+
+    },
+    "Forgot password" : {
+
+    },
+    "Forgot password?" : {
+
+    },
+    "Free" : {
+
+    },
+    "Free preview ended. " : {
+
+    },
+    "From $%lld/night" : {
+
+    },
+    "Full Guide locked — audio + full article" : {
+
+    },
+    "Full list →" : {
+
+    },
+    "Generate itinerary" : {
+
+    },
+    "Genius Bar" : {
+
+    },
+    "Genius Bar · real people" : {
+
+    },
+    "Get Started" : {
+
+    },
+    "Get the latest spots, guides & audio" : {
+
+    },
+    "Good afternoon," : {
+
+    },
+    "Good evening," : {
+
+    },
+    "Good morning," : {
+
+    },
+    "Guest" : {
+
+    },
+    "Guide" : {
+
+    },
+    "HAPPY" : {
+
+    },
+    "Has audio guide" : {
+
+    },
+    "Hello, world!" : {
+
+    },
+    "Hide password" : {
+
+    },
+    "Hide translation" : {
+
+    },
+    "Hide troubleshooting" : {
+
+    },
+    "High-speed rail / ticket links open externally and are not recorded in your booking trace." : {
+
+    },
+    "History" : {
+
+    },
+    "I agree to the [Terms of Service](yolo://legal/terms) and [Privacy Policy](yolo://legal/privacy)" : {
+
+    },
+    "I already have a China visa" : {
+
+    },
+    "If you don't see the email, check your spam folder or try resending." : {
+
+    },
+    "Image" : {
+
+    },
+    "Included with %@ audio guide" : {
+
+    },
+    "Incorrect email or password. Please try again." : {
+
+    },
+    "International department" : {
+
+    },
+    "Internet Access" : {
+
+    },
+    "Introduction" : {
+
+    },
+    "It moves to History. You can start a new chat anytime." : {
+
+    },
+    "Keep original itinerary" : {
+
+    },
+    "Keep your itinerary; apply for an L tourist visa (about 4–7 business days plus visa fee)." : {
+
+    },
+    "Lifetime access" : {
+
+    },
+    "Link" : {
+
+    },
+    "Link sharing requires a signed-in Supabase account." : {
+
+    },
+    "Live · AI" : {
+
+    },
+    "Loading audio…" : {
+
+    },
+    "Loading preview…" : {
+
+    },
+    "Loading trip…" : {
+
+    },
+    "Local Experiences to Try" : {
+
+    },
+    "Long-press to delete history (removed on your device only)" : {
+
+    },
+    "Lost / theft & police / can't find help — remote support" : {
+
+    },
+    "Made with YOLO HAPPY app" : {
+
+    },
+    "Major medical diagnoses · political or legal matters — contact official services first (110 / 120 / embassy)" : {
+
+    },
+    "Manage in App Store →" : {
+
+    },
+    "Maps →" : {
+
+    },
+    "Mark as Done" : {
+
+    },
+    "Mark as Skipped" : {
+
+    },
+    "Marked as Done" : {
+
+    },
+    "Matching attractions…" : {
+
+    },
+    "Max 10" : {
+
+    },
+    "Maybe Later" : {
+
+    },
+    "Membership" : {
+
+    },
+    "Membership & Purchases" : {
+
+    },
+    "Membership suspended" : {
+
+    },
+    "Message… (Chinese or English, auto-translated)" : {
+
+    },
+    "Mock mode (Supabase not connected)" : {
+
+    },
+    "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig." : {
+
+    },
+    "Must exit by %@." : {
+
+    },
+    "My Booking Trace" : {
+
+    },
+    "My Favorites" : {
+
+    },
+    "Name must be 30 characters or fewer." : {
+
+    },
+    "Name must be at least 2 characters." : {
+
+    },
+    "Nationality" : {
+
+    },
+    "Need a real person? Genius Bar" : {
+
+    },
+    "New password" : {
+
+    },
+    "Next" : {
+
+    },
+    "No active membership" : {
+
+    },
+    "No conversation history" : {
+
+    },
+    "No favorites yet" : {
+
+    },
+    "No hotels found for this city." : {
+
+    },
+    "No plans available. Please try again later." : {
+
+    },
+    "No purchases yet" : {
+
+    },
+    "No recommended hospitals for %@ yet. Try another city or call 120." : {
+
+    },
+    "No shared itinerary matches this link." : {
+
+    },
+    "No trip yet. Plan one in Plan, or tap \"Pick cities to test\" above." : {
+
+    },
+    "Notifications" : {
+
+    },
+    "Offline content, cover images & audio" : {
+
+    },
+    "OK" : {
+
+    },
+    "one-time · %@" : {
+
+    },
+    "One-time · this attraction · yours forever" : {
+
+    },
+    "One-time Purchase" : {
+
+    },
+    "Open →" : {
+
+    },
+    "Open checklist" : {
+
+    },
+    "Passport nationality · %@" : {
+
+    },
+    "Passport valid for ≥ %lld months" : {
+
+    },
+    "Passport valid for less than 6 months. Renew your passport first; policies below will not apply." : {
+
+    },
+    "Password" : {
+
+    },
+    "Password must be at least %lld characters." : {
+
+    },
+    "Password reset email sent. Check your inbox." : {
+
+    },
+    "Password updated successfully." : {
+
+    },
+    "Passwords do not match." : {
+
+    },
+    "Payment Helper" : {
+
+    },
+    "Phrases / Dialect" : {
+
+    },
+    "Phrases & Dialect" : {
+
+    },
+    "Pick 1 of %lld" : {
+
+    },
+    "Pick cities to test" : {
+
+    },
+    "Pick someone to chat with (tap their avatar to start):" : {
+
+    },
+    "Pick your trip start and end dates. Activity days exclude both travel days." : {
+
+    },
+    "Plan" : {
+
+    },
+    "Plan A · Adjust itinerary to stay visa-free" : {
+
+    },
+    "Plan a Trip →" : {
+
+    },
+    "Plan a trip to see cities" : {
+
+    },
+    "Plan B · Keep cities, apply for L visa" : {
+
+    },
+    "Plan My First Trip" : {
+
+    },
+    "Plan Trip" : {
+
+    },
+    "Plan your China trip" : {
+
+    },
+    "Planned exit date & time" : {
+
+    },
+    "Planning your days…" : {
+
+    },
+    "Platform bookings and selections, all in one place" : {
+
+    },
+    "Play recording" : {
+
+    },
+    "Playlist" : {
+
+    },
+    "Please wait %lld seconds before requesting another email." : {
+
+    },
+    "Policy basis" : {
+
+    },
+    "Popular" : {
+
+    },
+    "Practical Info" : {
+
+    },
+    "Pre-departure prep" : {
+
+    },
+    "Pre-trip Q&A · finding local help · payment & card binding · emergency support in China" : {
+
+    },
+    "Preferences" : {
+
+    },
+    "Prefilled from your profile: %@" : {
+
+    },
+    "Prep Checklist" : {
+
+    },
+    "Prep checklist alerts before departure" : {
+
+    },
+    "Prep Complete" : {
+
+    },
+    "Prep List →" : {
+
+    },
+    "Preparation" : {
+
+    },
+    "Prepare" : {
+
+    },
+    "Preparing link…" : {
+
+    },
+    "Preview" : {
+
+    },
+    "Preview · unlock the full guide" : {
+
+    },
+    "Privacy Policy" : {
+
+    },
+    "Profile" : {
+
+    },
+    "Purchase" : {
+
+    },
+    "Purchase History" : {
+
+    },
+    "Quick Access" : {
+
+    },
+    "Read aloud" : {
+
+    },
+    "Read less ▲" : {
+
+    },
+    "Read more ▼" : {
+
+    },
+    "Read-only · shared with YOLO HAPPY" : {
+
+    },
+    "Reading List" : {
+
+    },
+    "Recommended hospitals · %@" : {
+
+    },
+    "Refund" : {
+
+    },
+    "Remind me ahead of time for key prep items" : {
+
+    },
+    "Remove" : {
+
+    },
+    "Remove activity" : {
+
+    },
+    "Remove from favorites" : {
+
+    },
+    "Remove this day" : {
+
+    },
+    "Renewal" : {
+
+    },
+    "Renews in %lld days" : {
+
+    },
+    "Reorder" : {
+
+    },
+    "Resend confirmation email" : {
+
+    },
+    "Resend reset link" : {
+
+    },
+    "Restore" : {
+
+    },
+    "Restore this item?" : {
+
+    },
+    "Retry" : {
+
+    },
+    "Route summary" : {
+
+    },
+    "Rule details" : {
+
+    },
+    "Run check · Is my route OK?" : {
+
+    },
+    "Save" : {
+
+    },
+    "Save trip" : {
+
+    },
+    "Saved" : {
+
+    },
+    "Saved trips · %lld" : {
+
+    },
+    "Say it right · dialect gems" : {
+
+    },
+    "Search attractions" : {
+
+    },
+    "Search cities" : {
+
+    },
+    "Search country / region" : {
+
+    },
+    "Search country..." : {
+
+    },
+    "Search foreigner-friendly hotels" : {
+
+    },
+    "Search port / IATA" : {
+
+    },
+    "Select %lld replacement %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Select %1$lld replacement %2$@"
+          }
+        }
+      }
+    },
+    "Select cities to test (local only, won't affect your real trip)" : {
+
+    },
+    "Select one or more cities for your trip." : {
+
+    },
+    "Select test cities" : {
+
+    },
+    "Select your nationality" : {
+
+    },
+    "Send Feedback" : {
+
+    },
+    "Send reset link" : {
+
+    },
+    "Set your nationality in Profile" : {
+
+    },
+    "Settings" : {
+
+    },
+    "Share as" : {
+
+    },
+    "Share Image" : {
+
+    },
+    "Share Itinerary" : {
+
+    },
+    "Share Link" : {
+
+    },
+    "Shared trip" : {
+
+    },
+    "Show password" : {
+
+    },
+    "Show to locals · Large text" : {
+
+    },
+    "Show to merchant" : {
+
+    },
+    "Show translation" : {
+
+    },
+    "Sign in / Register →" : {
+
+    },
+    "Sign in →" : {
+
+    },
+    "Sign in to create an AI-powered day-by-day itinerary." : {
+
+    },
+    "Sign in to plan →" : {
+
+    },
+    "Sign in to plan your China trip" : {
+
+    },
+    "Sign in to share a link" : {
+
+    },
+    "Sign in to start a conversation." : {
+
+    },
+    "Sign in to use Genius Bar" : {
+
+    },
+    "Sign in to view membership" : {
+
+    },
+    "Sign in to view purchases" : {
+
+    },
+    "Sign in to view your membership status" : {
+
+    },
+    "Sign out" : {
+
+    },
+    "Sign Out" : {
+
+    },
+    "Signed in: %@" : {
+
+    },
+    "Skip" : {
+
+    },
+    "Skipped" : {
+
+    },
+    "Something went wrong" : {
+
+    },
+    "🆘" : {
+
+    },
+    "🆘 Rescue" : {
+
+    },
+    "Start date" : {
+
+    },
+    "Start Free Trial" : {
+
+    },
+    "Start your prep checklist before you go" : {
+
+    },
+    "Starts in %lld days" : {
+
+    },
+    "Static · AI" : {
+
+    },
+    "Static Demo" : {
+
+    },
+    "Still stuck? Get human help (card binding) →" : {
+
+    },
+    "Storage" : {
+
+    },
+    "Storage bucket not set up yet. Run: supabase db push" : {
+
+    },
+    "Subject to live platform rules" : {
+
+    },
+    "Subscribe" : {
+
+    },
+    "Subscribe · %@" : {
+
+    },
+    "Support" : {
+
+    },
+    "Swap for visa-free · Same city count" : {
+
+    },
+    "Syncing…" : {
+
+    },
+    "Talk to a Human" : {
+
+    },
+    "Tap a number to call. Your phone will ask you to confirm." : {
+
+    },
+    "Tap to change passport nationality (syncs to Profile)" : {
+
+    },
+    "Terms of Service" : {
+
+    },
+    "Test cities" : {
+
+    },
+    "then %@ · cancel anytime" : {
+
+    },
+    "These are experience ideas — no specific venues." : {
+
+    },
+    "This cannot be undone." : {
+
+    },
+    "This check only answers whether your route qualifies; it does not finalize paperwork. Card binding and pre-trip tasks belong in your Pre-Trip Checklist. Subject to final decision at border control." : {
+
+    },
+    "This link may have expired or sharing was turned off." : {
+
+    },
+    "This name is not allowed." : {
+
+    },
+    "This permanently removes your account and cloud trips. This cannot be undone." : {
+
+    },
+    "This route may require a visa by default" : {
+
+    },
+    "Title" : {
+
+    },
+    "Too many password reset emails sent. Wait a few minutes, check your inbox and spam folder, then try again." : {
+
+    },
+    "Translate" : {
+
+    },
+    "Translating…" : {
+
+    },
+    "Transport" : {
+
+    },
+    "Travel dates" : {
+
+    },
+    "Traveler" : {
+
+    },
+    "Trip ended" : {
+
+    },
+    "Trip links are saved to your account so friends can open them in the app or browser." : {
+
+    },
+    "Trip not found" : {
+
+    },
+    "Trip overview" : {
+
+    },
+    "Trip reminders" : {
+
+    },
+    "Trip saved" : {
+
+    },
+    "Try again" : {
+
+    },
+    "Try Again" : {
+
+    },
+    "Turn on Live content in app settings to load hotels from the CMS." : {
+
+    },
+    "Two options" : {
+
+    },
+    "Typing…" : {
+
+    },
+    "Unable to load city content. Check your connection." : {
+
+    },
+    "Unable to load content. Pull to refresh." : {
+
+    },
+    "Unable to send password reset email. Please try again." : {
+
+    },
+    "Unlock" : {
+
+    },
+    "Unlock all attraction guides, text content, and more." : {
+
+    },
+    "Unlock Audio Guide" : {
+
+    },
+    "Unlock Guide · %@" : {
+
+    },
+    "Unlock the full Guide to keep listening & reading." : {
+
+    },
+    "UNLOCK THE GUIDE" : {
+
+    },
+    "Unlock the Guide →" : {
+
+    },
+    "Unlock this Guide" : {
+
+    },
+    "Unlock visitor tips →" : {
+
+    },
+    "Unsure / skip" : {
+
+    },
+    "Update password" : {
+
+    },
+    "Upgrade to unlock all content" : {
+
+    },
+    "Uploading…" : {
+
+    },
+    "Use a different email" : {
+
+    },
+    "Use my trip" : {
+
+    },
+    "Valid until: " : {
+
+    },
+    "Version %@" : {
+
+    },
+    "View city" : {
+
+    },
+    "View ended conversations" : {
+
+    },
+    "View in Guide →" : {
+
+    },
+    "View Itinerary" : {
+
+    },
+    "View official notice →" : {
+
+    },
+    "View Plans →" : {
+
+    },
+    "View visa-friendly routes →" : {
+
+    },
+    "Visa Check" : {
+
+    },
+    "Visa details (for accurate checks)" : {
+
+    },
+    "Visa required" : {
+
+    },
+    "Visa Review" : {
+
+    },
+    "Visa Verdict" : {
+
+    },
+    "Visa-free" : {
+
+    },
+    "Visitor Tips" : {
+
+    },
+    "Voice" : {
+
+    },
+    "We'll remind you when your trip is approaching and key prep items are overdue." : {
+
+    },
+    "We'll show visa rules and travel tips for your country" : {
+
+    },
+    "WeChat" : {
+
+    },
+    "Welcome back!" : {
+
+    },
+    "Works offline" : {
+
+    },
+    "Works offline · no network needed" : {
+
+    },
+    "YOLO" : {
+
+    },
+    "YOLO HAPPY" : {
+
+    },
+    "Your access has been suspended. Contact support if you believe this is a mistake." : {
+
+    },
+    "Your benefits" : {
+
+    },
+    "Your China adventure starts here" : {
+
+    },
+    "Your itinerary" : {
+
+    },
+    "Your itinerary isn't an input—geographic limits are policy outputs. The engine only takes hard facts that yield a definite verdict; cities come from your trip. Border officers have the final say." : {
+
+    },
+    "Your plan, benefits, and purchase history are linked to your account." : {
+
+    },
+    "Your purchase history is linked to your account." : {
+
+    },
+    "Your purchase history will appear here after your first transaction." : {
+
+    },
+    "Your Trip" : {
+
+    },
+    "Your trip “%@” has ended. Tap to revisit your itinerary." : {
+
+    },
+    "Your Trip Destinations" : {
+
+    },
+    "Your trip starts in %lld days. Enjoy China!" : {
+
+    },
+    "Your trip starts tomorrow" : {
+
+    }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

@@ -223,14 +223,166 @@ def requires_advance_booking(ticket_en: str) -> bool:
     return "reservation" in lower or "预约" in ticket_en
 
 
+def _first_content_line(text: str, *, skip_note: bool = True) -> str:
+    for line in text.splitlines():
+        line = line.strip().lstrip("- ").strip()
+        if not line:
+            continue
+        if skip_note and line.lower().startswith("note:"):
+            continue
+        if line.endswith(":") and not re.search(r"\d", line):
+            continue
+        return line
+    return ""
+
+
+def summarize_ticket(ticket_en: str, *, requires_booking: bool = False) -> str:
+    if not ticket_en.strip():
+        return ""
+    lower = ticket_en.lower()
+    if re.search(r"\bfree\b", lower) and not re.search(r"\d+\s*rmb", lower):
+        return "Free"
+
+    for line in ticket_en.splitlines():
+        total_match = re.search(r"total[:\s]*(\d+)\s*rmb", line, re.I)
+        if total_match:
+            return f"{total_match.group(1)} RMB"
+
+    lines = [line.strip().lstrip("- ").strip() for line in ticket_en.splitlines() if line.strip()]
+    peak_price = off_price = adult_price = None
+
+    for line in lines:
+        ll = line.lower()
+        price_match = re.search(r"(\d+)\s*rmb", line, re.I) or re.search(r"¥\s*(\d+)", line)
+        if not price_match:
+            continue
+        price = price_match.group(1)
+        if "peak" in ll or ("apr" in ll and "oct" in ll):
+            peak_price = price
+        elif "off" in ll or ("nov" in ll and "mar" in ll):
+            off_price = price
+        elif "adult" in ll and not adult_price:
+            adult_price = price
+
+    if peak_price and off_price:
+        return f"{peak_price} / {off_price} RMB"
+    if adult_price:
+        return f"{adult_price} RMB"
+    for line in lines:
+        prices = re.findall(r"(\d+)\s*rmb", line, re.I)
+        if prices:
+            return f"{prices[0]} RMB" if len(prices) == 1 else f"{prices[0]} / {prices[-1]} RMB"
+    first = _first_content_line(ticket_en)
+    price_match = re.search(r"(\d+)\s*rmb", first, re.I)
+    return f"{price_match.group(1)} RMB" if price_match else first[:50]
+
+
+def summarize_duration(opening_en: str, duration_raw: str | None) -> str:
+    duration_pattern = re.compile(
+        r"(?:at least\s+)?(\d+(?:\.\d+)?[–-]\d+(?:\.\d+)?|\d+(?:\.\d+)?)\s*hours?",
+        re.I,
+    )
+    candidates: list[tuple[int, str]] = []
+    for source in (duration_raw or "", opening_en):
+        for line in source.splitlines():
+            ll = line.lower()
+            if re.search(r"\bopen\b.*\b24\b", ll) or "24/7" in ll:
+                continue
+            match = duration_pattern.search(line)
+            if not match:
+                continue
+            priority = 0
+            if any(keyword in ll for keyword in ("recommend", "visit", "duration", "note:")):
+                priority = 2
+            elif "at least" in ll:
+                priority = 1
+            candidates.append((priority, match.group(1).replace("-", "–")))
+    if candidates:
+        candidates.sort(key=lambda item: -item[0])
+        return f"{candidates[0][1]} hours"
+    return ""
+
+
+def summarize_opening_hours(opening_en: str) -> str:
+    if not opening_en.strip():
+        return ""
+
+    for line in opening_en.splitlines():
+        line = line.strip().lstrip("- ").strip()
+        if not line or line.lower().startswith("note:"):
+            continue
+        if re.match(r"^closed\b", line, re.I):
+            continue
+        time_match = re.search(r"(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})", line)
+        if time_match:
+            return f"{time_match.group(1)}–{time_match.group(2)}"
+
+    if any("24/7" in line for line in opening_en.splitlines()):
+        return "24/7"
+
+    line = _first_content_line(opening_en)
+    time_match = re.search(r"(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})", line)
+    return f"{time_match.group(1)}–{time_match.group(2)}" if time_match else ""
+
+
+def summarize_closed(closed_days: str) -> str:
+    if not closed_days.strip():
+        return ""
+    match = re.search(r"closed on (\w+days?|\w+)", closed_days, re.I)
+    if match:
+        day = match.group(1)
+        if not day.lower().endswith("s"):
+            day += "s"
+        return day.capitalize() if day.islower() else day
+    return closed_days.strip()[:40]
+
+
+def summarize_metro(transport_en: str) -> str:
+    if not transport_en.strip():
+        return ""
+
+    for line in transport_en.splitlines():
+        line = line.strip().lstrip("- ").strip()
+        if not line or (line.endswith(":") and "line" not in line.lower()):
+            continue
+        if not re.search(r"\b(subway|metro|rail transit|line\s*\d)", line, re.I):
+            continue
+
+        line_match = re.search(r"(?:Subway|Metro|Rail Transit)?\s*Line\s*(\d+[A-Za-z]?)", line, re.I)
+        if not line_match:
+            continue
+        line_num = line_match.group(1)
+        after_line = line[line_match.end() :]
+        station_match = re.search(
+            r"(?:get off at|to)\s+([^,;.]+(?:Station|station))", after_line, re.I
+        )
+        if station_match:
+            return f"Metro Line {line_num}, {station_match.group(1).strip()}"
+        return f"Metro Line {line_num}"
+
+    for line in transport_en.splitlines():
+        line = line.strip().lstrip("- ").strip()
+        if line and not line.endswith(":"):
+            metro_match = re.search(r"metro[^.]{0,80}", line, re.I)
+            if metro_match:
+                text = metro_match.group(0).strip().rstrip(".")
+                return text[:80]
+    return ""
+
+
 def build_practical_info(parsed: dict) -> list[dict]:
-    """Build practical_info rows from ticket / hours / transport EN sections (verbatim)."""
+    """Build concise practical_info summaries; full text stays in scalar columns."""
+    requires_booking = bool(parsed.get("requires_advance_booking"))
     rows: list[tuple[str, str, str]] = [
-        ("🎫", "Ticket", parsed.get("ticket_price") or ""),
-        ("🕐", "Duration", parsed.get("recommended_duration") or ""),
-        ("🕘", "Opening Hours", parsed.get("opening_hours") or ""),
-        ("❌", "Closed", parsed.get("closed_days") or ""),
-        ("🚇", "Metro", parsed.get("metro_access") or ""),
+        ("🎫", "Ticket", summarize_ticket(parsed.get("ticket_price") or "", requires_booking=requires_booking)),
+        (
+            "🕐",
+            "Duration",
+            summarize_duration(parsed.get("opening_hours") or "", parsed.get("recommended_duration")),
+        ),
+        ("🕘", "Opening Hours", summarize_opening_hours(parsed.get("opening_hours") or "")),
+        ("❌", "Closed", summarize_closed(parsed.get("closed_days") or "")),
+        ("🚇", "Metro", summarize_metro(parsed.get("metro_access") or "")),
     ]
     return [
         {"icon": icon, "label": label, "value": value.strip()}
@@ -367,6 +519,113 @@ def resolve_png_path(folder: Path, md_basename: str, config: dict) -> Path | Non
     return None
 
 
+def tokenize_sql_values(values_body: str) -> list:
+    tokens: list = []
+    i = 0
+    n = len(values_body)
+    while i < n:
+        while i < n and values_body[i] in " \t\n\r,":
+            i += 1
+        if i >= n:
+            break
+        if values_body[i] == "'":
+            i += 1
+            chars: list[str] = []
+            while i < n:
+                if values_body[i] == "'":
+                    if i + 1 < n and values_body[i + 1] == "'":
+                        chars.append("'")
+                        i += 2
+                    else:
+                        i += 1
+                        break
+                else:
+                    chars.append(values_body[i])
+                    i += 1
+            while i < n and values_body[i] in " \t\n\r":
+                i += 1
+            if values_body.startswith("::jsonb", i):
+                i += 7
+            tokens.append("".join(chars))
+        elif values_body.startswith("TRUE", i):
+            tokens.append(True)
+            i += 4
+        elif values_body.startswith("FALSE", i):
+            tokens.append(False)
+            i += 5
+        elif values_body.startswith("NULL", i):
+            tokens.append(None)
+            i += 4
+        elif values_body[i].isdigit():
+            j = i
+            while j < n and values_body[j].isdigit():
+                j += 1
+            tokens.append(int(values_body[i:j]))
+            i = j
+        else:
+            raise ValueError(f"Unexpected SQL value at {i}: {values_body[i : i + 40]!r}")
+    return tokens
+
+
+def render_sql_values(tokens: list) -> str:
+    parts: list[str] = []
+    for index, token in enumerate(tokens):
+        if isinstance(token, bool):
+            parts.append(sql_bool(token))
+        elif isinstance(token, int):
+            parts.append(str(token))
+        elif token is None:
+            parts.append("NULL")
+        elif index == 15 and isinstance(token, list):
+            parts.append(sql_jsonb(token))
+        elif index in (16, 17) and token == "[]":
+            parts.append("'[]'::jsonb")
+        else:
+            parts.append(sql_str(token))
+    return ",\n  ".join(parts)
+
+
+def patch_practical_info_in_sql(content: str) -> tuple[str, int]:
+    pattern = re.compile(
+        r"(INSERT INTO attractions \([\s\S]*?\) VALUES \()([\s\S]*?)(\) ON CONFLICT)",
+        re.MULTILINE,
+    )
+    count = 0
+
+    def replacer(match: re.Match[str]) -> str:
+        nonlocal count
+        prefix, values_body, suffix = match.group(1), match.group(2), match.group(3)
+        tokens = tokenize_sql_values(values_body)
+        if len(tokens) < 16:
+            return match.group(0)
+        parsed = {
+            "ticket_price": tokens[9] if isinstance(tokens[9], str) else "",
+            "recommended_duration": tokens[10] if isinstance(tokens[10], str) else "",
+            "opening_hours": tokens[11] if isinstance(tokens[11], str) else "",
+            "closed_days": (tokens[12] or "") if isinstance(tokens[12], str) else "",
+            "requires_advance_booking": tokens[13] is True,
+            "metro_access": tokens[14] if isinstance(tokens[14], str) else "",
+        }
+        tokens[15] = build_practical_info(parsed)
+        count += 1
+        return prefix + render_sql_values(tokens) + suffix
+
+    return pattern.sub(replacer, content), count
+
+
+def patch_practical_info_migrations() -> None:
+    migration_files = sorted(MIGRATIONS_DIR.glob("11[4-8]_seed_*_attractions.sql"))
+    for path in migration_files:
+        original = path.read_text(encoding="utf-8")
+        updated = original.replace(
+            "-- practical_info = Ticket / Duration / Opening Hours / Closed / Metro from MD sections.",
+            "-- practical_info = concise summaries; scalar columns keep full EN text.",
+        )
+        patched, count = patch_practical_info_in_sql(updated)
+        path.write_text(patched, encoding="utf-8")
+        print("patched:", path.name, f"({count} attractions)")
+
+
 def main() -> None:
     config = load_config()
     MIGRATIONS_DIR.mkdir(parents=True, exist_ok=True)
@@ -385,7 +644,7 @@ def main() -> None:
         parts = [
             f"-- Seed: {meta['city_id']} attractions from Desktop Markdown",
             "-- Text fields = verbatim English sections from source docs.",
-            "-- practical_info = Ticket / Duration / Opening Hours / Closed / Metro from MD sections.",
+            "-- practical_info = concise summaries; scalar columns keep full EN text.",
             "-- Idempotent: ON CONFLICT (id) DO UPDATE",
             "",
         ]
@@ -410,4 +669,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--patch-practical-info":
+        patch_practical_info_migrations()
+    else:
+        main()

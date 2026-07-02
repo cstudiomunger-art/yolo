@@ -6,6 +6,8 @@ struct PlanView: View {
     @State private var path = NavigationPath()
     @State private var tripToDelete: SampleItinerary?
     @State private var prepItems: [ChecklistItem] = []
+    @State private var showLogin = false
+    @State private var pendingCreateAfterLogin = false
 
     private var savedTrips: [SampleItinerary] {
         let all = appEnv.preferences.savedItineraries
@@ -30,6 +32,15 @@ struct PlanView: View {
                 if show { Task { await reloadPrepProgress() } }
             }
             .task { await reloadPrepProgress() }
+            .loginSheet(isPresented: $showLogin, appEnv: appEnv)
+            .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+                guard isAuthenticated else { return }
+                showLogin = false
+                if pendingCreateAfterLogin {
+                    pendingCreateAfterLogin = false
+                    openCreateFlowIfAllowed()
+                }
+            }
     }
 
     private var showPrepGuideBanner: Bool {
@@ -119,7 +130,7 @@ struct PlanView: View {
 
     private var newTripHeaderButton: some View {
         Button {
-            path.append(PlanRoute.create)
+            requestCreateTrip()
         } label: {
             VStack(spacing: 2) {
                 Image(systemName: "plus")
@@ -189,11 +200,28 @@ struct PlanView: View {
                 Text(String(localized: "Plan your China trip"))
                     .font(Theme.FontToken.playfair(22, weight: .semibold))
                     .multilineTextAlignment(.center)
-                Text(String(localized: "Choose cities and dates — AI builds a day-by-day itinerary you can edit."))
-                    .font(Theme.FontToken.inter(12))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
+                if appEnv.auth.isAuthenticated || AppConfig.useMock {
+                    Text(String(localized: "Choose cities and dates — AI builds a day-by-day itinerary you can edit."))
+                        .font(Theme.FontToken.inter(12))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                } else {
+                    Text(String(localized: "Sign in to create an AI-powered day-by-day itinerary."))
+                        .font(Theme.FontToken.inter(12))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                    Button {
+                        requestCreateTrip()
+                    } label: {
+                        Text(String(localized: "Sign in to plan →"))
+                            .font(Theme.FontToken.inter(12, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.accent)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 4)
+                }
             }
             Spacer()
         }
@@ -328,8 +356,21 @@ struct PlanView: View {
     private func consumePlanGeneratorDeepLink() {
         guard appEnv.navigation.planShowGenerator else { return }
         appEnv.navigation.planShowGenerator = false
-        if appEnv.preferences.canSaveMoreItineraries {
-            path.append(PlanRoute.create)
+        requestCreateTrip()
+    }
+
+    private func requestCreateTrip() {
+        guard appEnv.preferences.canSaveMoreItineraries else { return }
+        if !appEnv.auth.isAuthenticated, !AppConfig.useMock {
+            pendingCreateAfterLogin = true
+            showLogin = true
+            return
         }
+        openCreateFlowIfAllowed()
+    }
+
+    private func openCreateFlowIfAllowed() {
+        guard appEnv.preferences.canSaveMoreItineraries else { return }
+        path.append(PlanRoute.create)
     }
 }

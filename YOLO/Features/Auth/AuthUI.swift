@@ -198,3 +198,43 @@ extension View {
         }
     }
 }
+
+// MARK: - Account feature gate
+
+extension AppEnvironment {
+    /// True when the user must sign in before account-linked actions (purchases, chat, cloud sync).
+    var mustSignInForAccountAction: Bool {
+        !auth.isAuthenticated && !AppConfig.useMock
+    }
+}
+
+/// Centered prompt shown when a screen requires a signed-in account.
+struct AccountSignInPrompt: View {
+    let title: String
+    let message: String
+    var buttonTitle: String = String(localized: "Sign in →")
+    let onSignIn: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            Text(title)
+                .font(Theme.FontToken.playfair(20, weight: .semibold))
+                .multilineTextAlignment(.center)
+            Text(message)
+                .font(Theme.FontToken.inter(12))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+            Button(action: onSignIn) {
+                Text(buttonTitle)
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.accent)
+            }
+            .buttonStyle(.plain)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(Theme.screenPadding)
+    }
+}

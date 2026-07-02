@@ -5,8 +5,13 @@ struct MembershipCenterView: View {
     @Environment(AppEnvironment.self) private var appEnv
 
     @State private var showHistory = false
-    @State private var showRefund = false
     @State private var showUpgrade = false
+    @State private var showLogin = false
+    @State private var pendingHistory = false
+
+    private var canViewMembership: Bool {
+        appEnv.auth.isAuthenticated || AppConfig.useMock
+    }
 
     private var purchase: PurchaseService { appEnv.purchase }
     private var prefs: UserPreferencesStore { appEnv.preferences }
@@ -29,26 +34,32 @@ struct MembershipCenterView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                subscriptionStatusCard
-                if let plan = displayPlan, !plan.featureLines.isEmpty {
-                    benefitsSection(plan: plan)
+        Group {
+            if canViewMembership {
+                membershipContent
+            } else {
+                AccountSignInPrompt(
+                    title: String(localized: "Sign in to view membership"),
+                    message: String(localized: "Your plan, benefits, and purchase history are linked to your account.")
+                ) {
+                    showLogin = true
                 }
-                actionsSection
             }
-            .padding(Theme.screenPadding)
         }
         .navigationTitle(String(localized: "Membership"))
         .navigationBarTitleDisplayMode(.inline)
-        .task { await appEnv.refreshRemoteMembershipState() }
-        .onChange(of: appEnv.membershipRevision) { _, _ in }
+        .loginSheet(isPresented: $showLogin, appEnv: appEnv)
+        .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+            guard isAuthenticated else { return }
+            showLogin = false
+            if pendingHistory {
+                pendingHistory = false
+                showHistory = true
+            }
+            Task { await appEnv.refreshRemoteMembershipState() }
+        }
         .navigationDestination(isPresented: $showHistory) {
             PurchaseHistoryView()
-                .environment(appEnv)
-        }
-        .sheet(isPresented: $showRefund) {
-            RefundRequestView()
                 .environment(appEnv)
         }
         .sheet(isPresented: $showUpgrade) {
@@ -75,6 +86,21 @@ struct MembershipCenterView: View {
                 }
             }
         }
+    }
+
+    private var membershipContent: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                subscriptionStatusCard
+                if let plan = displayPlan, !plan.featureLines.isEmpty {
+                    benefitsSection(plan: plan)
+                }
+                actionsSection
+            }
+            .padding(Theme.screenPadding)
+        }
+        .task { await appEnv.refreshRemoteMembershipState() }
+        .onChange(of: appEnv.membershipRevision) { _, _ in }
     }
 
     // MARK: - Subscription status
@@ -172,20 +198,22 @@ struct MembershipCenterView: View {
     private var actionsSection: some View {
         VStack(spacing: 0) {
             Button {
-                showHistory = true
+                requestPurchaseHistory()
             } label: {
                 settingsRow(String(localized: "Purchase History"))
             }
             .buttonStyle(.plain)
-
-            Button {
-                showRefund = true
-            } label: {
-                settingsRow(String(localized: "Request a Refund"))
-            }
-            .buttonStyle(.plain)
         }
         .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+    }
+
+    private func requestPurchaseHistory() {
+        if appEnv.mustSignInForAccountAction {
+            pendingHistory = true
+            showLogin = true
+            return
+        }
+        showHistory = true
     }
 
     private func settingsRow(_ label: String) -> some View {

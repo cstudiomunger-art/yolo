@@ -17,7 +17,6 @@ struct MembershipPlansView: View {
     var onPurchaseComplete: (() -> Void)?
 
     @State private var selectedId: String?
-    @State private var showRefund = false
     @State private var showLogin = false
     @State private var errorMessage: String?
 
@@ -86,10 +85,11 @@ struct MembershipPlansView: View {
                     Button(String(localized: "Close")) { dismiss() }
                 }
             }
-            .sheet(isPresented: $showRefund) {
-                RefundRequestView().environment(appEnv)
-            }
             .loginSheet(isPresented: $showLogin, appEnv: appEnv)
+            .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+                guard isAuthenticated else { return }
+                showLogin = false
+            }
             .task {
                 if options.isEmpty { await appEnv.purchase.loadPlans() }
                 ensureSelection()
@@ -190,6 +190,10 @@ struct MembershipPlansView: View {
     private var footerLinks: some View {
         VStack(spacing: 10) {
             Button(branding.paywall.restore) {
+                if appEnv.mustSignInForAccountAction {
+                    showLogin = true
+                    return
+                }
                 Task { try? await appEnv.purchase.restorePurchases() }
             }
             .font(Theme.FontToken.inter(11))
@@ -199,12 +203,6 @@ struct MembershipPlansView: View {
                 .font(Theme.FontToken.inter(9))
                 .foregroundStyle(Theme.ColorToken.textGhost)
                 .multilineTextAlignment(.center)
-
-            Button(String(localized: "Request a refund")) {
-                showRefund = true
-            }
-            .font(Theme.FontToken.inter(10))
-            .foregroundStyle(Theme.ColorToken.textGhost)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, Theme.screenPadding)

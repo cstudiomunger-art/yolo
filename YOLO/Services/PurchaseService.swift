@@ -2,7 +2,6 @@ import Foundation
 import Observation
 import RevenueCat
 import Supabase
-import UIKit
 
 /// Manages IAP purchases, entitlement state, and membership plan data.
 ///
@@ -226,38 +225,6 @@ final class PurchaseService {
         }
         guard let auth, auth.isAuthenticated else { return }
         await profileSync?.syncAfterSignIn()
-    }
-
-    // MARK: - Refund
-
-    func beginRefundRequest(windowScene: UIWindowScene) async throws {
-        if AppConfig.isRevenueCatConfigured {
-            do {
-                _ = try await Purchases.shared.beginRefundRequest(forEntitlement: Self.proEntitlementID)
-                return
-            } catch {
-                TelemetryService.shared.recordError(error, context: "revenuecat_refund")
-            }
-        }
-        _ = windowScene
-        if let url = URL(string: "itms-apps://apps.apple.com/account/subscriptions") {
-            await UIApplication.shared.open(url)
-        }
-    }
-
-    func submitRefundRequest(planId: String?, reason: String) async {
-        guard let userId = auth?.userId else { return }
-        guard AppConfig.isSupabaseConfigured else { return }
-        let row: [String: String?] = [
-            "user_id": userId.uuidString,
-            "plan_id": planId,
-            "reason": reason,
-            "status": "pending",
-        ]
-        _ = try? await SupabaseManager.shared
-            .from("user_refund_requests")
-            .insert(row)
-            .execute()
     }
 
     // MARK: - RevenueCat Login / Logout

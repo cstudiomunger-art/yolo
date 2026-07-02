@@ -12,6 +12,56 @@ enum ChatIntent: Hashable {
     case start(agentId: String?, priority: String)
 }
 
+/// Presents Genius Bar for signed-in users; guests see a login prompt first.
+struct GeniusBarGateView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    @State private var showLogin = false
+
+    var body: some View {
+        Group {
+            if appEnv.mustSignInForAccountAction {
+                accountSignInPlaceholder
+            } else {
+                GeniusBarHomeView()
+            }
+        }
+        .loginSheet(isPresented: $showLogin, appEnv: appEnv)
+        .onAppear {
+            if appEnv.mustSignInForAccountAction {
+                showLogin = true
+            }
+        }
+        .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+            if isAuthenticated {
+                showLogin = false
+            }
+        }
+        .onChange(of: showLogin) { _, showing in
+            if !showing, appEnv.mustSignInForAccountAction {
+                appEnv.navigation.dismissModal()
+            }
+        }
+    }
+
+    private var accountSignInPlaceholder: some View {
+        NavigationStack {
+            AccountSignInPrompt(
+                title: String(localized: "Sign in to use Genius Bar"),
+                message: String(localized: "Chat with our team for trip help, payment issues, and emergency support in China.")
+            ) {
+                showLogin = true
+            }
+            .navigationTitle("Genius Bar")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { appEnv.navigation.dismissModal() }
+                }
+            }
+        }
+    }
+}
+
 struct GeniusBarHomeView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss

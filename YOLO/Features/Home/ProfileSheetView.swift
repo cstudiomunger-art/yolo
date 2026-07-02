@@ -9,6 +9,7 @@ struct ProfileSheetView: View {
     @State private var showEditProfile = false
     @State private var showMembership = false
     @State private var showSettings = false
+    @State private var pendingMembership = false
 
     var body: some View {
         NavigationStack {
@@ -42,6 +43,10 @@ struct ProfileSheetView: View {
                 if isAuthenticated {
                     showLogin = false
                     Task { await appEnv.syncAfterSignIn() }
+                    if pendingMembership {
+                        pendingMembership = false
+                        showMembership = true
+                    }
                 }
             }
             // Edit profile sheet
@@ -142,6 +147,17 @@ struct ProfileSheetView: View {
     // MARK: - Membership summary
 
     private var membershipSummarySection: some View {
+        Group {
+            if appEnv.auth.isAuthenticated || AppConfig.useMock {
+                authenticatedMembershipSummary
+            } else {
+                guestMembershipSummary
+            }
+        }
+        .onChange(of: appEnv.membershipRevision) { _, _ in }
+    }
+
+    private var authenticatedMembershipSummary: some View {
         Button {
             showMembership = true
         } label: {
@@ -180,7 +196,30 @@ struct ProfileSheetView: View {
             .padding(.horizontal, Theme.screenPadding)
         }
         .buttonStyle(.plain)
-        .onChange(of: appEnv.membershipRevision) { _, _ in }
+    }
+
+    private var guestMembershipSummary: some View {
+        Button {
+            requestMembership()
+        } label: {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(String(localized: "Membership"))
+                        .font(Theme.FontToken.inter(13, weight: .medium))
+                    Text(String(localized: "Sign in to view your membership status"))
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                }
+                Spacer()
+                Text("›")
+                    .foregroundStyle(Theme.ColorToken.textGhost)
+                    .font(.system(size: 18))
+            }
+            .padding(16)
+            .background(Theme.ColorToken.backgroundSubtle)
+            .padding(.horizontal, Theme.screenPadding)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Navigation buttons
@@ -188,13 +227,22 @@ struct ProfileSheetView: View {
     private var navigationButtons: some View {
         VStack(spacing: 0) {
             navRow(String(localized: "Membership & Purchases"), icon: "crown") {
-                showMembership = true
+                requestMembership()
             }
             navRow(String(localized: "Settings"), icon: "gearshape") {
                 showSettings = true
             }
         }
         .padding(.top, 20)
+    }
+
+    private func requestMembership() {
+        if appEnv.mustSignInForAccountAction {
+            pendingMembership = true
+            showLogin = true
+            return
+        }
+        showMembership = true
     }
 
     private func navRow(_ label: String, icon: String, action: @escaping () -> Void) -> some View {

@@ -7,10 +7,18 @@ struct PurchaseHistoryView: View {
     @State private var transactions: [IAPTransaction] = []
     @State private var isLoading = true
     @State private var loadError: String?
+    @State private var showLogin = false
 
     var body: some View {
         Group {
-            if isLoading {
+            if appEnv.mustSignInForAccountAction {
+                AccountSignInPrompt(
+                    title: String(localized: "Sign in to view purchases"),
+                    message: String(localized: "Your purchase history is linked to your account.")
+                ) {
+                    showLogin = true
+                }
+            } else if isLoading {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if transactions.isEmpty {
@@ -33,6 +41,7 @@ struct PurchaseHistoryView: View {
         }
         .navigationTitle(String(localized: "Purchase History"))
         .navigationBarTitleDisplayMode(.inline)
+        .loginSheet(isPresented: $showLogin, appEnv: appEnv)
         .task { await load() }
         .overlay(alignment: .top) {
             if let loadError {
@@ -45,6 +54,10 @@ struct PurchaseHistoryView: View {
     }
 
     private func load() async {
+        guard !appEnv.mustSignInForAccountAction else {
+            isLoading = false
+            return
+        }
         isLoading = true
         loadError = nil
         defer { isLoading = false }

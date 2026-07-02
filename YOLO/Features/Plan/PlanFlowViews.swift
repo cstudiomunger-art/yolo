@@ -854,6 +854,11 @@ struct ShareItinerarySheet: View {
 
     @State private var showSystemShare = false
     @State private var systemShareItems: [Any] = []
+    @State private var showLogin = false
+
+    private var canShareLink: Bool {
+        appEnv.auth.isAuthenticated || AppConfig.useMock
+    }
 
     init(itinerary: SampleItinerary) {
         self.itinerary = itinerary
@@ -899,6 +904,12 @@ struct ShareItinerarySheet: View {
             .sheet(isPresented: $showSystemShare) {
                 ShareSheet(items: systemShareItems)
             }
+            .loginSheet(isPresented: $showLogin, appEnv: appEnv)
+            .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+                if isAuthenticated, mode == .link {
+                    Task { await ensureShareLink() }
+                }
+            }
             .onChange(of: mode) { _, newMode in
                 switch newMode {
                 case .image:
@@ -906,7 +917,9 @@ struct ShareItinerarySheet: View {
                         Task { await generateImage() }
                     }
                 case .link:
-                    Task { await ensureShareLink() }
+                    if canShareLink {
+                        Task { await ensureShareLink() }
+                    }
                 }
             }
             .task {
@@ -914,7 +927,9 @@ struct ShareItinerarySheet: View {
                 case .image:
                     await generateImage()
                 case .link:
-                    await ensureShareLink()
+                    if canShareLink {
+                        await ensureShareLink()
+                    }
                 }
             }
         }
@@ -966,6 +981,20 @@ struct ShareItinerarySheet: View {
 
     @ViewBuilder
     private var linkSection: some View {
+        if !canShareLink {
+            AccountSignInPrompt(
+                title: String(localized: "Sign in to share a link"),
+                message: String(localized: "Trip links are saved to your account so friends can open them in the app or browser.")
+            ) {
+                showLogin = true
+            }
+        } else {
+            linkShareContent
+        }
+    }
+
+    @ViewBuilder
+    private var linkShareContent: some View {
         Text(String(localized: "Anyone with the link can view this trip read-only in a browser or the app."))
             .font(Theme.FontToken.inter(12))
             .foregroundStyle(Theme.ColorToken.textMuted)
@@ -1036,6 +1065,7 @@ struct ShareItinerarySheet: View {
     }
 
     private func ensureShareLink() async {
+        guard canShareLink else { return }
         guard !AppConfig.useMock else { return }
         if isSavingLink { return }
 
