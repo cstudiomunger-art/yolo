@@ -121,6 +121,30 @@ final class AppEnvironment {
         await signOutAndReset()
     }
 
+    // MARK: - Account profile (auth-gated)
+
+    /// Display name from preferences; nil when logged out so stale local data is not shown.
+    var visibleProfileName: String? {
+        guard auth.isAuthenticated else { return nil }
+        let trimmed = preferences.displayName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    /// Avatar URL from preferences; nil when logged out (uploads require an account).
+    var visibleProfileAvatarUrl: String? {
+        guard auth.isAuthenticated else { return nil }
+        let trimmed = preferences.avatarUrl?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    /// Clears account-bound profile fields when there is no active session.
+    func reconcileAccountProfileWithAuth() {
+        guard !auth.isAuthenticated else { return }
+        preferences.displayName = nil
+        preferences.avatarUrl = nil
+        preferences.avatarStatus = "none"
+    }
+
     func rescheduleTripReminders() async {
         let active = preferences.activeItinerary
         await TripReminderService.reschedule(

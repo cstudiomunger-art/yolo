@@ -52,7 +52,7 @@ struct HomeView: View {
     }
 
     private var displayName: String {
-        if let name = appEnv.preferences.displayName, !name.isEmpty {
+        if let name = appEnv.visibleProfileName {
             return name
         }
         if let email = appEnv.auth.userEmail,
@@ -139,8 +139,8 @@ struct HomeView: View {
             }
             Spacer()
             ProfileAvatarButton(
-                avatarUrl: appEnv.preferences.avatarUrl,
-                displayName: appEnv.preferences.displayName
+                avatarUrl: appEnv.visibleProfileAvatarUrl,
+                displayName: appEnv.visibleProfileName
             ) { showProfile = true }
         }
         .padding(.horizontal, Theme.screenPadding)

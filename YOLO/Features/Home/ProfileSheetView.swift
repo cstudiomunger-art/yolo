@@ -72,19 +72,22 @@ struct ProfileSheetView: View {
     private var identitySection: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 14) {
-                Button { showEditProfile = true } label: {
+                Button {
+                    if appEnv.auth.isAuthenticated { showEditProfile = true }
+                } label: {
                     ProfileAvatarButton(
-                        avatarUrl: appEnv.preferences.avatarUrl,
-                        displayName: appEnv.preferences.displayName,
+                        avatarUrl: appEnv.visibleProfileAvatarUrl,
+                        displayName: appEnv.visibleProfileName,
                         size: 56,
                         action: {}
                     )
                     .allowsHitTesting(false)
                 }
                 .buttonStyle(.plain)
+                .disabled(!appEnv.auth.isAuthenticated)
 
                 VStack(alignment: .leading, spacing: 3) {
-                    if let name = appEnv.preferences.displayName, !name.isEmpty {
+                    if let name = appEnv.visibleProfileName {
                         Text(name)
                             .font(Theme.FontToken.playfair(16, weight: .semibold))
                     } else if let email = appEnv.auth.userEmail {
@@ -104,14 +107,16 @@ struct ProfileSheetView: View {
 
                 Spacer()
 
-                Button {
-                    showEditProfile = true
-                } label: {
-                    Text(String(localized: "Edit"))
-                        .font(Theme.FontToken.inter(11, weight: .medium))
-                        .foregroundStyle(Theme.ColorToken.accent)
+                if appEnv.auth.isAuthenticated {
+                    Button {
+                        showEditProfile = true
+                    } label: {
+                        Text(String(localized: "Edit"))
+                            .font(Theme.FontToken.inter(11, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.accent)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
 
             if !appEnv.auth.isAuthenticated, !AppConfig.useMock {

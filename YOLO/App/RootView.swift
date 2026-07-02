@@ -22,6 +22,8 @@ struct RootView: View {
             await appEnv.purchase.loadPlans()
             if appEnv.auth.isAuthenticated {
                 await appEnv.syncAfterSignIn()
+            } else {
+                appEnv.reconcileAccountProfileWithAuth()
             }
         }
         .onChange(of: appEnv.preferences.countryCode) { _, _ in
@@ -55,6 +57,8 @@ struct RootView: View {
         .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
             if isAuthenticated {
                 Task { await appEnv.syncAfterSignIn() }
+            } else {
+                appEnv.reconcileAccountProfileWithAuth()
             }
         }
     }
