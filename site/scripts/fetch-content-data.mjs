@@ -5,8 +5,8 @@
 // audio_url / audio_guide_id and keep only a `has_audio` flag + attraction
 // audio_guide_count so the page can tease "N audio guides in the app".
 //
-// Content is rendered as-is (whatever language the CMS holds). Cover images are already
-// stored as full public URLs, so no resolution is needed.
+// Content is rendered as-is (whatever language the CMS holds). Cover image fields may be
+// full URLs or storage-relative paths; URL normalization is handled in src/lib/guides.ts.
 
 import { writeFile, readFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";

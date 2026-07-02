@@ -43,10 +43,6 @@ const description = `Plan ${city.name}, China: top attractions with ticket price
                 <div class="attr-body">
                   <h3>{a.name}</h3>
                   {a.chinese_name && a.chinese_name !== a.name && <span class="muted zh">{a.chinese_name}</span>}
-                  <p class="attr-meta ui">
-                    {a.ticket_price && <span>🎫 {a.ticket_price}</span>}
-                    {a.recommended_duration && <span>· 🕐 {a.recommended_duration}</span>}
-                  </p>
                   {audio > 0 && <span class="audio-tag ui">🎧 {audio} audio guide{audio > 1 ? "s" : ""} in app</span>}
                 </div>
               </a>
@@ -74,7 +70,6 @@ const description = `Plan ${city.name}, China: top attractions with ticket price
   .attr-body { padding: 15px 16px; display: flex; flex-direction: column; gap: 4px; }
   .attr-body h3 { margin: 0; font-size: 1.1rem; }
   .zh { font-size: 0.85rem; }
-  .attr-meta { margin: 4px 0 0; font-size: 0.85rem; color: var(--muted); }
   .audio-tag { margin-top: 8px; font-size: 0.78rem; color: var(--coral-dark); background: var(--coral-tint); border-radius: 999px; padding: 3px 10px; align-self: flex-start; }
   @media (max-width: 820px) { .attr-grid { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 520px) { .attr-grid { grid-template-columns: 1fr; } }

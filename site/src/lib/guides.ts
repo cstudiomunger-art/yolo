@@ -4,6 +4,29 @@
 import raw from "../data/guides.json";
 import sanitizeHtml from "sanitize-html";
 
+const DEFAULT_SUPABASE_URL = "https://edwvrriuwzaaqznklrgi.supabase.co";
+const SUPABASE_URL = (import.meta.env.PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/+$/, "");
+const COVER_BUCKET = "cover-images";
+
+/** Full URL passthrough; relative storage path -> Supabase public URL. */
+export function resolveCoverImageUrl(raw: string | null | undefined, bucket = COVER_BUCKET): string | null {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+
+  let path = trimmed.replace(/^\/+/, "");
+  const storagePrefix = "storage/v1/object/public/";
+  if (path.startsWith(storagePrefix)) {
+    const rest = path.slice(storagePrefix.length);
+    if (rest.startsWith(`${bucket}/`)) return `${SUPABASE_URL}/storage/v1/object/public/${rest}`;
+  }
+
+  const prefix = `${bucket}/`;
+  if (path.startsWith(prefix)) path = path.slice(prefix.length);
+  if (!path) return null;
+  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
+}
+
 // CMS body fields (introduction / description / sub-area body / content blocks) are
 // rendered with set:html, so they must be sanitized. This runs at BUILD only (SSG) —
 // sanitize-html never reaches the client bundle. Defense-in-depth against stored XSS
@@ -100,16 +123,46 @@ export interface SubArea {
 
 const data = raw as unknown as { cities: City[]; attractions: Attraction[]; sub_areas: SubArea[] };
 
-export const cities = [...data.cities].sort((a, b) => a.display_order - b.display_order);
-export const attractions = data.attractions;
-export const subAreas = data.sub_areas;
+export const cities = data.cities
+  .map((c) => ({ ...c, cover_image_path: resolveCoverImageUrl(c.cover_image_path) }))
+  .sort((a, b) => a.display_order - b.display_order);
+
+export const attractions = data.attractions.map((a) => ({
+  ...a,
+  cover_image_path: resolveCoverImageUrl(a.cover_image_path),
+  cover_images: (a.cover_images || []).map((img) => resolveCoverImageUrl(img) || "").filter(Boolean),
+}));
+
+export const subAreas = data.sub_areas.map((s) => ({
+  ...s,
+  cover_image_path: resolveCoverImageUrl(s.cover_image_path),
+  content_blocks: (s.content_blocks || []).map((b) => ({
+    ...b,
+    image_path: resolveCoverImageUrl(b.image_path),
+    imagePath: resolveCoverImageUrl(b.imagePath),
+  })),
+}));
 
 export const cityCover = (c: City) => c.cover_image_path || c.cover_image_url || null;
 
 export function attractionsForCity(cityId: string): Attraction[] {
-  return attractions
-    .filter((a) => a.city_id === cityId)
-    .sort((a, b) => a.display_order - b.display_order);
+  const list = attractions.filter((a) => a.city_id === cityId);
+  const byKey = new Map<string, Attraction>();
+  for (const item of list) {
+    const key = (item.chinese_name || item.name || item.id).trim().toLowerCase();
+    const prev = byKey.get(key);
+    if (!prev) {
+      byKey.set(key, item);
+      continue;
+    }
+    const score = (a: Attraction) =>
+      (a.cover_image_path ? 100 : 0) +
+      ((a.practical_info?.length || 0) > 0 ? 40 : 0) +
+      ((a.summary?.length || 0) > 0 ? 20 : 0) -
+      (a.display_order ?? 0);
+    if (score(item) > score(prev)) byKey.set(key, item);
+  }
+  return [...byKey.values()].sort((a, b) => a.display_order - b.display_order);
 }
 
 export function subAreasForAttraction(attractionId: string): SubArea[] {
