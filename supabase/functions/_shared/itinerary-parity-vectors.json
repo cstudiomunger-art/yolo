@@ -1,0 +1,30 @@
+[
+  {
+    "name": "beijing-monday-closure",
+    "input": {
+      "trip": {
+        "start_date_local": "2026-07-06",
+        "trip_days": 3,
+        "entry_city_id": "beijing",
+        "exit_city_id": "beijing"
+      },
+      "cities": [{ "id": "beijing", "region": "north_china" }],
+      "attractions": [
+        { "id": "national_museum", "city_id": "beijing", "display_order": 1, "duration_slots": 1, "closed_weekdays": ["mon"], "open_time": "09:00", "close_time": "17:00" },
+        { "id": "forbidden_city", "city_id": "beijing", "display_order": 2, "duration_slots": 2, "open_time": "08:30", "close_time": "17:00" }
+      ],
+      "constraints": { "max_attractions_per_day": 3, "allow_silent_drop": true }
+    }
+  },
+  {
+    "name": "afternoon-only-attraction",
+    "input": {
+      "trip": { "start_date_local": "2026-07-08", "trip_days": 2 },
+      "cities": [{ "id": "shanghai", "region": "yangtze_delta" }],
+      "attractions": [
+        { "id": "night_museum", "city_id": "shanghai", "display_order": 1, "duration_slots": 1, "open_time": "13:00", "close_time": "20:00" }
+      ],
+      "constraints": { "max_attractions_per_day": 2, "allow_silent_drop": true }
+    }
+  }
+]

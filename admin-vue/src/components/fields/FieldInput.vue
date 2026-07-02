@@ -123,13 +123,14 @@ const multiOptions = computed(() => {
     case "ref_ports_multi":
       return refCache.ports.map((p) => ({ value: p.code, label: p.name_zh || p.code }));
     case "enum_multi":
+    case "weekday_multiselect":
       return (f.options || []).map((o) => (typeof o === "string" ? { value: o, label: o } : o));
     default:
       return [];
   }
 });
 const isMulti = computed(() =>
-  ["ref_cities_multi", "ref_attractions_multi", "ref_countries_multi", "ref_ports_multi", "enum_multi"].includes(f.type)
+  ["ref_cities_multi", "ref_attractions_multi", "ref_countries_multi", "ref_ports_multi", "enum_multi", "weekday_multiselect"].includes(f.type)
 );
 
 const multiVal = computed({
@@ -243,6 +244,8 @@ async function onAudioFile(e) {
       :placeholder="f.type === 'slug' ? '留空则自动生成' : ''" />
 
     <input v-else-if="isType('number')" v-model.number="val" type="number" step="any" />
+
+    <input v-else-if="isType('time')" v-model="val" type="time" />
 
     <textarea v-else-if="isType('textarea')" v-model="val" rows="4"></textarea>
 

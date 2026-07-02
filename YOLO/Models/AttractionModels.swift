@@ -14,6 +14,10 @@ struct Attraction: Identifiable, Hashable, Codable {
     let recommendedDuration: String?
     let openingHours: String?
     let closedDays: String?
+    let closedWeekdays: [String]
+    let openTime: String?
+    let closeTime: String?
+    let lastEntryTime: String?
     let requiresAdvanceBooking: Bool
     let metroAccess: String?
     let practicalInfo: [PracticalInfoItem]
@@ -30,6 +34,7 @@ struct Attraction: Identifiable, Hashable, Codable {
     let addressEn: String?
     let addressZh: String?
     let paywallSubtitleOverride: String?
+    let planningZone: String?
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -52,6 +57,10 @@ struct Attraction: Identifiable, Hashable, Codable {
         recommendedDuration = try c.decodeIfPresent(String.self, forKey: .recommendedDuration)
         openingHours = try c.decodeIfPresent(String.self, forKey: .openingHours)
         closedDays = try c.decodeIfPresent(String.self, forKey: .closedDays)
+        closedWeekdays = Self.decodeStringArray(from: c, forKey: .closedWeekdays).map { $0.lowercased() }
+        openTime = try c.decodeIfPresent(String.self, forKey: .openTime)
+        closeTime = try c.decodeIfPresent(String.self, forKey: .closeTime)
+        lastEntryTime = try c.decodeIfPresent(String.self, forKey: .lastEntryTime)
         requiresAdvanceBooking = try c.decodeIfPresent(Bool.self, forKey: .requiresAdvanceBooking) ?? false
         metroAccess = try c.decodeIfPresent(String.self, forKey: .metroAccess)
         westernVisitorTips = Self.decodeStringArray(from: c, forKey: .westernVisitorTips)
@@ -71,6 +80,7 @@ struct Attraction: Identifiable, Hashable, Codable {
         addressEn = try c.decodeIfPresent(String.self, forKey: .addressEn)
         addressZh = try c.decodeIfPresent(String.self, forKey: .addressZh)
         paywallSubtitleOverride = try c.decodeIfPresent(String.self, forKey: .paywallSubtitleOverride)
+        planningZone = try c.decodeIfPresent(String.self, forKey: .planningZone)
 
         let decodedPractical = (try? c.decode([PracticalInfoItem].self, forKey: .practicalInfo)) ?? []
         if !decodedPractical.isEmpty {
@@ -119,6 +129,10 @@ struct Attraction: Identifiable, Hashable, Codable {
         try c.encodeIfPresent(recommendedDuration, forKey: .recommendedDuration)
         try c.encodeIfPresent(openingHours, forKey: .openingHours)
         try c.encodeIfPresent(closedDays, forKey: .closedDays)
+        try c.encode(closedWeekdays, forKey: .closedWeekdays)
+        try c.encodeIfPresent(openTime, forKey: .openTime)
+        try c.encodeIfPresent(closeTime, forKey: .closeTime)
+        try c.encodeIfPresent(lastEntryTime, forKey: .lastEntryTime)
         try c.encode(requiresAdvanceBooking, forKey: .requiresAdvanceBooking)
         try c.encodeIfPresent(metroAccess, forKey: .metroAccess)
         try c.encode(practicalInfo, forKey: .practicalInfo)
@@ -135,14 +149,16 @@ struct Attraction: Identifiable, Hashable, Codable {
         try c.encodeIfPresent(addressEn, forKey: .addressEn)
         try c.encodeIfPresent(addressZh, forKey: .addressZh)
         try c.encodeIfPresent(paywallSubtitleOverride, forKey: .paywallSubtitleOverride)
+        try c.encodeIfPresent(planningZone, forKey: .planningZone)
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, cityId, name, chineseName, category, coverImagePath, summary, introduction
         case priority, ticketPrice, recommendedDuration, openingHours, closedDays
+        case closedWeekdays, openTime, closeTime, lastEntryTime
         case requiresAdvanceBooking, metroAccess, practicalInfo, westernVisitorTips, nearbyPlaces
         case audioGuideCount, iapProductId, textPaywallFree, requiresPurchase, priceTierId, displayOrder
-        case shortDescription, coverImages, addressEn, addressZh, paywallSubtitleOverride
+        case shortDescription, coverImages, addressEn, addressZh, paywallSubtitleOverride, planningZone
     }
 
     private static func decodeStringArray(

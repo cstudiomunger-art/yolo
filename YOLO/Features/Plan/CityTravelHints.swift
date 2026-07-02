@@ -20,29 +20,61 @@ enum CityTravelHints {
         "chengdu|chongqing": 1.5,
     ]
 
-    private static let deltaCities: Set<String> = ["shanghai", "nanjing", "hangzhou", "suzhou"]
-    private static let swCities: Set<String> = ["chengdu", "chongqing"]
+    private static let cityRegionFallback: [String: String] = [
+        "beijing": "north_china",
+        "shanghai": "yangtze_delta",
+        "nanjing": "yangtze_delta",
+        "hangzhou": "yangtze_delta",
+        "suzhou": "yangtze_delta",
+        "chengdu": "southwest",
+        "chongqing": "southwest",
+    ]
+
+    private static let nearRegionPairs: Set<String> = [
+        "north_china|yangtze_delta",
+        "north_china|central_china",
+        "yangtze_delta|central_china",
+        "yangtze_delta|southwest",
+        "central_china|southwest",
+        "central_china|pearl_delta",
+        "yangtze_delta|pearl_delta",
+    ]
 
     private static func pairKey(_ a: String, _ b: String) -> String {
         [a.lowercased(), b.lowercased()].sorted().joined(separator: "|")
     }
 
-    static func travelHours(_ a: String, _ b: String) -> Double {
+    private static func regionPairKey(_ a: String, _ b: String) -> String {
+        [a, b].sorted().joined(separator: "|")
+    }
+
+    static func travelHours(_ a: String, _ b: String, regionByCity: [String: String?] = [:]) -> Double {
         let x = a.lowercased()
         let y = b.lowercased()
         if x == y { return 0 }
         if let known = pairHours[pairKey(x, y)] { return known }
-        if deltaCities.contains(x), deltaCities.contains(y) { return 2 }
-        if swCities.contains(x), swCities.contains(y) { return 2 }
+        let rx = (regionByCity[x] ?? nil) ?? cityRegionFallback[x]
+        let ry = (regionByCity[y] ?? nil) ?? cityRegionFallback[y]
+        if let rx, let ry {
+            if rx == ry { return 2 }
+            if nearRegionPairs.contains(regionPairKey(rx, ry)) { return 4 }
+            return 6
+        }
         return 6
     }
 
-    static func canVisitSameDay(_ a: String, _ b: String) -> Bool {
-        travelHours(a, b) <= 2
+    static func commuteSlots(_ travelHours: Double) -> Int {
+        if travelHours <= 2 { return 0 }
+        if travelHours <= 4 { return 1 }
+        return 2
     }
 
-    static func needsTravelDay(_ a: String, _ b: String) -> Bool {
-        travelHours(a, b) > 2.5
+    static func canVisitSameDay(_ a: String, _ b: String, regionByCity: [String: String?] = [:]) -> Bool {
+        commuteSlots(travelHours(a, b, regionByCity: regionByCity)) == 0
+    }
+
+    static func needsTravelDay(_ a: String, _ b: String, regionByCity: [String: String?] = [:]) -> Bool {
+        commuteSlots(travelHours(a, b, regionByCity: regionByCity)) >= 2
     }
 
     static func displayName(for cityId: String) -> String {
@@ -67,7 +99,10 @@ enum CityTravelHints {
     static func inferVisitOrder(
         cityIds: [String],
         catalogCountByCity: [String: Int],
-        avgDaysByCity: [String: Int] = [:]
+        avgDaysByCity: [String: Int] = [:],
+        regionByCity: [String: String?] = [:],
+        entryCityId: String? = nil,
+        exitCityId: String? = nil
     ) -> [String] {
         let unique = Array(Set(cityIds.map { $0.lowercased() }.filter { !$0.isEmpty }))
         guard unique.count > 1 else { return unique.isEmpty ? ["beijing"] : unique }
@@ -78,17 +113,26 @@ enum CityTravelHints {
             return count + avg
         }
 
+        let entry = entryCityId?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let exit = exitCityId?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         var remaining = Set(unique)
         var order: [String] = []
-        var current = unique.sorted { weight($0) > weight($1) }[0]
+        var current = (entry != nil && remaining.contains(entry!))
+            ? entry!
+            : unique.sorted { weight($0) > weight($1) }[0]
         order.append(current)
         remaining.remove(current)
 
         while !remaining.isEmpty {
-            let best = remaining.min { travelHours(current, $0) < travelHours(current, $1) }!
+            let best = remaining.min {
+                travelHours(current, $0, regionByCity: regionByCity) < travelHours(current, $1, regionByCity: regionByCity)
+            }!
             order.append(best)
             remaining.remove(best)
             current = best
+        }
+        if let exit, order.contains(exit), order.last != exit {
+            return order.filter { $0 != exit } + [exit]
         }
         return order
     }

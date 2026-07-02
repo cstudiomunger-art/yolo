@@ -9,9 +9,24 @@ enum PlanItineraryNormalizer {
 
         var days = trip.days
         var pool: [ItineraryActivity] = []
+        var seenAttractionIds = Set<String>()
 
         for index in days.indices {
             guard !days[index].isExperienceSuggestions else { continue }
+            var deduped: [ItineraryActivity] = []
+            for act in days[index].activities {
+                guard let aid = act.attractionId else {
+                    deduped.append(act)
+                    continue
+                }
+                if seenAttractionIds.contains(aid) {
+                    pool.append(act)
+                    continue
+                }
+                seenAttractionIds.insert(aid)
+                deduped.append(act)
+            }
+            days[index] = days[index].withActivities(deduped)
             let split = splitIncompatibleSameDay(days[index].activities)
             days[index] = days[index].withActivities(split.keep)
             pool.append(contentsOf: split.overflow)

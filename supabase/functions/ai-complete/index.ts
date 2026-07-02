@@ -6,7 +6,9 @@ import {
   type AISettings,
 } from "../_shared/ai-settings.ts";
 import {
+  commuteSlots,
   fetchCitiesMeta,
+  travelHours,
 } from "../_shared/city-travel-hints.ts";
 import {
   AI_PLAN_JSON_SCHEMA,
@@ -19,6 +21,7 @@ import {
   type AttractionRow,
   type SampleItinerary,
 } from "../_shared/itinerary-assembler.ts";
+import { parseDurationSlots } from "../_shared/itinerary-duration.ts";
 import {
   chatCompletion,
   corsHeaders,
@@ -72,11 +75,17 @@ function buildItineraryUserPrompt(params: {
   citiesMeta: Awaited<ReturnType<typeof fetchCitiesMeta>>;
   travelContext: string;
 }): string {
-  const catalogCompact = params.catalog.map((a) => ({
+  const catalogCompact = compactCatalogForPrompt(params.catalog).map((a) => ({
     id: a.id,
     city_id: a.city_id,
     name: a.name,
     recommended_duration: a.recommended_duration,
+    duration_slots: parseDurationSlots(a.recommended_duration),
+    closed_weekdays: a.closed_weekdays ?? [],
+    open_time: a.open_time,
+    close_time: a.close_time,
+    last_entry_time: a.last_entry_time,
+    planning_zone: a.planning_zone ?? null,
     summary: a.summary ? a.summary.slice(0, 160) : null,
   }));
 
@@ -97,8 +106,30 @@ function buildItineraryUserPrompt(params: {
     `\nAttraction catalog (ONLY these ids are valid):\n${JSON.stringify(catalogCompact)}\n` +
     `\nRules: max ${params.plan.maxPerDay} attraction_ids per non-travel day; no duplicate ids; ` +
     `distant cities cannot share a day; use experience_days (kind travel/rest) for intercity moves within the ${params.days}-day budget.\n` +
+    `Respect opening constraints: do not assign closed_weekdays to matching dates; if only afternoon-open, avoid Morning slot assumptions.\n` +
     `Return JSON with visit_order, assignments, experience_days, optional title and estimated_budget.`
   );
+}
+
+function compactCatalogForPrompt(catalog: AttractionRow[]): AttractionRow[] {
+  const byCity = new Map<string, AttractionRow[]>();
+  for (const row of catalog) {
+    const list = byCity.get(row.city_id) ?? [];
+    list.push(row);
+    byCity.set(row.city_id, list);
+  }
+
+  const picked: AttractionRow[] = [];
+  for (const rows of byCity.values()) {
+    const sorted = [...rows].sort((a, b) => {
+      const pa = a.priority === "P0" ? 0 : a.priority === "P1" ? 1 : 2;
+      const pb = b.priority === "P0" ? 0 : b.priority === "P1" ? 1 : 2;
+      if (pa !== pb) return pa - pb;
+      return a.display_order - b.display_order;
+    });
+    picked.push(...sorted.slice(0, 18));
+  }
+  return picked;
 }
 
 function buildTravelContext(cityIds: string[]): string {
@@ -108,7 +139,8 @@ function buildTravelContext(cityIds: string[]): string {
     for (let j = i + 1; j < sorted.length; j++) {
       const a = sorted[i];
       const b = sorted[j];
-      lines.push(`${a}↔${b}: see travel hints module`);
+      const h = travelHours(a, b);
+      lines.push(`${a}↔${b}: ${h}h, commuteSlots=${commuteSlots(h)}, sameDayOk=${h <= 2}`);
     }
   }
   return lines.length ? lines.join("\n") : "Single city trip.";
@@ -120,6 +152,9 @@ async function buildItineraryFromAI(
   userNotes: string,
   aiPlanRaw: string | null,
   citiesMeta: Awaited<ReturnType<typeof fetchCitiesMeta>>,
+  entryCityId: string | null,
+  exitCityId: string | null,
+  startDateLocal: string | null,
 ): Promise<SampleItinerary> {
   const cityIds = cities.length ? cities : ["beijing"];
   const catalog = await fetchAttractionsForCities(cityIds);
@@ -143,6 +178,9 @@ async function buildItineraryFromAI(
     citiesMeta,
     aiPlan,
     userNotes,
+    entryCityId,
+    exitCityId,
+    startDateLocal,
   });
 }
 
@@ -267,6 +305,9 @@ async function handleItinerary(
     : [];
   const days = Math.max(1, Math.min(Number(body.days) || 7, 21));
   const userNotes = String(body.userNotes ?? body.user_notes ?? "").trim();
+  const entryCityId = body.entry_city_id ? String(body.entry_city_id).trim().toLowerCase() : null;
+  const exitCityId = body.exit_city_id ? String(body.exit_city_id).trim().toLowerCase() : null;
+  const startDateLocal = body.start_date ? String(body.start_date).trim() : null;
 
   const cityIds = cities.length ? cities : ["beijing"];
   const creds = supabaseHeaders();
@@ -309,11 +350,16 @@ async function handleItinerary(
     userNotes,
     hasAI ? raw : null,
     citiesMeta,
+    entryCityId,
+    exitCityId,
+    startDateLocal,
   );
 
   return jsonResponse({
     code: 200,
     itinerary,
+    entry_city_id: entryCityId,
+    exit_city_id: exitCityId,
     is_default: !hasAI,
   });
 }

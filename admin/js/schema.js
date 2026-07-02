@@ -5,6 +5,15 @@
 
   const CATEGORY_OPTIONS = ["palace", "temple", "park", "museum", "wall", "garden", "sight", "market", "other"];
   const PRIORITY_OPTIONS = ["P0", "P1", "P2"];
+  const WEEKDAY_OPTIONS = [
+    { value: "mon", label: "Mon" },
+    { value: "tue", label: "Tue" },
+    { value: "wed", label: "Wed" },
+    { value: "thu", label: "Thu" },
+    { value: "fri", label: "Fri" },
+    { value: "sat", label: "Sat" },
+    { value: "sun", label: "Sun" },
+  ];
   const CHECKLIST_PHASE_OPTIONS = [
     { value: "before_departure", label: "出发前" },
     { value: "on_arrival", label: "抵达后" },
@@ -298,6 +307,19 @@
           hint: "点击「本地上传」选择一张或多张；保存时自动上传至 Storage。也可粘贴已有 URL。",
         },
         { key: "priority", type: "enum", options: PRIORITY_OPTIONS, label: "优先级" },
+        {
+          key: "planning_time_section",
+          type: "section",
+          label: "行程规划 · 开放时间",
+          hint: "结构化维护闭馆日与开闭馆时段；保存时会自动同步 Opening Hours / Closed 文案到实用信息",
+        },
+        { key: "planning_zone", type: "text", label: "规划分区（planning_zone）", hint: "如 palace_core / old_city_west，用于同日顺路分区" },
+        { key: "closed_weekdays", type: "weekday_multiselect", options: WEEKDAY_OPTIONS, label: "固定闭馆周几" },
+        { key: "open_time", type: "time", label: "开馆时间（HH:MM）" },
+        { key: "close_time", type: "time", label: "闭馆时间（HH:MM）" },
+        { key: "last_entry_time", type: "time", label: "最晚入场（HH:MM）" },
+        { key: "opening_hours", type: "text", label: "Opening Hours 文案（自动生成，可覆盖）" },
+        { key: "closed_days", type: "text", label: "Closed 文案（自动生成，可覆盖）" },
         {
           key: "practical_section",
           type: "section",

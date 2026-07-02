@@ -96,7 +96,52 @@ function buildPayload() {
       if (!(k in payload) && !k.startsWith("_")) payload[k] = form[k];
     }
   }
+  return normalizePayloadForTable(props.tableKey, payload);
+}
+
+function normalizePayloadForTable(tableKey, payload) {
+  if (tableKey !== "attractions") return payload;
+  return normalizeAttractionPayload(payload);
+}
+
+function normalizeAttractionPayload(payload) {
+  const weekdays = Array.isArray(payload.closed_weekdays)
+    ? payload.closed_weekdays.map((v) => String(v).trim().toLowerCase()).filter(Boolean)
+    : [];
+  payload.closed_weekdays = weekdays;
+
+  const open = typeof payload.open_time === "string" ? payload.open_time.trim() : "";
+  const close = typeof payload.close_time === "string" ? payload.close_time.trim() : "";
+  const lastEntry = typeof payload.last_entry_time === "string" ? payload.last_entry_time.trim() : "";
+
+  if ((!payload.opening_hours || !String(payload.opening_hours).trim()) && (open || close)) {
+    payload.opening_hours = [open, close].filter(Boolean).join(" - ");
+    if (lastEntry) payload.opening_hours += ` (Last entry ${lastEntry})`;
+  }
+  if ((!payload.closed_days || !String(payload.closed_days).trim()) && weekdays.length) {
+    payload.closed_days = weekdays.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(", ");
+  }
+
+  payload.practical_info = upsertPracticalInfo(payload.practical_info, [
+    { icon: "🕘", label: "Opening Hours", value: payload.opening_hours || "" },
+    { icon: "❌", label: "Closed", value: payload.closed_days || "" },
+  ]);
   return payload;
+}
+
+function upsertPracticalInfo(existing, entries) {
+  const list = Array.isArray(existing) ? [...existing] : [];
+  for (const entry of entries) {
+    const idx = list.findIndex((item) => {
+      const label = String(item?.label ?? "").toLowerCase();
+      return label === entry.label.toLowerCase();
+    });
+    if (!entry.value) continue;
+    const normalized = { icon: entry.icon, label: entry.label, value: entry.value };
+    if (idx >= 0) list[idx] = normalized;
+    else list.push(normalized);
+  }
+  return list;
 }
 
 function validate(payload) {

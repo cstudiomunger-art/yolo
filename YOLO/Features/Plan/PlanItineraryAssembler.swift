@@ -64,12 +64,8 @@ enum PlanItineraryAssembler {
             catalogCountByCity: catalogCounts
         )
 
-        let maxPerDay: Int = {
-            if catalog.count >= days {
-                return min(3, max(1, Int(ceil(Double(catalog.count) / Double(days)))))
-            }
-            return catalog.isEmpty ? 1 : min(3, max(1, Int(ceil(Double(catalog.count) / Double(days)))))
-        }()
+        let durationSlots = catalog.map { PlanItineraryDuration.parseDurationSlots($0.recommendedDurationText) }
+        let maxPerDay = PlanItineraryDuration.maxAttractionsPerDay(catalogDurations: durationSlots, tripDays: days, hardMax: 3)
 
         let dayBudget = distributeDaysAcrossCities(tripDays: days, cities: visitOrder, catalogByCity: catalogByCity)
         var itineraryDays: [ItineraryDay] = []
@@ -87,16 +83,30 @@ enum PlanItineraryAssembler {
 
             let budget = min(dayBudget[cityId] ?? 1, max(0, days - dayPtr + 1))
             let pool = catalogByCity[cityId] ?? []
-            var cursor = 0
+            var zoneBuckets: [String: [Attraction]] = [:]
+            for row in pool {
+                let key = (row.planningZone ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                zoneBuckets[key.isEmpty ? "default" : key, default: []].append(row)
+            }
+            let zoneOrder = zoneBuckets.keys.sorted()
+            var zoneCursor = 0
 
             for _ in 0..<budget {
                 guard dayPtr <= days else { break }
                 var activities: [ItineraryActivity] = []
                 var actIndex = 0
-                while cursor < pool.count, activities.count < maxPerDay {
-                    activities.append(activity(from: pool[cursor], dayIndex: dayPtr, actIndex: actIndex))
-                    cursor += 1
+                while activities.count < maxPerDay, zoneCursor < zoneOrder.count {
+                    let zone = zoneOrder[zoneCursor]
+                    var list = zoneBuckets[zone] ?? []
+                    guard !list.isEmpty else {
+                        zoneCursor += 1
+                        continue
+                    }
+                    let row = list.removeFirst()
+                    zoneBuckets[zone] = list
+                    activities.append(activity(from: row, dayIndex: dayPtr, actIndex: actIndex))
                     actIndex += 1
+                    if list.isEmpty { zoneCursor += 1 }
                 }
                 itineraryDays.append(
                     ItineraryDay(
@@ -201,8 +211,13 @@ enum PlanItineraryAssembler {
         }
         let detail = detailParts.isEmpty ? "Explore at your own pace" : detailParts.joined(separator: " · ")
 
+        let preferred: HalfDaySlot? = (actIndex % 2 == 0) ? .morning : .afternoon
+        let picked = PlanItineraryVisitHours.pickTimeSlot(row, preferred: preferred)
+        let timeSlot = picked == .morning ? "Morning" : (picked == .afternoon ? "Afternoon" : "")
+
         return ItineraryActivity(
             id: "a_\(dayIndex)_\(actIndex)_\(row.id)",
+            timeSlot: timeSlot,
             name: row.name,
             detail: detail,
             attractionId: row.id,
