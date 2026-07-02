@@ -141,6 +141,16 @@ struct PlanCreateFlowView: View {
         .sheet(item: $editingCountry) { field in
             countryPickerSheet(field)
         }
+        .onAppear {
+            if !appEnv.auth.isAuthenticated, !AppConfig.useMock {
+                dismiss()
+            }
+        }
+        .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+            if !isAuthenticated, !AppConfig.useMock {
+                dismiss()
+            }
+        }
     }
 
     private var navigationTitle: String {
@@ -927,20 +937,27 @@ struct PlanCreateFlowView: View {
     }
 
     private func buildAINotes() -> String {
-        "Arrival \(PlanTripDateMath.formatDisplayDate(arrivalDate)); departure \(PlanTripDateMath.formatDisplayDate(departureDate)); \(activityDays) full activity days (exclude arrival and departure). Days are date-only (not tied to one city). A single day may include attractions from multiple cities. Do not assign AM/PM time slots."
+        let cityList = Array(selectedCityIds).sorted().joined(separator: ", ")
+        return """
+        Arrival \(PlanTripDateMath.formatDisplayDate(arrivalDate)); departure \(PlanTripDateMath.formatDisplayDate(departureDate)); \
+        \(activityDays) full activity days (exclude arrival and departure). \
+        Selected cities (unordered): \(cityList). Optimize visit order for minimal intercity travel. \
+        Do not put distant cities on the same day. Use experience_days with kind travel to mark intercity travel days (occupies a day slot, does not add days). \
+        Do not assign AM/PM time slots.
+        """
     }
 
     private func enrichItinerary(_ trip: SampleItinerary) -> SampleItinerary {
-        let labels = PlanTripDateMath.activityDateLabels(arrival: arrivalDate, count: trip.days.count)
-        let cityNames = cities.filter { selectedCityIds.contains($0.id) }.map(\.name)
-        let route = cityNames.isEmpty ? trip.routeSummary : cityNames.joined(separator: " → ")
-        let days = trip.days.enumerated().map { index, day in
+        let cityIds = Array(selectedCityIds).map { $0.lowercased() }
+        let normalized = PlanItineraryNormalizer.normalize(trip, selectedCityIds: cityIds)
+        let labels = PlanTripDateMath.activityDateLabels(arrival: arrivalDate, count: normalized.days.count)
+        let days = normalized.days.enumerated().map { index, day in
             let label = labels.indices.contains(index) ? labels[index] : day.dateLabel
             return ItineraryDay(
                 id: day.id,
                 dayIndex: index + 1,
                 dateLabel: label,
-                cityName: "",
+                cityName: day.cityName,
                 costEstimate: day.costEstimate,
                 activities: day.isExperienceSuggestions ? [] : day.activities.map { act in
                     ItineraryActivity(
@@ -959,13 +976,14 @@ struct PlanCreateFlowView: View {
         }
         return SampleItinerary(
             id: trip.id.isEmpty ? UUID().uuidString : trip.id,
-            title: trip.title,
+            title: normalized.title,
             meta: PlanTripDateMath.formatTripMeta(arrival: arrivalDate, departure: departureDate),
-            routeSummary: route,
+            routeSummary: normalized.routeSummary,
             estimatedBudget: trip.estimatedBudget,
             days: days,
             startDate: arrivalDate,
-            endDate: departureDate
+            endDate: departureDate,
+            visitOrder: normalized.visitOrder
         )
     }
 

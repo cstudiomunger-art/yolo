@@ -24,13 +24,15 @@ enum AIService {
             if case .success(let response) = result,
                response.code == 200,
                let itinerary = response.itinerary {
-                return itinerary
+                let cityIds = cities.map { $0.lowercased() }
+                return PlanItineraryNormalizer.normalize(itinerary, selectedCityIds: cityIds)
             }
         }
         return try await localItineraryFallback(
             content: content,
             cities: cities,
-            days: days
+            days: days,
+            userNotes: userNotes
         )
     }
 
@@ -88,7 +90,8 @@ enum AIService {
     private static func localItineraryFallback(
         content: any ContentRepositoryProtocol,
         cities: [String],
-        days: Int
+        days: Int,
+        userNotes: String? = nil
     ) async throws -> SampleItinerary {
         let cityIds = cities.isEmpty ? ["beijing"] : cities
         var catalog: [Attraction] = []
@@ -99,7 +102,8 @@ enum AIService {
         return PlanItineraryAssembler.build(
             cities: cityIds,
             tripDays: days,
-            attractions: catalog
+            attractions: catalog,
+            userNotes: userNotes
         )
     }
 

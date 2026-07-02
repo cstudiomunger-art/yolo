@@ -13,6 +13,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
     var startDate: Date?
     /// 行程末日（离开日）。
     var endDate: Date?
+    /// Canonical visit order derived from the day timeline (optional; from AI `visit_order`).
+    var visitOrder: [String]?
 
     init(
         id: String,
@@ -24,7 +26,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         shareSlug: String? = nil,
         isShared: Bool = false,
         startDate: Date? = nil,
-        endDate: Date? = nil
+        endDate: Date? = nil,
+        visitOrder: [String]? = nil
     ) {
         self.id = id
         self.title = title
@@ -36,6 +39,7 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         self.isShared = isShared
         self.startDate = startDate
         self.endDate = endDate
+        self.visitOrder = visitOrder
     }
 
     init(from decoder: Decoder) throws {
@@ -50,10 +54,27 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         isShared = try c.decodeIfPresent(Bool.self, forKey: .isShared) ?? false
         startDate = try c.decodeIfPresent(Date.self, forKey: .startDate)
         endDate = try c.decodeIfPresent(Date.self, forKey: .endDate)
+        visitOrder = try c.decodeIfPresent([String].self, forKey: .visitOrder)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(id, forKey: .id)
+        try c.encode(title, forKey: .title)
+        try c.encode(meta, forKey: .meta)
+        try c.encode(routeSummary, forKey: .routeSummary)
+        try c.encode(estimatedBudget, forKey: .estimatedBudget)
+        try c.encode(days, forKey: .days)
+        try c.encodeIfPresent(shareSlug, forKey: .shareSlug)
+        try c.encode(isShared, forKey: .isShared)
+        try c.encodeIfPresent(startDate, forKey: .startDate)
+        try c.encodeIfPresent(endDate, forKey: .endDate)
+        try c.encodeIfPresent(visitOrder, forKey: .visitOrder)
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, title, meta, routeSummary, estimatedBudget, days, shareSlug, isShared, startDate, endDate
+        case visitOrder = "visit_order"
     }
 
     /// Copy with replaced days; preserves share state and trip dates.
@@ -68,7 +89,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             shareSlug: shareSlug,
             isShared: isShared,
             startDate: startDate,
-            endDate: endDate
+            endDate: endDate,
+            visitOrder: visitOrder
         )
     }
 }

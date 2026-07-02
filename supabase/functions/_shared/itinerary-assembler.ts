@@ -1,5 +1,15 @@
 /** DB-backed itinerary assembly for ai-complete. */
 
+import {
+  canVisitSameDay,
+  cityDisplayName,
+  inferVisitOrder,
+  needsTravelDay,
+  routeLabelFromOrder,
+  travelExperienceItems,
+  type CityMetaRow,
+} from "./city-travel-hints.ts";
+
 export type AttractionRow = {
   id: string;
   city_id: string;
@@ -42,6 +52,7 @@ export type SampleItinerary = {
   route_summary: string;
   estimated_budget: string;
   days: ItineraryDay[];
+  visit_order?: string[];
 };
 
 export type AIAssignment = {
@@ -53,16 +64,19 @@ export type AIExperienceDay = {
   day_index: number;
   city_id: string;
   items: string[];
+  kind?: "travel" | "rest" | "experience";
 };
 
 export type AIPlanResponse = {
   assignments?: AIAssignment[];
   experience_days?: AIExperienceDay[];
+  visit_order?: string[];
   title?: string;
   estimated_budget?: string;
 };
 
 export type DayPlan = {
+  /** All calendar activity slots (1…tripDays). */
   attractionDayIndices: number[];
   experienceDaySpecs: { day_index: number; city_id: string }[];
   maxPerDay: number;
@@ -153,30 +167,17 @@ export async function fetchAttractionsForCities(
   }));
 }
 
+/** Every trip day is a slot; experience vs attraction decided by normalize / AI. */
 export function buildDayPlan(tripDays: number, catalog: AttractionRow[]): DayPlan {
   const days = Math.max(1, Math.min(tripDays, 21));
-  const attractionCount = catalog.length;
-  const attractionDayCount = attractionCount === 0
-    ? 0
-    : Math.min(days, attractionCount);
-
-  const attractionDayIndices: number[] = [];
-  for (let i = 1; i <= attractionDayCount; i++) {
-    attractionDayIndices.push(i);
-  }
-
-  const experienceDaySpecs: { day_index: number; city_id: string }[] = [];
-  for (let i = attractionDayCount + 1; i <= days; i++) {
-    experienceDaySpecs.push({ day_index: i, city_id: "" });
-  }
-
-  const maxPerDay = attractionCount >= days
-    ? Math.min(3, Math.max(1, Math.ceil(attractionCount / days)))
-    : attractionCount > 0 && attractionDayCount > 0
-    ? Math.min(3, Math.max(1, Math.ceil(attractionCount / attractionDayCount)))
+  const attractionDayIndices = Array.from({ length: days }, (_, i) => i + 1);
+  const maxPerDay = catalog.length >= days
+    ? Math.min(3, Math.max(1, Math.ceil(catalog.length / days)))
+    : catalog.length > 0
+    ? Math.min(3, Math.max(1, Math.ceil(catalog.length / days)))
     : 1;
 
-  return { attractionDayIndices, experienceDaySpecs, maxPerDay };
+  return { attractionDayIndices, experienceDaySpecs: [], maxPerDay };
 }
 
 export function assignExperienceCities(
@@ -188,10 +189,6 @@ export function assignExperienceCities(
     day_index: spec.day_index,
     city_id: cityIds[(spec.day_index - 1) % cityIds.length] ?? cityIds[idx % cityIds.length],
   }));
-}
-
-function cityDisplayName(cityId: string): string {
-  return cityId.charAt(0).toUpperCase() + cityId.slice(1).replace(/_/g, " ");
 }
 
 function stripHtmlToPlainText(content: string): string {
@@ -236,6 +233,24 @@ function templateExperienceItems(cityId: string): string[] {
   return [...(EXPERIENCE_TEMPLATES[key] ?? EXPERIENCE_TEMPLATES.default)];
 }
 
+function isExperienceSlot(exp: AIExperienceDay | undefined): boolean {
+  if (!exp) return false;
+  if (exp.kind === "travel" || exp.kind === "rest") return true;
+  return (exp.items?.length ?? 0) > 0;
+}
+
+function catalogCountByCity(catalog: AttractionRow[]): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const row of catalog) {
+    map.set(row.city_id, (map.get(row.city_id) ?? 0) + 1);
+  }
+  return map;
+}
+
+function metaMap(rows: CityMetaRow[]): Map<string, CityMetaRow> {
+  return new Map(rows.map((r) => [r.id.toLowerCase(), r]));
+}
+
 export function dedupeAssignmentIds(
   assignments: AIAssignment[],
   catalogById: Map<string, AttractionRow>,
@@ -253,46 +268,354 @@ export function dedupeAssignmentIds(
   });
 }
 
+function primaryCityForAssignment(
+  ids: string[],
+  catalogById: Map<string, AttractionRow>,
+): string | null {
+  const counts = new Map<string, number>();
+  for (const id of ids) {
+    const row = catalogById.get(id);
+    if (!row) continue;
+    counts.set(row.city_id, (counts.get(row.city_id) ?? 0) + 1);
+  }
+  let best: string | null = null;
+  let bestCount = 0;
+  for (const [city, count] of counts) {
+    if (count > bestCount) {
+      bestCount = count;
+      best = city;
+    }
+  }
+  return best;
+}
+
+function citiesOnAssignment(
+  ids: string[],
+  catalogById: Map<string, AttractionRow>,
+): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const id of ids) {
+    const cid = catalogById.get(id)?.city_id;
+    if (!cid || seen.has(cid)) continue;
+    seen.add(cid);
+    out.push(cid);
+  }
+  return out;
+}
+
+function splitIncompatibleSameDay(
+  ids: string[],
+  catalogById: Map<string, AttractionRow>,
+): { keep: string[]; overflow: string[] } {
+  if (ids.length <= 1) return { keep: ids, overflow: [] };
+  const keep: string[] = [];
+  const overflow: string[] = [];
+  let anchorCity: string | null = null;
+
+  for (const id of ids) {
+    const city = catalogById.get(id)?.city_id;
+    if (!city) continue;
+    if (!anchorCity) {
+      anchorCity = city;
+      keep.push(id);
+      continue;
+    }
+    if (city === anchorCity || canVisitSameDay(anchorCity, city)) {
+      keep.push(id);
+    } else {
+      overflow.push(id);
+    }
+  }
+  return { keep, overflow };
+}
+
+/** City-block deterministic fill following visit order. */
 export function deterministicAssignments(
   plan: DayPlan,
   catalog: AttractionRow[],
-): AIAssignment[] {
-  const sorted = [...catalog].sort((a, b) => {
-    if (a.display_order !== b.display_order) {
-      return a.display_order - b.display_order;
-    }
-    return a.name.localeCompare(b.name);
-  });
+  visitOrder: string[],
+): { assignments: AIAssignment[]; experienceDays: AIExperienceDay[] } {
+  const tripDays = plan.attractionDayIndices.length;
+  const catalogByCity = new Map<string, AttractionRow[]>();
+  for (const row of catalog) {
+    const list = catalogByCity.get(row.city_id) ?? [];
+    list.push(row);
+    catalogByCity.set(row.city_id, list);
+  }
+  for (const list of catalogByCity.values()) {
+    list.sort((a, b) =>
+      a.display_order !== b.display_order
+        ? a.display_order - b.display_order
+        : a.name.localeCompare(b.name)
+    );
+  }
 
   const assignments: AIAssignment[] = plan.attractionDayIndices.map((dayIndex) => ({
     day_index: dayIndex,
     attraction_ids: [],
   }));
+  const experienceDays: AIExperienceDay[] = [];
+  const experienceDaySet = new Set<number>();
 
-  let cursor = 0;
+  const citiesInTrip = visitOrder.filter((c) => (catalogByCity.get(c)?.length ?? 0) > 0);
+  const activeCities = citiesInTrip.length ? citiesInTrip : visitOrder;
+
+  const dayBudget = distributeDaysAcrossCities(tripDays, activeCities, catalogByCity);
+  let dayPtr = 1;
+
+  for (let i = 0; i < activeCities.length; i++) {
+    const cityId = activeCities[i];
+    const prevCity = i > 0 ? activeCities[i - 1] : null;
+    if (prevCity && needsTravelDay(prevCity, cityId) && dayPtr <= tripDays) {
+      experienceDays.push({
+        day_index: dayPtr,
+        city_id: cityId,
+        items: travelExperienceItems(cityId),
+        kind: "travel",
+      });
+      experienceDaySet.add(dayPtr);
+      dayPtr++;
+    }
+
+    const budget = dayBudget.get(cityId) ?? 1;
+    const pool = [...(catalogByCity.get(cityId) ?? [])];
+    let cursor = 0;
+
+    for (let b = 0; b < budget && dayPtr <= tripDays; b++) {
+      while (experienceDaySet.has(dayPtr) && dayPtr <= tripDays) dayPtr++;
+      if (dayPtr > tripDays) break;
+
+      const slot = assignments.find((a) => a.day_index === dayPtr)!;
+      while (cursor < pool.length && slot.attraction_ids.length < plan.maxPerDay) {
+        slot.attraction_ids.push(pool[cursor].id);
+        cursor++;
+      }
+      dayPtr++;
+    }
+  }
+
+  return { assignments, experienceDays };
+}
+
+function distributeDaysAcrossCities(
+  tripDays: number,
+  cities: string[],
+  catalogByCity: Map<string, AttractionRow[]>,
+): Map<string, number> {
+  if (cities.length === 0) return new Map();
+  const weights = cities.map((c) => Math.max(1, catalogByCity.get(c)?.length ?? 1));
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  const map = new Map<string, number>();
+  let assigned = 0;
+
+  for (let i = 0; i < cities.length; i++) {
+    const share = i === cities.length - 1
+      ? Math.max(1, tripDays - assigned)
+      : Math.max(1, Math.round((tripDays * weights[i]) / totalWeight));
+    map.set(cities[i], share);
+    assigned += share;
+  }
+
+  while (assigned > tripDays) {
+    const richest = cities.reduce((best, c) =>
+      (map.get(c) ?? 0) > (map.get(best) ?? 0) ? c : best
+    );
+    if ((map.get(richest) ?? 0) <= 1) break;
+    map.set(richest, (map.get(richest) ?? 1) - 1);
+    assigned--;
+  }
+  return map;
+}
+
+export function deriveVisitOrderFromTimeline(
+  tripDays: number,
+  assignments: AIAssignment[],
+  experienceDays: AIExperienceDay[],
+  catalogById: Map<string, AttractionRow>,
+): string[] {
+  const experienceByDay = new Map(experienceDays.map((e) => [e.day_index, e]));
+  const assignmentByDay = new Map(assignments.map((a) => [a.day_index, a]));
+  const order: string[] = [];
+  const seen = new Set<string>();
+
+  for (let day = 1; day <= tripDays; day++) {
+    const exp = experienceByDay.get(day);
+    if (isExperienceSlot(exp) && exp?.city_id) {
+      const cid = exp.city_id.toLowerCase();
+      if (!seen.has(cid)) {
+        seen.add(cid);
+        order.push(cid);
+      }
+      continue;
+    }
+    const ids = assignmentByDay.get(day)?.attraction_ids ?? [];
+    for (const id of ids) {
+      const cid = catalogById.get(id)?.city_id?.toLowerCase();
+      if (!cid || seen.has(cid)) continue;
+      seen.add(cid);
+      order.push(cid);
+    }
+  }
+  return order;
+}
+
+export function normalizeItineraryPlan(params: {
+  cityIds: string[];
+  tripDays: number;
+  catalog: AttractionRow[];
+  plan: DayPlan;
+  assignments: AIAssignment[];
+  experienceDays: AIExperienceDay[];
+  visitOrderHint?: string[];
+  citiesMeta?: CityMetaRow[];
+}): {
+  assignments: AIAssignment[];
+  experienceDays: AIExperienceDay[];
+  visitOrder: string[];
+  routeSummary: string;
+} {
+  const {
+    cityIds,
+    tripDays,
+    catalog,
+    plan,
+    citiesMeta = [],
+  } = params;
+
+  const catalogById = new Map(catalog.map((a) => [a.id, a]));
+  const experienceByDay = new Map<number, AIExperienceDay>();
+
+  for (const exp of params.experienceDays) {
+    if (exp.day_index >= 1 && exp.day_index <= tripDays) {
+      experienceByDay.set(exp.day_index, { ...exp });
+    }
+  }
+
+  let assignments = plan.attractionDayIndices.map((dayIndex) => {
+    const existing = params.assignments.find((a) => a.day_index === dayIndex);
+    return {
+      day_index: dayIndex,
+      attraction_ids: [...(existing?.attraction_ids ?? [])],
+    };
+  });
+
+  assignments = dedupeAssignmentIds(assignments, catalogById);
+
+  const overflow: string[] = [];
   for (const assignment of assignments) {
-    while (
-      cursor < sorted.length &&
-      assignment.attraction_ids.length < plan.maxPerDay
-    ) {
-      assignment.attraction_ids.push(sorted[cursor].id);
-      cursor++;
+    if (experienceByDay.has(assignment.day_index) &&
+      isExperienceSlot(experienceByDay.get(assignment.day_index))) {
+      overflow.push(...assignment.attraction_ids);
+      assignment.attraction_ids = [];
+      continue;
+    }
+    if (assignment.attraction_ids.length > plan.maxPerDay) {
+      overflow.push(...assignment.attraction_ids.splice(plan.maxPerDay));
+    }
+    const split = splitIncompatibleSameDay(assignment.attraction_ids, catalogById);
+    assignment.attraction_ids = split.keep;
+    overflow.push(...split.overflow);
+  }
+
+  for (const id of overflow) {
+    let placed = false;
+    for (const assignment of assignments) {
+      if (experienceByDay.has(assignment.day_index) &&
+        isExperienceSlot(experienceByDay.get(assignment.day_index))) continue;
+      if (assignment.attraction_ids.length >= plan.maxPerDay) continue;
+      const city = catalogById.get(id)?.city_id;
+      if (!city) continue;
+      const existingCities = citiesOnAssignment(assignment.attraction_ids, catalogById);
+      if (existingCities.every((c) => canVisitSameDay(c, city))) {
+        assignment.attraction_ids.push(id);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      for (const assignment of assignments) {
+        if (experienceByDay.has(assignment.day_index) &&
+          isExperienceSlot(experienceByDay.get(assignment.day_index))) continue;
+        if (assignment.attraction_ids.length < plan.maxPerDay) {
+          assignment.attraction_ids.push(id);
+          break;
+        }
+      }
     }
   }
 
-  // Spread leftovers across attraction days if we have more days than one-per-day
-  let dayPtr = 0;
-  while (cursor < sorted.length && assignments.length > 0) {
-    const day = assignments[dayPtr % assignments.length];
-    if (day.attraction_ids.length < plan.maxPerDay) {
-      day.attraction_ids.push(sorted[cursor].id);
-      cursor++;
+  let prevCity: string | null = null;
+  for (let day = 1; day <= tripDays; day++) {
+    const exp = experienceByDay.get(day);
+    if (isExperienceSlot(exp)) {
+      prevCity = exp?.city_id?.toLowerCase() ?? prevCity;
+      continue;
     }
-    dayPtr++;
-    if (dayPtr > assignments.length * plan.maxPerDay * 2) break;
+    const assignment = assignments.find((a) => a.day_index === day);
+    const ids = assignment?.attraction_ids ?? [];
+    const city = primaryCityForAssignment(ids, catalogById);
+    if (city && prevCity && needsTravelDay(prevCity, city) && !isExperienceSlot(exp)) {
+      experienceByDay.set(day, {
+        day_index: day,
+        city_id: city,
+        items: travelExperienceItems(city),
+        kind: "travel",
+      });
+      if (assignment) overflow.push(...assignment.attraction_ids);
+      if (assignment) assignment.attraction_ids = [];
+    }
+    if (city) prevCity = city;
   }
 
-  return assignments;
+  for (const id of overflow) {
+    for (let day = tripDays; day >= 1; day--) {
+      const exp = experienceByDay.get(day);
+      if (isExperienceSlot(exp)) continue;
+      const assignment = assignments.find((a) => a.day_index === day)!;
+      if (assignment.attraction_ids.length >= plan.maxPerDay) continue;
+      assignment.attraction_ids.push(id);
+      break;
+    }
+  }
+
+  const metaByCity = metaMap(citiesMeta);
+  let visitOrder = deriveVisitOrderFromTimeline(
+    tripDays,
+    assignments,
+    [...experienceByDay.values()],
+    catalogById,
+  );
+
+  if (visitOrder.length === 0) {
+    visitOrder = params.visitOrderHint?.length
+      ? params.visitOrderHint
+      : inferVisitOrder(cityIds, catalogCountByCity(catalog), metaByCity);
+  }
+
+  const routeSummary = routeLabelFromOrder(visitOrder);
+  return {
+    assignments,
+    experienceDays: [...experienceByDay.values()],
+    visitOrder,
+    routeSummary,
+  };
+}
+
+function dayCityLabel(
+  day: ItineraryDay,
+): string {
+  if (day.day_kind === "experience_suggestions") {
+    return day.experience_city_id ? cityDisplayName(day.experience_city_id) : "";
+  }
+  const seen: string[] = [];
+  for (const act of day.activities) {
+    const cid = act.city_id;
+    if (!cid) continue;
+    const name = cityDisplayName(cid);
+    if (!seen.includes(name)) seen.push(name);
+  }
+  return seen.join(" · ");
 }
 
 export function assembleItinerary(params: {
@@ -302,15 +625,14 @@ export function assembleItinerary(params: {
   plan: DayPlan;
   assignments: AIAssignment[];
   experienceDays: AIExperienceDay[];
+  visitOrder?: string[];
   userNotes?: string;
   title?: string;
   estimatedBudget?: string;
 }): SampleItinerary {
   const {
-    cities,
     tripDays,
     catalog,
-    plan,
     assignments,
     experienceDays,
     userNotes,
@@ -318,11 +640,12 @@ export function assembleItinerary(params: {
     estimatedBudget,
   } = params;
 
-  const catalogById = new Map(catalog.map((a) => [a.id, a]));
-  const cityLabel = cities.length
-    ? cities.map((c) => cityDisplayName(c)).join(" → ")
-    : "China";
+  const visitOrder = params.visitOrder?.length
+    ? params.visitOrder
+    : params.cities;
+  const cityLabel = routeLabelFromOrder(visitOrder);
 
+  const catalogById = new Map(catalog.map((a) => [a.id, a]));
   const assignmentByDay = new Map<number, string[]>();
   for (const a of assignments) {
     assignmentByDay.set(a.day_index, a.attraction_ids ?? []);
@@ -336,24 +659,22 @@ export function assembleItinerary(params: {
   const days: ItineraryDay[] = [];
 
   for (let dayIndex = 1; dayIndex <= tripDays; dayIndex++) {
-    const isExperience = !plan.attractionDayIndices.includes(dayIndex);
     const exp = experienceByDay.get(dayIndex);
 
-    if (isExperience) {
-      const cityId = exp?.city_id ||
-        plan.experienceDaySpecs.find((s) => s.day_index === dayIndex)?.city_id ||
-        cities[(dayIndex - 1) % Math.max(cities.length, 1)] ||
-        "beijing";
-      const items = (exp?.items?.length ? exp.items : templateExperienceItems(cityId))
-        .map((s) => String(s).trim())
-        .filter(Boolean)
-        .slice(0, 8);
+    if (isExperienceSlot(exp)) {
+      const cityId = exp?.city_id || visitOrder[(dayIndex - 1) % visitOrder.length] || "beijing";
+      const items = exp?.kind === "travel"
+        ? travelExperienceItems(cityId)
+        : (exp?.items?.length ? exp.items : templateExperienceItems(cityId))
+          .map((s) => String(s).trim())
+          .filter(Boolean)
+          .slice(0, 8);
 
       days.push({
         id: `day_${dayIndex}`,
         day_index: dayIndex,
         date_label: `Day ${dayIndex}`,
-        city_name: "",
+        city_name: cityDisplayName(cityId),
         cost_estimate: null,
         day_kind: "experience_suggestions",
         experience_items: items,
@@ -370,28 +691,28 @@ export function assembleItinerary(params: {
       if (row) activities.push(buildActivity(row, dayIndex, actIndex));
     });
 
-    const primaryCityId = activities[0]?.city_id ??
-      cities[(dayIndex - 1) % Math.max(cities.length, 1)] ??
-      "beijing";
-
-    days.push({
+    const day: ItineraryDay = {
       id: `day_${dayIndex}`,
       day_index: dayIndex,
       date_label: `Day ${dayIndex}`,
       city_name: "",
       cost_estimate: null,
       activities,
-      experience_city_id: activities.length === 0 ? primaryCityId : undefined,
-    });
+    };
+    day.city_name = dayCityLabel(day);
+    days.push(day);
   }
+
+  const resolvedTitle = title?.trim() ||
+    `${tripDays}-Day ${cityLabel} Trip`;
 
   return {
     id: `itin_${Date.now()}`,
-    title: title?.trim() ||
-      `${tripDays}-Day ${cityLabel} Trip`,
+    title: resolvedTitle,
     meta: userNotes ? `Generated · ${userNotes.slice(0, 120)}` : "Generated",
     route_summary: cityLabel,
     estimated_budget: estimatedBudget?.trim() || "$800–$1,500",
+    visit_order: visitOrder,
     days,
   };
 }
@@ -419,17 +740,27 @@ export function parseAIPlanResponse(raw: unknown): AIPlanResponse | null {
       const items = Array.isArray(row.items)
         ? row.items.map((s) => String(s).trim()).filter(Boolean)
         : [];
+      const kindRaw = row.kind != null ? String(row.kind).trim() : "";
+      const kind = kindRaw === "travel" || kindRaw === "rest" || kindRaw === "experience"
+        ? kindRaw
+        : undefined;
       return {
         day_index: Number(row.day_index) || 0,
         city_id: String(row.city_id ?? "").trim(),
         items,
+        kind,
       };
     }).filter((e) => e.day_index > 0)
     : [];
 
+  const visit_order = Array.isArray(o.visit_order)
+    ? o.visit_order.map((c) => String(c).trim().toLowerCase()).filter(Boolean)
+    : undefined;
+
   return {
     assignments,
     experience_days,
+    visit_order,
     title: o.title != null ? String(o.title) : undefined,
     estimated_budget: o.estimated_budget != null
       ? String(o.estimated_budget)
@@ -438,12 +769,90 @@ export function parseAIPlanResponse(raw: unknown): AIPlanResponse | null {
 }
 
 export const AI_PLAN_JSON_SCHEMA = `{
+  "visit_order": ["city_id_in_optimized_order"],
   "assignments": [
     { "day_index": 1, "attraction_ids": ["attraction_id_from_catalog"] }
   ],
   "experience_days": [
-    { "day_index": 8, "city_id": "beijing", "items": ["Street food tasting", "Traditional tea ceremony"] }
+    { "day_index": 3, "city_id": "shanghai", "kind": "travel", "items": ["Intercity travel", "Travel to Shanghai"] }
   ],
   "title": "optional string",
   "estimated_budget": "optional string"
 }`;
+
+export const ITINERARY_HARD_CONSTRAINTS =
+  "HARD CONSTRAINTS (never violate): Use only catalog attraction_ids; each id once globally; " +
+  "max attractions per day as given; do not put distant cities on the same day (e.g. Beijing+Shanghai+Chengdu); " +
+  "use experience_days with kind travel/rest for intercity moves within the fixed day budget; " +
+  "optimize visit_order for minimal travel; output JSON only.";
+
+export function buildItineraryPipeline(params: {
+  cityIds: string[];
+  tripDays: number;
+  catalog: AttractionRow[];
+  citiesMeta: CityMetaRow[];
+  aiPlan: AIPlanResponse | null;
+  userNotes?: string;
+}): SampleItinerary {
+  const cityIds = params.cityIds.length ? params.cityIds : ["beijing"];
+  const catalog = params.catalog;
+  const plan = buildDayPlan(params.tripDays, catalog);
+  const metaByCity = metaMap(params.citiesMeta);
+  const catalogCounts = catalogCountByCity(catalog);
+
+  const visitOrderDefault = inferVisitOrder(cityIds, catalogCounts, metaByCity);
+  const det = deterministicAssignments(plan, catalog, visitOrderDefault);
+
+  let assignments = det.assignments;
+  let experienceDays = det.experienceDays;
+  let title = params.aiPlan?.title;
+  let estimatedBudget = params.aiPlan?.estimated_budget;
+  let visitOrderHint = params.aiPlan?.visit_order;
+
+  if (params.aiPlan?.assignments?.length) {
+    const catalogById = new Map(catalog.map((a) => [a.id, a]));
+    const aiAssignments = dedupeAssignmentIds(params.aiPlan.assignments, catalogById);
+    assignments = plan.attractionDayIndices.map((dayIndex) => {
+      const ai = aiAssignments.find((a) => a.day_index === dayIndex);
+      const fallback = det.assignments.find((a) => a.day_index === dayIndex);
+      const ids = (ai?.attraction_ids?.length
+        ? ai.attraction_ids
+        : fallback?.attraction_ids) ?? [];
+      return { day_index: dayIndex, attraction_ids: ids };
+    });
+  }
+
+  if (params.aiPlan?.experience_days?.length) {
+    const byDay = new Map(experienceDays.map((e) => [e.day_index, e]));
+    for (const aiExp of params.aiPlan.experience_days) {
+      if (aiExp.day_index >= 1 && aiExp.day_index <= params.tripDays) {
+        byDay.set(aiExp.day_index, aiExp);
+      }
+    }
+    experienceDays = [...byDay.values()];
+  }
+
+  const normalized = normalizeItineraryPlan({
+    cityIds,
+    tripDays: params.tripDays,
+    catalog,
+    plan,
+    assignments,
+    experienceDays,
+    visitOrderHint,
+    citiesMeta: params.citiesMeta,
+  });
+
+  return assembleItinerary({
+    cities: normalized.visitOrder,
+    tripDays: params.tripDays,
+    catalog,
+    plan,
+    assignments: normalized.assignments,
+    experienceDays: normalized.experienceDays,
+    visitOrder: normalized.visitOrder,
+    userNotes: params.userNotes,
+    title,
+    estimatedBudget,
+  });
+}

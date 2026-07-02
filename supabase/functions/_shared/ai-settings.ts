@@ -120,7 +120,10 @@ export function defaultItinerarySystemPrompt(_days: number, schema: string): str
     `CRITICAL: You MUST only assign attractions from the provided catalog using attraction_id values exactly as given. ` +
     `Do NOT suggest any place, venue, shop, or address not in the catalog. ` +
     `Each attraction_id may appear at most once across all assignments. ` +
-    `For experience_days only: output generic experience titles (no venue names, addresses, or business names). ` +
+    `The user selects an UNORDERED set of cities — you MUST output visit_order optimized for geographic flow and minimal intercity travel. ` +
+    `Do not put attractions from distant cities on the same calendar day. ` +
+    `For intercity moves within the fixed day budget, mark a day as experience_days with kind "travel" or "rest" (generic titles only). ` +
+    `For other experience_days: generic experience titles only (no venue names, addresses, or business names). ` +
     `Do not output full itinerary days, activity names for catalog attractions, or time slots.`
   );
 }

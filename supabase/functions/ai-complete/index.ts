@@ -6,20 +6,21 @@ import {
   type AISettings,
 } from "../_shared/ai-settings.ts";
 import {
+  fetchCitiesMeta,
+} from "../_shared/city-travel-hints.ts";
+import {
   AI_PLAN_JSON_SCHEMA,
-  assembleItinerary,
-  assignExperienceCities,
   buildDayPlan,
-  dedupeAssignmentIds,
-  deterministicAssignments,
+  buildItineraryPipeline,
   fetchAttractionsForCities,
+  ITINERARY_HARD_CONSTRAINTS,
   parseAIPlanResponse,
+  supabaseHeaders,
   type AttractionRow,
   type SampleItinerary,
 } from "../_shared/itinerary-assembler.ts";
 import {
   chatCompletion,
-  streamChatCompletion,
   corsHeaders,
   type ChatMessage,
 } from "../_shared/volcengine.ts";
@@ -68,7 +69,8 @@ function buildItineraryUserPrompt(params: {
   userNotes: string;
   catalog: AttractionRow[];
   plan: ReturnType<typeof buildDayPlan>;
-  experienceDaySpecs: { day_index: number; city_id: string }[];
+  citiesMeta: Awaited<ReturnType<typeof fetchCitiesMeta>>;
+  travelContext: string;
 }): string {
   const catalogCompact = params.catalog.map((a) => ({
     id: a.id,
@@ -78,18 +80,38 @@ function buildItineraryUserPrompt(params: {
     summary: a.summary ? a.summary.slice(0, 160) : null,
   }));
 
+  const metaCompact = params.citiesMeta.map((c) => ({
+    id: c.id,
+    avg_days_recommended: c.avg_days_recommended,
+    attraction_count: c.attraction_count,
+  }));
+
+  const sortedCities = [...params.cities].sort();
+
   return (
-    `Plan a ${params.days}-day China trip.\n` +
-    `Cities in visit order: ${params.cities.join(", ") || "beijing"}\n` +
+    `Plan a ${params.days}-day China trip using exactly ${params.days} activity day slots (fixed budget).\n` +
+    `Selected cities (unordered — YOU choose the optimal visit_order): ${sortedCities.join(", ") || "beijing"}\n` +
     (params.userNotes ? `User preferences: ${params.userNotes}\n` : "") +
-    `\nAttraction catalog (ONLY these ids are valid):\n` +
-    `${JSON.stringify(catalogCompact)}\n` +
-    `\nAttraction days (assign 1–${params.plan.maxPerDay} attraction_ids per day, no duplicates): ` +
-    `${JSON.stringify(params.plan.attractionDayIndices)}\n` +
-    `Experience suggestion days (generic titles only, no venues): ` +
-    `${JSON.stringify(params.experienceDaySpecs)}\n` +
-    `Return JSON only with assignments and experience_days.`
+    `\nCity metadata:\n${JSON.stringify(metaCompact)}\n` +
+    `\nTravel hints (same-day only when sameDayOk):\n${params.travelContext}\n` +
+    `\nAttraction catalog (ONLY these ids are valid):\n${JSON.stringify(catalogCompact)}\n` +
+    `\nRules: max ${params.plan.maxPerDay} attraction_ids per non-travel day; no duplicate ids; ` +
+    `distant cities cannot share a day; use experience_days (kind travel/rest) for intercity moves within the ${params.days}-day budget.\n` +
+    `Return JSON with visit_order, assignments, experience_days, optional title and estimated_budget.`
   );
+}
+
+function buildTravelContext(cityIds: string[]): string {
+  const sorted = [...cityIds].sort();
+  const lines: string[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    for (let j = i + 1; j < sorted.length; j++) {
+      const a = sorted[i];
+      const b = sorted[j];
+      lines.push(`${a}↔${b}: see travel hints module`);
+    }
+  }
+  return lines.length ? lines.join("\n") : "Single city trip.";
 }
 
 async function buildItineraryFromAI(
@@ -97,84 +119,36 @@ async function buildItineraryFromAI(
   days: number,
   userNotes: string,
   aiPlanRaw: string | null,
+  citiesMeta: Awaited<ReturnType<typeof fetchCitiesMeta>>,
 ): Promise<SampleItinerary> {
   const cityIds = cities.length ? cities : ["beijing"];
   const catalog = await fetchAttractionsForCities(cityIds);
-  const plan = buildDayPlan(days, catalog);
-  const experienceDaySpecs = assignExperienceCities(
-    plan.experienceDaySpecs,
-    cityIds,
-  );
 
-  const deterministic = deterministicAssignments(plan, catalog);
-  let assignments = deterministic;
-  let experienceDays = experienceDaySpecs.map((spec) => ({
-    day_index: spec.day_index,
-    city_id: spec.city_id,
-    items: [] as string[],
-  }));
-
-  let title: string | undefined;
-  let estimatedBudget: string | undefined;
-
+  let aiPlan = null;
   if (aiPlanRaw) {
     const jsonStr = extractJsonObject(aiPlanRaw);
     if (jsonStr) {
       try {
-        const parsed = parseAIPlanResponse(JSON.parse(jsonStr));
-        if (parsed) {
-          const catalogById = new Map(catalog.map((a) => [a.id, a]));
-          if (parsed.assignments?.length) {
-            const aiAssignments = dedupeAssignmentIds(
-              parsed.assignments,
-              catalogById,
-            );
-            assignments = plan.attractionDayIndices.map((dayIndex) => {
-              const ai = aiAssignments.find((a) => a.day_index === dayIndex);
-              const det = deterministic.find((a) => a.day_index === dayIndex);
-              const ids = (ai?.attraction_ids?.length
-                ? ai.attraction_ids
-                : det?.attraction_ids) ?? [];
-              return { day_index: dayIndex, attraction_ids: ids };
-            });
-          }
-          if (parsed.experience_days?.length) {
-            experienceDays = experienceDaySpecs.map((spec) => {
-              const ai = parsed.experience_days?.find((e) =>
-                e.day_index === spec.day_index
-              );
-              return {
-                day_index: spec.day_index,
-                city_id: ai?.city_id || spec.city_id,
-                items: ai?.items?.length ? ai.items : [],
-              };
-            });
-          }
-          title = parsed.title;
-          estimatedBudget = parsed.estimated_budget;
-        }
+        aiPlan = parseAIPlanResponse(JSON.parse(jsonStr));
       } catch {
-        // use deterministic assignments
+        aiPlan = null;
       }
     }
   }
 
-  return assembleItinerary({
-    cities: cityIds,
+  return buildItineraryPipeline({
+    cityIds,
     tripDays: days,
     catalog,
-    plan: { ...plan, experienceDaySpecs },
-    assignments,
-    experienceDays,
+    citiesMeta,
+    aiPlan,
     userNotes,
-    title,
-    estimatedBudget,
   });
 }
 
 type ScenarioCache = { aiSystemPrompt: string | null; responseMode: string };
 const _scenarioCache = new Map<string, { value: ScenarioCache | null; cachedAt: number }>();
-const SCENARIO_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const SCENARIO_TTL_MS = 10 * 60 * 1000;
 
 async function loadAssistantScenario(
   scenarioId: string,
@@ -295,16 +269,15 @@ async function handleItinerary(
   const userNotes = String(body.userNotes ?? body.user_notes ?? "").trim();
 
   const cityIds = cities.length ? cities : ["beijing"];
+  const creds = supabaseHeaders();
   const catalog = await fetchAttractionsForCities(cityIds);
+  const citiesMeta = await fetchCitiesMeta(cityIds, creds);
   const plan = buildDayPlan(days, catalog);
-  const experienceDaySpecs = assignExperienceCities(
-    plan.experienceDaySpecs,
-    cityIds,
-  );
 
   const cmsPrompt = ai.systemPromptItinerary?.trim();
-  const systemPrompt = cmsPrompt ||
+  const baseSystem = cmsPrompt ||
     defaultItinerarySystemPrompt(days, AI_PLAN_JSON_SCHEMA);
+  const systemPrompt = `${baseSystem}\n\n${ITINERARY_HARD_CONSTRAINTS}`;
 
   const userPrompt = buildItineraryUserPrompt({
     cities: cityIds,
@@ -312,7 +285,8 @@ async function handleItinerary(
     userNotes,
     catalog,
     plan,
-    experienceDaySpecs,
+    citiesMeta,
+    travelContext: buildTravelContext(cityIds),
   });
 
   const raw =
@@ -334,6 +308,7 @@ async function handleItinerary(
     days,
     userNotes,
     hasAI ? raw : null,
+    citiesMeta,
   );
 
   return jsonResponse({

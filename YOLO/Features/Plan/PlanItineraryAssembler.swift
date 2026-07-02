@@ -1,6 +1,6 @@
 import Foundation
 
-/// Deterministic DB-only itinerary assembly (mirrors Edge `itinerary-assembler.ts`).
+/// Deterministic DB-only itinerary assembly (mirrors Edge `buildItineraryPipeline`).
 enum PlanItineraryAssembler {
     private static let experienceTemplates: [String: [String]] = [
         "beijing": [
@@ -44,97 +44,148 @@ enum PlanItineraryAssembler {
         attractions: [Attraction],
         userNotes: String? = nil
     ) -> SampleItinerary {
-        let cityIds = cities.isEmpty ? ["beijing"] : cities
+        let cityIds = Array(Set(cities.map { $0.lowercased() }.filter { !$0.isEmpty }))
+        let resolvedCityIds = cityIds.isEmpty ? ["beijing"] : cityIds
         let days = max(1, min(tripDays, 21))
+
         let catalog = attractions.sorted {
             if $0.displayOrder != $1.displayOrder { return $0.displayOrder < $1.displayOrder }
             return $0.name < $1.name
         }
 
-        let attractionDayCount = catalog.isEmpty ? 0 : min(days, catalog.count)
-        let attractionDayIndices = (1...attractionDayCount).map { $0 }
-        var experienceSpecs: [(dayIndex: Int, cityId: String)] = []
-        for dayIndex in (attractionDayCount + 1)...days {
-            let cityId = cityIds[(dayIndex - 1) % cityIds.count]
-            experienceSpecs.append((dayIndex, cityId))
+        var catalogByCity: [String: [Attraction]] = [:]
+        for row in catalog {
+            catalogByCity[row.cityId, default: []].append(row)
         }
+        let catalogCounts = Dictionary(uniqueKeysWithValues: catalogByCity.map { ($0.key, $0.value.count) })
+
+        let visitOrder = CityTravelHints.inferVisitOrder(
+            cityIds: resolvedCityIds,
+            catalogCountByCity: catalogCounts
+        )
 
         let maxPerDay: Int = {
             if catalog.count >= days {
                 return min(3, max(1, Int(ceil(Double(catalog.count) / Double(days)))))
             }
-            if attractionDayCount > 0 {
-                return min(3, max(1, Int(ceil(Double(catalog.count) / Double(attractionDayCount)))))
-            }
-            return 1
+            return catalog.isEmpty ? 1 : min(3, max(1, Int(ceil(Double(catalog.count) / Double(days)))))
         }()
 
-        var assignments: [(dayIndex: Int, ids: [String])] = attractionDayIndices.map { ($0, []) }
-        var cursor = 0
-        for i in assignments.indices {
-            while cursor < catalog.count, assignments[i].ids.count < maxPerDay {
-                assignments[i].ids.append(catalog[cursor].id)
-                cursor += 1
-            }
-        }
-        var dayPtr = 0
-        while cursor < catalog.count, !assignments.isEmpty {
-            if assignments[dayPtr % assignments.count].ids.count < maxPerDay {
-                assignments[dayPtr % assignments.count].ids.append(catalog[cursor].id)
-                cursor += 1
-            }
-            dayPtr += 1
-            if dayPtr > assignments.count * maxPerDay * 2 { break }
-        }
-
-        let catalogById = Dictionary(uniqueKeysWithValues: catalog.map { ($0.id, $0) })
-        let cityLabel = cityIds.map { $0.capitalized }.joined(separator: " → ")
-
+        let dayBudget = distributeDaysAcrossCities(tripDays: days, cities: visitOrder, catalogByCity: catalogByCity)
         var itineraryDays: [ItineraryDay] = []
-        for dayIndex in 1...days {
-            if let spec = experienceSpecs.first(where: { $0.dayIndex == dayIndex }) {
-                let items = templateItems(cityId: spec.cityId)
+        var dayPtr = 1
+
+        for (cityIndex, cityId) in visitOrder.enumerated() {
+            if dayPtr > days { break }
+            if cityIndex > 0 {
+                let prevCity = visitOrder[cityIndex - 1]
+                if CityTravelHints.needsTravelDay(prevCity, cityId), dayPtr <= days {
+                    itineraryDays.append(experienceDay(dayIndex: dayPtr, cityId: cityId, travel: true))
+                    dayPtr += 1
+                }
+            }
+
+            let budget = min(dayBudget[cityId] ?? 1, max(0, days - dayPtr + 1))
+            let pool = catalogByCity[cityId] ?? []
+            var cursor = 0
+
+            for _ in 0..<budget {
+                guard dayPtr <= days else { break }
+                var activities: [ItineraryActivity] = []
+                var actIndex = 0
+                while cursor < pool.count, activities.count < maxPerDay {
+                    activities.append(activity(from: pool[cursor], dayIndex: dayPtr, actIndex: actIndex))
+                    cursor += 1
+                    actIndex += 1
+                }
                 itineraryDays.append(
                     ItineraryDay(
-                        id: "day_\(dayIndex)",
-                        dayIndex: dayIndex,
-                        dateLabel: "Day \(dayIndex)",
-                        cityName: "",
+                        id: "day_\(dayPtr)",
+                        dayIndex: dayPtr,
+                        dateLabel: "Day \(dayPtr)",
+                        cityName: CityTravelHints.displayName(for: cityId),
                         costEstimate: nil,
-                        activities: [],
-                        dayKind: .experienceSuggestions,
-                        experienceItems: items,
-                        experienceCityId: spec.cityId
+                        activities: activities
                     )
                 )
-                continue
+                dayPtr += 1
             }
-
-            let ids = assignments.first(where: { $0.dayIndex == dayIndex })?.ids ?? []
-            let activities = ids.enumerated().compactMap { actIndex, aid -> ItineraryActivity? in
-                guard let row = catalogById[aid] else { return nil }
-                return activity(from: row, dayIndex: dayIndex, actIndex: actIndex)
-            }
-
-            itineraryDays.append(
-                ItineraryDay(
-                    id: "day_\(dayIndex)",
-                    dayIndex: dayIndex,
-                    dateLabel: "Day \(dayIndex)",
-                    cityName: "",
-                    costEstimate: nil,
-                    activities: activities
-                )
-            )
         }
 
-        return SampleItinerary(
+        while itineraryDays.count < days {
+            let dayIndex = itineraryDays.count + 1
+            let cityId = visitOrder[(dayIndex - 1) % visitOrder.count]
+            itineraryDays.append(experienceDay(dayIndex: dayIndex, cityId: cityId, travel: false))
+        }
+
+        if itineraryDays.count > days {
+            itineraryDays = Array(itineraryDays.prefix(days))
+        }
+
+        for index in itineraryDays.indices {
+            itineraryDays[index] = itineraryDays[index].withDayIndex(index + 1)
+        }
+
+        let route = CityTravelHints.routeLabel(from: visitOrder)
+        let trip = SampleItinerary(
             id: UUID().uuidString,
-            title: "\(days)-Day \(cityLabel) Trip",
+            title: "\(days)-Day \(route) Trip",
             meta: userNotes.map { "Generated · \($0.prefix(120))" } ?? "Generated",
-            routeSummary: cityLabel,
+            routeSummary: route,
             estimatedBudget: "$800–$1,500",
-            days: itineraryDays
+            days: itineraryDays,
+            visitOrder: visitOrder
+        )
+        return PlanItineraryNormalizer.normalize(trip, selectedCityIds: resolvedCityIds)
+    }
+
+    private static func distributeDaysAcrossCities(
+        tripDays: Int,
+        cities: [String],
+        catalogByCity: [String: [Attraction]]
+    ) -> [String: Int] {
+        guard !cities.isEmpty else { return [:] }
+        let weights = cities.map { max(1, catalogByCity[$0]?.count ?? 1) }
+        let totalWeight = weights.reduce(0, +)
+        var map: [String: Int] = [:]
+        var assigned = 0
+
+        for (index, city) in cities.enumerated() {
+            let share: Int
+            if index == cities.count - 1 {
+                share = max(1, tripDays - assigned)
+            } else {
+                share = max(1, Int((Double(tripDays) * Double(weights[index]) / Double(totalWeight)).rounded()))
+            }
+            map[city] = share
+            assigned += share
+        }
+
+        while assigned > tripDays {
+            if let richest = map.max(by: { $0.value < $1.value })?.key, map[richest, default: 1] > 1 {
+                map[richest, default: 1] -= 1
+                assigned -= 1
+            } else {
+                break
+            }
+        }
+        return map
+    }
+
+    private static func experienceDay(dayIndex: Int, cityId: String, travel: Bool) -> ItineraryDay {
+        let items = travel
+            ? CityTravelHints.travelExperienceItems(toCityId: cityId)
+            : templateItems(cityId: cityId)
+        return ItineraryDay(
+            id: "day_\(dayIndex)",
+            dayIndex: dayIndex,
+            dateLabel: "Day \(dayIndex)",
+            cityName: CityTravelHints.displayName(for: cityId),
+            costEstimate: nil,
+            activities: [],
+            dayKind: .experienceSuggestions,
+            experienceItems: items,
+            experienceCityId: cityId
         )
     }
 
@@ -161,7 +212,6 @@ enum PlanItineraryAssembler {
     }
 
     private static func templateItems(cityId: String) -> [String] {
-        let key = cityId.lowercased()
-        return experienceTemplates[key] ?? defaultExperiences
+        experienceTemplates[cityId.lowercased()] ?? defaultExperiences
     }
 }
