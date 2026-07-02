@@ -202,10 +202,10 @@ enum TripKind: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .city: return "大城市为主"
-        case .both: return "城市 + 乡村都去"
-        case .remote: return "主要去乡村 / 偏远"
-        case .family: return "家庭游 / 带老人小孩"
+        case .city: return "Major cities mainly"
+        case .both: return "Cities & countryside"
+        case .remote: return "Mostly rural / remote areas"
+        case .family: return "Family trip / with elders & kids"
         }
     }
 }

@@ -659,8 +659,8 @@ struct HotelSearchView: View {
                             Text("No hotels found for this city.")
                                 .font(Theme.FontToken.inter(13, weight: .medium))
                             Text(usesLiveContent
-                                ? "Check the admin: city, 启用, and 接待外国客人 must match this trip."
-                                : "Turn on Live content in app settings (远程内容) to load hotels from the CMS.")
+                                ? "Check the admin: city, enabled status, and foreign-guest acceptance must match this trip."
+                                : "Turn on Live content in app settings to load hotels from the CMS.")
                                 .font(Theme.FontToken.inter(11))
                                 .foregroundStyle(Theme.ColorToken.textMuted)
                         }
@@ -693,27 +693,27 @@ struct HotelCardView: View {
     private var addToTripControl: some View {
         if let adder {
             if adder.addedHotelIds.contains(hotel.id) {
-                Label("已加入", systemImage: "checkmark.circle.fill")
+                Label("Added", systemImage: "checkmark.circle.fill")
                     .font(Theme.FontToken.inter(11, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.success)
             } else {
                 Button {
                     showDayPicker = true
                 } label: {
-                    Label("加入行程", systemImage: "plus")
+                    Label("Add to trip", systemImage: "plus")
                         .font(Theme.FontToken.inter(11, weight: .medium))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
                         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.ColorToken.textPrimary, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-                .confirmationDialog("加入哪一天？", isPresented: $showDayPicker, titleVisibility: .visible) {
+                .confirmationDialog("Add to which day?", isPresented: $showDayPicker, titleVisibility: .visible) {
                     ForEach(adder.days) { day in
                         Button("Day \(day.dayIndex) · \(day.dateLabel.isEmpty ? "Day \(day.dayIndex)" : day.dateLabel)") {
                             adder.add(hotel, day)
                         }
                     }
-                    Button("取消", role: .cancel) {}
+                    Button("Cancel", role: .cancel) {}
                 }
             }
         }

@@ -11,12 +11,6 @@ final class UserPreferencesStore {
     private var suppressSyncNotification = false
     private var skipItineraryPersistence = false
 
-    var appLanguage: AppLanguage {
-        didSet {
-            UserDefaults.standard.set(appLanguage.rawValue, forKey: Keys.appLanguage)
-        }
-    }
-
     var hasCompletedOnboarding: Bool {
         didSet {
             UserDefaults.standard.set(hasCompletedOnboarding, forKey: Keys.onboardingDone)
@@ -259,7 +253,6 @@ final class UserPreferencesStore {
         avatarUrl = UserDefaults.standard.string(forKey: Keys.avatarUrl)
         avatarStatus = UserDefaults.standard.string(forKey: Keys.avatarStatus) ?? "none"
         preferredAudioVoiceVariantIds = Self.loadPreferredVoiceVariantIds()
-        appLanguage = AppLanguage.resolved(fromStoredValue: UserDefaults.standard.string(forKey: Keys.appLanguage))
         hasCompletedIntroOnboarding = UserDefaults.standard.bool(forKey: Keys.introOnboardingDone)
         hasCompletedNotificationOnboarding = UserDefaults.standard.bool(forKey: Keys.notificationOnboardingDone)
         isGuestMode = UserDefaults.standard.bool(forKey: Keys.guestMode)
@@ -296,7 +289,6 @@ final class UserPreferencesStore {
             Keys.displayName,
             Keys.avatarUrl,
             Keys.avatarStatus,
-            Keys.appLanguage,
             Keys.introOnboardingDone,
             Keys.notificationOnboardingDone,
             Keys.guestMode,
@@ -325,7 +317,6 @@ final class UserPreferencesStore {
         purchasedAttractionIds = []
         favoriteAttractions = []
         preferredAudioVoiceVariantIds = [:]
-        appLanguage = AppLanguage.resolved(fromStoredValue: nil)
         cachedVisaRule = nil
     }
 

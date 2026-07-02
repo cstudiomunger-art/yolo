@@ -91,8 +91,8 @@ struct MembershipCenterView: View {
             } else if purchase.isProActive {
                 HStack(spacing: 8) {
                     Text("✨")
-                    Text(displayPlan?.localizedName(preferChinese: appEnv.preferences.appLanguage == .chinese)
-                         ?? purchase.displayMembershipPlanName(preferChinese: appEnv.preferences.appLanguage == .chinese))
+                    Text(displayPlan?.displayName
+                         ?? purchase.displayMembershipPlanName())
                         .font(Theme.FontToken.playfair(18, weight: .semibold))
                 }
 
@@ -215,7 +215,7 @@ private struct PlanSummaryRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(plan.localizedName(preferChinese: appEnv.preferences.appLanguage == .chinese))
+                Text(plan.displayName)
                     .font(Theme.FontToken.inter(14, weight: .medium))
                 Spacer()
                 Text(plan.priceLabel)

@@ -17,11 +17,11 @@ enum JSONCoding {
     nonisolated static func describe(_ error: DecodingError) -> String {
         switch error {
         case .keyNotFound(let key, let context):
-            return "缺少字段 \(key.stringValue)（\(context.codingPath.map(\.stringValue).joined(separator: "."))）"
+            return "Missing field \(key.stringValue) (\(context.codingPath.map(\.stringValue).joined(separator: ".")))"
         case .valueNotFound(let type, let context):
-            return "字段为空 \(type)（\(context.codingPath.map(\.stringValue).joined(separator: "."))）"
+            return "Null value for \(type) (\(context.codingPath.map(\.stringValue).joined(separator: ".")))"
         case .typeMismatch(let type, let context):
-            return "类型不匹配 \(type)（\(context.codingPath.map(\.stringValue).joined(separator: "."))）"
+            return "Type mismatch for \(type) (\(context.codingPath.map(\.stringValue).joined(separator: ".")))"
         case .dataCorrupted(let context):
             return context.debugDescription
         @unknown default:

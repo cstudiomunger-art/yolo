@@ -16,7 +16,7 @@ struct InternetAccessGuideView: View {
         let zh = guide.titleZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let en = guide.titleEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !zh.isEmpty { return zh }
-        return en.isEmpty ? "科学上网" : en
+        return en.isEmpty ? "Internet Access" : en
     }
 
     private var bodyHTML: String {
@@ -36,7 +36,7 @@ struct InternetAccessGuideView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Theme.screenPadding)
         }
-        .navigationTitle("科学上网")
+        .navigationTitle("Internet Access")
         .navigationBarTitleDisplayMode(.inline)
         .task { await appEnv.infoHub.load() }
     }
@@ -69,7 +69,7 @@ struct TransportView: View {
             }
             .padding(Theme.screenPadding)
         }
-        .navigationTitle("交通")
+        .navigationTitle("Transport")
         .navigationBarTitleDisplayMode(.inline)
         .task { await appEnv.infoHub.load() }
     }
@@ -101,7 +101,7 @@ struct PhrasesView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("💬 常用语").font(Theme.FontToken.inter(14, weight: .semibold))
+                Text("💬 Common phrases").font(Theme.FontToken.inter(14, weight: .semibold))
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                     ForEach(content.common) { p in
                         Button { audio.play(text: p.cn, url: p.audioUrl) } label: {
@@ -122,7 +122,7 @@ struct PhrasesView: View {
                 }
 
                 if !dialects.isEmpty {
-                    Text("🗣 方言彩蛋 · 长按卡片给本地人看大字")
+                    Text("🗣 Dialect gems · long-press a card for large text")
                         .font(Theme.FontToken.inter(14, weight: .semibold)).padding(.top, 6)
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 14) {
@@ -144,7 +144,7 @@ struct PhrasesView: View {
             }
             .padding(Theme.screenPadding)
         }
-        .navigationTitle("表达 / 方言")
+        .navigationTitle("Phrases / Dialect")
         .navigationBarTitleDisplayMode(.inline)
         .task { await appEnv.infoHub.load() }
         .fullScreenCover(item: $bigScreen) { d in
@@ -160,7 +160,7 @@ struct PhrasesView: View {
                 .font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
                 .multilineTextAlignment(.center)
             Button { audio.play(text: d.cn, url: d.audioUrl) } label: {
-                Text("▶ 听").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.accent)
+                Text("▶ Listen").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.accent)
             }
             .buttonStyle(.plain)
         }
@@ -188,10 +188,10 @@ private struct DialectBigScreen: View {
             VStack {
                 HStack {
                     Spacer()
-                    Button("✕ 收起") { dismiss() }.foregroundStyle(.white.opacity(0.7)).padding()
+                    Button("✕ Close") { dismiss() }.foregroundStyle(.white.opacity(0.7)).padding()
                 }
                 Spacer()
-                Text("把屏幕转给本地人看 · 大字模式").font(.system(size: 12)).foregroundStyle(.white.opacity(0.5)).padding(.bottom, 40)
+                Text("Show to locals · Large text").font(.system(size: 12)).foregroundStyle(.white.opacity(0.5)).padding(.bottom, 40)
             }
         }
     }

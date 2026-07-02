@@ -121,14 +121,14 @@ final class PurchaseService {
     }
 
     /// Plan name for profile UI — uses RC plan id, or the annual plan when admin-granted.
-    func displayMembershipPlanName(preferChinese: Bool) -> String {
+    func displayMembershipPlanName() -> String {
         if let planId = preferences?.subscriptionPlanId,
            let plan = availablePlans.first(where: { $0.id == planId }) {
-            return plan.localizedName(preferChinese: preferChinese)
+            return plan.displayName
         }
         if preferences?.isOverrideGrantActive == true,
            let plan = availablePlans.first(where: { $0.planType == .subscription }) {
-            return plan.localizedName(preferChinese: preferChinese)
+            return plan.displayName
         }
         return String(localized: "Active Membership")
     }

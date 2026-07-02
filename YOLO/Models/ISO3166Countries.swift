@@ -1,12 +1,14 @@
 import Foundation
 
-/// Complete ISO 3166-1 country/territory list (Chinese names; source: editBug/ISO3166_zh).
+/// Complete ISO 3166-1 country/territory list (English display names via system Locale).
 /// Used by the visa detector's passport / departure / onward pickers so the lists cover
 /// every country worldwide — not just the ~90 visa-relevant nationalities in `passport_countries`.
 /// Flag emoji is derived from the alpha-2 code at runtime (no need to store it).
 enum ISO3166 {
     static let all: [PassportCountry] = raw.enumerated().map {
-        PassportCountry(code: $0.element.0, name: $0.element.1, flag: flag($0.element.0), displayOrder: $0.offset)
+        let code = $0.element.0
+        let english = Locale(identifier: "en").localizedString(forRegionCode: code) ?? code
+        return PassportCountry(code: code, name: english, flag: flag(code), displayOrder: $0.offset)
     }
 
     /// Regional-indicator flag emoji for an alpha-2 code (A→🇦 …).

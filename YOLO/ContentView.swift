@@ -18,15 +18,15 @@ struct ContentView: View {
                 .foregroundStyle(.tint)
 
             if AppConfig.useMock {
-                Text("Mock 模式（未连接 Supabase）")
+                Text("Mock mode (Supabase not connected)")
             } else if let userEmail {
-                Text("已登录：\(userEmail)")
+                Text("Signed in: \(userEmail)")
             } else {
                 Text("Hello, world!")
             }
 
             if !AppConfig.useMock {
-                Button("退出登录", role: .destructive) {
+                Button("Sign out", role: .destructive) {
                     signOut()
                 }
             }

@@ -36,10 +36,10 @@ struct VisaPlanHintBanner: View {
             HStack(spacing: 10) {
                 Text("🛂").font(.system(size: 18))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(rec.level == .amber ? "这条线有条件免签，建议核对" : "这条线默认可能需要签证")
+                    Text(rec.level == .amber ? "Conditional visa-free entry — verify details" : "This route may require a visa by default")
                         .font(Theme.FontToken.inter(12, weight: .semibold))
                         .foregroundStyle(Theme.ColorToken.textPrimary)
-                    Text("按常见默认粗判（往返同国、主要机场进出）。点开可改出发地/口岸/续程票并看签证友好路线。")
+                    Text("Based on common defaults (round-trip same country, major airports). Tap to adjust departure/port/onward ticket and see visa-friendly routes.")
                         .font(Theme.FontToken.inter(10))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                         .multilineTextAlignment(.leading)

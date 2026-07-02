@@ -7,7 +7,6 @@ struct SettingsView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
 
-    @State private var showLanguagePicker = false
     @State private var showCountryPicker = false
     @State private var showAbout = false
     @State private var cacheSizeLabel = "…"
@@ -36,9 +35,6 @@ struct SettingsView: View {
         .background(Theme.ColorToken.backgroundSubtle)
         .navigationTitle(String(localized: "Settings"))
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showLanguagePicker) {
-            LanguagePickerView()
-        }
         .sheet(isPresented: $showCountryPicker) {
             NavigationStack {
                 CountryPickerView(mode: .profileEdit)
@@ -108,10 +104,6 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             sectionHeader(String(localized: "Preferences"))
             card {
-                navRow(String(localized: "Language"), value: appEnv.preferences.appLanguage.displayName) {
-                    showLanguagePicker = true
-                }
-                rowDivider
                 navRow(String(localized: "Nationality"), value: nationalityLabel) {
                     showCountryPicker = true
                 }

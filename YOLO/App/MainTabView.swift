@@ -124,7 +124,7 @@ struct MainTabView: View {
                     PhrasesView()
                         .toolbar {
                             ToolbarItem(placement: .cancellationAction) {
-                                Button("关闭") { appEnv.navigation.dismissModal() }
+                                Button("Close") { appEnv.navigation.dismissModal() }
                             }
                         }
                 }

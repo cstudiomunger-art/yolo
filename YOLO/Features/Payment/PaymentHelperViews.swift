@@ -14,17 +14,17 @@ struct PaymentHelperHomeView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     PaymentNodeHeader(nodeKey: .home, service: service)
-                    laneButton(.prep, emoji: "🧭", title: "我还没出发", subtitle: "在家慢慢准备")
-                    laneButton(.china, emoji: "✈️", title: "我已经在中国了", subtitle: "跳过出发前步骤")
-                    laneButton(.rescue, emoji: "🆘", title: "我正卡在付款，付不了", subtitle: "现在就要解决 · 离线可用", warm: true)
+                    laneButton(.prep, emoji: "🧭", title: "Haven't left yet", subtitle: "Prepare at home at your own pace")
+                    laneButton(.china, emoji: "✈️", title: "Already in China", subtitle: "Skip pre-departure steps")
+                    laneButton(.rescue, emoji: "🆘", title: "Stuck paying right now", subtitle: "Fix it now · works offline", warm: true)
                     PaymentArticleSection(nodeKey: "home", service: service)
                     PaymentLinksSection(lane: nil, service: service)
                 }
                 .padding(Theme.screenPadding)
             }
-            .navigationTitle("支付助手")
+            .navigationTitle("Payment Helper")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
             .navigationDestination(for: PaymentLane.self) { lane in
                 switch lane {
                 case .prep, .china:
@@ -71,7 +71,7 @@ struct PaymentFlowContainerView: View {
 
     var body: some View {
         PaymentFlowNodeView(nodeKey: nodes[0], lane: lane, path: $path, nodes: nodes)
-            .navigationTitle(lane == .china ? "已经在中国" : "出发前准备")
+            .navigationTitle(lane == .china ? "Already in China" : "Pre-departure prep")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: PaymentNodeKey.self) { key in
                 PaymentFlowNodeView(nodeKey: key, lane: lane, path: $path, nodes: nodes)
@@ -130,12 +130,15 @@ struct PaymentFlowNodeView: View {
             PaymentChipGrid(
                 items: service.countries,
                 isOn: { service.selectedCountryCode?.lowercased() == $0.countryCode.lowercased() },
-                label: { ($0.flagEmoji ?? "") + " " + $0.nameZh }
+                label: { c in
+                    let en = c.nameEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                    return (c.flagEmoji ?? "") + " " + (en.isEmpty ? c.nameZh : en)
+                }
             ) { c in
                 service.selectedCountryCode = c.countryCode
             }
             if service.selectedCountryCode == nil, !country.isEmpty {
-                Text("已根据你的资料预填：\(country)")
+                Text("Prefilled from your profile: \(country)")
                     .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
             }
         }
@@ -156,7 +159,7 @@ struct PaymentFlowNodeView: View {
         PaymentChipGrid(
             items: availableTripKinds,
             isOn: { service.tripKind == $0 },
-            label: { $0.label }
+            label: { tripKindLabel($0) }
         ) { trip in service.tripKind = trip }
     }
 
@@ -170,9 +173,9 @@ struct PaymentFlowNodeView: View {
 
     private var planView: some View {
         VStack(alignment: .leading, spacing: 14) {
-            adviceCard(title: "📱 注册时", result: service.smsAdvice(countryCode: country))
-            adviceCard(title: "💳 绑卡策略", result: service.cardAdvice())
-            adviceCard(title: "💴 现金", result: service.cashAdvice())
+            adviceCard(title: "📱 At registration", result: service.smsAdvice(countryCode: country))
+            adviceCard(title: "💳 Card binding strategy", result: service.cardAdvice())
+            adviceCard(title: "💴 Cash", result: service.cashAdvice())
             PaymentArticleSection(nodeKey: "plan", service: service)
         }
     }
@@ -186,8 +189,8 @@ struct PaymentFlowNodeView: View {
         let stableOnly = nodeKey == .verify
         if tools.count > 1 {
             Picker("App", selection: $selectedTool) {
-                Text("支付宝").tag("alipay")
-                Text("微信").tag("wechat")
+                Text("Alipay").tag("alipay")
+                Text("WeChat").tag("wechat")
             }
             .pickerStyle(.segmented)
             PaymentStepsList(steps: service.steps(for: key, tool: selectedTool, includeVolatile: !stableOnly))
@@ -200,7 +203,7 @@ struct PaymentFlowNodeView: View {
         if nodeKey == .verify {
             let extra = service.steps(for: key).filter(\.isVolatile)
             if !extra.isEmpty {
-                Text("备选方案（以平台实时为准）")
+                Text("Alternatives (subject to live platform rules)")
                     .font(Theme.FontToken.inter(12, weight: .semibold))
                     .foregroundStyle(Theme.ColorToken.warning)
                     .padding(.top, 8)
@@ -214,7 +217,7 @@ struct PaymentFlowNodeView: View {
         VStack(alignment: .leading, spacing: 8) {
             Button { withAnimation { showTrouble.toggle() } } label: {
                 HStack(spacing: 4) {
-                    Text(showTrouble ? "收起排查" : "没成功？对症排查")
+                    Text(showTrouble ? "Hide troubleshooting" : "Didn't work? Troubleshoot")
                         .font(Theme.FontToken.inter(12, weight: .medium))
                         .foregroundStyle(Theme.ColorToken.accent)
                     Image(systemName: showTrouble ? "chevron.up" : "chevron.down")
@@ -228,7 +231,7 @@ struct PaymentFlowNodeView: View {
                     appEnv.navigation.presentedModal = nil
                     appEnv.navigation.presentGeniusBar()
                 } label: {
-                    Text("还不行？找真人帮你（绑卡） →")
+                    Text("Still stuck? Get human help (card binding) →")
                         .font(Theme.FontToken.inter(12, weight: .medium))
                         .foregroundStyle(Theme.ColorToken.accent)
                 }
@@ -243,16 +246,16 @@ struct PaymentFlowNodeView: View {
         let wxOk = service.weChatBindingViable
         let pct = service.readinessPercent
         return VStack(alignment: .leading, spacing: 14) {
-            Text("\(pct)% 就绪")
+            Text("\(pct)% ready")
                 .font(Theme.FontToken.playfair(34, weight: .bold))
                 .foregroundStyle(pct >= 100 ? Theme.ColorToken.success : Theme.ColorToken.warning)
-            Text("逐项勾选你已完成的准备（诚实自报即可）")
+            Text("Check off what you've already done (self-report is fine)")
                 .font(Theme.FontToken.inter(12))
                 .foregroundStyle(Theme.ColorToken.textMuted)
             ForEach(service.checklistItems) { item in
                 let skipped = item.condition == "has_wechat" && !wxOk
                 let label = skipped
-                    ? "\(item.labelZh) ·（你的卡不支持，跳过）"
+                    ? "\(item.labelZh) · (card not supported, skip)"
                     : item.labelZh
                 let done = skipped || service.isChecklistSelfReported(item.id)
                 Button {
@@ -267,9 +270,9 @@ struct PaymentFlowNodeView: View {
             PaymentCallout(
                 text: pct >= 100
                     ? (wxOk
-                        ? "全部就绪。到了中国直接扫码即可。"
-                        : "全部就绪。你的卡不支持微信，但支付宝 + 现金已能覆盖绝大多数场景。")
-                    : "还有 \(100 - pct)% 未勾选——回到前面步骤补完，或先勾选你已做好的项。",
+                        ? "All set. Scan to pay as soon as you're in China."
+                        : "All set. Your card doesn't support WeChat, but Alipay + cash cover most situations.")
+                    : "\(100 - pct)% still unchecked — go back to finish earlier steps, or check off what you've already done.",
                 tone: pct >= 100 ? .ok : .info
             )
         }
@@ -289,7 +292,7 @@ struct PaymentFlowNodeView: View {
             }
             .buttonStyle(.plain)
         } else if canProceed, nodeKey == .card {
-            PaymentFinishButton(title: "完成 · 关闭支付助手")
+            PaymentFinishButton(title: "Done · Close Payment Helper")
         } else if !canProceed {
             Text(blockedReason)
                 .font(Theme.FontToken.inter(13))
@@ -316,20 +319,20 @@ struct PaymentFlowNodeView: View {
 
     private var blockedReason: String {
         switch nodeKey {
-        case .q1: return "请选择国家"
-        case .q2: return "请至少选一张卡"
-        case .q3: return "请选择行程类型"
-        default: return "请完成当前步骤"
+        case .q1: return "Select a country"
+        case .q2: return "Select at least one card"
+        case .q3: return "Select a trip type"
+        default: return "Complete this step"
         }
     }
 
     private var nextButtonTitle: String {
         switch nodeKey {
-        case .q1, .q2: return "下一步 →"
-        case .q3: return "看为你裁好的方案 →"
-        case .plan: return lane == .china ? "去绑卡 →" : "开始准备 · 一步步来 →"
-        case .use: return "完成 · 看我的随身支付卡 →"
-        default: return "下一步 →"
+        case .q1, .q2: return "Next →"
+        case .q3: return "See your tailored plan →"
+        case .plan: return lane == .china ? "Go to card binding →" : "Start prep · step by step →"
+        case .use: return "Done · View my payment card →"
+        default: return "Next →"
         }
     }
 
@@ -340,6 +343,15 @@ struct PaymentFlowNodeView: View {
                 Text(tone == .warn ? "⚠️" : (tone == .ok ? "✓" : "💴"))
                 PaymentMarkdownView(markdown: result.bodyZh)
             }
+        }
+    }
+
+    private func tripKindLabel(_ kind: TripKind) -> String {
+        switch kind {
+        case .city: return "Mostly cities"
+        case .both: return "Cities + rural"
+        case .remote: return "Mostly remote / rural"
+        case .family: return "Family trip"
         }
     }
 }
@@ -382,7 +394,7 @@ struct PaymentStepsList: View {
                 PaymentCardBox(title: step.titleZh) {
                     VStack(alignment: .leading, spacing: 8) {
                         if showVolatileBadge && step.isVolatile {
-                            Label("以平台实时为准", systemImage: "exclamationmark.triangle")
+                            Label("Subject to live platform rules", systemImage: "exclamationmark.triangle")
                                 .font(Theme.FontToken.inter(11, weight: .semibold))
                                 .foregroundStyle(Theme.ColorToken.warning)
                         }
@@ -419,7 +431,7 @@ struct PaymentLinksSection: View {
         let links = service.links(for: lane)
         if !links.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
-                Text("🔗 参考链接")
+                Text("🔗 Reference links")
                     .font(Theme.FontToken.inter(12, weight: .semibold))
                     .foregroundStyle(Theme.ColorToken.textMuted)
                 ForEach(links) { link in
@@ -449,7 +461,7 @@ struct PaymentLinksSection: View {
 
 struct PaymentFinishButton: View {
     @Environment(AppEnvironment.self) private var appEnv
-    var title: String = "完成 · 关闭支付助手"
+    var title: String = "Done · Close Payment Helper"
 
     var body: some View {
         Button {
@@ -476,7 +488,7 @@ struct PaymentArticleSection: View {
         let arts = service.articles(for: nodeKey)
         if !arts.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
-                Text("📄 详细图文")
+                Text("📄 Detailed guides")
                     .font(Theme.FontToken.inter(12, weight: .semibold))
                     .foregroundStyle(Theme.ColorToken.textMuted)
                 ForEach(arts) { art in
@@ -511,7 +523,7 @@ struct PaymentRescueView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Label("离线可用 · Works offline", systemImage: "wifi.slash")
+                Label("Works offline", systemImage: "wifi.slash")
                     .font(Theme.FontToken.inter(11, weight: .semibold))
                     .foregroundStyle(Theme.ColorToken.success)
                 PaymentNodeHeader(nodeKey: .rescue, service: service)
@@ -519,7 +531,7 @@ struct PaymentRescueView: View {
                     rescueRung(rung)
                 }
                 NavigationLink { PaymentMerchantPhraseView() } label: {
-                    Text("🗣️ 给商家看这句话 →")
+                    Text("🗣️ Show this phrase to the merchant →")
                         .font(Theme.FontToken.inter(14, weight: .semibold))
                         .frame(maxWidth: .infinity).padding(.vertical, 14)
                         .background(Theme.ColorToken.warning).foregroundStyle(.white)
@@ -531,7 +543,7 @@ struct PaymentRescueView: View {
             }
             .padding(Theme.screenPadding)
         }
-        .navigationTitle("🆘 救援")
+        .navigationTitle("🆘 Rescue")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             if open.isEmpty, let first = service.rescueRungsForUser().first {
@@ -581,7 +593,7 @@ struct PaymentMerchantPhraseView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Label("离线可用 · 没网也能调出", systemImage: "wifi.slash")
+                Label("Works offline · no network needed", systemImage: "wifi.slash")
                     .font(Theme.FontToken.inter(11, weight: .semibold))
                     .foregroundStyle(Theme.ColorToken.success)
                 PaymentNodeHeader(nodeKey: .merchant, service: appEnv.paymentHelper)
@@ -594,7 +606,7 @@ struct PaymentMerchantPhraseView: View {
                         HStack(spacing: 8) {
                             if phrase.speakable != false {
                                 Button { speak(phrase.cn) } label: {
-                                    Label("读出来", systemImage: "speaker.wave.2.fill")
+                                    Label("Read aloud", systemImage: "speaker.wave.2.fill")
                                         .font(Theme.FontToken.inter(12, weight: .semibold))
                                         .padding(.horizontal, 14).padding(.vertical, 7)
                                         .background(Theme.ColorToken.accent).foregroundStyle(.white)
@@ -604,7 +616,7 @@ struct PaymentMerchantPhraseView: View {
                             }
                             if let urlStr = phrase.audioUrl, !urlStr.isEmpty, let url = URL(string: urlStr) {
                                 Button { playAudio(url) } label: {
-                                    Label("播放录音", systemImage: "play.circle.fill")
+                                    Label("Play recording", systemImage: "play.circle.fill")
                                         .font(Theme.FontToken.inter(12, weight: .semibold))
                                         .padding(.horizontal, 14).padding(.vertical, 7)
                                         .background(Theme.ColorToken.success).foregroundStyle(.white)
@@ -622,7 +634,7 @@ struct PaymentMerchantPhraseView: View {
             }
             .padding(Theme.screenPadding)
         }
-        .navigationTitle("给商家看")
+        .navigationTitle("Show to merchant")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -655,7 +667,7 @@ struct PaymentArticleView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Theme.screenPadding)
         }
-        .navigationTitle("详细图文")
+        .navigationTitle("Detailed guide")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

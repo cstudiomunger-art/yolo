@@ -25,12 +25,12 @@ struct VisaVerdictView: View {
         }
     }
 
-    private var titleZh: String {
-        if isGate0 { return "需先换护照 · 后续政策不适用" }
+    private var titleText: String {
+        if isGate0 { return "Renew passport first · policies below don't apply" }
         switch rec.level {
-        case .green: return "够用 · 这条线全程免签"
-        case .amber: return "有条件够用 · 满足条件即免签"
-        case .red: return "不够用 · 默认需办签证"
+        case .green: return "Good to go · fully visa-free on this route"
+        case .amber: return "Conditionally OK · visa-free if conditions met"
+        case .red: return "Not enough · visa likely required"
         }
     }
 
@@ -47,7 +47,7 @@ struct VisaVerdictView: View {
                     if let fresh = rec.freshness { freshnessBadge(fresh) }
                     if !rec.isEnough && !routes.isEmpty {
                         Button { showRoutes = true } label: {
-                            Text("看签证友好路线 →")
+                            Text("View visa-friendly routes →")
                                 .font(Theme.FontToken.inter(13, weight: .semibold))
                                 .frame(maxWidth: .infinity).padding(.vertical, 12)
                                 .background(Theme.ColorToken.textPrimary).foregroundStyle(.white)
@@ -56,19 +56,19 @@ struct VisaVerdictView: View {
                         .buttonStyle(.plain)
                     }
                     if showRules { rulesDetail }
-                    Text("检测器只回答够不够用，不在此盖章收尾。绑卡 / 行前事项在「行前清单」里完成。以边检最终判定为准。")
+                    Text("This check only answers whether your route qualifies; it does not finalize paperwork. Card binding and pre-trip tasks belong in your Pre-Trip Checklist. Subject to final decision at border control.")
                         .font(Theme.FontToken.inter(10))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                 }
                 .padding(Theme.screenPadding)
             }
-            .navigationTitle("签证结论")
+            .navigationTitle("Visa Verdict")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
-            .alert("问真人确认", isPresented: $showHumanNote) {
-                Button("好") {}
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .alert("Confirm with an expert", isPresented: $showHumanNote) {
+                Button("OK") {}
             } message: {
-                Text("可在「实用信息 · Genius Bar」找真人，带着判定结果咨询。")
+                Text("Find a live expert under Practical Info · Genius Bar and bring this verdict with you.")
             }
             .sheet(isPresented: $showRoutes) {
                 PlanRouteVisaCompareView(routes: routes)
@@ -97,33 +97,32 @@ struct VisaVerdictView: View {
     private var verdictCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(icon).font(.system(size: 30))
-            Text(titleZh).font(Theme.FontToken.playfair(18, weight: .semibold))
+            Text(titleText).font(Theme.FontToken.playfair(18, weight: .semibold))
             if isGate0 {
-                Text("护照剩余有效期不足 6 个月，需先换发护照，后续政策均不再适用。")
+                Text("Passport valid for less than 6 months. Renew your passport first; policies below will not apply.")
                     .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
             } else {
-                Text(chosenPolicy?.officialNameZh ?? rec.chosenPolicyId)
-                    .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
+                policyNameBlock(chosenPolicy, fallback: rec.chosenPolicyId)
                 if let exit = rec.latestExitDate {
-                    Text("最晚须于 \(Self.dateLabel(exit)) 前出境。")
+                    Text("Must exit by \(Self.dateLabel(exit)).")
                         .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
                 }
                 if !rec.alsoEligible.isEmpty {
-                    Text("你也符合：" + rec.alsoEligible.map { alsoLabel($0) }.joined(separator: " / ") + "，当前已选限制更少的一条。")
+                    Text("You also qualify for: " + rec.alsoEligible.map { alsoLabel($0) }.joined(separator: " / ") + ". The least restrictive option was selected.")
                         .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
                 }
                 if portZoneOnly {
-                    Text("⚠️ 24 小时过境：仅限口岸限定区域活动，出区需办临时入境许可，不可自由前往其他城市。")
+                    Text("⚠️ 24-hour transit: activity limited to the port zone. Leaving the zone requires a temporary entry permit; you cannot freely visit other cities.")
                         .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.warning)
                 }
                 if !rec.blockers.isEmpty {
-                    Text("拖累城市：\(rec.blockers.map { data.cityName(forAdminCode: $0) }.joined(separator: " · "))。可在下方方案 A 或「签证友好路线」调整。")
+                    Text("Cities holding you back: \(rec.blockers.map { data.cityName(forAdminCode: $0) }.joined(separator: " · ")). Adjust in Plan A below or via visa-friendly routes.")
                         .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.warning)
                 }
             }
             HStack(spacing: 10) {
-                if !isGate0 { actionButton("看规则详情") { showRules.toggle() } }
-                actionButton("问真人确认") { showHumanNote = true }
+                if !isGate0 { actionButton("View rule details") { showRules.toggle() } }
+                actionButton("Confirm with an expert") { showHumanNote = true }
             }
             .padding(.top, 4)
         }
@@ -134,41 +133,58 @@ struct VisaVerdictView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
+    @ViewBuilder
+    private func policyNameBlock(_ policy: VisaPolicyV2?, fallback: String) -> some View {
+        if let en = policy?.officialNameEn, !en.isEmpty {
+            Text(en).font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
+            if let zh = policy?.officialNameZh, !zh.isEmpty {
+                Text(zh).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+            }
+        } else {
+            Text(policy?.officialNameZh ?? fallback)
+                .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textSecondary)
+        }
+    }
+
     private var portZoneOnly: Bool {
         guard let p = chosenPolicy else { return false }
         if case .codes(let a) = p.allowedArea { return a.isEmpty }
         return false
     }
 
-    // MARK: - Policy entry card（依据政策 · 条目）
+    // MARK: - Policy entry card
 
-    /// The concrete policy this verdict rests on — official name (zh/en), the key params
-    /// in plain language, the verified date, and the 一级信源 link (source_url, previously
-    /// unused on the client) so the result is traceable to the official notice.
+    /// The concrete policy this verdict rests on — official name (en/zh), the key params
+    /// in plain language, the verified date, and the primary-source link (source_url) so
+    /// the result is traceable to the official notice.
     private func policyEntryCard(_ p: VisaPolicyV2) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("依据政策 · 条目").font(Theme.FontToken.inter(12, weight: .semibold))
+            Text("Policy basis").font(Theme.FontToken.inter(12, weight: .semibold))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(p.officialNameZh).font(Theme.FontToken.inter(14, weight: .semibold))
                 if !p.officialNameEn.isEmpty {
-                    Text(p.officialNameEn).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                    Text(p.officialNameEn).font(Theme.FontToken.inter(14, weight: .semibold))
+                    if !p.officialNameZh.isEmpty {
+                        Text(p.officialNameZh).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                    }
+                } else {
+                    Text(p.officialNameZh).font(Theme.FontToken.inter(14, weight: .semibold))
                 }
             }
 
-            entryParam("停留", stayText(p))
-            entryParam("活动范围", areaText)
-            entryParam("计时", clockText(p))
-            if let ec = entryCountText(p) { entryParam("入境次数", ec) }
-            if let pp = purposeText(p) { entryParam("适用目的", pp) }
-            if p.passportOrdinaryOnly == true { entryParam("护照", "仅普通护照适用") }
+            entryParam("Stay", stayText(p))
+            entryParam("Allowed area", areaText)
+            entryParam("Clock", clockText(p))
+            if let ec = entryCountText(p) { entryParam("Entries", ec) }
+            if let pp = purposeText(p) { entryParam("Purpose", pp) }
+            if p.passportOrdinaryOnly == true { entryParam("Passport", "Ordinary passport only") }
             if let lv = p.lastVerified, !lv.isEmpty {
-                entryParam("核验", "核验于 \(lv)")
+                entryParam("Verified", "Verified \(lv)")
             }
 
             if let s = p.sourceUrl, let url = URL(string: s) {
                 Link(destination: url) {
-                    Text("查看官方公告 →")
+                    Text("View official notice →")
                         .font(Theme.FontToken.inter(11, weight: .medium))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 9)
@@ -187,59 +203,64 @@ struct VisaVerdictView: View {
     private func entryParam(_ label: String, _ value: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Text(label).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
-                .frame(width: 56, alignment: .leading)
+                .frame(width: 72, alignment: .leading)
             Text(value).font(Theme.FontToken.inter(11, weight: .medium)).foregroundStyle(Theme.ColorToken.textPrimary)
             Spacer(minLength: 0)
         }
     }
 
     private func stayText(_ p: VisaPolicyV2) -> String {
-        if p.maxStayUnit == "hours" { return p.maxStayDefault.map { "\($0) 小时" } ?? "—" }
-        return rec.maxStayDays.map { "\($0) 天" } ?? p.maxStayDefault.map { "\($0) 天" } ?? "—"
+        if p.maxStayUnit == "hours" { return p.maxStayDefault.map { "\($0) hours" } ?? "—" }
+        return rec.maxStayDays.map { "\($0) days" } ?? p.maxStayDefault.map { "\($0) days" } ?? "—"
     }
 
     private func clockText(_ p: VisaPolicyV2) -> String {
         switch p.clockRule {
-        case "by_hour": return "入境精确时刻起算"
-        case "entry_day": return "入境当日起算"
-        default: return "入境次日 0 时起算"
+        case "by_hour": return "Counted from exact entry time"
+        case "entry_day": return "Counted from day of entry"
+        default: return "Counted from midnight after entry day"
         }
     }
 
     private func entryCountText(_ p: VisaPolicyV2) -> String? {
         switch p.entryCount {
-        case "single": return "单次入境"
-        case "double": return "两次入境"
-        case "multiple": return "多次入境"
-        case "per_entry": return "按每次入境计"
+        case "single": return "Single entry"
+        case "double": return "Two entries"
+        case "multiple": return "Multiple entries"
+        case "per_entry": return "Counted per entry"
         default: return nil
         }
     }
 
     private func purposeText(_ p: VisaPolicyV2) -> String? {
         guard let purpose = p.purpose, !purpose.isEmpty else { return nil }
-        let map = ["tourism": "旅游", "business": "商务", "transit": "过境", "family": "探亲"]
+        let map = ["tourism": "Tourism", "business": "Business", "transit": "Transit", "family": "Family visit"]
         return purpose.map { map[$0] ?? $0 }.joined(separator: " · ")
     }
 
     private var areaText: String {
         guard let p = chosenPolicy else { return "—" }
-        if case .national = p.allowedArea { return "全国（除特别说明区域）" }
-        if case .codes(let a) = p.allowedArea { return a.isEmpty ? "仅口岸限定区" : "限 \(a.count) 个指定地区" }
+        if case .national = p.allowedArea { return "Nationwide (except specially noted areas)" }
+        if case .codes(let a) = p.allowedArea { return a.isEmpty ? "Port zone only" : "Limited to \(a.count) designated areas" }
         return "—"
     }
 
     private func alsoLabel(_ id: String) -> String {
         let p = data.policy(id)
-        let stay = p?.maxStayUnit == "days" ? (p?.maxStayDefault).map { "（最长 \($0) 天）" } ?? "" : ""
-        return (p?.officialNameZh ?? id) + stay
+        let stay = p?.maxStayUnit == "days" ? (p?.maxStayDefault).map { " (up to \($0) days)" } ?? "" : ""
+        let name = {
+            guard let p else { return id }
+            if !p.officialNameEn.isEmpty { return p.officialNameEn }
+            return p.officialNameZh
+        }()
+        return name + stay
     }
 
     // MARK: - Amber plans A/B
 
     private var plansCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("两个方案").font(Theme.FontToken.inter(12, weight: .semibold))
+            Text("Two options").font(Theme.FontToken.inter(12, weight: .semibold))
             ForEach(rec.plans) { plan in planRow(plan) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -252,21 +273,21 @@ struct VisaVerdictView: View {
         switch plan {
         case .modify(_, let swaps, let newExit):
             VStack(alignment: .leading, spacing: 4) {
-                Text("方案 A · 改行程保免签").font(Theme.FontToken.inter(12, weight: .semibold))
+                Text("Plan A · Adjust itinerary to stay visa-free").font(Theme.FontToken.inter(12, weight: .semibold))
                 ForEach(swaps.sorted(by: { $0.key < $1.key }), id: \.key) { from, to in
-                    Text("· 把「\(data.cityName(forAdminCode: from))」换成「" +
-                         (to.map { data.cityName(forAdminCode: $0) } ?? "同省暂无可替代城市") + "」")
+                    Text("· Replace \(data.cityName(forAdminCode: from)) with " +
+                         (to.map { data.cityName(forAdminCode: $0) } ?? "no in-province alternative"))
                         .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
                 }
                 if let newExit {
-                    Text("· 把离境收紧到 \(Self.dateLabel(newExit)) 前")
+                    Text("· Move exit date up to before \(Self.dateLabel(newExit))")
                         .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
                 }
             }
         case .applyVisa:
             VStack(alignment: .leading, spacing: 4) {
-                Text("方案 B · 一城不动办 L 签").font(Theme.FontToken.inter(12, weight: .semibold))
-                Text("行程不改，办一张 L 旅游签证（约 4–7 个工作日 + 签证费）。")
+                Text("Plan B · Keep cities, apply for L visa").font(Theme.FontToken.inter(12, weight: .semibold))
+                Text("Keep your itinerary; apply for an L tourist visa (about 4–7 business days plus visa fee).")
                     .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
             }
         }
@@ -291,7 +312,7 @@ struct VisaVerdictView: View {
 
     private var rulesDetail: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("规则详情").font(Theme.FontToken.inter(12, weight: .semibold))
+            Text("Rule details").font(Theme.FontToken.inter(12, weight: .semibold))
             Text(rulesText).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -302,15 +323,24 @@ struct VisaVerdictView: View {
 
     private var rulesText: String {
         switch rec.chosenPolicyId {
-        case "mutual_exempt": return "互免签证：你的国籍与中国签有互免协议，落地免签，自入境次日起算可连续停留至上限。"
-        case "unilateral_30d": return "单方面免签：你的国籍在中国单方面免签清单内，且入境日在适用窗口内，落地免签 30 天（自入境次日 0 时起算）。"
-        case "twov_240h": return "240 小时过境免签：下一程为第三国/港澳、从开放口岸进出、停留 ≤ 240 小时即成立；活动范围限指定省市。"
-        case "twov_24h": return "24 小时过境免签：世界各国通用，需有续程票去第三国；仅限口岸限定区域活动，出区需办临时入境许可。"
-        case "hainan_30d": return "海南区域免签：从海南口岸入境时适用，活动范围限海南省。"
-        case "cruise_15d": return "邮轮团免签：随邮轮团从指定港口入境，团进团出，停留 ≤ 15 天，限沿海指定省市。"
-        case "group_asean_xsbn": return "东盟旅游团西双版纳免签：东盟国家旅游团从指定口岸入境西双版纳，随团 6 天。"
-        case "GATE0": return "护照剩余有效期不足 6 个月，需先换发护照，后续政策均不再适用。"
-        default: return "默认需办 L 旅游签证（约 4–7 个工作日 + 签证费）。可在「签证友好路线」看是否能改成免签。L 签停留期/有效期以使馆签注实际为准。"
+        case "mutual_exempt":
+            return "Mutual visa exemption: your nationality has a mutual exemption agreement with China. Visa-free on arrival; continuous stay from the day after entry up to the limit."
+        case "unilateral_30d":
+            return "Unilateral visa waiver: your nationality is on China's unilateral waiver list and entry falls within the applicable window. Visa-free for 30 days (from midnight after the day of entry)."
+        case "twov_240h":
+            return "240-hour transit waiver: valid when your next destination is a third country or Hong Kong/Macau, you enter/exit via an eligible port, and stay ≤ 240 hours; activity limited to designated provinces/cities."
+        case "twov_24h":
+            return "24-hour transit waiver: available to all nationalities with onward tickets to a third country; activity limited to the port zone; leaving the zone requires a temporary entry permit."
+        case "hainan_30d":
+            return "Hainan regional waiver: applies when entering via a Hainan port; activity limited to Hainan Province."
+        case "cruise_15d":
+            return "Cruise group waiver: enter with a cruise group at designated ports, group travel in/out, stay ≤ 15 days, limited to designated coastal provinces/cities."
+        case "group_asean_xsbn":
+            return "ASEAN tour group Xishuangbanna waiver: ASEAN tour groups enter Xishuangbanna via designated ports, 6 days with the group."
+        case "GATE0":
+            return "Passport valid for less than 6 months. Renew your passport first; policies below will not apply."
+        default:
+            return "L tourist visa likely required (about 4–7 business days plus fee). See visa-friendly routes to see if you can switch to visa-free. L visa stay/validity per embassy stamp. Subject to final decision at border control."
         }
     }
 
@@ -327,8 +357,8 @@ struct VisaVerdictView: View {
 
     private static func dateLabel(_ date: Date) -> String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "zh_CN")
-        f.dateFormat = "M 月 d 日"
+        f.locale = Locale(identifier: "en_US")
+        f.dateFormat = "MMM d"
         return f.string(from: date)
     }
 }

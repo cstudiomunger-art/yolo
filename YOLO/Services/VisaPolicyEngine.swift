@@ -113,27 +113,27 @@ enum VisaPolicyEngine {
         var out: [Candidate] = []
         for p in data.policies.sorted(by: { $0.priority < $1.priority }) {
             if p.id == "visa_L" {
-                out.append(Candidate(policyId: p.id, status: .fallback, reason: "永远可行，代价=时间+费用"))
+                out.append(Candidate(policyId: p.id, status: .fallback, reason: "Always available; cost = time + fees"))
                 continue
             }
             let grant = activeGrant(policyId: p.id, country: query.countryCode, onDate: onDate, data: data)
             // universal=1 policies (24h / cruise) apply worldwide → skip grant; non-universal
             // without a grant = not applicable (incl. "grant not录完" drafts — exclude not admit).
             if grant == nil && !p.universal {
-                out.append(Candidate(policyId: p.id, status: .excluded, reason: "\(query.countryCode) 无生效中的 \(p.id) grant"))
+                out.append(Candidate(policyId: p.id, status: .excluded, reason: "No active \(p.id) grant for \(query.countryCode)"))
                 continue
             }
             if p.onwardThirdCountry && third != true {
-                out.append(Candidate(policyId: p.id, status: .excluded, reason: "非第三国过境"))
+                out.append(Candidate(policyId: p.id, status: .excluded, reason: "Not third-country transit"))
                 continue
             }
             // Group-exemption (cruise / asean) is a hard 随团 gate: lone travelers excluded so a
             // universal cruise policy doesn't leak into every散客 candidate set (README fix #2).
             if p.groupRequired && !query.group {
-                out.append(Candidate(policyId: p.id, status: .excluded, reason: "团体免签需随团入境（当前为散客）"))
+                out.append(Candidate(policyId: p.id, status: .excluded, reason: "Group visa-free requires tour entry (solo traveler)"))
                 continue
             }
-            out.append(Candidate(policyId: p.id, status: .candidate, reason: "资格过滤通过"))
+            out.append(Candidate(policyId: p.id, status: .candidate, reason: "Eligibility filter passed"))
         }
         return out
     }
@@ -162,9 +162,9 @@ enum VisaPolicyEngine {
         let third = isThirdCountryTransit(departure: query.departure, onward: query.onward)
         var condOk = true
         var reasons: [String] = []
-        if policy.onwardTicket && !query.ticketed { condOk = false; reasons.append("需已出续程票") }
-        if policy.onwardThirdCountry && third != true { condOk = false; reasons.append("需前往第三国/地区") }
-        if policy.groupRequired && !query.group { condOk = false; reasons.append("需随旅游团入境") }
+        if policy.onwardTicket && !query.ticketed { condOk = false; reasons.append("Onward ticket required") }
+        if policy.onwardThirdCountry && third != true { condOk = false; reasons.append("Must travel to a third country/region") }
+        if policy.groupRequired && !query.group { condOk = false; reasons.append("Must enter with a tour group") }
 
         let pass = spaceOk && timeOk && portOk && condOk
         return VisaSheet(

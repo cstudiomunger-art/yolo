@@ -202,7 +202,10 @@ struct VisaDataSet: Codable, Equatable {
 
     /// Display label for an admin code (falls back to the raw code).
     func cityName(forAdminCode code: String) -> String {
-        city(forAdminCode: code)?.nameZh ?? code
+        guard let city = city(forAdminCode: code) else { return code }
+        let en = city.nameEn.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !en.isEmpty { return en }
+        return city.nameZh
     }
 
     func policy(_ id: String) -> VisaPolicyV2? { policies.first { $0.id == id } }

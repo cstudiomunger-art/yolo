@@ -59,9 +59,9 @@ struct EmergencyView: View {
                 }
                 .padding(Theme.screenPadding)
             }
-            .navigationTitle("紧急 · Emergency")
+            .navigationTitle("Emergency")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
             .task { await loadContent() }
             .onChange(of: selectedCityId) { _, _ in
                 Task { await loadCityResources() }
@@ -76,8 +76,8 @@ struct EmergencyView: View {
             HStack(spacing: 12) {
                 Text("💬").font(.system(size: 22))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("需要真人帮忙？Genius Bar").font(Theme.FontToken.inter(13, weight: .semibold)).foregroundStyle(.white)
-                    Text("紧急情况也能找到我们团队的活人").font(Theme.FontToken.inter(10)).foregroundStyle(.white.opacity(0.6))
+                    Text("Need a real person? Genius Bar").font(Theme.FontToken.inter(13, weight: .semibold)).foregroundStyle(.white)
+                    Text("Emergency situations — reach our team directly").font(Theme.FontToken.inter(10)).foregroundStyle(.white.opacity(0.6))
                 }
                 Spacer()
                 Image(systemName: "chevron.right").foregroundStyle(.white.opacity(0.5))
@@ -93,7 +93,7 @@ struct EmergencyView: View {
 
     private var callBlock: some View {
         VStack(alignment: .leading, spacing: 12) {
-            blockLabel("🚨 紧急电话 · 一键拨号")
+            blockLabel("🚨 Emergency numbers · tap to call")
             Text("Tap a number to call. Your phone will ask you to confirm.")
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(Theme.ColorToken.textMuted)
@@ -140,7 +140,7 @@ struct EmergencyView: View {
 
     private var medicalSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            blockLabel("🏥 医疗 & 药品")
+            blockLabel("🏥 Medical & medication")
             if !medicalItems.isEmpty {
                 VStack(spacing: 8) {
                     ForEach(medicalItems) { item in
@@ -184,7 +184,7 @@ struct EmergencyView: View {
 
     private var hospitalsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("推荐医院 · \(cityLabel(selectedCityId))")
+            Text("Recommended hospitals · \(cityLabel(selectedCityId))")
                 .font(Theme.FontToken.inter(13, weight: .semibold))
             cityPickerCard
             if !hospitals.isEmpty {
@@ -196,7 +196,7 @@ struct EmergencyView: View {
                 .padding(12)
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.ColorToken.border, lineWidth: 1))
             } else {
-                Text("暂无 \(cityLabel(selectedCityId)) 的推荐医院，请切换城市或拨打 120。")
+                Text("No recommended hospitals for \(cityLabel(selectedCityId)) yet. Try another city or call 120.")
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
                     .padding(12)
@@ -214,7 +214,7 @@ struct EmergencyView: View {
                     Text(hospital.displayName)
                         .font(Theme.FontToken.inter(12, weight: .medium))
                     if hospital.hasInternationalDept {
-                        Text("国际部 / International")
+                        Text("International department")
                             .font(Theme.FontToken.inter(10))
                             .foregroundStyle(Theme.ColorToken.accent)
                     }
@@ -250,7 +250,7 @@ struct EmergencyView: View {
 
     private var cityPickerRow: some View {
         HStack {
-            Text("查看城市").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+            Text("View city").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
             Spacer()
             Menu {
                 ForEach(pickerCityIds, id: \.self) { cityId in

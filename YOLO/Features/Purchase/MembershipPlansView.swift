@@ -49,7 +49,6 @@ struct MembershipPlansView: View {
     }
 
     private var branding: AppBranding { appEnv.contentMode.branding }
-    private var preferChinese: Bool { appEnv.preferences.appLanguage == .chinese }
 
     // MARK: - Body
 
@@ -155,8 +154,7 @@ struct MembershipPlansView: View {
                 PlanOptionCard(
                     plan: plan,
                     isSelected: plan.id == selectedId,
-                    isSingle: plan.planType == .oneTimeAttraction,
-                    preferChinese: preferChinese
+                    isSingle: plan.planType == .oneTimeAttraction
                 ) {
                     selectedId = plan.id
                 }
@@ -314,7 +312,6 @@ private struct PlanOptionCard: View {
     let plan: MembershipPlan
     let isSelected: Bool
     let isSingle: Bool
-    let preferChinese: Bool
     let onTap: () -> Void
 
     private var accent: Color {
@@ -328,7 +325,7 @@ private struct PlanOptionCard: View {
                     radio
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(alignment: .firstTextBaseline) {
-                            Text(plan.localizedName(preferChinese: preferChinese))
+                            Text(plan.displayName)
                                 .font(Theme.FontToken.playfair(16, weight: .semibold))
                                 .foregroundStyle(Theme.ColorToken.textPrimary)
                             Spacer()

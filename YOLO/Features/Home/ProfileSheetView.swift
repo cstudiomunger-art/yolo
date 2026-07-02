@@ -150,9 +150,7 @@ struct ProfileSheetView: View {
                             .font(Theme.FontToken.inter(11))
                             .foregroundStyle(Theme.ColorToken.textMuted)
                     } else if appEnv.purchase.isProActive {
-                        Text("✨ " + appEnv.purchase.displayMembershipPlanName(
-                            preferChinese: appEnv.preferences.appLanguage == .chinese
-                        ))
+                        Text("✨ " + appEnv.purchase.displayMembershipPlanName())
                             .font(Theme.FontToken.inter(13, weight: .medium))
                         if let expires = appEnv.preferences.effectiveMembershipExpiry {
                             Text(String(localized: "Valid until: ") + expires.formatted(date: .abbreviated, time: .omitted))

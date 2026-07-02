@@ -322,7 +322,7 @@ struct PrepareView: View {
 
     @ViewBuilder
     private var cultureTipsSection: some View {
-        Text("文化贴士")
+        Text("Culture Tips")
             .font(Theme.FontToken.inter(10, weight: .medium))
             .foregroundStyle(Theme.ColorToken.textDisabled)
             .textCase(.uppercase)
@@ -334,7 +334,7 @@ struct PrepareView: View {
         }
 
         ForEach(cityCultureTipGroups, id: \.cityName) { group in
-            Text("\(group.cityName) 特色贴士")
+            Text("\(group.cityName) Tips")
                 .font(Theme.FontToken.inter(10, weight: .medium))
                 .foregroundStyle(Theme.ColorToken.textDisabled)
                 .textCase(.uppercase)

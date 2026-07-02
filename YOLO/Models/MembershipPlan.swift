@@ -113,9 +113,5 @@ struct MembershipPlan: Identifiable, Codable, Sendable {
 }
 
 extension MembershipPlan {
-    /// Display name preferring the app language.
-    func localizedName(preferChinese: Bool) -> String {
-        if preferChinese, let zh = nameZh, !zh.isEmpty { return zh }
-        return nameEn
-    }
+    var displayName: String { nameEn }
 }

@@ -29,13 +29,13 @@ struct GeniusBarHomeView: View {
                     if !service.myConversations.isEmpty {
                         inbox
                     }
-                    Text("选一位伙伴和你聊（点头像即开始）：")
+                    Text("Pick someone to chat with (tap their avatar to start):")
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textSecondary)
                     grid
                     boundaryCard
                     if appEnv.auth.userId == nil {
-                        Text("登录后才能开始对话。")
+                        Text("Sign in to start a conversation.")
                             .font(Theme.FontToken.inter(11))
                             .foregroundStyle(Theme.ColorToken.warning)
                     }
@@ -44,7 +44,7 @@ struct GeniusBarHomeView: View {
             }
             .navigationTitle("Genius Bar")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
             .task {
                 await service.loadAgents()
                 if let uid = appEnv.auth.userId { await service.loadMyConversations(userId: uid) }
@@ -64,7 +64,7 @@ struct GeniusBarHomeView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Talk to a Human").font(Theme.FontToken.playfair(24, weight: .semibold))
-            Text("真诚是我们的护城河，不是机器人。我们是真心想帮你。")
+            Text("Authenticity is our moat — we're not bots. We genuinely want to help.")
                 .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
         }
     }
@@ -74,8 +74,8 @@ struct GeniusBarHomeView: View {
             HStack(spacing: 13) {
                 Text("🆘").font(.system(size: 26))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("在华紧急支援").font(Theme.FontToken.playfair(15, weight: .semibold))
-                    Text("迷路 / 被偷报警 / 找不到帮手 — 远程支援")
+                    Text("Emergency support in China").font(Theme.FontToken.playfair(15, weight: .semibold))
+                    Text("Lost / theft & police / can't find help — remote support")
                         .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
                 }
                 Spacer()
@@ -93,7 +93,7 @@ struct GeniusBarHomeView: View {
     private var inbox: some View {
         VStack(alignment: .leading, spacing: 14) {
             if !service.activeConversations.isEmpty {
-                conversationSection("进行中 · 继续聊", convs: service.activeConversations, history: false)
+                conversationSection("Active · Continue", convs: service.activeConversations, history: false)
             }
             if !service.historyConversations.isEmpty {
                 historyButton
@@ -106,8 +106,8 @@ struct GeniusBarHomeView: View {
             HStack(spacing: 11) {
                 Image(systemName: "clock.arrow.circlepath").font(.system(size: 17)).foregroundStyle(Theme.ColorToken.textSecondary)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("历史会话").font(Theme.FontToken.inter(13, weight: .medium))
-                    Text("查看已结束的对话记录").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+                    Text("History").font(Theme.FontToken.inter(13, weight: .medium))
+                    Text("View ended conversations").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
                 }
                 Spacer()
                 Text("\(service.historyConversations.count)").font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
@@ -132,11 +132,11 @@ struct GeniusBarHomeView: View {
                     .contextMenu {
                         Button(role: .destructive) {
                             Task { await service.deleteMyConversation(conv.id) }
-                        } label: { Label("删除记录", systemImage: "trash") }
+                        } label: { Label("Delete", systemImage: "trash") }
                     }
             }
             if history {
-                Text("长按可删除历史记录（仅从你这里移除）")
+                Text("Long-press to delete history (removed on your device only)")
                     .font(Theme.FontToken.inter(9)).foregroundStyle(Theme.ColorToken.textGhost)
             }
         }
@@ -147,8 +147,8 @@ struct GeniusBarHomeView: View {
             Text(conv.priority == "emergency" ? "🆘" : "💬").font(.system(size: 18))
             VStack(alignment: .leading, spacing: 1) {
                 Text(agentName(conv.agentId)).font(Theme.FontToken.inter(13, weight: .medium))
-                Text(history ? "已结束 · 查看记录"
-                     : (conv.priority == "emergency" ? "紧急支援会话" : "继续和 TA 聊"))
+                Text(history ? "Ended · View history"
+                     : (conv.priority == "emergency" ? "Emergency support chat" : "Continue chatting"))
                     .font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
             }
             Spacer()
@@ -171,7 +171,7 @@ struct GeniusBarHomeView: View {
     }
 
     private func agentName(_ agentId: String?) -> String {
-        guard let agentId, let a = service.agents.first(where: { $0.id == agentId }) else { return "客服" }
+        guard let agentId, let a = service.agents.first(where: { $0.id == agentId }) else { return "Support" }
         return a.name
     }
 
@@ -207,13 +207,13 @@ struct GeniusBarHomeView: View {
 
     private var boundaryCard: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("✓ 我们能帮").font(Theme.FontToken.inter(10, weight: .semibold)).foregroundStyle(Theme.ColorToken.success)
-            Text("行前答疑 · 帮你找帮手 · 付款绑卡协助 · 在华紧急联络支援")
+            Text("✓ We can help").font(Theme.FontToken.inter(10, weight: .semibold)).foregroundStyle(Theme.ColorToken.success)
+            Text("Pre-trip Q&A · finding local help · payment & card binding · emergency support in China")
                 .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
-            Text("— 暂不能帮").font(Theme.FontToken.inter(10, weight: .semibold)).foregroundStyle(Theme.ColorToken.textMuted).padding(.top, 4)
-            Text("重大医疗诊断 · 涉政法律事务 — 请优先联系官方机构（110 / 120 / 使领馆）")
+            Text("— We can't help with").font(Theme.FontToken.inter(10, weight: .semibold)).foregroundStyle(Theme.ColorToken.textMuted).padding(.top, 4)
+            Text("Major medical diagnoses · political or legal matters — contact official services first (110 / 120 / embassy)")
                 .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
-            Text("※ 边界文案待团队最终确认").font(Theme.FontToken.inter(9)).foregroundStyle(Theme.ColorToken.textMuted)
+            Text("※ Boundary copy pending final team review").font(Theme.FontToken.inter(9)).foregroundStyle(Theme.ColorToken.textMuted)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
@@ -235,7 +235,7 @@ struct GeniusBarHomeView: View {
         switch s { case "online": return Theme.ColorToken.success; case "busy": return Theme.ColorToken.warning; default: return Theme.ColorToken.textGhost }
     }
     private func statusLabel(_ s: String) -> String {
-        switch s { case "online": return "🟢 在线 · 通常几分钟回"; case "busy": return "🟡 忙 · 稍后回"; default: return "离线" }
+        switch s { case "online": return "🟢 Online · usually replies in minutes"; case "busy": return "🟡 Busy · replies later"; default: return "Offline" }
     }
 
 }
@@ -250,7 +250,7 @@ struct GeniusBarHistoryView: View {
     var body: some View {
         List {
             if service.historyConversations.isEmpty {
-                Text("暂无历史会话")
+                Text("No conversation history")
                     .font(Theme.FontToken.inter(13))
                     .foregroundStyle(Theme.ColorToken.textMuted)
             } else {
@@ -262,7 +262,7 @@ struct GeniusBarHistoryView: View {
                         VStack(alignment: .leading, spacing: 1) {
                             Text(agentName(conv.agentId)).font(Theme.FontToken.inter(14, weight: .medium))
                                 .foregroundStyle(Theme.ColorToken.textPrimary)
-                            Text("已结束 · 查看记录").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                            Text("Ended · View history").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
                         }
                         Spacer()
                         Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.textGhost)
@@ -273,19 +273,19 @@ struct GeniusBarHistoryView: View {
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             Task { await service.deleteMyConversation(conv.id) }
-                        } label: { Label("删除", systemImage: "trash") }
+                        } label: { Label("Delete", systemImage: "trash") }
                     }
                 }
             }
         }
         .listStyle(.plain)
-        .navigationTitle("历史会话")
+        .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(item: $chatIntent) { GeniusBarChatView(intent: $0) }
     }
 
     private func agentName(_ agentId: String?) -> String {
-        guard let agentId, let a = service.agents.first(where: { $0.id == agentId }) else { return "客服" }
+        guard let agentId, let a = service.agents.first(where: { $0.id == agentId }) else { return "Support" }
         return a.name
     }
 }
@@ -324,7 +324,7 @@ struct GeniusBarChatView: View {
 
     private var closedBanner: some View {
         VStack(spacing: 8) {
-            Text("会话已结束 · 再次咨询将开启新会话")
+            Text("Chat ended · starting again opens a new conversation")
                 .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
             if let agentId = service.conversation?.agentId, let uid = appEnv.auth.userId {
                 Button {
@@ -333,7 +333,7 @@ struct GeniusBarChatView: View {
                             displayName: appEnv.preferences.displayName, email: appEnv.auth.userEmail)
                     }
                 } label: {
-                    Text("再次咨询 TA")
+                    Text("Chat again")
                         .font(Theme.FontToken.inter(13, weight: .semibold)).foregroundStyle(.white)
                         .frame(maxWidth: .infinity).padding(.vertical, 12)
                         .background(Theme.ColorToken.success).clipShape(RoundedRectangle(cornerRadius: 12))
@@ -351,7 +351,7 @@ struct GeniusBarChatView: View {
             VStack(spacing: 12) {
                 Spacer()
                 ProgressView()
-                Text("正在接通…")
+                Text("Connecting…")
                     .font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
                 Spacer()
             }
@@ -380,7 +380,7 @@ struct GeniusBarChatView: View {
                 .simultaneousGesture(TapGesture().onEnded { inputFocused = false })
             }
             if service.conversation?.isClosed == false && service.agentIsTyping {
-                Text("对方正在输入…")
+                Text("Typing…")
                     .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, Theme.screenPadding).padding(.bottom, 4)
@@ -396,7 +396,7 @@ struct GeniusBarChatView: View {
         .onChange(of: draft) { _, value in
             if !value.isEmpty { Task { await service.userIsTyping() } }
         }
-        .navigationTitle("对话")
+        .navigationTitle("Chat")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -406,7 +406,7 @@ struct GeniusBarChatView: View {
                 } label: {
                     HStack(spacing: 3) {
                         Image(systemName: "globe").font(.system(size: 11, weight: .semibold))
-                        Text("翻译").font(Theme.FontToken.inter(11, weight: .semibold))
+                        Text("Translate").font(Theme.FontToken.inter(11, weight: .semibold))
                     }
                     .padding(.horizontal, 9).padding(.vertical, 5)
                     .foregroundStyle(service.autoTranslate ? .white : Theme.ColorToken.textSecondary)
@@ -417,16 +417,16 @@ struct GeniusBarChatView: View {
             }
             if service.conversation?.isClosed == false {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("结束会话") { showEndConfirm = true }
+                    Button("End chat") { showEndConfirm = true }
                         .font(Theme.FontToken.inter(12, weight: .medium))
                 }
             }
         }
-        .alert("结束这次会话？", isPresented: $showEndConfirm) {
-            Button("结束会话", role: .destructive) { Task { await service.endConversation() } }
-            Button("取消", role: .cancel) {}
+        .alert("End this chat?", isPresented: $showEndConfirm) {
+            Button("End chat", role: .destructive) { Task { await service.endConversation() } }
+            Button("Cancel", role: .cancel) {}
         } message: {
-            Text("结束后会进入「历史会话」，需要时可再次咨询（开启新会话）。")
+            Text("It moves to History. You can start a new chat anytime.")
         }
         .task { await resolveIntent() }
         .onDisappear { Task { await service.leaveConversation() } }
@@ -475,13 +475,13 @@ struct GeniusBarChatView: View {
     private func translateControl(_ msg: SupportMessage) -> some View {
         if let body = msg.bodyOriginal, !body.isEmpty {
             if service.translatingIds.contains(msg.id) {
-                Text("翻译中…").font(Theme.FontToken.inter(9)).foregroundStyle(Theme.ColorToken.textMuted)
+                Text("Translating…").font(Theme.FontToken.inter(9)).foregroundStyle(Theme.ColorToken.textMuted)
             } else if (msg.bodyTranslated ?? "").isEmpty {
-                Button("翻译") { Task { await service.translateMessage(msg) } }
+                Button("Translate") { Task { await service.translateMessage(msg) } }
                     .font(Theme.FontToken.inter(9, weight: .medium)).foregroundStyle(Theme.ColorToken.accent)
                     .buttonStyle(.plain)
             } else if !service.autoTranslate {
-                Button(shownTranslations.contains(msg.id) ? "隐藏译文" : "显示译文") {
+                Button(shownTranslations.contains(msg.id) ? "Hide translation" : "Show translation") {
                     if shownTranslations.contains(msg.id) { shownTranslations.remove(msg.id) } else { shownTranslations.insert(msg.id) }
                 }
                 .font(Theme.FontToken.inter(9, weight: .medium)).foregroundStyle(Theme.ColorToken.accent)
@@ -495,7 +495,7 @@ struct GeniusBarChatView: View {
             PhotosPicker(selection: $photoItem, matching: .images) {
                 Image(systemName: "photo").font(.system(size: 18)).foregroundStyle(Theme.ColorToken.textSecondary)
             }
-            TextField("发消息…（中英都行，自动翻译）", text: $draft, axis: .vertical)
+            TextField("Message… (Chinese or English, auto-translated)", text: $draft, axis: .vertical)
                 .font(Theme.FontToken.inter(13)).lineLimit(1...4)
                 .focused($inputFocused)
                 .padding(.horizontal, 12).padding(.vertical, 8)

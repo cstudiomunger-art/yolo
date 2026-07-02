@@ -39,10 +39,10 @@ struct BookingTraceCard: View {
             header
 
             if !hotels.isEmpty {
-                group(label: "🏨 已加入行程的酒店", items: hotels)
+                group(label: "🏨 Hotels added to trip", items: hotels)
             }
             if !attractions.isEmpty {
-                group(label: "📍 已加入行程的景点", items: attractions)
+                group(label: "📍 Attractions added to trip", items: attractions)
             }
             externalLinksNote
         }
@@ -53,10 +53,10 @@ struct BookingTraceCard: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("My Booking Trace · 行程留痕")
+            Text("My Booking Trace")
                 .font(Theme.FontToken.playfair(15, weight: .semibold))
                 .foregroundStyle(.white)
-            Text("平台内的预订与选择，聚合在这里")
+            Text("Platform bookings and selections, all in one place")
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(.white.opacity(0.62))
         }
@@ -93,11 +93,11 @@ struct BookingTraceCard: View {
 
     private var externalLinksNote: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("🔗 购票链接（外部 · 不留痕）")
+            Text("🔗 Ticket links (external · not tracked)")
                 .font(Theme.FontToken.inter(9, weight: .medium))
                 .foregroundStyle(Theme.ColorToken.textMuted)
                 .textCase(.uppercase)
-            Text("高铁 / 门票等外部购票入口为跳转链接，不记录在行程留痕中。")
+            Text("High-speed rail / ticket links open externally and are not recorded in your booking trace.")
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
         }

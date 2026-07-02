@@ -34,7 +34,7 @@ enum VisaNationalitySummary {
                 return VisaRule(
                     countryCode: cc, countryName: countryName, flag: flag,
                     visaFree: true, stayDays: grant.maxStayOverride ?? p.maxStayDefault,
-                    headline: p.officialNameZh, details: [])
+                    headline: p.officialNameEn.isEmpty ? p.officialNameZh : p.officialNameEn, details: [])
             }
         }
 

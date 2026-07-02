@@ -24,7 +24,7 @@ struct ItineraryEditorView: View {
                             .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
                             .listRowBackground(Color.clear)
                     } header: {
-                        Text("Booking trace · 行程留痕")
+                        Text("Booking trace")
                     }
                 }
 

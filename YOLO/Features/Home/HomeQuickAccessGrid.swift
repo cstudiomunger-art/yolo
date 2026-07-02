@@ -42,7 +42,7 @@ struct HomeQuickAccessGrid: View {
                 quickCell(
                     icon: "🗣",
                     label: String(localized: "Phrases & Dialect"),
-                    subtitle: String(localized: "Say it right · 方言彩蛋"),
+                    subtitle: String(localized: "Say it right · dialect gems"),
                     action: onOpenPhrases
                 )
                 quickCell(

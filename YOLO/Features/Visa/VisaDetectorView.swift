@@ -58,8 +58,8 @@ struct VisaDetectorView: View {
     }
 
     private var tripSourceTitle: String {
-        if selfTest { return "手动试算（不写回行程）" }
-        return hasRealTrip ? "正在判定：我的行程" : "还没有行程"
+        if selfTest { return "Manual test (won't update trip)" }
+        return hasRealTrip ? "Checking: My trip" : "No trip yet"
     }
 
     /// GB/T 2260 codes the engine evaluates (self-test picks are already codes).
@@ -76,7 +76,7 @@ struct VisaDetectorView: View {
                     selectorsSection
                     ctaButton
 
-                    Text("行程不是输入——地理范围限制是政策的输出。引擎只收能产生确定判决的硬事实，城市来自你的行程。以边检最终判定为准。")
+                    Text("Your itinerary isn't an input—geographic limits are policy outputs. The engine only takes hard facts that yield a definite verdict; cities come from your trip. Border officers have the final say.")
                         .font(Theme.FontToken.inter(10))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                         .padding(.top, 2)
@@ -84,10 +84,10 @@ struct VisaDetectorView: View {
                 .padding(.horizontal, Theme.screenPadding)
                 .padding(.vertical, 20)
             }
-            .navigationTitle("签证检测")
+            .navigationTitle("Visa Check")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }
             }
             .task { await appEnv.visaData.load() }
             .onAppear {
@@ -115,7 +115,7 @@ struct VisaDetectorView: View {
                       systemImage: selfTest ? "slider.horizontal.3" : (hasRealTrip ? "location" : "questionmark.circle"))
                     .font(Theme.FontToken.inter(13, weight: .semibold))
                 Spacer()
-                Button(selfTest ? "用我的行程" : "手动选城市测一测") { selfTest.toggle() }
+                Button(selfTest ? "Use my trip" : "Pick cities to test") { selfTest.toggle() }
                     .font(Theme.FontToken.inter(11, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.accent)
             }
@@ -124,8 +124,8 @@ struct VisaDetectorView: View {
                 Button { showCityPicker = true } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 1) {
-                            Text("测算城市").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
-                            Text(selfTestCodes.isEmpty ? "点此选择城市" : selfTestSummary)
+                            Text("Test cities").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+                            Text(selfTestCodes.isEmpty ? "Tap to select cities" : selfTestSummary)
                                 .font(Theme.FontToken.inter(14, weight: .medium))
                                 .foregroundStyle(selfTestCodes.isEmpty ? Theme.ColorToken.textMuted : Theme.ColorToken.textPrimary)
                         }
@@ -138,7 +138,7 @@ struct VisaDetectorView: View {
                 .buttonStyle(.plain)
 
                 if selfTestCodes.isEmpty {
-                    Text("选几座城市来试算（仅本地，不影响真实行程）")
+                    Text("Select cities to test (local only, won't affect your real trip)")
                         .font(Theme.FontToken.inter(10))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                 } else {
@@ -150,7 +150,7 @@ struct VisaDetectorView: View {
                     }
                 }
             } else if tripSlugs.isEmpty {
-                Text("还没有行程。去 Plan 规划一条，或点上面「手动选城市测一测」。")
+                Text("No trip yet. Plan one in Plan, or tap \"Pick cities to test\" above.")
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
             } else {
@@ -169,7 +169,7 @@ struct VisaDetectorView: View {
 
     private var selfTestSummary: String {
         let names = selfTestCodes.sorted().map { appEnv.visaData.data.cityName(forAdminCode: $0) }
-        return names.count <= 3 ? names.joined(separator: " · ") : "已选 \(names.count) 城"
+        return names.count <= 3 ? names.joined(separator: " · ") : "\(names.count) cities selected"
     }
 
     private var ctaButton: some View {
@@ -177,7 +177,7 @@ struct VisaDetectorView: View {
         return Button(action: runEngine) {
             HStack(spacing: 8) {
                 Image(systemName: "checkmark.seal.fill").font(.system(size: 14))
-                Text("开始判定 · 我这条线够用吗")
+                Text("Run check · Is my route OK?")
                     .font(Theme.FontToken.inter(14, weight: .semibold))
             }
             .frame(maxWidth: .infinity)
@@ -200,10 +200,10 @@ struct VisaDetectorView: View {
                     .background(Theme.ColorToken.accent.opacity(0.14))
                     .clipShape(RoundedRectangle(cornerRadius: 11))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("护照国籍 · \(countryLabel(country))")
+                    Text("Passport nationality · \(countryLabel(country))")
                         .font(Theme.FontToken.inter(14, weight: .semibold))
                         .foregroundStyle(Theme.ColorToken.textPrimary)
-                    Text("点此修改护照国籍（同步到「我的」）")
+                    Text("Tap to change passport nationality (syncs to Profile)")
                         .font(Theme.FontToken.inter(10))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                 }
@@ -218,7 +218,7 @@ struct VisaDetectorView: View {
         .buttonStyle(.plain)
         .sheet(isPresented: $editingPassport) {
             CountrySelectSheet(
-                title: "护照国籍",
+                title: "Passport nationality",
                 countries: countries,
                 includeUndecided: false,
                 selected: country
@@ -249,12 +249,12 @@ struct VisaDetectorView: View {
 
     private var selectorsSection: some View {
         VStack(spacing: 18) {
-            groupCard("路线 · 从哪来、到哪去") {
-                countryRow(title: "从哪国出发", field: .departure, code: departure)
+            groupCard("Route · Where from & to") {
+                countryRow(title: "Departing from", field: .departure, code: departure)
                 Divider()
-                countryRow(title: "下一程去哪 / 回哪国", field: .onward, code: onward)
+                countryRow(title: "Next destination / return country", field: .onward, code: onward)
                 Divider()
-                portRow(title: "入境口岸", field: .entry, code: entryPort)
+                portRow(title: "Entry port", field: .entry, code: entryPort)
                     .sheet(item: $editingPort) { field in
                         PortSelectSheet(
                             title: field.title,
@@ -266,7 +266,7 @@ struct VisaDetectorView: View {
                         }
                     }
                 Divider()
-                portRow(title: "出境口岸", field: .exit, code: exitPort)
+                portRow(title: "Exit port", field: .exit, code: exitPort)
             }
             .sheet(item: $editingCountry) { field in
                 CountrySelectSheet(
@@ -280,12 +280,12 @@ struct VisaDetectorView: View {
                 }
             }
 
-            groupCard("时间 · 进出时刻") { datesRow }
+            groupCard("Dates & times") { datesRow }
 
-            groupCard("条件 · 影响免签的开关") {
-                toggleRow(title: "已出续程机票", subtitle: "过境免签需要", isOn: $ticketed)
+            groupCard("Conditions · Visa waiver factors") {
+                toggleRow(title: "Onward ticket booked", subtitle: "Required for transit visa waiver", isOn: $ticketed)
                 Divider()
-                toggleRow(title: "随旅游团入境", subtitle: "团体/邮轮免签需要", isOn: $group)
+                toggleRow(title: "Entering with tour group", subtitle: "Required for group/cruise visa waiver", isOn: $group)
                 Divider()
                 validityRow
             }
@@ -301,7 +301,7 @@ struct VisaDetectorView: View {
 
     /// flag + name for a code, from the loaded full list (empty = undecided).
     private func countryLabel(_ code: String) -> String {
-        if code.isEmpty { return "❓ 还没定" }
+        if code.isEmpty { return "❓ Undecided" }
         if let c = countries.first(where: { $0.code.caseInsensitiveCompare(code) == .orderedSame }) {
             return "\(c.flag) \(c.name)"
         }
@@ -328,16 +328,16 @@ struct VisaDetectorView: View {
     private var datesRow: some View {
         VStack(spacing: 8) {
             HStack {
-                Text("入境日期时间").font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
+                Text("Entry date & time").font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
                 Spacer()
                 DatePicker("", selection: $entryAt, displayedComponents: [.date, .hourAndMinute]).labelsHidden()
             }
             HStack {
-                Text("计划离境日期时间").font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
+                Text("Planned exit date & time").font(Theme.FontToken.inter(12)).foregroundStyle(Theme.ColorToken.textMuted)
                 Spacer()
                 DatePicker("", selection: $plannedExitAt, displayedComponents: [.date, .hourAndMinute]).labelsHidden()
             }
-            Text("24 小时过境免签按入境精确时刻计时；其余按入境次日 0 时起算。")
+            Text("24-hour transit visa waiver is counted from exact entry time; others from midnight after entry.")
                 .font(Theme.FontToken.inter(9))
                 .foregroundStyle(Theme.ColorToken.textMuted)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -359,11 +359,11 @@ struct VisaDetectorView: View {
 
     private var validityRow: some View {
         Menu {
-            Button("≥ 6 个月 ✓") { validity = .ok }
-            Button("< 6 个月 ⚠️") { validity = .short }
-            Button("不确定 / 跳过") { validity = .skip }
+            Button("≥ 6 months ✓") { validity = .ok }
+            Button("< 6 months ⚠️") { validity = .short }
+            Button("Unsure / skip") { validity = .skip }
         } label: {
-            selectorRow(title: "护照剩余有效期（可选）", value: validity.label)
+            selectorRow(title: "Passport validity remaining (optional)", value: validity.label)
         }
     }
 
@@ -421,21 +421,21 @@ struct VisaDetectorView: View {
 
     enum ValidityChoice { case ok, short, skip
         var months: Int? { switch self { case .ok: return 12; case .short: return 3; case .skip: return nil } }
-        var label: String { switch self { case .ok: return "≥ 6 个月 ✓"; case .short: return "< 6 个月 ⚠️"; case .skip: return "不确定 / 跳过" } }
+        var label: String { switch self { case .ok: return "≥ 6 months ✓"; case .short: return "< 6 months ⚠️"; case .skip: return "Unsure / skip" } }
     }
 
     /// Which country selector the picker sheet is editing.
     enum CountryField: Identifiable {
         case departure, onward
         var id: Int { self == .departure ? 0 : 1 }
-        var title: String { self == .departure ? "从哪国出发" : "下一程去哪 / 回哪国" }
+        var title: String { self == .departure ? "Departing from" : "Next destination / return country" }
     }
 
     /// Which port selector the picker sheet is editing.
     enum PortField: Identifiable {
         case entry, exit
         var id: Int { self == .entry ? 0 : 1 }
-        var title: String { self == .entry ? "入境口岸" : "出境口岸" }
+        var title: String { self == .entry ? "Entry port" : "Exit port" }
     }
 
     /// Used only until `visa_ports` is fetched (keeps the port menu non-empty offline).
@@ -489,7 +489,7 @@ struct CountrySelectSheet: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     if includeUndecided && search.isEmpty {
-                        row(flag: "❓", name: "还没定", code: "")
+                        row(flag: "❓", name: "Undecided", code: "")
                         Divider().padding(.leading, Theme.screenPadding)
                     }
                     ForEach(filtered) { c in
@@ -498,10 +498,10 @@ struct CountrySelectSheet: View {
                     }
                 }
             }
-            .searchable(text: $search, prompt: "搜索国家 / 地区")
+            .searchable(text: $search, prompt: "Search country / region")
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
         }
     }
 
@@ -564,10 +564,10 @@ private struct PortSelectSheet: View {
                     }
                 }
             }
-            .searchable(text: $search, prompt: "搜索口岸 / IATA")
+            .searchable(text: $search, prompt: "Search port / IATA")
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
         }
     }
 }
@@ -612,10 +612,10 @@ private struct CitySelectSheet: View {
                     }
                 }
             }
-            .searchable(text: $search, prompt: "搜索城市")
-            .navigationTitle("选择测算城市")
+            .searchable(text: $search, prompt: "Search cities")
+            .navigationTitle("Select test cities")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完成") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
     }
 }

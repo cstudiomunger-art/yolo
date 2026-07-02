@@ -42,9 +42,9 @@ struct PlanCreateFlowView: View {
         var id: Int { rawValue }
         var title: String {
             switch self {
-            case .nationality: return "国籍 / 护照"
-            case .departure: return "从哪国出发"
-            case .onward: return "下一程去哪 / 回哪国"
+            case .nationality: return "Nationality / Passport"
+            case .departure: return "Departing from"
+            case .onward: return "Next destination / Return to"
             }
         }
     }
@@ -147,7 +147,7 @@ struct PlanCreateFlowView: View {
         switch step {
         case .cities: String(localized: "Choose cities")
         case .dates: String(localized: "Travel dates")
-        case .visa: String(localized: "签证核对")
+        case .visa: String(localized: "Visa Review")
         case .generating: String(localized: "Creating trip")
         case .failed: String(localized: "Something went wrong")
         case .review: String(localized: "Your itinerary")
@@ -299,7 +299,7 @@ struct PlanCreateFlowView: View {
     // 签证相关输入: 国籍 / 出发国 / 下一程国 — 让生成前的签证核对更准(尤其过境 240h 依赖下一程)。
     private var visaInputsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("签证信息(让签证核对更准)")
+            Text("Visa details (for accurate checks)")
                 .font(Theme.FontToken.inter(12, weight: .semibold))
                 .foregroundStyle(Theme.ColorToken.textSecondary)
             VStack(spacing: 0) {
@@ -310,14 +310,14 @@ struct PlanCreateFlowView: View {
                 planCountryRow(.onward, code: onwardCode)
                 Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
                 Toggle(isOn: $passportValidEnough) {
-                    Text("护照有效期 ≥ \(minValidityMonths) 个月")
+                    Text("Passport valid for ≥ \(minValidityMonths) months")
                         .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
                 }
                 .tint(Theme.ColorToken.success)
                 .padding(.vertical, 8)
                 Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
                 Toggle(isOn: $hasChinaVisa) {
-                    Text("我已持有中国签证")
+                    Text("I already have a China visa")
                         .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
                 }
                 .tint(Theme.ColorToken.success)
@@ -326,7 +326,7 @@ struct PlanCreateFlowView: View {
             .padding(.horizontal, 12)
             .background(Theme.ColorToken.backgroundSubtle)
             .clipShape(RoundedRectangle(cornerRadius: 10))
-            Text("默认按往返同国判定。若下一程是第三国/港澳,可能触发过境免签。护照有效期不足 \(minValidityMonths) 个月将无法免签也无法办签证。")
+            Text("Defaults assume round-trip to the same country. A third country or HK/Macau as next stop may qualify for transit visa-free. Passport validity under \(minValidityMonths) months blocks both visa-free entry and visa applications.")
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(Theme.ColorToken.textMuted)
         }
@@ -350,7 +350,7 @@ struct PlanCreateFlowView: View {
     }
 
     private func planCountryLabel(_ code: String) -> String {
-        if code.isEmpty { return "❓ 还没定" }
+        if code.isEmpty { return "❓ Not decided yet" }
         if let c = visaCountries.first(where: { $0.code.caseInsensitiveCompare(code) == .orderedSame }) {
             return "\(c.flag) \(c.name)"
         }
@@ -384,7 +384,7 @@ struct PlanCreateFlowView: View {
                 VStack(spacing: 20) {
                     Spacer()
                     ProgressView().scaleEffect(1.3)
-                    Text("正在核对签证…").font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textMuted)
+                    Text("Checking visa requirements…").font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textMuted)
                     Spacer()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -404,21 +404,21 @@ struct PlanCreateFlowView: View {
                         // Route cards are each selectable; only show the standalone continue
                         // button when there are none (GATE0 / passport-validity block).
                         if visaRoutes.isEmpty {
-                            primaryButton(String(localized: "保持原行程继续")) { startGeneration() }
+                            primaryButton(String(localized: "Keep original itinerary")) { startGeneration() }
                                 .padding(.top, 4)
                         }
 
                         Button {
                             showVisaDetector = true
                         } label: {
-                            Text("精细核对(出发地 / 口岸 / 续程票)")
+                            Text("Detailed check (departure / port / onward ticket)")
                                 .font(Theme.FontToken.inter(12, weight: .medium))
                                 .foregroundStyle(Theme.ColorToken.accent)
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.plain)
 
-                        Text("按常见默认粗判(往返同国、主要机场进出、已出续程票)。以边检最终判定为准。")
+                        Text("Based on common defaults (round-trip same country, major airports, onward ticket issued). Final decision rests with border control.")
                             .font(Theme.FontToken.inter(10))
                             .foregroundStyle(Theme.ColorToken.textMuted)
                     }
@@ -436,12 +436,12 @@ struct PlanCreateFlowView: View {
         let title: String
         let detail: String
         if isGate0 {
-            title = "护照有效期不足"
-            detail = "有效期不足 \(minValidityMonths) 个月，免签和签证都无法办理。请先换发护照再出行。"
+            title = "Passport validity insufficient"
+            detail = "Validity under \(minValidityMonths) months — neither visa-free entry nor a visa is possible. Renew your passport before traveling."
         } else {
-            title = needVisa ? "这条线默认可能需要签证" : "这条线有条件免签，建议核对"
-            var d = "下面给出更省事的走法，签证友好那条经引擎复核为全程免签。"
-            if let days = rec.maxStayDays { d = "免签停留上限约 \(days) 天。" + d }
+            title = needVisa ? "This route may require a visa by default" : "Conditional visa-free entry — verify details"
+            var d = "Easier alternatives below; the visa-friendly option is engine-verified as fully visa-free."
+            if let days = rec.maxStayDays { d = "Visa-free stay limit approx. \(days) days. " + d }
             detail = d
         }
         return HStack(alignment: .top, spacing: 9) {
@@ -493,7 +493,7 @@ struct PlanCreateFlowView: View {
                 HStack(spacing: 10) {
                     ForEach(opts) { opt in
                         Button { adoptTransit(route, option: opt) } label: {
-                            Text("选\(opt.short)")
+                            Text("Choose \(opt.short)")
                                 .font(Theme.FontToken.inter(12, weight: .semibold))
                                 .frame(maxWidth: .infinity).padding(.vertical, 10)
                                 .foregroundStyle(Color.white)
@@ -506,7 +506,7 @@ struct PlanCreateFlowView: View {
             } else {
                 // Every route is selectable. Friendly = filled success CTA; original = outline.
                 Button { adoptVisaRoute(route) } label: {
-                    Text(route.kind == .friendly ? "按推荐确认并生成" : "选这条 · 办 L 签生成")
+                    Text(route.kind == .friendly ? "Confirm recommendation & generate" : "Choose this · Apply for L visa & generate")
                         .font(Theme.FontToken.inter(12, weight: .semibold))
                         .frame(maxWidth: .infinity).padding(.vertical, 10)
                         .foregroundStyle(route.kind == .friendly ? Color.white : Theme.ColorToken.textPrimary)
@@ -532,15 +532,15 @@ struct PlanCreateFlowView: View {
         let ready = swapPicks.count == plan.need
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("✓ 签证友好 · 换城(自选)").font(Theme.FontToken.inter(12, weight: .semibold))
+                Text("✓ Visa-friendly · Swap cities (your choice)").font(Theme.FontToken.inter(12, weight: .semibold))
                 Spacer()
-                Text("换城免签 · 城数不变")
+                Text("Swap for visa-free · Same city count")
                     .font(Theme.FontToken.inter(9, weight: .semibold))
                     .padding(.horizontal, 8).padding(.vertical, 3)
                     .foregroundStyle(Theme.ColorToken.success)
                     .overlay(Capsule().stroke(Theme.ColorToken.success, lineWidth: 1))
             }
-            Text("需签证的城市：\(plan.blockerNames)。换成下面任一座免签可达的城市(选 \(plan.need) 座)，经引擎复核为全程免签。")
+            Text("Cities requiring a visa: \(plan.blockerNames). Swap any below for a visa-free alternative (pick \(plan.need)), engine-verified as fully visa-free.")
                 .font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
 
             VStack(spacing: 0) {
@@ -569,7 +569,7 @@ struct PlanCreateFlowView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
 
             Button { confirmSwap(plan) } label: {
-                Text(ready ? "按所选换城确认并生成" : "请选择 \(plan.need) 座替换城市")
+                Text(ready ? "Confirm swap & generate" : "Select \(plan.need) replacement \(plan.need == 1 ? "city" : "cities")")
                     .font(Theme.FontToken.inter(12, weight: .semibold))
                     .frame(maxWidth: .infinity).padding(.vertical, 10)
                     .background(ready ? Theme.ColorToken.success : Theme.ColorToken.textGhost)
@@ -853,7 +853,7 @@ struct PlanCreateFlowView: View {
             let plan = VisaTripChecker.swapPlan(query: query, appCities: slugs, catalog: catalog, data: data, rec: rec)
             var rs = VisaTripChecker.routes(query: query, appCities: slugs, data: data, recommendation: rec)
             // Prefer the interactive 换城 card over the auto 删城 route when a swap pool exists.
-            if plan != nil { rs.removeAll { $0.kind == .friendly && $0.title.contains("去掉拖累城") } }
+            if plan != nil { rs.removeAll { $0.kind == .friendly && $0.title.contains("drop blocker") } }
             // Drop the 备选·办L签 card — it's identical to 纯兴趣 (keep original + L visa), and the
             // 纯兴趣 card is now selectable on its own.
             rs.removeAll { $0.kind == .applyVisa }

@@ -16,8 +16,8 @@ struct PlanRouteVisaCompareView: View {
 
     private var introText: String {
         hasFriendly
-            ? "这条线默认需签证。下面 \(routes.count) 条走法，签证友好那条不用办签、还可能多一座城。"
-            : "这条线默认需签证，且暂未找到免签走法（多因停留超免签时限或城市超范围）。下面 \(routes.count) 条都需办 L 旅游签证。"
+            ? "This route likely requires a visa. Below are \(routes.count) options — the visa-friendly one needs no visa and may add a city."
+            : "This route likely requires a visa, and no visa-free alternative was found (often due to stay limits or city scope). All \(routes.count) options below require an L tourist visa."
     }
 
     var body: some View {
@@ -39,9 +39,9 @@ struct PlanRouteVisaCompareView: View {
                 }
                 .padding(Theme.screenPadding)
             }
-            .navigationTitle("\(routes.count) 选 1")
+            .navigationTitle("Pick 1 of \(routes.count)")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
         }
     }
 
@@ -69,7 +69,7 @@ struct PlanRouteVisaCompareView: View {
             Text(route.note).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
             if route.kind == .friendly {
                 Button { adopt(route) } label: {
-                    Text(adopted == route.id ? "✓ 已采用" : "采用这条")
+                    Text(adopted == route.id ? "✓ Adopted" : "Adopt this route")
                         .font(Theme.FontToken.inter(12, weight: .semibold))
                         .frame(maxWidth: .infinity).padding(.vertical, 10)
                         .background(Theme.ColorToken.success).foregroundStyle(.white)

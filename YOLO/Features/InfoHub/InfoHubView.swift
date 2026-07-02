@@ -11,19 +11,19 @@ struct InfoHubView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
-                    actionCard("🚨", "紧急", "报警 110 · 使馆按国籍 · 急救卡") { appEnv.navigation.presentEmergency() }
-                    actionCard("🛂", "签证", "你这条线够不够用 · 规则说明") { appEnv.navigation.presentVisaChecker() }
-                    actionCard("💳", "支付", "绑卡 / 外卡 / 现金 三级方案") { appEnv.navigation.presentPaymentHelper() }
-                    NavigationLink { InternetAccessGuideView() } label: { cardBody("🌐", "科学上网", "合法渠道 · SIM 卡 · 漫游") }
+                    actionCard("🚨", "Emergency", "Call 110 · embassy by nationality · medical card") { appEnv.navigation.presentEmergency() }
+                    actionCard("🛂", "Visa", "Does your route qualify · rules explained") { appEnv.navigation.presentVisaChecker() }
+                    actionCard("💳", "Payment", "Card binding / foreign cards / cash tiers") { appEnv.navigation.presentPaymentHelper() }
+                    NavigationLink { InternetAccessGuideView() } label: { cardBody("🌐", "Internet access", "Legal options · SIM cards · roaming") }
                         .buttonStyle(.plain)
-                    NavigationLink { TransportView() } label: { cardBody("🚄", "交通", "高铁怎么买 · 打车 · 地铁") }
+                    NavigationLink { TransportView() } label: { cardBody("🚄", "Transport", "High-speed rail · taxis · metro") }
                         .buttonStyle(.plain)
                 }
                 .padding(Theme.screenPadding)
             }
-            .navigationTitle("实用信息")
+            .navigationTitle("Practical Info")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
         }
     }
 

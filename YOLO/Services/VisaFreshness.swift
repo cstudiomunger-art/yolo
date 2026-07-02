@@ -1,8 +1,8 @@
 import Foundation
 
-/// Swift port of the delivery-package `freshness.py` UI badge (铁律：只告警不改库).
+/// Swift port of the delivery-package `freshness.py` UI badge (iron rule: alert only, never mutate DB).
 /// Derives a freshness level + copy from a policy's expiry / last_verified dates so the
-/// result card can flag near-expiry policies (单方面 48 国 2026-12-31 临期).
+/// result card can flag near-expiry policies (e.g. unilateral 48-country policy expiring 2026-12-31).
 struct VisaFreshness: Equatable {
     enum Level: String { case fresh, stale, expiring, expired }
 
@@ -13,6 +13,8 @@ struct VisaFreshness: Equatable {
 
     /// Rules baseline (delivery-package VERSION + verification round).
     static let rulesVersion = "phase1 · 2026-06-22 verified"
+
+    private static let borderDisclaimer = "Subject to final decision at border control."
 
     private static let dayFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -40,24 +42,24 @@ struct VisaFreshness: Equatable {
         let lv = parse(lastVerified)
 
         if let exp, exp < today {
-            let tail = hasHistory ? "；历史上曾多次延期，请关注官方公告" : "，请关注官方公告"
+            let tail = hasHistory ? "; this policy has been extended before — check official announcements" : " — check official announcements"
             return VisaFreshness(
                 level: .expired, lastVerified: lastVerified, expiryDate: expiryDate,
-                message: "按现行公告该政策已于 \(expiryDate ?? "") 到期\(tail)。以边检最终判定为准。")
+                message: "Under current rules this policy expired on \(expiryDate ?? "")\(tail). \(borderDisclaimer)")
         }
         if let exp, days(from: today, to: exp) <= within {
             return VisaFreshness(
                 level: .expiring, lastVerified: lastVerified, expiryDate: expiryDate,
-                message: "现行公布的截止日为 \(expiryDate ?? "")，行程在有效期内，建议出发前复查是否延期。以边检最终判定为准。")
+                message: "Published expiry is \(expiryDate ?? ""); your trip falls within it — recheck for extensions before departure. \(borderDisclaimer)")
         }
         if let lv, days(from: lv, to: today) > staleAfter {
             return VisaFreshness(
                 level: .stale, lastVerified: lastVerified, expiryDate: expiryDate,
-                message: "规则核验于 \(lastVerified ?? "")，已超 \(staleAfter) 天，建议复查官方公告。以边检最终判定为准。")
+                message: "Rules last verified \(lastVerified ?? ""), over \(staleAfter) days ago — recheck official announcements. \(borderDisclaimer)")
         }
         return VisaFreshness(
             level: .fresh, lastVerified: lastVerified, expiryDate: expiryDate,
-            message: "规则版本 \(rulesVersion) · 核验于 \(lastVerified ?? "—")。以边检最终判定为准。")
+            message: "Rules version \(rulesVersion) · verified \(lastVerified ?? "—"). \(borderDisclaimer)")
     }
 
     /// UI display badge for a nationality × policy: takes the active grant's expiry and the

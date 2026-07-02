@@ -103,7 +103,7 @@ let baseRec = VisaPolicyEngine.recommend(baseQ, data: dataset)
 let p2routes = VisaTripChecker.routes(query: baseQ, appCities: ["beijing", "shanghai"],
                                       data: dataset, recommendation: baseRec)
 let friendly = p2routes.first { $0.kind == .friendly }
-let p2ok = !baseRec.isEnough && friendly?.addedCity?.contains("香港") == true
+let p2ok = !baseRec.isEnough && friendly?.addedCity?.contains("Hong Kong") == true
 print("\(p2ok ? "✓" : "✗") Phase2 加城激活240h: base=\(baseRec.level.rawValue) friendly=\(friendly?.addedCity ?? "无")")
 if !p2ok { fails += 1 }
 

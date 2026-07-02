@@ -16,7 +16,7 @@ struct RootView: View {
                 mainFlow
             }
         }
-        .environment(\.locale, appEnv.preferences.appLanguage.locale)
+        .environment(\.locale, Locale(identifier: "en"))
         .task {
             await appEnv.refreshContentMode(clearSettingsCache: true)
             await appEnv.purchase.loadPlans()

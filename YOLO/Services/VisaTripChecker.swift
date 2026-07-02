@@ -3,7 +3,7 @@ import Foundation
 /// Phase 2 route recommendation (delivery doc 02): the engine is the judge, the route
 /// layer is the question-setter. We don't re-derive visa logic — we GENERATE candidate
 /// routes (add a transit hub / drop blockers) and re-run `VisaPolicyEngine.recommend`
-/// on each, keeping only engine-verified green ones. Ranking: 加城 > 删城 > 办签.
+/// on each, keeping only engine-verified green ones. Ranking: add city > drop city > apply visa.
 ///
 /// City lists are app content-city ids (slugs) because they write back to
 /// `selectedCityIds`; engine works in GB/T 2260 codes, mapped via the data set.
@@ -20,7 +20,7 @@ struct VisaRoute: Identifiable {
     /// catalog, adopting the route folds it into the itinerary as a real stop; until then the
     /// add stays advisory (display-only). Forward-compatible: no-op while the slug is absent.
     var addedCitySlug: String? = nil
-    /// For a 过境 card that offers several equivalent exits (香港 / 澳门), the per-hub choices.
+    /// For a transit card that offers several equivalent exits (HK / Macao), the per-hub choices.
     /// When present the UI shows one button per option (pick the hub) instead of one CTA.
     var transitOptions: [TransitOption]? = nil
     let note: String
@@ -34,13 +34,13 @@ enum VisaTripChecker {
     /// HK/MO are valid third-place transit exits that can activate 240h transit visa-free.
     /// `short` = display short name; `landPort` = the bordering mainland city to cross by land.
     private static let transitHubs: [(code: String, name: String, short: String, landPort: String, slug: String)] = [
-        ("HK", "香港 Hong Kong", "香港", "深圳", "hongkong"),
-        ("MO", "澳门 Macao", "澳门", "珠海", "macao"),
+        ("HK", "Hong Kong", "Hong Kong", "Shenzhen", "hongkong"),
+        ("MO", "Macao", "Macao", "Zhuhai", "macao"),
     ]
 
     /// `query` carries the exact engine inputs used for the base verdict; we clone it with
     /// candidate tweaks and re-run the engine to verify each route actually goes green.
-    /// 换城 is NOT here — it's interactive (`swapPlan`), so the user picks the replacement
+    /// City swap is NOT here — it's interactive (`swapPlan`), so the user picks the replacement
     /// from a city list rather than us auto-choosing the most popular one.
     static func routes(query: VisaQuery, appCities: [String], data: VisaDataSet,
                        recommendation rec: VisaRecommendation) -> [VisaRoute] {
@@ -48,16 +48,16 @@ enum VisaTripChecker {
 
         var result: [VisaRoute] = []
 
-        // R1 纯兴趣 — original cities, pay with an L visa (cost from the base verdict).
+        // R1 original interest — original cities, pay with an L visa (cost from the base verdict).
         result.append(VisaRoute(
             kind: .interest,
-            title: "✦ 纯兴趣 · 你最初选的",
-            badge: "需办 L 签", badgeTone: .warn,
+            title: "✦ Original picks",
+            badge: "L visa needed", badgeTone: .warn,
             cities: appCities, addedCity: nil,
-            note: "保持原行程，默认需办 L 旅游签证。"))
+            note: "Keep your original itinerary; an L tourist visa is typically required."))
 
-        // R3 签证友好 — engine-verified least change. Show a card per working transit hub
-        // (港 + 澳, both verified green); fall back to 删城 only when no transit works.
+        // R3 visa-friendly — engine-verified least change. Show a card per working transit hub
+        // (HK + Macao, both verified green); fall back to drop-city only when no transit works.
         let transit = activateTransit(query: query, appCities: appCities, data: data)
         if !transit.isEmpty {
             result.append(contentsOf: transit)
@@ -65,25 +65,25 @@ enum VisaTripChecker {
             result.append(drop)
         }
 
-        // R2 备选 — cities unchanged, apply an L visa (engine plan B).
+        // R2 fallback — cities unchanged, apply an L visa (engine plan B).
         result.append(VisaRoute(
             kind: .applyVisa,
-            title: "◇ 备选 · 一城不动",
-            badge: "办 L 签", badgeTone: .neutral,
+            title: "◇ Fallback · keep cities",
+            badge: "Apply for L visa", badgeTone: .neutral,
             cities: appCities, addedCity: nil,
-            note: "行程一城不动，办一张 L 旅游签证（约 4–7 个工作日 + 签证费）。"))
+            note: "Keep every city; apply for an L tourist visa (~4–7 business days + visa fee)."))
 
         return result
     }
 
-    // MARK: - 换城 (interactive)：list qualifying replacement cities, the user chooses
+    // MARK: - City swap (interactive): list qualifying replacement cities, the user chooses
 
     /// An engine-verified replacement pool for a not-enough trip's blocker cities. Each
     /// candidate is green as a solo stand-in (under the same coarse query); the user's final
     /// combined pick is re-verified with `verifySwap` at confirm time (engine is the judge).
     struct SwapPlan {
         let blockerSlugs: [String]   // app slugs being removed
-        let blockerNames: String     // display, e.g. "运城市 · 大同市"
+        let blockerNames: String     // display, e.g. "Yuncheng · Datong"
         let keptSlugs: [String]      // retained non-blocker cities (app slugs)
         let need: Int                // how many replacements the user must choose
         let candidates: [Candidate]  // qualifying replacements, ranked by popularity
@@ -128,11 +128,11 @@ enum VisaTripChecker {
         return VisaPolicyEngine.recommend(query.with(cities: codes), data: data).level == .green
     }
 
-    // MARK: - ① 加城：add a HK/MO transit exit to activate 240h (engine-verified)
+    // MARK: - Add city: add a HK/MO transit exit to activate 240h (engine-verified)
 
     /// Route-layer's headline move (doc §4②): the engine never adds cities itself, so we
     /// propose adding HK/MO as the onward leg and let the engine VERIFY each goes green via
-    /// twov_240h. Returns a card PER working hub (港 + 澳), copy/stay-limit derived from the
+    /// twov_240h. Returns a card PER working hub (HK + Macao), copy/stay-limit derived from the
     /// matched policy so it stays in sync with the CMS.
     private static func activateTransit(query: VisaQuery, appCities: [String], data: VisaDataSet) -> [VisaRoute] {
         var working: [(code: String, name: String, short: String, landPort: String, slug: String)] = []
@@ -146,38 +146,40 @@ enum VisaTripChecker {
         }
         guard !working.isEmpty else { return [] }
 
-        // Equivalent exits (香港 / 澳门) collapse into ONE card with a button per hub.
-        let policyName = policy?.officialNameZh ?? "过境免签"
+        // Equivalent exits (Hong Kong / Macao) collapse into ONE card with a button per hub.
+        let policyName = policy.map { p in
+            p.officialNameEn.isEmpty ? p.officialNameZh : p.officialNameEn
+        } ?? "Transit visa-free"
         let stayLimit = stayLimitText(policy)
-        let hubNames = working.map(\.short).joined(separator: "或")
-        let landBullets = working.map { "想去\($0.short)可经\($0.landPort)口岸陆路出境" }.joined(separator: "；")
+        let hubNames = working.map(\.short).joined(separator: " or ")
+        let landBullets = working.map { "To reach \($0.short), exit via \($0.landPort) land port" }.joined(separator: "; ")
         let options = working.map { VisaRoute.TransitOption(short: $0.short, slug: $0.slug) }
 
         return [VisaRoute(
             kind: .friendly,
-            title: "✓ 签证友好 · 加一城过境",
-            badge: "全程免签 · 多一城", badgeTone: .ok,
+            title: "✓ Visa-friendly · add transit stop",
+            badge: "All visa-free · +1 city", badgeTone: .ok,
             cities: appCities,
             addedCity: working.map(\.short).joined(separator: " / "),
             addedCitySlug: working.first?.slug,
             transitOptions: options,
             note: """
-            根据你的情况：把\(hubNames)加成途经/最后一站，内地段即符合\(policyName)（全程免签、白赚一座城）。
-            • \(landBullets)；也可直接订一张飞往该地的机票。
-            • 想去任意第三国（只要不是你的出发国）：同样免签——请重建行程，把第三国设为「下一程 / 返回国」。
-            ⚠️ 需停留\(stayLimit)、从开放口岸进出、出示离境机票。
+            For your case: add \(hubNames) as a transit/final stop and the mainland leg qualifies under \(policyName) (all visa-free, one extra city).
+            • \(landBullets); or book a flight directly there.
+            • Heading to any third country (not your departure country): also visa-free — rebuild the trip with that country as your onward/return leg.
+            ⚠️ Stay within \(stayLimit), enter/exit via open ports, and show onward tickets.
             """)]
     }
 
-    /// Stay-limit phrase from the matched policy (hours → "≤ N 天", days → "≤ N 天"). Keeps the
-    /// transit card's "≤ 10 天" honest if the CMS ever changes the window.
+    /// Stay-limit phrase from the matched policy (hours → "≤ N days", days → "≤ N days"). Keeps the
+    /// transit card honest if the CMS ever changes the window.
     private static func stayLimitText(_ policy: VisaPolicyV2?) -> String {
-        guard let p = policy, let n = p.maxStayDefault else { return "在免签时限内" }
-        if p.maxStayUnit == "hours" { return "≤ \(n / 24) 天" }
-        return "≤ \(n) 天"
+        guard let p = policy, let n = p.maxStayDefault else { return "within the visa-free window" }
+        if p.maxStayUnit == "hours" { return "≤ \(n / 24) days" }
+        return "≤ \(n) days"
     }
 
-    // MARK: - 删城：drop blocker cities (engine-verified)
+    // MARK: - Drop city: drop blocker cities (engine-verified)
 
     private static func dropBlockers(query: VisaQuery, appCities: [String], data: VisaDataSet,
                                      rec: VisaRecommendation) -> VisaRoute? {
@@ -193,10 +195,10 @@ enum VisaTripChecker {
         let blockerNames = rec.blockers.map { data.cityName(forAdminCode: $0) }.joined(separator: " · ")
         return VisaRoute(
             kind: .friendly,
-            title: "✓ 签证友好 · 去掉拖累城",
-            badge: "去掉拖累城", badgeTone: .ok,
+            title: "✓ Visa-friendly · drop blocker cities",
+            badge: "Drop blockers", badgeTone: .ok,
             cities: keptSlugs, addedCity: nil,
-            note: "去掉需签证的城市（\(blockerNames)），其余城市免签可达，经引擎复核为全程免签。")
+            note: "Remove visa-required cities (\(blockerNames)); remaining cities stay visa-free per engine check.")
     }
 }
 

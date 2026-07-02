@@ -61,7 +61,7 @@ final class ContentModeService {
         defer { isRefreshing = false }
 
         guard AppConfig.isSupabaseConfigured else {
-            lastRefreshError = "未配置 Supabase URL / Anon Key（检查 Secrets.xcconfig）"
+            lastRefreshError = "Supabase URL / Anon Key not configured (check Secrets.xcconfig)"
             restoreCachedOrBundled()
             return
         }
@@ -77,7 +77,7 @@ final class ContentModeService {
 
             guard let row = rows.first else {
                 lastRefreshError =
-                    "Supabase 中缺少 app_settings（id=global）。请在 SQL Editor 执行 001 与 003 迁移。"
+                    "Missing app_settings in Supabase (id=global). Run migrations 001 and 003 in the SQL Editor."
                 restoreCachedOrBundled()
                 return
             }
@@ -88,7 +88,7 @@ final class ContentModeService {
         } catch {
             lastRefreshError = Self.describeFetchError(error)
             if await applyFlagsFallback() {
-                lastRefreshError = (lastRefreshError ?? "") + "（已用精简字段恢复开关）"
+                lastRefreshError = (lastRefreshError ?? "") + " (recovered flags from minimal fetch)"
             } else {
                 restoreCachedOrBundled()
             }
@@ -116,7 +116,7 @@ final class ContentModeService {
         branding = BundledJSONLoader.load(AppBranding.self, resource: "app_branding")
         aiSettings = .fallback
         if AppConfig.forceBundled {
-            lastRefreshError = "当前为静态演示模式（FORCE_BUNDLED / Mock）。请在 Secrets.xcconfig 关闭 USE_MOCK 与 FORCE_BUNDLED。"
+            lastRefreshError = "Static demo mode (FORCE_BUNDLED / Mock). Disable USE_MOCK and FORCE_BUNDLED in Secrets.xcconfig."
         }
     }
 
@@ -202,11 +202,11 @@ final class ContentModeService {
 
     private static func describeFetchError(_ error: Error) -> String {
         if error is DecodingError {
-            return "CMS 配置解析失败：\(JSONCoding.describe(error))。请在 Supabase 执行 011、016 迁移后重试。"
+            return "CMS config parse failed: \(JSONCoding.describe(error)). Run migrations 011 and 016 in Supabase, then retry."
         }
         let message = error.localizedDescription
         if message.contains("数据缺失") || message.localizedCaseInsensitiveContains("missing") {
-            return "CMS 配置解析失败（\(message)）。请确认已执行迁移 001、003、011，且 app_settings 存在 global 行。"
+            return "CMS config parse failed (\(message)). Confirm migrations 001, 003, and 011 ran, and app_settings has a global row."
         }
         return message
     }

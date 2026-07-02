@@ -14,7 +14,6 @@ enum UserDefaultsKeys {
     static let savedItineraries = prefix + "savedItineraries"
     static let activeItineraryId = prefix + "activeItineraryId"
     static let purchasedAttractionIds = prefix + "purchasedAttractionIds"
-    static let appLanguage = prefix + "appLanguage"
     static let introOnboardingDone = prefix + "introOnboardingDone"
     static let notificationOnboardingDone = prefix + "notificationOnboardingDone"
     static let tripPrepRemindersEnabled = prefix + "tripPrepRemindersEnabled"
@@ -44,7 +43,6 @@ enum UserDefaultsKeys {
         (savedItineraries, "chinago.savedItineraries"),
         (activeItineraryId, "chinago.activeItineraryId"),
         (purchasedAttractionIds, "chinago.purchasedAttractionIds"),
-        (appLanguage, "chinago.appLanguage"),
         (introOnboardingDone, "chinago.introOnboardingDone"),
         (notificationOnboardingDone, "chinago.notificationOnboardingDone"),
         (tripPrepRemindersEnabled, "chinago.tripPrepRemindersEnabled"),
