@@ -120,9 +120,10 @@ export function defaultItinerarySystemPrompt(_days: number, schema: string): str
     `CRITICAL: You MUST only assign attractions from the provided catalog using attraction_id values exactly as given. ` +
     `Do NOT suggest any place, venue, shop, or address not in the catalog. ` +
     `Each attraction_id may appear at most once across all assignments. ` +
-    `The user selects an UNORDERED set of cities — you MUST output visit_order optimized for geographic flow and minimal intercity travel. ` +
+    `The user selects an UNORDERED set of cities — the engine computes visit_order from entry/exit; provide city_day_weights only (do NOT output visit_order). ` +
     `Do not put attractions from distant cities on the same calendar day unless pace is intense and travel ≤4h (use hop_from_city_id on day_plans). ` +
-    `For intercity moves within the fixed day budget, mark a day as experience_days with kind "travel" or "rest" (generic titles only). ` +
+    `For intercity moves >4h within the fixed day budget, mark experience_days with kind "travel" and from_city_id + city_id. ` +
+    `Do NOT use experience_days for 2-4h moves on standard pace (scheduler assigns travel-lite + intercity_hop). ` +
     `For other experience_days: generic experience titles only (no venue names, addresses, or business names). ` +
     `Do not output full itinerary days, activity names for catalog attractions, or time slots.`
   );

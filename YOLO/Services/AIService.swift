@@ -5,6 +5,8 @@ struct GeneratedItinerary {
     let trip: SampleItinerary
     /// True when the trip was built by local rules (guest, remote failure, or Edge `is_default`).
     let isRuleBased: Bool
+    /// True when remote AI was requested but fell back to local rules.
+    let usedLocalFallback: Bool
 }
 
 enum AIService {
@@ -48,10 +50,12 @@ enum AIService {
                let itinerary = response.itinerary {
                 return GeneratedItinerary(
                     trip: itinerary,
-                    isRuleBased: response.isDefault ?? false
+                    isRuleBased: response.isDefault ?? false,
+                    usedLocalFallback: false
                 )
             }
         }
+        let attemptedRemote = useRemoteAI && isAuthenticated && AppConfig.isSupabaseConfigured && !AppConfig.forceBundled
         let trip = try await localItineraryFallback(
             content: content,
             cities: cities,
@@ -59,7 +63,11 @@ enum AIService {
             userNotes: userNotes,
             options: options
         )
-        return GeneratedItinerary(trip: trip, isRuleBased: true)
+        return GeneratedItinerary(
+            trip: trip,
+            isRuleBased: true,
+            usedLocalFallback: attemptedRemote
+        )
     }
 
     static func planningItineraryCard(

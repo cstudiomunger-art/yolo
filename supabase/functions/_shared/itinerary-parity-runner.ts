@@ -152,6 +152,24 @@ export function assertParityExpect(
     }
   }
 
+  if (expect.visit_order_ends) {
+    const order = trip.visit_order ?? [];
+    const [start, end] = expect.visit_order_ends;
+    if (order[0]?.toLowerCase() !== start.toLowerCase()) {
+      errors.push(`visit_order should start with ${start}, got ${order[0] ?? "none"}`);
+    }
+    if (order[order.length - 1]?.toLowerCase() !== end.toLowerCase()) {
+      errors.push(`visit_order should end with ${end}, got ${order[order.length - 1] ?? "none"}`);
+    }
+  }
+
+  if (expect.intercity_hop_days_min != null) {
+    const hopDays = trip.days.filter((d) => d.intercity_hop != null).length;
+    if (hopDays < expect.intercity_hop_days_min) {
+      errors.push(`expected at least ${expect.intercity_hop_days_min} intercity hop days, got ${hopDays}`);
+    }
+  }
+
   for (const id of expect.dropped_ids ?? []) {
     const scheduled = trip.days.some((d) =>
       d.activities.some((a) => a.attraction_id === id)

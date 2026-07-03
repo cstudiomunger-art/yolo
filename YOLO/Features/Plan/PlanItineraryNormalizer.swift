@@ -2,6 +2,105 @@ import Foundation
 
 /// Post-processes assembled itineraries for geographic sanity (mirrors Edge normalize).
 enum PlanItineraryNormalizer {
+    /// Dedup + geo split + slot trim only — preserves scheduler travel/hop days.
+    static func hopSafeNormalize(
+        _ trip: SampleItinerary,
+        selectedCityIds: [String],
+        catalogById: [String: Attraction] = [:],
+        pace: TripPace = .standard,
+        arrivalTime: String? = nil,
+        departureTime: String? = nil
+    ) -> SampleItinerary {
+        if trip.userEdited { return trip }
+        guard !trip.days.isEmpty else { return trip }
+
+        var days = trip.days
+        var pool: [ItineraryActivity] = []
+        var seenAttractionIds = Set<String>()
+
+        for index in days.indices {
+            guard !days[index].isExperienceSuggestions else { continue }
+            var deduped: [ItineraryActivity] = []
+            for act in days[index].activities {
+                guard let aid = act.attractionId else {
+                    deduped.append(act)
+                    continue
+                }
+                if seenAttractionIds.contains(aid) {
+                    pool.append(act)
+                    continue
+                }
+                seenAttractionIds.insert(aid)
+                deduped.append(act)
+            }
+            days[index] = days[index].withActivities(deduped)
+            if days[index].intercityHop == nil {
+                let split = splitIncompatibleSameDay(days[index].activities)
+                days[index] = days[index].withActivities(split.keep)
+                pool.append(contentsOf: split.overflow)
+            }
+        }
+
+        for index in days.indices {
+            guard !days[index].isExperienceSuggestions else { continue }
+            let dayCapacity = PlanItinerarySlotBudget.daytimeCapacity(
+                dayIndex: days[index].dayIndex,
+                days: days,
+                pace: pace,
+                arrivalTime: arrivalTime,
+                departureTime: departureTime
+            )
+            let trimmed = PlanItinerarySlotBudget.trimDaytimeToCapacity(
+                activities: days[index].activities,
+                capacity: dayCapacity,
+                catalogById: catalogById
+            )
+            days[index] = days[index].withActivities(trimmed.keep)
+            pool.append(contentsOf: trimmed.overflow)
+        }
+
+        let visitOrder = trip.visitOrder ?? deriveVisitOrder(from: days, fallback: selectedCityIds)
+        let route = CityTravelHints.routeLabel(from: visitOrder)
+
+        days = PlanItineraryDayFill.fillEmptyDays(
+            days,
+            visitOrder: visitOrder,
+            pace: pace,
+            arrivalTime: arrivalTime,
+            departureTime: departureTime
+        )
+
+        let dayCount = days.count
+        let title = titleMatchesRoute(trip.title, route: route)
+            ? trip.title
+            : "\(dayCount)-Day \(route) Trip"
+
+        var adjustments = trip.schedulingAdjustments ?? []
+        for activity in pool {
+            let label = activity.attractionId ?? activity.name
+            adjustments.append(String(localized: "Could not place \(label) during normalize"))
+        }
+
+        return SampleItinerary(
+            id: trip.id,
+            title: title,
+            meta: trip.meta,
+            routeSummary: route,
+            estimatedBudget: trip.estimatedBudget,
+            days: days,
+            shareSlug: trip.shareSlug,
+            isShared: trip.isShared,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            visitOrder: visitOrder,
+            userEdited: trip.userEdited,
+            droppedAttractionIds: trip.droppedAttractionIds,
+            schedulingAdjustments: adjustments.isEmpty ? nil : adjustments,
+            seasonHints: trip.seasonHints,
+            pace: trip.pace
+        )
+    }
+
     static func normalize(
         _ trip: SampleItinerary,
         selectedCityIds: [String],
@@ -129,7 +228,8 @@ enum PlanItineraryNormalizer {
             userEdited: trip.userEdited,
             droppedAttractionIds: trip.droppedAttractionIds,
             schedulingAdjustments: adjustments.isEmpty ? nil : adjustments,
-            seasonHints: trip.seasonHints
+            seasonHints: trip.seasonHints,
+            pace: trip.pace
         )
     }
 

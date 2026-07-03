@@ -61,6 +61,12 @@ enum PlanItineraryCityDays {
             cityDays = rule
         }
 
+        cityDays = applyEntryCityMinDays(
+            cityDays,
+            visitOrder: visitOrder,
+            tripDays: tripDays
+        )
+
         let (hints, adjustments) = assessTightTrip(
             visitOrder: visitOrder,
             cityDays: cityDays,
@@ -137,6 +143,27 @@ enum PlanItineraryCityDays {
             result[last, default: 1] += 1
             assigned += 1
         }
+        return result
+    }
+
+    /// Long multi-city trips: entry city keeps at least 2 sightseeing budget days when possible.
+    private static func applyEntryCityMinDays(
+        _ map: [String: Int],
+        visitOrder: [String],
+        tripDays: Int
+    ) -> [String: Int] {
+        guard tripDays >= 8, visitOrder.count >= 3,
+              let entry = visitOrder.first?.lowercased() else { return map }
+        let minEntry = 2
+        var result = map
+        let current = result[entry, default: 1]
+        guard current < minEntry,
+              let last = visitOrder.last?.lowercased(),
+              last != entry,
+              (result[last] ?? 1) > 1 else { return map }
+        let take = min(minEntry - current, (result[last] ?? 1) - 1)
+        result[entry, default: 1] += take
+        result[last, default: 1] -= take
         return result
     }
 

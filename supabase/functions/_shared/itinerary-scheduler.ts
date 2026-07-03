@@ -174,16 +174,24 @@ function applyFlightAndPaceProfiles(
   },
 ): TimelineSlot[] {
   const { tripDays, pace, arrivalTime, departureTime } = params;
+  const activeSlots = slots.filter((s) => s.kind !== "travel");
+  const firstActive = activeSlots[0]?.day_index;
+  const lastActive = activeSlots[activeSlots.length - 1]?.day_index;
   const sightseeing = slots.filter((s) => s.kind === "sightseeing");
   const firstSight = sightseeing[0]?.day_index;
   const lastSight = sightseeing[sightseeing.length - 1]?.day_index;
 
   return slots.map((slot) => {
-    if (slot.kind !== "sightseeing") return slot;
+    const isSightseeing = slot.kind === "sightseeing";
+    const isHopLike = slot.kind === "hop" || slot.kind === "travel_lite";
+    if (!isSightseeing && !isHopLike) return slot;
+
+    const anchorFirst = isHopLike ? firstActive : firstSight;
+    const anchorLast = isHopLike ? lastActive : lastSight;
 
     let profile: DayScheduleProfile = "full_day";
-    if (slot.day_index === firstSight) profile = "arrival_day";
-    if (slot.day_index === lastSight && tripDays > 1) profile = "departure_day";
+    if (slot.day_index === anchorFirst) profile = "arrival_day";
+    if (slot.day_index === anchorLast && tripDays > 1) profile = "departure_day";
 
     let dayCapacity = Math.min(
       slot.day_capacity,
@@ -191,11 +199,13 @@ function applyFlightAndPaceProfiles(
     );
     let eveningCapacity = slot.evening_capacity;
 
-    if (slot.day_index === firstSight && isAfternoonArrival(arrivalTime)) {
-      dayCapacity = 0;
-      eveningCapacity = Math.max(eveningCapacity, 1);
+    if (slot.day_index === anchorFirst && isAfternoonArrival(arrivalTime)) {
+      if (isSightseeing) {
+        dayCapacity = 0;
+        eveningCapacity = Math.max(eveningCapacity, 1);
+      }
     }
-    if (slot.day_index === lastSight && isMorningDeparture(departureTime)) {
+    if (slot.day_index === anchorLast && isMorningDeparture(departureTime)) {
       dayCapacity = Math.min(dayCapacity, daySlotCapacityForPace("departure_day", pace));
     }
 
@@ -377,21 +387,44 @@ function alignDayPlansToTimeline(
 
 function filterDayPlansToCandidates(
   dayPlans: DayPlanDraft[],
+  timeline: TimelineSlot[],
   candidatesByCity: Map<string, string[]>,
+  catalogById: Map<string, AttractionRow>,
   adjustments: string[],
 ): DayPlanDraft[] {
-  const allowed = new Map<string, Set<string>>();
-  for (const [city, ids] of candidatesByCity) {
-    allowed.set(city, new Set(ids));
-  }
+  const hopSlotByDay = new Map(
+    timeline
+      .filter((s) => (s.kind === "hop" || s.kind === "travel_lite") && s.from_city_id)
+      .map((s) => [s.day_index, s]),
+  );
 
   return dayPlans.map((plan) => {
-    const city = plan.city_id.toLowerCase();
-    const set = allowed.get(city) ?? new Set();
+    const slot = hopSlotByDay.get(plan.day_index);
+    const fromCity = plan.hop_from_city_id?.toLowerCase()
+      ?? slot?.from_city_id?.toLowerCase();
+    const toCity = plan.city_id.toLowerCase();
+
+    const allowedIds = new Set<string>();
+    for (const id of candidatesByCity.get(toCity) ?? []) allowedIds.add(id);
+    if (fromCity) {
+      for (const id of candidatesByCity.get(fromCity) ?? []) allowedIds.add(id);
+    }
+
     const kept: string[] = [];
     for (const id of plan.attraction_ids) {
-      if (set.has(id)) kept.push(id);
-      else adjustments.push(`Removed ${id} (not in city candidate set)`);
+      if (allowedIds.has(id)) {
+        kept.push(id);
+        continue;
+      }
+      const attrCity = catalogById.get(id)?.city_id?.toLowerCase();
+      if (attrCity && (attrCity === toCity || attrCity === fromCity)) {
+        const pool = candidatesByCity.get(attrCity) ?? [];
+        if (pool.includes(id)) {
+          kept.push(id);
+          continue;
+        }
+      }
+      adjustments.push(`Removed ${id} (not in city candidate set)`);
     }
     return { ...plan, attraction_ids: kept };
   });
@@ -531,23 +564,104 @@ function parseAIMustSee(aiPlan: AIPlanResponse | null): Set<string> {
   return new Set(raw.map((id) => String(id).trim()).filter(Boolean));
 }
 
+function buildTimelineExperienceDays(
+  timeline: TimelineSlot[],
+  regionByCity: Map<string, string | null>,
+): AIExperienceDay[] {
+  const days: AIExperienceDay[] = [];
+  for (const slot of timeline) {
+    if (slot.kind !== "travel") continue;
+    const from = slot.from_city_id ?? "";
+    const hours = from
+      ? travelHours(from, slot.city_id, regionByCity)
+      : 6;
+    days.push({
+      day_index: slot.day_index,
+      city_id: slot.city_id,
+      from_city_id: from || undefined,
+      items: from
+        ? buildTravelDayContent(from, slot.city_id, hours)
+        : travelExperienceItems(slot.city_id),
+      kind: "travel",
+    });
+  }
+  return days;
+}
+
+function mergeExperienceDaysWithTimeline(params: {
+  timeline: TimelineSlot[];
+  regionByCity: Map<string, string | null>;
+  aiExperienceDays?: AIExperienceDay[];
+  adjustments: string[];
+}): AIExperienceDay[] {
+  const { timeline, regionByCity, aiExperienceDays, adjustments } = params;
+  const reservedHopDays = new Set(
+    timeline
+      .filter((s) => s.kind === "hop" || s.kind === "travel_lite")
+      .map((s) => s.day_index),
+  );
+  const byDay = new Map<number, AIExperienceDay>();
+  for (const exp of buildTimelineExperienceDays(timeline, regionByCity)) {
+    byDay.set(exp.day_index, exp);
+  }
+  for (const exp of aiExperienceDays ?? []) {
+    if (exp.day_index < 1) continue;
+    if (reservedHopDays.has(exp.day_index)) {
+      adjustments.push(`Dropped AI experience on day ${exp.day_index} (reserved for intercity hop/travel-lite)`);
+      continue;
+    }
+    const mandatory = byDay.get(exp.day_index);
+    if (mandatory?.kind === "travel") {
+      adjustments.push(`Dropped AI experience on day ${exp.day_index} (reserved for intercity travel)`);
+      continue;
+    }
+    if (!byDay.has(exp.day_index)) {
+      byDay.set(exp.day_index, exp);
+    }
+  }
+  return [...byDay.values()].sort((a, b) => a.day_index - b.day_index);
+}
+
+function sightseeingBudgetForDay(
+  day: number,
+  timeline: TimelineSlot[],
+  regionByCity: Map<string, string | null>,
+): { dayCapacity: number; eveningCap: number } {
+  const slot = timeline.find((t) => t.day_index === day);
+  if (!slot) {
+    return { dayCapacity: daySlotCapacity("full_day"), eveningCap: 0 };
+  }
+  let dayCapacity = slot.day_capacity;
+  if ((slot.kind === "hop" || slot.kind === "travel_lite") && slot.from_city_id) {
+    const hours = travelHours(slot.from_city_id, slot.city_id, regionByCity);
+    dayCapacity = Math.max(0, dayCapacity - commuteSlots(hours));
+  }
+  return { dayCapacity, eveningCap: slot.evening_capacity };
+}
+
 export function validateAndRepair(params: {
   tripDays: number;
   dayPlans: DayPlanDraft[];
   timeline: TimelineSlot[];
   catalogById: Map<string, AttractionRow>;
   startDate: Date | null;
+  regionByCity?: Map<string, string | null>;
 }): {
   assignments: AIAssignment[];
   dropped: string[];
   adjustments: string[];
 } {
   const { tripDays, dayPlans, timeline, catalogById, startDate } = params;
+  const regionByCity = params.regionByCity ?? new Map<string, string | null>();
   const adjustments: string[] = [];
   const dropped: string[] = [];
   const planByDay = new Map(dayPlans.map((p) => [p.day_index, p]));
-  const capacityByDay = new Map(timeline.map((t) => [t.day_index, t.day_capacity]));
-  const eveningCapByDay = new Map(timeline.map((t) => [t.day_index, t.evening_capacity]));
+  const capacityByDay = new Map(
+    timeline.map((t) => [t.day_index, sightseeingBudgetForDay(t.day_index, timeline, regionByCity).dayCapacity]),
+  );
+  const eveningCapByDay = new Map(
+    timeline.map((t) => [t.day_index, sightseeingBudgetForDay(t.day_index, timeline, regionByCity).eveningCap]),
+  );
   const allowedCitiesByDay = allowedCitiesFromTimeline(timeline);
   const assignments: AIAssignment[] = [];
   const overflow: { id: string; priority: number }[] = [];
@@ -688,12 +802,10 @@ export function runItinerarySchedulerPipeline(params: {
     catalogCounts.set(c, (catalogCounts.get(c) ?? 0) + 1);
   }
 
-  const visitOrder = aiPlan?.visit_order?.length
-    ? aiPlan.visit_order.map((c) => c.toLowerCase())
-    : inferVisitOrder(cityIds, catalogCounts, metaByCity, {
-      entryCityId: params.entryCityId,
-      exitCityId: params.exitCityId,
-    });
+  const visitOrder = inferVisitOrder(cityIds, catalogCounts, metaByCity, {
+    entryCityId: params.entryCityId,
+    exitCityId: params.exitCityId,
+  });
 
   const cityDaysCalibration = calibrateCityDays(
     visitOrder,
@@ -733,7 +845,13 @@ export function runItinerarySchedulerPipeline(params: {
     dayPlans = buildRuleDayPlans({ timeline, candidatesByCity, catalogById });
   } else {
     dayPlans = alignDayPlansToTimeline(dayPlans, timeline, adjustments);
-    dayPlans = filterDayPlansToCandidates(dayPlans, candidatesByCity, adjustments);
+    dayPlans = filterDayPlansToCandidates(
+      dayPlans,
+      timeline,
+      candidatesByCity,
+      catalogById,
+      adjustments,
+    );
   }
 
   let { assignments, dropped, adjustments: repairAdj } = validateAndRepair({
@@ -742,6 +860,7 @@ export function runItinerarySchedulerPipeline(params: {
     timeline,
     catalogById,
     startDate,
+    regionByCity,
   });
 
   const geoAdj: string[] = [];
@@ -757,32 +876,12 @@ export function runItinerarySchedulerPipeline(params: {
   dropped.push(...geo.dropped);
   adjustments.push(...geoAdj);
 
-  const experienceDays: AIExperienceDay[] = [];
-  if (aiPlan?.experience_days?.length) {
-    for (const exp of aiPlan.experience_days) {
-      if (exp.day_index >= 1 && exp.day_index <= tripDays) {
-        experienceDays.push(exp);
-      }
-    }
-  } else {
-    for (const slot of timeline) {
-      if (slot.kind === "travel") {
-        const from = slot.from_city_id ?? "";
-        const hours = from
-          ? travelHours(from, slot.city_id, regionByCity)
-          : 6;
-        experienceDays.push({
-          day_index: slot.day_index,
-          city_id: slot.city_id,
-          from_city_id: from || undefined,
-          items: from
-            ? buildTravelDayContent(from, slot.city_id, hours)
-            : travelExperienceItems(slot.city_id),
-          kind: "travel",
-        });
-      }
-    }
-  }
+  const experienceDays = mergeExperienceDaysWithTimeline({
+    timeline,
+    regionByCity,
+    aiExperienceDays: aiPlan?.experience_days,
+    adjustments,
+  });
 
   const expByDay = new Map(experienceDays.map((e) => [e.day_index, e]));
   for (const assignment of assignments) {

@@ -252,4 +252,47 @@ enum CityTravelHints {
         }
         return order
     }
+
+    struct EndpointSuggestion {
+        let entryCityId: String
+        let exitCityId: String
+        let visitOrder: [String]
+    }
+
+    /// Suggest international landing/return cities from selected stops using shortest route order.
+    static func suggestEntryExit(cityIds: [String], cities: [City]) -> EndpointSuggestion {
+        let unique = Array(Set(cityIds.map { $0.lowercased() }.filter { !$0.isEmpty }))
+        guard !unique.isEmpty else {
+            return EndpointSuggestion(entryCityId: "beijing", exitCityId: "beijing", visitOrder: ["beijing"])
+        }
+        if unique.count == 1 {
+            let only = unique[0]
+            return EndpointSuggestion(entryCityId: only, exitCityId: only, visitOrder: [only])
+        }
+
+        var catalogCountByCity: [String: Int] = [:]
+        var avgDaysByCity: [String: Int] = [:]
+        for city in cities {
+            let cid = city.id.lowercased()
+            guard unique.contains(cid) else { continue }
+            catalogCountByCity[cid] = city.attractionCount
+            if let avg = city.avgDaysRecommended {
+                avgDaysByCity[cid] = avg
+            }
+        }
+        for cid in unique {
+            catalogCountByCity[cid, default: 1] = catalogCountByCity[cid, default: 1]
+        }
+
+        let visitOrder = inferVisitOrder(
+            cityIds: unique,
+            catalogCountByCity: catalogCountByCity,
+            avgDaysByCity: avgDaysByCity
+        )
+        return EndpointSuggestion(
+            entryCityId: visitOrder.first ?? unique[0],
+            exitCityId: visitOrder.last ?? unique[0],
+            visitOrder: visitOrder
+        )
+    }
 }

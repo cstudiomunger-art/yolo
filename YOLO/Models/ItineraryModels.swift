@@ -23,6 +23,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
     var schedulingAdjustments: [String]?
     /// Non-blocking season / month hints (optional).
     var seasonHints: [String]?
+    /// Trip pace used when generating (optional; for replanner parity).
+    var pace: String?
 
     init(
         id: String,
@@ -39,7 +41,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         userEdited: Bool = false,
         droppedAttractionIds: [String]? = nil,
         schedulingAdjustments: [String]? = nil,
-        seasonHints: [String]? = nil
+        seasonHints: [String]? = nil,
+        pace: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -56,6 +59,7 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         self.droppedAttractionIds = droppedAttractionIds
         self.schedulingAdjustments = schedulingAdjustments
         self.seasonHints = seasonHints
+        self.pace = pace
     }
 
     init(from decoder: Decoder) throws {
@@ -75,6 +79,7 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         droppedAttractionIds = try c.decodeIfPresent([String].self, forKey: .droppedAttractionIds)
         schedulingAdjustments = try c.decodeIfPresent([String].self, forKey: .schedulingAdjustments)
         seasonHints = try c.decodeIfPresent([String].self, forKey: .seasonHints)
+        pace = try c.decodeIfPresent(String.self, forKey: .pace)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -94,6 +99,7 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         try c.encodeIfPresent(droppedAttractionIds, forKey: .droppedAttractionIds)
         try c.encodeIfPresent(schedulingAdjustments, forKey: .schedulingAdjustments)
         try c.encodeIfPresent(seasonHints, forKey: .seasonHints)
+        try c.encodeIfPresent(pace, forKey: .pace)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -103,6 +109,7 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         case droppedAttractionIds = "dropped_attraction_ids"
         case schedulingAdjustments = "scheduling_adjustments"
         case seasonHints = "season_hints"
+        case pace
     }
 
     /// Copy with replaced days; preserves share state and trip dates.
@@ -122,7 +129,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             userEdited: userEdited,
             droppedAttractionIds: droppedAttractionIds,
             schedulingAdjustments: schedulingAdjustments,
-            seasonHints: seasonHints
+            seasonHints: seasonHints,
+            pace: pace
         )
     }
 
@@ -142,7 +150,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             userEdited: true,
             droppedAttractionIds: droppedAttractionIds,
             schedulingAdjustments: schedulingAdjustments,
-            seasonHints: seasonHints
+            seasonHints: seasonHints,
+            pace: pace
         )
     }
 }

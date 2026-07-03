@@ -136,15 +136,15 @@ function buildItineraryUserPrompt(params: {
     `Trip pace: ${params.pace ?? "standard"}.\n` +
     `Sightseeing day budget (excludes dedicated >4h travel days): ${budget.availableCityDays} days across ${visitOrder.length} cities.\n` +
     `Rule-based city day hints: ${JSON.stringify(Object.fromEntries(budget.cityDays))}\n` +
-    `Suggested visit_order anchor: ${visitOrder.join(" → ")}\n` +
-    `Selected cities (unordered — YOU choose the optimal visit_order): ${sortedCities.join(", ") || "beijing"}\n` +
+    `Suggested visit_order anchor (engine-computed — do NOT override): ${visitOrder.join(" → ")}\n` +
+    `Selected cities (unordered): ${sortedCities.join(", ") || "beijing"}\n` +
     (params.userNotes ? `User preferences: ${params.userNotes}\n` : "") +
     `\nCity metadata:\n${JSON.stringify(metaCompact)}\n` +
     `\nTravel hints (sameDayOk ≤2h; intenseHopOk ≤4h for intense pace):\n${params.travelContext}\n` +
     `\nAttraction catalog (ONLY these ids are valid):\n${JSON.stringify(catalogCompact)}\n` +
     `\nRules: pack each sightseeing day by duration_slots until the daily budget is full (not a fixed sight count); no duplicate ids; ` +
     `${crossCityRule}\n` +
-    `Output city_plan (visit_order, city_day_weights, must_see_ids, experience_days) and day_plans using ONLY candidate attraction ids you receive in a follow-up catalog slice, or combined in one JSON.\n` +
+    `Output city_plan (city_day_weights, must_see_ids, experience_days) and day_plans using ONLY catalog attraction ids.\n` +
     `Do not output final time_slot strings (scheduler assigns Morning/Afternoon).\n` +
     `Respect opening constraints: do not assign closed_weekdays to matching dates.\n` +
     `Return JSON with city_plan, day_plans, optional title and estimated_budget.`
@@ -172,16 +172,14 @@ function compactCatalogForPrompt(catalog: AttractionRow[]): AttractionRow[] {
   return picked;
 }
 
-function buildTravelContext(cityIds: string[]): string {
-  const sorted = [...cityIds].sort();
+function buildTravelContext(cityIds: string[], visitOrder?: string[]): string {
+  const order = visitOrder?.length ? visitOrder : cityIds;
   const lines: string[] = [];
-  for (let i = 0; i < sorted.length; i++) {
-    for (let j = i + 1; j < sorted.length; j++) {
-      const a = sorted[i];
-      const b = sorted[j];
-      const h = travelHours(a, b);
-      lines.push(`${a}↔${b}: ${h}h, commuteSlots=${commuteSlots(h)}, sameDayOk=${h <= 2}, intenseHopOk=${h <= 4}`);
-    }
+  for (let i = 0; i < order.length - 1; i++) {
+    const a = order[i];
+    const b = order[i + 1];
+    const h = travelHours(a, b);
+    lines.push(`${a}→${b}: ${h}h, commuteSlots=${commuteSlots(h)}, sameDayOk=${h <= 2}, intenseHopOk=${h <= 4}`);
   }
   return lines.length ? lines.join("\n") : "Single city trip.";
 }
@@ -376,7 +374,7 @@ async function handleItinerary(
     catalog,
     plan,
     citiesMeta,
-    travelContext: buildTravelContext(cityIds),
+    travelContext: buildTravelContext(cityIds, visitOrder),
     pace,
     entryCityId,
     exitCityId,
@@ -480,7 +478,7 @@ async function handleItinerary(
     itinerary,
     entry_city_id: entryCityId,
     exit_city_id: exitCityId,
-    is_default: !hasAI,
+    is_default: !hasAI || !aiPlan,
   });
 }
 

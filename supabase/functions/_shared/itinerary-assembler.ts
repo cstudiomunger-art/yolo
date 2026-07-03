@@ -13,7 +13,7 @@ import {
 } from "./itinerary-duration.ts";
 import { pickVisitTimeSlot, visitTimeSlotLabel } from "./itinerary-visit-hours.ts";
 import { runItinerarySchedulerPipeline, type IntercityHopDay } from "./itinerary-scheduler.ts";
-import { parsePace } from "./itinerary-pace.ts";
+import { parsePace, defaultPace } from "./itinerary-pace.ts";
 import { seasonHintsForTrip } from "./itinerary-season-hints.ts";
 import { fillEmptyItineraryDays } from "./itinerary-day-fill.ts";
 
@@ -370,6 +370,42 @@ export function assembleItinerary(params: {
     const exp = experienceByDay.get(dayIndex);
     const hop = hopByDay.get(dayIndex);
 
+    if (hop) {
+      const ids = assignmentByDay.get(dayIndex) ?? [];
+      const activities: ItineraryActivity[] = [];
+      ids.forEach((aid, actIndex) => {
+        const row = catalogById.get(aid);
+        if (!row) return;
+        const fromLower = hop.from_city_id.toLowerCase();
+        const hinted = timeHints.get(aid);
+        let preferred: "morning" | "afternoon" | "evening";
+        if (hinted) {
+          preferred = hinted;
+        } else if (row.city_id.toLowerCase() === fromLower) {
+          preferred = "morning";
+        } else {
+          preferred = row.recommended_visit_period === "evening" ? "evening" : "afternoon";
+        }
+        activities.push(buildActivity(row, dayIndex, actIndex, preferred));
+      });
+      days.push({
+        id: `day_${dayIndex}`,
+        day_index: dayIndex,
+        date_label: `Day ${dayIndex}`,
+        city_name: routeLabelFromOrder([hop.from_city_id, hop.to_city_id]),
+        cost_estimate: null,
+        experience_city_id: hop.to_city_id,
+        intercity_hop: {
+          from_city_id: hop.from_city_id,
+          to_city_id: hop.to_city_id,
+          travel_hours: hop.travel_hours,
+          items: hop.items,
+        },
+        activities,
+      });
+      continue;
+    }
+
     if (isExperienceSlot(exp)) {
       const cityId = exp?.city_id || visitOrder[(dayIndex - 1) % visitOrder.length] || "beijing";
       const items = (exp?.items?.length ? exp.items : exp?.kind === "travel"
@@ -417,43 +453,10 @@ export function assembleItinerary(params: {
     ids.forEach((aid, actIndex) => {
       const row = catalogById.get(aid);
       if (!row) return;
-      if (hop) {
-        const fromLower = hop.from_city_id.toLowerCase();
-        const hinted = timeHints.get(aid);
-        let preferred: "morning" | "afternoon" | "evening";
-        if (hinted) {
-          preferred = hinted;
-        } else if (row.city_id.toLowerCase() === fromLower) {
-          preferred = "morning";
-        } else {
-          preferred = row.recommended_visit_period === "evening" ? "evening" : "afternoon";
-        }
-        activities.push(buildActivity(row, dayIndex, actIndex, preferred));
-        return;
-      }
       const hinted = timeHints.get(aid);
       const preferred = hinted ?? (actIndex % 2 === 0 ? "morning" : "afternoon");
       activities.push(buildActivity(row, dayIndex, actIndex, preferred));
     });
-
-    if (hop) {
-      days.push({
-        id: `day_${dayIndex}`,
-        day_index: dayIndex,
-        date_label: `Day ${dayIndex}`,
-        city_name: routeLabelFromOrder([hop.from_city_id, hop.to_city_id]),
-        cost_estimate: null,
-        experience_city_id: hop.to_city_id,
-        intercity_hop: {
-          from_city_id: hop.from_city_id,
-          to_city_id: hop.to_city_id,
-          travel_hours: hop.travel_hours,
-          items: hop.items,
-        },
-        activities,
-      });
-      continue;
-    }
 
     const day: ItineraryDay = {
       id: `day_${dayIndex}`,
@@ -496,11 +499,15 @@ export function parseAIPlanResponse(raw: unknown): AIPlanResponse | null {
         const kind = kindRaw === "travel" || kindRaw === "rest" || kindRaw === "experience"
           ? kindRaw
           : undefined;
+        const fromCity = row.from_city_id != null
+          ? String(row.from_city_id).trim().toLowerCase()
+          : undefined;
         return {
           day_index: Number(row.day_index) || 0,
           city_id: String(row.city_id ?? "").trim(),
           items: expItems,
           kind,
+          from_city_id: fromCity,
         };
       }).filter((e) => e.day_index > 0)
       : [];
@@ -602,11 +609,10 @@ export function parseAIPlanResponse(raw: unknown): AIPlanResponse | null {
 
 export const AI_PLAN_JSON_SCHEMA = `{
   "city_plan": {
-    "visit_order": ["city_id_in_optimized_order"],
     "city_day_weights": { "beijing": 3, "shanghai": 2 },
     "must_see_ids": ["attraction_id_from_catalog"],
     "experience_days": [
-      { "day_index": 3, "city_id": "shanghai", "kind": "travel" }
+      { "day_index": 3, "city_id": "shanghai", "kind": "travel", "from_city_id": "beijing" }
     ]
   },
   "day_plans": [
@@ -628,9 +634,10 @@ export const ITINERARY_HARD_CONSTRAINTS =
   "respect per-day duration_slots budget until full (short sights may share a day; full-day sights may fill it alone); " +
   "do not put distant cities on the same day unless pace is intense AND travel is ≤4h using hop_from_city_id + city_id on day_plans; " +
   "respect closed_weekdays/open_time/close_time when present; " +
-  "use experience_days with kind travel/rest for intercity moves >4h within the fixed day budget; " +
-  "optimize visit_order for minimal travel; output JSON only.";
-
+  "use experience_days with kind travel ONLY for intercity moves >4h within the fixed day budget; " +
+  "for standard pace do NOT use experience_days for 2-4h moves (scheduler assigns travel-lite + intercity_hop); " +
+  "visit_order is computed by the engine from entry/exit — provide city_day_weights only; " +
+  "output JSON only.";
 export function buildItineraryPipeline(params: {
   cityIds: string[];
   tripDays: number;
@@ -659,7 +666,7 @@ export function buildItineraryPipeline(params: {
     entryCityId: params.entryCityId,
     exitCityId: params.exitCityId,
     startDate: parsedStartDate,
-    pace: parsePace(params.pace),
+    pace: parsePace(params.pace ?? defaultPace(tripDays, cityIds.length)),
     arrivalTime: params.arrivalTime,
     departureTime: params.departureTime,
   });

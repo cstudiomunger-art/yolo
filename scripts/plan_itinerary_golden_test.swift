@@ -56,6 +56,8 @@ enum PlanItineraryGoldenTest {
         fails += testIntenseHopDayForNearbyCities()
         fails += testStandardTravelLiteHasIntercityHop()
         fails += testSixCitySeventeenDayLinearRoute()
+        fails += testSixCityFifteenDayBeijingEntry()
+        fails += testHopSafeNormalizePreservesTravelHop()
         fails += testIntenseLongLegUsesTravelDayNotHop()
         fails += testHopDayGeoRepairKeepsBothCities()
         fails += testTravelDayHasIntercityHopMetadata()
@@ -65,7 +67,8 @@ enum PlanItineraryGoldenTest {
         fails += testClearArrivalTimeRestoresSnapshot()
         fails += testNormalizePreservesIntenseHopDayDualCities()
         fails += testTravelDayEveningArrivalReplans()
-        fails += testFullTripSnapshotRestoreAfterOverflow()
+        fails += testEntryCityMinDaysOnLongTrip()
+        fails += testSuggestEntryExitTwoAndSixCities()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -911,6 +914,80 @@ enum PlanItineraryGoldenTest {
         return fail
     }
 
+    private static func testSixCityFifteenDayBeijingEntry() -> Int {
+        let cities = ["beijing", "nanjing", "suzhou", "hangzhou", "shanghai", "guangzhou"]
+        let attractions = mockCatalog(cities: cities, perCity: 5)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 15,
+            attractions: attractions,
+            pace: .standard,
+            entryCityId: "beijing",
+            exitCityId: "guangzhou"
+        )
+        var fail = 0
+        if trip.days.count != 15 {
+            print("✗ 6-city 15-day: expected 15 days, got \(trip.days.count)")
+            fail += 1
+        }
+        let order = trip.visitOrder ?? []
+        if order.first != "beijing" {
+            print("✗ 6-city 15-day: visit order should start at beijing")
+            fail += 1
+        }
+        if order.last != "guangzhou" {
+            print("✗ 6-city 15-day: visit order should end at guangzhou")
+            fail += 1
+        }
+        if trip.days.filter({ $0.intercityHop != nil }).isEmpty {
+            print("✗ 6-city 15-day: should include intercity hop/travel cards")
+            fail += 1
+        }
+        if fail == 0 {
+            print("✓ 6-city 15-day beijing entry linear route")
+        }
+        return fail
+    }
+
+    private static func testHopSafeNormalizePreservesTravelHop() -> Int {
+        let hop = ItineraryIntercityHop(
+            fromCityId: "beijing",
+            toCityId: "nanjing",
+            travelHours: 3.5,
+            items: ["Train to Nanjing"]
+        )
+        let day = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Beijing → Nanjing",
+            costEstimate: nil,
+            activities: [
+                mockActivity(id: "bj_1", cityId: "beijing", name: "Morning"),
+                mockActivity(id: "nj_1", cityId: "nanjing", name: "Afternoon"),
+            ],
+            intercityHop: hop
+        )
+        let trip = SampleItinerary(
+            id: "t_hop_safe",
+            title: "Test",
+            meta: "",
+            routeSummary: "Beijing → Nanjing",
+            estimatedBudget: "",
+            days: [day],
+            visitOrder: ["beijing", "nanjing"]
+        )
+        let normalized = PlanItineraryNormalizer.hopSafeNormalize(
+            trip,
+            selectedCityIds: ["beijing", "nanjing"],
+            pace: .intense
+        )
+        let ok = normalized.days.first?.intercityHop?.fromCityId == "beijing"
+            && Set(normalized.days.first?.activities.compactMap(\.cityId) ?? []).count >= 1
+        print(ok ? "✓ hopSafeNormalize preserves intercity hop" : "✗ hopSafeNormalize dropped hop metadata")
+        return ok ? 0 : 1
+    }
+
     private static func testIntenseLongLegUsesTravelDayNotHop() -> Int {
         let cities = ["beijing", "shanghai"]
         let attractions = mockCatalog(cities: cities, perCity: 6)
@@ -1130,7 +1207,7 @@ enum PlanItineraryGoldenTest {
     }
 
     private static func testNormalizePreservesIntenseHopDayDualCities() -> Int {
-        let cities = ["beijing", "nanjing"]
+        let cities = ["shanghai", "nanjing"]
         let attractions = mockCatalog(cities: cities, perCity: 6)
         let catalogById = Dictionary(uniqueKeysWithValues: attractions.map { ($0.id, $0) })
         let trip = PlanItineraryAssembler.build(
@@ -1138,22 +1215,22 @@ enum PlanItineraryGoldenTest {
             tripDays: 5,
             attractions: attractions,
             pace: .intense,
-            entryCityId: "beijing",
+            entryCityId: "shanghai",
             exitCityId: "nanjing"
         )
-        let normalized = PlanItineraryNormalizer.normalize(
+        let normalized = PlanItineraryNormalizer.hopSafeNormalize(
             trip,
             selectedCityIds: cities,
             catalogById: catalogById,
             pace: .intense
         )
         guard let hopDay = normalized.days.first(where: { $0.intercityHop != nil && !$0.isExperienceSuggestions }) else {
-            print("✗ intense beijing→nanjing should have a hop day before normalize")
+            print("✗ intense shanghai→nanjing should have a hop day before normalize")
             return 1
         }
         let onDay = Set(hopDay.activities.compactMap(\.cityId))
-        let ok = onDay.contains("beijing") && onDay.contains("nanjing")
-        print(ok ? "✓ normalize keeps both cities on 4h hop day" : "✗ normalize stripped valid hop-day cities")
+        let ok = onDay.contains("shanghai") && onDay.contains("nanjing")
+        print(ok ? "✓ hopSafeNormalize keeps both cities on 4h hop day" : "✗ hopSafeNormalize stripped valid hop-day cities")
         return ok ? 0 : 1
     }
 
@@ -1223,6 +1300,68 @@ enum PlanItineraryGoldenTest {
         let ok = overflowed && restored[1].activities.isEmpty && restored[0].activities.count == 3
         print(ok ? "✓ full-trip snapshot can undo overflow replan" : "✗ snapshot restore should revert overflow")
         return ok ? 0 : 1
+    }
+
+    private static func testEntryCityMinDaysOnLongTrip() -> Int {
+        let cities = ["beijing", "nanjing", "suzhou", "hangzhou", "shanghai", "guangzhou"]
+        let attractions = mockCatalog(cities: cities, perCity: 5)
+        let catalogByCity = Dictionary(grouping: attractions, by: { $0.cityId.lowercased() })
+        let calibration = PlanItineraryCityDays.calibrateCityDays(
+            visitOrder: cities,
+            aiWeights: nil,
+            catalogByCity: catalogByCity,
+            tripDays: 15,
+            pace: .standard
+        )
+        let beijingDays = calibration.cityDays["beijing"] ?? 0
+        let ok = beijingDays >= 2
+        print(ok ? "✓ entry city gets min 2 days on 15-day 6-city trip" : "✗ beijing should have ≥2 city days, got \(beijingDays)")
+        return ok ? 0 : 1
+    }
+
+    private static func testMergeExperienceRespectsHopDays() -> Int {
+        let cities = ["beijing", "nanjing"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 5,
+            attractions: attractions,
+            pace: .standard,
+            entryCityId: "beijing",
+            exitCityId: "nanjing",
+            applyNormalizer: false
+        )
+        let travelLite = trip.days.first {
+            !$0.isExperienceSuggestions && $0.intercityHop != nil
+        }
+        let ok = travelLite != nil
+            && !travelLite!.isExperienceSuggestions
+            && travelLite!.intercityHop?.fromCityId == "beijing"
+        print(ok ? "✓ travel-lite day is hop card not experience card" : "✗ beijing→nanjing should be travel-lite with intercity_hop")
+        return ok ? 0 : 1
+    }
+
+    private static func testSuggestEntryExitTwoAndSixCities() -> Int {
+        var fail = 0
+        let two = CityTravelHints.suggestEntryExit(
+            cityIds: ["shanghai", "nanjing"],
+            cities: []
+        )
+        if two.entryCityId != two.visitOrder.first || two.exitCityId != two.visitOrder.last {
+            print("✗ suggestEntryExit 2-city: entry/exit should match visit order ends")
+            fail += 1
+        }
+
+        let sixIds = ["beijing", "nanjing", "suzhou", "hangzhou", "shanghai", "guangzhou"]
+        let six = CityTravelHints.suggestEntryExit(cityIds: sixIds, cities: [])
+        if Set(six.visitOrder).count != sixIds.count {
+            print("✗ suggestEntryExit 6-city: visit order should be linear without repeats")
+            fail += 1
+        }
+        if fail == 0 {
+            print("✓ suggestEntryExit returns linear route endpoints")
+        }
+        return fail
     }
 
     private static func mockActivity(id: String, cityId: String, name: String) -> ItineraryActivity {

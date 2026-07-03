@@ -197,7 +197,7 @@ struct ItineraryDetailView: View {
                 dayIndex: dayIndex,
                 arrivalTime: arrivalTime,
                 options: PlanItineraryIntercityReplanner.Options(
-                    pace: inferredTripPace,
+                    pace: resolvedTripPace,
                     catalogById: attractionCache
                 )
             )
@@ -207,7 +207,10 @@ struct ItineraryDetailView: View {
         }
     }
 
-    private var inferredTripPace: TripPace {
+    private var resolvedTripPace: TripPace {
+        if let raw = currentItinerary.pace, let pace = TripPace(rawValue: raw) {
+            return pace
+        }
         let days = editableDays.isEmpty ? itinerary.days : editableDays
         return PlanItinerarySlotBudget.inferTripPace(from: days)
     }
@@ -232,7 +235,8 @@ struct ItineraryDetailView: View {
             schedulingAdjustments: schedulingAdjustments.isEmpty
                 ? (saved?.schedulingAdjustments ?? itinerary.schedulingAdjustments)
                 : schedulingAdjustments,
-            seasonHints: saved?.seasonHints ?? itinerary.seasonHints
+            seasonHints: saved?.seasonHints ?? itinerary.seasonHints,
+            pace: saved?.pace ?? itinerary.pace
         )
     }
 
@@ -286,18 +290,6 @@ struct ItineraryDetailView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
-
-                            if day.intercityHop == nil {
-                                ForEach(day.activities) { activity in
-                                    activityRow(activity, dayId: day.id)
-                                }
-                                .onMove { source, destination in
-                                    moveActivities(dayId: day.id, from: source, to: destination)
-                                }
-                                .onDelete { offsets in
-                                    deleteActivities(dayId: day.id, at: offsets)
-                                }
-                            }
 
                             Button {
                                 guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }

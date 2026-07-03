@@ -100,5 +100,30 @@
       "visit_order_ends": ["beijing", "guangzhou"],
       "intercity_hop_days_min": 1
     }
+  },
+  {
+    "name": "six-city-15-day-beijing-entry",
+    "input": {
+      "trip": {
+        "trip_days": 15,
+        "entry_city_id": "beijing",
+        "exit_city_id": "guangzhou",
+        "pace": "standard"
+      },
+      "cities": [
+        { "id": "beijing", "region": "north_china" },
+        { "id": "nanjing", "region": "yangtze_delta" },
+        { "id": "suzhou", "region": "yangtze_delta" },
+        { "id": "hangzhou", "region": "yangtze_delta" },
+        { "id": "shanghai", "region": "yangtze_delta" },
+        { "id": "guangzhou", "region": "pearl_delta" }
+      ],
+      "constraints": { "allow_silent_drop": true }
+    },
+    "expect": {
+      "trip_days": 15,
+      "visit_order_ends": ["beijing", "guangzhou"],
+      "intercity_hop_days_min": 1
+    }
   }
 ]

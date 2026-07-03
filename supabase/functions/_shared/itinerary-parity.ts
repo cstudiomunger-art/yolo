@@ -41,6 +41,8 @@ export type ParityExpectV1 = {
   not_on_weekday?: Array<{ id: string; weekday: Weekday }>;
   dropped_ids?: string[];
   no_duplicate_ids?: boolean;
+  visit_order_ends?: [string, string];
+  intercity_hop_days_min?: number;
 };
 
 export type ParityVectorV1 = {

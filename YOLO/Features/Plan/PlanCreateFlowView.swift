@@ -13,6 +13,7 @@ struct PlanCreateFlowView: View {
     @State private var selectedCityIds: Set<String> = []
     @State private var entryCityId: String?
     @State private var exitCityId: String?
+    @State private var entryExitUserEdited = false
     @State private var arrivalDate = Date()
     @State private var departureDate = Calendar.current.date(byAdding: .day, value: 9, to: Date()) ?? Date()
     @State private var showArrivalPicker = false
@@ -40,10 +41,14 @@ struct PlanCreateFlowView: View {
     @State private var arrivalTime = Calendar.current.date(bySettingHour: 14, minute: 0, second: 0, of: Date()) ?? Date()
     @State private var departureTime = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: Date()) ?? Date()
     @State private var isRuleBasedTrip = false
+    @State private var usedLocalFallback = false
     @State private var reviewEditMode: EditMode = .inactive
     @State private var intercityTripSnapshot: [ItineraryDay]?
     @State private var intercityAdjustmentsSnapshot: [String]?
     @State private var arrivalReplanTask: Task<Void, Never>?
+    @State private var generationTask: Task<Void, Never>?
+    @State private var visaCheckTask: Task<Void, Never>?
+    @State private var generationEpoch = 0
 
     private let visaCountries: [PassportCountry] = ISO3166.all
 
@@ -189,7 +194,7 @@ struct PlanCreateFlowView: View {
             }
         }
         .onChange(of: selectedCityIds) { _, _ in
-            syncEntryExitCities()
+            applySuggestedEntryExit(force: false)
             tripPace = TripPace.defaultPace(tripDays: activityDays, cityCount: selectedCityIds.count)
         }
         .onChange(of: activityDays) { _, _ in
@@ -228,9 +233,6 @@ struct PlanCreateFlowView: View {
 
                 if !selectedCityIds.isEmpty {
                     selectedCityChips
-                    if selectedCityIds.count > 1 {
-                        entryExitCitySection
-                    }
                 }
 
                 if !popularCities.isEmpty && search.isEmpty {
@@ -249,6 +251,7 @@ struct PlanCreateFlowView: View {
             VStack(spacing: 0) {
                 Divider()
                 primaryButton(String(localized: "Continue")) {
+                    applySuggestedEntryExit(force: true)
                     step = .dates
                 }
                 .disabled(selectedCityIds.isEmpty)
@@ -269,6 +272,13 @@ struct PlanCreateFlowView: View {
         cities.filter { selectedCityIds.contains($0.id) }
     }
 
+    private var endpointSuggestion: CityTravelHints.EndpointSuggestion {
+        CityTravelHints.suggestEntryExit(
+            cityIds: Array(selectedCityIds),
+            cities: cities
+        )
+    }
+
     private var entryExitCitySection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(String(localized: "Flight endpoints"))
@@ -277,20 +287,29 @@ struct PlanCreateFlowView: View {
             Text(String(localized: "Pick where you land in China and which city you fly home from. We'll order the middle cities for the shortest route."))
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
+            Text(String(format: String(localized: "Suggested route: %@"), CityTravelHints.routeLabel(from: endpointSuggestion.visitOrder)))
+                .font(Theme.FontToken.inter(11, weight: .medium))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
             VStack(spacing: 0) {
                 entryExitCityRow(
                     label: String(localized: "Landing city"),
                     selection: Binding(
-                        get: { entryCityId ?? selectedCitiesInDisplayOrder.first?.id ?? "" },
-                        set: { entryCityId = $0 }
+                        get: { entryCityId ?? endpointSuggestion.entryCityId },
+                        set: {
+                            entryCityId = $0
+                            entryExitUserEdited = true
+                        }
                     )
                 )
                 Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
                 entryExitCityRow(
                     label: String(localized: "Return from"),
                     selection: Binding(
-                        get: { exitCityId ?? entryCityId ?? selectedCitiesInDisplayOrder.first?.id ?? "" },
-                        set: { exitCityId = $0 }
+                        get: { exitCityId ?? endpointSuggestion.exitCityId },
+                        set: {
+                            exitCityId = $0
+                            entryExitUserEdited = true
+                        }
                     )
                 )
             }
@@ -403,6 +422,10 @@ struct PlanCreateFlowView: View {
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Theme.ColorToken.warningBackground)
+                }
+
+                if selectedCityIds.count > 1 {
+                    entryExitCitySection
                 }
 
                 paceSection
@@ -789,6 +812,7 @@ struct PlanCreateFlowView: View {
             }
             .padding(.horizontal, Theme.screenPadding)
             Button(String(localized: "Back to dates")) {
+                cancelPendingGeneration()
                 step = .dates
             }
             .font(Theme.FontToken.inter(12))
@@ -932,6 +956,24 @@ struct PlanCreateFlowView: View {
                 .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+
+                if reviewEditMode == .inactive {
+                    Button {
+                        let cityIds: [String] = {
+                            if let cid = displayDay.experienceCityId, !cid.isEmpty { return [cid] }
+                            return reviewTripCityIds()
+                        }()
+                        addAttractionContext = PlanAddAttractionContext(dayIndex: dayIndex, cityIds: cityIds)
+                    } label: {
+                        Label(String(localized: "Add attraction"), systemImage: "plus")
+                            .font(Theme.FontToken.inter(12, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.ColorToken.accent)
+                    .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
             } else {
                 ForEach(day.activities) { activity in
                     reviewActivityRow(activity, dayIndex: dayIndex)
@@ -1055,7 +1097,12 @@ struct PlanCreateFlowView: View {
 
     @ViewBuilder
     private var ruleBasedTripBanner: some View {
-        Label(String(localized: "Built with on-device scheduling rules"), systemImage: "gearshape.2")
+        Label(
+            usedLocalFallback
+                ? String(localized: "AI unavailable — built with on-device scheduling rules")
+                : String(localized: "Built with on-device scheduling rules"),
+            systemImage: usedLocalFallback ? "wifi.slash" : "gearshape.2"
+        )
             .font(Theme.FontToken.inter(11, weight: .medium))
             .foregroundStyle(Theme.ColorToken.textSecondary)
             .padding(14)
@@ -1065,6 +1112,12 @@ struct PlanCreateFlowView: View {
     }
 
     // MARK: - Actions
+
+    private func cancelPendingGeneration() {
+        generationTask?.cancel()
+        visaCheckTask?.cancel()
+        generationEpoch += 1
+    }
 
     private func loadCities() async {
         do {
@@ -1093,58 +1146,86 @@ struct PlanCreateFlowView: View {
         syncEntryExitCities()
     }
 
-    private func syncEntryExitCities() {
-        let selected = selectedCitiesInDisplayOrder.map(\.id)
+    private func applySuggestedEntryExit(force: Bool = false) {
+        let selected = Array(selectedCityIds).map { $0.lowercased() }
         guard !selected.isEmpty else {
             entryCityId = nil
             exitCityId = nil
             return
         }
-        if let entry = entryCityId, selected.contains(entry) {
-            // keep user choice
-        } else {
-            entryCityId = selected[0]
-        }
         if selected.count == 1 {
-            exitCityId = entryCityId
+            entryCityId = selected[0]
+            exitCityId = selected[0]
             return
         }
-        if let exit = exitCityId, selected.contains(exit) {
-            // keep user choice
-        } else if let entry = entryCityId, let fallback = selected.first(where: { $0 != entry }) {
-            exitCityId = fallback
-        } else {
-            exitCityId = selected.last
+
+        let suggestion = CityTravelHints.suggestEntryExit(
+            cityIds: selected,
+            cities: cities
+        )
+
+        if force || !entryExitUserEdited {
+            entryCityId = suggestion.entryCityId
+            exitCityId = suggestion.exitCityId
+            return
         }
+
+        if let entry = entryCityId?.lowercased(), !selected.contains(entry) {
+            entryCityId = suggestion.entryCityId
+        }
+        if let exit = exitCityId?.lowercased(), !selected.contains(exit) {
+            exitCityId = suggestion.exitCityId
+        }
+        if entryCityId?.lowercased() == exitCityId?.lowercased() {
+            exitCityId = suggestion.exitCityId
+        }
+    }
+
+    /// Legacy alias — validates selection membership only.
+    private func syncEntryExitCities() {
+        applySuggestedEntryExit(force: false)
     }
 
     private func resolvedEntryCityId() -> String {
-        let selected = Array(selectedCityIds)
-        if let entry = entryCityId, selected.contains(entry) { return entry }
-        return selected.sorted().first ?? "beijing"
+        let selected = Array(selectedCityIds).map { $0.lowercased() }
+        if let entry = entryCityId?.lowercased(), selected.contains(entry) { return entry }
+        return endpointSuggestion.entryCityId
     }
 
     private func resolvedExitCityId() -> String {
-        let selected = Array(selectedCityIds)
-        if let exit = exitCityId, selected.contains(exit) { return exit }
-        if selected.count == 1 { return resolvedEntryCityId() }
-        return selected.sorted().last ?? resolvedEntryCityId()
+        let selected = Array(selectedCityIds).map { $0.lowercased() }
+        if selected.count <= 1 { return resolvedEntryCityId() }
+        if let exit = exitCityId?.lowercased(), selected.contains(exit) { return exit }
+        return endpointSuggestion.exitCityId
     }
 
     /// Judge the chosen cities + real dates against the user's passport before generating.
     /// CN / unknown passport → skip (engine judges foreigners entering China). Green/enough →
     /// silent pass straight to generation. Not enough → show engine-verified route options.
     private func enterVisaCheck() {
+        visaCheckTask?.cancel()
+        generationTask?.cancel()
+        generationEpoch += 1
+        let epoch = generationEpoch
         step = .visa
         visaChecking = true
         visaRec = nil
         visaRoutes = []
-        Task {
+        visaCheckTask = Task {
             // Already holds a China visa → visa-free routing is moot, skip the whole check.
-            if hasChinaVisa { startGeneration(); return }
+            if hasChinaVisa {
+                guard !Task.isCancelled, epoch == generationEpoch else { return }
+                startGeneration(epoch: epoch)
+                return
+            }
             let cc = natCode.trimmingCharacters(in: .whitespaces).uppercased()
-            if cc.isEmpty || cc == "CN" { startGeneration(); return }
+            if cc.isEmpty || cc == "CN" {
+                guard !Task.isCancelled, epoch == generationEpoch else { return }
+                startGeneration(epoch: epoch)
+                return
+            }
             await appEnv.visaData.load()
+            guard !Task.isCancelled, epoch == generationEpoch else { return }
             let data = appEnv.visaData.data
             let slugs = Array(selectedCityIds)
             // Passport-validity gate: pass nil when sufficient (no GATE0); 0 when the user says
@@ -1154,16 +1235,23 @@ struct PlanCreateFlowView: View {
                                                     end: departureDate, countryCode: cc, data: data,
                                                     departure: depCode, onward: onwardCode,
                                                     passportValidMonths: validMonths) else {
-                startGeneration(); return
+                guard !Task.isCancelled, epoch == generationEpoch else { return }
+                startGeneration(epoch: epoch)
+                return
             }
             let rec = VisaPolicyEngine.recommend(query, data: data)
+            guard !Task.isCancelled, epoch == generationEpoch else { return }
             // GATE0 (passport validity) — no route helps; show the renew-passport warning only.
             if rec.chosenPolicyId == "GATE0" {
                 visaQuery = query; visaRec = rec; visaRoutes = []
                 swapPlan = nil; swapPicks = []; visaChecking = false
                 return
             }
-            if rec.isEnough { startGeneration(); return }
+            if rec.isEnough {
+                guard !Task.isCancelled, epoch == generationEpoch else { return }
+                startGeneration(epoch: epoch)
+                return
+            }
             let catalog = cities.map { (slug: $0.id, popularity: $0.attractionCount) }
             let plan = VisaTripChecker.swapPlan(query: query, appCities: slugs, catalog: catalog, data: data, rec: rec)
             var rs = VisaTripChecker.routes(query: query, appCities: slugs, data: data, recommendation: rec)
@@ -1194,7 +1282,8 @@ struct PlanCreateFlowView: View {
             ids.append(slug)
         }
         selectedCityIds = Set(ids)
-        syncEntryExitCities()
+        entryExitUserEdited = false
+        applySuggestedEntryExit(force: true)
         startGeneration()
     }
 
@@ -1206,21 +1295,25 @@ struct PlanCreateFlowView: View {
             ids.append(option.slug)
         }
         selectedCityIds = Set(ids)
-        syncEntryExitCities()
+        entryExitUserEdited = false
+        applySuggestedEntryExit(force: true)
         startGeneration()
     }
 
-    private func startGeneration() {
+    private func startGeneration(epoch: Int? = nil) {
+        generationTask?.cancel()
+        let activeEpoch = epoch ?? generationEpoch
         step = .generating
         failureMessage = nil
         generationMessage = String(localized: "Planning your days…")
-        Task {
+        generationTask = Task {
             let messages = [
                 String(localized: "Planning your days…"),
                 String(localized: "Matching attractions…"),
                 String(localized: "Almost ready…"),
             ]
             for (i, msg) in messages.enumerated() {
+                guard !Task.isCancelled, activeEpoch == generationEpoch else { return }
                 generationMessage = msg
                 try? await Task.sleep(for: .milliseconds(i == 0 ? 400 : 700))
             }
@@ -1240,7 +1333,9 @@ struct PlanCreateFlowView: View {
                         exitCityId: resolvedExitCityId()
                     )
                 )
-                isRuleBasedTrip = generated.isRuleBased
+                guard !Task.isCancelled, activeEpoch == generationEpoch else { return }
+                isRuleBasedTrip = generated.isRuleBased || generated.usedLocalFallback
+                usedLocalFallback = generated.usedLocalFallback
                 attractionCache = await PlanItineraryHelpers.catalogById(
                     forCityIds: Array(selectedCityIds),
                     content: appEnv.content
@@ -1250,6 +1345,7 @@ struct PlanCreateFlowView: View {
                 await loadAttractionCache(for: enriched)
                 step = .review
             } catch {
+                guard !Task.isCancelled, activeEpoch == generationEpoch else { return }
                 failureMessage = error.localizedDescription
                 step = .failed
             }
@@ -1262,12 +1358,12 @@ struct PlanCreateFlowView: View {
         let exit = resolvedExitCityId()
         let crossCityRule = tripPace == .intense
             ? "Intense pace: for city pairs with ≤4h travel you MAY use same-day hops (morning in hop_from city, afternoon in destination) when it saves days; use experience_days kind travel for >4h moves."
-            : "Do not put distant cities on the same day. Use experience_days with kind travel to mark intercity travel days (occupies a day slot, does not add days)."
+            : "Standard pace: 2-4h intercity legs are travel-lite days (destination afternoon sights + intercity card). Do NOT use experience_days for 2-4h moves. Use experience_days kind travel ONLY for >4h moves."
         return """
         Arrival \(PlanTripDateMath.formatDisplayDate(arrivalDate)); departure \(PlanTripDateMath.formatDisplayDate(departureDate)); \
         \(activityDays) full activity days (exclude arrival and departure). \
         Selected cities (unordered): \(cityList). Landing city (international entry): \(entry). Return city (international exit): \(exit). \
-        Visit order must start in \(entry) and end in \(exit); optimize middle cities for minimal intercity travel. \
+        Visit order is computed by the engine from entry/exit — provide city_day_weights only (do NOT output visit_order). \
         \(crossCityRule) \
         Prefer city_plan + day_plans JSON (pack sights by duration_slots until each day's budget is full). \
         Pace: \(tripPace.rawValue). \
@@ -1278,18 +1374,83 @@ struct PlanCreateFlowView: View {
 
     private func enrichItinerary(_ trip: SampleItinerary) -> SampleItinerary {
         let cityIds = Array(selectedCityIds).map { $0.lowercased() }
-        let normalized = trip.userEdited
-            ? trip
-            : PlanItineraryNormalizer.normalize(
+        let visitOrder = trip.visitOrder ?? cityIds
+        let arrivalHHMM = PlanItineraryFlightTimes.formatHHMM(from: arrivalTime)
+        let departureHHMM = PlanItineraryFlightTimes.formatHHMM(from: departureTime)
+
+        let working: SampleItinerary
+        if trip.userEdited {
+            working = trip
+        } else if isRuleBasedTrip {
+            working = PlanItineraryNormalizer.hopSafeNormalize(
                 trip,
                 selectedCityIds: cityIds,
                 catalogById: attractionCache,
                 pace: tripPace,
-                arrivalTime: PlanItineraryFlightTimes.formatHHMM(from: arrivalTime),
-                departureTime: PlanItineraryFlightTimes.formatHHMM(from: departureTime)
+                arrivalTime: arrivalHHMM,
+                departureTime: departureHHMM
             )
-        let labels = PlanTripDateMath.activityDateLabels(arrival: arrivalDate, count: normalized.days.count)
-        let days = normalized.days.enumerated().map { index, day in
+        } else {
+            let filledDays = PlanItineraryDayFill.fillEmptyDays(
+                trip.days,
+                visitOrder: visitOrder,
+                pace: tripPace,
+                arrivalTime: arrivalHHMM,
+                departureTime: departureHHMM
+            )
+            working = SampleItinerary(
+                id: trip.id,
+                title: trip.title,
+                meta: trip.meta,
+                routeSummary: trip.routeSummary,
+                estimatedBudget: trip.estimatedBudget,
+                days: filledDays,
+                shareSlug: trip.shareSlug,
+                isShared: trip.isShared,
+                startDate: trip.startDate,
+                endDate: trip.endDate,
+                visitOrder: trip.visitOrder,
+                userEdited: trip.userEdited,
+                droppedAttractionIds: trip.droppedAttractionIds,
+                schedulingAdjustments: trip.schedulingAdjustments,
+                seasonHints: trip.seasonHints
+            )
+        }
+
+        let normalized = working
+        var alignedDays = normalized.days
+        if alignedDays.count > activityDays {
+            alignedDays = Array(alignedDays.prefix(activityDays))
+        } else if alignedDays.count < activityDays {
+            let visitOrder = normalized.visitOrder ?? cityIds
+            while alignedDays.count < activityDays {
+                let nextIndex = alignedDays.count + 1
+                let filler = PlanItineraryDayFill.fillEmptyDays(
+                    [ItineraryDay(
+                        id: "day_\(nextIndex)",
+                        dayIndex: nextIndex,
+                        dateLabel: "Day \(nextIndex)",
+                        cityName: "",
+                        costEstimate: nil,
+                        activities: []
+                    )],
+                    visitOrder: visitOrder,
+                    pace: tripPace,
+                    arrivalTime: arrivalHHMM,
+                    departureTime: departureHHMM
+                ).first ?? ItineraryDay(
+                    id: "day_\(nextIndex)",
+                    dayIndex: nextIndex,
+                    dateLabel: "Day \(nextIndex)",
+                    cityName: "",
+                    costEstimate: nil,
+                    activities: []
+                )
+                alignedDays.append(filler)
+            }
+        }
+        let labels = PlanTripDateMath.activityDateLabels(arrival: arrivalDate, count: activityDays)
+        let days = alignedDays.enumerated().map { index, day in
             let label = labels.indices.contains(index) ? labels[index] : day.dateLabel
             return ItineraryDay(
                 id: day.id,
@@ -1333,7 +1494,8 @@ struct PlanCreateFlowView: View {
                 cities: cities,
                 selectedCityIds: selectedCityIds,
                 tripMonth: tripMonth
-            )
+            ),
+            pace: tripPace.rawValue
         )
     }
 
@@ -1451,11 +1613,30 @@ struct PlanCreateFlowView: View {
 
     private func saveDraft() {
         guard let trip = draftItinerary else { return }
+        let persisted = trip.withDays(persistFilledDays(trip.days))
         appEnv.preferences.selectedCityIds = Array(selectedCityIds)
         appEnv.preferences.departureDate = departureDate
-        appEnv.preferences.saveItinerary(trip)
-        onSaved(trip)
+        appEnv.preferences.saveItinerary(persisted)
+        onSaved(persisted)
         dismiss()
+    }
+
+    private func persistFilledDays(_ days: [ItineraryDay]) -> [ItineraryDay] {
+        let visitOrder = draftItinerary?.visitOrder ?? reviewTripCityIds()
+        let arrivalHHMM = PlanItineraryFlightTimes.formatHHMM(from: arrivalTime)
+        let departureHHMM = PlanItineraryFlightTimes.formatHHMM(from: departureTime)
+        return days.map { day in
+            if day.isExperienceSuggestions || !PlanItineraryDayFill.isBlank(day) {
+                return day
+            }
+            return PlanItineraryDayFill.fillEmptyDays(
+                [day],
+                visitOrder: visitOrder,
+                pace: tripPace,
+                arrivalTime: arrivalHHMM,
+                departureTime: departureHHMM
+            ).first ?? day
+        }
     }
 
     // MARK: - UI helpers

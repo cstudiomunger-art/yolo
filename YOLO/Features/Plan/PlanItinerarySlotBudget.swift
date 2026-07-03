@@ -22,8 +22,9 @@ enum PlanItinerarySlotBudget {
 
     /// Daytime slot budget for hop / travel-lite days (matches scheduler timeline).
     static func hopDaytimeSlotBudget(for day: ItineraryDay, pace: TripPace) -> Double {
-        guard day.intercityHop != nil, !day.isExperienceSuggestions else { return 0 }
-        if isIntenseHopDay(day, pace: pace) {
+        guard let hop = day.intercityHop, !day.isExperienceSuggestions else { return 0 }
+        if pace == .intense,
+           CityTravelHints.canIntenseSameDayHop(hop.fromCityId, hop.toCityId) {
             return PlanItineraryPace.hopDaySlotCapacity
         }
         return 1

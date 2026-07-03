@@ -337,25 +337,33 @@ enum PlanItineraryScheduler {
         arrivalTime: String?,
         departureTime: String?
     ) -> [TimelineSlot] {
+        let activeSlots = slots.filter { $0.kind != "travel" }
+        let firstActive = activeSlots.first?.dayIndex
+        let lastActive = activeSlots.last?.dayIndex
         let sightseeing = slots.filter { $0.kind == "sightseeing" }
         let firstSight = sightseeing.first?.dayIndex
         let lastSight = sightseeing.last?.dayIndex
 
         return slots.map { slot in
-            guard slot.kind == "sightseeing" else { return slot }
+            let isSightseeing = slot.kind == "sightseeing"
+            let isHopLike = slot.kind == "hop" || slot.kind == "travel_lite"
+            guard isSightseeing || isHopLike else { return slot }
+
+            let anchorFirst = isHopLike ? firstActive : firstSight
+            let anchorLast = isHopLike ? lastActive : lastSight
 
             var profile: DayScheduleProfile = .fullDay
-            if slot.dayIndex == firstSight { profile = .arrivalDay }
-            if slot.dayIndex == lastSight, tripDays > 1 { profile = .departureDay }
+            if slot.dayIndex == anchorFirst { profile = .arrivalDay }
+            if slot.dayIndex == anchorLast, tripDays > 1 { profile = .departureDay }
 
             var dayCapacity = min(slot.dayCapacity, PlanItineraryPace.daySlotCapacity(profile: profile, pace: pace))
             var eveningCapacity = slot.eveningCapacity
 
-            if slot.dayIndex == firstSight, PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
+            if slot.dayIndex == anchorFirst, PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime), isSightseeing {
                 dayCapacity = 0
                 eveningCapacity = max(eveningCapacity, 1)
             }
-            if slot.dayIndex == lastSight, PlanItineraryFlightTimes.isMorningDeparture(departureTime) {
+            if slot.dayIndex == anchorLast, PlanItineraryFlightTimes.isMorningDeparture(departureTime) {
                 dayCapacity = min(dayCapacity, PlanItineraryPace.daySlotCapacity(profile: .departureDay, pace: pace))
             }
 
@@ -368,6 +376,21 @@ enum PlanItineraryScheduler {
                 fromCityId: slot.fromCityId
             )
         }
+    }
+
+    private static func sightseeingBudget(
+        for day: Int,
+        timeline: [TimelineSlot]
+    ) -> (dayCapacity: Double, eveningCap: Int) {
+        guard let slot = timeline.first(where: { $0.dayIndex == day }) else {
+            return (PlanItineraryDuration.daySlotCapacity(.fullDay), 0)
+        }
+        var dayCapacity = slot.dayCapacity
+        if (slot.kind == "hop" || slot.kind == "travel_lite"), let from = slot.fromCityId {
+            let hours = CityTravelHints.travelHours(from, slot.cityId)
+            dayCapacity = max(0, dayCapacity - Double(CityTravelHints.commuteSlots(hours)))
+        }
+        return (dayCapacity, slot.eveningCapacity)
     }
 
     private static func buildRuleDayPlans(
@@ -530,8 +553,12 @@ enum PlanItineraryScheduler {
         var dropped: [String] = []
         var overflow: [(id: String, priority: Int)] = []
 
-        let capacityByDay = Dictionary(uniqueKeysWithValues: timeline.map { ($0.dayIndex, $0.dayCapacity) })
-        let eveningCapByDay = Dictionary(uniqueKeysWithValues: timeline.map { ($0.dayIndex, $0.eveningCapacity) })
+        let capacityByDay = Dictionary(uniqueKeysWithValues: timeline.map {
+            ($0.dayIndex, sightseeingBudget(for: $0.dayIndex, timeline: timeline).dayCapacity)
+        })
+        let eveningCapByDay = Dictionary(uniqueKeysWithValues: timeline.map {
+            ($0.dayIndex, sightseeingBudget(for: $0.dayIndex, timeline: timeline).eveningCap)
+        })
         let allowedCitiesByDay = allowedCities(from: timeline)
         let planByDay = Dictionary(uniqueKeysWithValues: dayPlans.map { ($0.dayIndex, $0) })
 

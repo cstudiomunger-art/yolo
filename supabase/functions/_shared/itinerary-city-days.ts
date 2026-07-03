@@ -168,6 +168,26 @@ function assessTightTrip(params: {
   return { hints, adjustments };
 }
 
+function applyEntryCityMinDays(
+  map: Map<string, number>,
+  visitOrder: string[],
+  tripDays: number,
+): Map<string, number> {
+  if (tripDays < 8 || visitOrder.length < 3) return map;
+  const entry = visitOrder[0]?.toLowerCase();
+  const last = visitOrder[visitOrder.length - 1]?.toLowerCase();
+  if (!entry || !last || entry === last) return map;
+  const result = new Map(map);
+  const minEntry = 2;
+  const current = result.get(entry) ?? 1;
+  const lastDays = result.get(last) ?? 1;
+  if (current >= minEntry || lastDays <= 1) return map;
+  const take = Math.min(minEntry - current, lastDays - 1);
+  result.set(entry, current + take);
+  result.set(last, lastDays - take);
+  return result;
+}
+
 export function calibrateCityDays(
   visitOrder: string[],
   aiWeights: Record<string, number> | undefined,
@@ -199,6 +219,8 @@ export function calibrateCityDays(
     }
     cityDays = clampCityDaysSum(merged, visitOrder, available);
   }
+
+  cityDays = applyEntryCityMinDays(cityDays, visitOrder, tripDays);
 
   const { hints, adjustments } = assessTightTrip({
     visitOrder,
