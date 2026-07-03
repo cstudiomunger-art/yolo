@@ -150,7 +150,8 @@ enum PlanItineraryScheduler {
                     dateLabel: "Day \(dayIndex)",
                     cityName: CityTravelHints.displayName(for: cityId),
                     costEstimate: nil,
-                    activities: activities
+                    activities: activities,
+                    experienceCityId: cityId
                 )
             )
         }
@@ -160,7 +161,13 @@ enum PlanItineraryScheduler {
         _ = userNotes
 
         return PipelineResult(
-            days: itineraryDays,
+            days: PlanItineraryDayFill.fillEmptyDays(
+                itineraryDays,
+                visitOrder: visitOrder,
+                pace: resolvedPace,
+                arrivalTime: arrivalTime,
+                departureTime: departureTime
+            ),
             visitOrder: visitOrder,
             droppedAttractionIds: pick.preDropped + repaired.dropped,
             schedulingAdjustments: adjustments

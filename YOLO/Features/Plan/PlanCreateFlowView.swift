@@ -806,10 +806,21 @@ struct PlanCreateFlowView: View {
             )
 
         Section {
-            if day.isExperienceSuggestions {
+            if day.isExperienceSuggestions || PlanItineraryDayFill.isBlank(day) {
+                let displayDay = day.isExperienceSuggestions
+                    ? day
+                    : (PlanItineraryDayFill.fillEmptyDays(
+                        [day],
+                        visitOrder: draftItinerary?.visitOrder ?? reviewTripCityIds(),
+                        pace: tripPace,
+                        arrivalTime: PlanItineraryFlightTimes.formatHHMM(from: arrivalTime),
+                        departureTime: PlanItineraryFlightTimes.formatHHMM(from: departureTime)
+                    ).first ?? day)
                 ExperienceSuggestionsDayCard(
-                    day: day,
-                    cityDisplayName: visited
+                    day: displayDay,
+                    cityDisplayName: visited.isEmpty
+                        ? CityTravelHints.displayName(for: displayDay.experienceCityId ?? "beijing")
+                        : visited
                 )
                 .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
                 .listRowBackground(Color.clear)

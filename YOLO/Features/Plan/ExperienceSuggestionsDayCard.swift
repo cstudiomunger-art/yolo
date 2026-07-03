@@ -9,13 +9,33 @@ struct ExperienceSuggestionsDayCard: View {
             || day.experienceItems.contains { $0.localizedCaseInsensitiveContains("intercity travel") }
     }
 
+    private var isArrivalDay: Bool {
+        day.experienceItems.first?.localizedCaseInsensitiveContains("Afternoon arrival") == true
+    }
+
+    private var isDepartureDay: Bool {
+        day.experienceItems.first?.localizedCaseInsensitiveContains("Morning departure") == true
+    }
+
+    private var cardTitle: String {
+        if isTravelDay { return String(localized: "Travel day") }
+        if isArrivalDay { return String(localized: "Arrival day") }
+        if isDepartureDay { return String(localized: "Departure day") }
+        return String(localized: "Local Experiences to Try")
+    }
+
+    private var cardEmoji: String {
+        if isTravelDay { return "🚄" }
+        if isArrivalDay { return "✈️" }
+        if isDepartureDay { return "🧳" }
+        return "💡"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
-                Text(isTravelDay ? "🚄" : "💡")
-                Text(isTravelDay
-                    ? String(localized: "Travel day")
-                    : String(localized: "Local Experiences to Try"))
+                Text(cardEmoji)
+                Text(cardTitle)
                     .font(Theme.FontToken.inter(13, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
             }
@@ -58,7 +78,7 @@ struct ExperienceSuggestionsDayCard: View {
                 }
             }
 
-            if !isTravelDay {
+            if !isTravelDay && !isArrivalDay && !isDepartureDay {
                 Rectangle()
                     .fill(Theme.ColorToken.borderLight)
                     .frame(height: 1)

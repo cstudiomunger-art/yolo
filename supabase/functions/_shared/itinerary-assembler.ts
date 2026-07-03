@@ -14,6 +14,7 @@ import { pickVisitTimeSlot, visitTimeSlotLabel } from "./itinerary-visit-hours.t
 import { runItinerarySchedulerPipeline } from "./itinerary-scheduler.ts";
 import { parsePace } from "./itinerary-pace.ts";
 import { seasonHintsForTrip } from "./itinerary-season-hints.ts";
+import { fillEmptyItineraryDays } from "./itinerary-day-fill.ts";
 
 export type AttractionRow = {
   id: string;
@@ -615,6 +616,11 @@ export function buildItineraryPipeline(params: {
     timeHintsByAttractionId: scheduled.timeHintsByAttractionId,
   });
 
+  const filledDays = fillEmptyItineraryDays(itinerary.days, scheduled.visitOrder, {
+    arrivalTime: params.arrivalTime,
+    departureTime: params.departureTime,
+  });
+
   const tripMonth = parsedStartDate ? parsedStartDate.getMonth() + 1 : new Date().getMonth() + 1;
   const seasonHints = seasonHintsForTrip({
     cityIds: scheduled.visitOrder,
@@ -624,6 +630,7 @@ export function buildItineraryPipeline(params: {
 
   return {
     ...itinerary,
+    days: filledDays,
     dropped_attraction_ids: scheduled.droppedAttractionIds.length
       ? scheduled.droppedAttractionIds
       : undefined,

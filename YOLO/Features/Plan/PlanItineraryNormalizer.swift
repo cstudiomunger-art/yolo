@@ -91,6 +91,15 @@ enum PlanItineraryNormalizer {
 
         let visitOrder = trip.visitOrder ?? deriveVisitOrder(from: days, fallback: selectedCityIds)
         let route = CityTravelHints.routeLabel(from: visitOrder)
+
+        days = PlanItineraryDayFill.fillEmptyDays(
+            days,
+            visitOrder: visitOrder,
+            pace: pace,
+            arrivalTime: arrivalTime,
+            departureTime: departureTime
+        )
+
         let dayCount = days.count
         let title = titleMatchesRoute(trip.title, route: route)
             ? trip.title

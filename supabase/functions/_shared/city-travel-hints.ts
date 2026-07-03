@@ -236,3 +236,34 @@ export function buildTravelDayContent(
   lines.push(`Explore ${to} near your hotel`);
   return lines;
 }
+
+export function arrivalAfternoonExperienceItems(cityId: string): string[] {
+  const name = cityDisplayName(cityId);
+  return [
+    `Afternoon arrival in ${name}`,
+    "Check in and settle at your hotel",
+    "Light neighborhood walk if you have energy",
+    "Optional evening street food or night market",
+    "Major sights start on the next full day",
+  ];
+}
+
+export function departureMorningExperienceItems(cityId: string): string[] {
+  const name = cityDisplayName(cityId);
+  return [
+    `Morning departure from ${name}`,
+    "Pack and hotel checkout",
+    "Breakfast near your hotel",
+    "Allow extra time for airport or train station transfer",
+  ];
+}
+
+export function flexibleRestDayItems(cityId: string): string[] {
+  const name = cityDisplayName(cityId);
+  return [
+    `Flexible day in ${name}`,
+    "Rest or explore at your own pace",
+    "Neighborhood café, park, or local market",
+    "Tap + Add attraction to schedule a specific sight",
+  ];
+}

@@ -15,6 +15,7 @@ import Foundation
 //     YOLO/Features/Plan/PlanItineraryCityDays.swift \
 //     YOLO/Features/Plan/PlanItineraryPickAttractions.swift \
 //     YOLO/Features/Plan/PlanItineraryGeoRepair.swift \
+//     YOLO/Features/Plan/PlanItineraryDayFill.swift \
 //     YOLO/Features/Plan/PlanItineraryScheduler.swift \
 //     YOLO/Features/Plan/PlanItinerarySlotBudget.swift \
 //     YOLO/Features/Plan/PlanItineraryNormalizer.swift \
@@ -44,6 +45,7 @@ enum PlanItineraryGoldenTest {
         fails += testFullDaySightBlocksSecond()
         fails += testChineseDurationParsing()
         fails += testGeoRepairSplitsIncompatibleSameDay()
+        fails += testAfternoonArrivalFillsFirstDay()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -552,6 +554,23 @@ enum PlanItineraryGoldenTest {
             costEstimate: nil,
             activities: acts
         )
+    }
+
+    private static func testAfternoonArrivalFillsFirstDay() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "beijing", name: "Museum", displayOrder: 0)
+        let trip = PlanItineraryAssembler.build(
+            cities: ["beijing"],
+            tripDays: 2,
+            attractions: [museum],
+            arrivalTime: "15:00"
+        )
+        guard let first = trip.days.first else {
+            print("✗ afternoon arrival fill: missing first day")
+            return 1
+        }
+        let ok = first.isExperienceSuggestions && !first.experienceItems.isEmpty
+        print(ok ? "✓ afternoon arrival fills blank first day" : "✗ first day should show arrival experience card")
+        return ok ? 0 : 1
     }
 
     private static func testGeoRepairSplitsIncompatibleSameDay() -> Int {

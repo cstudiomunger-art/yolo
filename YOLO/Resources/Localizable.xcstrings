@@ -35,6 +35,16 @@
         }
       }
     },
+    "%@ — %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ — %2$@"
+          }
+        }
+      }
+    },
     "%@ — %lld days planned. Open YOLO HAPPY to review." : {
       "localizations" : {
         "en" : {
@@ -103,6 +113,16 @@
     },
     "%@ Tips" : {
 
+    },
+    "%@: best time is %@; your month may be off-peak for weather or crowds." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: best time is %2$@; your month may be off-peak for weather or crowds."
+          }
+        }
+      }
     },
     "%lld" : {
 
@@ -216,6 +236,12 @@
 
     },
     ">" : {
+
+    },
+    "~1 slot per day" : {
+
+    },
+    "~2 slots per day" : {
 
     },
     "≥ 6 months ✓" : {
@@ -359,6 +385,9 @@
     "🗺" : {
 
     },
+    "🚄" : {
+
+    },
     "🛂" : {
 
     },
@@ -434,6 +463,9 @@
     "Advance reminders" : {
 
     },
+    "Afternoon arrival → first day evening only; morning departure → lighter last day." : {
+
+    },
     "Agree to terms and privacy policy" : {
 
     },
@@ -470,6 +502,9 @@
     "Apple sign-in failed. Please try again." : {
 
     },
+    "Arrival time" : {
+
+    },
     "Attractions" : {
 
     },
@@ -504,6 +539,9 @@
 
     },
     "Booking trace" : {
+
+    },
+    "Built with on-device scheduling rules" : {
 
     },
     "Cache Cleared" : {
@@ -690,6 +728,9 @@
     "Could not load the selected image." : {
 
     },
+    "Could not place %@ during normalize" : {
+
+    },
     "Create a trip poster you can send to friends." : {
 
     },
@@ -758,6 +799,9 @@
 
     },
     "Departure date" : {
+
+    },
+    "Departure time" : {
 
     },
     "Detailed check (departure / port / onward ticket)" : {
@@ -862,6 +906,9 @@
     "Estimated budget" : {
 
     },
+    "Evening plans" : {
+
+    },
     "Excludes start and end days" : {
 
     },
@@ -878,6 +925,9 @@
 
     },
     "Find a live expert under Practical Info · Genius Bar and bring this verdict with you." : {
+
+    },
+    "Flight times (optional)" : {
 
     },
     "Forgot password" : {
@@ -971,6 +1021,9 @@
 
     },
     "Incorrect email or password. Please try again." : {
+
+    },
+    "Intense" : {
 
     },
     "International department" : {
@@ -1147,6 +1200,9 @@
     "Open checklist" : {
 
     },
+    "Packed schedule" : {
+
+    },
     "Passport nationality · %@" : {
 
     },
@@ -1318,6 +1374,9 @@
     "Refund" : {
 
     },
+    "Relaxed" : {
+
+    },
     "Remind me ahead of time for key prep items" : {
 
     },
@@ -1346,6 +1405,9 @@
 
     },
     "Resend reset link" : {
+
+    },
+    "Reservation" : {
 
     },
     "Restore" : {
@@ -1379,6 +1441,9 @@
 
     },
     "Say it right · dialect gems" : {
+
+    },
+    "Schedule notes" : {
 
     },
     "Search attractions" : {
@@ -1508,6 +1573,9 @@
     "Skipped" : {
 
     },
+    "Some sights could not fit: %@" : {
+
+    },
     "Something went wrong" : {
 
     },
@@ -1515,6 +1583,9 @@
 
     },
     "🆘 Rescue" : {
+
+    },
+    "Standard" : {
 
     },
     "Start date" : {
@@ -1601,6 +1672,16 @@
     "This route may require a visa by default" : {
 
     },
+    "This route typically needs about %lld activity days; you have %lld. Some sights may be dropped." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This route typically needs about %1$lld activity days; you have %2$lld. Some sights may be dropped."
+          }
+        }
+      }
+    },
     "Title" : {
 
     },
@@ -1619,6 +1700,9 @@
     "Travel dates" : {
 
     },
+    "Travel day" : {
+
+    },
     "Traveler" : {
 
     },
@@ -1632,6 +1716,9 @@
 
     },
     "Trip overview" : {
+
+    },
+    "Trip pace" : {
 
     },
     "Trip reminders" : {
@@ -1704,6 +1791,9 @@
 
     },
     "Use a different email" : {
+
+    },
+    "Use as sightseeing day" : {
 
     },
     "Use my trip" : {

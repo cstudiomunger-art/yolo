@@ -116,6 +116,37 @@ enum CityTravelHints {
         return lines
     }
 
+    static func arrivalAfternoonExperienceItems(cityId: String) -> [String] {
+        let name = displayName(for: cityId)
+        return [
+            "Afternoon arrival in \(name)",
+            "Check in and settle at your hotel",
+            "Light neighborhood walk if you have energy",
+            "Optional evening street food or night market",
+            "Major sights start on the next full day",
+        ]
+    }
+
+    static func departureMorningExperienceItems(cityId: String) -> [String] {
+        let name = displayName(for: cityId)
+        return [
+            "Morning departure from \(name)",
+            "Pack and hotel checkout",
+            "Breakfast near your hotel",
+            "Allow extra time for airport or train station transfer",
+        ]
+    }
+
+    static func flexibleRestDayItems(cityId: String) -> [String] {
+        let name = displayName(for: cityId)
+        return [
+            "Flexible day in \(name)",
+            "Rest or explore at your own pace",
+            "Neighborhood café, park, or local market",
+            "Tap + Add attraction to schedule a specific sight",
+        ]
+    }
+
     /// Nearest-neighbor visit order using travel hours and catalog weights.
     static func inferVisitOrder(
         cityIds: [String],
