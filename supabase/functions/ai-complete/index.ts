@@ -79,7 +79,6 @@ function buildItineraryUserPrompt(params: {
   catalog: AttractionRow[];
   plan: ReturnType<typeof buildDayPlan>;
   citiesMeta: Awaited<ReturnType<typeof fetchCitiesMeta>>;
-  travelContext: string;
   pace?: string | null;
   entryCityId?: string | null;
   exitCityId?: string | null;
@@ -118,6 +117,7 @@ function buildItineraryUserPrompt(params: {
     entryCityId: params.entryCityId,
     exitCityId: params.exitCityId,
   });
+  const travelContext = buildTravelContext(params.cities, visitOrder);
   const budget = calibrateCityDays(
     visitOrder,
     undefined,
@@ -140,7 +140,7 @@ function buildItineraryUserPrompt(params: {
     `Selected cities (unordered): ${sortedCities.join(", ") || "beijing"}\n` +
     (params.userNotes ? `User preferences: ${params.userNotes}\n` : "") +
     `\nCity metadata:\n${JSON.stringify(metaCompact)}\n` +
-    `\nTravel hints (sameDayOk ≤2h; intenseHopOk ≤4h for intense pace):\n${params.travelContext}\n` +
+    `\nTravel hints (sameDayOk ≤2h; intenseHopOk ≤4h for intense pace):\n${travelContext}\n` +
     `\nAttraction catalog (ONLY these ids are valid):\n${JSON.stringify(catalogCompact)}\n` +
     `\nRules: pack each sightseeing day by duration_slots until the daily budget is full (not a fixed sight count); no duplicate ids; ` +
     `${crossCityRule}\n` +
@@ -374,7 +374,6 @@ async function handleItinerary(
     catalog,
     plan,
     citiesMeta,
-    travelContext: buildTravelContext(cityIds, visitOrder),
     pace,
     entryCityId,
     exitCityId,
