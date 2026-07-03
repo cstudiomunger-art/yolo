@@ -26,6 +26,9 @@ export function daySlotCapacityForPace(
   }
 }
 
+/** Hop days pack AM sight + commute + PM sight (intense only). */
+export const hopDaySlotCapacity = 3;
+
 export function parsePace(raw: string | null | undefined): TripPace {
   const v = String(raw ?? "standard").trim().toLowerCase();
   if (v === "relaxed" || v === "intense") return v;

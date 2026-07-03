@@ -8,6 +8,7 @@ import { isAfternoonArrival, isMorningDeparture } from "./itinerary-flight-times
 import type { ItineraryDay } from "./itinerary-assembler.ts";
 
 function isBlankDay(day: ItineraryDay): boolean {
+  if (day.intercity_hop) return false;
   return day.day_kind !== "experience_suggestions"
     && (day.activities?.length ?? 0) === 0
     && (day.experience_items?.length ?? 0) === 0;
@@ -30,25 +31,25 @@ function resolveCityId(day: ItineraryDay, visitOrder: string[]): string {
 function experienceItemsForBlankDay(params: {
   dayIndex: number;
   cityId: string;
-  firstSight?: number;
-  lastSight?: number;
-  sightseeingCount: number;
+  firstTripDay?: number;
+  lastTripDay?: number;
+  tripDayCount: number;
   arrivalTime?: string | null;
   departureTime?: string | null;
 }): string[] {
   const {
     dayIndex,
     cityId,
-    firstSight,
-    lastSight,
-    sightseeingCount,
+    firstTripDay,
+    lastTripDay,
+    tripDayCount,
     arrivalTime,
     departureTime,
   } = params;
-  if (dayIndex === firstSight && isAfternoonArrival(arrivalTime)) {
+  if (dayIndex === firstTripDay && isAfternoonArrival(arrivalTime)) {
     return arrivalAfternoonExperienceItems(cityId);
   }
-  if (dayIndex === lastSight && sightseeingCount > 1 && isMorningDeparture(departureTime)) {
+  if (dayIndex === lastTripDay && tripDayCount > 1 && isMorningDeparture(departureTime)) {
     return departureMorningExperienceItems(cityId);
   }
   return flexibleRestDayItems(cityId);
@@ -62,22 +63,20 @@ export function fillEmptyItineraryDays(
     departureTime?: string | null;
   },
 ): ItineraryDay[] {
-  const sightseeing = days
-    .filter((d) => d.day_kind !== "experience_suggestions")
-    .map((d) => d.day_index)
-    .sort((a, b) => a - b);
-  const firstSight = sightseeing[0];
-  const lastSight = sightseeing[sightseeing.length - 1];
+  const dayIndices = days.map((d) => d.day_index).sort((a, b) => a - b);
+  const firstTripDay = dayIndices[0];
+  const lastTripDay = dayIndices[dayIndices.length - 1];
 
   return days.map((day) => {
+    if (day.intercity_hop) return day;
     if (!isBlankDay(day)) return day;
     const cityId = resolveCityId(day, visitOrder);
     const items = experienceItemsForBlankDay({
       dayIndex: day.day_index,
       cityId,
-      firstSight,
-      lastSight,
-      sightseeingCount: sightseeing.length,
+      firstTripDay,
+      lastTripDay,
+      tripDayCount: dayIndices.length,
       arrivalTime: opts?.arrivalTime,
       departureTime: opts?.departureTime,
     });

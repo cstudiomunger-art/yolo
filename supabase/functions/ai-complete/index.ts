@@ -8,8 +8,14 @@ import {
 import {
   commuteSlots,
   fetchCitiesMeta,
+  inferVisitOrder,
   travelHours,
 } from "../_shared/city-travel-hints.ts";
+import {
+  calibrateCityDays,
+  metaMap,
+  regionMap,
+} from "../_shared/itinerary-city-days.ts";
 import {
   AI_PLAN_JSON_SCHEMA,
   buildDayPlan,
@@ -74,6 +80,9 @@ function buildItineraryUserPrompt(params: {
   plan: ReturnType<typeof buildDayPlan>;
   citiesMeta: Awaited<ReturnType<typeof fetchCitiesMeta>>;
   travelContext: string;
+  pace?: string | null;
+  entryCityId?: string | null;
+  exitCityId?: string | null;
 }): string {
   const catalogCompact = compactCatalogForPrompt(params.catalog).map((a) => ({
     id: a.id,
@@ -97,16 +106,44 @@ function buildItineraryUserPrompt(params: {
   }));
 
   const sortedCities = [...params.cities].sort();
+  const isIntense = String(params.pace ?? "").toLowerCase() === "intense";
+  const metaByCity = metaMap(params.citiesMeta);
+  const regionByCity = regionMap(metaByCity);
+  const catalogCounts = new Map<string, number>();
+  for (const row of params.catalog) {
+    const c = row.city_id.toLowerCase();
+    catalogCounts.set(c, (catalogCounts.get(c) ?? 0) + 1);
+  }
+  const visitOrder = inferVisitOrder(params.cities, catalogCounts, metaByCity, {
+    entryCityId: params.entryCityId,
+    exitCityId: params.exitCityId,
+  });
+  const budget = calibrateCityDays(
+    visitOrder,
+    undefined,
+    params.catalog,
+    params.citiesMeta,
+    params.days,
+    regionByCity,
+    isIntense ? "intense" : "standard",
+  );
+  const crossCityRule = isIntense
+    ? "For intense pace only: when intenseHopOk=true (≤4h), you MAY use day_plans with hop_from_city_id (morning) + city_id (afternoon destination) if it saves days; judge density and opening hours. Otherwise keep one city per day or use experience_days kind travel for >4h moves."
+    : "Standard pace: 2-4h legs are travel-lite days (afternoon destination sights + intercity card). Do not share a day for >4h moves — use experience_days kind travel. Visit order must be linear (each city once).";
 
   return (
     `Plan a ${params.days}-day China trip using exactly ${params.days} activity day slots (fixed budget).\n` +
+    `Trip pace: ${params.pace ?? "standard"}.\n` +
+    `Sightseeing day budget (excludes dedicated >4h travel days): ${budget.availableCityDays} days across ${visitOrder.length} cities.\n` +
+    `Rule-based city day hints: ${JSON.stringify(Object.fromEntries(budget.cityDays))}\n` +
+    `Suggested visit_order anchor: ${visitOrder.join(" → ")}\n` +
     `Selected cities (unordered — YOU choose the optimal visit_order): ${sortedCities.join(", ") || "beijing"}\n` +
     (params.userNotes ? `User preferences: ${params.userNotes}\n` : "") +
     `\nCity metadata:\n${JSON.stringify(metaCompact)}\n` +
-    `\nTravel hints (same-day only when sameDayOk):\n${params.travelContext}\n` +
+    `\nTravel hints (sameDayOk ≤2h; intenseHopOk ≤4h for intense pace):\n${params.travelContext}\n` +
     `\nAttraction catalog (ONLY these ids are valid):\n${JSON.stringify(catalogCompact)}\n` +
     `\nRules: pack each sightseeing day by duration_slots until the daily budget is full (not a fixed sight count); no duplicate ids; ` +
-    `distant cities cannot share a day; use experience_days (kind travel/rest) for intercity moves within the ${params.days}-day budget.\n` +
+    `${crossCityRule}\n` +
     `Output city_plan (visit_order, city_day_weights, must_see_ids, experience_days) and day_plans using ONLY candidate attraction ids you receive in a follow-up catalog slice, or combined in one JSON.\n` +
     `Do not output final time_slot strings (scheduler assigns Morning/Afternoon).\n` +
     `Respect opening constraints: do not assign closed_weekdays to matching dates.\n` +
@@ -143,7 +180,7 @@ function buildTravelContext(cityIds: string[]): string {
       const a = sorted[i];
       const b = sorted[j];
       const h = travelHours(a, b);
-      lines.push(`${a}↔${b}: ${h}h, commuteSlots=${commuteSlots(h)}, sameDayOk=${h <= 2}`);
+      lines.push(`${a}↔${b}: ${h}h, commuteSlots=${commuteSlots(h)}, sameDayOk=${h <= 2}, intenseHopOk=${h <= 4}`);
     }
   }
   return lines.length ? lines.join("\n") : "Single city trip.";
@@ -340,6 +377,9 @@ async function handleItinerary(
     plan,
     citiesMeta,
     travelContext: buildTravelContext(cityIds),
+    pace,
+    entryCityId,
+    exitCityId,
   });
 
   const raw =

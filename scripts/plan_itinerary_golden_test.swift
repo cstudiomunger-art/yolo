@@ -12,6 +12,7 @@ import Foundation
 //     YOLO/Features/Plan/PlanItineraryVisitHours.swift \
 //     YOLO/Features/Plan/PlanItineraryPace.swift \
 //     YOLO/Features/Plan/PlanItineraryFlightTimes.swift \
+//     YOLO/Features/Plan/PlanItineraryIntercityReplanner.swift \
 //     YOLO/Features/Plan/PlanItineraryCityDays.swift \
 //     YOLO/Features/Plan/PlanItineraryPickAttractions.swift \
 //     YOLO/Features/Plan/PlanItineraryGeoRepair.swift \
@@ -40,12 +41,31 @@ enum PlanItineraryGoldenTest {
         fails += testEveningOnlyScheduling()
         fails += testRelaxedPaceCapsDaytime()
         fails += testAfternoonArrivalEveningOnly()
+        fails += testNormalizePreservesTravelDayIntercityHop()
+        fails += testInferTripPaceDistinguishesTravelLite()
         fails += testNormalizePreservesSchedulerMetadata()
         fails += testDurationBasedPacking()
         fails += testFullDaySightBlocksSecond()
         fails += testChineseDurationParsing()
         fails += testGeoRepairSplitsIncompatibleSameDay()
         fails += testAfternoonArrivalFillsFirstDay()
+        fails += testOnlyFirstTripDayGetsArrivalCard()
+        fails += testGeoRepairStripsWrongCityDay()
+        fails += testLateDaysOnlyUseTimelineCity()
+        fails += testCustomEntryExitVisitOrder()
+        fails += testIntenseHopDayForNearbyCities()
+        fails += testStandardTravelLiteHasIntercityHop()
+        fails += testSixCitySeventeenDayLinearRoute()
+        fails += testIntenseLongLegUsesTravelDayNotHop()
+        fails += testHopDayGeoRepairKeepsBothCities()
+        fails += testTravelDayHasIntercityHopMetadata()
+        fails += testHopDayAfternoonArrivalStripsMorning()
+        fails += testHopDayEveningArrivalKeepsEveningOnly()
+        fails += testArrivalReplanOverflowRelocates()
+        fails += testClearArrivalTimeRestoresSnapshot()
+        fails += testNormalizePreservesIntenseHopDayDualCities()
+        fails += testTravelDayEveningArrivalReplans()
+        fails += testFullTripSnapshotRestoreAfterOverflow()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -310,6 +330,81 @@ enum PlanItineraryGoldenTest {
         return ok ? 0 : 1
     }
 
+    private static func testNormalizePreservesTravelDayIntercityHop() -> Int {
+        let hop = ItineraryIntercityHop(
+            fromCityId: "beijing",
+            toCityId: "shanghai",
+            travelHours: 5.5,
+            items: CityTravelHints.buildTravelDayContent(fromCityId: "beijing", toCityId: "shanghai", hours: 5.5)
+        )
+        let travelDay = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Shanghai",
+            costEstimate: nil,
+            activities: [],
+            dayKind: .experienceSuggestions,
+            experienceItems: hop.items,
+            experienceCityId: "shanghai",
+            intercityHop: hop
+        )
+        let trip = SampleItinerary(
+            id: "t_hop_meta",
+            title: "Test",
+            meta: "Test",
+            routeSummary: "Beijing → Shanghai",
+            estimatedBudget: "$0",
+            days: [mockAttractionDay(dayIndex: 1, cityId: "beijing", count: 1), travelDay],
+            visitOrder: ["beijing", "shanghai"]
+        )
+        let normalized = PlanItineraryNormalizer.normalize(
+            trip,
+            selectedCityIds: ["beijing", "shanghai"],
+            catalogById: [:],
+            pace: .standard
+        )
+        let day = normalized.days.first { $0.dayIndex == 2 }
+        let ok = day?.intercityHop?.fromCityId == "beijing"
+            && day?.intercityHop?.toCityId == "shanghai"
+            && day?.isExperienceSuggestions == true
+        print(ok ? "✓ normalize preserves travel day intercity_hop" : "✗ normalize dropped travel day intercity_hop")
+        return ok ? 0 : 1
+    }
+
+    private static func testInferTripPaceDistinguishesTravelLite() -> Int {
+        let hop = ItineraryIntercityHop(
+            fromCityId: "beijing",
+            toCityId: "nanjing",
+            travelHours: 4,
+            items: []
+        )
+        let travelLiteDay = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Beijing → Nanjing",
+            costEstimate: nil,
+            activities: [
+                ItineraryActivity(
+                    id: "nj1",
+                    timeSlot: "Afternoon",
+                    name: "Wall",
+                    detail: "",
+                    attractionId: "nj1",
+                    cityId: "nanjing",
+                    hasAudio: false
+                )
+            ],
+            experienceCityId: "nanjing",
+            intercityHop: hop
+        )
+        let pace = PlanItinerarySlotBudget.inferTripPace(from: [travelLiteDay])
+        let ok = pace == .standard
+        print(ok ? "✓ travel-lite day infers standard pace" : "✗ travel-lite should not infer intense pace")
+        return ok ? 0 : 1
+    }
+
     private static func testNormalizePreservesSchedulerMetadata() -> Int {
         let travelDay = ItineraryDay(
             id: "day_2",
@@ -329,8 +424,22 @@ enum PlanItineraryGoldenTest {
                 )
             ],
             dayKind: .experienceSuggestions,
-            experienceItems: CityTravelHints.travelExperienceItems(toCityId: "shanghai"),
-            experienceCityId: "shanghai"
+            experienceItems: CityTravelHints.buildTravelDayContent(
+                fromCityId: "beijing",
+                toCityId: "shanghai",
+                hours: 5.5
+            ),
+            experienceCityId: "shanghai",
+            intercityHop: ItineraryIntercityHop(
+                fromCityId: "beijing",
+                toCityId: "shanghai",
+                travelHours: 5.5,
+                items: CityTravelHints.buildTravelDayContent(
+                    fromCityId: "beijing",
+                    toCityId: "shanghai",
+                    hours: 5.5
+                )
+            )
         )
         let trip = SampleItinerary(
             id: "t_meta",
@@ -357,6 +466,10 @@ enum PlanItineraryGoldenTest {
         }
         if travel.activities.isEmpty {
             print("✗ normalize metadata: wiped travel-day evening activity")
+            fail += 1
+        }
+        if travel.intercityHop?.fromCityId != "beijing" || travel.intercityHop?.toCityId != "shanghai" {
+            print("✗ normalize metadata: travel day intercity_hop not preserved")
             fail += 1
         }
         if normalized.droppedAttractionIds != trip.droppedAttractionIds {
@@ -533,11 +646,13 @@ enum PlanItineraryGoldenTest {
         cityId: String,
         name: String,
         displayOrder: Int,
-        duration: String? = nil
+        duration: String? = nil,
+        visitPeriod: String? = nil
     ) -> Attraction {
         let durationField = duration.map { ",\"recommendedDuration\":\"\($0)\"" } ?? ""
+        let periodField = visitPeriod.map { ",\"recommended_visit_period\":\"\($0)\"" } ?? ""
         let json = """
-        {"id":"\(id)","cityId":"\(cityId)","name":"\(name)","displayOrder":\(displayOrder)\(durationField)}
+        {"id":"\(id)","cityId":"\(cityId)","name":"\(name)","displayOrder":\(displayOrder)\(durationField)\(periodField)}
         """
         return try! JSONDecoder().decode(Attraction.self, from: Data(json.utf8))
     }
@@ -573,6 +688,267 @@ enum PlanItineraryGoldenTest {
         return ok ? 0 : 1
     }
 
+    private static func testOnlyFirstTripDayGetsArrivalCard() -> Int {
+        let beijing = mockAttraction(id: "bj1", cityId: "beijing", name: "Palace", displayOrder: 0)
+        let hangzhou = mockAttraction(id: "hz1", cityId: "hangzhou", name: "Lake", displayOrder: 0)
+        let trip = PlanItineraryAssembler.build(
+            cities: ["beijing", "hangzhou"],
+            tripDays: 3,
+            attractions: [beijing, hangzhou],
+            arrivalTime: "15:00",
+            applyNormalizer: false
+        )
+        var filled = PlanItineraryDayFill.fillEmptyDays(
+            trip.days,
+            visitOrder: trip.visitOrder ?? ["beijing", "hangzhou"],
+            arrivalTime: "15:00"
+        )
+        // Simulate day 1 already an arrival experience card (day 2 still blank).
+        if let idx = filled.firstIndex(where: { $0.dayIndex == 1 }) {
+            filled[idx] = ItineraryDay(
+                id: filled[idx].id,
+                dayIndex: 1,
+                dateLabel: filled[idx].dateLabel,
+                cityName: "Beijing",
+                costEstimate: nil,
+                activities: [],
+                dayKind: .experienceSuggestions,
+                experienceItems: CityTravelHints.arrivalAfternoonExperienceItems(cityId: "beijing"),
+                experienceCityId: "beijing"
+            )
+        }
+        guard let day2 = filled.first(where: { $0.dayIndex == 2 }) else {
+            print("✗ arrival card scope: missing day 2")
+            return 1
+        }
+        let arrivalLine = day2.experienceItems.first ?? ""
+        let ok = !arrivalLine.contains("Afternoon arrival")
+        print(ok ? "✓ only trip day 1 may use arrival card template" : "✗ day 2 wrongly shows afternoon arrival card")
+        return ok ? 0 : 1
+    }
+
+    private static func testGeoRepairStripsWrongCityDay() -> Int {
+        let beijing = mockAttraction(id: "bj1", cityId: "beijing", name: "Palace", displayOrder: 0)
+        let shanghai = mockAttraction(id: "sh1", cityId: "shanghai", name: "Garden", displayOrder: 0)
+        let catalogById = [beijing.id: beijing, shanghai.id: shanghai]
+        var adjustments: [String] = []
+        let geo = PlanItineraryGeoRepair.apply(
+            assignments: [2: ["bj1"]],
+            catalogById: catalogById,
+            allowedCitiesByDay: [2: ["shanghai"]],
+            adjustments: &adjustments
+        )
+        let ok = !(geo.assignments[2] ?? []).contains("bj1")
+        print(ok ? "✓ geo repair strips wrong-city sights from a day" : "✗ beijing sight should not remain on shanghai day")
+        return ok ? 0 : 1
+    }
+
+    private static func testLateDaysOnlyUseTimelineCity() -> Int {
+        let cities = ["beijing", "shanghai"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 6,
+            attractions: attractions
+        )
+        guard let shanghaiStart = trip.days.firstIndex(where: { day in
+            day.experienceCityId == "shanghai" || day.activities.contains { $0.cityId == "shanghai" }
+        }) else {
+            print("✗ timeline city: no shanghai segment found")
+            return 1
+        }
+        var fail = 0
+        for day in trip.days.dropFirst(shanghaiStart) where !day.isExperienceSuggestions {
+            let expected = day.experienceCityId ?? "shanghai"
+            for act in day.activities {
+                guard let cid = act.cityId else { continue }
+                if cid != expected {
+                    print("✗ day \(day.dayIndex): found \(cid) during \(expected) segment")
+                    fail += 1
+                }
+            }
+        }
+        print(fail == 0 ? "✓ post-arrival days only keep that city's sights" : "")
+        return fail
+    }
+
+    private static func testCustomEntryExitVisitOrder() -> Int {
+        let cities = ["beijing", "shanghai"]
+        let attractions = mockCatalog(cities: cities, perCity: 5)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 6,
+            attractions: attractions,
+            entryCityId: "shanghai",
+            exitCityId: "beijing"
+        )
+        let order = trip.visitOrder ?? []
+        let ok = order.first == "shanghai" && order.last == "beijing"
+        print(ok ? "✓ custom landing/return cities anchor visit order" : "✗ visit order should start shanghai and end beijing, got \(order)")
+        return ok ? 0 : 1
+    }
+
+    private static func testIntenseHopDayForNearbyCities() -> Int {
+        let cities = ["shanghai", "nanjing"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 5,
+            attractions: attractions,
+            pace: .intense,
+            entryCityId: "shanghai",
+            exitCityId: "nanjing"
+        )
+        guard let hopDay = trip.days.first(where: { $0.intercityHop != nil }) else {
+            print("✗ intense shanghai→nanjing should produce an intercity hop day")
+            return 1
+        }
+        let citiesOnDay = Set(hopDay.activities.compactMap(\.cityId))
+        let ok = citiesOnDay.contains("shanghai") && citiesOnDay.contains("nanjing")
+            && hopDay.intercityHop?.fromCityId == "shanghai"
+            && hopDay.intercityHop?.toCityId == "nanjing"
+        print(ok ? "✓ intense pace creates hop day for ≤4h city pair" : "✗ hop day should include both shanghai and nanjing sights")
+        return ok ? 0 : 1
+    }
+
+    private static func testStandardTravelLiteHasIntercityHop() -> Int {
+        let cities = ["beijing", "nanjing"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 5,
+            attractions: attractions,
+            pace: .standard,
+            entryCityId: "beijing",
+            exitCityId: "nanjing"
+        )
+        let travelLite = trip.days.first {
+            !$0.isExperienceSuggestions && $0.intercityHop != nil
+        }
+        let ok = travelLite != nil
+            && travelLite?.intercityHop?.fromCityId == "beijing"
+            && travelLite?.intercityHop?.toCityId == "nanjing"
+        print(ok ? "✓ standard 2-4h leg uses travel-lite intercity card" : "✗ standard should show travel-lite hop card")
+        return ok ? 0 : 1
+    }
+
+    private static func testSixCitySeventeenDayLinearRoute() -> Int {
+        let cities = ["beijing", "nanjing", "suzhou", "hangzhou", "shanghai", "guangzhou"]
+        let avgDays: [String: Int] = [
+            "beijing": 3, "nanjing": 2, "suzhou": 2,
+            "hangzhou": 2, "shanghai": 3, "guangzhou": 2,
+        ]
+        let attractions = mockCatalog(cities: cities, perCity: 5)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 17,
+            attractions: attractions,
+            pace: .standard,
+            entryCityId: "beijing",
+            exitCityId: "guangzhou",
+            avgDaysByCity: avgDays
+        )
+        let catalogById = Dictionary(uniqueKeysWithValues: attractions.map { ($0.id, $0) })
+        var fail = 0
+        if trip.days.count != 17 {
+            print("✗ 6-city 17-day: expected 17 days, got \(trip.days.count)")
+            fail += 1
+        }
+
+        let order = trip.visitOrder ?? []
+        if order.first != "beijing" {
+            print("✗ 6-city 17-day: visit order should start at beijing, got \(order.first ?? "nil")")
+            fail += 1
+        }
+        if order.last != "guangzhou" {
+            print("✗ 6-city 17-day: visit order should end at guangzhou, got \(order.last ?? "nil")")
+            fail += 1
+        }
+        if Set(order).count != order.count {
+            print("✗ 6-city 17-day: visit order repeats cities (yo-yo)")
+            fail += 1
+        }
+
+        let calibration = PlanItineraryCityDays.calibrateCityDays(
+            visitOrder: order.isEmpty ? cities : order,
+            aiWeights: nil,
+            catalogByCity: Dictionary(grouping: attractions, by: { $0.cityId.lowercased() }),
+            tripDays: 17,
+            pace: .standard,
+            avgDaysByCity: avgDays
+        )
+        let cityDaySum = calibration.cityDays.values.reduce(0, +)
+        if cityDaySum + calibration.reservedTravelDays > 17 {
+            print("✗ 6-city 17-day: city days \(cityDaySum) + travel \(calibration.reservedTravelDays) exceeds 17")
+            fail += 1
+        }
+
+        for day in trip.days where !day.isExperienceSuggestions {
+            let capacity = PlanItinerarySlotBudget.daytimeCapacity(
+                dayIndex: day.dayIndex,
+                days: trip.days,
+                pace: .standard
+            )
+            if !PlanItinerarySlotBudget.daytimeWithinCapacity(
+                activities: day.activities,
+                capacity: capacity,
+                catalogById: catalogById
+            ) {
+                print("✗ 6-city 17-day: day \(day.dayIndex) exceeds slot budget")
+                fail += 1
+            }
+        }
+
+        let intercityDays = trip.days.filter { $0.intercityHop != nil }
+        if intercityDays.isEmpty {
+            print("✗ 6-city 17-day: should include intercity hop/travel cards")
+            fail += 1
+        }
+
+        if fail == 0 {
+            print("✓ 6-city 17-day linear route with intercity cards")
+        }
+        return fail
+    }
+
+    private static func testIntenseLongLegUsesTravelDayNotHop() -> Int {
+        let cities = ["beijing", "shanghai"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 6,
+            attractions: attractions,
+            pace: .intense,
+            entryCityId: "beijing",
+            exitCityId: "shanghai"
+        )
+        let hasHop = trip.days.contains { !$0.isExperienceSuggestions && $0.intercityHop != nil }
+        let hasTravel = trip.days.contains {
+            $0.isExperienceSuggestions &&
+            $0.intercityHop != nil
+        }
+        let ok = hasTravel && !hasHop
+        print(ok ? "✓ intense >4h leg still uses dedicated travel day" : "✗ beijing→shanghai should not hop same day")
+        return ok ? 0 : 1
+    }
+
+    private static func testHopDayGeoRepairKeepsBothCities() -> Int {
+        let sh = mockAttraction(id: "sh1", cityId: "shanghai", name: "Bund", displayOrder: 0)
+        let nj = mockAttraction(id: "nj1", cityId: "nanjing", name: "Wall", displayOrder: 0)
+        let catalogById = [sh.id: sh, nj.id: nj]
+        var adjustments: [String] = []
+        let geo = PlanItineraryGeoRepair.apply(
+            assignments: [2: ["sh1", "nj1"]],
+            catalogById: catalogById,
+            allowedCitiesByDay: [2: ["shanghai", "nanjing"]],
+            adjustments: &adjustments
+        )
+        let onDay = Set((geo.assignments[2] ?? []).compactMap { catalogById[$0]?.cityId })
+        let ok = onDay.contains("shanghai") && onDay.contains("nanjing")
+        print(ok ? "✓ geo repair keeps both cities on hop day" : "✗ hop day geo repair stripped a valid city")
+        return ok ? 0 : 1
+    }
+
     private static func testGeoRepairSplitsIncompatibleSameDay() -> Int {
         let beijing = mockAttraction(id: "bj1", cityId: "beijing", name: "Forbidden City", displayOrder: 0)
         let chengdu = mockAttraction(id: "cd1", cityId: "chengdu", name: "Panda Base", displayOrder: 0)
@@ -581,11 +957,271 @@ enum PlanItineraryGoldenTest {
         let geo = PlanItineraryGeoRepair.apply(
             assignments: [1: ["bj1", "cd1"]],
             catalogById: catalogById,
+            allowedCitiesByDay: [1: ["beijing"]],
             adjustments: &adjustments
         )
         let day1Cities = Set((geo.assignments[1] ?? []).compactMap { catalogById[$0]?.cityId })
         let ok = !day1Cities.contains("beijing") || !day1Cities.contains("chengdu")
         print(ok ? "✓ geo repair splits incompatible same-day cities" : "✗ geo repair should split beijing+chengdu")
+        return ok ? 0 : 1
+    }
+
+    private static func testTravelDayHasIntercityHopMetadata() -> Int {
+        let cities = ["beijing", "shanghai"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 6,
+            attractions: attractions,
+            pace: .intense,
+            entryCityId: "beijing",
+            exitCityId: "shanghai"
+        )
+        let travelDay = trip.days.first {
+            $0.isExperienceSuggestions && $0.intercityHop != nil
+        }
+        let ok = travelDay != nil
+            && travelDay?.intercityHop?.fromCityId == "beijing"
+            && travelDay?.intercityHop?.toCityId == "shanghai"
+        print(ok ? "✓ travel day carries intercity_hop metadata" : "✗ travel day missing intercity_hop")
+        return ok ? 0 : 1
+    }
+
+    private static func testHopDayAfternoonArrivalStripsMorning() -> Int {
+        let sh = mockAttraction(id: "sh1", cityId: "shanghai", name: "Bund", displayOrder: 0)
+        let nj = mockAttraction(id: "nj1", cityId: "nanjing", name: "Wall", displayOrder: 1)
+        let hop = ItineraryIntercityHop(
+            fromCityId: "shanghai",
+            toCityId: "nanjing",
+            travelHours: 1.5,
+            items: ["Travel"]
+        )
+        let day = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Shanghai → Nanjing",
+            costEstimate: nil,
+            activities: [
+                mockActivity(id: "sh1", cityId: "shanghai", name: "Bund AM"),
+                mockActivity(id: "nj1", cityId: "nanjing", name: "Wall PM"),
+            ],
+            intercityHop: hop
+        )
+        let (newDays, _) = PlanItineraryIntercityReplanner.replan(
+            days: [day],
+            dayIndex: 2,
+            arrivalTime: "15:00",
+            options: .init(pace: .intense, catalogById: [sh.id: sh, nj.id: nj])
+        )
+        let updated = newDays[0]
+        let hasShanghai = updated.activities.contains { $0.cityId == "shanghai" }
+        let ok = !hasShanghai && updated.activities.contains { $0.cityId == "nanjing" }
+        print(ok ? "✓ 15:00 arrival strips morning origin sights" : "✗ afternoon arrival should drop shanghai morning")
+        return ok ? 0 : 1
+    }
+
+    private static func testHopDayEveningArrivalKeepsEveningOnly() -> Int {
+        let sh = mockAttraction(id: "sh1", cityId: "shanghai", name: "Bund", displayOrder: 0, visitPeriod: "evening")
+        let nj = mockAttraction(id: "nj1", cityId: "nanjing", name: "Wall", displayOrder: 1)
+        let eve = mockAttraction(id: "nj2", cityId: "nanjing", name: "Night market", displayOrder: 2, visitPeriod: "evening")
+        let hop = ItineraryIntercityHop(
+            fromCityId: "shanghai",
+            toCityId: "nanjing",
+            travelHours: 1.5,
+            items: ["Travel"]
+        )
+        let day = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Shanghai → Nanjing",
+            costEstimate: nil,
+            activities: [
+                mockActivity(id: "sh1", cityId: "shanghai", name: "Bund Eve"),
+                mockActivity(id: "nj1", cityId: "nanjing", name: "Wall PM"),
+                mockActivity(id: "nj2", cityId: "nanjing", name: "Night market"),
+            ],
+            intercityHop: hop
+        )
+        let (newDays, _) = PlanItineraryIntercityReplanner.replan(
+            days: [day],
+            dayIndex: 2,
+            arrivalTime: "18:00",
+            options: .init(pace: .intense, catalogById: [sh.id: sh, nj.id: nj, eve.id: eve])
+        )
+        let updated = newDays[0]
+        let ok = !updated.activities.contains { $0.cityId == "shanghai" }
+            && updated.activities.contains { $0.name == "Night market" }
+        print(ok ? "✓ 18:00 arrival keeps evening-only sights" : "✗ evening arrival replan wrong")
+        return ok ? 0 : 1
+    }
+
+    private static func testArrivalReplanOverflowRelocates() -> Int {
+        let nj1 = mockAttraction(id: "nj1", cityId: "nanjing", name: "Wall", displayOrder: 0)
+        let nj2 = mockAttraction(id: "nj2", cityId: "nanjing", name: "Museum", displayOrder: 1)
+        let nj3 = mockAttraction(id: "nj3", cityId: "nanjing", name: "Temple", displayOrder: 2)
+        let hop = ItineraryIntercityHop(
+            fromCityId: "shanghai",
+            toCityId: "nanjing",
+            travelHours: 1.5,
+            items: ["Travel"]
+        )
+        let hopDay = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Hop",
+            costEstimate: nil,
+            activities: [
+                mockActivity(id: "nj1", cityId: "nanjing", name: "Wall"),
+                mockActivity(id: "nj2", cityId: "nanjing", name: "Museum"),
+                mockActivity(id: "nj3", cityId: "nanjing", name: "Temple"),
+            ],
+            intercityHop: hop
+        )
+        let nextDay = ItineraryDay(
+            id: "day_3",
+            dayIndex: 3,
+            dateLabel: "Day 3",
+            cityName: "Nanjing",
+            costEstimate: nil,
+            activities: []
+        )
+        let (newDays, adj) = PlanItineraryIntercityReplanner.replan(
+            days: [hopDay, nextDay],
+            dayIndex: 2,
+            arrivalTime: "16:00",
+            options: .init(pace: .standard, catalogById: [nj1.id: nj1, nj2.id: nj2, nj3.id: nj3])
+        )
+        let day3Acts = newDays[1].activities.count
+        let ok = day3Acts > 0 && adj.contains { $0.localizedCaseInsensitiveContains("Moved") }
+        print(ok ? "✓ overflow sights relocate to next day" : "✗ late arrival should overflow to day 3")
+        return ok ? 0 : 1
+    }
+
+    private static func testClearArrivalTimeRestoresSnapshot() -> Int {
+        // UI layer restores snapshot; replanner with nil is no-op on hop without prior replan
+        let hop = ItineraryIntercityHop(
+            fromCityId: "shanghai",
+            toCityId: "nanjing",
+            travelHours: 1.5,
+            items: ["Travel"],
+            arrivalTimeAtDestination: "15:00"
+        )
+        let day = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Hop",
+            costEstimate: nil,
+            activities: [mockActivity(id: "a1", cityId: "nanjing", name: "Wall")],
+            intercityHop: hop
+        )
+        let (newDays, _) = PlanItineraryIntercityReplanner.replan(
+            days: [day],
+            dayIndex: 2,
+            arrivalTime: nil,
+            options: .init(pace: .standard, catalogById: [:])
+        )
+        let ok = newDays[0].intercityHop?.arrivalTimeAtDestination == nil
+        print(ok ? "✓ clearing arrival time removes stored arrival" : "✗ nil arrival should clear hop arrival time")
+        return ok ? 0 : 1
+    }
+
+    private static func testNormalizePreservesIntenseHopDayDualCities() -> Int {
+        let cities = ["beijing", "nanjing"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let catalogById = Dictionary(uniqueKeysWithValues: attractions.map { ($0.id, $0) })
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 5,
+            attractions: attractions,
+            pace: .intense,
+            entryCityId: "beijing",
+            exitCityId: "nanjing"
+        )
+        let normalized = PlanItineraryNormalizer.normalize(
+            trip,
+            selectedCityIds: cities,
+            catalogById: catalogById,
+            pace: .intense
+        )
+        guard let hopDay = normalized.days.first(where: { $0.intercityHop != nil && !$0.isExperienceSuggestions }) else {
+            print("✗ intense beijing→nanjing should have a hop day before normalize")
+            return 1
+        }
+        let onDay = Set(hopDay.activities.compactMap(\.cityId))
+        let ok = onDay.contains("beijing") && onDay.contains("nanjing")
+        print(ok ? "✓ normalize keeps both cities on 4h hop day" : "✗ normalize stripped valid hop-day cities")
+        return ok ? 0 : 1
+    }
+
+    private static func testTravelDayEveningArrivalReplans() -> Int {
+        let eve = mockAttraction(id: "sh1", cityId: "shanghai", name: "Bund night", displayOrder: 0, visitPeriod: "evening")
+        let museum = mockAttraction(id: "sh2", cityId: "shanghai", name: "Museum", displayOrder: 1)
+        let hop = ItineraryIntercityHop(
+            fromCityId: "beijing",
+            toCityId: "shanghai",
+            travelHours: 5.5,
+            items: ["Travel"]
+        )
+        let travelDay = ItineraryDay(
+            id: "day_3",
+            dayIndex: 3,
+            dateLabel: "Day 3",
+            cityName: "Shanghai",
+            costEstimate: nil,
+            activities: [
+                mockActivity(id: "sh2", cityId: "shanghai", name: "Museum"),
+                mockActivity(id: "sh1", cityId: "shanghai", name: "Bund night"),
+            ],
+            dayKind: .experienceSuggestions,
+            experienceItems: ["Travel from Beijing to Shanghai"],
+            experienceCityId: "shanghai",
+            intercityHop: hop
+        )
+        let (newDays, _) = PlanItineraryIntercityReplanner.replan(
+            days: [travelDay],
+            dayIndex: 3,
+            arrivalTime: "19:00",
+            options: .init(pace: .standard, catalogById: [eve.id: eve, museum.id: museum])
+        )
+        let updated = newDays[0]
+        let ok = updated.activities.count == 1
+            && updated.activities.first?.attractionId == "sh1"
+        print(ok ? "✓ travel day 19:00 keeps evening-only activity" : "✗ travel evening replan wrong")
+        return ok ? 0 : 1
+    }
+
+    private static func testFullTripSnapshotRestoreAfterOverflow() -> Int {
+        let nj1 = mockAttraction(id: "nj1", cityId: "nanjing", name: "Wall", displayOrder: 0)
+        let nj2 = mockAttraction(id: "nj2", cityId: "nanjing", name: "Museum", displayOrder: 1)
+        let nj3 = mockAttraction(id: "nj3", cityId: "nanjing", name: "Temple", displayOrder: 2)
+        let hop = ItineraryIntercityHop(fromCityId: "shanghai", toCityId: "nanjing", travelHours: 1.5, items: ["Travel"])
+        let hopDay = ItineraryDay(
+            id: "day_2", dayIndex: 2, dateLabel: "Day 2", cityName: "Hop", costEstimate: nil,
+            activities: [
+                mockActivity(id: "nj1", cityId: "nanjing", name: "Wall"),
+                mockActivity(id: "nj2", cityId: "nanjing", name: "Museum"),
+                mockActivity(id: "nj3", cityId: "nanjing", name: "Temple"),
+            ],
+            intercityHop: hop
+        )
+        let nextDay = ItineraryDay(
+            id: "day_3", dayIndex: 3, dateLabel: "Day 3", cityName: "Nanjing", costEstimate: nil, activities: []
+        )
+        let snapshot = [hopDay, nextDay]
+        let (replanned, _) = PlanItineraryIntercityReplanner.replan(
+            days: snapshot,
+            dayIndex: 2,
+            arrivalTime: "16:00",
+            options: .init(pace: .standard, catalogById: [nj1.id: nj1, nj2.id: nj2, nj3.id: nj3])
+        )
+        let overflowed = replanned[1].activities.count > 0
+        let restored = snapshot
+        let ok = overflowed && restored[1].activities.isEmpty && restored[0].activities.count == 3
+        print(ok ? "✓ full-trip snapshot can undo overflow replan" : "✗ snapshot restore should revert overflow")
         return ok ? 0 : 1
     }
 

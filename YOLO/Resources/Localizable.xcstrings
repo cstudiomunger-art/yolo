@@ -334,9 +334,6 @@
     "🎧 Audio guide unlocked!" : {
 
     },
-    "💡" : {
-
-    },
     "💬" : {
 
     },
@@ -500,6 +497,9 @@
 
     },
     "Apple sign-in failed. Please try again." : {
+
+    },
+    "Arrival day" : {
 
     },
     "Arrival time" : {
@@ -801,6 +801,9 @@
     "Departure date" : {
 
     },
+    "Departure day" : {
+
+    },
     "Departure time" : {
 
     },
@@ -927,6 +930,9 @@
     "Find a live expert under Practical Info · Genius Bar and bring this verdict with you." : {
 
     },
+    "Flight endpoints" : {
+
+    },
     "Flight times (optional)" : {
 
     },
@@ -1026,6 +1032,9 @@
     "Intense" : {
 
     },
+    "Intercity travel" : {
+
+    },
     "International department" : {
 
     },
@@ -1042,6 +1051,9 @@
 
     },
     "Keep your itinerary; apply for an L tourist visa (about 4–7 business days plus visa fee)." : {
+
+    },
+    "Landing city" : {
 
     },
     "Lifetime access" : {
@@ -1245,6 +1257,9 @@
     "Pick someone to chat with (tap their avatar to start):" : {
 
     },
+    "Pick where you land in China and which city you fly home from. We'll order the middle cities for the shortest route." : {
+
+    },
     "Pick your trip start and end dates. Activity days exclude both travel days." : {
 
     },
@@ -1419,6 +1434,9 @@
     "Retry" : {
 
     },
+    "Return from" : {
+
+    },
     "Route summary" : {
 
     },
@@ -1441,9 +1459,6 @@
 
     },
     "Say it right · dialect gems" : {
-
-    },
-    "Schedule notes" : {
 
     },
     "Search attractions" : {
@@ -1490,6 +1505,9 @@
 
     },
     "Send reset link" : {
+
+    },
+    "Set arrival time at destination" : {
 
     },
     "Set your nationality in Profile" : {
@@ -1571,9 +1589,6 @@
 
     },
     "Skipped" : {
-
-    },
-    "Some sights could not fit: %@" : {
 
     },
     "Something went wrong" : {

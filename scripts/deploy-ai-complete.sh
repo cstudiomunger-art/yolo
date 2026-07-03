@@ -13,7 +13,7 @@ if ! command -v supabase >/dev/null 2>&1; then
   exit 1
 fi
 
-if [[ -z "${SUPABASE_ACCESS_TOKEN:-}" ]] && [[ ! -f "$HOME/.supabase/access-token" ]]; then
+if ! supabase projects list >/dev/null 2>&1; then
   echo "未检测到 Supabase 登录。请先执行："
   echo "  supabase login"
   echo "或在 https://supabase.com/dashboard/account/tokens 创建 Access Token 后："

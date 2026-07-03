@@ -3,9 +3,11 @@ import SwiftUI
 struct ExperienceSuggestionsDayCard: View {
     let day: ItineraryDay
     let cityDisplayName: String
+    var onArrivalTimeChange: ((String?) -> Void)? = nil
 
     private var isTravelDay: Bool {
-        day.experienceItems.contains { $0.localizedCaseInsensitiveContains("travel from") }
+        day.intercityHop != nil
+            || day.experienceItems.contains { $0.localizedCaseInsensitiveContains("travel from") }
             || day.experienceItems.contains { $0.localizedCaseInsensitiveContains("intercity travel") }
     }
 
@@ -52,6 +54,16 @@ struct ExperienceSuggestionsDayCard: View {
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textSecondary)
                 }
+            }
+
+            if let hop = day.intercityHop, let onArrivalTimeChange {
+                Rectangle()
+                    .fill(Theme.ColorToken.borderLight)
+                    .frame(height: 1)
+                IntercityArrivalTimePicker(
+                    arrivalTime: hop.arrivalTimeAtDestination,
+                    onChange: onArrivalTimeChange
+                )
             }
 
             if !day.activities.isEmpty {

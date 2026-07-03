@@ -34,9 +34,11 @@ enum PlanItineraryNormalizer {
                 deduped.append(act)
             }
             days[index] = days[index].withActivities(deduped)
-            let split = splitIncompatibleSameDay(days[index].activities)
-            days[index] = days[index].withActivities(split.keep)
-            pool.append(contentsOf: split.overflow)
+            if days[index].intercityHop == nil {
+                let split = splitIncompatibleSameDay(days[index].activities)
+                days[index] = days[index].withActivities(split.keep)
+                pool.append(contentsOf: split.overflow)
+            }
         }
 
         for index in days.indices {
@@ -85,7 +87,8 @@ enum PlanItineraryNormalizer {
                 activities: day.activities,
                 dayKind: day.dayKind,
                 experienceItems: day.experienceItems,
-                experienceCityId: day.experienceCityId
+                experienceCityId: day.experienceCityId,
+                intercityHop: day.intercityHop
             )
         }
 
@@ -164,8 +167,16 @@ enum PlanItineraryNormalizer {
         departureTime: String?
     ) {
         guard let city = activity.cityId else { return }
+        let targetCity = city.lowercased()
         for index in days.indices {
             guard !days[index].isExperienceSuggestions else { continue }
+            if let hop = days[index].intercityHop {
+                let allowed = [hop.fromCityId.lowercased(), hop.toCityId.lowercased()]
+                guard allowed.contains(targetCity) else { continue }
+            } else if let scheduled = days[index].experienceCityId?.lowercased(), !scheduled.isEmpty,
+                      scheduled != targetCity {
+                continue
+            }
             let dayCapacity = PlanItinerarySlotBudget.daytimeCapacity(
                 dayIndex: days[index].dayIndex,
                 days: days,
@@ -184,7 +195,15 @@ enum PlanItineraryNormalizer {
                 catalogById: catalogById
             ) else { continue }
             let cities = Set(days[index].activities.compactMap(\.cityId))
-            if cities.isEmpty || cities.allSatisfy({ CityTravelHints.canVisitSameDay($0, city) }) {
+            let compatible: Bool
+            if let hop = days[index].intercityHop {
+                let allowed = Set([hop.fromCityId.lowercased(), hop.toCityId.lowercased()])
+                compatible = allowed.contains(targetCity)
+                    && (cities.isEmpty || cities.allSatisfy { allowed.contains($0.lowercased()) })
+            } else {
+                compatible = cities.isEmpty || cities.allSatisfy({ CityTravelHints.canVisitSameDay($0, city) })
+            }
+            if compatible {
                 days[index] = days[index].withActivities(days[index].activities + [activity])
                 return
             }
@@ -197,6 +216,10 @@ enum PlanItineraryNormalizer {
         for index in days.indices {
             if days[index].isExperienceSuggestions {
                 previousCity = days[index].experienceCityId ?? previousCity
+                continue
+            }
+            if days[index].intercityHop != nil {
+                previousCity = days[index].intercityHop?.toCityId ?? days[index].experienceCityId
                 continue
             }
             let city = primaryCity(for: days[index].activities)
@@ -235,6 +258,9 @@ enum PlanItineraryNormalizer {
     }
 
     private static func dayCityLabel(_ day: ItineraryDay) -> String {
+        if let hop = day.intercityHop {
+            return CityTravelHints.hopDayRouteLabel(fromCityId: hop.fromCityId, toCityId: hop.toCityId)
+        }
         if day.isExperienceSuggestions {
             return day.experienceCityId.map { CityTravelHints.displayName(for: $0) } ?? day.cityName
         }

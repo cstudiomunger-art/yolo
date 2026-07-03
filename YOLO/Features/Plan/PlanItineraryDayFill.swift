@@ -9,20 +9,21 @@ enum PlanItineraryDayFill {
         arrivalTime: String? = nil,
         departureTime: String? = nil
     ) -> [ItineraryDay] {
-        let sightseeing = days.filter { !$0.isExperienceSuggestions }.map(\.dayIndex).sorted()
-        let firstSight = sightseeing.first
-        let lastSight = sightseeing.last
+        let dayIndices = days.map(\.dayIndex).sorted()
+        let firstTripDay = dayIndices.first
+        let lastTripDay = dayIndices.last
         let order = visitOrder.map { $0.lowercased() }.filter { !$0.isEmpty }
 
         return days.map { day in
+            if day.intercityHop != nil { return day }
             guard isBlank(day) else { return day }
             let cityId = resolveCityId(for: day, visitOrder: order)
             let items = experienceItems(
                 dayIndex: day.dayIndex,
                 cityId: cityId,
-                firstSight: firstSight,
-                lastSight: lastSight,
-                sightseeingCount: sightseeing.count,
+                firstTripDay: firstTripDay,
+                lastTripDay: lastTripDay,
+                tripDayCount: dayIndices.count,
                 arrivalTime: arrivalTime,
                 departureTime: departureTime
             )
@@ -41,22 +42,25 @@ enum PlanItineraryDayFill {
     }
 
     static func isBlank(_ day: ItineraryDay) -> Bool {
-        !day.isExperienceSuggestions && day.activities.isEmpty && day.experienceItems.isEmpty
+        if day.intercityHop != nil { return false }
+        return !day.isExperienceSuggestions && day.activities.isEmpty && day.experienceItems.isEmpty
     }
 
     private static func experienceItems(
         dayIndex: Int,
         cityId: String,
-        firstSight: Int?,
-        lastSight: Int?,
-        sightseeingCount: Int,
+        firstTripDay: Int?,
+        lastTripDay: Int?,
+        tripDayCount: Int,
         arrivalTime: String?,
         departureTime: String?
     ) -> [String] {
-        if dayIndex == firstSight, PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
+        // Trip-wide flight profile: only calendar day 1 / last activity day — not
+        // "first blank sightseeing row" after day 1 became an experience card.
+        if dayIndex == firstTripDay, PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
             return CityTravelHints.arrivalAfternoonExperienceItems(cityId: cityId)
         }
-        if dayIndex == lastSight, sightseeingCount > 1,
+        if dayIndex == lastTripDay, tripDayCount > 1,
            PlanItineraryFlightTimes.isMorningDeparture(departureTime) {
             return CityTravelHints.departureMorningExperienceItems(cityId: cityId)
         }

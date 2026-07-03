@@ -6,6 +6,7 @@ enum PlanItineraryScheduler {
         let dayIndex: Int
         let cityId: String
         var attractionIds: [String]
+        var hopFromCityId: String?
     }
 
     struct PipelineResult {
@@ -34,7 +35,8 @@ enum PlanItineraryScheduler {
         departureTime: String? = nil,
         startDate: Date? = nil,
         entryCityId: String? = nil,
-        exitCityId: String? = nil
+        exitCityId: String? = nil,
+        avgDaysByCity: [String: Int] = [:]
     ) -> PipelineResult {
         let cityIds = Array(Set(cities.map { $0.lowercased() }.filter { !$0.isEmpty }))
         let resolved = cityIds.isEmpty ? ["beijing"] : cityIds
@@ -52,12 +54,15 @@ enum PlanItineraryScheduler {
             entryCityId: entryCityId,
             exitCityId: exitCityId
         )
-        let cityDays = PlanItineraryCityDays.calibrateCityDays(
+        let calibration = PlanItineraryCityDays.calibrateCityDays(
             visitOrder: visitOrder,
             aiWeights: nil,
             catalogByCity: catalogByCity,
-            tripDays: days
+            tripDays: days,
+            pace: pace,
+            avgDaysByCity: avgDaysByCity
         )
+        let cityDays = calibration.cityDays
 
         let resolvedPace = pace
 
@@ -68,7 +73,7 @@ enum PlanItineraryScheduler {
         )
 
         let catalogById = Dictionary(uniqueKeysWithValues: attractions.map { ($0.id, $0) })
-        var timeline = buildTimeline(tripDays: days, visitOrder: visitOrder, cityDays: cityDays)
+        var timeline = buildTimeline(tripDays: days, visitOrder: visitOrder, cityDays: cityDays, pace: resolvedPace)
         timeline = applyFlightAndPaceProfiles(
             timeline,
             tripDays: days,
@@ -82,7 +87,7 @@ enum PlanItineraryScheduler {
             catalogById: catalogById
         )
 
-        var adjustments: [String] = []
+        var adjustments: [String] = calibration.schedulingAdjustments
         var repaired = validateAndRepair(
             tripDays: days,
             dayPlans: &dayPlans,
@@ -92,9 +97,15 @@ enum PlanItineraryScheduler {
             adjustments: &adjustments
         )
 
+        let allowedCitiesByDay = mergeAllowedCitiesForHops(
+            timeline: timeline,
+            dayPlans: dayPlans,
+            pace: resolvedPace
+        )
         let geo = PlanItineraryGeoRepair.apply(
             assignments: repaired.assignments,
             catalogById: catalogById,
+            allowedCitiesByDay: allowedCitiesByDay,
             adjustments: &adjustments
         )
         repaired = (assignments: geo.assignments, dropped: repaired.dropped + geo.dropped)
@@ -102,6 +113,9 @@ enum PlanItineraryScheduler {
         var itineraryDays: [ItineraryDay] = []
         let travelSlots = timeline.filter { $0.kind == "travel" }
         let expByDay = Dictionary(uniqueKeysWithValues: travelSlots.map { ($0.dayIndex, $0) })
+        let hopByDay = Dictionary(uniqueKeysWithValues: timeline.filter {
+            $0.kind == "hop" || $0.kind == "travel_lite"
+        }.map { ($0.dayIndex, $0) })
 
         for dayIndex in 1...days {
             if let travelSlot = expByDay[dayIndex] {
@@ -129,7 +143,61 @@ enum PlanItineraryScheduler {
                     activities.append(activity(from: row, dayIndex: dayIndex, actIndex: actIndex, preferred: .evening))
                 }
                 day = day.withActivities(activities)
+                if !fromCity.isEmpty {
+                    day = day.withIntercityHop(ItineraryIntercityHop(
+                        fromCityId: fromCity.lowercased(),
+                        toCityId: travelSlot.cityId.lowercased(),
+                        travelHours: hours,
+                        items: CityTravelHints.buildTravelDayContent(
+                            fromCityId: fromCity,
+                            toCityId: travelSlot.cityId,
+                            hours: hours
+                        )
+                    ))
+                }
                 itineraryDays.append(day)
+                continue
+            }
+            if let hopSlot = hopByDay[dayIndex], let fromCity = hopSlot.fromCityId {
+                let ids = repaired.assignments[dayIndex] ?? []
+                let hours = CityTravelHints.travelHours(fromCity, hopSlot.cityId)
+                let hopMeta = ItineraryIntercityHop(
+                    fromCityId: fromCity.lowercased(),
+                    toCityId: hopSlot.cityId.lowercased(),
+                    travelHours: hours,
+                    items: CityTravelHints.buildHopCardContent(
+                        fromCityId: fromCity,
+                        toCityId: hopSlot.cityId,
+                        hours: hours
+                    )
+                )
+                var activities: [ItineraryActivity] = []
+                for (actIndex, id) in ids.enumerated() {
+                    guard let row = catalogById[id] else { continue }
+                    let fromLower = fromCity.lowercased()
+                    let preferred: VisitTimeSlot?
+                    if row.cityId.lowercased() == fromLower {
+                        preferred = row.isEveningOnly ? .evening : .morning
+                    } else {
+                        preferred = row.isEveningOnly ? .evening : .afternoon
+                    }
+                    activities.append(activity(from: row, dayIndex: dayIndex, actIndex: actIndex, preferred: preferred))
+                }
+                itineraryDays.append(
+                    ItineraryDay(
+                        id: "day_\(dayIndex)",
+                        dayIndex: dayIndex,
+                        dateLabel: "Day \(dayIndex)",
+                        cityName: CityTravelHints.hopDayRouteLabel(
+                            fromCityId: fromCity,
+                            toCityId: hopSlot.cityId
+                        ),
+                        costEstimate: nil,
+                        activities: activities,
+                        experienceCityId: hopSlot.cityId.lowercased(),
+                        intercityHop: hopMeta
+                    )
+                )
                 continue
             }
             let ids = repaired.assignments[dayIndex] ?? []
@@ -141,8 +209,9 @@ enum PlanItineraryScheduler {
                     : (actIndex % 2 == 0 ? .morning : .afternoon)
                 activities.append(activity(from: row, dayIndex: dayIndex, actIndex: actIndex, preferred: preferred))
             }
-            let cityId = timeline.first { $0.dayIndex == dayIndex && $0.kind == "sightseeing" }?.cityId
-                ?? visitOrder[(dayIndex - 1) % visitOrder.count]
+            let cityId = timeline.first { $0.dayIndex == dayIndex && ($0.kind == "sightseeing" || $0.kind == "travel_lite") }?.cityId
+                ?? visitOrder.last?.lowercased()
+                ?? "beijing"
             itineraryDays.append(
                 ItineraryDay(
                     id: "day_\(dayIndex)",
@@ -177,7 +246,8 @@ enum PlanItineraryScheduler {
     private static func buildTimeline(
         tripDays: Int,
         visitOrder: [String],
-        cityDays: [String: Int]
+        cityDays: [String: Int],
+        pace: TripPace = .standard
     ) -> [TimelineSlot] {
         var slots: [TimelineSlot] = []
         var dayPtr = 1
@@ -203,13 +273,35 @@ enum PlanItineraryScheduler {
 
             let budget = cityDays[cityId] ?? 1
             for b in 0..<budget where dayPtr <= tripDays {
-                var capacity = PlanItineraryDuration.daySlotCapacity(.fullDay)
-                if i > 0 {
+                if i > 0, b == 0, pace == .intense,
+                   CityTravelHints.canIntenseSameDayHop(visitOrder[i - 1], cityId) {
+                    slots.append(TimelineSlot(
+                        dayIndex: dayPtr,
+                        kind: "hop",
+                        cityId: cityId,
+                        dayCapacity: PlanItineraryPace.hopDaySlotCapacity,
+                        eveningCapacity: 1,
+                        fromCityId: visitOrder[i - 1]
+                    ))
+                    dayPtr += 1
+                    continue
+                }
+                if i > 0, b == 0, pace != .intense {
                     let h = CityTravelHints.travelHours(visitOrder[i - 1], cityId)
-                    if CityTravelHints.commuteSlots(h) == 1, b == 0 {
-                        capacity = 1
+                    if CityTravelHints.commuteSlots(h) == 1 {
+                        slots.append(TimelineSlot(
+                            dayIndex: dayPtr,
+                            kind: "travel_lite",
+                            cityId: cityId,
+                            dayCapacity: 1,
+                            eveningCapacity: 1,
+                            fromCityId: visitOrder[i - 1]
+                        ))
+                        dayPtr += 1
+                        continue
                     }
                 }
+                let capacity = PlanItineraryDuration.daySlotCapacity(.fullDay)
                 slots.append(TimelineSlot(
                     dayIndex: dayPtr,
                     kind: "sightseeing",
@@ -223,7 +315,7 @@ enum PlanItineraryScheduler {
         }
 
         while dayPtr <= tripDays {
-            let cityId = visitOrder[(dayPtr - 1) % visitOrder.count]
+            let cityId = visitOrder.last?.lowercased() ?? "beijing"
             slots.append(TimelineSlot(
                 dayIndex: dayPtr,
                 kind: "sightseeing",
@@ -287,6 +379,61 @@ enum PlanItineraryScheduler {
         var plans: [DayPlanDraft] = []
 
         for slot in timeline {
+            if (slot.kind == "hop" || slot.kind == "travel_lite"), let fromCity = slot.fromCityId?.lowercased() {
+                let toCity = slot.cityId.lowercased()
+                var fromPool = pools[fromCity] ?? []
+                var toPool = pools[toCity] ?? []
+                let hours = CityTravelHints.travelHours(fromCity, toCity)
+                let commuteCost = Double(CityTravelHints.commuteSlots(hours))
+                var amIds: [String] = []
+                var pmIds: [String] = []
+                var eveningIds: [String] = []
+
+                if let amIdx = fromPool.firstIndex(where: { id in
+                    guard let row = catalogById[id], !row.isEveningOnly else { return false }
+                    return PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText) <= 1
+                }) {
+                    amIds.append(fromPool.remove(at: amIdx))
+                }
+
+                let sightBudget = max(0, slot.dayCapacity - commuteCost)
+                var used = 0.0
+                for id in amIds {
+                    used += PlanItineraryDuration.parseDurationSlots(catalogById[id]?.recommendedDurationText)
+                }
+                var i = 0
+                while i < toPool.count, used < sightBudget {
+                    let id = toPool[i]
+                    guard let row = catalogById[id], !row.isEveningOnly else {
+                        i += 1
+                        continue
+                    }
+                    let dur = PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText)
+                    if used + dur <= sightBudget || pmIds.isEmpty {
+                        pmIds.append(id)
+                        used += dur
+                        toPool.remove(at: i)
+                    } else {
+                        i += 1
+                    }
+                }
+
+                if slot.eveningCapacity > 0,
+                   let eveIdx = toPool.firstIndex(where: { catalogById[$0]?.isEveningOnly == true }) {
+                    eveningIds.append(toPool.remove(at: eveIdx))
+                }
+
+                pools[fromCity] = fromPool
+                pools[toCity] = toPool
+                plans.append(DayPlanDraft(
+                    dayIndex: slot.dayIndex,
+                    cityId: toCity,
+                    attractionIds: amIds + pmIds + eveningIds,
+                    hopFromCityId: fromCity
+                ))
+                continue
+            }
+
             let city = slot.cityId
             var pool = pools[city] ?? []
             var daytimeIds: [String] = []
@@ -322,10 +469,39 @@ enum PlanItineraryScheduler {
             plans.append(DayPlanDraft(
                 dayIndex: slot.dayIndex,
                 cityId: city,
-                attractionIds: daytimeIds + eveningIds
+                attractionIds: daytimeIds + eveningIds,
+                hopFromCityId: nil
             ))
         }
         return plans
+    }
+
+    private static func allowedCities(from timeline: [TimelineSlot]) -> [Int: Set<String>] {
+        var out: [Int: Set<String>] = [:]
+        for slot in timeline {
+            if (slot.kind == "hop" || slot.kind == "travel_lite"), let from = slot.fromCityId?.lowercased() {
+                out[slot.dayIndex] = [from, slot.cityId.lowercased()]
+            } else {
+                out[slot.dayIndex] = [slot.cityId.lowercased()]
+            }
+        }
+        return out
+    }
+
+    private static func mergeAllowedCitiesForHops(
+        timeline: [TimelineSlot],
+        dayPlans: [DayPlanDraft],
+        pace: TripPace
+    ) -> [Int: Set<String>] {
+        var allowed = allowedCities(from: timeline)
+        guard pace == .intense else { return allowed }
+        for plan in dayPlans {
+            guard let from = plan.hopFromCityId?.lowercased(), !from.isEmpty else { continue }
+            let to = plan.cityId.lowercased()
+            guard from != to, CityTravelHints.canIntenseSameDayHop(from, to) else { continue }
+            allowed[plan.dayIndex] = [from, to]
+        }
+        return allowed
     }
 
     private static func partitionAttractionIds(
@@ -356,6 +532,7 @@ enum PlanItineraryScheduler {
 
         let capacityByDay = Dictionary(uniqueKeysWithValues: timeline.map { ($0.dayIndex, $0.dayCapacity) })
         let eveningCapByDay = Dictionary(uniqueKeysWithValues: timeline.map { ($0.dayIndex, $0.eveningCapacity) })
+        let allowedCitiesByDay = allowedCities(from: timeline)
         let planByDay = Dictionary(uniqueKeysWithValues: dayPlans.map { ($0.dayIndex, $0) })
 
         for day in 1...tripDays {
@@ -414,6 +591,7 @@ enum PlanItineraryScheduler {
 
             if row.isEveningOnly {
                 for day in 1...tripDays {
+                    guard allowedCitiesByDay[day]?.contains(row.cityId.lowercased()) == true else { continue }
                     let eveCap = eveningCapByDay[day] ?? 0
                     guard eveCap > 0 else { continue }
                     let eveningCount = (assignments[day] ?? []).filter { catalogById[$0]?.isEveningOnly == true }.count
@@ -425,6 +603,7 @@ enum PlanItineraryScheduler {
                 }
             } else {
                 for day in 1...tripDays {
+                    guard allowedCitiesByDay[day]?.contains(row.cityId.lowercased()) == true else { continue }
                     if let date = dateForDay(day, startDate: startDate),
                        PlanItineraryVisitHours.isClosedOnDate(row, date: date) {
                         continue

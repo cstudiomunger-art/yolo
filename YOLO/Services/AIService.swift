@@ -27,7 +27,9 @@ enum AIService {
                 f.timeZone = .current
                 return f.string(from: date)
             }
-            let sorted = cities.map { $0.lowercased() }.sorted()
+            let citySlugs = cities.map { $0.lowercased() }
+            let entry = resolvedEndpointCity(options.entryCityId, among: citySlugs)
+            let exit = resolvedEndpointCity(options.exitCityId, among: citySlugs) ?? entry
             let payload = ItineraryRequest(
                 type: "itinerary",
                 cities: cities,
@@ -37,8 +39,8 @@ enum AIService {
                 arrivalTime: options.arrivalTime,
                 departureTime: options.departureTime,
                 startDate: startLocal,
-                entryCityId: sorted.first,
-                exitCityId: sorted.count > 1 ? sorted.last : sorted.first
+                entryCityId: entry,
+                exitCityId: exit
             )
             let result: Result<ItineraryResponse, AIInvokeError> = await invokeResult(payload)
             if case .success(let response) = result,
@@ -134,8 +136,20 @@ enum AIService {
             arrivalTime: options.arrivalTime,
             departureTime: options.departureTime,
             startDate: options.startDate,
+            entryCityId: options.entryCityId,
+            exitCityId: options.exitCityId,
             applyNormalizer: false
         )
+    }
+
+    private static func resolvedEndpointCity(_ preferred: String?, among cities: [String]) -> String? {
+        let unique = Array(Set(cities.map { $0.lowercased() }.filter { !$0.isEmpty }))
+        guard !unique.isEmpty else { return nil }
+        if let preferred {
+            let normalized = preferred.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            if unique.contains(normalized) { return normalized }
+        }
+        return unique.sorted().first
     }
 
     /// ai-complete 要求登录用户 JWT（verify_jwt=true）；游客一律走本地兜底，不调用远程。

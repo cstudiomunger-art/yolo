@@ -4,6 +4,7 @@ import {
   cityDisplayName,
   routeLabelFromOrder,
   travelExperienceItems,
+  travelHours,
   type CityMetaRow,
 } from "./city-travel-hints.ts";
 import {
@@ -11,7 +12,7 @@ import {
   parseDurationSlots,
 } from "./itinerary-duration.ts";
 import { pickVisitTimeSlot, visitTimeSlotLabel } from "./itinerary-visit-hours.ts";
-import { runItinerarySchedulerPipeline } from "./itinerary-scheduler.ts";
+import { runItinerarySchedulerPipeline, type IntercityHopDay } from "./itinerary-scheduler.ts";
 import { parsePace } from "./itinerary-pace.ts";
 import { seasonHintsForTrip } from "./itinerary-season-hints.ts";
 import { fillEmptyItineraryDays } from "./itinerary-day-fill.ts";
@@ -48,6 +49,14 @@ export type ItineraryActivity = {
   has_audio: boolean;
 };
 
+export type ItineraryIntercityHop = {
+  from_city_id: string;
+  to_city_id: string;
+  travel_hours: number;
+  items: string[];
+  arrival_time_at_destination?: string;
+};
+
 export type ItineraryDay = {
   id: string;
   day_index: number;
@@ -57,6 +66,7 @@ export type ItineraryDay = {
   day_kind?: string;
   experience_items?: string[];
   experience_city_id?: string;
+  intercity_hop?: ItineraryIntercityHop;
   activities: ItineraryActivity[];
 };
 
@@ -84,6 +94,7 @@ export type AIExperienceDay = {
   city_id: string;
   items: string[];
   kind?: "travel" | "rest" | "experience";
+  from_city_id?: string;
 };
 
 export type AICityPlan = {
@@ -97,6 +108,7 @@ export type AIDayPlan = {
   day_index: number;
   city_id: string;
   attraction_ids: string[];
+  hop_from_city_id?: string;
   theme?: string;
   time_hints?: Record<string, string>;
 };
@@ -311,6 +323,7 @@ export function assembleItinerary(params: {
   plan: DayPlan;
   assignments: AIAssignment[];
   experienceDays: AIExperienceDay[];
+  hopDays?: IntercityHopDay[];
   visitOrder?: string[];
   userNotes?: string;
   title?: string;
@@ -346,10 +359,16 @@ export function assembleItinerary(params: {
     experienceByDay.set(e.day_index, e);
   }
 
+  const hopByDay = new Map<number, IntercityHopDay>();
+  for (const hop of params.hopDays ?? []) {
+    hopByDay.set(hop.day_index, hop);
+  }
+
   const days: ItineraryDay[] = [];
 
   for (let dayIndex = 1; dayIndex <= tripDays; dayIndex++) {
     const exp = experienceByDay.get(dayIndex);
+    const hop = hopByDay.get(dayIndex);
 
     if (isExperienceSlot(exp)) {
       const cityId = exp?.city_id || visitOrder[(dayIndex - 1) % visitOrder.length] || "beijing";
@@ -369,6 +388,15 @@ export function assembleItinerary(params: {
         }
       });
 
+      const travelHop = exp?.kind === "travel" && exp.from_city_id
+        ? {
+          from_city_id: exp.from_city_id.toLowerCase(),
+          to_city_id: cityId.toLowerCase(),
+          travel_hours: travelHours(exp.from_city_id, cityId),
+          items,
+        }
+        : undefined;
+
       days.push({
         id: `day_${dayIndex}`,
         day_index: dayIndex,
@@ -378,21 +406,54 @@ export function assembleItinerary(params: {
         day_kind: "experience_suggestions",
         experience_items: items,
         experience_city_id: cityId,
+        intercity_hop: travelHop,
         activities,
       });
       continue;
     }
 
     const ids = assignmentByDay.get(dayIndex) ?? [];
-      const activities: ItineraryActivity[] = [];
+    const activities: ItineraryActivity[] = [];
     ids.forEach((aid, actIndex) => {
       const row = catalogById.get(aid);
-      if (row) {
+      if (!row) return;
+      if (hop) {
+        const fromLower = hop.from_city_id.toLowerCase();
         const hinted = timeHints.get(aid);
-        const preferred = hinted ?? (actIndex % 2 === 0 ? "morning" : "afternoon");
+        let preferred: "morning" | "afternoon" | "evening";
+        if (hinted) {
+          preferred = hinted;
+        } else if (row.city_id.toLowerCase() === fromLower) {
+          preferred = "morning";
+        } else {
+          preferred = row.recommended_visit_period === "evening" ? "evening" : "afternoon";
+        }
         activities.push(buildActivity(row, dayIndex, actIndex, preferred));
+        return;
       }
+      const hinted = timeHints.get(aid);
+      const preferred = hinted ?? (actIndex % 2 === 0 ? "morning" : "afternoon");
+      activities.push(buildActivity(row, dayIndex, actIndex, preferred));
     });
+
+    if (hop) {
+      days.push({
+        id: `day_${dayIndex}`,
+        day_index: dayIndex,
+        date_label: `Day ${dayIndex}`,
+        city_name: routeLabelFromOrder([hop.from_city_id, hop.to_city_id]),
+        cost_estimate: null,
+        experience_city_id: hop.to_city_id,
+        intercity_hop: {
+          from_city_id: hop.from_city_id,
+          to_city_id: hop.to_city_id,
+          travel_hours: hop.travel_hours,
+          items: hop.items,
+        },
+        activities,
+      });
+      continue;
+    }
 
     const day: ItineraryDay = {
       id: `day_${dayIndex}`,
@@ -496,6 +557,9 @@ export function parseAIPlanResponse(raw: unknown): AIPlanResponse | null {
         attraction_ids: ids,
         theme: row.theme != null ? String(row.theme) : undefined,
         time_hints,
+        hop_from_city_id: row.hop_from_city_id != null
+          ? String(row.hop_from_city_id).trim().toLowerCase()
+          : undefined,
       };
     }).filter((p) => p.day_index > 0 && p.city_id)
     : [];
@@ -549,6 +613,7 @@ export const AI_PLAN_JSON_SCHEMA = `{
     {
       "day_index": 1,
       "city_id": "beijing",
+      "hop_from_city_id": "optional — morning city for intense same-day hop (≤4h travel only)",
       "attraction_ids": ["attraction_id_from_catalog"],
       "theme": "optional",
       "time_hints": { "attraction_id": "morning" }
@@ -560,9 +625,10 @@ export const AI_PLAN_JSON_SCHEMA = `{
 
 export const ITINERARY_HARD_CONSTRAINTS =
   "HARD CONSTRAINTS (never violate): Use only catalog attraction_ids; each id once globally; " +
-  "respect per-day duration_slots budget until full (short sights may share a day; full-day sights may fill it alone); do not put distant cities on the same day (e.g. Beijing+Shanghai+Chengdu); " +
+  "respect per-day duration_slots budget until full (short sights may share a day; full-day sights may fill it alone); " +
+  "do not put distant cities on the same day unless pace is intense AND travel is ≤4h using hop_from_city_id + city_id on day_plans; " +
   "respect closed_weekdays/open_time/close_time when present; " +
-  "use experience_days with kind travel/rest for intercity moves within the fixed day budget; " +
+  "use experience_days with kind travel/rest for intercity moves >4h within the fixed day budget; " +
   "optimize visit_order for minimal travel; output JSON only.";
 
 export function buildItineraryPipeline(params: {
@@ -608,6 +674,7 @@ export function buildItineraryPipeline(params: {
     plan,
     assignments: scheduled.assignments,
     experienceDays: scheduled.experienceDays,
+    hopDays: scheduled.hopDays,
     visitOrder: scheduled.visitOrder,
     userNotes: params.userNotes,
     title,

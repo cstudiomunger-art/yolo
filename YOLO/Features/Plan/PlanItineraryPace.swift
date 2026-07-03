@@ -30,6 +30,9 @@ enum TripPace: String, CaseIterable, Identifiable {
 }
 
 enum PlanItineraryPace {
+    /// Hop days pack AM sight + commute + PM sight (intense only).
+    static let hopDaySlotCapacity: Double = 3
+
     static func daySlotCapacity(profile: DayScheduleProfile, pace: TripPace) -> Double {
         if profile == .departureDay { return 1 }
         if profile == .arrivalDay { return 1 }

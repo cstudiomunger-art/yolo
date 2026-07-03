@@ -11,6 +11,8 @@ struct PlanCreateFlowView: View {
     @State private var search = ""
     @State private var cities: [City] = []
     @State private var selectedCityIds: Set<String> = []
+    @State private var entryCityId: String?
+    @State private var exitCityId: String?
     @State private var arrivalDate = Date()
     @State private var departureDate = Calendar.current.date(byAdding: .day, value: 9, to: Date()) ?? Date()
     @State private var showArrivalPicker = false
@@ -39,6 +41,9 @@ struct PlanCreateFlowView: View {
     @State private var departureTime = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: Date()) ?? Date()
     @State private var isRuleBasedTrip = false
     @State private var reviewEditMode: EditMode = .inactive
+    @State private var intercityTripSnapshot: [ItineraryDay]?
+    @State private var intercityAdjustmentsSnapshot: [String]?
+    @State private var arrivalReplanTask: Task<Void, Never>?
 
     private let visaCountries: [PassportCountry] = ISO3166.all
 
@@ -184,6 +189,7 @@ struct PlanCreateFlowView: View {
             }
         }
         .onChange(of: selectedCityIds) { _, _ in
+            syncEntryExitCities()
             tripPace = TripPace.defaultPace(tripDays: activityDays, cityCount: selectedCityIds.count)
         }
         .onChange(of: activityDays) { _, _ in
@@ -222,6 +228,9 @@ struct PlanCreateFlowView: View {
 
                 if !selectedCityIds.isEmpty {
                     selectedCityChips
+                    if selectedCityIds.count > 1 {
+                        entryExitCitySection
+                    }
                 }
 
                 if !popularCities.isEmpty && search.isEmpty {
@@ -254,6 +263,59 @@ struct PlanCreateFlowView: View {
 
     private var selectedCityChips: some View {
         FlowLayoutTags(tags: cities.filter { selectedCityIds.contains($0.id) }.map(\.name))
+    }
+
+    private var selectedCitiesInDisplayOrder: [City] {
+        cities.filter { selectedCityIds.contains($0.id) }
+    }
+
+    private var entryExitCitySection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(String(localized: "Flight endpoints"))
+                .font(Theme.FontToken.inter(12, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+            Text(String(localized: "Pick where you land in China and which city you fly home from. We'll order the middle cities for the shortest route."))
+                .font(Theme.FontToken.inter(11))
+                .foregroundStyle(Theme.ColorToken.textMuted)
+            VStack(spacing: 0) {
+                entryExitCityRow(
+                    label: String(localized: "Landing city"),
+                    selection: Binding(
+                        get: { entryCityId ?? selectedCitiesInDisplayOrder.first?.id ?? "" },
+                        set: { entryCityId = $0 }
+                    )
+                )
+                Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                entryExitCityRow(
+                    label: String(localized: "Return from"),
+                    selection: Binding(
+                        get: { exitCityId ?? entryCityId ?? selectedCitiesInDisplayOrder.first?.id ?? "" },
+                        set: { exitCityId = $0 }
+                    )
+                )
+            }
+            .padding(.horizontal, 12)
+            .background(Theme.ColorToken.backgroundSubtle)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+    }
+
+    private func entryExitCityRow(label: String, selection: Binding<String>) -> some View {
+        HStack {
+            Text(label)
+                .font(Theme.FontToken.inter(13))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+            Spacer()
+            Picker(label, selection: selection) {
+                ForEach(selectedCitiesInDisplayOrder) { city in
+                    Text("\(city.emoji ?? "📍") \(city.name)").tag(city.id)
+                }
+            }
+            .labelsHidden()
+            .font(Theme.FontToken.inter(13, weight: .medium))
+            .tint(Theme.ColorToken.textPrimary)
+        }
+        .padding(.vertical, 10)
     }
 
     private func cityGrid(_ items: [City]) -> some View {
@@ -690,6 +752,7 @@ struct PlanCreateFlowView: View {
         guard VisaTripChecker.verifySwap(query: q, keptSlugs: plan.keptSlugs, picks: picks,
                                          data: appEnv.visaData.data) else { return }
         selectedCityIds = Set(plan.keptSlugs + picks)
+        syncEntryExitCities()
         startGeneration()
     }
 
@@ -765,15 +828,6 @@ struct PlanCreateFlowView: View {
                         }
                     }
 
-                    if let notes = schedulingNotes(for: draftItinerary), !notes.isEmpty {
-                        Section {
-                            schedulingNotesCard(notes)
-                                .listRowInsets(EdgeInsets(top: 0, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                        }
-                    }
-
                     ForEach(draftItinerary.days.indices, id: \.self) { dayIndex in
                         reviewDaySection(dayIndex: dayIndex, day: draftItinerary.days[dayIndex])
                     }
@@ -799,14 +853,64 @@ struct PlanCreateFlowView: View {
         let cityNameById = Dictionary(uniqueKeysWithValues: cities.map { ($0.id, $0.name) })
         let visited = day.isExperienceSuggestions
             ? (day.experienceCityId.flatMap { cityNameById[$0] } ?? "")
-            : PlanTripCities.visitedCityNames(
-                day: day,
-                cityNameById: cityNameById,
-                attractionCache: attractionCache
-            )
+            : (day.intercityHop != nil
+                ? day.cityName
+                : PlanTripCities.visitedCityNames(
+                    day: day,
+                    cityNameById: cityNameById,
+                    attractionCache: attractionCache
+                ))
 
         Section {
-            if day.isExperienceSuggestions || PlanItineraryDayFill.isBlank(day) {
+            if day.intercityHop != nil && !day.isExperienceSuggestions {
+                let split = PlanItineraryHopUI.splitActivities(day)
+                ForEach(split.morning) { activity in
+                    reviewActivityRow(activity, dayIndex: dayIndex)
+                        .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 4, trailing: Theme.screenPadding))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+                .onMove { source, destination in
+                    moveReviewActivities(dayIndex: dayIndex, from: source, to: destination)
+                }
+                if let hop = day.intercityHop {
+                    IntercityHopCard(hop: hop) { time in
+                        applyIntercityArrivalTime(dayIndex: dayIndex, arrivalTime: time)
+                    }
+                        .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+                ForEach(split.afternoon) { activity in
+                    reviewActivityRow(activity, dayIndex: dayIndex)
+                        .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 4, trailing: Theme.screenPadding))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+                .onMove { source, destination in
+                    let offset = split.morning.count
+                    moveReviewActivities(
+                        dayIndex: dayIndex,
+                        from: IndexSet(source.map { $0 + offset }),
+                        to: destination + offset
+                    )
+                }
+
+                if reviewEditMode == .inactive {
+                    Button {
+                        let ids = reviewTripCityIds()
+                        addAttractionContext = PlanAddAttractionContext(dayIndex: dayIndex, cityIds: ids)
+                    } label: {
+                        Label(String(localized: "Add attraction"), systemImage: "plus")
+                            .font(Theme.FontToken.inter(12, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.ColorToken.accent)
+                    .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+            } else if day.isExperienceSuggestions || PlanItineraryDayFill.isBlank(day) {
                 let displayDay = day.isExperienceSuggestions
                     ? day
                     : (PlanItineraryDayFill.fillEmptyDays(
@@ -820,7 +924,10 @@ struct PlanCreateFlowView: View {
                     day: displayDay,
                     cityDisplayName: visited.isEmpty
                         ? CityTravelHints.displayName(for: displayDay.experienceCityId ?? "beijing")
-                        : visited
+                        : visited,
+                    onArrivalTimeChange: displayDay.intercityHop != nil
+                        ? { applyIntercityArrivalTime(dayIndex: dayIndex, arrivalTime: $0) }
+                        : nil
                 )
                 .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
                 .listRowBackground(Color.clear)
@@ -946,23 +1053,6 @@ struct PlanCreateFlowView: View {
         .padding(.vertical, 4)
     }
 
-    private func schedulingNotes(for trip: SampleItinerary) -> [String]? {
-        var lines = trip.schedulingAdjustments ?? []
-        if let dropped = trip.droppedAttractionIds, !dropped.isEmpty {
-            let names = dropped.map { id in
-                attractionCache[id]?.name ?? id
-            }
-            lines.append(String(localized: "Some sights could not fit: \(names.joined(separator: ", "))"))
-        }
-        let season = trip.seasonHints ?? PlanSeasonHints.hints(
-            cities: cities,
-            selectedCityIds: selectedCityIds,
-            tripMonth: tripMonth
-        )
-        lines.append(contentsOf: season)
-        return lines.isEmpty ? nil : lines
-    }
-
     @ViewBuilder
     private var ruleBasedTripBanner: some View {
         Label(String(localized: "Built with on-device scheduling rules"), systemImage: "gearshape.2")
@@ -972,24 +1062,6 @@ struct PlanCreateFlowView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.ColorToken.backgroundSubtle)
             .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
-    }
-
-    @ViewBuilder
-    private func schedulingNotesCard(_ notes: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label(String(localized: "Schedule notes"), systemImage: "clock.badge.exclamationmark")
-                .font(Theme.FontToken.inter(12, weight: .semibold))
-                .foregroundStyle(Theme.ColorToken.textSecondary)
-            ForEach(Array(notes.enumerated()), id: \.offset) { _, note in
-                Text(note)
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-            }
-        }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.ColorToken.warningBackground)
-        .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
     }
 
     // MARK: - Actions
@@ -1002,6 +1074,7 @@ struct PlanCreateFlowView: View {
             TelemetryService.shared.recordError(error, context: "plan_create_cities")
         }
         selectedCityIds = Set(appEnv.preferences.selectedCityIds)
+        syncEntryExitCities()
         departureDate = appEnv.preferences.departureDate
         departureDate = PlanTripDateMath.clampDeparture(departureDate, arrival: arrivalDate)
         let cc = appEnv.preferences.countryCode.trimmingCharacters(in: .whitespaces).uppercased()
@@ -1017,6 +1090,45 @@ struct PlanCreateFlowView: View {
         } else {
             selectedCityIds.insert(id)
         }
+        syncEntryExitCities()
+    }
+
+    private func syncEntryExitCities() {
+        let selected = selectedCitiesInDisplayOrder.map(\.id)
+        guard !selected.isEmpty else {
+            entryCityId = nil
+            exitCityId = nil
+            return
+        }
+        if let entry = entryCityId, selected.contains(entry) {
+            // keep user choice
+        } else {
+            entryCityId = selected[0]
+        }
+        if selected.count == 1 {
+            exitCityId = entryCityId
+            return
+        }
+        if let exit = exitCityId, selected.contains(exit) {
+            // keep user choice
+        } else if let entry = entryCityId, let fallback = selected.first(where: { $0 != entry }) {
+            exitCityId = fallback
+        } else {
+            exitCityId = selected.last
+        }
+    }
+
+    private func resolvedEntryCityId() -> String {
+        let selected = Array(selectedCityIds)
+        if let entry = entryCityId, selected.contains(entry) { return entry }
+        return selected.sorted().first ?? "beijing"
+    }
+
+    private func resolvedExitCityId() -> String {
+        let selected = Array(selectedCityIds)
+        if let exit = exitCityId, selected.contains(exit) { return exit }
+        if selected.count == 1 { return resolvedEntryCityId() }
+        return selected.sorted().last ?? resolvedEntryCityId()
     }
 
     /// Judge the chosen cities + real dates against the user's passport before generating.
@@ -1082,6 +1194,7 @@ struct PlanCreateFlowView: View {
             ids.append(slug)
         }
         selectedCityIds = Set(ids)
+        syncEntryExitCities()
         startGeneration()
     }
 
@@ -1093,6 +1206,7 @@ struct PlanCreateFlowView: View {
             ids.append(option.slug)
         }
         selectedCityIds = Set(ids)
+        syncEntryExitCities()
         startGeneration()
     }
 
@@ -1121,7 +1235,9 @@ struct PlanCreateFlowView: View {
                         pace: tripPace,
                         arrivalTime: PlanItineraryFlightTimes.formatHHMM(from: arrivalTime),
                         departureTime: PlanItineraryFlightTimes.formatHHMM(from: departureTime),
-                        startDate: arrivalDate
+                        startDate: arrivalDate,
+                        entryCityId: resolvedEntryCityId(),
+                        exitCityId: resolvedExitCityId()
                     )
                 )
                 isRuleBasedTrip = generated.isRuleBased
@@ -1142,11 +1258,17 @@ struct PlanCreateFlowView: View {
 
     private func buildAINotes() -> String {
         let cityList = Array(selectedCityIds).sorted().joined(separator: ", ")
+        let entry = resolvedEntryCityId()
+        let exit = resolvedExitCityId()
+        let crossCityRule = tripPace == .intense
+            ? "Intense pace: for city pairs with ≤4h travel you MAY use same-day hops (morning in hop_from city, afternoon in destination) when it saves days; use experience_days kind travel for >4h moves."
+            : "Do not put distant cities on the same day. Use experience_days with kind travel to mark intercity travel days (occupies a day slot, does not add days)."
         return """
         Arrival \(PlanTripDateMath.formatDisplayDate(arrivalDate)); departure \(PlanTripDateMath.formatDisplayDate(departureDate)); \
         \(activityDays) full activity days (exclude arrival and departure). \
-        Selected cities (unordered): \(cityList). Optimize visit order for minimal intercity travel. \
-        Do not put distant cities on the same day. Use experience_days with kind travel to mark intercity travel days (occupies a day slot, does not add days). \
+        Selected cities (unordered): \(cityList). Landing city (international entry): \(entry). Return city (international exit): \(exit). \
+        Visit order must start in \(entry) and end in \(exit); optimize middle cities for minimal intercity travel. \
+        \(crossCityRule) \
         Prefer city_plan + day_plans JSON (pack sights by duration_slots until each day's budget is full). \
         Pace: \(tripPace.rawValue). \
         Arrival time \(PlanItineraryFlightTimes.formatHHMM(from: arrivalTime)); departure time \(PlanItineraryFlightTimes.formatHHMM(from: departureTime)). \
@@ -1191,7 +1313,8 @@ struct PlanCreateFlowView: View {
                 },
                 dayKind: day.dayKind,
                 experienceItems: day.experienceItems,
-                experienceCityId: day.experienceCityId
+                experienceCityId: day.experienceCityId,
+                intercityHop: day.intercityHop
             )
         }
         return SampleItinerary(
@@ -1228,6 +1351,76 @@ struct PlanCreateFlowView: View {
         )
         if !ids.isEmpty { return ids }
         return Array(selectedCityIds)
+    }
+
+    private func applyIntercityArrivalTime(dayIndex: Int, arrivalTime: String?) {
+        arrivalReplanTask?.cancel()
+        arrivalReplanTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            guard !Task.isCancelled else { return }
+            guard let trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return }
+            let day = trip.days[dayIndex]
+            guard day.intercityHop != nil else { return }
+
+            if intercityTripSnapshot == nil {
+                intercityTripSnapshot = trip.days
+                intercityAdjustmentsSnapshot = trip.schedulingAdjustments
+            }
+
+            if arrivalTime == nil, let snapshot = intercityTripSnapshot {
+                replaceReviewDays(
+                    snapshot,
+                    schedulingAdjustments: intercityAdjustmentsSnapshot
+                )
+                intercityTripSnapshot = nil
+                intercityAdjustmentsSnapshot = nil
+                return
+            }
+
+            let (newDays, adjustments) = PlanItineraryIntercityReplanner.replan(
+                days: trip.days,
+                dayIndex: day.dayIndex,
+                arrivalTime: arrivalTime,
+                options: PlanItineraryIntercityReplanner.Options(
+                    pace: tripPace,
+                    catalogById: attractionCache
+                )
+            )
+            replaceReviewDays(newDays, extraAdjustments: adjustments)
+        }
+    }
+
+    private func replaceReviewDays(
+        _ days: [ItineraryDay],
+        extraAdjustments: [String] = [],
+        schedulingAdjustments: [String]? = nil
+    ) {
+        guard let trip = draftItinerary else { return }
+        let adj: [String]?
+        if let schedulingAdjustments {
+            adj = schedulingAdjustments.isEmpty ? nil : schedulingAdjustments
+        } else {
+            var merged = trip.schedulingAdjustments ?? []
+            merged.append(contentsOf: extraAdjustments)
+            adj = merged.isEmpty ? trip.schedulingAdjustments : merged
+        }
+        draftItinerary = SampleItinerary(
+            id: trip.id,
+            title: trip.title,
+            meta: trip.meta,
+            routeSummary: trip.routeSummary,
+            estimatedBudget: trip.estimatedBudget,
+            days: days,
+            shareSlug: trip.shareSlug,
+            isShared: trip.isShared,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            visitOrder: trip.visitOrder,
+            userEdited: true,
+            droppedAttractionIds: trip.droppedAttractionIds,
+            schedulingAdjustments: adj,
+            seasonHints: trip.seasonHints
+        )
     }
 
     private func removeActivity(dayIndex: Int, activityId: String) {

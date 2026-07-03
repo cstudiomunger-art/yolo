@@ -5,6 +5,7 @@ enum PlanItineraryGeoRepair {
     static func apply(
         assignments: [Int: [String]],
         catalogById: [String: Attraction],
+        allowedCitiesByDay: [Int: Set<String>],
         adjustments: inout [String]
     ) -> (assignments: [Int: [String]], dropped: [String]) {
         var result = assignments
@@ -24,6 +25,28 @@ enum PlanItineraryGeoRepair {
 
         var overflow: [String] = []
         for day in result.keys.sorted() {
+            let allowed = allowedCitiesByDay[day] ?? []
+            let ids = result[day] ?? []
+            var kept: [String] = []
+            for id in ids {
+                guard let city = catalogById[id]?.cityId.lowercased() else {
+                    kept.append(id)
+                    continue
+                }
+                if !allowed.isEmpty, !allowed.contains(city) {
+                    overflow.append(id)
+                    adjustments.append("Moved \(id) off day \(day) (allowed \(allowed.sorted().joined(separator: ", ")), got \(city))")
+                    continue
+                }
+                kept.append(id)
+            }
+            result[day] = kept
+        }
+
+        for day in result.keys.sorted() {
+            let allowed = allowedCitiesByDay[day] ?? []
+            let isHopDay = allowed.count == 2
+            if isHopDay { continue }
             let split = splitIncompatibleSameDay(result[day] ?? [], catalogById: catalogById)
             if !split.overflow.isEmpty {
                 adjustments.append(
@@ -35,9 +58,10 @@ enum PlanItineraryGeoRepair {
         }
 
         for id in overflow {
-            guard let city = catalogById[id]?.cityId else { continue }
+            guard let city = catalogById[id]?.cityId.lowercased() else { continue }
             var placed = false
             for day in result.keys.sorted() {
+                guard allowedCitiesByDay[day]?.contains(city) == true else { continue }
                 let existing = citiesOnAssignment(result[day] ?? [], catalogById: catalogById)
                 if existing.isEmpty || existing.allSatisfy({ CityTravelHints.canVisitSameDay($0, city) }) {
                     result[day, default: []].append(id)

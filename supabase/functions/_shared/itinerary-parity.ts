@@ -6,6 +6,7 @@ export type ParityInputV1 = {
     trip_days: number;
     entry_city_id?: string | null;
     exit_city_id?: string | null;
+    pace?: string | null;
   };
   cities: Array<{
     id: string;

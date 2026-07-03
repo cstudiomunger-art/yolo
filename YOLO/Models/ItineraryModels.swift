@@ -152,6 +152,53 @@ enum ItineraryDayKind: String, Codable, Hashable {
     case experienceSuggestions = "experience_suggestions"
 }
 
+/// Inline intercity hop on a standard day (morning city A → commute card → afternoon city B).
+struct ItineraryIntercityHop: Codable, Hashable {
+    let fromCityId: String
+    let toCityId: String
+    let travelHours: Double
+    let items: [String]
+    /// User-set arrival at destination (HH:mm) from Review; triggers replan when set.
+    let arrivalTimeAtDestination: String?
+
+    init(
+        fromCityId: String,
+        toCityId: String,
+        travelHours: Double,
+        items: [String],
+        arrivalTimeAtDestination: String? = nil
+    ) {
+        self.fromCityId = fromCityId
+        self.toCityId = toCityId
+        self.travelHours = travelHours
+        self.items = items
+        self.arrivalTimeAtDestination = arrivalTimeAtDestination
+    }
+
+    func withArrivalTime(_ time: String?) -> ItineraryIntercityHop {
+        ItineraryIntercityHop(
+            fromCityId: fromCityId,
+            toCityId: toCityId,
+            travelHours: travelHours,
+            items: CityTravelHints.buildHopCardContentWithArrival(
+                fromCityId: fromCityId,
+                toCityId: toCityId,
+                hours: travelHours,
+                arrivalAtDestination: time
+            ),
+            arrivalTimeAtDestination: time
+        )
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case fromCityId = "from_city_id"
+        case toCityId = "to_city_id"
+        case travelHours = "travel_hours"
+        case items
+        case arrivalTimeAtDestination = "arrival_time_at_destination"
+    }
+}
+
 struct ItineraryDay: Identifiable, Codable, Hashable {
     let id: String
     let dayIndex: Int
@@ -161,10 +208,15 @@ struct ItineraryDay: Identifiable, Codable, Hashable {
     let dayKind: ItineraryDayKind
     let experienceItems: [String]
     let experienceCityId: String?
+    let intercityHop: ItineraryIntercityHop?
     let activities: [ItineraryActivity]
 
     var isExperienceSuggestions: Bool {
         dayKind == .experienceSuggestions
+    }
+
+    var isIntercityHopDay: Bool {
+        intercityHop != nil
     }
 
     init(
@@ -176,7 +228,8 @@ struct ItineraryDay: Identifiable, Codable, Hashable {
         activities: [ItineraryActivity],
         dayKind: ItineraryDayKind = .standard,
         experienceItems: [String] = [],
-        experienceCityId: String? = nil
+        experienceCityId: String? = nil,
+        intercityHop: ItineraryIntercityHop? = nil
     ) {
         self.id = id
         self.dayIndex = dayIndex
@@ -186,6 +239,7 @@ struct ItineraryDay: Identifiable, Codable, Hashable {
         self.dayKind = dayKind
         self.experienceItems = experienceItems
         self.experienceCityId = experienceCityId
+        self.intercityHop = intercityHop
         self.activities = activities
     }
 
@@ -199,6 +253,7 @@ struct ItineraryDay: Identifiable, Codable, Hashable {
         dayKind = try c.decodeIfPresent(ItineraryDayKind.self, forKey: .dayKind) ?? .standard
         experienceItems = try c.decodeIfPresent([String].self, forKey: .experienceItems) ?? []
         experienceCityId = try c.decodeIfPresent(String.self, forKey: .experienceCityId)
+        intercityHop = try c.decodeIfPresent(ItineraryIntercityHop.self, forKey: .intercityHop)
         activities = try c.decodeIfPresent([ItineraryActivity].self, forKey: .activities) ?? []
     }
 
@@ -216,11 +271,13 @@ struct ItineraryDay: Identifiable, Codable, Hashable {
             try c.encode(experienceItems, forKey: .experienceItems)
         }
         try c.encodeIfPresent(experienceCityId, forKey: .experienceCityId)
+        try c.encodeIfPresent(intercityHop, forKey: .intercityHop)
         try c.encode(activities, forKey: .activities)
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, dayIndex, dateLabel, cityName, costEstimate, dayKind, experienceItems, experienceCityId, activities
+        case intercityHop = "intercity_hop"
     }
 
     func withActivities(_ activities: [ItineraryActivity]) -> ItineraryDay {
@@ -233,7 +290,8 @@ struct ItineraryDay: Identifiable, Codable, Hashable {
             activities: activities,
             dayKind: dayKind,
             experienceItems: experienceItems,
-            experienceCityId: experienceCityId
+            experienceCityId: experienceCityId,
+            intercityHop: intercityHop
         )
     }
 
@@ -247,7 +305,38 @@ struct ItineraryDay: Identifiable, Codable, Hashable {
             activities: activities,
             dayKind: dayKind,
             experienceItems: experienceItems,
-            experienceCityId: experienceCityId
+            experienceCityId: experienceCityId,
+            intercityHop: intercityHop
+        )
+    }
+
+    func withIntercityHop(_ hop: ItineraryIntercityHop?) -> ItineraryDay {
+        ItineraryDay(
+            id: id,
+            dayIndex: dayIndex,
+            dateLabel: dateLabel,
+            cityName: cityName,
+            costEstimate: costEstimate,
+            activities: activities,
+            dayKind: dayKind,
+            experienceItems: experienceItems,
+            experienceCityId: experienceCityId,
+            intercityHop: hop
+        )
+    }
+
+    func withExperienceItems(_ items: [String]) -> ItineraryDay {
+        ItineraryDay(
+            id: id,
+            dayIndex: dayIndex,
+            dateLabel: dateLabel,
+            cityName: cityName,
+            costEstimate: costEstimate,
+            activities: activities,
+            dayKind: dayKind,
+            experienceItems: items,
+            experienceCityId: experienceCityId,
+            intercityHop: intercityHop
         )
     }
 }

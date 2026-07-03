@@ -74,19 +74,39 @@ function citiesOnAssignment(
   return out;
 }
 
-/** Dedupe globally and split incompatible cities on the same day. */
+/** Dedupe globally, enforce per-day allowed cities, and split incompatible same-day mixes. */
 export function applyGeographicRepairs<T extends GeoAssignment>(params: {
   assignments: T[];
   catalogById: Map<string, GeoAttractionRow>;
   regionByCity: Map<string, string | null>;
+  allowedCitiesByDay: Map<number, Set<string>>;
   adjustments: string[];
 }): { assignments: T[]; dropped: string[] } {
-  const { catalogById, regionByCity, adjustments } = params;
+  const { catalogById, regionByCity, allowedCitiesByDay, adjustments } = params;
   const assignments = dedupeAssignmentIds(params.assignments, catalogById);
   const overflow: string[] = [];
   const dropped: string[] = [];
 
   for (const assignment of assignments) {
+    const allowed = allowedCitiesByDay.get(assignment.day_index) ?? new Set<string>();
+    const kept: string[] = [];
+    for (const id of assignment.attraction_ids) {
+      const city = catalogById.get(id)?.city_id?.toLowerCase();
+      if (allowed.size > 0 && city && !allowed.has(city)) {
+        overflow.push(id);
+        adjustments.push(
+          `Moved ${id} off day ${assignment.day_index} (allowed ${[...allowed].sort().join(", ")}, got ${city})`,
+        );
+        continue;
+      }
+      kept.push(id);
+    }
+    assignment.attraction_ids = kept;
+  }
+
+  for (const assignment of assignments) {
+    const allowed = allowedCitiesByDay.get(assignment.day_index) ?? new Set<string>();
+    if (allowed.size === 2) continue;
     const split = splitIncompatibleSameDay(
       assignment.attraction_ids,
       catalogById,
@@ -102,10 +122,12 @@ export function applyGeographicRepairs<T extends GeoAssignment>(params: {
   }
 
   for (const id of overflow) {
-    const city = catalogById.get(id)?.city_id;
+    const city = catalogById.get(id)?.city_id?.toLowerCase();
     if (!city) continue;
     let placed = false;
     for (const assignment of assignments) {
+      const allowed = allowedCitiesByDay.get(assignment.day_index);
+      if (!allowed?.has(city)) continue;
       const existing = citiesOnAssignment(assignment.attraction_ids, catalogById);
       if (existing.length === 0 || existing.every((c) => canVisitSameDay(c, city, regionByCity))) {
         assignment.attraction_ids.push(id);
@@ -121,4 +143,22 @@ export function applyGeographicRepairs<T extends GeoAssignment>(params: {
   }
 
   return { assignments, dropped };
+}
+
+/** Build allowed city sets from timeline slots (hop days allow two cities). */
+export function allowedCitiesFromTimeline(
+  timeline: Array<{ day_index: number; kind: string; city_id: string; from_city_id?: string }>,
+): Map<number, Set<string>> {
+  const out = new Map<number, Set<string>>();
+  for (const slot of timeline) {
+    if ((slot.kind === "hop" || slot.kind === "travel_lite") && slot.from_city_id) {
+      out.set(slot.day_index, new Set([
+        slot.from_city_id.toLowerCase(),
+        slot.city_id.toLowerCase(),
+      ]));
+    } else {
+      out.set(slot.day_index, new Set([slot.city_id.toLowerCase()]));
+    }
+  }
+  return out;
 }

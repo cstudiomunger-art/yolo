@@ -64,6 +64,7 @@ export function runParityVector(vector: ParityVectorV1): SampleItinerary {
     entryCityId: input.trip.entry_city_id ?? null,
     exitCityId: input.trip.exit_city_id ?? null,
     startDateLocal: input.trip.start_date_local ?? null,
+    pace: input.trip.pace ?? null,
   });
 }
 

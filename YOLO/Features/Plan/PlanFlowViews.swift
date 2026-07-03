@@ -37,6 +37,10 @@ struct ItineraryDetailView: View {
     @State private var attractionCache: [String: Attraction] = [:]
     @State private var cities: [City] = []
     @State private var addAttractionContext: PlanAddAttractionContext?
+    @State private var intercityTripSnapshot: [ItineraryDay]?
+    @State private var intercityAdjustmentsSnapshot: [String] = []
+    @State private var arrivalReplanTask: Task<Void, Never>?
+    @State private var schedulingAdjustments: [String] = []
 
     enum DetailSegment { case itinerary, book }
 
@@ -106,6 +110,7 @@ struct ItineraryDetailView: View {
         }
         .onAppear {
             editableDays = itinerary.days
+            schedulingAdjustments = itinerary.schedulingAdjustments ?? []
         }
         .task(id: itinerary.id) {
             do {
@@ -164,6 +169,49 @@ struct ItineraryDetailView: View {
         persistItineraryOrder()
     }
 
+    private func applyIntercityArrivalTime(dayIndex: Int, arrivalTime: String?) {
+        arrivalReplanTask?.cancel()
+        arrivalReplanTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            guard !Task.isCancelled else { return }
+            guard let dayIdx = editableDays.firstIndex(where: { $0.dayIndex == dayIndex }) else { return }
+            let day = editableDays[dayIdx]
+            guard day.intercityHop != nil else { return }
+
+            if intercityTripSnapshot == nil {
+                intercityTripSnapshot = editableDays
+                intercityAdjustmentsSnapshot = schedulingAdjustments
+            }
+
+            if arrivalTime == nil, let snapshot = intercityTripSnapshot {
+                editableDays = snapshot
+                schedulingAdjustments = intercityAdjustmentsSnapshot
+                intercityTripSnapshot = nil
+                intercityAdjustmentsSnapshot = []
+                persistItineraryOrder()
+                return
+            }
+
+            let (newDays, adjustments) = PlanItineraryIntercityReplanner.replan(
+                days: editableDays,
+                dayIndex: dayIndex,
+                arrivalTime: arrivalTime,
+                options: PlanItineraryIntercityReplanner.Options(
+                    pace: inferredTripPace,
+                    catalogById: attractionCache
+                )
+            )
+            editableDays = newDays
+            schedulingAdjustments.append(contentsOf: adjustments)
+            persistItineraryOrder()
+        }
+    }
+
+    private var inferredTripPace: TripPace {
+        let days = editableDays.isEmpty ? itinerary.days : editableDays
+        return PlanItinerarySlotBudget.inferTripPace(from: days)
+    }
+
     private var currentItinerary: SampleItinerary {
         let days = editableDays.isEmpty ? itinerary.days : editableDays
         let saved = appEnv.preferences.savedItineraries.first(where: { $0.id == itinerary.id })
@@ -181,7 +229,9 @@ struct ItineraryDetailView: View {
             visitOrder: saved?.visitOrder ?? itinerary.visitOrder,
             userEdited: saved?.userEdited ?? itinerary.userEdited,
             droppedAttractionIds: saved?.droppedAttractionIds ?? itinerary.droppedAttractionIds,
-            schedulingAdjustments: saved?.schedulingAdjustments ?? itinerary.schedulingAdjustments,
+            schedulingAdjustments: schedulingAdjustments.isEmpty
+                ? (saved?.schedulingAdjustments ?? itinerary.schedulingAdjustments)
+                : schedulingAdjustments,
             seasonHints: saved?.seasonHints ?? itinerary.seasonHints
         )
     }
@@ -211,12 +261,6 @@ struct ItineraryDetailView: View {
 
     private var itineraryScroll: some View {
         VStack(spacing: 0) {
-            if let notes = schedulingNotes(for: currentItinerary), !notes.isEmpty {
-                schedulingNotesCard(notes)
-                    .padding(.horizontal, Theme.screenPadding)
-                    .padding(.top, 12)
-            }
-
             Text("Drag to reorder days and activities. Tap Done when finished.")
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
@@ -233,21 +277,26 @@ struct ItineraryDetailView: View {
                         if day.isExperienceSuggestions {
                             ExperienceSuggestionsDayCard(
                                 day: day,
-                                cityDisplayName: experienceCityDisplayName(day)
+                                cityDisplayName: experienceCityDisplayName(day),
+                                onArrivalTimeChange: day.intercityHop != nil
+                                    ? { applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: $0) }
+                                    : nil
                             )
                             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
 
-                            ForEach(day.activities) { activity in
-                                activityRow(activity, dayId: day.id)
-                            }
-                            .onMove { source, destination in
-                                moveActivities(dayId: day.id, from: source, to: destination)
-                            }
-                            .onDelete { offsets in
-                                deleteActivities(dayId: day.id, at: offsets)
+                            if day.intercityHop == nil {
+                                ForEach(day.activities) { activity in
+                                    activityRow(activity, dayId: day.id)
+                                }
+                                .onMove { source, destination in
+                                    moveActivities(dayId: day.id, from: source, to: destination)
+                                }
+                                .onDelete { offsets in
+                                    deleteActivities(dayId: day.id, at: offsets)
+                                }
                             }
 
                             Button {
@@ -270,15 +319,71 @@ struct ItineraryDetailView: View {
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
 
+                            if day.intercityHop == nil {
+                                Button {
+                                    convertExperienceDayToStandard(dayId: day.id)
+                                } label: {
+                                    Label(String(localized: "Use as sightseeing day"), systemImage: "sun.max")
+                                        .font(Theme.FontToken.inter(11, weight: .medium))
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(Theme.ColorToken.textSecondary)
+                                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Theme.ColorToken.background)
+                                .moveDisabled(true)
+                            }
+                        } else if day.intercityHop != nil {
+                            let split = PlanItineraryHopUI.splitActivities(day)
+                            ForEach(split.morning) { activity in
+                                activityRow(activity, dayId: day.id)
+                            }
+                            .onMove { source, destination in
+                                moveActivities(dayId: day.id, from: source, to: destination)
+                            }
+                            .onDelete { offsets in
+                                deleteActivities(dayId: day.id, at: offsets)
+                            }
+                            if let hop = day.intercityHop {
+                                IntercityHopCard(hop: hop) { time in
+                                    applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: time)
+                                }
+                                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Theme.ColorToken.background)
+                                .moveDisabled(true)
+                            }
+                            ForEach(split.afternoon) { activity in
+                                activityRow(activity, dayId: day.id)
+                            }
+                            .onMove { source, destination in
+                                let offset = split.morning.count
+                                moveActivities(
+                                    dayId: day.id,
+                                    from: IndexSet(source.map { $0 + offset }),
+                                    to: destination + offset
+                                )
+                            }
+                            .onDelete { offsets in
+                                let offset = split.morning.count
+                                deleteActivities(
+                                    dayId: day.id,
+                                    at: IndexSet(offsets.map { $0 + offset })
+                                )
+                            }
+
                             Button {
-                                convertExperienceDayToStandard(dayId: day.id)
+                                guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
+                                addAttractionContext = PlanAddAttractionContext(
+                                    dayIndex: dayIndex,
+                                    cityIds: tripCityIds
+                                )
                             } label: {
-                                Label(String(localized: "Use as sightseeing day"), systemImage: "sun.max")
-                                    .font(Theme.FontToken.inter(11, weight: .medium))
+                                addAttractionButtonLabel
                             }
                             .buttonStyle(.plain)
-                            .foregroundStyle(Theme.ColorToken.textSecondary)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
+                            .foregroundStyle(Theme.ColorToken.accent)
+                            .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 6, trailing: 16))
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
@@ -508,36 +613,6 @@ struct ItineraryDetailView: View {
         persistItineraryOrder()
     }
 
-    private func schedulingNotes(for trip: SampleItinerary) -> [String]? {
-        var lines = trip.schedulingAdjustments ?? []
-        if let dropped = trip.droppedAttractionIds, !dropped.isEmpty {
-            let names = dropped.map { attractionCache[$0]?.name ?? $0 }
-            lines.append(String(localized: "Some sights could not fit: \(names.joined(separator: ", "))"))
-        }
-        if let season = trip.seasonHints, !season.isEmpty {
-            lines.append(contentsOf: season)
-        }
-        return lines.isEmpty ? nil : lines
-    }
-
-    @ViewBuilder
-    private func schedulingNotesCard(_ notes: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label(String(localized: "Schedule notes"), systemImage: "clock.badge.exclamationmark")
-                .font(Theme.FontToken.inter(12, weight: .semibold))
-                .foregroundStyle(Theme.ColorToken.textSecondary)
-            ForEach(Array(notes.enumerated()), id: \.offset) { _, note in
-                Text(note)
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-            }
-        }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.ColorToken.warningBackground)
-        .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
-    }
-
     private func mapActivities(_ activities: [ItineraryActivity]) -> [ItineraryActivity] {
         activities.map { act in
             let resolvedCityId = act.cityId ?? act.attractionId.flatMap { attractionCache[$0]?.cityId }
@@ -569,7 +644,8 @@ struct ItineraryDetailView: View {
                     activities: mapped,
                     dayKind: .experienceSuggestions,
                     experienceItems: day.experienceItems,
-                    experienceCityId: day.experienceCityId
+                    experienceCityId: day.experienceCityId,
+                    intercityHop: day.intercityHop
                 )
             }
             return ItineraryDay(
@@ -578,7 +654,9 @@ struct ItineraryDetailView: View {
                 dateLabel: day.dateLabel,
                 cityName: day.cityName,
                 costEstimate: day.costEstimate,
-                activities: mapped
+                activities: mapped,
+                experienceCityId: day.experienceCityId,
+                intercityHop: day.intercityHop
             )
         }
     }

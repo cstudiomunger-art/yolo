@@ -11,11 +11,22 @@ enum PlanItineraryAssembler {
         arrivalTime: String? = nil,
         departureTime: String? = nil,
         startDate: Date? = nil,
-        applyNormalizer: Bool = true
+        entryCityId: String? = nil,
+        exitCityId: String? = nil,
+        applyNormalizer: Bool = true,
+        avgDaysByCity: [String: Int] = [:]
     ) -> SampleItinerary {
         let cityIds = Array(Set(cities.map { $0.lowercased() }.filter { !$0.isEmpty }))
         let resolvedCityIds = cityIds.isEmpty ? ["beijing"] : cityIds
         let days = max(1, min(tripDays, 21))
+        let resolvedEntry = entryCityId?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedExit = exitCityId?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let entry = (resolvedEntry != nil && resolvedCityIds.contains(resolvedEntry!))
+            ? resolvedEntry!
+            : resolvedCityIds.sorted().first!
+        let exit = (resolvedExit != nil && resolvedCityIds.contains(resolvedExit!))
+            ? resolvedExit!
+            : (resolvedCityIds.count > 1 ? resolvedCityIds.sorted().last! : entry)
 
         let scheduled = PlanItineraryScheduler.run(
             cities: resolvedCityIds,
@@ -26,8 +37,9 @@ enum PlanItineraryAssembler {
             arrivalTime: arrivalTime,
             departureTime: departureTime,
             startDate: startDate,
-            entryCityId: resolvedCityIds.sorted().first,
-            exitCityId: resolvedCityIds.count > 1 ? resolvedCityIds.sorted().last : resolvedCityIds.sorted().first
+            entryCityId: entry,
+            exitCityId: exit,
+            avgDaysByCity: avgDaysByCity
         )
 
         let route = CityTravelHints.routeLabel(from: scheduled.visitOrder)

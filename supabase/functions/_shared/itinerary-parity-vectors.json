@@ -51,5 +51,54 @@
       "evening_slot_ids": ["chongqing_guanyinqiao"],
       "no_daytime_ids": ["chongqing_guanyinqiao"]
     }
+  },
+  {
+    "name": "intense-shanghai-nanjing-hop",
+    "input": {
+      "trip": {
+        "trip_days": 4,
+        "entry_city_id": "shanghai",
+        "exit_city_id": "nanjing",
+        "pace": "intense"
+      },
+      "cities": [
+        { "id": "shanghai", "region": "yangtze_delta" },
+        { "id": "nanjing", "region": "yangtze_delta" }
+      ],
+      "attractions": [
+        { "id": "bund", "city_id": "shanghai", "display_order": 1, "duration_slots": 1 },
+        { "id": "nanjing_wall", "city_id": "nanjing", "display_order": 1, "duration_slots": 1 }
+      ],
+      "constraints": { "allow_silent_drop": true }
+    },
+    "expect": {
+      "trip_days": 4,
+      "no_duplicate_ids": true
+    }
+  },
+  {
+    "name": "six-city-17-day-beijing-entry",
+    "input": {
+      "trip": {
+        "trip_days": 17,
+        "entry_city_id": "beijing",
+        "exit_city_id": "guangzhou",
+        "pace": "standard"
+      },
+      "cities": [
+        { "id": "beijing", "region": "north_china", "avg_days_recommended": 3 },
+        { "id": "nanjing", "region": "yangtze_delta", "avg_days_recommended": 2 },
+        { "id": "suzhou", "region": "yangtze_delta", "avg_days_recommended": 2 },
+        { "id": "hangzhou", "region": "yangtze_delta", "avg_days_recommended": 2 },
+        { "id": "shanghai", "region": "yangtze_delta", "avg_days_recommended": 3 },
+        { "id": "guangzhou", "region": "pearl_delta", "avg_days_recommended": 2 }
+      ],
+      "constraints": { "allow_silent_drop": true }
+    },
+    "expect": {
+      "trip_days": 17,
+      "visit_order_ends": ["beijing", "guangzhou"],
+      "intercity_hop_days_min": 1
+    }
   }
 ]

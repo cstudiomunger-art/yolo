@@ -17,6 +17,8 @@ enum CityTravelHints {
         "nanjing|hangzhou": 2.5,
         "nanjing|suzhou": 2,
         "hangzhou|suzhou": 1.5,
+        "shanghai|guangzhou": 7,
+        "beijing|guangzhou": 8,
         "chengdu|chongqing": 1.5,
     ]
 
@@ -26,6 +28,7 @@ enum CityTravelHints {
         "nanjing": "yangtze_delta",
         "hangzhou": "yangtze_delta",
         "suzhou": "yangtze_delta",
+        "guangzhou": "pearl_delta",
         "chengdu": "southwest",
         "chongqing": "southwest",
     ]
@@ -75,6 +78,67 @@ enum CityTravelHints {
 
     static func needsTravelDay(_ a: String, _ b: String, regionByCity: [String: String?] = [:]) -> Bool {
         commuteSlots(travelHours(a, b, regionByCity: regionByCity)) >= 2
+    }
+
+    /// Intense pace: same-day hop when commute is at most one slot (≤4h travel).
+    static func canIntenseSameDayHop(_ a: String, _ b: String, regionByCity: [String: String?] = [:]) -> Bool {
+        commuteSlots(travelHours(a, b, regionByCity: regionByCity)) <= 1
+    }
+
+    /// Compact intercity hop card (between morning and afternoon sights).
+    static func buildHopCardContent(fromCityId: String, toCityId: String, hours: Double) -> [String] {
+        let from = displayName(for: fromCityId)
+        let to = displayName(for: toCityId)
+        let slots = commuteSlots(hours)
+        let journey = hours.truncatingRemainder(dividingBy: 1) == 0
+            ? "\(Int(hours))h"
+            : String(format: "~%.1fh", hours)
+        var lines = [
+            "Travel from \(from) to \(to)",
+            "Estimated journey: \(journey) (HSR / flight)",
+        ]
+        if slots == 0 {
+            lines.append("Short hop — afternoon sightseeing in \(to)")
+        } else {
+            lines.append("Morning commute — afternoon sightseeing window")
+        }
+        return lines
+    }
+
+    static func buildHopCardContentWithArrival(
+        fromCityId: String,
+        toCityId: String,
+        hours: Double,
+        arrivalAtDestination: String?
+    ) -> [String] {
+        let from = displayName(for: fromCityId)
+        let to = displayName(for: toCityId)
+        let journey = hours.truncatingRemainder(dividingBy: 1) == 0
+            ? "\(Int(hours))h"
+            : String(format: "~%.1fh", hours)
+        var lines = [
+            "Travel from \(from) to \(to)",
+            "Estimated journey: \(journey) (HSR / flight)",
+        ]
+        if let arrival = arrivalAtDestination, !arrival.isEmpty {
+            lines.append("Arrive in \(to) at \(arrival)")
+            if PlanItineraryFlightTimes.isEveningArrival(arrival) {
+                lines.append("Evening arrival — check in and rest")
+            } else if PlanItineraryFlightTimes.isAfternoonArrival(arrival) {
+                lines.append("Afternoon arrival — light sightseeing window")
+            } else {
+                lines.append("Morning commute — afternoon sightseeing window")
+            }
+        } else {
+            let suggested = PlanItineraryFlightTimes.suggestedArrivalAtDestination(travelHours: hours)
+            lines.append("Estimated arrival in \(to): \(suggested)")
+            lines.append("Set your actual arrival time below")
+        }
+        return lines
+    }
+
+    static func hopDayRouteLabel(fromCityId: String, toCityId: String) -> String {
+        routeLabel(from: [fromCityId, toCityId])
     }
 
     static func displayName(for cityId: String) -> String {

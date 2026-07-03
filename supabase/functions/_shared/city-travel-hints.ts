@@ -25,6 +25,8 @@ const PAIR_HOURS: Record<string, number> = {
   "nanjing|hangzhou": 2.5,
   "nanjing|suzhou": 2,
   "hangzhou|suzhou": 1.5,
+  "shanghai|guangzhou": 7,
+  "beijing|guangzhou": 8,
   "chengdu|chongqing": 1.5,
 };
 
@@ -34,6 +36,7 @@ const CITY_REGION_FALLBACK: Record<string, string> = {
   nanjing: "yangtze_delta",
   hangzhou: "yangtze_delta",
   suzhou: "yangtze_delta",
+  guangzhou: "pearl_delta",
   chengdu: "southwest",
   chongqing: "southwest",
 };
@@ -104,6 +107,37 @@ export function needsTravelDay(
   regionByCity: Map<string, string | null> = new Map(),
 ): boolean {
   return commuteSlots(travelHours(a, b, regionByCity)) >= 2;
+}
+
+/** Intense pace: same-day hop when commute is at most one slot (≤4h travel). */
+export function canIntenseSameDayHop(
+  a: string,
+  b: string,
+  regionByCity: Map<string, string | null> = new Map(),
+): boolean {
+  return commuteSlots(travelHours(a, b, regionByCity)) <= 1;
+}
+
+/** Compact intercity hop card between morning and afternoon sights. */
+export function buildHopCardContent(
+  fromCityId: string,
+  toCityId: string,
+  hours: number,
+): string[] {
+  const from = cityDisplayName(fromCityId);
+  const to = cityDisplayName(toCityId);
+  const slots = commuteSlots(hours);
+  const journey = Number.isInteger(hours) ? `${hours}h` : `~${hours.toFixed(1)}h`;
+  const lines = [
+    `Travel from ${from} to ${to}`,
+    `Estimated journey: ${journey} (HSR / flight)`,
+  ];
+  if (slots === 0) {
+    lines.push(`Short hop — afternoon sightseeing in ${to}`);
+  } else {
+    lines.push("Morning commute — afternoon sightseeing window");
+  }
+  return lines;
 }
 
 export function cityDisplayName(cityId: string): string {
