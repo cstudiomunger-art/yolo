@@ -295,7 +295,7 @@ export function buildRuleDayPlans(params: {
       });
       if (amIdx >= 0) {
         amIds.push(fromPool.splice(amIdx, 1)[0]);
-      } else if (amIds.length === 0) {
+      } else if (amIds.length === 0 && slot.kind !== "short_hop") {
         for (let d = slot.day_index - 1; d >= 1; d--) {
           const prev = plans.find((p) => p.day_index === d && p.city_id === fromCity);
           if (!prev?.attraction_ids.length) continue;
@@ -304,10 +304,15 @@ export function buildRuleDayPlans(params: {
             return row != null && !isEveningOnlyAttraction(row) &&
               parseDurationSlots(row.recommended_duration) <= 1;
           });
-          if (stealIdx >= 0) {
-            amIds.push(prev.attraction_ids.splice(stealIdx, 1)[0]);
-            break;
-          }
+          if (stealIdx < 0) continue;
+          const remainingDaytime = prev.attraction_ids.filter((id, idx) => {
+            if (idx === stealIdx) return false;
+            const row = catalogById.get(id);
+            return row != null && !isEveningOnlyAttraction(row);
+          });
+          if (remainingDaytime.length === 0) continue;
+          amIds.push(prev.attraction_ids.splice(stealIdx, 1)[0]);
+          break;
         }
       }
 
@@ -342,6 +347,16 @@ export function buildRuleDayPlans(params: {
         });
         if (eveIdx >= 0) {
           eveningIds.push(toPool.splice(eveIdx, 1)[0]);
+        }
+      }
+
+      if (pmIds.length === 0 && toPool.length > 0) {
+        const pmIdx = toPool.findIndex((id) => {
+          const row = catalogById.get(id);
+          return row != null && !isEveningOnlyAttraction(row);
+        });
+        if (pmIdx >= 0) {
+          pmIds.push(toPool.splice(pmIdx, 1)[0]);
         }
       }
 

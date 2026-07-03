@@ -147,7 +147,8 @@
     },
     "expect": {
       "trip_days": 5,
-      "intercity_hop_pair": ["chongqing", "chengdu"]
+      "intercity_hop_pair": ["chongqing", "chengdu"],
+      "hop_day_route_label_contains": ["chongqing", "chengdu"]
     }
   },
   {

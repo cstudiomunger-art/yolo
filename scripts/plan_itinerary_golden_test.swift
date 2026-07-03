@@ -72,6 +72,8 @@ enum PlanItineraryGoldenTest {
         fails += testSuggestEntryExitTwoAndSixCities()
         fails += testChongqingChengduShortHop()
         fails += testBlankDayExitCity()
+        fails += testShortHopNoStealPrevDay()
+        fails += testHopDayHeaderRouteLabel()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -1381,8 +1383,66 @@ enum PlanItineraryGoldenTest {
         let hop = trip.days.first {
             $0.intercityHop?.fromCityId == "chongqing" && $0.intercityHop?.toCityId == "chengdu"
         }
+        let routeLabel = hop.map {
+            CityTravelHints.daySectionCityLabel(
+                day: $0,
+                cityNameById: ["chongqing": "Chongqing", "chengdu": "Chengdu"]
+            )
+        } ?? ""
         let ok = hop != nil && !hop!.isExperienceSuggestions
-        print(ok ? "✓ chongqing→chengdu short hop has intercity_hop card" : "✗ ≤2h hop missing intercity card")
+            && routeLabel.contains("Chongqing") && routeLabel.contains("Chengdu")
+        print(ok ? "✓ chongqing→chengdu short hop has intercity_hop card" : "✗ ≤2h hop missing intercity card or route label")
+        return ok ? 0 : 1
+    }
+
+    private static func testShortHopNoStealPrevDay() -> Int {
+        let cities = ["chongqing", "chengdu"]
+        let attractions = mockCatalog(cities: cities, perCity: 8)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 6,
+            attractions: attractions,
+            entryCityId: "chongqing",
+            exitCityId: "chengdu",
+            applyNormalizer: false
+        )
+        guard let hopDay = trip.days.first(where: {
+            $0.intercityHop?.fromCityId == "chongqing" && $0.intercityHop?.toCityId == "chengdu"
+        }) else {
+            print("✗ short-hop no-steal: missing hop day")
+            return 1
+        }
+        let prevDays = trip.days.filter { $0.dayIndex < hopDay.dayIndex }
+        let lastChongqing = prevDays.last {
+            $0.activities.contains { $0.cityId == "chongqing" } || $0.experienceCityId == "chongqing"
+        }
+        let prevHasSight = lastChongqing?.activities.contains { $0.cityId == "chongqing" } ?? false
+        let ok = prevHasSight || (lastChongqing?.activities.isEmpty == false)
+        print(ok ? "✓ short_hop does not leave prior chongqing day empty" : "✗ prior chongqing day was emptied for hop AM steal")
+        return ok ? 0 : 1
+    }
+
+    private static func testHopDayHeaderRouteLabel() -> Int {
+        let cities = ["chongqing", "chengdu"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 5,
+            attractions: attractions,
+            entryCityId: "chongqing",
+            exitCityId: "chengdu",
+            applyNormalizer: false
+        )
+        guard let hop = trip.days.first(where: { $0.intercityHop != nil }) else {
+            print("✗ hop header: no hop day")
+            return 1
+        }
+        let label = CityTravelHints.daySectionCityLabel(
+            day: hop,
+            cityNameById: ["chongqing": "Chongqing", "chengdu": "Chengdu"]
+        )
+        let ok = label.contains("→") || (label.contains("Chongqing") && label.contains("Chengdu"))
+        print(ok ? "✓ hop day section header uses route label" : "✗ hop header should be route label, got \(label)")
         return ok ? 0 : 1
     }
 

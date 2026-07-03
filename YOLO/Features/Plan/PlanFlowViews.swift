@@ -439,13 +439,11 @@ struct ItineraryDetailView: View {
     }
 
     private func daySectionHeader(_ day: ItineraryDay) -> some View {
-        let visited = day.isExperienceSuggestions
-            ? experienceCityDisplayName(day)
-            : PlanTripCities.visitedCityNames(
-                day: day,
-                cityNameById: cityNameById,
-                attractionCache: attractionCache
-            )
+        let visited = CityTravelHints.daySectionCityLabel(
+            day: day,
+            cityNameById: cityNameById,
+            attractionCache: attractionCache
+        )
         return VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text("Day \(day.dayIndex) · \(day.dateLabel)")

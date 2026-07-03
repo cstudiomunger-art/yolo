@@ -1,4 +1,5 @@
 import {
+  canIntenseSameDayHop,
   commuteSlots,
   travelHours,
   type CityMetaRow,
@@ -53,6 +54,36 @@ export function reservedFullTravelDays(
   return count;
 }
 
+/** Hop / travel-lite / short_hop / intense same-day transitions (first day in dest city). */
+export function reservedHopTransitionDays(
+  visitOrder: string[],
+  regionByCity: Map<string, string | null>,
+  pace: TripPace = "standard",
+): number {
+  let count = 0;
+  for (let i = 1; i < visitOrder.length; i++) {
+    const a = visitOrder[i - 1].toLowerCase();
+    const b = visitOrder[i].toLowerCase();
+    const slots = commuteSlots(travelHours(a, b, regionByCity));
+    if (slots >= 2) continue;
+    if (pace === "intense" && canIntenseSameDayHop(a, b, regionByCity)) {
+      count++;
+      continue;
+    }
+    if (slots <= 1) count++;
+  }
+  return count;
+}
+
+export function reservedIntercityDays(
+  visitOrder: string[],
+  regionByCity: Map<string, string | null>,
+  pace: TripPace = "standard",
+): number {
+  return reservedFullTravelDays(visitOrder, regionByCity)
+    + reservedHopTransitionDays(visitOrder, regionByCity, pace);
+}
+
 export function countLongTravelDays(
   visitOrder: string[],
   regionByCity: Map<string, string | null>,
@@ -94,7 +125,7 @@ export function distributeDaysAcrossCitiesV2(
 ): Map<string, number> {
   if (visitOrder.length === 0) return new Map();
 
-  const travelReserved = reservedFullTravelDays(visitOrder, regionByCity);
+  const travelReserved = reservedIntercityDays(visitOrder, regionByCity, pace);
   const available = Math.max(visitOrder.length, tripDays - travelReserved);
   return distributeDaysWithAvailable(available, visitOrder, catalog, citiesMeta);
 }
@@ -175,16 +206,26 @@ function applyEntryCityMinDays(
 ): Map<string, number> {
   if (tripDays < 8 || visitOrder.length < 3) return map;
   const entry = visitOrder[0]?.toLowerCase();
-  const last = visitOrder[visitOrder.length - 1]?.toLowerCase();
-  if (!entry || !last || entry === last) return map;
+  if (!entry) return map;
   const result = new Map(map);
   const minEntry = 2;
-  const current = result.get(entry) ?? 1;
-  const lastDays = result.get(last) ?? 1;
-  if (current >= minEntry || lastDays <= 1) return map;
-  const take = Math.min(minEntry - current, lastDays - 1);
-  result.set(entry, current + take);
-  result.set(last, lastDays - take);
+  let current = result.get(entry) ?? 1;
+  if (current >= minEntry) return map;
+
+  const donors = visitOrder
+    .slice(1)
+    .map((c) => c.toLowerCase())
+    .sort((a, b) => (result.get(b) ?? 1) - (result.get(a) ?? 1));
+
+  for (const donor of donors) {
+    if (current >= minEntry) break;
+    const spare = (result.get(donor) ?? 1) - 1;
+    if (spare <= 0) continue;
+    const take = Math.min(minEntry - current, spare);
+    result.set(entry, current + take);
+    result.set(donor, (result.get(donor) ?? 1) - take);
+    current += take;
+  }
   return result;
 }
 
@@ -197,7 +238,7 @@ export function calibrateCityDays(
   regionByCity: Map<string, string | null>,
   pace: TripPace = "standard",
 ): CityDaysCalibration {
-  const travelReserved = reservedFullTravelDays(visitOrder, regionByCity);
+  const travelReserved = reservedIntercityDays(visitOrder, regionByCity, pace);
   const available = Math.max(visitOrder.length, tripDays - travelReserved);
 
   const ruleWeights = distributeDaysWithAvailable(available, visitOrder, catalog, citiesMeta);

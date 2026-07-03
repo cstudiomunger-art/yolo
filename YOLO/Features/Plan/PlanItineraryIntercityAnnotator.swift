@@ -26,7 +26,7 @@ enum PlanItineraryIntercityAnnotator {
                 id: day.id,
                 dayIndex: day.dayIndex,
                 dateLabel: day.dateLabel,
-                cityName: day.cityName,
+                cityName: CityTravelHints.hopDayRouteLabel(fromCityId: fromCity, toCityId: toCity),
                 costEstimate: day.costEstimate,
                 activities: day.activities,
                 dayKind: day.dayKind,
@@ -37,21 +37,29 @@ enum PlanItineraryIntercityAnnotator {
         }
     }
 
+    private static func activityCityIds(_ day: ItineraryDay) -> [String] {
+        var out: [String] = []
+        for act in day.activities {
+            guard let cid = act.cityId?.lowercased(), !cid.isEmpty else { continue }
+            if !out.contains(cid) { out.append(cid) }
+        }
+        return out
+    }
+
     private static func trailingCityId(_ day: ItineraryDay) -> String? {
-        if let hop = day.intercityHop { return hop.toCityId.lowercased() }
-        if let cid = day.experienceCityId?.lowercased(), !cid.isEmpty { return cid }
         for act in day.activities.reversed() {
             if let cid = act.cityId?.lowercased(), !cid.isEmpty { return cid }
         }
+        if let hop = day.intercityHop { return hop.toCityId.lowercased() }
+        if let cid = day.experienceCityId?.lowercased(), !cid.isEmpty { return cid }
         return nil
     }
 
     private static func leadingCityId(_ day: ItineraryDay) -> String? {
+        let actCities = activityCityIds(day)
+        if let first = actCities.first { return first }
         if let hop = day.intercityHop { return hop.toCityId.lowercased() }
         if let cid = day.experienceCityId?.lowercased(), !cid.isEmpty { return cid }
-        for act in day.activities {
-            if let cid = act.cityId?.lowercased(), !cid.isEmpty { return cid }
-        }
         return nil
     }
 }

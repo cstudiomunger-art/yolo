@@ -45,6 +45,7 @@ export type ParityExpectV1 = {
   intercity_hop_days_min?: number;
   intercity_hop_pair?: [string, string];
   last_day_experience_city_id?: string;
+  hop_day_route_label_contains?: string[];
 };
 
 export type ParityVectorV1 = {

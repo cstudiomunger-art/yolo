@@ -449,18 +449,23 @@ enum PlanItineraryScheduler {
                     return PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText) <= 1
                 }) {
                     amIds.append(fromPool.remove(at: amIdx))
-                } else if amIds.isEmpty {
+                } else if amIds.isEmpty, slot.kind != "short_hop" {
                     for prevDay in (1..<slot.dayIndex).reversed() {
                         guard let prevIdx = plans.firstIndex(where: {
                             $0.dayIndex == prevDay && $0.cityId == fromCity
                         }) else { continue }
-                        if let stealIdx = plans[prevIdx].attractionIds.firstIndex(where: { id in
+                        guard let stealIdx = plans[prevIdx].attractionIds.firstIndex(where: { id in
                             guard let row = catalogById[id], !row.isEveningOnly else { return false }
                             return PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText) <= 1
-                        }) {
-                            amIds.append(plans[prevIdx].attractionIds.remove(at: stealIdx))
-                            break
+                        }) else { continue }
+                        let stealId = plans[prevIdx].attractionIds[stealIdx]
+                        let remainingDaytime = plans[prevIdx].attractionIds.filter { id in
+                            guard id != stealId, let row = catalogById[id] else { return false }
+                            return !row.isEveningOnly
                         }
+                        guard !remainingDaytime.isEmpty else { continue }
+                        amIds.append(plans[prevIdx].attractionIds.remove(at: stealIdx))
+                        break
                     }
                 }
 
@@ -489,6 +494,11 @@ enum PlanItineraryScheduler {
                 if slot.eveningCapacity > 0,
                    let eveIdx = toPool.firstIndex(where: { catalogById[$0]?.isEveningOnly == true }) {
                     eveningIds.append(toPool.remove(at: eveIdx))
+                }
+
+                if pmIds.isEmpty,
+                   let pmIdx = toPool.firstIndex(where: { catalogById[$0]?.isEveningOnly != true }) {
+                    pmIds.append(toPool.remove(at: pmIdx))
                 }
 
                 pools[fromCity] = fromPool

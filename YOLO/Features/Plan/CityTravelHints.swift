@@ -153,6 +153,31 @@ enum CityTravelHints {
         cityIds.map { displayName(for: $0) }.joined(separator: " → ")
     }
 
+    /// Section header city line — hop days use route label (e.g. Chongqing → Chengdu).
+    static func daySectionCityLabel(
+        day: ItineraryDay,
+        cityNameById: [String: String],
+        attractionCache: [String: Attraction] = [:]
+    ) -> String {
+        if let hop = day.intercityHop, !day.isExperienceSuggestions {
+            if !day.cityName.isEmpty { return day.cityName }
+            return hopDayRouteLabel(fromCityId: hop.fromCityId, toCityId: hop.toCityId)
+        }
+        if day.isExperienceSuggestions, let cid = day.experienceCityId, !cid.isEmpty {
+            return cityNameById[cid] ?? displayName(for: cid)
+        }
+        if let cid = day.experienceCityId, !cid.isEmpty {
+            return cityNameById[cid] ?? displayName(for: cid)
+        }
+        var seen: [String] = []
+        for act in day.activities {
+            let cid = act.cityId ?? act.attractionId.flatMap { attractionCache[$0]?.cityId }
+            guard let cid, let name = cityNameById[cid], !seen.contains(name) else { continue }
+            seen.append(name)
+        }
+        return seen.joined(separator: " · ")
+    }
+
     static func travelExperienceItems(toCityId: String) -> [String] {
         let name = displayName(for: toCityId)
         return [

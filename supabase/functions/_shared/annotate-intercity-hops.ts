@@ -1,25 +1,35 @@
-import { buildHopCardContent, travelHours } from "./city-travel-hints.ts";
+import {
+  buildHopCardContent,
+  routeLabelFromOrder,
+  travelHours,
+} from "./city-travel-hints.ts";
 import type { ItineraryDay } from "./itinerary-assembler.ts";
 
+function activityCityIds(day: ItineraryDay): string[] {
+  const out: string[] = [];
+  for (const act of day.activities ?? []) {
+    const c = act.city_id?.toLowerCase();
+    if (c && !out.includes(c)) out.push(c);
+  }
+  return out;
+}
+
 function trailingCityId(day: ItineraryDay): string | null {
-  if (day.intercity_hop) return day.intercity_hop.to_city_id.toLowerCase();
-  if (day.experience_city_id) return day.experience_city_id.toLowerCase();
   const acts = day.activities ?? [];
   for (let i = acts.length - 1; i >= 0; i--) {
     const c = acts[i].city_id?.toLowerCase();
     if (c) return c;
   }
+  if (day.intercity_hop) return day.intercity_hop.to_city_id.toLowerCase();
+  if (day.experience_city_id) return day.experience_city_id.toLowerCase();
   return null;
 }
 
 function leadingCityId(day: ItineraryDay): string | null {
+  const actCities = activityCityIds(day);
+  if (actCities.length > 0) return actCities[0];
   if (day.intercity_hop) return day.intercity_hop.to_city_id.toLowerCase();
   if (day.experience_city_id) return day.experience_city_id.toLowerCase();
-  const acts = day.activities ?? [];
-  for (const act of acts) {
-    const c = act.city_id?.toLowerCase();
-    if (c) return c;
-  }
   return null;
 }
 
@@ -39,6 +49,7 @@ export function annotateIntercityHops(
     const hours = travelHours(fromCity, toCity, regionByCity);
     return {
       ...day,
+      city_name: routeLabelFromOrder([fromCity, toCity]),
       intercity_hop: {
         from_city_id: fromCity,
         to_city_id: toCity,

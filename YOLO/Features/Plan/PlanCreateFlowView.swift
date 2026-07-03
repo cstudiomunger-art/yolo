@@ -875,18 +875,11 @@ struct PlanCreateFlowView: View {
     @ViewBuilder
     private func reviewDaySection(dayIndex: Int, day: ItineraryDay) -> some View {
         let cityNameById = Dictionary(uniqueKeysWithValues: cities.map { ($0.id, $0.name) })
-        let visited: String = {
-            if let cid = day.experienceCityId, !cid.isEmpty {
-                return cityNameById[cid] ?? CityTravelHints.displayName(for: cid)
-            }
-            if day.isExperienceSuggestions { return "" }
-            if day.intercityHop != nil { return day.cityName }
-            return PlanTripCities.visitedCityNames(
-                day: day,
-                cityNameById: cityNameById,
-                attractionCache: attractionCache
-            )
-        }()
+        let visited = CityTravelHints.daySectionCityLabel(
+            day: day,
+            cityNameById: cityNameById,
+            attractionCache: attractionCache
+        )
 
         Section {
             if day.intercityHop != nil && !day.isExperienceSuggestions {

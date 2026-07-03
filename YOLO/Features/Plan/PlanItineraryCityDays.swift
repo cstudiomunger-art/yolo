@@ -25,6 +25,30 @@ enum PlanItineraryCityDays {
         return count
     }
 
+    static func reservedHopTransitionDays(
+        visitOrder: [String],
+        pace: TripPace = .standard
+    ) -> Int {
+        var count = 0
+        for i in 1..<visitOrder.count {
+            let a = visitOrder[i - 1]
+            let b = visitOrder[i]
+            let slots = CityTravelHints.commuteSlots(CityTravelHints.travelHours(a, b))
+            if slots >= 2 { continue }
+            if pace == .intense, CityTravelHints.canIntenseSameDayHop(a, b) {
+                count += 1
+                continue
+            }
+            if slots <= 1 { count += 1 }
+        }
+        return count
+    }
+
+    static func reservedIntercityDays(visitOrder: [String], pace: TripPace = .standard) -> Int {
+        reservedFullTravelDays(visitOrder: visitOrder)
+            + reservedHopTransitionDays(visitOrder: visitOrder, pace: pace)
+    }
+
     static func calibrateCityDays(
         visitOrder: [String],
         aiWeights: [String: Int]?,
@@ -33,7 +57,7 @@ enum PlanItineraryCityDays {
         pace: TripPace = .standard,
         avgDaysByCity: [String: Int] = [:]
     ) -> Calibration {
-        let travelReserved = reservedFullTravelDays(visitOrder: visitOrder)
+        let travelReserved = reservedIntercityDays(visitOrder: visitOrder, pace: pace)
         let available = max(visitOrder.count, tripDays - travelReserved)
 
         let rule = distributeDaysAcrossCitiesV2(
@@ -156,14 +180,20 @@ enum PlanItineraryCityDays {
               let entry = visitOrder.first?.lowercased() else { return map }
         let minEntry = 2
         var result = map
-        let current = result[entry, default: 1]
-        guard current < minEntry,
-              let last = visitOrder.last?.lowercased(),
-              last != entry,
-              (result[last] ?? 1) > 1 else { return map }
-        let take = min(minEntry - current, (result[last] ?? 1) - 1)
-        result[entry, default: 1] += take
-        result[last, default: 1] -= take
+        var current = result[entry, default: 1]
+        guard current < minEntry else { return map }
+
+        let donors = visitOrder.dropFirst().map { $0.lowercased() }.sorted {
+            (result[$0] ?? 1) > (result[$1] ?? 1)
+        }
+        for donor in donors where current < minEntry {
+            let spare = (result[donor] ?? 1) - 1
+            guard spare > 0 else { continue }
+            let take = min(minEntry - current, spare)
+            result[entry, default: 1] += take
+            result[donor, default: 1] -= take
+            current += take
+        }
         return result
     }
 

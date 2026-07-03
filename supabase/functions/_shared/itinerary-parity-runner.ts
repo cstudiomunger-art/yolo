@@ -190,6 +190,19 @@ export function assertParityExpect(
     }
   }
 
+  if (expect.hop_day_route_label_contains) {
+    const hopDay = trip.days.find((d) =>
+      d.intercity_hop?.from_city_id?.toLowerCase() === expect.intercity_hop_pair?.[0]?.toLowerCase()
+      && d.intercity_hop?.to_city_id?.toLowerCase() === expect.intercity_hop_pair?.[1]?.toLowerCase()
+    );
+    const label = (hopDay?.city_name ?? "").toLowerCase();
+    for (const part of expect.hop_day_route_label_contains) {
+      if (!label.includes(part.toLowerCase())) {
+        errors.push(`hop day city_name should contain ${part}, got ${hopDay?.city_name ?? "none"}`);
+      }
+    }
+  }
+
   for (const id of expect.dropped_ids ?? []) {
     const scheduled = trip.days.some((d) =>
       d.activities.some((a) => a.attraction_id === id)
