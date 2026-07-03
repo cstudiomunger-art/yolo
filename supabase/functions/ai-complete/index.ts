@@ -81,6 +81,7 @@ function buildItineraryUserPrompt(params: {
     name: a.name,
     recommended_duration: a.recommended_duration,
     duration_slots: parseDurationSlots(a.recommended_duration),
+    recommended_visit_period: a.recommended_visit_period ?? null,
     closed_weekdays: a.closed_weekdays ?? [],
     open_time: a.open_time,
     close_time: a.close_time,
@@ -104,10 +105,12 @@ function buildItineraryUserPrompt(params: {
     `\nCity metadata:\n${JSON.stringify(metaCompact)}\n` +
     `\nTravel hints (same-day only when sameDayOk):\n${params.travelContext}\n` +
     `\nAttraction catalog (ONLY these ids are valid):\n${JSON.stringify(catalogCompact)}\n` +
-    `\nRules: max ${params.plan.maxPerDay} attraction_ids per non-travel day; no duplicate ids; ` +
+    `\nRules: pack each sightseeing day by duration_slots until the daily budget is full (not a fixed sight count); no duplicate ids; ` +
     `distant cities cannot share a day; use experience_days (kind travel/rest) for intercity moves within the ${params.days}-day budget.\n` +
-    `Respect opening constraints: do not assign closed_weekdays to matching dates; if only afternoon-open, avoid Morning slot assumptions.\n` +
-    `Return JSON with visit_order, assignments, experience_days, optional title and estimated_budget.`
+    `Output city_plan (visit_order, city_day_weights, must_see_ids, experience_days) and day_plans using ONLY candidate attraction ids you receive in a follow-up catalog slice, or combined in one JSON.\n` +
+    `Do not output final time_slot strings (scheduler assigns Morning/Afternoon).\n` +
+    `Respect opening constraints: do not assign closed_weekdays to matching dates.\n` +
+    `Return JSON with city_plan, day_plans, optional title and estimated_budget.`
   );
 }
 
@@ -127,7 +130,7 @@ function compactCatalogForPrompt(catalog: AttractionRow[]): AttractionRow[] {
       if (pa !== pb) return pa - pb;
       return a.display_order - b.display_order;
     });
-    picked.push(...sorted.slice(0, 18));
+    picked.push(...sorted.slice(0, 24));
   }
   return picked;
 }
@@ -155,6 +158,9 @@ async function buildItineraryFromAI(
   entryCityId: string | null,
   exitCityId: string | null,
   startDateLocal: string | null,
+  pace: string | null,
+  arrivalTime: string | null,
+  departureTime: string | null,
 ): Promise<SampleItinerary> {
   const cityIds = cities.length ? cities : ["beijing"];
   const catalog = await fetchAttractionsForCities(cityIds);
@@ -181,6 +187,9 @@ async function buildItineraryFromAI(
     entryCityId,
     exitCityId,
     startDateLocal,
+    pace,
+    arrivalTime,
+    departureTime,
   });
 }
 
@@ -308,6 +317,9 @@ async function handleItinerary(
   const entryCityId = body.entry_city_id ? String(body.entry_city_id).trim().toLowerCase() : null;
   const exitCityId = body.exit_city_id ? String(body.exit_city_id).trim().toLowerCase() : null;
   const startDateLocal = body.start_date ? String(body.start_date).trim() : null;
+  const pace = body.pace ? String(body.pace).trim() : null;
+  const arrivalTime = body.arrival_time ? String(body.arrival_time).trim() : null;
+  const departureTime = body.departure_time ? String(body.departure_time).trim() : null;
 
   const cityIds = cities.length ? cities : ["beijing"];
   const creds = supabaseHeaders();
@@ -344,7 +356,19 @@ async function handleItinerary(
     })) ?? "";
 
   const hasAI = Boolean(raw.trim());
-  const itinerary = await buildItineraryFromAI(
+  let aiPlan = null;
+  if (hasAI) {
+    const jsonStr = extractJsonObject(raw);
+    if (jsonStr) {
+      try {
+        aiPlan = parseAIPlanResponse(JSON.parse(jsonStr));
+      } catch {
+        aiPlan = null;
+      }
+    }
+  }
+
+  let itinerary = await buildItineraryFromAI(
     cityIds,
     days,
     userNotes,
@@ -353,7 +377,63 @@ async function handleItinerary(
     entryCityId,
     exitCityId,
     startDateLocal,
+    pace,
+    arrivalTime,
+    departureTime,
   );
+
+  const adjCount = itinerary.scheduling_adjustments?.length ?? 0;
+  const dropCount = itinerary.dropped_attraction_ids?.length ?? 0;
+  if (hasAI && aiPlan && (adjCount >= 8 || dropCount >= 5)) {
+    const retryUser = (
+      `Your day_plans needed heavy schedule repairs (${adjCount} adjustments, ${dropCount} dropped).\n` +
+      `Violations:\n${(itinerary.scheduling_adjustments ?? []).slice(0, 12).join("\n")}\n` +
+      `Regenerate ONLY day_plans JSON. Keep city_plan unchanged. Use only catalog ids.`
+    );
+    const retryRaw =
+      (await chatCompletion({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+          { role: "assistant", content: raw },
+          { role: "user", content: retryUser },
+        ],
+        maxTokens: ai.itineraryMaxTokens,
+        temperature: Math.min(ai.temperature, 0.4),
+        modelId: ai.modelId,
+        apiUrl: ai.apiUrl,
+        timeoutMs: ai.timeoutMs,
+      })) ?? "";
+    const retryJson = extractJsonObject(retryRaw);
+    if (retryJson) {
+      try {
+        const retryPlan = parseAIPlanResponse(JSON.parse(retryJson));
+        if (retryPlan?.day_plans?.length) {
+          const merged = {
+            ...aiPlan,
+            day_plans: retryPlan.day_plans,
+            title: retryPlan.title ?? aiPlan.title,
+            estimated_budget: retryPlan.estimated_budget ?? aiPlan.estimated_budget,
+          };
+          itinerary = await buildItineraryFromAI(
+            cityIds,
+            days,
+            userNotes,
+            JSON.stringify(merged),
+            citiesMeta,
+            entryCityId,
+            exitCityId,
+            startDateLocal,
+            pace,
+            arrivalTime,
+            departureTime,
+          );
+        }
+      } catch {
+        // keep first itinerary
+      }
+    }
+  }
 
   return jsonResponse({
     code: 200,

@@ -14,6 +14,10 @@
         { "id": "forbidden_city", "city_id": "beijing", "display_order": 2, "duration_slots": 2, "open_time": "08:30", "close_time": "17:00" }
       ],
       "constraints": { "max_attractions_per_day": 3, "allow_silent_drop": true }
+    },
+    "expect": {
+      "trip_days": 3,
+      "not_on_weekday": [{ "id": "national_museum", "weekday": "mon" }]
     }
   },
   {
@@ -25,6 +29,27 @@
         { "id": "night_museum", "city_id": "shanghai", "display_order": 1, "duration_slots": 1, "open_time": "13:00", "close_time": "20:00" }
       ],
       "constraints": { "max_attractions_per_day": 2, "allow_silent_drop": true }
+    },
+    "expect": {
+      "trip_days": 2,
+      "afternoon_slot_ids": ["night_museum"]
+    }
+  },
+  {
+    "name": "evening-only-attraction",
+    "input": {
+      "trip": { "trip_days": 2 },
+      "cities": [{ "id": "chongqing", "region": "southwest" }],
+      "attractions": [
+        { "id": "chongqing_guanyinqiao", "city_id": "chongqing", "display_order": 1, "duration_slots": 1, "recommended_visit_period": "evening" },
+        { "id": "museum", "city_id": "chongqing", "display_order": 2, "duration_slots": 1, "recommended_visit_period": "flexible" }
+      ],
+      "constraints": { "allow_silent_drop": true }
+    },
+    "expect": {
+      "trip_days": 2,
+      "evening_slot_ids": ["chongqing_guanyinqiao"],
+      "no_daytime_ids": ["chongqing_guanyinqiao"]
     }
   }
 ]

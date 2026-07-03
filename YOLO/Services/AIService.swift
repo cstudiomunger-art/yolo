@@ -1,6 +1,12 @@
 import Foundation
 import Supabase
 
+struct GeneratedItinerary {
+    let trip: SampleItinerary
+    /// True when the trip was built by local rules (guest, remote failure, or Edge `is_default`).
+    let isRuleBased: Bool
+}
+
 enum AIService {
     private static let functionName = "ai-complete"
 
@@ -11,29 +17,47 @@ enum AIService {
         cities: [String],
         days: Int,
         useRemoteAI: Bool,
-        userNotes: String? = nil
-    ) async throws -> SampleItinerary {
+        userNotes: String? = nil,
+        options: PlanItineraryGenerateOptions = .default
+    ) async throws -> GeneratedItinerary {
         if useRemoteAI, isAuthenticated, AppConfig.isSupabaseConfigured, !AppConfig.forceBundled {
+            let startLocal: String? = options.startDate.map { date in
+                let f = DateFormatter()
+                f.dateFormat = "yyyy-MM-dd"
+                f.timeZone = .current
+                return f.string(from: date)
+            }
+            let sorted = cities.map { $0.lowercased() }.sorted()
             let payload = ItineraryRequest(
                 type: "itinerary",
                 cities: cities,
                 days: days,
-                userNotes: userNotes
+                userNotes: userNotes,
+                pace: options.pace.rawValue,
+                arrivalTime: options.arrivalTime,
+                departureTime: options.departureTime,
+                startDate: startLocal,
+                entryCityId: sorted.first,
+                exitCityId: sorted.count > 1 ? sorted.last : sorted.first
             )
             let result: Result<ItineraryResponse, AIInvokeError> = await invokeResult(payload)
             if case .success(let response) = result,
                response.code == 200,
                let itinerary = response.itinerary {
-                let cityIds = cities.map { $0.lowercased() }
-                return PlanItineraryNormalizer.normalize(itinerary, selectedCityIds: cityIds)
+                return GeneratedItinerary(
+                    trip: itinerary,
+                    isRuleBased: response.isDefault ?? false
+                )
             }
         }
-        return try await localItineraryFallback(
+        let trip = try await localItineraryFallback(
             content: content,
             cities: cities,
             days: days,
-            userNotes: userNotes
+            userNotes: userNotes,
+            options: options
         )
+        return GeneratedItinerary(trip: trip, isRuleBased: true)
     }
 
     static func planningItineraryCard(
@@ -43,13 +67,14 @@ enum AIService {
         userNotes: String? = nil
     ) async throws -> SampleItinerary {
         if useRemoteAI, isAuthenticated, AppConfig.isSupabaseConfigured, !AppConfig.forceBundled {
-            return try await generateItinerary(
+            let generated = try await generateItinerary(
                 content: content,
                 cities: cities.isEmpty ? ["beijing"] : cities,
                 days: 7,
                 useRemoteAI: true,
                 userNotes: userNotes
             )
+            return generated.trip
         }
         return try await content.fetchPlanningItinerary()
     }
@@ -91,7 +116,8 @@ enum AIService {
         content: any ContentRepositoryProtocol,
         cities: [String],
         days: Int,
-        userNotes: String? = nil
+        userNotes: String? = nil,
+        options: PlanItineraryGenerateOptions = .default
     ) async throws -> SampleItinerary {
         let cityIds = cities.isEmpty ? ["beijing"] : cities
         var catalog: [Attraction] = []
@@ -103,7 +129,12 @@ enum AIService {
             cities: cityIds,
             tripDays: days,
             attractions: catalog,
-            userNotes: userNotes
+            userNotes: userNotes,
+            pace: options.pace,
+            arrivalTime: options.arrivalTime,
+            departureTime: options.departureTime,
+            startDate: options.startDate,
+            applyNormalizer: false
         )
     }
 
@@ -120,14 +151,31 @@ private struct ItineraryRequest: Encodable {
     let cities: [String]
     let days: Int
     let userNotes: String?
+    let pace: String?
+    let arrivalTime: String?
+    let departureTime: String?
+    let startDate: String?
+    let entryCityId: String?
+    let exitCityId: String?
 
     enum CodingKeys: String, CodingKey {
-        case type, cities, days
+        case type, cities, days, pace
         case userNotes = "user_notes"
+        case arrivalTime = "arrival_time"
+        case departureTime = "departure_time"
+        case startDate = "start_date"
+        case entryCityId = "entry_city_id"
+        case exitCityId = "exit_city_id"
     }
 }
 
 private struct ItineraryResponse: Decodable {
     let code: Int
     let itinerary: SampleItinerary?
+    let isDefault: Bool?
+
+    enum CodingKeys: String, CodingKey {
+        case code, itinerary
+        case isDefault = "is_default"
+    }
 }

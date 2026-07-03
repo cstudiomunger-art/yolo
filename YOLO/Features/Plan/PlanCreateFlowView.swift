@@ -34,6 +34,11 @@ struct PlanCreateFlowView: View {
     @State private var editingCountry: PlanCountryField?
     @State private var passportValidEnough = true   // 护照有效期是否满足最低要求(后台可配, 默认3个月)
     @State private var hasChinaVisa = false          // 已持中国签证 → 跳过免签核对
+    @State private var tripPace: TripPace = .standard
+    @State private var arrivalTime = Calendar.current.date(bySettingHour: 14, minute: 0, second: 0, of: Date()) ?? Date()
+    @State private var departureTime = Calendar.current.date(bySettingHour: 10, minute: 0, second: 0, of: Date()) ?? Date()
+    @State private var isRuleBasedTrip = false
+    @State private var reviewEditMode: EditMode = .inactive
 
     private let visaCountries: [PassportCountry] = ISO3166.all
 
@@ -76,6 +81,18 @@ struct PlanCreateFlowView: View {
         PlanTripDateMath.activityDayCount(arrival: arrivalDate, departure: departureDate)
     }
 
+    private var tripMonth: Int {
+        Calendar.current.component(.month, from: arrivalDate)
+    }
+
+    private var tightTripWarning: String? {
+        PlanTripFeasibility.tightTripWarning(
+            cities: cities,
+            selectedCityIds: selectedCityIds,
+            activityDays: activityDays
+        )
+    }
+
     var body: some View {
         Group {
             switch step {
@@ -104,6 +121,21 @@ struct PlanCreateFlowView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button { step = .dates } label: {
                         Image(systemName: "chevron.left").font(.system(size: 17, weight: .semibold))
+                    }
+                }
+            }
+            if step == .review {
+                ToolbarItem(placement: .topBarLeading) {
+                    if reviewEditMode == .active {
+                        Button(String(localized: "Done")) {
+                            reviewEditMode = .inactive
+                        }
+                        .font(Theme.FontToken.inter(12, weight: .medium))
+                    } else {
+                        Button(String(localized: "Reorder")) {
+                            reviewEditMode = .active
+                        }
+                        .font(Theme.FontToken.inter(12, weight: .medium))
                     }
                 }
             }
@@ -150,6 +182,12 @@ struct PlanCreateFlowView: View {
             if !isAuthenticated, !AppConfig.useMock {
                 dismiss()
             }
+        }
+        .onChange(of: selectedCityIds) { _, _ in
+            tripPace = TripPace.defaultPace(tripDays: activityDays, cityCount: selectedCityIds.count)
+        }
+        .onChange(of: activityDays) { _, _ in
+            tripPace = TripPace.defaultPace(tripDays: activityDays, cityCount: selectedCityIds.count)
         }
     }
 
@@ -296,6 +334,18 @@ struct PlanCreateFlowView: View {
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
 
+                if let tightTripWarning {
+                    Text(tightTripWarning)
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.warning)
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Theme.ColorToken.warningBackground)
+                }
+
+                paceSection
+                flightTimesSection
+
                 visaInputsSection
 
                 primaryButton(String(localized: "Generate itinerary")) {
@@ -303,6 +353,43 @@ struct PlanCreateFlowView: View {
                 }
             }
             .padding(Theme.screenPadding)
+        }
+    }
+
+    private var paceSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(String(localized: "Trip pace"))
+                .font(Theme.FontToken.inter(12, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+            Picker(String(localized: "Trip pace"), selection: $tripPace) {
+                ForEach(TripPace.allCases) { pace in
+                    Text("\(pace.label) — \(pace.subtitle)").tag(pace)
+                }
+            }
+            .pickerStyle(.menu)
+        }
+    }
+
+    private var flightTimesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(String(localized: "Flight times (optional)"))
+                .font(Theme.FontToken.inter(12, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+            DatePicker(
+                String(localized: "Arrival time"),
+                selection: $arrivalTime,
+                displayedComponents: .hourAndMinute
+            )
+            .font(Theme.FontToken.inter(13))
+            DatePicker(
+                String(localized: "Departure time"),
+                selection: $departureTime,
+                displayedComponents: .hourAndMinute
+            )
+            .font(Theme.FontToken.inter(13))
+            Text(String(localized: "Afternoon arrival → first day evening only; morning departure → lighter last day."))
+                .font(Theme.FontToken.inter(10))
+                .foregroundStyle(Theme.ColorToken.textMuted)
         }
     }
 
@@ -486,17 +573,10 @@ struct PlanCreateFlowView: View {
                     .foregroundStyle(tone)
                     .overlay(Capsule().stroke(tone, lineWidth: 1))
             }
-            HStack(spacing: 6) {
-                ForEach(Array(route.cities.enumerated()), id: \.offset) { idx, city in
-                    Text(cityDisplayName(city)).font(Theme.FontToken.playfair(13, weight: .semibold))
-                    if idx < route.cities.count - 1 || route.addedCity != nil {
-                        Image(systemName: "arrow.right").font(.system(size: 9)).foregroundStyle(Theme.ColorToken.textGhost)
-                    }
-                }
-                if let added = route.addedCity {
-                    Text("+ " + added).font(Theme.FontToken.playfair(13, weight: .semibold)).foregroundStyle(Theme.ColorToken.success)
-                }
-            }
+            VisaRouteCitiesView(
+                cityNames: route.cities.map { cityDisplayName($0) },
+                addedCity: route.addedCity
+            )
             Text(route.note).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
             if let opts = route.transitOptions, !opts.isEmpty {
                 // 过境卡:合并的港/澳一张卡,一个口岸一个按钮。
@@ -659,8 +739,8 @@ struct PlanCreateFlowView: View {
     private var reviewStep: some View {
         VStack(spacing: 0) {
             if let draftItinerary {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
+                List {
+                    Section {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(draftItinerary.title)
                                 .font(Theme.FontToken.playfair(18, weight: .semibold))
@@ -671,14 +751,36 @@ struct PlanCreateFlowView: View {
                                 .font(Theme.FontToken.inter(11))
                                 .foregroundStyle(Theme.ColorToken.textSecondary)
                         }
+                        .listRowInsets(EdgeInsets(top: 12, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    }
 
-                        ForEach(draftItinerary.days.indices, id: \.self) { dayIndex in
-                            reviewDaySection(dayIndex: dayIndex, day: draftItinerary.days[dayIndex])
+                    if isRuleBasedTrip {
+                        Section {
+                            ruleBasedTripBanner
+                                .listRowInsets(EdgeInsets(top: 0, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
                         }
                     }
-                    .padding(Theme.screenPadding)
-                    .padding(.bottom, 80)
+
+                    if let notes = schedulingNotes(for: draftItinerary), !notes.isEmpty {
+                        Section {
+                            schedulingNotesCard(notes)
+                                .listRowInsets(EdgeInsets(top: 0, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                        }
+                    }
+
+                    ForEach(draftItinerary.days.indices, id: \.self) { dayIndex in
+                        reviewDaySection(dayIndex: dayIndex, day: draftItinerary.days[dayIndex])
+                    }
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .environment(\.editMode, $reviewEditMode)
 
                 VStack(spacing: 0) {
                     Rectangle().fill(Theme.ColorToken.borderLight).frame(height: 1)
@@ -703,38 +805,55 @@ struct PlanCreateFlowView: View {
                 attractionCache: attractionCache
             )
 
-        VStack(alignment: .leading, spacing: 12) {
-            Text(day.dateLabel)
-                .font(Theme.FontToken.playfair(14, weight: .semibold))
-            if !visited.isEmpty {
-                Text(visited)
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-            }
-
+        Section {
             if day.isExperienceSuggestions {
                 ExperienceSuggestionsDayCard(
                     day: day,
                     cityDisplayName: visited
                 )
+                .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             } else {
                 ForEach(day.activities) { activity in
                     reviewActivityRow(activity, dayIndex: dayIndex)
+                        .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 4, trailing: Theme.screenPadding))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+                .onMove { source, destination in
+                    moveReviewActivities(dayIndex: dayIndex, from: source, to: destination)
                 }
 
-                Button {
-                    let ids = reviewTripCityIds()
-                    addAttractionContext = PlanAddAttractionContext(dayIndex: dayIndex, cityIds: ids)
-                } label: {
-                    Label(String(localized: "Add attraction"), systemImage: "plus")
-                        .font(Theme.FontToken.inter(12, weight: .medium))
+                if reviewEditMode == .inactive {
+                    Button {
+                        let ids = reviewTripCityIds()
+                        addAttractionContext = PlanAddAttractionContext(dayIndex: dayIndex, cityIds: ids)
+                    } label: {
+                        Label(String(localized: "Add attraction"), systemImage: "plus")
+                            .font(Theme.FontToken.inter(12, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.ColorToken.accent)
+                    .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
-                .buttonStyle(.plain)
-                .foregroundStyle(Theme.ColorToken.accent)
             }
+        } header: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(day.dateLabel)
+                    .font(Theme.FontToken.playfair(14, weight: .semibold))
+                if !visited.isEmpty {
+                    Text(visited)
+                        .font(Theme.FontToken.inter(11))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                }
+            }
+            .textCase(nil)
+            .padding(.horizontal, Theme.screenPadding)
+            .padding(.top, 8)
         }
-        .padding(16)
-        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
     }
 
     private func reviewActivityRow(_ activity: ItineraryActivity, dayIndex: Int) -> some View {
@@ -769,6 +888,21 @@ struct PlanCreateFlowView: View {
                                 .font(Theme.FontToken.inter(10, weight: .medium))
                                 .foregroundStyle(Theme.ColorToken.textDisabled)
                         }
+                        if !activity.timeSlot.isEmpty {
+                            Text(activity.timeSlot)
+                                .font(Theme.FontToken.inter(10, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.accent)
+                        }
+                        if let aid = activity.attractionId,
+                           attractionCache[aid]?.requiresAdvanceBooking == true {
+                            Text(String(localized: "Reservation"))
+                                .font(Theme.FontToken.inter(9, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.warning)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Theme.ColorToken.warningBackground)
+                                .clipShape(Capsule())
+                        }
                         Text(activity.name)
                             .font(Theme.FontToken.inter(13, weight: .medium))
                             .foregroundStyle(Theme.ColorToken.textPrimary)
@@ -787,16 +921,64 @@ struct PlanCreateFlowView: View {
             }
             .buttonStyle(.plain)
 
-            Button {
-                removeActivity(dayIndex: dayIndex, activityId: activity.id)
-            } label: {
-                Image(systemName: "trash")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Theme.ColorToken.urgent)
+            if reviewEditMode == .inactive {
+                Button {
+                    removeActivity(dayIndex: dayIndex, activityId: activity.id)
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.ColorToken.urgent)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(.vertical, 4)
+    }
+
+    private func schedulingNotes(for trip: SampleItinerary) -> [String]? {
+        var lines = trip.schedulingAdjustments ?? []
+        if let dropped = trip.droppedAttractionIds, !dropped.isEmpty {
+            let names = dropped.map { id in
+                attractionCache[id]?.name ?? id
+            }
+            lines.append(String(localized: "Some sights could not fit: \(names.joined(separator: ", "))"))
+        }
+        let season = trip.seasonHints ?? PlanSeasonHints.hints(
+            cities: cities,
+            selectedCityIds: selectedCityIds,
+            tripMonth: tripMonth
+        )
+        lines.append(contentsOf: season)
+        return lines.isEmpty ? nil : lines
+    }
+
+    @ViewBuilder
+    private var ruleBasedTripBanner: some View {
+        Label(String(localized: "Built with on-device scheduling rules"), systemImage: "gearshape.2")
+            .font(Theme.FontToken.inter(11, weight: .medium))
+            .foregroundStyle(Theme.ColorToken.textSecondary)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.ColorToken.backgroundSubtle)
+            .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+    }
+
+    @ViewBuilder
+    private func schedulingNotesCard(_ notes: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(String(localized: "Schedule notes"), systemImage: "clock.badge.exclamationmark")
+                .font(Theme.FontToken.inter(12, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+            ForEach(Array(notes.enumerated()), id: \.offset) { _, note in
+                Text(note)
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.ColorToken.warningBackground)
+        .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
     }
 
     // MARK: - Actions
@@ -918,14 +1100,25 @@ struct PlanCreateFlowView: View {
                 try? await Task.sleep(for: .milliseconds(i == 0 ? 400 : 700))
             }
             do {
-                let trip = try await AIService.generateItinerary(
+                let generated = try await AIService.generateItinerary(
                     content: appEnv.content,
                     cities: Array(selectedCityIds),
                     days: activityDays,
                     useRemoteAI: appEnv.contentMode.effectiveUseRemoteAI,
-                    userNotes: buildAINotes()
+                    userNotes: buildAINotes(),
+                    options: PlanItineraryGenerateOptions(
+                        pace: tripPace,
+                        arrivalTime: PlanItineraryFlightTimes.formatHHMM(from: arrivalTime),
+                        departureTime: PlanItineraryFlightTimes.formatHHMM(from: departureTime),
+                        startDate: arrivalDate
+                    )
                 )
-                let enriched = enrichItinerary(trip)
+                isRuleBasedTrip = generated.isRuleBased
+                attractionCache = await PlanItineraryHelpers.catalogById(
+                    forCityIds: Array(selectedCityIds),
+                    content: appEnv.content
+                )
+                let enriched = enrichItinerary(generated.trip)
                 draftItinerary = enriched
                 await loadAttractionCache(for: enriched)
                 step = .review
@@ -943,13 +1136,25 @@ struct PlanCreateFlowView: View {
         \(activityDays) full activity days (exclude arrival and departure). \
         Selected cities (unordered): \(cityList). Optimize visit order for minimal intercity travel. \
         Do not put distant cities on the same day. Use experience_days with kind travel to mark intercity travel days (occupies a day slot, does not add days). \
+        Prefer city_plan + day_plans JSON (pack sights by duration_slots until each day's budget is full). \
+        Pace: \(tripPace.rawValue). \
+        Arrival time \(PlanItineraryFlightTimes.formatHHMM(from: arrivalTime)); departure time \(PlanItineraryFlightTimes.formatHHMM(from: departureTime)). \
         Do not assign AM/PM time slots.
         """
     }
 
     private func enrichItinerary(_ trip: SampleItinerary) -> SampleItinerary {
         let cityIds = Array(selectedCityIds).map { $0.lowercased() }
-        let normalized = PlanItineraryNormalizer.normalize(trip, selectedCityIds: cityIds)
+        let normalized = trip.userEdited
+            ? trip
+            : PlanItineraryNormalizer.normalize(
+                trip,
+                selectedCityIds: cityIds,
+                catalogById: attractionCache,
+                pace: tripPace,
+                arrivalTime: PlanItineraryFlightTimes.formatHHMM(from: arrivalTime),
+                departureTime: PlanItineraryFlightTimes.formatHHMM(from: departureTime)
+            )
         let labels = PlanTripDateMath.activityDateLabels(arrival: arrivalDate, count: normalized.days.count)
         let days = normalized.days.enumerated().map { index, day in
             let label = labels.indices.contains(index) ? labels[index] : day.dateLabel
@@ -959,14 +1164,18 @@ struct PlanCreateFlowView: View {
                 dateLabel: label,
                 cityName: day.cityName,
                 costEstimate: day.costEstimate,
-                activities: day.isExperienceSuggestions ? [] : day.activities.map { act in
+                activities: day.activities.map { act in
                     ItineraryActivity(
                         id: act.id,
+                        timeSlot: act.timeSlot,
                         name: act.name,
                         detail: act.detail,
                         attractionId: act.attractionId,
                         cityId: act.cityId,
-                        hasAudio: act.hasAudio
+                        hasAudio: act.hasAudio,
+                        kind: act.kind,
+                        hotelId: act.hotelId,
+                        sourcePlatform: act.sourcePlatform
                     )
                 },
                 dayKind: day.dayKind,
@@ -983,7 +1192,14 @@ struct PlanCreateFlowView: View {
             days: days,
             startDate: arrivalDate,
             endDate: departureDate,
-            visitOrder: normalized.visitOrder
+            visitOrder: normalized.visitOrder,
+            droppedAttractionIds: normalized.droppedAttractionIds,
+            schedulingAdjustments: normalized.schedulingAdjustments,
+            seasonHints: trip.seasonHints ?? PlanSeasonHints.hints(
+                cities: cities,
+                selectedCityIds: selectedCityIds,
+                tripMonth: tripMonth
+            )
         )
     }
 
@@ -1008,7 +1224,16 @@ struct PlanCreateFlowView: View {
         let day = trip.days[dayIndex]
         var days = trip.days
         days[dayIndex] = day.withActivities(day.activities.filter { $0.id != activityId })
-        draftItinerary = trip.withDays(days)
+        draftItinerary = trip.withDays(days).markingUserEdited()
+    }
+
+    private func moveReviewActivities(dayIndex: Int, from source: IndexSet, to destination: Int) {
+        guard let trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return }
+        var activities = trip.days[dayIndex].activities
+        activities.move(fromOffsets: source, toOffset: destination)
+        var days = trip.days
+        days[dayIndex] = trip.days[dayIndex].withActivities(activities)
+        draftItinerary = trip.withDays(days).markingUserEdited()
     }
 
     private func appendAttraction(_ attraction: Attraction, dayIndex: Int) {
@@ -1016,7 +1241,7 @@ struct PlanCreateFlowView: View {
         let day = trip.days[dayIndex]
         var days = trip.days
         days[dayIndex] = day.withActivities(day.activities + [PlanItineraryHelpers.activity(from: attraction)])
-        draftItinerary = trip.withDays(days)
+        draftItinerary = trip.withDays(days).markingUserEdited()
         attractionCache[attraction.id] = attraction
     }
 

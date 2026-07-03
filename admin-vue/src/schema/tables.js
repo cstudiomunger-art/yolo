@@ -315,6 +315,28 @@ const App = {};
           hint: "结构化维护闭馆日与开闭馆时段；保存时会自动同步 Opening Hours / Closed 文案到实用信息",
         },
         { key: "planning_zone", type: "text", label: "规划分区（planning_zone）", hint: "如 palace_core / old_city_west，用于同日顺路分区" },
+        {
+          key: "recommended_visit_period",
+          type: "enum",
+          options: [
+            { value: "flexible", label: "灵活（默认白天）" },
+            { value: "morning", label: "上午" },
+            { value: "afternoon", label: "下午" },
+            { value: "evening", label: "晚间（夜市/步行街）" },
+          ],
+          label: "推荐游览时段",
+          hint: "evening 仅用于夜市、步行街等；调度器会排入 Evening slot，不占 Morning/Afternoon",
+        },
+        {
+          key: "attraction_kind",
+          type: "enum",
+          options: [
+            { value: "", label: "（未设置）" },
+            { value: "commercial_street", label: "商业步行街" },
+            { value: "night_market", label: "夜市/酒吧街" },
+          ],
+          label: "景点类型（规划）",
+        },
         { key: "closed_weekdays", type: "weekday_multiselect", options: WEEKDAY_OPTIONS, label: "固定闭馆周几" },
         { key: "open_time", type: "time", label: "开馆时间（HH:MM）" },
         { key: "close_time", type: "time", label: "闭馆时间（HH:MM）" },

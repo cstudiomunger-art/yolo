@@ -4,11 +4,18 @@ struct ExperienceSuggestionsDayCard: View {
     let day: ItineraryDay
     let cityDisplayName: String
 
+    private var isTravelDay: Bool {
+        day.experienceItems.contains { $0.localizedCaseInsensitiveContains("travel from") }
+            || day.experienceItems.contains { $0.localizedCaseInsensitiveContains("intercity travel") }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
-                Text("💡")
-                Text(String(localized: "Local Experiences to Try"))
+                Text(isTravelDay ? "🚄" : "💡")
+                Text(isTravelDay
+                    ? String(localized: "Travel day")
+                    : String(localized: "Local Experiences to Try"))
                     .font(Theme.FontToken.inter(13, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
             }
@@ -27,14 +34,40 @@ struct ExperienceSuggestionsDayCard: View {
                 }
             }
 
-            Rectangle()
-                .fill(Theme.ColorToken.borderLight)
-                .frame(height: 1)
+            if !day.activities.isEmpty {
+                Rectangle()
+                    .fill(Theme.ColorToken.borderLight)
+                    .frame(height: 1)
 
-            Text(String(localized: "These are experience ideas — no specific venues."))
-                .font(Theme.FontToken.inter(10))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-                .fixedSize(horizontal: false, vertical: true)
+                Text(String(localized: "Evening plans"))
+                    .font(Theme.FontToken.inter(11, weight: .semibold))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
+
+                ForEach(day.activities) { activity in
+                    HStack(alignment: .top, spacing: 8) {
+                        if !activity.timeSlot.isEmpty {
+                            Text(activity.timeSlot)
+                                .font(Theme.FontToken.inter(10, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.accent)
+                                .frame(minWidth: 58, alignment: .leading)
+                        }
+                        Text(activity.name)
+                            .font(Theme.FontToken.inter(12, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.textPrimary)
+                    }
+                }
+            }
+
+            if !isTravelDay {
+                Rectangle()
+                    .fill(Theme.ColorToken.borderLight)
+                    .frame(height: 1)
+
+                Text(String(localized: "These are experience ideas — no specific venues."))
+                    .font(Theme.FontToken.inter(10))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -43,7 +76,7 @@ struct ExperienceSuggestionsDayCard: View {
             RoundedRectangle(cornerRadius: 4, style: .continuous)
                 .strokeBorder(
                     Theme.ColorToken.border,
-                    style: StrokeStyle(lineWidth: 1, dash: [5, 4])
+                    style: StrokeStyle(lineWidth: 1, dash: isTravelDay ? [] : [5, 4])
                 )
         }
     }

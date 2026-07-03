@@ -57,15 +57,10 @@ struct PlanRouteVisaCompareView: View {
                     .foregroundStyle(tone)
                     .overlay(Capsule().stroke(tone, lineWidth: 1))
             }
-            HStack(spacing: 6) {
-                ForEach(Array(route.cities.enumerated()), id: \.offset) { _, city in
-                    Text(city.capitalized).font(Theme.FontToken.playfair(13, weight: .semibold))
-                    Image(systemName: "arrow.right").font(.system(size: 9)).foregroundStyle(Theme.ColorToken.textGhost)
-                }
-                if let added = route.addedCity {
-                    Text("+ " + added).font(Theme.FontToken.playfair(13, weight: .semibold)).foregroundStyle(Theme.ColorToken.success)
-                }
-            }
+            VisaRouteCitiesView(
+                cityNames: route.cities.map { $0.capitalized },
+                addedCity: route.addedCity
+            )
             Text(route.note).font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textSecondary)
             if route.kind == .friendly {
                 Button { adopt(route) } label: {

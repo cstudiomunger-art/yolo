@@ -95,6 +95,27 @@ enum CityTravelHints {
         ]
     }
 
+    static func buildTravelDayContent(fromCityId: String, toCityId: String, hours: Double) -> [String] {
+        let from = displayName(for: fromCityId)
+        let to = displayName(for: toCityId)
+        let slots = commuteSlots(hours)
+        let journey = hours.truncatingRemainder(dividingBy: 1) == 0
+            ? "\(Int(hours))h"
+            : String(format: "~%.1fh", hours)
+        var lines = [
+            "Travel from \(from) to \(to)",
+            "Estimated journey: \(journey) (HSR / flight)",
+        ]
+        if slots >= 2 {
+            lines.append("Full travel day — check in and rest")
+            lines.append("Optional light evening stroll after arrival")
+        } else if slots == 1 {
+            lines.append("Morning commute — afternoon sightseeing window")
+        }
+        lines.append("Explore \(to) near your hotel")
+        return lines
+    }
+
     /// Nearest-neighbor visit order using travel hours and catalog weights.
     static func inferVisitOrder(
         cityIds: [String],

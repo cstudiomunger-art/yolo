@@ -2,14 +2,21 @@ import Foundation
 
 /// Post-processes assembled itineraries for geographic sanity (mirrors Edge normalize).
 enum PlanItineraryNormalizer {
-    private static let maxPerDay = 3
-
-    static func normalize(_ trip: SampleItinerary, selectedCityIds: [String]) -> SampleItinerary {
+    static func normalize(
+        _ trip: SampleItinerary,
+        selectedCityIds: [String],
+        catalogById: [String: Attraction] = [:],
+        pace: TripPace = .standard,
+        arrivalTime: String? = nil,
+        departureTime: String? = nil
+    ) -> SampleItinerary {
+        if trip.userEdited { return trip }
         guard !trip.days.isEmpty else { return trip }
 
         var days = trip.days
         var pool: [ItineraryActivity] = []
         var seenAttractionIds = Set<String>()
+        let hasScheduledExperienceDays = days.contains { $0.isExperienceSuggestions }
 
         for index in days.indices {
             guard !days[index].isExperienceSuggestions else { continue }
@@ -34,18 +41,38 @@ enum PlanItineraryNormalizer {
 
         for index in days.indices {
             guard !days[index].isExperienceSuggestions else { continue }
-            var acts = days[index].activities
-            while acts.count > maxPerDay {
-                pool.append(acts.removeLast())
-            }
-            days[index] = days[index].withActivities(acts)
+            let dayCapacity = PlanItinerarySlotBudget.daytimeCapacity(
+                dayIndex: days[index].dayIndex,
+                days: days,
+                pace: pace,
+                arrivalTime: arrivalTime,
+                departureTime: departureTime
+            )
+            let trimmed = PlanItinerarySlotBudget.trimDaytimeToCapacity(
+                activities: days[index].activities,
+                capacity: dayCapacity,
+                catalogById: catalogById
+            )
+            days[index] = days[index].withActivities(trimmed.keep)
+            pool.append(contentsOf: trimmed.overflow)
         }
 
         for activity in pool {
-            placeActivity(activity, into: &days)
+            placeActivity(
+                activity,
+                into: &days,
+                catalogById: catalogById,
+                pace: pace,
+                arrivalTime: arrivalTime,
+                departureTime: departureTime
+            )
         }
 
-        insertTravelDays(into: &days)
+        // Scheduler already inserts dedicated travel days — do not overwrite them.
+        if !hasScheduledExperienceDays {
+            insertTravelDays(into: &days)
+        }
+
         days = days.map { day in
             guard !day.isExperienceSuggestions else { return day }
             let label = dayCityLabel(day)
@@ -62,12 +89,18 @@ enum PlanItineraryNormalizer {
             )
         }
 
-        let visitOrder = deriveVisitOrder(from: days, fallback: selectedCityIds)
+        let visitOrder = trip.visitOrder ?? deriveVisitOrder(from: days, fallback: selectedCityIds)
         let route = CityTravelHints.routeLabel(from: visitOrder)
         let dayCount = days.count
         let title = titleMatchesRoute(trip.title, route: route)
             ? trip.title
             : "\(dayCount)-Day \(route) Trip"
+
+        var adjustments = trip.schedulingAdjustments ?? []
+        for activity in pool {
+            let label = activity.attractionId ?? activity.name
+            adjustments.append(String(localized: "Could not place \(label) during normalize"))
+        }
 
         return SampleItinerary(
             id: trip.id,
@@ -80,7 +113,11 @@ enum PlanItineraryNormalizer {
             isShared: trip.isShared,
             startDate: trip.startDate,
             endDate: trip.endDate,
-            visitOrder: visitOrder
+            visitOrder: visitOrder,
+            userEdited: trip.userEdited,
+            droppedAttractionIds: trip.droppedAttractionIds,
+            schedulingAdjustments: adjustments.isEmpty ? nil : adjustments,
+            seasonHints: trip.seasonHints
         )
     }
 
@@ -109,11 +146,34 @@ enum PlanItineraryNormalizer {
         return (keep, overflow)
     }
 
-    private static func placeActivity(_ activity: ItineraryActivity, into days: inout [ItineraryDay]) {
+    private static func placeActivity(
+        _ activity: ItineraryActivity,
+        into days: inout [ItineraryDay],
+        catalogById: [String: Attraction],
+        pace: TripPace,
+        arrivalTime: String?,
+        departureTime: String?
+    ) {
         guard let city = activity.cityId else { return }
         for index in days.indices {
             guard !days[index].isExperienceSuggestions else { continue }
-            guard days[index].activities.count < maxPerDay else { continue }
+            let dayCapacity = PlanItinerarySlotBudget.daytimeCapacity(
+                dayIndex: days[index].dayIndex,
+                days: days,
+                pace: pace,
+                arrivalTime: arrivalTime,
+                departureTime: departureTime
+            )
+            let used = PlanItinerarySlotBudget.usedDaytimeSlots(
+                activities: days[index].activities,
+                catalogById: catalogById
+            )
+            guard PlanItinerarySlotBudget.fitsDaytime(
+                activity: activity,
+                into: used,
+                capacity: dayCapacity,
+                catalogById: catalogById
+            ) else { continue }
             let cities = Set(days[index].activities.compactMap(\.cityId))
             if cities.isEmpty || cities.allSatisfy({ CityTravelHints.canVisitSameDay($0, city) }) {
                 days[index] = days[index].withActivities(days[index].activities + [activity])

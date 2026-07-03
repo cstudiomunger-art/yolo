@@ -155,7 +155,7 @@ struct ItineraryEditorView: View {
                     id: d.id,
                     dayIndex: d.dayIndex,
                     dateLabel: keyPath == \.dateLabel ? newValue : d.dateLabel,
-                    cityName: "",
+                    cityName: d.cityName,
                     costEstimate: d.costEstimate,
                     activities: d.activities,
                     dayKind: d.dayKind,
@@ -291,7 +291,12 @@ struct ItineraryEditorView: View {
             shareSlug: itinerary.shareSlug,
             isShared: itinerary.isShared,
             startDate: itinerary.startDate,
-            endDate: itinerary.endDate
+            endDate: itinerary.endDate,
+            visitOrder: itinerary.visitOrder,
+            userEdited: true,
+            droppedAttractionIds: itinerary.droppedAttractionIds,
+            schedulingAdjustments: itinerary.schedulingAdjustments,
+            seasonHints: itinerary.seasonHints
         )
         appEnv.preferences.saveItinerary(updated)
         let cityIds = Set(

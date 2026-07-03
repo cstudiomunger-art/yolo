@@ -6,6 +6,7 @@ export type CityMetaRow = {
   region?: string | null;
   avg_days_recommended?: number | null;
   attraction_count?: number | null;
+  best_time_to_visit?: string | null;
 };
 
 /** Known HSR/flight hours between city pairs (symmetric). */
@@ -119,7 +120,7 @@ export async function fetchCitiesMeta(
 ): Promise<CityMetaRow[]> {
   if (!creds || cityIds.length === 0) return [];
   const ids = cityIds.map((c) => encodeURIComponent(c)).join(",");
-  const select = "id,name,region,avg_days_recommended,attraction_count";
+  const select = "id,name,region,avg_days_recommended,attraction_count,best_time_to_visit";
   const res = await fetch(
     `${creds.url}/rest/v1/cities?id=in.(${ids})&select=${select}`,
     {
@@ -141,6 +142,9 @@ export async function fetchCitiesMeta(
       : null,
     attraction_count: r.attraction_count != null
       ? Number(r.attraction_count)
+      : null,
+    best_time_to_visit: r.best_time_to_visit != null
+      ? String(r.best_time_to_visit)
       : null,
   }));
 }
@@ -207,4 +211,28 @@ export function travelExperienceItems(toCityId: string): string[] {
     "Rest and check in",
     "Neighborhood walk near hotel",
   ];
+}
+
+/** Enriched travel-day bullets with route context (P2). */
+export function buildTravelDayContent(
+  fromCityId: string,
+  toCityId: string,
+  hours: number,
+): string[] {
+  const from = cityDisplayName(fromCityId);
+  const to = cityDisplayName(toCityId);
+  const slots = commuteSlots(hours);
+  const journey = Number.isInteger(hours) ? `${hours}h` : `~${hours.toFixed(1)}h`;
+  const lines = [
+    `Travel from ${from} to ${to}`,
+    `Estimated journey: ${journey} (HSR / flight)`,
+  ];
+  if (slots >= 2) {
+    lines.push("Full travel day — check in and rest");
+    lines.push("Optional light evening stroll after arrival");
+  } else if (slots === 1) {
+    lines.push("Morning commute — afternoon sightseeing window");
+  }
+  lines.push(`Explore ${to} near your hotel`);
+  return lines;
 }

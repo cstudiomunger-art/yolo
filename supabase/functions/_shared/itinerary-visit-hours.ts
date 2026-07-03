@@ -43,8 +43,32 @@ export function isClosedOnWeekday(input: VisitScheduleLike, weekday: Weekday): b
   return list.some((v) => normalizeWeekday(String(v)) === weekday);
 }
 
-export function isClosedOnDate(input: VisitScheduleLike, date: Date): boolean {
-  return isClosedOnWeekday(input, weekdayFromDate(date));
+export function parseWeekdaysFromClosedDays(text: string | null | undefined): Weekday[] {
+  const raw = String(text ?? "").trim().toLowerCase();
+  if (!raw) return [];
+  const out = new Set<Weekday>();
+  const map: [string, Weekday][] = [
+    ["monday", "mon"], ["mon", "mon"],
+    ["tuesday", "tue"], ["tue", "tue"],
+    ["wednesday", "wed"], ["wed", "wed"],
+    ["thursday", "thu"], ["thu", "thu"],
+    ["friday", "fri"], ["fri", "fri"],
+    ["saturday", "sat"], ["sat", "sat"],
+    ["sunday", "sun"], ["sun", "sun"],
+  ];
+  for (const [token, key] of map) {
+    if (raw.includes(token)) out.add(key);
+  }
+  return [...out];
+}
+
+export function isClosedOnDate(
+  input: VisitScheduleLike & { closed_days?: string | null },
+  date: Date,
+): boolean {
+  const weekday = weekdayFromDate(date);
+  if (isClosedOnWeekday(input, weekday)) return true;
+  return parseWeekdaysFromClosedDays(input.closed_days).includes(weekday);
 }
 
 export function allowedHalfDaySlots(input: VisitScheduleLike): HalfDaySlot[] {
@@ -72,4 +96,61 @@ export function pickTimeSlot(
   if (allowed.length === 0) return null;
   if (preferred && allowed.includes(preferred)) return preferred;
   return allowed[0];
+}
+
+export type VisitTimeSlot = "morning" | "afternoon" | "evening";
+
+export type VisitScheduleWithPeriod = VisitScheduleLike & {
+  recommended_visit_period?: string | null;
+};
+
+function normalizeVisitPeriod(raw: string | null | undefined): VisitTimeSlot | "flexible" {
+  const v = String(raw ?? "flexible").trim().toLowerCase();
+  if (v === "morning") return "morning";
+  if (v === "afternoon") return "afternoon";
+  if (v === "evening") return "evening";
+  return "flexible";
+}
+
+export function isEveningOnlyAttraction(input: VisitScheduleWithPeriod): boolean {
+  return normalizeVisitPeriod(input.recommended_visit_period) === "evening";
+}
+
+export function visitTimeSlotLabel(slot: VisitTimeSlot | null | undefined): string {
+  switch (slot) {
+    case "morning":
+      return "Morning";
+    case "afternoon":
+      return "Afternoon";
+    case "evening":
+      return "Evening";
+    default:
+      return "";
+  }
+}
+
+export function pickVisitTimeSlot(
+  input: VisitScheduleWithPeriod,
+  preferred: VisitTimeSlot | null = null,
+): VisitTimeSlot | null {
+  switch (normalizeVisitPeriod(input.recommended_visit_period)) {
+    case "evening":
+      return "evening";
+    case "morning":
+      return pickTimeSlot(input, "morning") === "morning" ? "morning" : null;
+    case "afternoon":
+      return pickTimeSlot(input, "afternoon") === "afternoon" ? "afternoon" : null;
+    case "flexible": {
+      if (preferred === "evening") return null;
+      const halfPreferred: HalfDaySlot | null = preferred === "afternoon"
+        ? "afternoon"
+        : preferred === "morning"
+        ? "morning"
+        : null;
+      const half = pickTimeSlot(input, halfPreferred);
+      if (half === "morning") return "morning";
+      if (half === "afternoon") return "afternoon";
+      return null;
+    }
+  }
 }

@@ -9,7 +9,34 @@ enum HalfDaySlot: String {
     case afternoon
 }
 
+enum VisitPeriod: String {
+    case morning
+    case afternoon
+    case evening
+    case flexible
+}
+
+enum VisitTimeSlot: String {
+    case morning
+    case afternoon
+    case evening
+}
+
 enum PlanItineraryVisitHours {
+    static func normalizeVisitPeriod(_ raw: String?) -> VisitPeriod {
+        let v = (raw ?? "flexible").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        switch v {
+        case "morning": return .morning
+        case "afternoon": return .afternoon
+        case "evening": return .evening
+        default: return .flexible
+        }
+    }
+
+    static func isEveningOnly(_ attraction: Attraction) -> Bool {
+        normalizeVisitPeriod(attraction.recommendedVisitPeriod) == .evening
+    }
+
     static func weekday(from date: Date, calendar: Calendar = .current) -> VisitWeekday {
         let value = calendar.component(.weekday, from: date)
         switch value {
@@ -25,6 +52,10 @@ enum PlanItineraryVisitHours {
 
     static func isClosedOnWeekday(_ attraction: Attraction, weekday: VisitWeekday) -> Bool {
         attraction.closedWeekdays.contains(weekday.rawValue)
+    }
+
+    static func isClosedOnDate(_ attraction: Attraction, date: Date, calendar: Calendar = .current) -> Bool {
+        isClosedOnWeekday(attraction, weekday: weekday(from: date, calendar: calendar))
     }
 
     static func allowedHalfDaySlots(_ attraction: Attraction) -> [HalfDaySlot] {
@@ -45,6 +76,32 @@ enum PlanItineraryVisitHours {
         if allowed.isEmpty { return nil }
         if let preferred, allowed.contains(preferred) { return preferred }
         return allowed.first
+    }
+
+    static func visitTimeSlotLabel(_ slot: VisitTimeSlot?) -> String {
+        switch slot {
+        case .morning: return "Morning"
+        case .afternoon: return "Afternoon"
+        case .evening: return "Evening"
+        case nil: return ""
+        }
+    }
+
+    static func pickVisitTimeSlot(_ attraction: Attraction, preferred: VisitTimeSlot? = nil) -> VisitTimeSlot? {
+        switch normalizeVisitPeriod(attraction.recommendedVisitPeriod) {
+        case .evening:
+            return .evening
+        case .morning:
+            return pickTimeSlot(attraction, preferred: .morning) != nil ? .morning : nil
+        case .afternoon:
+            return pickTimeSlot(attraction, preferred: .afternoon) != nil ? .afternoon : nil
+        case .flexible:
+            if preferred == .evening { return nil }
+            if let half = pickTimeSlot(attraction, preferred: preferred == .afternoon ? .afternoon : preferred == .morning ? .morning : nil) {
+                return half == .morning ? .morning : .afternoon
+            }
+            return nil
+        }
     }
 
     private static func parseMinute(_ value: String?) -> Int? {

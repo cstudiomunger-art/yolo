@@ -1,6 +1,8 @@
+import type { Weekday } from "./itinerary-visit-hours.ts";
+
 export type ParityInputV1 = {
   trip: {
-    start_date_local: string;
+    start_date_local?: string;
     trip_days: number;
     entry_city_id?: string | null;
     exit_city_id?: string | null;
@@ -18,14 +20,32 @@ export type ParityInputV1 = {
     planning_zone?: string | null;
     duration_slots?: number | null;
     closed_weekdays?: string[] | null;
+    closed_days?: string | null;
     open_time?: string | null;
     close_time?: string | null;
     last_entry_time?: string | null;
+    recommended_visit_period?: string | null;
   }>;
   constraints?: {
     max_attractions_per_day?: number;
     allow_silent_drop?: boolean;
   };
+};
+
+export type ParityExpectV1 = {
+  trip_days?: number;
+  evening_slot_ids?: string[];
+  afternoon_slot_ids?: string[];
+  no_daytime_ids?: string[];
+  not_on_weekday?: Array<{ id: string; weekday: Weekday }>;
+  dropped_ids?: string[];
+  no_duplicate_ids?: boolean;
+};
+
+export type ParityVectorV1 = {
+  name: string;
+  input: ParityInputV1;
+  expect?: ParityExpectV1;
 };
 
 export type ParityDropReason = "closed_day" | "capacity" | "invalid_slot";

@@ -15,6 +15,14 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
     var endDate: Date?
     /// Canonical visit order derived from the day timeline (optional; from AI `visit_order`).
     var visitOrder: [String]?
+    /// When true, skip auto-normalize / re-schedule on save (user hand-edited).
+    var userEdited: Bool
+    /// Attractions omitted because the trip was too tight (optional).
+    var droppedAttractionIds: [String]?
+    /// Human-readable scheduling fixes applied after AI draft (optional).
+    var schedulingAdjustments: [String]?
+    /// Non-blocking season / month hints (optional).
+    var seasonHints: [String]?
 
     init(
         id: String,
@@ -27,7 +35,11 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         isShared: Bool = false,
         startDate: Date? = nil,
         endDate: Date? = nil,
-        visitOrder: [String]? = nil
+        visitOrder: [String]? = nil,
+        userEdited: Bool = false,
+        droppedAttractionIds: [String]? = nil,
+        schedulingAdjustments: [String]? = nil,
+        seasonHints: [String]? = nil
     ) {
         self.id = id
         self.title = title
@@ -40,6 +52,10 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         self.startDate = startDate
         self.endDate = endDate
         self.visitOrder = visitOrder
+        self.userEdited = userEdited
+        self.droppedAttractionIds = droppedAttractionIds
+        self.schedulingAdjustments = schedulingAdjustments
+        self.seasonHints = seasonHints
     }
 
     init(from decoder: Decoder) throws {
@@ -55,6 +71,10 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         startDate = try c.decodeIfPresent(Date.self, forKey: .startDate)
         endDate = try c.decodeIfPresent(Date.self, forKey: .endDate)
         visitOrder = try c.decodeIfPresent([String].self, forKey: .visitOrder)
+        userEdited = try c.decodeIfPresent(Bool.self, forKey: .userEdited) ?? false
+        droppedAttractionIds = try c.decodeIfPresent([String].self, forKey: .droppedAttractionIds)
+        schedulingAdjustments = try c.decodeIfPresent([String].self, forKey: .schedulingAdjustments)
+        seasonHints = try c.decodeIfPresent([String].self, forKey: .seasonHints)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -70,11 +90,19 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         try c.encodeIfPresent(startDate, forKey: .startDate)
         try c.encodeIfPresent(endDate, forKey: .endDate)
         try c.encodeIfPresent(visitOrder, forKey: .visitOrder)
+        if userEdited { try c.encode(userEdited, forKey: .userEdited) }
+        try c.encodeIfPresent(droppedAttractionIds, forKey: .droppedAttractionIds)
+        try c.encodeIfPresent(schedulingAdjustments, forKey: .schedulingAdjustments)
+        try c.encodeIfPresent(seasonHints, forKey: .seasonHints)
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, title, meta, routeSummary, estimatedBudget, days, shareSlug, isShared, startDate, endDate
         case visitOrder = "visit_order"
+        case userEdited = "user_edited"
+        case droppedAttractionIds = "dropped_attraction_ids"
+        case schedulingAdjustments = "scheduling_adjustments"
+        case seasonHints = "season_hints"
     }
 
     /// Copy with replaced days; preserves share state and trip dates.
@@ -90,7 +118,31 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             isShared: isShared,
             startDate: startDate,
             endDate: endDate,
-            visitOrder: visitOrder
+            visitOrder: visitOrder,
+            userEdited: userEdited,
+            droppedAttractionIds: droppedAttractionIds,
+            schedulingAdjustments: schedulingAdjustments,
+            seasonHints: seasonHints
+        )
+    }
+
+    func markingUserEdited() -> SampleItinerary {
+        SampleItinerary(
+            id: id,
+            title: title,
+            meta: meta,
+            routeSummary: routeSummary,
+            estimatedBudget: estimatedBudget,
+            days: days,
+            shareSlug: shareSlug,
+            isShared: isShared,
+            startDate: startDate,
+            endDate: endDate,
+            visitOrder: visitOrder,
+            userEdited: true,
+            droppedAttractionIds: droppedAttractionIds,
+            schedulingAdjustments: schedulingAdjustments,
+            seasonHints: seasonHints
         )
     }
 }

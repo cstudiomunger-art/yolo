@@ -67,9 +67,25 @@ enum PlanItineraryHelpers {
         return cache
     }
 
+    static func catalogById(
+        forCityIds cityIds: [String],
+        content: any ContentRepositoryProtocol
+    ) async -> [String: Attraction] {
+        var catalog: [String: Attraction] = [:]
+        for cityId in cityIds {
+            let list = (try? await content.fetchAttractions(cityId: cityId)) ?? []
+            for attraction in list {
+                catalog[attraction.id] = attraction
+            }
+        }
+        return catalog
+    }
+
     static func activity(from attraction: Attraction) -> ItineraryActivity {
-        ItineraryActivity(
+        let slot = PlanItineraryVisitHours.pickVisitTimeSlot(attraction, preferred: .morning)
+        return ItineraryActivity(
             id: UUID().uuidString,
+            timeSlot: PlanItineraryVisitHours.visitTimeSlotLabel(slot),
             name: attraction.name,
             detail: HTMLContentView.plainText(from: attraction.summary ?? attraction.shortDescription ?? ""),
             attractionId: attraction.id,

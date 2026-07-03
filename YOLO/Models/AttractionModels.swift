@@ -35,6 +35,8 @@ struct Attraction: Identifiable, Hashable, Codable {
     let addressZh: String?
     let paywallSubtitleOverride: String?
     let planningZone: String?
+    let recommendedVisitPeriod: String?
+    let attractionKind: String?
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -84,6 +86,8 @@ struct Attraction: Identifiable, Hashable, Codable {
         addressZh = try c.decodeIfPresent(String.self, forKey: .addressZh)
         paywallSubtitleOverride = try c.decodeIfPresent(String.self, forKey: .paywallSubtitleOverride)
         planningZone = try c.decodeIfPresent(String.self, forKey: .planningZone)
+        recommendedVisitPeriod = try c.decodeIfPresent(String.self, forKey: .recommendedVisitPeriod) ?? "flexible"
+        attractionKind = try c.decodeIfPresent(String.self, forKey: .attractionKind)
 
         let decodedPractical = (try? c.decode([PracticalInfoItem].self, forKey: .practicalInfo)) ?? []
         if !decodedPractical.isEmpty {
@@ -153,6 +157,10 @@ struct Attraction: Identifiable, Hashable, Codable {
         try c.encodeIfPresent(addressZh, forKey: .addressZh)
         try c.encodeIfPresent(paywallSubtitleOverride, forKey: .paywallSubtitleOverride)
         try c.encodeIfPresent(planningZone, forKey: .planningZone)
+        if recommendedVisitPeriod != "flexible" {
+            try c.encodeIfPresent(recommendedVisitPeriod, forKey: .recommendedVisitPeriod)
+        }
+        try c.encodeIfPresent(attractionKind, forKey: .attractionKind)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -162,6 +170,12 @@ struct Attraction: Identifiable, Hashable, Codable {
         case requiresAdvanceBooking, metroAccess, practicalInfo, westernVisitorTips, nearbyPlaces
         case audioGuideCount, iapProductId, textPaywallFree, requiresPurchase, priceTierId, displayOrder
         case shortDescription, coverImages, addressEn, addressZh, paywallSubtitleOverride, planningZone
+        case recommendedVisitPeriod = "recommended_visit_period"
+        case attractionKind = "attraction_kind"
+    }
+
+    var isEveningOnly: Bool {
+        PlanItineraryVisitHours.isEveningOnly(self)
     }
 
     private static func decodeStringArray(

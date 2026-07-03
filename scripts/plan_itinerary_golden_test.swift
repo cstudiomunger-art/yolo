@@ -10,6 +10,13 @@ import Foundation
 //     YOLO/Features/Plan/CityTravelHints.swift \
 //     YOLO/Features/Plan/PlanItineraryDuration.swift \
 //     YOLO/Features/Plan/PlanItineraryVisitHours.swift \
+//     YOLO/Features/Plan/PlanItineraryPace.swift \
+//     YOLO/Features/Plan/PlanItineraryFlightTimes.swift \
+//     YOLO/Features/Plan/PlanItineraryCityDays.swift \
+//     YOLO/Features/Plan/PlanItineraryPickAttractions.swift \
+//     YOLO/Features/Plan/PlanItineraryGeoRepair.swift \
+//     YOLO/Features/Plan/PlanItineraryScheduler.swift \
+//     YOLO/Features/Plan/PlanItinerarySlotBudget.swift \
 //     YOLO/Features/Plan/PlanItineraryNormalizer.swift \
 //     YOLO/Features/Plan/PlanItineraryAssembler.swift \
 //     scripts/html_plain_stub.swift \
@@ -29,6 +36,14 @@ enum PlanItineraryGoldenTest {
         fails += testRouteConsistency()
         fails += testClosedWeekdayFallbackParsing()
         fails += testAfternoonOnlySlotRule()
+        fails += testEveningOnlyScheduling()
+        fails += testRelaxedPaceCapsDaytime()
+        fails += testAfternoonArrivalEveningOnly()
+        fails += testNormalizePreservesSchedulerMetadata()
+        fails += testDurationBasedPacking()
+        fails += testFullDaySightBlocksSecond()
+        fails += testChineseDurationParsing()
+        fails += testGeoRepairSplitsIncompatibleSameDay()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -48,6 +63,8 @@ enum PlanItineraryGoldenTest {
             attractions: attractions
         )
 
+        let catalogById = Dictionary(uniqueKeysWithValues: attractions.map { ($0.id, $0) })
+
         var fail = 0
         if trip.days.count != 6 {
             print("✗ 4-city 6-day: expected 6 days, got \(trip.days.count)")
@@ -56,6 +73,20 @@ enum PlanItineraryGoldenTest {
 
         for day in trip.days where !day.isExperienceSuggestions {
             let cityIds = Set(day.activities.compactMap(\.cityId))
+            let capacity = PlanItinerarySlotBudget.daytimeCapacity(
+                dayIndex: day.dayIndex,
+                days: trip.days,
+                pace: .standard
+            )
+            if !PlanItinerarySlotBudget.daytimeWithinCapacity(
+                activities: day.activities,
+                capacity: capacity,
+                catalogById: catalogById
+            ) {
+                let used = PlanItinerarySlotBudget.usedDaytimeSlots(activities: day.activities, catalogById: catalogById)
+                print("✗ 4-city 6-day: day \(day.dayIndex) uses \(used) slots (max \(capacity))")
+                fail += 1
+            }
             if cityIds.contains("beijing"), cityIds.contains("shanghai"), cityIds.contains("chengdu") {
                 print("✗ 4-city 6-day: day \(day.dayIndex) mixes beijing+shanghai+chengdu")
                 fail += 1
@@ -191,9 +222,296 @@ enum PlanItineraryGoldenTest {
         let attraction = try! JSONDecoder().decode(Attraction.self, from: Data(json.utf8))
         let allowed = PlanItineraryVisitHours.allowedHalfDaySlots(attraction)
         let ok = allowed == [.afternoon] &&
-            PlanItineraryVisitHours.pickTimeSlot(attraction, preferred: .morning) == .afternoon
+            PlanItineraryVisitHours.pickVisitTimeSlot(attraction, preferred: .morning) == .afternoon
         print(ok ? "✓ afternoon-only slot rule" : "✗ expected afternoon-only slot behavior")
         return ok ? 0 : 1
+    }
+
+    private static func testEveningOnlyScheduling() -> Int {
+        let json = """
+        {"id":"night_street","cityId":"chongqing","name":"Night Street","recommended_visit_period":"evening","displayOrder":1}
+        """
+        let evening = try! JSONDecoder().decode(Attraction.self, from: Data(json.utf8))
+        let slot = PlanItineraryVisitHours.pickVisitTimeSlot(evening, preferred: .morning)
+        if slot != .evening {
+            print("✗ evening-only: expected Evening slot, got \(String(describing: slot))")
+            return 1
+        }
+
+        let trip = PlanItineraryAssembler.build(
+            cities: ["chongqing"],
+            tripDays: 2,
+            attractions: [evening, mockAttraction(id: "museum", cityId: "chongqing", name: "Museum", displayOrder: 0)]
+        )
+        let eveningActs = trip.days.flatMap(\.activities).filter { $0.timeSlot == "Evening" }
+        let morningEvening = trip.days.flatMap(\.activities).filter {
+            $0.attractionId == "night_street" && ($0.timeSlot == "Morning" || $0.timeSlot == "Afternoon")
+        }
+        let ok = !eveningActs.isEmpty && morningEvening.isEmpty
+        print(ok ? "✓ evening-only scheduling" : "✗ evening sight should use Evening slot only")
+        return ok ? 0 : 1
+    }
+
+    private static func testRelaxedPaceCapsDaytime() -> Int {
+        let cities = ["beijing"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 3,
+            attractions: attractions,
+            pace: .relaxed
+        )
+        let catalogById = Dictionary(uniqueKeysWithValues: attractions.map { ($0.id, $0) })
+        var fail = 0
+        for day in trip.days where !day.isExperienceSuggestions {
+            let capacity = PlanItinerarySlotBudget.daytimeCapacity(
+                dayIndex: day.dayIndex,
+                days: trip.days,
+                pace: .relaxed
+            )
+            let used = PlanItinerarySlotBudget.usedDaytimeSlots(activities: day.activities, catalogById: catalogById)
+            if used > capacity {
+                print("✗ relaxed pace: day \(day.dayIndex) uses \(used) daytime slots (max \(capacity))")
+                fail += 1
+            }
+        }
+        print(fail == 0 ? "✓ relaxed pace caps daytime slot budget" : "")
+        return fail
+    }
+
+    private static func testAfternoonArrivalEveningOnly() -> Int {
+        let evening = try! JSONDecoder().decode(
+            Attraction.self,
+            from: Data("""
+            {"id":"night_street","cityId":"beijing","name":"Night","recommended_visit_period":"evening","displayOrder":1}
+            """.utf8)
+        )
+        let day = try! JSONDecoder().decode(
+            Attraction.self,
+            from: Data("""
+            {"id":"museum","cityId":"beijing","name":"Museum","displayOrder":0}
+            """.utf8)
+        )
+        let trip = PlanItineraryAssembler.build(
+            cities: ["beijing"],
+            tripDays: 2,
+            attractions: [day, evening],
+            arrivalTime: "15:00"
+        )
+        guard let first = trip.days.first(where: { !$0.isExperienceSuggestions }) else {
+            print("✗ afternoon arrival: missing first sightseeing day")
+            return 1
+        }
+        let daytime = first.activities.filter { $0.timeSlot == "Morning" || $0.timeSlot == "Afternoon" }
+        let ok = daytime.isEmpty
+        print(ok ? "✓ afternoon arrival → first day no daytime sights" : "✗ expected no morning/afternoon on first day after late arrival")
+        return ok ? 0 : 1
+    }
+
+    private static func testNormalizePreservesSchedulerMetadata() -> Int {
+        let travelDay = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Shanghai",
+            costEstimate: nil,
+            activities: [
+                ItineraryActivity(
+                    id: "a_eve",
+                    timeSlot: "Evening",
+                    name: "The Bund",
+                    detail: "Explore",
+                    attractionId: "bund",
+                    cityId: "shanghai",
+                    hasAudio: false
+                )
+            ],
+            dayKind: .experienceSuggestions,
+            experienceItems: CityTravelHints.travelExperienceItems(toCityId: "shanghai"),
+            experienceCityId: "shanghai"
+        )
+        let trip = SampleItinerary(
+            id: "t_meta",
+            title: "Test",
+            meta: "Test",
+            routeSummary: "Beijing → Shanghai",
+            estimatedBudget: "$0",
+            days: [
+                mockAttractionDay(dayIndex: 1, cityId: "beijing", count: 2),
+                travelDay,
+                mockAttractionDay(dayIndex: 3, cityId: "shanghai", count: 2),
+            ],
+            visitOrder: ["beijing", "shanghai"],
+            droppedAttractionIds: ["dropped1"],
+            schedulingAdjustments: ["Placed bund on day 2 (evening)"],
+            seasonHints: ["Pack layers for shoulder season"]
+        )
+        let normalized = PlanItineraryNormalizer.normalize(trip, selectedCityIds: ["beijing", "shanghai"])
+
+        var fail = 0
+        guard let travel = normalized.days.first(where: { $0.isExperienceSuggestions }) else {
+            print("✗ normalize metadata: missing experience day")
+            return 1
+        }
+        if travel.activities.isEmpty {
+            print("✗ normalize metadata: wiped travel-day evening activity")
+            fail += 1
+        }
+        if normalized.droppedAttractionIds != trip.droppedAttractionIds {
+            print("✗ normalize metadata: droppedAttractionIds not preserved")
+            fail += 1
+        }
+        if normalized.schedulingAdjustments != trip.schedulingAdjustments {
+            let preserved = trip.schedulingAdjustments?.allSatisfy {
+                normalized.schedulingAdjustments?.contains($0) == true
+            } ?? true
+            if !preserved {
+                print("✗ normalize metadata: schedulingAdjustments not preserved")
+                fail += 1
+            }
+        }
+        if normalized.seasonHints != trip.seasonHints {
+            print("✗ normalize metadata: seasonHints not preserved")
+            fail += 1
+        }
+        print(fail == 0 ? "✓ normalize preserves scheduler travel day + metadata" : "")
+        return fail
+    }
+
+    private static func testDurationBasedPacking() -> Int {
+        let short1 = mockAttraction(id: "s1", cityId: "beijing", name: "Temple", displayOrder: 0, duration: "2h")
+        let short2 = mockAttraction(id: "s2", cityId: "beijing", name: "Park", displayOrder: 1, duration: "2h")
+        let short3 = mockAttraction(id: "s3", cityId: "beijing", name: "Market", displayOrder: 2, duration: "2h")
+        let catalog = [short1, short2, short3]
+        let catalogById = Dictionary(uniqueKeysWithValues: catalog.map { ($0.id, $0) })
+
+        let packedDay = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Beijing",
+            costEstimate: nil,
+            activities: catalog.map { row in
+                ItineraryActivity(
+                    id: "a_\(row.id)",
+                    name: row.name,
+                    detail: "Explore",
+                    attractionId: row.id,
+                    cityId: row.cityId,
+                    hasAudio: false
+                )
+            }
+        )
+        let trip = SampleItinerary(
+            id: "t_pack",
+            title: "Pack",
+            meta: "",
+            routeSummary: "Beijing",
+            estimatedBudget: "$0",
+            days: [
+                mockAttractionDay(dayIndex: 1, cityId: "beijing", count: 1),
+                packedDay,
+                mockAttractionDay(dayIndex: 3, cityId: "beijing", count: 0),
+            ]
+        )
+        let normalized = PlanItineraryNormalizer.normalize(
+            trip,
+            selectedCityIds: ["beijing"],
+            catalogById: catalogById,
+            pace: .standard
+        )
+        let kept = normalized.days.first(where: { $0.dayIndex == 2 })?.activities.count ?? 0
+        let ok = kept == 3
+        print(ok ? "✓ duration-based packing keeps three short sights on one day" : "✗ expected 3 short sights on day 2, got \(kept)")
+        return ok ? 0 : 1
+    }
+
+    private static func testFullDaySightBlocksSecond() -> Int {
+        let fullDay = mockAttraction(id: "fc", cityId: "beijing", name: "Forbidden City", displayOrder: 0, duration: "full day")
+        let halfDay = mockAttraction(id: "tm", cityId: "beijing", name: "Temple", displayOrder: 1, duration: "half day")
+        let catalog = [fullDay, halfDay]
+        let catalogById = Dictionary(uniqueKeysWithValues: catalog.map { ($0.id, $0) })
+
+        let trip = SampleItinerary(
+            id: "t_full",
+            title: "Full",
+            meta: "",
+            routeSummary: "Beijing",
+            estimatedBudget: "$0",
+            days: [
+                mockAttractionDay(dayIndex: 1, cityId: "beijing", count: 1),
+                ItineraryDay(
+                    id: "day_2",
+                    dayIndex: 2,
+                    dateLabel: "Day 2",
+                    cityName: "Beijing",
+                    costEstimate: nil,
+                    activities: catalog.map { row in
+                        ItineraryActivity(
+                            id: "a_\(row.id)",
+                            name: row.name,
+                            detail: "Explore",
+                            attractionId: row.id,
+                            cityId: row.cityId,
+                            hasAudio: false
+                        )
+                    }
+                ),
+                mockAttractionDay(dayIndex: 3, cityId: "beijing", count: 0),
+            ]
+        )
+        let normalized = PlanItineraryNormalizer.normalize(
+            trip,
+            selectedCityIds: ["beijing"],
+            catalogById: catalogById,
+            pace: .standard
+        )
+
+        var fail = 0
+        for day in normalized.days where !day.isExperienceSuggestions {
+            let capacity = PlanItinerarySlotBudget.daytimeCapacity(
+                dayIndex: day.dayIndex,
+                days: normalized.days,
+                pace: .standard
+            )
+            let used = PlanItinerarySlotBudget.usedDaytimeSlots(activities: day.activities, catalogById: catalogById)
+            if used > capacity {
+                print("✗ full-day block: day \(day.dayIndex) exceeds slot budget (\(used) > \(capacity))")
+                fail += 1
+            }
+        }
+        let day2 = normalized.days.first(where: { $0.dayIndex == 2 })
+        let day2Ids = Set(day2?.activities.compactMap(\.attractionId) ?? [])
+        if day2Ids.contains("fc"), day2Ids.contains("tm") {
+            print("✗ full-day block: both sights should not fit on the same full day")
+            fail += 1
+        }
+        let totalActs = normalized.days.flatMap(\.activities).filter { $0.attractionId == "tm" || $0.attractionId == "fc" }.count
+        if totalActs < 2 {
+            print("✗ full-day block: expected both sights preserved across days, got \(totalActs)")
+            fail += 1
+        }
+        print(fail == 0 ? "✓ full-day sight blocks second on same day" : "")
+        return fail
+    }
+
+    private static func testChineseDurationParsing() -> Int {
+        let cases: [(String, Double)] = [
+            ("建议游玩2小时", 0.5),
+            ("3小时", 0.5),
+            ("半天", 1),
+            ("全天游览", 2),
+        ]
+        var fail = 0
+        for (text, expected) in cases {
+            let slots = PlanItineraryDuration.parseDurationSlots(text)
+            if slots != expected {
+                print("✗ Chinese duration '\(text)': expected \(expected) slots, got \(slots)")
+                fail += 1
+            }
+        }
+        print(fail == 0 ? "✓ Chinese duration strings parse to slots" : "")
+        return fail
     }
 
     // MARK: - Fixtures
@@ -208,9 +526,16 @@ enum PlanItineraryGoldenTest {
         return rows
     }
 
-    private static func mockAttraction(id: String, cityId: String, name: String, displayOrder: Int) -> Attraction {
+    private static func mockAttraction(
+        id: String,
+        cityId: String,
+        name: String,
+        displayOrder: Int,
+        duration: String? = nil
+    ) -> Attraction {
+        let durationField = duration.map { ",\"recommendedDuration\":\"\($0)\"" } ?? ""
         let json = """
-        {"id":"\(id)","cityId":"\(cityId)","name":"\(name)","displayOrder":\(displayOrder)}
+        {"id":"\(id)","cityId":"\(cityId)","name":"\(name)","displayOrder":\(displayOrder)\(durationField)}
         """
         return try! JSONDecoder().decode(Attraction.self, from: Data(json.utf8))
     }
@@ -227,6 +552,22 @@ enum PlanItineraryGoldenTest {
             costEstimate: nil,
             activities: acts
         )
+    }
+
+    private static func testGeoRepairSplitsIncompatibleSameDay() -> Int {
+        let beijing = mockAttraction(id: "bj1", cityId: "beijing", name: "Forbidden City", displayOrder: 0)
+        let chengdu = mockAttraction(id: "cd1", cityId: "chengdu", name: "Panda Base", displayOrder: 0)
+        let catalogById = [beijing.id: beijing, chengdu.id: chengdu]
+        var adjustments: [String] = []
+        let geo = PlanItineraryGeoRepair.apply(
+            assignments: [1: ["bj1", "cd1"]],
+            catalogById: catalogById,
+            adjustments: &adjustments
+        )
+        let day1Cities = Set((geo.assignments[1] ?? []).compactMap { catalogById[$0]?.cityId })
+        let ok = !day1Cities.contains("beijing") || !day1Cities.contains("chengdu")
+        print(ok ? "✓ geo repair splits incompatible same-day cities" : "✗ geo repair should split beijing+chengdu")
+        return ok ? 0 : 1
     }
 
     private static func mockActivity(id: String, cityId: String, name: String) -> ItineraryActivity {

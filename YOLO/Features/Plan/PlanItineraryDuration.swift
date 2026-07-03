@@ -11,7 +11,8 @@ enum PlanItineraryDuration {
         let raw = (recommendedDuration ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if raw.isEmpty { return 1 }
 
-        if raw.contains("full day") || raw.contains("all day") || raw.contains("whole day") {
+        if raw.contains("full day") || raw.contains("all day") || raw.contains("whole day")
+            || raw.contains("全天") || raw.contains("一整天") {
             return 2
         }
 
@@ -21,7 +22,7 @@ enum PlanItineraryDuration {
             return 1
         }
 
-        if raw.contains("half day") { return 1 }
+        if raw.contains("half day") || raw.contains("半天") { return 1 }
         return 1
     }
 
@@ -45,15 +46,21 @@ enum PlanItineraryDuration {
     }
 
     private static func extractHours(_ raw: String) -> Double? {
-        let pattern = #"(\d+(?:\.\d+)?)\s*(h|hour)"#
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
-            return nil
+        let patterns = [
+            #"(\d+(?:\.\d+)?)\s*(h|hour|小时|hrs?)"#,
+            #"(\d+(?:\.\d+)?)\s*小时"#,
+        ]
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
+                continue
+            }
+            let range = NSRange(raw.startIndex..<raw.endIndex, in: raw)
+            guard let match = regex.firstMatch(in: raw, options: [], range: range),
+                  match.numberOfRanges >= 2,
+                  let r = Range(match.range(at: 1), in: raw)
+            else { continue }
+            return Double(raw[r])
         }
-        let range = NSRange(raw.startIndex..<raw.endIndex, in: raw)
-        guard let match = regex.firstMatch(in: raw, options: [], range: range),
-              match.numberOfRanges >= 2,
-              let r = Range(match.range(at: 1), in: raw)
-        else { return nil }
-        return Double(raw[r])
+        return nil
     }
 }

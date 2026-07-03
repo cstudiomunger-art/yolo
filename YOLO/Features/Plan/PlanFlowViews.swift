@@ -177,7 +177,12 @@ struct ItineraryDetailView: View {
             shareSlug: saved?.shareSlug ?? itinerary.shareSlug,
             isShared: saved?.isShared ?? itinerary.isShared,
             startDate: saved?.startDate ?? itinerary.startDate,
-            endDate: saved?.endDate ?? itinerary.endDate
+            endDate: saved?.endDate ?? itinerary.endDate,
+            visitOrder: saved?.visitOrder ?? itinerary.visitOrder,
+            userEdited: saved?.userEdited ?? itinerary.userEdited,
+            droppedAttractionIds: saved?.droppedAttractionIds ?? itinerary.droppedAttractionIds,
+            schedulingAdjustments: saved?.schedulingAdjustments ?? itinerary.schedulingAdjustments,
+            seasonHints: saved?.seasonHints ?? itinerary.seasonHints
         )
     }
 
@@ -206,6 +211,12 @@ struct ItineraryDetailView: View {
 
     private var itineraryScroll: some View {
         VStack(spacing: 0) {
+            if let notes = schedulingNotes(for: currentItinerary), !notes.isEmpty {
+                schedulingNotesCard(notes)
+                    .padding(.horizontal, Theme.screenPadding)
+                    .padding(.top, 12)
+            }
+
             Text("Drag to reorder days and activities. Tap Done when finished.")
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
@@ -225,6 +236,49 @@ struct ItineraryDetailView: View {
                                 cityDisplayName: experienceCityDisplayName(day)
                             )
                             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Theme.ColorToken.background)
+                            .moveDisabled(true)
+
+                            ForEach(day.activities) { activity in
+                                activityRow(activity, dayId: day.id)
+                            }
+                            .onMove { source, destination in
+                                moveActivities(dayId: day.id, from: source, to: destination)
+                            }
+                            .onDelete { offsets in
+                                deleteActivities(dayId: day.id, at: offsets)
+                            }
+
+                            Button {
+                                guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
+                                let cityIds: [String] = {
+                                    if let cid = day.experienceCityId, !cid.isEmpty { return [cid] }
+                                    return tripCityIds
+                                }()
+                                addAttractionContext = PlanAddAttractionContext(
+                                    dayIndex: dayIndex,
+                                    cityIds: cityIds
+                                )
+                            } label: {
+                                addAttractionButtonLabel
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Theme.ColorToken.accent)
+                            .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 6, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Theme.ColorToken.background)
+                            .moveDisabled(true)
+
+                            Button {
+                                convertExperienceDayToStandard(dayId: day.id)
+                            } label: {
+                                Label(String(localized: "Use as sightseeing day"), systemImage: "sun.max")
+                                    .font(Theme.FontToken.inter(11, weight: .medium))
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Theme.ColorToken.textSecondary)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 4, trailing: 16))
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
@@ -337,6 +391,23 @@ struct ItineraryDetailView: View {
                         .font(Theme.FontToken.inter(10, weight: .medium))
                         .foregroundStyle(Theme.ColorToken.textDisabled)
                 }
+                HStack(spacing: 6) {
+                    if !activity.timeSlot.isEmpty {
+                        Text(activity.timeSlot)
+                            .font(Theme.FontToken.inter(10, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.accent)
+                    }
+                    if let aid = activity.attractionId,
+                       attractionCache[aid]?.requiresAdvanceBooking == true {
+                        Text(String(localized: "Reservation"))
+                            .font(Theme.FontToken.inter(9, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.warning)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Theme.ColorToken.warningBackground)
+                            .clipShape(Capsule())
+                    }
+                }
                 Text(activity.name)
                     .font(Theme.FontToken.inter(13, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
@@ -416,20 +487,86 @@ struct ItineraryDetailView: View {
 
     private func persistItineraryOrder() {
         editableDays = normalizeDays(editableDays)
-        let updated = currentItinerary
+        let updated = currentItinerary.markingUserEdited()
         appEnv.preferences.saveItinerary(updated)
+    }
+
+    private func convertExperienceDayToStandard(dayId: String) {
+        guard let index = editableDays.firstIndex(where: { $0.id == dayId }) else { return }
+        let day = editableDays[index]
+        editableDays[index] = ItineraryDay(
+            id: day.id,
+            dayIndex: day.dayIndex,
+            dateLabel: day.dateLabel,
+            cityName: day.cityName,
+            costEstimate: day.costEstimate,
+            activities: mapActivities(day.activities),
+            dayKind: .standard,
+            experienceItems: [],
+            experienceCityId: nil
+        )
+        persistItineraryOrder()
+    }
+
+    private func schedulingNotes(for trip: SampleItinerary) -> [String]? {
+        var lines = trip.schedulingAdjustments ?? []
+        if let dropped = trip.droppedAttractionIds, !dropped.isEmpty {
+            let names = dropped.map { attractionCache[$0]?.name ?? $0 }
+            lines.append(String(localized: "Some sights could not fit: \(names.joined(separator: ", "))"))
+        }
+        if let season = trip.seasonHints, !season.isEmpty {
+            lines.append(contentsOf: season)
+        }
+        return lines.isEmpty ? nil : lines
+    }
+
+    @ViewBuilder
+    private func schedulingNotesCard(_ notes: [String]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(String(localized: "Schedule notes"), systemImage: "clock.badge.exclamationmark")
+                .font(Theme.FontToken.inter(12, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+            ForEach(Array(notes.enumerated()), id: \.offset) { _, note in
+                Text(note)
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.ColorToken.warningBackground)
+        .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+    }
+
+    private func mapActivities(_ activities: [ItineraryActivity]) -> [ItineraryActivity] {
+        activities.map { act in
+            let resolvedCityId = act.cityId ?? act.attractionId.flatMap { attractionCache[$0]?.cityId }
+            return ItineraryActivity(
+                id: act.id,
+                timeSlot: act.timeSlot,
+                name: act.name,
+                detail: act.detail,
+                attractionId: act.attractionId,
+                cityId: resolvedCityId,
+                hasAudio: act.hasAudio,
+                kind: act.kind,
+                hotelId: act.hotelId,
+                sourcePlatform: act.sourcePlatform
+            )
+        }
     }
 
     private func normalizeDays(_ days: [ItineraryDay]) -> [ItineraryDay] {
         days.map { day in
+            let mapped = mapActivities(day.activities)
             if day.isExperienceSuggestions {
                 return ItineraryDay(
                     id: day.id,
                     dayIndex: day.dayIndex,
                     dateLabel: day.dateLabel,
-                    cityName: "",
+                    cityName: day.experienceCityId.map { CityTravelHints.displayName(for: $0) } ?? day.cityName,
                     costEstimate: day.costEstimate,
-                    activities: [],
+                    activities: mapped,
                     dayKind: .experienceSuggestions,
                     experienceItems: day.experienceItems,
                     experienceCityId: day.experienceCityId
@@ -439,19 +576,9 @@ struct ItineraryDetailView: View {
                 id: day.id,
                 dayIndex: day.dayIndex,
                 dateLabel: day.dateLabel,
-                cityName: "",
+                cityName: day.cityName,
                 costEstimate: day.costEstimate,
-                activities: day.activities.map { act in
-                    let resolvedCityId = act.cityId ?? act.attractionId.flatMap { attractionCache[$0]?.cityId }
-                    return ItineraryActivity(
-                        id: act.id,
-                        name: act.name,
-                        detail: act.detail,
-                        attractionId: act.attractionId,
-                        cityId: resolvedCityId,
-                        hasAudio: act.hasAudio
-                    )
-                }
+                activities: mapped
             )
         }
     }
@@ -548,7 +675,7 @@ struct BookYourTripView: View {
         )
         var days = itin.days
         days[di] = days[di].withActivities(days[di].activities + [activity])
-        itin = itin.withDays(days)
+        itin = itin.withDays(days).markingUserEdited()
         working = itin
         appEnv.preferences.saveItinerary(itin)
     }

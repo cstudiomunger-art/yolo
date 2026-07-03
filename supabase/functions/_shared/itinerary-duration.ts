@@ -9,10 +9,12 @@ export function parseDurationSlots(
   if (
     raw.includes("full day") ||
     raw.includes("all day") ||
-    raw.includes("whole day")
+    raw.includes("whole day") ||
+    raw.includes("全天") ||
+    raw.includes("一整天")
   ) return 2;
 
-  const hourMatch = raw.match(/(\d+(?:\.\d+)?)\s*(h|hour)/);
+  const hourMatch = raw.match(/(\d+(?:\.\d+)?)\s*(h|hour|hrs?|小时)/);
   if (hourMatch) {
     const hours = Number(hourMatch[1]);
     if (Number.isFinite(hours)) {
@@ -22,7 +24,7 @@ export function parseDurationSlots(
     }
   }
 
-  if (raw.includes("half day")) return 1;
+  if (raw.includes("half day") || raw.includes("半天")) return 1;
   return 1;
 }
 
