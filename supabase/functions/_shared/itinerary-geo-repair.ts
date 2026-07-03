@@ -151,7 +151,7 @@ export function allowedCitiesFromTimeline(
 ): Map<number, Set<string>> {
   const out = new Map<number, Set<string>>();
   for (const slot of timeline) {
-    if ((slot.kind === "hop" || slot.kind === "travel_lite") && slot.from_city_id) {
+    if ((slot.kind === "hop" || slot.kind === "travel_lite" || slot.kind === "short_hop") && slot.from_city_id) {
       out.set(slot.day_index, new Set([
         slot.from_city_id.toLowerCase(),
         slot.city_id.toLowerCase(),

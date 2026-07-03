@@ -125,5 +125,54 @@
       "visit_order_ends": ["beijing", "guangzhou"],
       "intercity_hop_days_min": 1
     }
+  },
+  {
+    "name": "chongqing-chengdu-short-hop",
+    "input": {
+      "trip": {
+        "trip_days": 5,
+        "entry_city_id": "chongqing",
+        "exit_city_id": "chengdu",
+        "pace": "standard"
+      },
+      "cities": [
+        { "id": "chongqing", "region": "southwest" },
+        { "id": "chengdu", "region": "southwest" }
+      ],
+      "attractions": [
+        { "id": "cq_hotpot", "city_id": "chongqing", "display_order": 1, "duration_slots": 1 },
+        { "id": "cd_panda", "city_id": "chengdu", "display_order": 1, "duration_slots": 1 }
+      ],
+      "constraints": { "allow_silent_drop": true }
+    },
+    "expect": {
+      "trip_days": 5,
+      "intercity_hop_pair": ["chongqing", "chengdu"]
+    }
+  },
+  {
+    "name": "blank-day-exit-city",
+    "input": {
+      "trip": {
+        "trip_days": 15,
+        "entry_city_id": "beijing",
+        "exit_city_id": "guangzhou",
+        "pace": "standard"
+      },
+      "cities": [
+        { "id": "beijing", "region": "north_china" },
+        { "id": "nanjing", "region": "yangtze_delta" },
+        { "id": "suzhou", "region": "yangtze_delta" },
+        { "id": "hangzhou", "region": "yangtze_delta" },
+        { "id": "shanghai", "region": "yangtze_delta" },
+        { "id": "guangzhou", "region": "pearl_delta" }
+      ],
+      "constraints": { "allow_silent_drop": true }
+    },
+    "expect": {
+      "trip_days": 15,
+      "visit_order_ends": ["beijing", "guangzhou"],
+      "last_day_experience_city_id": "guangzhou"
+    }
   }
 ]

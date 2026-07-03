@@ -118,6 +118,11 @@ export function canIntenseSameDayHop(
   return commuteSlots(travelHours(a, b, regionByCity)) <= 1;
 }
 
+/** Timeline slot kinds that carry an intercity hop card (morning/afternoon split). */
+export function isIntercityHopKind(kind: string): boolean {
+  return kind === "hop" || kind === "travel_lite" || kind === "short_hop";
+}
+
 /** Compact intercity hop card between morning and afternoon sights. */
 export function buildHopCardContent(
   fromCityId: string,

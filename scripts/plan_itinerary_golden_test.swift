@@ -17,6 +17,7 @@ import Foundation
 //     YOLO/Features/Plan/PlanItineraryPickAttractions.swift \
 //     YOLO/Features/Plan/PlanItineraryGeoRepair.swift \
 //     YOLO/Features/Plan/PlanItineraryDayFill.swift \
+//     YOLO/Features/Plan/PlanItineraryIntercityAnnotator.swift \
 //     YOLO/Features/Plan/PlanItineraryScheduler.swift \
 //     YOLO/Features/Plan/PlanItinerarySlotBudget.swift \
 //     YOLO/Features/Plan/PlanItineraryNormalizer.swift \
@@ -69,6 +70,8 @@ enum PlanItineraryGoldenTest {
         fails += testTravelDayEveningArrivalReplans()
         fails += testEntryCityMinDaysOnLongTrip()
         fails += testSuggestEntryExitTwoAndSixCities()
+        fails += testChongqingChengduShortHop()
+        fails += testBlankDayExitCity()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -327,9 +330,8 @@ enum PlanItineraryGoldenTest {
             print("✗ afternoon arrival: missing first sightseeing day")
             return 1
         }
-        let daytime = first.activities.filter { $0.timeSlot == "Morning" || $0.timeSlot == "Afternoon" }
-        let ok = daytime.isEmpty
-        print(ok ? "✓ afternoon arrival → first day no daytime sights" : "✗ expected no morning/afternoon on first day after late arrival")
+        let ok = first.activities.contains { $0.attractionId == "night_street" && $0.timeSlot == "Evening" }
+        print(ok ? "✓ afternoon arrival: evening-only sight still schedules on first activity day" : "✗ evening-only sight missing on first activity day")
         return ok ? 0 : 1
     }
 
@@ -683,11 +685,11 @@ enum PlanItineraryGoldenTest {
             arrivalTime: "15:00"
         )
         guard let first = trip.days.first else {
-            print("✗ afternoon arrival fill: missing first day")
+            print("✗ afternoon arrival: missing first day")
             return 1
         }
-        let ok = first.isExperienceSuggestions && !first.experienceItems.isEmpty
-        print(ok ? "✓ afternoon arrival fills blank first day" : "✗ first day should show arrival experience card")
+        let ok = !first.isExperienceSuggestions && !first.activities.isEmpty
+        print(ok ? "✓ first activity day keeps sights despite afternoon arrival" : "✗ first day should not be arrival experience card")
         return ok ? 0 : 1
     }
 
@@ -704,7 +706,8 @@ enum PlanItineraryGoldenTest {
         var filled = PlanItineraryDayFill.fillEmptyDays(
             trip.days,
             visitOrder: trip.visitOrder ?? ["beijing", "hangzhou"],
-            arrivalTime: "15:00"
+            arrivalTime: "15:00",
+            activityDaysExcludeCalendarEndpoints: false
         )
         // Simulate day 1 already an arrival experience card (day 2 still blank).
         if let idx = filled.firstIndex(where: { $0.dayIndex == 1 }) {
@@ -1362,6 +1365,46 @@ enum PlanItineraryGoldenTest {
             print("✓ suggestEntryExit returns linear route endpoints")
         }
         return fail
+    }
+
+    private static func testChongqingChengduShortHop() -> Int {
+        let cities = ["chongqing", "chengdu"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 5,
+            attractions: attractions,
+            entryCityId: "chongqing",
+            exitCityId: "chengdu",
+            applyNormalizer: false
+        )
+        let hop = trip.days.first {
+            $0.intercityHop?.fromCityId == "chongqing" && $0.intercityHop?.toCityId == "chengdu"
+        }
+        let ok = hop != nil && !hop!.isExperienceSuggestions
+        print(ok ? "✓ chongqing→chengdu short hop has intercity_hop card" : "✗ ≤2h hop missing intercity card")
+        return ok ? 0 : 1
+    }
+
+    private static func testBlankDayExitCity() -> Int {
+        let sixIds = ["beijing", "nanjing", "suzhou", "hangzhou", "shanghai", "guangzhou"]
+        let attractions = mockCatalog(cities: sixIds, perCity: 4)
+        let trip = PlanItineraryAssembler.build(
+            cities: sixIds,
+            tripDays: 15,
+            attractions: attractions,
+            entryCityId: "beijing",
+            exitCityId: "guangzhou",
+            applyNormalizer: false
+        )
+        guard let last = trip.days.last else {
+            print("✗ blank exit city: no last day")
+            return 1
+        }
+        let cityId = last.experienceCityId ?? last.activities.compactMap(\.cityId).first
+        let ok = cityId == "guangzhou"
+        print(ok ? "✓ trailing blank day uses exit city guangzhou" : "✗ last day city should be guangzhou, got \(cityId ?? "nil")")
+        return ok ? 0 : 1
     }
 
     private static func mockActivity(id: String, cityId: String, name: String) -> ItineraryActivity {

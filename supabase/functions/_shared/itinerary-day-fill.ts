@@ -14,7 +14,11 @@ function isBlankDay(day: ItineraryDay): boolean {
     && (day.experience_items?.length ?? 0) === 0;
 }
 
-function resolveCityId(day: ItineraryDay, visitOrder: string[]): string {
+function resolveCityId(
+  day: ItineraryDay,
+  visitOrder: string[],
+  cityIdByDayIndex?: Record<number, string>,
+): string {
   if (day.experience_city_id) return day.experience_city_id.toLowerCase();
   const actCity = day.activities?.find((a) => a.city_id)?.city_id;
   if (actCity) return actCity.toLowerCase();
@@ -24,8 +28,11 @@ function resolveCityId(day: ItineraryDay, visitOrder: string[]): string {
       if (cityDisplayName(cid).toLowerCase() === name) return cid.toLowerCase();
     }
   }
-  const idx = Math.max(0, day.day_index - 1);
-  return visitOrder[idx]?.toLowerCase() ?? visitOrder[0]?.toLowerCase() ?? "beijing";
+  const timelineCity = cityIdByDayIndex?.[day.day_index];
+  if (timelineCity) return timelineCity.toLowerCase();
+  const idx = day.day_index - 1;
+  if (idx >= 0 && idx < visitOrder.length) return visitOrder[idx].toLowerCase();
+  return visitOrder[visitOrder.length - 1]?.toLowerCase() ?? "beijing";
 }
 
 function experienceItemsForBlankDay(params: {
@@ -36,6 +43,7 @@ function experienceItemsForBlankDay(params: {
   tripDayCount: number;
   arrivalTime?: string | null;
   departureTime?: string | null;
+  activityDaysExcludeCalendarEndpoints?: boolean;
 }): string[] {
   const {
     dayIndex,
@@ -45,8 +53,13 @@ function experienceItemsForBlankDay(params: {
     tripDayCount,
     arrivalTime,
     departureTime,
+    activityDaysExcludeCalendarEndpoints = true,
   } = params;
-  if (dayIndex === firstTripDay && isAfternoonArrival(arrivalTime)) {
+  if (
+    !activityDaysExcludeCalendarEndpoints &&
+    dayIndex === firstTripDay &&
+    isAfternoonArrival(arrivalTime)
+  ) {
     return arrivalAfternoonExperienceItems(cityId);
   }
   if (dayIndex === lastTripDay && tripDayCount > 1 && isMorningDeparture(departureTime)) {
@@ -61,6 +74,8 @@ export function fillEmptyItineraryDays(
   opts?: {
     arrivalTime?: string | null;
     departureTime?: string | null;
+    cityIdByDayIndex?: Record<number, string>;
+    activityDaysExcludeCalendarEndpoints?: boolean;
   },
 ): ItineraryDay[] {
   const dayIndices = days.map((d) => d.day_index).sort((a, b) => a - b);
@@ -70,7 +85,7 @@ export function fillEmptyItineraryDays(
   return days.map((day) => {
     if (day.intercity_hop) return day;
     if (!isBlankDay(day)) return day;
-    const cityId = resolveCityId(day, visitOrder);
+    const cityId = resolveCityId(day, visitOrder, opts?.cityIdByDayIndex);
     const items = experienceItemsForBlankDay({
       dayIndex: day.day_index,
       cityId,
@@ -79,6 +94,7 @@ export function fillEmptyItineraryDays(
       tripDayCount: dayIndices.length,
       arrivalTime: opts?.arrivalTime,
       departureTime: opts?.departureTime,
+      activityDaysExcludeCalendarEndpoints: opts?.activityDaysExcludeCalendarEndpoints,
     });
     return {
       ...day,

@@ -43,6 +43,8 @@ export type ParityExpectV1 = {
   no_duplicate_ids?: boolean;
   visit_order_ends?: [string, string];
   intercity_hop_days_min?: number;
+  intercity_hop_pair?: [string, string];
+  last_day_experience_city_id?: string;
 };
 
 export type ParityVectorV1 = {

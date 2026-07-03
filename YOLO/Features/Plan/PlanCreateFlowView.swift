@@ -875,15 +875,18 @@ struct PlanCreateFlowView: View {
     @ViewBuilder
     private func reviewDaySection(dayIndex: Int, day: ItineraryDay) -> some View {
         let cityNameById = Dictionary(uniqueKeysWithValues: cities.map { ($0.id, $0.name) })
-        let visited = day.isExperienceSuggestions
-            ? (day.experienceCityId.flatMap { cityNameById[$0] } ?? "")
-            : (day.intercityHop != nil
-                ? day.cityName
-                : PlanTripCities.visitedCityNames(
-                    day: day,
-                    cityNameById: cityNameById,
-                    attractionCache: attractionCache
-                ))
+        let visited: String = {
+            if let cid = day.experienceCityId, !cid.isEmpty {
+                return cityNameById[cid] ?? CityTravelHints.displayName(for: cid)
+            }
+            if day.isExperienceSuggestions { return "" }
+            if day.intercityHop != nil { return day.cityName }
+            return PlanTripCities.visitedCityNames(
+                day: day,
+                cityNameById: cityNameById,
+                attractionCache: attractionCache
+            )
+        }()
 
         Section {
             if day.intercityHop != nil && !day.isExperienceSuggestions {
@@ -1391,12 +1394,16 @@ struct PlanCreateFlowView: View {
                 departureTime: departureHHMM
             )
         } else {
+            let annotated = PlanItineraryIntercityAnnotator.annotate(trip.days)
+            let cityMap = timelineCityIdByDay(from: annotated, visitOrder: visitOrder)
             let filledDays = PlanItineraryDayFill.fillEmptyDays(
-                trip.days,
+                annotated,
                 visitOrder: visitOrder,
                 pace: tripPace,
                 arrivalTime: arrivalHHMM,
-                departureTime: departureHHMM
+                departureTime: departureHHMM,
+                cityIdByDayIndex: cityMap,
+                activityDaysExcludeCalendarEndpoints: true
             )
             working = SampleItinerary(
                 id: trip.id,
@@ -1425,6 +1432,7 @@ struct PlanCreateFlowView: View {
             let visitOrder = normalized.visitOrder ?? cityIds
             while alignedDays.count < activityDays {
                 let nextIndex = alignedDays.count + 1
+                let cityMap = timelineCityIdByDay(from: alignedDays, visitOrder: visitOrder)
                 let filler = PlanItineraryDayFill.fillEmptyDays(
                     [ItineraryDay(
                         id: "day_\(nextIndex)",
@@ -1437,7 +1445,9 @@ struct PlanCreateFlowView: View {
                     visitOrder: visitOrder,
                     pace: tripPace,
                     arrivalTime: arrivalHHMM,
-                    departureTime: departureHHMM
+                    departureTime: departureHHMM,
+                    cityIdByDayIndex: cityMap,
+                    activityDaysExcludeCalendarEndpoints: true
                 ).first ?? ItineraryDay(
                     id: "day_\(nextIndex)",
                     dayIndex: nextIndex,
@@ -1497,6 +1507,25 @@ struct PlanCreateFlowView: View {
             ),
             pace: tripPace.rawValue
         )
+    }
+
+    private func timelineCityIdByDay(from days: [ItineraryDay], visitOrder: [String]) -> [Int: String] {
+        var map: [Int: String] = [:]
+        for day in days {
+            if let cid = day.experienceCityId?.lowercased(), !cid.isEmpty {
+                map[day.dayIndex] = cid
+            } else if let hop = day.intercityHop {
+                map[day.dayIndex] = hop.toCityId.lowercased()
+            } else if let cid = day.activities.compactMap(\.cityId).first?.lowercased(), !cid.isEmpty {
+                map[day.dayIndex] = cid
+            }
+        }
+        if let exit = visitOrder.last?.lowercased() {
+            for index in 1...activityDays where map[index] == nil {
+                map[index] = exit
+            }
+        }
+        return map
     }
 
     private func loadAttractionCache(for trip: SampleItinerary) async {

@@ -7,7 +7,9 @@ enum PlanItineraryDayFill {
         visitOrder: [String],
         pace: TripPace = .standard,
         arrivalTime: String? = nil,
-        departureTime: String? = nil
+        departureTime: String? = nil,
+        cityIdByDayIndex: [Int: String] = [:],
+        activityDaysExcludeCalendarEndpoints: Bool = true
     ) -> [ItineraryDay] {
         let dayIndices = days.map(\.dayIndex).sorted()
         let firstTripDay = dayIndices.first
@@ -17,7 +19,11 @@ enum PlanItineraryDayFill {
         return days.map { day in
             if day.intercityHop != nil { return day }
             guard isBlank(day) else { return day }
-            let cityId = resolveCityId(for: day, visitOrder: order)
+            let cityId = resolveCityId(
+                for: day,
+                visitOrder: order,
+                cityIdByDayIndex: cityIdByDayIndex
+            )
             let items = experienceItems(
                 dayIndex: day.dayIndex,
                 cityId: cityId,
@@ -25,7 +31,8 @@ enum PlanItineraryDayFill {
                 lastTripDay: lastTripDay,
                 tripDayCount: dayIndices.count,
                 arrivalTime: arrivalTime,
-                departureTime: departureTime
+                departureTime: departureTime,
+                activityDaysExcludeCalendarEndpoints: activityDaysExcludeCalendarEndpoints
             )
             return ItineraryDay(
                 id: day.id,
@@ -53,11 +60,12 @@ enum PlanItineraryDayFill {
         lastTripDay: Int?,
         tripDayCount: Int,
         arrivalTime: String?,
-        departureTime: String?
+        departureTime: String?,
+        activityDaysExcludeCalendarEndpoints: Bool
     ) -> [String] {
-        // Trip-wide flight profile: only calendar day 1 / last activity day — not
-        // "first blank sightseeing row" after day 1 became an experience card.
-        if dayIndex == firstTripDay, PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
+        if !activityDaysExcludeCalendarEndpoints,
+           dayIndex == firstTripDay,
+           PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
             return CityTravelHints.arrivalAfternoonExperienceItems(cityId: cityId)
         }
         if dayIndex == lastTripDay, tripDayCount > 1,
@@ -67,7 +75,11 @@ enum PlanItineraryDayFill {
         return CityTravelHints.flexibleRestDayItems(cityId: cityId)
     }
 
-    private static func resolveCityId(for day: ItineraryDay, visitOrder: [String]) -> String {
+    private static func resolveCityId(
+        for day: ItineraryDay,
+        visitOrder: [String],
+        cityIdByDayIndex: [Int: String]
+    ) -> String {
         if let cid = day.experienceCityId?.lowercased(), !cid.isEmpty { return cid }
         if let cid = day.activities.compactMap(\.cityId).first, !cid.isEmpty { return cid.lowercased() }
         let normalizedName = day.cityName.lowercased()
@@ -76,8 +88,11 @@ enum PlanItineraryDayFill {
                 if CityTravelHints.displayName(for: cid).lowercased() == normalizedName { return cid }
             }
         }
-        let idx = max(0, day.dayIndex - 1)
-        if idx < visitOrder.count { return visitOrder[idx] }
-        return visitOrder.first ?? "beijing"
+        if let timelineCity = cityIdByDayIndex[day.dayIndex]?.lowercased(), !timelineCity.isEmpty {
+            return timelineCity
+        }
+        let idx = day.dayIndex - 1
+        if idx >= 0, idx < visitOrder.count { return visitOrder[idx] }
+        return visitOrder.last ?? "beijing"
     }
 }

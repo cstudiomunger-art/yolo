@@ -16,6 +16,8 @@ import { runItinerarySchedulerPipeline, type IntercityHopDay } from "./itinerary
 import { parsePace, defaultPace } from "./itinerary-pace.ts";
 import { seasonHintsForTrip } from "./itinerary-season-hints.ts";
 import { fillEmptyItineraryDays } from "./itinerary-day-fill.ts";
+import { annotateIntercityHops } from "./annotate-intercity-hops.ts";
+import { regionMap } from "./itinerary-city-days.ts";
 
 export type AttractionRow = {
   id: string;
@@ -330,6 +332,7 @@ export function assembleItinerary(params: {
   estimatedBudget?: string;
   startDate?: Date | null;
   timeHintsByAttractionId?: Map<string, "morning" | "afternoon" | "evening">;
+  cityIdByDayIndex?: Record<number, string>;
 }): SampleItinerary {
   const {
     tripDays,
@@ -458,15 +461,19 @@ export function assembleItinerary(params: {
       activities.push(buildActivity(row, dayIndex, actIndex, preferred));
     });
 
+    const timelineCity = params.cityIdByDayIndex?.[dayIndex];
     const day: ItineraryDay = {
       id: `day_${dayIndex}`,
       day_index: dayIndex,
       date_label: `Day ${dayIndex}`,
-      city_name: "",
+      city_name: timelineCity ? cityDisplayName(timelineCity) : "",
       cost_estimate: null,
       activities,
+      experience_city_id: timelineCity,
     };
-    day.city_name = dayCityLabel(day);
+    if (!timelineCity) {
+      day.city_name = dayCityLabel(day);
+    }
     days.push(day);
   }
 
@@ -688,11 +695,16 @@ export function buildItineraryPipeline(params: {
     estimatedBudget,
     startDate: parsedStartDate,
     timeHintsByAttractionId: scheduled.timeHintsByAttractionId,
+    cityIdByDayIndex: scheduled.cityIdByDayIndex,
   });
 
-  const filledDays = fillEmptyItineraryDays(itinerary.days, scheduled.visitOrder, {
+  const regionByCity = regionMap(params.citiesMeta);
+  const annotatedDays = annotateIntercityHops(itinerary.days, regionByCity);
+  const filledDays = fillEmptyItineraryDays(annotatedDays, scheduled.visitOrder, {
     arrivalTime: params.arrivalTime,
     departureTime: params.departureTime,
+    cityIdByDayIndex: scheduled.cityIdByDayIndex,
+    activityDaysExcludeCalendarEndpoints: true,
   });
 
   const tripMonth = parsedStartDate ? parsedStartDate.getMonth() + 1 : new Date().getMonth() + 1;

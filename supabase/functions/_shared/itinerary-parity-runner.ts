@@ -170,6 +170,26 @@ export function assertParityExpect(
     }
   }
 
+  if (expect.intercity_hop_pair) {
+    const [from, to] = expect.intercity_hop_pair;
+    const found = trip.days.some((d) =>
+      d.intercity_hop?.from_city_id?.toLowerCase() === from.toLowerCase()
+      && d.intercity_hop?.to_city_id?.toLowerCase() === to.toLowerCase()
+    );
+    if (!found) {
+      errors.push(`expected intercity hop ${from}→${to}, not found`);
+    }
+  }
+
+  if (expect.last_day_experience_city_id) {
+    const last = trip.days[trip.days.length - 1];
+    const cityId = last?.experience_city_id?.toLowerCase()
+      ?? last?.activities.find((a) => a.city_id)?.city_id?.toLowerCase();
+    if (cityId !== expect.last_day_experience_city_id.toLowerCase()) {
+      errors.push(`last day city expected ${expect.last_day_experience_city_id}, got ${cityId ?? "none"}`);
+    }
+  }
+
   for (const id of expect.dropped_ids ?? []) {
     const scheduled = trip.days.some((d) =>
       d.activities.some((a) => a.attraction_id === id)

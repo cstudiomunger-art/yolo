@@ -72,6 +72,10 @@ enum CityTravelHints {
         return 2
     }
 
+    static func isIntercityHopKind(_ kind: String) -> Bool {
+        kind == "hop" || kind == "travel_lite" || kind == "short_hop"
+    }
+
     static func canVisitSameDay(_ a: String, _ b: String, regionByCity: [String: String?] = [:]) -> Bool {
         commuteSlots(travelHours(a, b, regionByCity: regionByCity)) == 0
     }

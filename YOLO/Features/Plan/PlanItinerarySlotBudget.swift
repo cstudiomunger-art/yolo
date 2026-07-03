@@ -27,6 +27,9 @@ enum PlanItinerarySlotBudget {
            CityTravelHints.canIntenseSameDayHop(hop.fromCityId, hop.toCityId) {
             return PlanItineraryPace.hopDaySlotCapacity
         }
+        if CityTravelHints.commuteSlots(hop.travelHours) == 0 {
+            return PlanItineraryDuration.daySlotCapacity(.fullDay)
+        }
         return 1
     }
 
@@ -95,7 +98,8 @@ enum PlanItinerarySlotBudget {
         days: [ItineraryDay],
         pace: TripPace,
         arrivalTime: String? = nil,
-        departureTime: String? = nil
+        departureTime: String? = nil,
+        activityDaysExcludeCalendarEndpoints: Bool = true
     ) -> Double {
         let sightseeingIndices = days
             .filter { !$0.isExperienceSuggestions && $0.intercityHop == nil }
@@ -112,12 +116,19 @@ enum PlanItinerarySlotBudget {
         let lastSight = sightseeingIndices.last
 
         var profile: DayScheduleProfile = .fullDay
-        if dayIndex == firstSight { profile = .arrivalDay }
-        if dayIndex == lastSight, sightseeingIndices.count > 1 { profile = .departureDay }
+        if !activityDaysExcludeCalendarEndpoints, dayIndex == firstSight { profile = .arrivalDay }
+        if dayIndex == lastSight, sightseeingIndices.count > 1 {
+            if !activityDaysExcludeCalendarEndpoints
+                || PlanItineraryFlightTimes.isMorningDeparture(departureTime) {
+                profile = .departureDay
+            }
+        }
 
         var capacity = PlanItineraryPace.daySlotCapacity(profile: profile, pace: pace)
 
-        if dayIndex == firstSight, PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
+        if !activityDaysExcludeCalendarEndpoints,
+           dayIndex == firstSight,
+           PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
             capacity = 0
         }
         if dayIndex == lastSight, PlanItineraryFlightTimes.isMorningDeparture(departureTime) {
