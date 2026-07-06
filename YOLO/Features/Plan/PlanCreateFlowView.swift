@@ -195,7 +195,11 @@ struct PlanCreateFlowView: View {
         }
         .sheet(item: $addAttractionContext) { ctx in
             PlanAttractionPickerSheet(cityIds: ctx.cityIds, dayIndex: ctx.dayIndex) { attraction in
-                appendAttraction(attraction, dayIndex: ctx.dayIndex)
+                if let bookend = ctx.bookend {
+                    appendBookendAttraction(attraction, bookend: bookend)
+                } else {
+                    appendAttraction(attraction, dayIndex: ctx.dayIndex)
+                }
                 addAttractionContext = nil
             }
         }
@@ -989,33 +993,27 @@ struct PlanCreateFlowView: View {
             let entryId = resolvedEntryCityId()
             let name = cities.first(where: { $0.id.lowercased() == entryId.lowercased() })?.name
                 ?? CityTravelHints.displayName(for: entryId)
-            let order = draftItinerary.visitOrder ?? reviewTripCityIds()
-            let linkedIdx = CityTravelHints.entrySightseeingDayArrayIndex(
-                days: draftItinerary.days,
-                visitOrder: order,
-                entryCityId: entryId
-            )
-            let linkedDay = linkedIdx.map { draftItinerary.days[$0] }
+            let bookendActivities = draftItinerary.internationalArrivalActivities ?? []
             InternationalEndpointDaySection(
                 kind: .inbound,
                 cityId: entryId,
                 cityDisplayName: name,
                 calendarDate: draftItinerary.startDate ?? arrivalDate,
                 flightTime: draftItinerary.internationalArrivalTime,
-                linkedDay: linkedDay,
+                activities: bookendActivities,
                 onTimeChange: applyInternationalArrivalTime
             ) {
-                if let linkedIdx {
-                    ForEach(draftItinerary.days[linkedIdx].activities) { activity in
-                        reviewActivityRow(activity, dayIndex: linkedIdx)
-                    }
+                ForEach(bookendActivities) { activity in
+                    reviewBookendActivityRow(activity, bookend: .arrival)
                 }
             } addAttractionButton: {
-                if reviewEditMode == .inactive, let linkedIdx {
+                if reviewEditMode == .inactive,
+                   PlanItineraryFlightTimes.hasMeaningfulTime(draftItinerary.internationalArrivalTime) {
                     Button {
                         addAttractionContext = PlanAddAttractionContext(
-                            dayIndex: linkedIdx,
-                            cityIds: [entryId]
+                            dayIndex: 0,
+                            cityIds: [entryId],
+                            bookend: .arrival
                         )
                     } label: {
                         Label(String(localized: "Add attraction"), systemImage: "plus")
@@ -1034,33 +1032,27 @@ struct PlanCreateFlowView: View {
             let exitId = resolvedExitCityId()
             let name = cities.first(where: { $0.id.lowercased() == exitId.lowercased() })?.name
                 ?? CityTravelHints.displayName(for: exitId)
-            let order = draftItinerary.visitOrder ?? reviewTripCityIds()
-            let linkedIdx = CityTravelHints.exitSightseeingDayArrayIndex(
-                days: draftItinerary.days,
-                visitOrder: order,
-                exitCityId: exitId
-            )
-            let linkedDay = linkedIdx.map { draftItinerary.days[$0] }
+            let bookendActivities = draftItinerary.internationalDepartureActivities ?? []
             InternationalEndpointDaySection(
                 kind: .outbound,
                 cityId: exitId,
                 cityDisplayName: name,
                 calendarDate: draftItinerary.endDate ?? departureDate,
                 flightTime: draftItinerary.internationalDepartureTime,
-                linkedDay: linkedDay,
+                activities: bookendActivities,
                 onTimeChange: applyInternationalDepartureTime
             ) {
-                if let linkedIdx {
-                    ForEach(draftItinerary.days[linkedIdx].activities) { activity in
-                        reviewActivityRow(activity, dayIndex: linkedIdx)
-                    }
+                ForEach(bookendActivities) { activity in
+                    reviewBookendActivityRow(activity, bookend: .departure)
                 }
             } addAttractionButton: {
-                if reviewEditMode == .inactive, let linkedIdx {
+                if reviewEditMode == .inactive,
+                   PlanItineraryFlightTimes.hasMeaningfulTime(draftItinerary.internationalDepartureTime) {
                     Button {
                         addAttractionContext = PlanAddAttractionContext(
-                            dayIndex: linkedIdx,
-                            cityIds: [exitId]
+                            dayIndex: 0,
+                            cityIds: [exitId],
+                            bookend: .departure
                         )
                     } label: {
                         Label(String(localized: "Add attraction"), systemImage: "plus")
@@ -1073,36 +1065,6 @@ struct PlanCreateFlowView: View {
         }
     }
 
-    private func bookendRelocation(for day: ItineraryDay) -> CityTravelHints.BookendActivityRelocation {
-        guard let trip = draftItinerary else { return .none }
-        let order = trip.visitOrder ?? reviewTripCityIds()
-        return CityTravelHints.bookendActivityRelocation(
-            day: day,
-            days: trip.days,
-            visitOrder: order,
-            entryCityId: resolvedEntryCityId(),
-            exitCityId: resolvedExitCityId(),
-            arrivalTime: trip.internationalArrivalTime,
-            departureTime: trip.internationalDepartureTime
-        )
-    }
-
-    @ViewBuilder
-    private func bookendRelocationHint(_ relocation: CityTravelHints.BookendActivityRelocation) -> some View {
-        let text: LocalizedStringKey = switch relocation {
-        case .arrivalCard: "Planned sights shown under International arrival above"
-        case .departureCard: "Planned sights shown under International departure below"
-        case .none: ""
-        }
-        Text(text)
-            .font(Theme.FontToken.inter(11))
-            .foregroundStyle(Theme.ColorToken.textMuted)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-    }
-
     @ViewBuilder
     private func reviewDaySection(dayIndex: Int, day: ItineraryDay) -> some View {
         let cityNameById = Dictionary(uniqueKeysWithValues: cities.map { ($0.id, $0.name) })
@@ -1111,12 +1073,9 @@ struct PlanCreateFlowView: View {
             cityNameById: cityNameById,
             attractionCache: attractionCache
         )
-        let relocation = bookendRelocation(for: day)
 
         Section {
-            if relocation != .none {
-                bookendRelocationHint(relocation)
-            } else if let hop = day.intercityHop, day.isExperienceSuggestions {
+            if let hop = day.intercityHop, day.isExperienceSuggestions {
                 let displayDay = day
                 ExperienceSuggestionsDayCard(
                     day: displayDay,
@@ -1325,6 +1284,69 @@ struct PlanCreateFlowView: View {
             .padding(.horizontal, Theme.screenPadding)
             .padding(.top, 8)
         }
+    }
+
+    private func reviewBookendActivityRow(
+        _ activity: ItineraryActivity,
+        bookend: PlanAddAttractionContext.InternationalBookend
+    ) -> some View {
+        let entryId = resolvedEntryCityId()
+        let exitId = resolvedExitCityId()
+        let cityId = bookend == .arrival ? entryId : exitId
+        let cityLabel = cities.first(where: { $0.id.lowercased() == cityId.lowercased() })?.name
+
+        return HStack(alignment: .top, spacing: 12) {
+            Button {
+                if let aid = activity.attractionId {
+                    appEnv.navigation.openGuide(
+                        attractionId: aid,
+                        cityId: activity.cityId ?? cityId,
+                        presentation: .planDay(dayIndex: 0)
+                    )
+                }
+            } label: {
+                HStack(alignment: .top, spacing: 12) {
+                    if let aid = activity.attractionId,
+                       let path = attractionCache[aid]?.coverImagePath ?? attractionCache[aid]?.coverImages.first {
+                        CoverImageView(path: path, height: 72, cornerRadius: 4)
+                            .frame(width: 72, height: 72)
+                            .fixedSize()
+                    } else {
+                        CoverImageView(path: nil, height: 72, cornerRadius: 4)
+                            .frame(width: 72, height: 72)
+                            .fixedSize()
+                    }
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let cityLabel {
+                            Text(cityLabel)
+                                .font(Theme.FontToken.inter(10, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.textDisabled)
+                        }
+                        Text(activity.name)
+                            .font(Theme.FontToken.inter(13, weight: .medium))
+                            .foregroundStyle(Theme.ColorToken.textPrimary)
+                        Text(HTMLContentView.plainText(from: activity.detail))
+                            .font(Theme.FontToken.inter(11))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                            .lineLimit(3)
+                    }
+                    Spacer(minLength: 0)
+                }
+            }
+            .buttonStyle(.plain)
+
+            if reviewEditMode == .inactive {
+                Button {
+                    removeBookendActivity(bookend: bookend, activityId: activity.id)
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.ColorToken.urgent)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.vertical, 4)
     }
 
     private func reviewActivityRow(_ activity: ItineraryActivity, dayIndex: Int) -> some View {
@@ -1858,8 +1880,12 @@ struct PlanCreateFlowView: View {
         _ days: [ItineraryDay],
         trip: SampleItinerary,
         arrivalTime: String?,
-        departureTime: String?
+        departureTime: String?,
+        skipFill: Bool = false
     ) -> [ItineraryDay] {
+        if skipFill {
+            return days
+        }
         let visitOrder = trip.visitOrder ?? reviewTripCityIds()
         let cityMap = PlanItineraryIntercityAnnotator.completeCityIdByDayIndex(
             from: days,
@@ -1977,7 +2003,10 @@ struct PlanCreateFlowView: View {
         internationalArrivalTime: String?? = nil,
         internationalDepartureTime: String?? = nil,
         droppedAttractionIds: [String] = [],
-        endpointScheduleBaselineDays: [ItineraryDay]?? = nil
+        endpointScheduleBaselineDays: [ItineraryDay]?? = nil,
+        internationalArrivalActivities: [ItineraryActivity]?? = nil,
+        internationalDepartureActivities: [ItineraryActivity]?? = nil,
+        skipActivityDayFill: Bool = false
     ) {
         guard let trip = draftItinerary else { return }
         let adj: [String]?
@@ -1991,11 +2020,14 @@ struct PlanCreateFlowView: View {
         let resolvedArrival = internationalArrivalTime ?? trip.internationalArrivalTime
         let resolvedDeparture = internationalDepartureTime ?? trip.internationalDepartureTime
         let resolvedBaseline = endpointScheduleBaselineDays ?? trip.endpointScheduleBaselineDays
+        let resolvedArrivalActivities = internationalArrivalActivities ?? trip.internationalArrivalActivities
+        let resolvedDepartureActivities = internationalDepartureActivities ?? trip.internationalDepartureActivities
         let filledDays = fillDaysAfterReplan(
             days,
             trip: trip,
             arrivalTime: resolvedArrival,
-            departureTime: resolvedDeparture
+            departureTime: resolvedDeparture,
+            skipFill: skipActivityDayFill
         )
         draftItinerary = SampleItinerary(
             id: trip.id,
@@ -2016,7 +2048,9 @@ struct PlanCreateFlowView: View {
             pace: trip.pace,
             internationalArrivalTime: resolvedArrival,
             internationalDepartureTime: resolvedDeparture,
-            endpointScheduleBaselineDays: resolvedBaseline
+            endpointScheduleBaselineDays: resolvedBaseline,
+            internationalArrivalActivities: resolvedArrivalActivities,
+            internationalDepartureActivities: resolvedDepartureActivities
         )
     }
 
@@ -2064,6 +2098,22 @@ struct PlanCreateFlowView: View {
             options: endpointReplannerOptions(for: trip)
         )
 
+        var arrivalActivities = trip.internationalArrivalActivities
+        var departureActivities = trip.internationalDepartureActivities
+        if clearingArrival || finalArrival == nil {
+            arrivalActivities = nil
+        }
+        if clearingDeparture || finalDeparture == nil {
+            departureActivities = nil
+        }
+
+        let restoredDays: [ItineraryDay]
+        if finalArrival == nil, finalDeparture == nil {
+            restoredDays = baseline
+        } else {
+            restoredDays = result.days
+        }
+
         let schedulingAdj: [String]?
         if clearingArrival || clearingDeparture {
             if finalArrival == nil, finalDeparture == nil {
@@ -2080,13 +2130,16 @@ struct PlanCreateFlowView: View {
         }
 
         replaceReviewDays(
-            result.days,
+            restoredDays,
             extraAdjustments: clearingArrival || clearingDeparture ? [] : result.adjustments,
             schedulingAdjustments: schedulingAdj,
             internationalArrivalTime: .some(finalArrival),
             internationalDepartureTime: .some(finalDeparture),
             droppedAttractionIds: result.droppedAttractionIds,
-            endpointScheduleBaselineDays: .some(trip.endpointScheduleBaselineDays ?? baseline)
+            endpointScheduleBaselineDays: .some(trip.endpointScheduleBaselineDays ?? baseline),
+            internationalArrivalActivities: .some(arrivalActivities),
+            internationalDepartureActivities: .some(departureActivities),
+            skipActivityDayFill: finalArrival != nil || finalDeparture != nil
         )
     }
 
@@ -2127,6 +2180,42 @@ struct PlanCreateFlowView: View {
                 clearingDeparture: departureTime == nil
             )
         }
+    }
+
+    private func removeBookendActivity(
+        bookend: PlanAddAttractionContext.InternationalBookend,
+        activityId: String
+    ) {
+        guard let trip = draftItinerary else { return }
+        switch bookend {
+        case .arrival:
+            let filtered = (trip.internationalArrivalActivities ?? []).filter { $0.id != activityId }
+            draftItinerary = trip
+                .withInternationalArrivalActivities(filtered.isEmpty ? nil : filtered)
+                .markingUserEdited()
+        case .departure:
+            let filtered = (trip.internationalDepartureActivities ?? []).filter { $0.id != activityId }
+            draftItinerary = trip
+                .withInternationalDepartureActivities(filtered.isEmpty ? nil : filtered)
+                .markingUserEdited()
+        }
+    }
+
+    private func appendBookendAttraction(
+        _ attraction: Attraction,
+        bookend: PlanAddAttractionContext.InternationalBookend
+    ) {
+        guard let trip = draftItinerary else { return }
+        let activity = PlanItineraryHelpers.activity(from: attraction)
+        switch bookend {
+        case .arrival:
+            let merged = (trip.internationalArrivalActivities ?? []) + [activity]
+            draftItinerary = trip.withInternationalArrivalActivities(merged).markingUserEdited()
+        case .departure:
+            let merged = (trip.internationalDepartureActivities ?? []) + [activity]
+            draftItinerary = trip.withInternationalDepartureActivities(merged).markingUserEdited()
+        }
+        attractionCache[attraction.id] = attraction
     }
 
     private func removeActivity(dayIndex: Int, activityId: String) {

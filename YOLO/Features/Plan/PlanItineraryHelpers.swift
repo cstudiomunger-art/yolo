@@ -1,9 +1,21 @@
 import Foundation
 
 struct PlanAddAttractionContext: Identifiable {
+    enum InternationalBookend {
+        case arrival
+        case departure
+    }
+
     let id = UUID()
     let dayIndex: Int
     let cityIds: [String]
+    let bookend: InternationalBookend?
+
+    init(dayIndex: Int, cityIds: [String], bookend: InternationalBookend? = nil) {
+        self.dayIndex = dayIndex
+        self.cityIds = cityIds
+        self.bookend = bookend
+    }
 }
 
 enum PlanTripCities {
@@ -58,7 +70,9 @@ enum PlanItineraryHelpers {
         content: any ContentRepositoryProtocol
     ) async -> [String: Attraction] {
         var cache: [String: Attraction] = [:]
-        let ids = Set(trip.days.flatMap(\.activities).compactMap(\.attractionId))
+        var ids = Set(trip.days.flatMap(\.activities).compactMap(\.attractionId))
+        ids.formUnion((trip.internationalArrivalActivities ?? []).compactMap(\.attractionId))
+        ids.formUnion((trip.internationalDepartureActivities ?? []).compactMap(\.attractionId))
         for id in ids {
             if let a = try? await content.fetchAttraction(id: id) {
                 cache[id] = a

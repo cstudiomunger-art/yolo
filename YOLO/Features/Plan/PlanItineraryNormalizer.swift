@@ -122,7 +122,12 @@ enum PlanItineraryNormalizer {
             droppedAttractionIds: trip.droppedAttractionIds,
             schedulingAdjustments: adjustments.isEmpty ? nil : adjustments,
             seasonHints: trip.seasonHints,
-            pace: trip.pace
+            pace: trip.pace,
+            internationalArrivalTime: trip.internationalArrivalTime,
+            internationalDepartureTime: trip.internationalDepartureTime,
+            endpointScheduleBaselineDays: trip.endpointScheduleBaselineDays,
+            internationalArrivalActivities: trip.internationalArrivalActivities,
+            internationalDepartureActivities: trip.internationalDepartureActivities
         )
     }
 
@@ -268,7 +273,12 @@ enum PlanItineraryNormalizer {
             droppedAttractionIds: trip.droppedAttractionIds,
             schedulingAdjustments: adjustments.isEmpty ? nil : adjustments,
             seasonHints: trip.seasonHints,
-            pace: trip.pace
+            pace: trip.pace,
+            internationalArrivalTime: trip.internationalArrivalTime,
+            internationalDepartureTime: trip.internationalDepartureTime,
+            endpointScheduleBaselineDays: trip.endpointScheduleBaselineDays,
+            internationalArrivalActivities: trip.internationalArrivalActivities,
+            internationalDepartureActivities: trip.internationalDepartureActivities
         )
     }
 

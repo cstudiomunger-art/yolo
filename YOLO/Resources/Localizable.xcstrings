@@ -460,6 +460,16 @@
         }
       }
     },
+    "Afternoon arrival in %@ — light sightseeing" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下午抵达 %@ — 轻松 1 站 + 可选晚间"
+          }
+        }
+      }
+    },
     "Afternoon departure — morning sights still possible" : {
       "localizations" : {
         "zh-Hans" : {
@@ -921,6 +931,16 @@
     "Drag to reorder days and activities. Tap Done when finished." : {
 
     },
+    "Early arrival — full day in %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清晨抵达 — 全天可在 %@ 游玩"
+          }
+        }
+      }
+    },
     "Edit" : {
 
     },
@@ -1327,6 +1347,16 @@
     "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig." : {
 
     },
+    "Morning arrival — afternoon in %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上午抵达 — 下午在 %@ 游玩"
+          }
+        }
+      }
+    },
     "Morning arrival — full sightseeing day" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1343,36 +1373,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上午赶路 — 下午在 %@ 游玩"
-          }
-        }
-      }
-    },
-    "Early arrival — full day in %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "清晨抵达 — 全天可在 %@ 游玩"
-          }
-        }
-      }
-    },
-    "Afternoon arrival in %@ — light sightseeing" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下午抵达 %@ — 轻松 1 站 + 可选晚间"
-          }
-        }
-      }
-    },
-    "Morning arrival — afternoon in %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上午抵达 — 下午在 %@ 游玩"
           }
         }
       }
@@ -1574,6 +1574,7 @@
       }
     },
     "Planned sights shown under International arrival above" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1613,6 +1614,26 @@
     },
     "Popular" : {
 
+    },
+    "Post-arrival itinerary" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抵达后行程"
+          }
+        }
+      }
+    },
+    "Post-arrival sights shown under International arrival above" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抵达后行程已移至上方「国际入境」卡片"
+          }
+        }
+      }
     },
     "Practical Info" : {
 
@@ -1857,6 +1878,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在下方设置落地时间"
+          }
+        }
+      }
+    },
+    "Set your landing time to plan sights for the arrival window." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置落地时间后将按抵达窗口规划"
           }
         }
       }

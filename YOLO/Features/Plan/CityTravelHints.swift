@@ -370,6 +370,34 @@ enum CityTravelHints {
         return lines
     }
 
+    /// International arrival event day (day 1 / trip start) — not the first full sightseeing day.
+    static func resolveArrivalEventDayIndex(
+        days: [ItineraryDay],
+        startDate: Date? = nil
+    ) -> Int? {
+        guard !days.isEmpty else { return nil }
+        if let startDate {
+            let cal = Calendar.current
+            let start = cal.startOfDay(for: startDate)
+            if let match = days.first(where: { day in
+                guard day.dayIndex >= 1 else { return false }
+                guard let date = cal.date(byAdding: .day, value: day.dayIndex - 1, to: start) else { return false }
+                return cal.isDate(date, inSameDayAs: start)
+            }) {
+                return match.dayIndex
+            }
+        }
+        return days.first(where: { $0.dayIndex == 1 })?.dayIndex ?? days.first?.dayIndex
+    }
+
+    static func arrivalEventDayArrayIndex(
+        days: [ItineraryDay],
+        startDate: Date? = nil
+    ) -> Int? {
+        guard let dayIndex = resolveArrivalEventDayIndex(days: days, startDate: startDate) else { return nil }
+        return days.firstIndex(where: { $0.dayIndex == dayIndex })
+    }
+
     /// First sightseeing day in the entry city (mirrors scheduler `firstEntrySight`).
     static func resolveEntrySightseeingDayIndex(
         days: [ItineraryDay],
@@ -439,26 +467,7 @@ enum CityTravelHints {
         arrivalTime: String?,
         departureTime: String?
     ) -> BookendActivityRelocation {
-        if PlanItineraryFlightTimes.hasMeaningfulTime(arrivalTime),
-           let entryIdx = resolveEntrySightseeingDayIndex(
-               days: days,
-               visitOrder: visitOrder,
-               entryCityId: entryCityId
-           ),
-           day.dayIndex == entryIdx,
-           !day.activities.isEmpty {
-            return .arrivalCard
-        }
-        if PlanItineraryFlightTimes.hasMeaningfulTime(departureTime),
-           let exitIdx = resolveExitSightseeingDayIndex(
-               days: days,
-               visitOrder: visitOrder,
-               exitCityId: exitCityId
-           ),
-           day.dayIndex == exitIdx,
-           !day.activities.isEmpty {
-            return .departureCard
-        }
+        _ = (day, days, visitOrder, entryCityId, exitCityId, arrivalTime, departureTime)
         return .none
     }
 

@@ -31,6 +31,10 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
     var internationalDepartureTime: String?
     /// Days before any international endpoint replan (for toggle-off restore).
     var endpointScheduleBaselineDays: [ItineraryDay]?
+    /// Manual sights on the calendar arrival bookend (not stored in `days`).
+    var internationalArrivalActivities: [ItineraryActivity]?
+    /// Manual sights on the calendar departure bookend (not stored in `days`).
+    var internationalDepartureActivities: [ItineraryActivity]?
 
     init(
         id: String,
@@ -51,7 +55,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         pace: String? = nil,
         internationalArrivalTime: String? = nil,
         internationalDepartureTime: String? = nil,
-        endpointScheduleBaselineDays: [ItineraryDay]? = nil
+        endpointScheduleBaselineDays: [ItineraryDay]? = nil,
+        internationalArrivalActivities: [ItineraryActivity]? = nil,
+        internationalDepartureActivities: [ItineraryActivity]? = nil
     ) {
         self.id = id
         self.title = title
@@ -72,6 +78,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         self.internationalArrivalTime = internationalArrivalTime
         self.internationalDepartureTime = internationalDepartureTime
         self.endpointScheduleBaselineDays = endpointScheduleBaselineDays
+        self.internationalArrivalActivities = internationalArrivalActivities
+        self.internationalDepartureActivities = internationalDepartureActivities
     }
 
     init(from decoder: Decoder) throws {
@@ -95,6 +103,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         internationalArrivalTime = try c.decodeIfPresent(String.self, forKey: .internationalArrivalTime)
         internationalDepartureTime = try c.decodeIfPresent(String.self, forKey: .internationalDepartureTime)
         endpointScheduleBaselineDays = try c.decodeIfPresent([ItineraryDay].self, forKey: .endpointScheduleBaselineDays)
+        internationalArrivalActivities = try c.decodeIfPresent([ItineraryActivity].self, forKey: .internationalArrivalActivities)
+        internationalDepartureActivities = try c.decodeIfPresent([ItineraryActivity].self, forKey: .internationalDepartureActivities)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -118,6 +128,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         try c.encodeIfPresent(internationalArrivalTime, forKey: .internationalArrivalTime)
         try c.encodeIfPresent(internationalDepartureTime, forKey: .internationalDepartureTime)
         try c.encodeIfPresent(endpointScheduleBaselineDays, forKey: .endpointScheduleBaselineDays)
+        try c.encodeIfPresent(internationalArrivalActivities, forKey: .internationalArrivalActivities)
+        try c.encodeIfPresent(internationalDepartureActivities, forKey: .internationalDepartureActivities)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -131,6 +143,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         case internationalArrivalTime = "international_arrival_time"
         case internationalDepartureTime = "international_departure_time"
         case endpointScheduleBaselineDays = "endpoint_schedule_baseline_days"
+        case internationalArrivalActivities = "international_arrival_activities"
+        case internationalDepartureActivities = "international_departure_activities"
     }
 
     /// Copy with replaced days; preserves share state and trip dates.
@@ -154,7 +168,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             pace: pace,
             internationalArrivalTime: internationalArrivalTime,
             internationalDepartureTime: internationalDepartureTime,
-            endpointScheduleBaselineDays: endpointScheduleBaselineDays
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays,
+            internationalArrivalActivities: internationalArrivalActivities,
+            internationalDepartureActivities: internationalDepartureActivities
         )
     }
 
@@ -180,7 +196,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             pace: pace,
             internationalArrivalTime: internationalArrivalTime,
             internationalDepartureTime: internationalDepartureTime,
-            endpointScheduleBaselineDays: baselineDays
+            endpointScheduleBaselineDays: baselineDays,
+            internationalArrivalActivities: internationalArrivalActivities,
+            internationalDepartureActivities: internationalDepartureActivities
         )
     }
 
@@ -204,7 +222,61 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             pace: pace,
             internationalArrivalTime: arrival,
             internationalDepartureTime: departure,
-            endpointScheduleBaselineDays: endpointScheduleBaselineDays
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays,
+            internationalArrivalActivities: internationalArrivalActivities,
+            internationalDepartureActivities: internationalDepartureActivities
+        )
+    }
+
+    func withInternationalArrivalActivities(_ activities: [ItineraryActivity]?) -> SampleItinerary {
+        SampleItinerary(
+            id: id,
+            title: title,
+            meta: meta,
+            routeSummary: routeSummary,
+            estimatedBudget: estimatedBudget,
+            days: days,
+            shareSlug: shareSlug,
+            isShared: isShared,
+            startDate: startDate,
+            endDate: endDate,
+            visitOrder: visitOrder,
+            userEdited: userEdited,
+            droppedAttractionIds: droppedAttractionIds,
+            schedulingAdjustments: schedulingAdjustments,
+            seasonHints: seasonHints,
+            pace: pace,
+            internationalArrivalTime: internationalArrivalTime,
+            internationalDepartureTime: internationalDepartureTime,
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays,
+            internationalArrivalActivities: activities,
+            internationalDepartureActivities: internationalDepartureActivities
+        )
+    }
+
+    func withInternationalDepartureActivities(_ activities: [ItineraryActivity]?) -> SampleItinerary {
+        SampleItinerary(
+            id: id,
+            title: title,
+            meta: meta,
+            routeSummary: routeSummary,
+            estimatedBudget: estimatedBudget,
+            days: days,
+            shareSlug: shareSlug,
+            isShared: isShared,
+            startDate: startDate,
+            endDate: endDate,
+            visitOrder: visitOrder,
+            userEdited: userEdited,
+            droppedAttractionIds: droppedAttractionIds,
+            schedulingAdjustments: schedulingAdjustments,
+            seasonHints: seasonHints,
+            pace: pace,
+            internationalArrivalTime: internationalArrivalTime,
+            internationalDepartureTime: internationalDepartureTime,
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays,
+            internationalArrivalActivities: internationalArrivalActivities,
+            internationalDepartureActivities: activities
         )
     }
 
@@ -228,7 +300,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             pace: pace,
             internationalArrivalTime: internationalArrivalTime,
             internationalDepartureTime: internationalDepartureTime,
-            endpointScheduleBaselineDays: endpointScheduleBaselineDays
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays,
+            internationalArrivalActivities: internationalArrivalActivities,
+            internationalDepartureActivities: internationalDepartureActivities
         )
     }
 
@@ -252,7 +326,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             pace: pace,
             internationalArrivalTime: internationalArrivalTime,
             internationalDepartureTime: internationalDepartureTime,
-            endpointScheduleBaselineDays: endpointScheduleBaselineDays
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays,
+            internationalArrivalActivities: internationalArrivalActivities,
+            internationalDepartureActivities: internationalDepartureActivities
         )
     }
 }

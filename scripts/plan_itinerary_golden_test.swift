@@ -12,6 +12,8 @@ import Foundation
 //     YOLO/Features/Plan/PlanItineraryVisitHours.swift \
 //     YOLO/Features/Plan/PlanItineraryPace.swift \
 //     YOLO/Features/Plan/PlanItineraryFlightTimes.swift \
+//     YOLO/Features/Plan/PlanItineraryAttractionLedger.swift \
+//     YOLO/Features/Plan/PlanItineraryEventDayPlanner.swift \
 //     YOLO/Features/Plan/PlanItineraryIntercityReplanner.swift \
 //     YOLO/Features/Plan/PlanItineraryEndpointReplanner.swift \
 //     YOLO/Features/Plan/PlanItineraryCityDays.swift \
@@ -80,6 +82,12 @@ enum PlanItineraryGoldenTest {
         fails += testSameDayEntryExitCombinedReplan()
         fails += testEntryReplanPullsSightsFromLaterSameCityDay()
         fails += testExitReplanKeepsMorningSightsForAfternoonDeparture()
+        fails += testCalendarBookendArrivalPreservesFirstActivityDay()
+        fails += testCalendarBookendDeparturePreservesLastActivityDay()
+        fails += testCalendarBookendManualActivitiesStayInMetadata()
+        fails += testAttractionLedgerEnforceUnique()
+        fails += testIntercityHopBackfillDoesNotBorrowLaterDay()
+        fails += testAfternoonInternationalArrivalEventDayIndependent()
         fails += testEntryCityMinDaysOnLongTrip()
         fails += testSuggestEntryExitTwoAndSixCities()
         fails += testChongqingChengduShortHop()
@@ -1427,7 +1435,7 @@ enum PlanItineraryGoldenTest {
             days: [day1, day2],
             entryCityId: "beijing",
             arrivalTime: "14:00",
-            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"])
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"], activityDaysExcludeCalendarEndpoints: false)
         )
         let entryDay = newDays[0]
         let daytimeActs = entryDay.activities.filter { $0.timeSlot != "Evening" }
@@ -1464,7 +1472,7 @@ enum PlanItineraryGoldenTest {
             days: [day1, day2],
             exitCityId: "beijing",
             departureTime: "10:00",
-            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"])
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"], activityDaysExcludeCalendarEndpoints: false)
         )
         let exitDay = newDays[1]
         let fullCap = PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: .standard)
@@ -1503,7 +1511,7 @@ enum PlanItineraryGoldenTest {
             days: [day1, day2],
             entryCityId: "beijing",
             arrivalTime: "14:00",
-            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"])
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"], activityDaysExcludeCalendarEndpoints: false)
         )
         let allIds = newDays.flatMap { $0.activities.compactMap(\.attractionId) }
         let ok = allIds.count == Set(allIds).count
@@ -1530,7 +1538,7 @@ enum PlanItineraryGoldenTest {
             ),
         ]
         let options = PlanItineraryEndpointReplanner.Options(
-            pace: .standard, catalogById: catalog, visitOrder: ["beijing"]
+            pace: .standard, catalogById: catalog, visitOrder: ["beijing"], activityDaysExcludeCalendarEndpoints: false
         )
         let trimmed = PlanItineraryEndpointReplanner.replan(
             days: baseline,
@@ -1565,18 +1573,23 @@ enum PlanItineraryGoldenTest {
         let baseline = [
             ItineraryDay(
                 id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Beijing", costEstimate: nil,
-                activities: [mockActivity(id: "museum", cityId: "beijing", name: "Museum")]
+                activities: [],
+                dayKind: .experienceSuggestions,
+                experienceItems: CityTravelHints.internationalArrivalPlaceholder(cityId: "beijing"),
+                experienceCityId: "beijing"
             ),
             ItineraryDay(
                 id: "day_2", dayIndex: 2, dateLabel: "Day 2", cityName: "Beijing", costEstimate: nil,
                 activities: [
+                    mockActivity(id: "museum", cityId: "beijing", name: "Museum"),
                     mockActivity(id: "temple", cityId: "beijing", name: "Temple"),
                     mockActivity(id: "summer", cityId: "beijing", name: "Summer Palace"),
-                ]
+                ],
+                experienceCityId: "beijing"
             ),
         ]
         let options = PlanItineraryEndpointReplanner.Options(
-            pace: .standard, catalogById: catalog, visitOrder: ["beijing"]
+            pace: .standard, catalogById: catalog, visitOrder: ["beijing"], activityDaysExcludeCalendarEndpoints: false
         )
         let exitTrimmed = PlanItineraryEndpointReplanner.replan(
             days: baseline,
@@ -1595,9 +1608,12 @@ enum PlanItineraryGoldenTest {
             options: options
         )
         let exitIds = { (days: [ItineraryDay]) in days[1].activities.compactMap(\.attractionId) }
-        let entryDaytime = chained.days[0].activities.filter { $0.timeSlot != "Evening" }
-        let ok = exitIds(chained.days) == exitIds(exitTrimmed.days) && entryDaytime.isEmpty
-        print(ok ? "✓ departure-then-arrival chain matches unified replan from baseline" : "✗ chained replan should trim entry and preserve exit departure trim")
+        let eventDaytime = chained.days[0].activities.filter { $0.timeSlot != "Evening" }
+        let allIds = chained.days.flatMap { $0.activities.compactMap(\.attractionId) }
+        let ok = eventDaytime.isEmpty
+            && allIds.count == Set(allIds).count
+            && exitIds(chained.days) == exitIds(exitTrimmed.days)
+        print(ok ? "✓ departure-then-arrival chain trims event day and preserves exit departure trim" : "✗ chained replan should keep event day daytime empty and exit trim stable (event=\(chained.days[0].activities.map(\.name)) exit=\(exitIds(chained.days)))")
         return ok ? 0 : 1
     }
 
@@ -1617,7 +1633,7 @@ enum PlanItineraryGoldenTest {
             ),
         ]
         let options = PlanItineraryEndpointReplanner.Options(
-            pace: .standard, catalogById: catalog, visitOrder: ["beijing"]
+            pace: .standard, catalogById: catalog, visitOrder: ["beijing"], activityDaysExcludeCalendarEndpoints: false
         )
         let result = PlanItineraryEndpointReplanner.replan(
             days: baseline,
@@ -1657,11 +1673,15 @@ enum PlanItineraryGoldenTest {
             exitCityId: "chongqing",
             arrivalTime: "08:00",
             departureTime: nil,
-            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["chongqing"])
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["chongqing"], activityDaysExcludeCalendarEndpoints: false)
         )
-        let entryActs = result.days[0].activities.compactMap(\.attractionId)
-        let ok = !entryActs.isEmpty && entryActs.count < 2
-        print(ok ? "✓ entry replan steals sights from later same-city day" : "✗ entry day should pull sights forward after landing time set (entry=\(entryActs))")
+        let entryActs = Set(result.days[0].activities.compactMap(\.attractionId))
+        let day2Acts = Set(result.days[1].activities.compactMap(\.attractionId))
+        let allIds = result.days.flatMap { $0.activities.compactMap(\.attractionId) }
+        let ok = allIds.count == Set(allIds).count
+            && day2Acts == Set(["museum", "temple"])
+            && entryActs.isDisjoint(with: day2Acts)
+        print(ok ? "✓ arrival event day plans independently without stealing from sightseeing day" : "✗ arrival event day should not duplicate or steal day-2 sights (entry=\(entryActs) day2=\(day2Acts))")
         return ok ? 0 : 1
     }
 
@@ -1686,11 +1706,15 @@ enum PlanItineraryGoldenTest {
             exitCityId: "beijing",
             arrivalTime: nil,
             departureTime: "19:00",
-            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"])
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"], activityDaysExcludeCalendarEndpoints: false)
         )
         let exitDaytime = result.days[1].activities.filter { $0.timeSlot != "Evening" }
-        let ok = !exitDaytime.isEmpty
-        print(ok ? "✓ afternoon departure keeps / pulls morning sights on exit day" : "✗ exit day should schedule daytime sights before 19:00 departure")
+        let day1Ids = result.days[0].activities.compactMap(\.attractionId)
+        let allIds = result.days.flatMap { $0.activities.compactMap(\.attractionId) }
+        let ok = exitDaytime.isEmpty
+            && day1Ids == ["museum"]
+            && allIds.count == Set(allIds).count
+        print(ok ? "✓ exit day replan does not steal sights from earlier days" : "✗ exit day should not pull museum from day 1 (exit=\(exitDaytime.map(\.name)))")
         return ok ? 0 : 1
     }
 
@@ -1722,6 +1746,183 @@ enum PlanItineraryGoldenTest {
         let restored = snapshot
         let ok = overflowed && restored[1].activities.isEmpty && restored[0].activities.count == 3
         print(ok ? "✓ full-trip snapshot can undo overflow replan" : "✗ snapshot restore should revert overflow")
+        return ok ? 0 : 1
+    }
+
+    private static func testCalendarBookendArrivalPreservesFirstActivityDay() -> Int {
+        let hongya = mockAttraction(id: "hongya", cityId: "chongqing", name: "Hongya Cave", displayOrder: 0)
+        let jiefang = mockAttraction(id: "jiefang", cityId: "chongqing", name: "Jiefangbei", displayOrder: 1)
+        let catalog = [hongya.id: hongya, jiefang.id: jiefang]
+        let baseline = [
+            ItineraryDay(
+                id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Chongqing", costEstimate: nil,
+                activities: [
+                    mockActivity(id: "hongya", cityId: "chongqing", name: "Hongya Cave"),
+                    mockActivity(id: "jiefang", cityId: "chongqing", name: "Jiefangbei"),
+                ]
+            ),
+        ]
+        let baselineIds = baseline[0].activities.compactMap(\.attractionId)
+        let result = PlanItineraryEndpointReplanner.replan(
+            days: baseline,
+            entryCityId: "chongqing",
+            exitCityId: "beijing",
+            arrivalTime: "16:17",
+            departureTime: nil,
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["chongqing", "beijing"])
+        )
+        let afterIds = result.days[0].activities.compactMap(\.attractionId)
+        let ok = afterIds == baselineIds
+        print(ok ? "✓ calendar bookend arrival time leaves first activity day unchanged" : "✗ arrival switch should not trim day 1 sights (baseline=\(baselineIds) after=\(afterIds))")
+        return ok ? 0 : 1
+    }
+
+    private static func testCalendarBookendDeparturePreservesLastActivityDay() -> Int {
+        let palace = mockAttraction(id: "gugong", cityId: "beijing", name: "Forbidden City", displayOrder: 0)
+        let temple = mockAttraction(id: "tiantan", cityId: "beijing", name: "Temple of Heaven", displayOrder: 1)
+        let catalog = [palace.id: palace, temple.id: temple]
+        let baseline = [
+            ItineraryDay(
+                id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Beijing", costEstimate: nil,
+                activities: [mockActivity(id: "tiantan", cityId: "beijing", name: "Temple of Heaven")]
+            ),
+            ItineraryDay(
+                id: "day_2", dayIndex: 2, dateLabel: "Day 2", cityName: "Beijing", costEstimate: nil,
+                activities: [mockActivity(id: "gugong", cityId: "beijing", name: "Forbidden City")]
+            ),
+        ]
+        let baselineIds = baseline[1].activities.compactMap(\.attractionId)
+        let result = PlanItineraryEndpointReplanner.replan(
+            days: baseline,
+            entryCityId: "chongqing",
+            exitCityId: "beijing",
+            arrivalTime: nil,
+            departureTime: "06:19",
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["chongqing", "beijing"])
+        )
+        let afterIds = result.days[1].activities.compactMap(\.attractionId)
+        let ok = afterIds == baselineIds
+        print(ok ? "✓ calendar bookend departure time leaves last activity day unchanged" : "✗ departure switch should not trim exit day sights (baseline=\(baselineIds) after=\(afterIds))")
+        return ok ? 0 : 1
+    }
+
+    private static func testCalendarBookendManualActivitiesStayInMetadata() -> Int {
+        let baseline = [
+            ItineraryDay(
+                id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Chongqing", costEstimate: nil,
+                activities: [mockActivity(id: "hongya", cityId: "chongqing", name: "Hongya Cave")]
+            ),
+        ]
+        let manual = [mockActivity(id: "guanyin", cityId: "chongqing", name: "Guanyinqiao")]
+        let trip = SampleItinerary(
+            id: "t1", title: "Test", meta: "", routeSummary: "cq", estimatedBudget: "", days: baseline,
+            internationalArrivalTime: "16:17",
+            internationalArrivalActivities: manual
+        )
+        let dayIds = trip.days[0].activities.compactMap(\.attractionId)
+        let bookendIds = trip.internationalArrivalActivities?.compactMap(\.attractionId) ?? []
+        let ok = dayIds == ["hongya"] && bookendIds == ["guanyin"]
+        print(ok ? "✓ bookend manual sights live in metadata without touching activity days" : "✗ manual bookend add should not change days (days=\(dayIds) bookend=\(bookendIds))")
+        return ok ? 0 : 1
+    }
+
+    private static func testAttractionLedgerEnforceUnique() -> Int {
+        let act1 = ItineraryActivity(
+            id: "a1", timeSlot: "Morning", name: "A", detail: "", attractionId: "s1", cityId: "beijing", hasAudio: false
+        )
+        let act2 = ItineraryActivity(
+            id: "a2", timeSlot: "Afternoon", name: "B", detail: "", attractionId: "s1", cityId: "beijing", hasAudio: false
+        )
+        let days = [
+            ItineraryDay(id: "d1", dayIndex: 1, dateLabel: "Day 1", cityName: "", costEstimate: nil, activities: [act1]),
+            ItineraryDay(id: "d2", dayIndex: 2, dateLabel: "Day 2", cityName: "", costEstimate: nil, activities: [act2]),
+        ]
+        let (deduped, _) = PlanItineraryAttractionLedger.enforceUnique(days)
+        let allIds = deduped.flatMap { $0.activities.compactMap(\.attractionId) }
+        let ok = allIds == ["s1"]
+        print(ok ? "✓ attraction ledger keeps one sight per id trip-wide" : "✗ enforceUnique should drop duplicate attraction ids")
+        return ok ? 0 : 1
+    }
+
+    private static func testIntercityHopBackfillDoesNotBorrowLaterDay() -> Int {
+        let wenshu = mockAttraction(id: "wenshu", cityId: "chengdu", name: "Wenshu", displayOrder: 0)
+        let wuhou = mockAttraction(id: "wuhou", cityId: "chengdu", name: "Wuhou", displayOrder: 1)
+        let jiefang = mockAttraction(id: "jiefang", cityId: "chongqing", name: "Jiefangbei", displayOrder: 0)
+        let catalog = [wenshu.id: wenshu, wuhou.id: wuhou, jiefang.id: jiefang]
+        let hop = ItineraryIntercityHop(
+            fromCityId: "chongqing",
+            toCityId: "chengdu",
+            travelHours: 1.5,
+            items: ["Travel"]
+        )
+        let hopDay = ItineraryDay(
+            id: "day_10", dayIndex: 10, dateLabel: "Day 10", cityName: "Chongqing → Chengdu", costEstimate: nil,
+            activities: [],
+            intercityHop: hop
+        )
+        let sightDay = ItineraryDay(
+            id: "day_11", dayIndex: 11, dateLabel: "Day 11", cityName: "Chengdu", costEstimate: nil,
+            activities: [
+                mockActivity(id: "wuhou", cityId: "chengdu", name: "Wuhou"),
+                mockActivity(id: "wenshu", cityId: "chengdu", name: "Wenshu"),
+            ],
+            experienceCityId: "chengdu"
+        )
+        let (replanned, _) = PlanItineraryIntercityReplanner.replan(
+            days: [hopDay, sightDay],
+            dayIndex: 10,
+            arrivalTime: "03:46",
+            options: .init(pace: .standard, catalogById: catalog)
+        )
+        let hopIds = replanned[0].activities.compactMap(\.attractionId)
+        let day11Ids = replanned[1].activities.compactMap(\.attractionId)
+        let allIds = replanned.flatMap { $0.activities.compactMap(\.attractionId) }
+        let ok = allIds.count == Set(allIds).count
+            && day11Ids == ["wuhou", "wenshu"]
+            && !hopIds.contains("wenshu")
+        print(ok ? "✓ early hop arrival backfills from catalog without borrowing day 11" : "✗ hop day duplicated or stole wenshu (hop=\(hopIds) day11=\(day11Ids))")
+        return ok ? 0 : 1
+    }
+
+    private static func testAfternoonInternationalArrivalEventDayIndependent() -> Int {
+        let hongya = mockAttraction(id: "hongya", cityId: "chongqing", name: "Hongya Cave", displayOrder: 0, visitPeriod: "evening")
+        let jiefang = mockAttraction(id: "jiefang", cityId: "chongqing", name: "Jiefangbei", displayOrder: 1)
+        let guanyin = mockAttraction(id: "guanyin", cityId: "chongqing", name: "Guanyinqiao", displayOrder: 2)
+        let catalog = [hongya.id: hongya, jiefang.id: jiefang, guanyin.id: guanyin]
+        let day1 = ItineraryDay(
+            id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Chongqing", costEstimate: nil,
+            activities: [],
+            dayKind: .experienceSuggestions,
+            experienceItems: CityTravelHints.internationalArrivalPlaceholder(cityId: "chongqing"),
+            experienceCityId: "chongqing"
+        )
+        let day2 = ItineraryDay(
+            id: "day_2", dayIndex: 2, dateLabel: "Day 2", cityName: "Chongqing", costEstimate: nil,
+            activities: [
+                mockActivity(id: "hongya", cityId: "chongqing", name: "Hongya Cave", timeSlot: "Evening"),
+                mockActivity(id: "jiefang", cityId: "chongqing", name: "Jiefangbei"),
+                mockActivity(id: "guanyin", cityId: "chongqing", name: "Guanyinqiao"),
+            ],
+            experienceCityId: "chongqing"
+        )
+        let result = PlanItineraryEndpointReplanner.replan(
+            days: [day1, day2],
+            entryCityId: "chongqing",
+            exitCityId: "chongqing",
+            arrivalTime: "15:45",
+            departureTime: nil,
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["chongqing"])
+        )
+        let eventDaytime = result.days[0].activities.filter { $0.timeSlot != "Evening" }
+        let eventIds = Set(result.days[0].activities.compactMap(\.attractionId))
+        let sightIds = Set(result.days[1].activities.compactMap(\.attractionId))
+        let allIds = result.days.flatMap { $0.activities.compactMap(\.attractionId) }
+        let ok = eventDaytime.isEmpty
+            && eventIds.count <= 1
+            && sightIds == Set(["hongya", "jiefang", "guanyin"])
+            && allIds.count == Set(allIds).count
+            && eventIds.isDisjoint(with: sightIds)
+        print(ok ? "✓ 15:45 arrival event day stays evening-only and independent from day-2 sights" : "✗ afternoon arrival should not mirror sightseeing day (event=\(eventIds) day2=\(sightIds))")
         return ok ? 0 : 1
     }
 

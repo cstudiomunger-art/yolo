@@ -296,7 +296,13 @@ struct ItineraryEditorView: View {
             userEdited: true,
             droppedAttractionIds: itinerary.droppedAttractionIds,
             schedulingAdjustments: itinerary.schedulingAdjustments,
-            seasonHints: itinerary.seasonHints
+            seasonHints: itinerary.seasonHints,
+            pace: itinerary.pace,
+            internationalArrivalTime: itinerary.internationalArrivalTime,
+            internationalDepartureTime: itinerary.internationalDepartureTime,
+            endpointScheduleBaselineDays: itinerary.endpointScheduleBaselineDays,
+            internationalArrivalActivities: itinerary.internationalArrivalActivities,
+            internationalDepartureActivities: itinerary.internationalDepartureActivities
         )
         appEnv.preferences.saveItinerary(updated)
         let cityIds = Set(
