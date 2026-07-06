@@ -38,8 +38,15 @@ struct InternationalEndpointCard: View {
     let kind: Kind
     let cityId: String
     let cityDisplayName: String
+    /// Calendar arrival/departure date (startDate / endDate).
+    var calendarDate: Date? = nil
     let flightTime: String?
     let onTimeChange: (String?) -> Void
+
+    private var calendarDateLabel: String? {
+        guard let calendarDate else { return nil }
+        return PlanTripDateMath.formatDisplayDate(calendarDate)
+    }
 
     private var cardItems: [String] {
         switch kind {
@@ -65,7 +72,20 @@ struct InternationalEndpointCard: View {
                     .foregroundStyle(Theme.ColorToken.textPrimary)
             }
 
-            if !cityDisplayName.isEmpty {
+            if let calendarDateLabel {
+                HStack(spacing: 4) {
+                    Text(calendarDateLabel)
+                        .font(Theme.FontToken.inter(12, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.textPrimary)
+                    if !cityDisplayName.isEmpty {
+                        Text("·")
+                            .foregroundStyle(Theme.ColorToken.textDisabled)
+                        Text(cityDisplayName)
+                            .font(Theme.FontToken.inter(12))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    }
+                }
+            } else if !cityDisplayName.isEmpty {
                 Text(cityDisplayName)
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)

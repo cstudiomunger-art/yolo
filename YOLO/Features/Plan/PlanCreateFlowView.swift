@@ -989,13 +989,38 @@ struct PlanCreateFlowView: View {
             let entryId = resolvedEntryCityId()
             let name = cities.first(where: { $0.id.lowercased() == entryId.lowercased() })?.name
                 ?? CityTravelHints.displayName(for: entryId)
-            InternationalEndpointCard(
+            let order = draftItinerary.visitOrder ?? reviewTripCityIds()
+            let linkedIdx = CityTravelHints.entrySightseeingDayArrayIndex(days: draftItinerary.days, visitOrder: order)
+            let linkedDay = linkedIdx.map { draftItinerary.days[$0] }
+            InternationalEndpointDaySection(
                 kind: .inbound,
                 cityId: entryId,
                 cityDisplayName: name,
+                calendarDate: draftItinerary.startDate ?? arrivalDate,
                 flightTime: draftItinerary.internationalArrivalTime,
+                linkedDay: linkedDay,
                 onTimeChange: applyInternationalArrivalTime
-            )
+            ) {
+                if let linkedIdx {
+                    ForEach(draftItinerary.days[linkedIdx].activities) { activity in
+                        reviewActivityRow(activity, dayIndex: linkedIdx)
+                    }
+                }
+            } addAttractionButton: {
+                if reviewEditMode == .inactive, let linkedIdx {
+                    Button {
+                        addAttractionContext = PlanAddAttractionContext(
+                            dayIndex: linkedIdx,
+                            cityIds: [entryId]
+                        )
+                    } label: {
+                        Label(String(localized: "Add attraction"), systemImage: "plus")
+                            .font(Theme.FontToken.inter(12, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.ColorToken.accent)
+                }
+            }
         }
     }
 
@@ -1005,14 +1030,53 @@ struct PlanCreateFlowView: View {
             let exitId = resolvedExitCityId()
             let name = cities.first(where: { $0.id.lowercased() == exitId.lowercased() })?.name
                 ?? CityTravelHints.displayName(for: exitId)
-            InternationalEndpointCard(
+            let order = draftItinerary.visitOrder ?? reviewTripCityIds()
+            let linkedIdx = CityTravelHints.exitSightseeingDayArrayIndex(days: draftItinerary.days, visitOrder: order)
+            let linkedDay = linkedIdx.map { draftItinerary.days[$0] }
+            InternationalEndpointDaySection(
                 kind: .outbound,
                 cityId: exitId,
                 cityDisplayName: name,
+                calendarDate: draftItinerary.endDate ?? departureDate,
                 flightTime: draftItinerary.internationalDepartureTime,
+                linkedDay: linkedDay,
                 onTimeChange: applyInternationalDepartureTime
-            )
+            ) {
+                if let linkedIdx {
+                    ForEach(draftItinerary.days[linkedIdx].activities) { activity in
+                        reviewActivityRow(activity, dayIndex: linkedIdx)
+                    }
+                }
+            } addAttractionButton: {
+                if reviewEditMode == .inactive, let linkedIdx {
+                    Button {
+                        addAttractionContext = PlanAddAttractionContext(
+                            dayIndex: linkedIdx,
+                            cityIds: [exitId]
+                        )
+                    } label: {
+                        Label(String(localized: "Add attraction"), systemImage: "plus")
+                            .font(Theme.FontToken.inter(12, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.ColorToken.accent)
+                }
+            }
         }
+    }
+
+    private func activitiesShownAtInternationalBookend(day: ItineraryDay) -> Bool {
+        guard let trip = draftItinerary else { return false }
+        let order = trip.visitOrder ?? reviewTripCityIds()
+        if trip.internationalArrivalTime != nil,
+           day.dayIndex == CityTravelHints.resolveEntrySightseeingDayIndex(days: trip.days, visitOrder: order) {
+            return true
+        }
+        if trip.internationalDepartureTime != nil,
+           day.dayIndex == CityTravelHints.resolveExitSightseeingDayIndex(days: trip.days, visitOrder: order) {
+            return true
+        }
+        return false
     }
 
     @ViewBuilder
@@ -1023,9 +1087,12 @@ struct PlanCreateFlowView: View {
             cityNameById: cityNameById,
             attractionCache: attractionCache
         )
+        let hideActivitiesAtBookend = activitiesShownAtInternationalBookend(day: day)
 
         Section {
-            if let hop = day.intercityHop, day.isExperienceSuggestions {
+            if hideActivitiesAtBookend {
+                EmptyView()
+            } else if let hop = day.intercityHop, day.isExperienceSuggestions {
                 let displayDay = day
                 ExperienceSuggestionsDayCard(
                     day: displayDay,

@@ -298,6 +298,17 @@ enum CityTravelHints {
         }?.dayIndex
     }
 
+    /// Array index for entry/exit sightseeing day (for bookend ↔ day list binding).
+    static func entrySightseeingDayArrayIndex(days: [ItineraryDay], visitOrder: [String]) -> Int? {
+        guard let dayIndex = resolveEntrySightseeingDayIndex(days: days, visitOrder: visitOrder) else { return nil }
+        return days.firstIndex(where: { $0.dayIndex == dayIndex })
+    }
+
+    static func exitSightseeingDayArrayIndex(days: [ItineraryDay], visitOrder: [String]) -> Int? {
+        guard let dayIndex = resolveExitSightseeingDayIndex(days: days, visitOrder: visitOrder) else { return nil }
+        return days.firstIndex(where: { $0.dayIndex == dayIndex })
+    }
+
     private static func isSightseeingDay(_ day: ItineraryDay) -> Bool {
         if day.intercityHop != nil, day.isExperienceSuggestions { return false }
         if day.experienceItems.contains(where: {

@@ -376,25 +376,89 @@ struct ItineraryDetailView: View {
     private var internationalArrivalBookendCard: some View {
         let entryId = resolvedEntryCityId
         let name = cityNameById[entryId] ?? CityTravelHints.displayName(for: entryId)
-        return InternationalEndpointCard(
+        let trip = currentItinerary
+        let order = trip.visitOrder ?? tripCityIds
+        let linkedIdx = CityTravelHints.entrySightseeingDayArrayIndex(days: trip.days, visitOrder: order)
+        let linkedDay = linkedIdx.map { trip.days[$0] }
+        return InternationalEndpointDaySection(
             kind: .inbound,
             cityId: entryId,
             cityDisplayName: name,
+            calendarDate: trip.startDate,
             flightTime: internationalArrivalTime,
+            linkedDay: linkedDay,
             onTimeChange: applyInternationalArrivalTime
-        )
+        ) {
+            if let linkedIdx {
+                ForEach(trip.days[linkedIdx].activities) { activity in
+                    activityRow(activity, dayId: trip.days[linkedIdx].id)
+                }
+            }
+        } addAttractionButton: {
+            if !editMode.isEditing, let linkedIdx {
+                Button {
+                    addAttractionContext = PlanAddAttractionContext(
+                        dayIndex: linkedIdx,
+                        cityIds: [entryId]
+                    )
+                } label: {
+                    addAttractionButtonLabel
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.ColorToken.accent)
+            }
+        }
     }
 
     private var internationalDepartureBookendCard: some View {
         let exitId = resolvedExitCityId
         let name = cityNameById[exitId] ?? CityTravelHints.displayName(for: exitId)
-        return InternationalEndpointCard(
+        let trip = currentItinerary
+        let order = trip.visitOrder ?? tripCityIds
+        let linkedIdx = CityTravelHints.exitSightseeingDayArrayIndex(days: trip.days, visitOrder: order)
+        let linkedDay = linkedIdx.map { trip.days[$0] }
+        return InternationalEndpointDaySection(
             kind: .outbound,
             cityId: exitId,
             cityDisplayName: name,
+            calendarDate: trip.endDate,
             flightTime: internationalDepartureTime,
+            linkedDay: linkedDay,
             onTimeChange: applyInternationalDepartureTime
-        )
+        ) {
+            if let linkedIdx {
+                ForEach(trip.days[linkedIdx].activities) { activity in
+                    activityRow(activity, dayId: trip.days[linkedIdx].id)
+                }
+            }
+        } addAttractionButton: {
+            if !editMode.isEditing, let linkedIdx {
+                Button {
+                    addAttractionContext = PlanAddAttractionContext(
+                        dayIndex: linkedIdx,
+                        cityIds: [exitId]
+                    )
+                } label: {
+                    addAttractionButtonLabel
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.ColorToken.accent)
+            }
+        }
+    }
+
+    private func activitiesShownAtInternationalBookend(day: ItineraryDay) -> Bool {
+        let trip = currentItinerary
+        let order = trip.visitOrder ?? tripCityIds
+        if internationalArrivalTime != nil,
+           day.dayIndex == CityTravelHints.resolveEntrySightseeingDayIndex(days: trip.days, visitOrder: order) {
+            return true
+        }
+        if internationalDepartureTime != nil,
+           day.dayIndex == CityTravelHints.resolveExitSightseeingDayIndex(days: trip.days, visitOrder: order) {
+            return true
+        }
+        return false
     }
 
     private var resolvedTripPace: TripPace {
@@ -489,6 +553,7 @@ struct ItineraryDetailView: View {
                     Section {
                         daySectionHeader(day)
 
+                        if !activitiesShownAtInternationalBookend(day: day) {
                         if day.intercityHop != nil && day.isExperienceSuggestions {
                             ExperienceSuggestionsDayCard(
                                 day: day,
@@ -657,6 +722,7 @@ struct ItineraryDetailView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
+                        }
                         }
                     }
                 }

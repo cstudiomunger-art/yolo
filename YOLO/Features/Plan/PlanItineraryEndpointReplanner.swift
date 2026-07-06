@@ -129,6 +129,36 @@ enum PlanItineraryEndpointReplanner {
         )
         result[idx] = updatedDay
 
+        if arrivalTime != nil {
+            let (afterSteal, stealAdj) = stealSightsIntoEntryDay(
+                days: result,
+                targetArrayIndex: idx,
+                entryCityId: entry,
+                arrivalTime: arrivalTime,
+                options: options
+            )
+            result = afterSteal
+            var allAdj = adjustments + stealAdj
+
+            guard !overflow.isEmpty else {
+                return ReplanResult(days: result, adjustments: allAdj, droppedAttractionIds: [])
+            }
+
+            let (relocated, relocateAdj, remaining) = relocateOverflowForward(
+                overflow,
+                cityId: entry,
+                fromDayIndex: dayIndex,
+                days: result,
+                options: options
+            )
+            let dropped = attractionIds(from: remaining)
+            allAdj.append(contentsOf: relocateAdj)
+            if !dropped.isEmpty {
+                allAdj.append("Dropped \(dropped.count) sight(s) that could not fit after international arrival")
+            }
+            return ReplanResult(days: relocated, adjustments: allAdj, droppedAttractionIds: dropped)
+        }
+
         guard !overflow.isEmpty else {
             return ReplanResult(days: result, adjustments: adjustments, droppedAttractionIds: [])
         }
@@ -173,6 +203,36 @@ enum PlanItineraryEndpointReplanner {
             options: options
         )
         result[idx] = updatedDay
+
+        if departureTime != nil {
+            let (afterSteal, stealAdj) = stealSightsIntoExitDay(
+                days: result,
+                targetArrayIndex: idx,
+                exitCityId: exit,
+                departureTime: departureTime,
+                options: options
+            )
+            result = afterSteal
+            var allAdj = adjustments + stealAdj
+
+            guard !overflow.isEmpty else {
+                return ReplanResult(days: result, adjustments: allAdj, droppedAttractionIds: [])
+            }
+
+            let (relocated, relocateAdj, remaining) = relocateOverflowBackward(
+                overflow,
+                cityId: exit,
+                fromDayIndex: dayIndex,
+                days: result,
+                options: options
+            )
+            let dropped = attractionIds(from: remaining)
+            allAdj.append(contentsOf: relocateAdj)
+            if !dropped.isEmpty {
+                allAdj.append("Dropped \(dropped.count) sight(s) that could not fit before international departure")
+            }
+            return ReplanResult(days: relocated, adjustments: allAdj, droppedAttractionIds: dropped)
+        }
 
         guard !overflow.isEmpty else {
             return ReplanResult(days: result, adjustments: adjustments, droppedAttractionIds: [])
@@ -280,6 +340,7 @@ enum PlanItineraryEndpointReplanner {
         result[dayArrayIndex] = day
             .withExperienceItems(experienceItems)
             .withActivities(reslottedDaytime + reslottedEvening)
+            .asStandardSightseeingDay()
 
         guard !overflow.isEmpty else {
             return ReplanResult(days: result, adjustments: adjustments, droppedAttractionIds: [])
@@ -420,6 +481,7 @@ enum PlanItineraryEndpointReplanner {
         let updated = day
             .withExperienceItems(experienceItems)
             .withActivities(reslottedDaytime + reslottedEvening)
+            .asStandardSightseeingDay()
         return (updated, adjustments, overflow)
     }
 
@@ -486,6 +548,7 @@ enum PlanItineraryEndpointReplanner {
         let updated = day
             .withExperienceItems(experienceItems)
             .withActivities(reslotted)
+            .asStandardSightseeingDay()
         return (updated, adjustments, overflow)
     }
 
@@ -565,6 +628,148 @@ enum PlanItineraryEndpointReplanner {
             }
         }
         return BackfillResult(daytime: daytime, evening: evening)
+    }
+
+    private static func stealSightsIntoEntryDay(
+        days: [ItineraryDay],
+        targetArrayIndex: Int,
+        entryCityId: String,
+        arrivalTime: String?,
+        options: Options
+    ) -> (days: [ItineraryDay], adjustments: [String]) {
+        guard arrivalTime != nil else { return (days, []) }
+        var result = days
+        let target = result[targetArrayIndex]
+        let caps = combinedEndpointCaps(arrivalTime: arrivalTime, departureTime: nil, pace: options.pace)
+        var daytimeUsed = target.activities.reduce(0.0) { sum, act in
+            guard act.timeSlot != "Evening", !isEveningOnly(act, catalogById: options.catalogById) else { return sum }
+            return sum + activityDuration(act, catalogById: options.catalogById)
+        }
+        var eveningCount = target.activities.filter {
+            $0.timeSlot == "Evening" || isEveningOnly($0, catalogById: options.catalogById)
+        }.count
+        let hasDaytimeRoom = daytimeUsed < caps.daytimeCap - 0.01
+        let hasEveningRoom = eveningCount < caps.eveningCap
+        guard hasDaytimeRoom || hasEveningRoom else { return (days, []) }
+
+        let city = entryCityId.lowercased()
+        var stolen: [ItineraryActivity] = []
+        var adjustments: [String] = []
+
+        for srcIdx in result.indices {
+            let src = result[srcIdx]
+            guard src.dayIndex > target.dayIndex else { continue }
+            guard dayMatchesCity(src, cityId: city) else { continue }
+
+            var remaining: [ItineraryActivity] = []
+            for act in src.activities {
+                let isEvening = act.timeSlot == "Evening" || isEveningOnly(act, catalogById: options.catalogById)
+                let dur = activityDuration(act, catalogById: options.catalogById)
+                if isEvening {
+                    if hasEveningRoom, eveningCount < caps.eveningCap {
+                        stolen.append(act)
+                        eveningCount += 1
+                    } else {
+                        remaining.append(act)
+                    }
+                    continue
+                }
+                if hasDaytimeRoom, daytimeUsed + dur <= caps.daytimeCap {
+                    stolen.append(act)
+                    daytimeUsed += dur
+                } else {
+                    remaining.append(act)
+                }
+            }
+            if remaining.count != src.activities.count {
+                result[srcIdx] = src.withActivities(remaining)
+            }
+            if eveningCount >= caps.eveningCap && daytimeUsed >= caps.daytimeCap - 0.01 { break }
+        }
+
+        guard !stolen.isEmpty else { return (days, []) }
+
+        let start = target.activities.count
+        let reslotted = stolen.enumerated().map { i, act in
+            let pref: VisitTimeSlot = (act.timeSlot == "Evening" || isEveningOnly(act, catalogById: options.catalogById))
+                ? .evening : .afternoon
+            return reslot(act, preferred: pref, dayIndex: target.dayIndex, actIndex: start + i, catalogById: options.catalogById)
+        }
+        result[targetArrayIndex] = target
+            .withActivities(target.activities + reslotted)
+            .asStandardSightseeingDay()
+        adjustments.append("Moved \(stolen.count) sight(s) to entry day for international arrival")
+        return (result, adjustments)
+    }
+
+    private static func stealSightsIntoExitDay(
+        days: [ItineraryDay],
+        targetArrayIndex: Int,
+        exitCityId: String,
+        departureTime: String?,
+        options: Options
+    ) -> (days: [ItineraryDay], adjustments: [String]) {
+        guard departureTime != nil else { return (days, []) }
+        var result = days
+        let target = result[targetArrayIndex]
+        var capacity = PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: options.pace)
+        if PlanItineraryFlightTimes.isMorningDeparture(departureTime) {
+            capacity = min(capacity, PlanItineraryPace.daySlotCapacity(profile: .departureDay, pace: options.pace))
+        }
+        var used = target.activities.reduce(0.0) { sum, act in
+            guard act.timeSlot != "Evening", !isEveningOnly(act, catalogById: options.catalogById) else { return sum }
+            return sum + activityDuration(act, catalogById: options.catalogById)
+        }
+        guard used < capacity - 0.01 else { return (days, []) }
+
+        let city = exitCityId.lowercased()
+        var stolen: [ItineraryActivity] = []
+        var adjustments: [String] = []
+
+        for srcIdx in result.indices.reversed() {
+            let src = result[srcIdx]
+            guard src.dayIndex < target.dayIndex else { continue }
+            guard dayMatchesCity(src, cityId: city) else { continue }
+
+            var remaining: [ItineraryActivity] = []
+            for act in src.activities {
+                let isEvening = act.timeSlot == "Evening" || isEveningOnly(act, catalogById: options.catalogById)
+                if isEvening {
+                    remaining.append(act)
+                    continue
+                }
+                let dur = activityDuration(act, catalogById: options.catalogById)
+                if used + dur <= capacity {
+                    stolen.append(act)
+                    used += dur
+                } else {
+                    remaining.append(act)
+                }
+            }
+            if remaining.count != src.activities.count {
+                result[srcIdx] = src.withActivities(remaining)
+            }
+            if used >= capacity - 0.01 { break }
+        }
+
+        guard !stolen.isEmpty else { return (days, []) }
+
+        let start = target.activities.count
+        let reslotted = stolen.enumerated().map { i, act in
+            reslot(act, preferred: .morning, dayIndex: target.dayIndex, actIndex: start + i, catalogById: options.catalogById)
+        }
+        result[targetArrayIndex] = target
+            .withActivities(target.activities + reslotted)
+            .asStandardSightseeingDay()
+        adjustments.append("Moved \(stolen.count) sight(s) to exit day for international departure")
+        return (result, adjustments)
+    }
+
+    private static func dayMatchesCity(_ day: ItineraryDay, cityId: String) -> Bool {
+        let city = cityId.lowercased()
+        if day.experienceCityId?.lowercased() == city { return true }
+        if day.intercityHop?.toCityId.lowercased() == city { return true }
+        return day.activities.contains { $0.cityId?.lowercased() == city }
     }
 
     private static func relocateOverflowForward(

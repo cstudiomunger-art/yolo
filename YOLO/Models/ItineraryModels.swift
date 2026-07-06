@@ -435,6 +435,23 @@ struct ItineraryDay: Identifiable, Codable, Hashable {
         )
     }
 
+    /// When replan assigns sights, show standard activity rows instead of experience card.
+    func asStandardSightseeingDay() -> ItineraryDay {
+        guard !activities.isEmpty else { return self }
+        return ItineraryDay(
+            id: id,
+            dayIndex: dayIndex,
+            dateLabel: dateLabel,
+            cityName: cityName,
+            costEstimate: costEstimate,
+            activities: activities,
+            dayKind: .standard,
+            experienceItems: [],
+            experienceCityId: experienceCityId,
+            intercityHop: intercityHop
+        )
+    }
+
     func withExperienceItems(_ items: [String]) -> ItineraryDay {
         ItineraryDay(
             id: id,

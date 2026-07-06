@@ -78,6 +78,8 @@ enum PlanItineraryGoldenTest {
         fails += testEndpointClearArrivalRestoresFromBaseline()
         fails += testDepartureThenArrivalChainsReplans()
         fails += testSameDayEntryExitCombinedReplan()
+        fails += testEntryReplanPullsSightsFromLaterSameCityDay()
+        fails += testExitReplanKeepsMorningSightsForAfternoonDeparture()
         fails += testEntryCityMinDaysOnLongTrip()
         fails += testSuggestEntryExitTwoAndSixCities()
         fails += testChongqingChengduShortHop()
@@ -1628,6 +1630,67 @@ enum PlanItineraryGoldenTest {
         let daytimeActs = result.days[0].activities.filter { $0.timeSlot != "Evening" }
         let ok = daytimeActs.isEmpty
         print(ok ? "✓ same-day entry/exit uses combined capacity (no daytime sights)" : "✗ same-day endpoint should trim all daytime sights")
+        return ok ? 0 : 1
+    }
+
+    private static func testEntryReplanPullsSightsFromLaterSameCityDay() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "chongqing", name: "Museum", displayOrder: 0)
+        let temple = mockAttraction(id: "temple", cityId: "chongqing", name: "Temple", displayOrder: 1)
+        let catalog = [museum.id: museum, temple.id: temple]
+        let day1 = ItineraryDay(
+            id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Chongqing", costEstimate: nil,
+            activities: [],
+            dayKind: .experienceSuggestions,
+            experienceItems: CityTravelHints.flexibleRestDayItems(cityId: "chongqing"),
+            experienceCityId: "chongqing"
+        )
+        let day2 = ItineraryDay(
+            id: "day_2", dayIndex: 2, dateLabel: "Day 2", cityName: "Chongqing", costEstimate: nil,
+            activities: [
+                mockActivity(id: "museum", cityId: "chongqing", name: "Museum"),
+                mockActivity(id: "temple", cityId: "chongqing", name: "Temple"),
+            ]
+        )
+        let result = PlanItineraryEndpointReplanner.replan(
+            days: [day1, day2],
+            entryCityId: "chongqing",
+            exitCityId: "chongqing",
+            arrivalTime: "08:00",
+            departureTime: nil,
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["chongqing"])
+        )
+        let entryActs = result.days[0].activities.compactMap(\.attractionId)
+        let ok = !entryActs.isEmpty && entryActs.count < 2
+        print(ok ? "✓ entry replan steals sights from later same-city day" : "✗ entry day should pull sights forward after landing time set (entry=\(entryActs))")
+        return ok ? 0 : 1
+    }
+
+    private static func testExitReplanKeepsMorningSightsForAfternoonDeparture() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "beijing", name: "Museum", displayOrder: 0)
+        let temple = mockAttraction(id: "temple", cityId: "beijing", name: "Temple", displayOrder: 1)
+        let catalog = [museum.id: museum, temple.id: temple]
+        let day1 = ItineraryDay(
+            id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Beijing", costEstimate: nil,
+            activities: [mockActivity(id: "museum", cityId: "beijing", name: "Museum")]
+        )
+        let day2 = ItineraryDay(
+            id: "day_2", dayIndex: 2, dateLabel: "Day 2", cityName: "Beijing", costEstimate: nil,
+            activities: [],
+            dayKind: .experienceSuggestions,
+            experienceItems: CityTravelHints.flexibleRestDayItems(cityId: "beijing"),
+            experienceCityId: "beijing"
+        )
+        let result = PlanItineraryEndpointReplanner.replan(
+            days: [day1, day2],
+            entryCityId: "beijing",
+            exitCityId: "beijing",
+            arrivalTime: nil,
+            departureTime: "19:00",
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"])
+        )
+        let exitDaytime = result.days[1].activities.filter { $0.timeSlot != "Evening" }
+        let ok = !exitDaytime.isEmpty
+        print(ok ? "✓ afternoon departure keeps / pulls morning sights on exit day" : "✗ exit day should schedule daytime sights before 19:00 departure")
         return ok ? 0 : 1
     }
 
