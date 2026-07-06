@@ -23,6 +23,15 @@ enum TripPace: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Compact label for menus; selected row shows `label` only.
+    var menuTitle: String {
+        switch self {
+        case .relaxed: return String(localized: "Relaxed · 1/day")
+        case .standard: return String(localized: "Standard · 2/day")
+        case .intense: return String(localized: "Intense · packed")
+        }
+    }
+
     static func defaultPace(tripDays: Int, cityCount: Int) -> TripPace {
         guard cityCount > 0 else { return .standard }
         return Double(tripDays) / Double(cityCount) >= 3 ? .standard : .relaxed

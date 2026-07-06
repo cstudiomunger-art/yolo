@@ -13,11 +13,19 @@ struct ExperienceSuggestionsDayCard: View {
     }
 
     private var isArrivalDay: Bool {
-        day.experienceItems.first?.localizedCaseInsensitiveContains("Afternoon arrival") == true
+        guard let first = day.experienceItems.first else { return false }
+        let lower = first.lowercased()
+        return lower.contains("afternoon arrival")
+            || lower.contains("international arrival")
+            || lower.contains("land in")
     }
 
     private var isDepartureDay: Bool {
-        day.experienceItems.first?.localizedCaseInsensitiveContains("Morning departure") == true
+        guard let first = day.experienceItems.first else { return false }
+        let lower = first.lowercased()
+        return lower.contains("morning departure")
+            || lower.contains("international departure")
+            || lower.contains("depart from")
     }
 
     private var cardTitle: String {

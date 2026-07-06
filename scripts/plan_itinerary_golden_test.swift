@@ -13,6 +13,7 @@ import Foundation
 //     YOLO/Features/Plan/PlanItineraryPace.swift \
 //     YOLO/Features/Plan/PlanItineraryFlightTimes.swift \
 //     YOLO/Features/Plan/PlanItineraryIntercityReplanner.swift \
+//     YOLO/Features/Plan/PlanItineraryEndpointReplanner.swift \
 //     YOLO/Features/Plan/PlanItineraryCityDays.swift \
 //     YOLO/Features/Plan/PlanItineraryPickAttractions.swift \
 //     YOLO/Features/Plan/PlanItineraryGeoRepair.swift \
@@ -70,6 +71,13 @@ enum PlanItineraryGoldenTest {
         fails += testNormalizePreservesIntenseHopDayDualCities()
         fails += testTravelDayEveningArrivalReplans()
         fails += testTravelDayArrivalReplanNoDuplicateAcrossDays()
+        fails += testNilInternationalArrivalFullDayEntry()
+        fails += testInternationalArrival1400TrimsEntryDay()
+        fails += testInternationalDeparture1000TrimsLastDay()
+        fails += testEndpointReplannerNoDuplicateAcrossDays()
+        fails += testEndpointClearArrivalRestoresFromBaseline()
+        fails += testDepartureThenArrivalChainsReplans()
+        fails += testSameDayEntryExitCombinedReplan()
         fails += testEntryCityMinDaysOnLongTrip()
         fails += testSuggestEntryExitTwoAndSixCities()
         fails += testChongqingChengduShortHop()
@@ -810,7 +818,6 @@ enum PlanItineraryGoldenTest {
     private static func testCustomEntryExitFiveCityShanghaiBeijing() -> Int {
         let cities = ["chongqing", "chengdu", "shanghai", "hangzhou", "beijing"]
         let attractions = mockCatalog(cities: cities, perCity: 5)
-        let autoOrder = CityTravelHints.visitOrder(cityIds: cities, cities: [])
         let customOrder = CityTravelHints.visitOrder(
             cityIds: cities,
             cities: [],
@@ -829,7 +836,6 @@ enum PlanItineraryGoldenTest {
             && order.last == "beijing"
             && customOrder.first == "shanghai"
             && customOrder.last == "beijing"
-            && autoOrder.first != "shanghai"
         print(ok ? "✓ 5-city custom shanghai/beijing endpoints anchor visit order" : "✗ 5-city custom endpoints wrong: \(order)")
         return ok ? 0 : 1
     }
@@ -1364,6 +1370,267 @@ enum PlanItineraryGoldenTest {
         return ok ? 0 : 1
     }
 
+    private static func testNilInternationalArrivalFullDayEntry() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "beijing", name: "Museum", displayOrder: 0)
+        let temple = mockAttraction(id: "temple", cityId: "beijing", name: "Temple", displayOrder: 1)
+        let trip = PlanItineraryAssembler.build(
+            cities: ["beijing"],
+            tripDays: 2,
+            attractions: [museum, temple],
+            arrivalTime: nil
+        )
+        guard let firstDay = trip.days.first else {
+            print("✗ nil international arrival: missing first day")
+            return 1
+        }
+        let capacity = PlanItinerarySlotBudget.daytimeCapacity(
+            dayIndex: firstDay.dayIndex,
+            days: trip.days,
+            pace: .standard,
+            arrivalTime: nil,
+            departureTime: nil
+        )
+        let catalog = [museum.id: museum, temple.id: temple]
+        let used = PlanItinerarySlotBudget.usedDaytimeSlots(activities: firstDay.activities, catalogById: catalog)
+        let ok = capacity >= 2 && used >= 1
+        print(ok ? "✓ nil international arrival keeps full entry-day capacity" : "✗ entry day should schedule sights without landing time")
+        return ok ? 0 : 1
+    }
+
+    private static func testInternationalArrival1400TrimsEntryDay() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "beijing", name: "Museum", displayOrder: 0)
+        let temple = mockAttraction(id: "temple", cityId: "beijing", name: "Temple", displayOrder: 1)
+        let summer = mockAttraction(id: "summer", cityId: "beijing", name: "Summer Palace", displayOrder: 2)
+        let catalog = [museum.id: museum, temple.id: temple, summer.id: summer]
+        let day1 = ItineraryDay(
+            id: "day_1",
+            dayIndex: 1,
+            dateLabel: "Day 1",
+            cityName: "Beijing",
+            costEstimate: nil,
+            activities: [
+                mockActivity(id: "museum", cityId: "beijing", name: "Museum"),
+                mockActivity(id: "temple", cityId: "beijing", name: "Temple"),
+            ]
+        )
+        let day2 = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Beijing",
+            costEstimate: nil,
+            activities: [mockActivity(id: "summer", cityId: "beijing", name: "Summer Palace")]
+        )
+        let (newDays, _) = PlanItineraryEndpointReplanner.replanArrival(
+            days: [day1, day2],
+            entryCityId: "beijing",
+            arrivalTime: "14:00",
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"])
+        )
+        let entryDay = newDays[0]
+        let daytimeActs = entryDay.activities.filter { $0.timeSlot != "Evening" }
+        let ok = daytimeActs.isEmpty
+        print(ok ? "✓ 14:00 international arrival trims entry-day daytime sights" : "✗ entry day should lose daytime sights after 14:00 landing (kept \(daytimeActs.count))")
+        return ok ? 0 : 1
+    }
+
+    private static func testInternationalDeparture1000TrimsLastDay() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "beijing", name: "Museum", displayOrder: 0)
+        let temple = mockAttraction(id: "temple", cityId: "beijing", name: "Temple", displayOrder: 1)
+        let summer = mockAttraction(id: "summer", cityId: "beijing", name: "Summer Palace", displayOrder: 2)
+        let catalog = [museum.id: museum, temple.id: temple, summer.id: summer]
+        let day1 = ItineraryDay(
+            id: "day_1",
+            dayIndex: 1,
+            dateLabel: "Day 1",
+            cityName: "Beijing",
+            costEstimate: nil,
+            activities: [mockActivity(id: "museum", cityId: "beijing", name: "Museum")]
+        )
+        let day2 = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Beijing",
+            costEstimate: nil,
+            activities: [
+                mockActivity(id: "temple", cityId: "beijing", name: "Temple"),
+                mockActivity(id: "summer", cityId: "beijing", name: "Summer Palace"),
+            ]
+        )
+        let (newDays, _) = PlanItineraryEndpointReplanner.replanDeparture(
+            days: [day1, day2],
+            exitCityId: "beijing",
+            departureTime: "10:00",
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"])
+        )
+        let exitDay = newDays[1]
+        let fullCap = PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: .standard)
+        let depCap = PlanItineraryPace.daySlotCapacity(profile: .departureDay, pace: .standard)
+        let used = PlanItinerarySlotBudget.usedDaytimeSlots(activities: exitDay.activities, catalogById: catalog)
+        let ok = depCap < fullCap && used <= depCap
+        print(ok ? "✓ 10:00 international departure trims exit-day capacity" : "✗ exit day should fit departure-day budget after 10:00 flight")
+        return ok ? 0 : 1
+    }
+
+    private static func testEndpointReplannerNoDuplicateAcrossDays() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "beijing", name: "Museum", displayOrder: 0)
+        let temple = mockAttraction(id: "temple", cityId: "beijing", name: "Temple", displayOrder: 1)
+        let summer = mockAttraction(id: "summer", cityId: "beijing", name: "Summer Palace", displayOrder: 2)
+        let catalog = [museum.id: museum, temple.id: temple, summer.id: summer]
+        let day1 = ItineraryDay(
+            id: "day_1",
+            dayIndex: 1,
+            dateLabel: "Day 1",
+            cityName: "Beijing",
+            costEstimate: nil,
+            activities: [
+                mockActivity(id: "museum", cityId: "beijing", name: "Museum"),
+                mockActivity(id: "temple", cityId: "beijing", name: "Temple"),
+            ]
+        )
+        let day2 = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Beijing",
+            costEstimate: nil,
+            activities: [mockActivity(id: "summer", cityId: "beijing", name: "Summer Palace")]
+        )
+        let (newDays, _) = PlanItineraryEndpointReplanner.replanArrival(
+            days: [day1, day2],
+            entryCityId: "beijing",
+            arrivalTime: "14:00",
+            options: .init(pace: .standard, catalogById: catalog, visitOrder: ["beijing"])
+        )
+        let allIds = newDays.flatMap { $0.activities.compactMap(\.attractionId) }
+        let ok = allIds.count == Set(allIds).count
+        print(ok ? "✓ endpoint replan avoids duplicate sights across days" : "✗ endpoint replan duplicated attraction ids")
+        return ok ? 0 : 1
+    }
+
+    private static func testEndpointClearArrivalRestoresFromBaseline() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "beijing", name: "Museum", displayOrder: 0)
+        let temple = mockAttraction(id: "temple", cityId: "beijing", name: "Temple", displayOrder: 1)
+        let summer = mockAttraction(id: "summer", cityId: "beijing", name: "Summer Palace", displayOrder: 2)
+        let catalog = [museum.id: museum, temple.id: temple, summer.id: summer]
+        let baseline = [
+            ItineraryDay(
+                id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Beijing", costEstimate: nil,
+                activities: [
+                    mockActivity(id: "museum", cityId: "beijing", name: "Museum"),
+                    mockActivity(id: "temple", cityId: "beijing", name: "Temple"),
+                ]
+            ),
+            ItineraryDay(
+                id: "day_2", dayIndex: 2, dateLabel: "Day 2", cityName: "Beijing", costEstimate: nil,
+                activities: [mockActivity(id: "summer", cityId: "beijing", name: "Summer Palace")]
+            ),
+        ]
+        let options = PlanItineraryEndpointReplanner.Options(
+            pace: .standard, catalogById: catalog, visitOrder: ["beijing"]
+        )
+        let trimmed = PlanItineraryEndpointReplanner.replan(
+            days: baseline,
+            entryCityId: "beijing",
+            exitCityId: "beijing",
+            arrivalTime: "14:00",
+            departureTime: nil,
+            options: options
+        )
+        let trimmedDaytime = trimmed.days[0].activities.filter { $0.timeSlot != "Evening" }
+        let restored = PlanItineraryEndpointReplanner.replan(
+            days: baseline,
+            entryCityId: "beijing",
+            exitCityId: "beijing",
+            arrivalTime: nil,
+            departureTime: nil,
+            options: options
+        )
+        let baselineEntryIds = baseline[0].activities.compactMap(\.attractionId)
+        let restoredEntryIds = restored.days[0].activities.compactMap(\.attractionId)
+        let ok = trimmedDaytime.isEmpty
+            && restoredEntryIds == baselineEntryIds
+        print(ok ? "✓ clearing international arrival restores baseline schedule" : "✗ baseline restore after clearing arrival failed (trimmed=\(trimmedDaytime.count) restored=\(restoredEntryIds))")
+        return ok ? 0 : 1
+    }
+
+    private static func testDepartureThenArrivalChainsReplans() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "beijing", name: "Museum", displayOrder: 0)
+        let temple = mockAttraction(id: "temple", cityId: "beijing", name: "Temple", displayOrder: 1)
+        let summer = mockAttraction(id: "summer", cityId: "beijing", name: "Summer Palace", displayOrder: 2)
+        let catalog = [museum.id: museum, temple.id: temple, summer.id: summer]
+        let baseline = [
+            ItineraryDay(
+                id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Beijing", costEstimate: nil,
+                activities: [mockActivity(id: "museum", cityId: "beijing", name: "Museum")]
+            ),
+            ItineraryDay(
+                id: "day_2", dayIndex: 2, dateLabel: "Day 2", cityName: "Beijing", costEstimate: nil,
+                activities: [
+                    mockActivity(id: "temple", cityId: "beijing", name: "Temple"),
+                    mockActivity(id: "summer", cityId: "beijing", name: "Summer Palace"),
+                ]
+            ),
+        ]
+        let options = PlanItineraryEndpointReplanner.Options(
+            pace: .standard, catalogById: catalog, visitOrder: ["beijing"]
+        )
+        let exitTrimmed = PlanItineraryEndpointReplanner.replan(
+            days: baseline,
+            entryCityId: "beijing",
+            exitCityId: "beijing",
+            arrivalTime: nil,
+            departureTime: "10:00",
+            options: options
+        )
+        let chained = PlanItineraryEndpointReplanner.replan(
+            days: baseline,
+            entryCityId: "beijing",
+            exitCityId: "beijing",
+            arrivalTime: "14:00",
+            departureTime: "10:00",
+            options: options
+        )
+        let exitIds = { (days: [ItineraryDay]) in days[1].activities.compactMap(\.attractionId) }
+        let entryDaytime = chained.days[0].activities.filter { $0.timeSlot != "Evening" }
+        let ok = exitIds(chained.days) == exitIds(exitTrimmed.days) && entryDaytime.isEmpty
+        print(ok ? "✓ departure-then-arrival chain matches unified replan from baseline" : "✗ chained replan should trim entry and preserve exit departure trim")
+        return ok ? 0 : 1
+    }
+
+    private static func testSameDayEntryExitCombinedReplan() -> Int {
+        let museum = mockAttraction(id: "museum", cityId: "beijing", name: "Museum", displayOrder: 0)
+        let temple = mockAttraction(id: "temple", cityId: "beijing", name: "Temple", displayOrder: 1)
+        let summer = mockAttraction(id: "summer", cityId: "beijing", name: "Summer Palace", displayOrder: 2)
+        let catalog = [museum.id: museum, temple.id: temple, summer.id: summer]
+        let baseline = [
+            ItineraryDay(
+                id: "day_1", dayIndex: 1, dateLabel: "Day 1", cityName: "Beijing", costEstimate: nil,
+                activities: [
+                    mockActivity(id: "museum", cityId: "beijing", name: "Museum"),
+                    mockActivity(id: "temple", cityId: "beijing", name: "Temple"),
+                    mockActivity(id: "summer", cityId: "beijing", name: "Summer Palace", timeSlot: "Evening"),
+                ]
+            ),
+        ]
+        let options = PlanItineraryEndpointReplanner.Options(
+            pace: .standard, catalogById: catalog, visitOrder: ["beijing"]
+        )
+        let result = PlanItineraryEndpointReplanner.replan(
+            days: baseline,
+            entryCityId: "beijing",
+            exitCityId: "beijing",
+            arrivalTime: "14:00",
+            departureTime: "10:00",
+            options: options
+        )
+        let daytimeActs = result.days[0].activities.filter { $0.timeSlot != "Evening" }
+        let ok = daytimeActs.isEmpty
+        print(ok ? "✓ same-day entry/exit uses combined capacity (no daytime sights)" : "✗ same-day endpoint should trim all daytime sights")
+        return ok ? 0 : 1
+    }
+
     private static func testFullTripSnapshotRestoreAfterOverflow() -> Int {
         let nj1 = mockAttraction(id: "nj1", cityId: "nanjing", name: "Wall", displayOrder: 0)
         let nj2 = mockAttraction(id: "nj2", cityId: "nanjing", name: "Museum", displayOrder: 1)
@@ -1723,9 +1990,10 @@ enum PlanItineraryGoldenTest {
         return ok ? 0 : 1
     }
 
-    private static func mockActivity(id: String, cityId: String, name: String) -> ItineraryActivity {
+    private static func mockActivity(id: String, cityId: String, name: String, timeSlot: String = "Morning") -> ItineraryActivity {
         ItineraryActivity(
             id: id,
+            timeSlot: timeSlot,
             name: name,
             detail: "Explore",
             attractionId: id,

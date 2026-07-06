@@ -25,6 +25,12 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
     var seasonHints: [String]?
     /// Trip pace used when generating (optional; for replanner parity).
     var pace: String?
+    /// International landing time (HH:mm), set on Review bookend card.
+    var internationalArrivalTime: String?
+    /// International departure time (HH:mm), set on Review bookend card.
+    var internationalDepartureTime: String?
+    /// Days before any international endpoint replan (for toggle-off restore).
+    var endpointScheduleBaselineDays: [ItineraryDay]?
 
     init(
         id: String,
@@ -42,7 +48,10 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         droppedAttractionIds: [String]? = nil,
         schedulingAdjustments: [String]? = nil,
         seasonHints: [String]? = nil,
-        pace: String? = nil
+        pace: String? = nil,
+        internationalArrivalTime: String? = nil,
+        internationalDepartureTime: String? = nil,
+        endpointScheduleBaselineDays: [ItineraryDay]? = nil
     ) {
         self.id = id
         self.title = title
@@ -60,6 +69,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         self.schedulingAdjustments = schedulingAdjustments
         self.seasonHints = seasonHints
         self.pace = pace
+        self.internationalArrivalTime = internationalArrivalTime
+        self.internationalDepartureTime = internationalDepartureTime
+        self.endpointScheduleBaselineDays = endpointScheduleBaselineDays
     }
 
     init(from decoder: Decoder) throws {
@@ -80,6 +92,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         schedulingAdjustments = try c.decodeIfPresent([String].self, forKey: .schedulingAdjustments)
         seasonHints = try c.decodeIfPresent([String].self, forKey: .seasonHints)
         pace = try c.decodeIfPresent(String.self, forKey: .pace)
+        internationalArrivalTime = try c.decodeIfPresent(String.self, forKey: .internationalArrivalTime)
+        internationalDepartureTime = try c.decodeIfPresent(String.self, forKey: .internationalDepartureTime)
+        endpointScheduleBaselineDays = try c.decodeIfPresent([ItineraryDay].self, forKey: .endpointScheduleBaselineDays)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -100,6 +115,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         try c.encodeIfPresent(schedulingAdjustments, forKey: .schedulingAdjustments)
         try c.encodeIfPresent(seasonHints, forKey: .seasonHints)
         try c.encodeIfPresent(pace, forKey: .pace)
+        try c.encodeIfPresent(internationalArrivalTime, forKey: .internationalArrivalTime)
+        try c.encodeIfPresent(internationalDepartureTime, forKey: .internationalDepartureTime)
+        try c.encodeIfPresent(endpointScheduleBaselineDays, forKey: .endpointScheduleBaselineDays)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -110,6 +128,9 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         case schedulingAdjustments = "scheduling_adjustments"
         case seasonHints = "season_hints"
         case pace
+        case internationalArrivalTime = "international_arrival_time"
+        case internationalDepartureTime = "international_departure_time"
+        case endpointScheduleBaselineDays = "endpoint_schedule_baseline_days"
     }
 
     /// Copy with replaced days; preserves share state and trip dates.
@@ -130,7 +151,84 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             droppedAttractionIds: droppedAttractionIds,
             schedulingAdjustments: schedulingAdjustments,
             seasonHints: seasonHints,
-            pace: pace
+            pace: pace,
+            internationalArrivalTime: internationalArrivalTime,
+            internationalDepartureTime: internationalDepartureTime,
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays
+        )
+    }
+
+    /// Records pre-endpoint-replan days once (first write wins).
+    func withEndpointBaseline(_ baselineDays: [ItineraryDay]) -> SampleItinerary {
+        guard endpointScheduleBaselineDays == nil else { return self }
+        return SampleItinerary(
+            id: id,
+            title: title,
+            meta: meta,
+            routeSummary: routeSummary,
+            estimatedBudget: estimatedBudget,
+            days: days,
+            shareSlug: shareSlug,
+            isShared: isShared,
+            startDate: startDate,
+            endDate: endDate,
+            visitOrder: visitOrder,
+            userEdited: userEdited,
+            droppedAttractionIds: droppedAttractionIds,
+            schedulingAdjustments: schedulingAdjustments,
+            seasonHints: seasonHints,
+            pace: pace,
+            internationalArrivalTime: internationalArrivalTime,
+            internationalDepartureTime: internationalDepartureTime,
+            endpointScheduleBaselineDays: baselineDays
+        )
+    }
+
+    func withInternationalFlightTimes(arrival: String?, departure: String?) -> SampleItinerary {
+        SampleItinerary(
+            id: id,
+            title: title,
+            meta: meta,
+            routeSummary: routeSummary,
+            estimatedBudget: estimatedBudget,
+            days: days,
+            shareSlug: shareSlug,
+            isShared: isShared,
+            startDate: startDate,
+            endDate: endDate,
+            visitOrder: visitOrder,
+            userEdited: userEdited,
+            droppedAttractionIds: droppedAttractionIds,
+            schedulingAdjustments: schedulingAdjustments,
+            seasonHints: seasonHints,
+            pace: pace,
+            internationalArrivalTime: arrival,
+            internationalDepartureTime: departure,
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays
+        )
+    }
+
+    func withDroppedAttractionIds(_ ids: [String]?) -> SampleItinerary {
+        SampleItinerary(
+            id: id,
+            title: title,
+            meta: meta,
+            routeSummary: routeSummary,
+            estimatedBudget: estimatedBudget,
+            days: days,
+            shareSlug: shareSlug,
+            isShared: isShared,
+            startDate: startDate,
+            endDate: endDate,
+            visitOrder: visitOrder,
+            userEdited: userEdited,
+            droppedAttractionIds: ids,
+            schedulingAdjustments: schedulingAdjustments,
+            seasonHints: seasonHints,
+            pace: pace,
+            internationalArrivalTime: internationalArrivalTime,
+            internationalDepartureTime: internationalDepartureTime,
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays
         )
     }
 
@@ -151,7 +249,10 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             droppedAttractionIds: droppedAttractionIds,
             schedulingAdjustments: schedulingAdjustments,
             seasonHints: seasonHints,
-            pace: pace
+            pace: pace,
+            internationalArrivalTime: internationalArrivalTime,
+            internationalDepartureTime: internationalDepartureTime,
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays
         )
     }
 }

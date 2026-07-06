@@ -1041,6 +1041,236 @@
     "International department" : {
 
     },
+    "International arrival" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "国际入境"
+          }
+        }
+      }
+    },
+    "International arrival in %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抵达 %@"
+          }
+        }
+      }
+    },
+    "International departure" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "国际出境"
+          }
+        }
+      }
+    },
+    "International departure from %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从 %@ 出发"
+          }
+        }
+      }
+    },
+    "Set landing time" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置落地时间"
+          }
+        }
+      }
+    },
+    "Set departure time" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置出发时间"
+          }
+        }
+      }
+    },
+    "Landing time" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "落地时间"
+          }
+        }
+      }
+    },
+    "Departure time" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出发时间"
+          }
+        }
+      }
+    },
+    "Set your landing time below" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在下方设置落地时间"
+          }
+        }
+      }
+    },
+    "Sightseeing for this day updates after you confirm arrival" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确认抵达后，当日行程将自动更新"
+          }
+        }
+      }
+    },
+    "Set your departure time below" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在下方设置出发时间"
+          }
+        }
+      }
+    },
+    "Last-day sights adjust after you confirm your flight" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确认航班后，末日行程将自动调整"
+          }
+        }
+      }
+    },
+    "Land in %@ at %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ 落地"
+          }
+        }
+      }
+    },
+    "Depart from %@ at %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@ 出发"
+          }
+        }
+      }
+    },
+    "Evening arrival — check in and rest" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "晚间抵达 — 办理入住并休息"
+          }
+        }
+      }
+    },
+    "Optional light evening stroll if you have energy" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如有精力可轻松晚间散步"
+          }
+        }
+      }
+    },
+    "Afternoon arrival — light sightseeing window" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下午抵达 — 可安排轻度观光"
+          }
+        }
+      }
+    },
+    "Check in and settle at your hotel" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "办理入住并在酒店安顿"
+          }
+        }
+      }
+    },
+    "Morning arrival — full sightseeing day" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上午抵达 — 全天观光"
+          }
+        }
+      }
+    },
+    "Pack and hotel checkout" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "收拾行李并退房"
+          }
+        }
+      }
+    },
+    "Allow extra time for airport or train station transfer" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "预留前往机场或火车站的额外时间"
+          }
+        }
+      }
+    },
+    "Morning departure — lighter sightseeing before you leave" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上午出发 — 出发前轻度观光"
+          }
+        }
+      }
+    },
+    "Afternoon departure — morning sights still possible" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下午出发 — 上午仍可安排景点"
+          }
+        }
+      }
+    },
     "Internet Access" : {
 
     },

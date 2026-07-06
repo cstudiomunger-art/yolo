@@ -81,6 +81,14 @@ struct ItineraryDetailView: View {
     @State private var addAttractionContext: PlanAddAttractionContext?
     @State private var intercityTripSnapshot: [ItineraryDay]?
     @State private var intercityAdjustmentsSnapshot: [String] = []
+    @State private var endpointTripSnapshot: [ItineraryDay]?
+    @State private var endpointAdjustmentsSnapshot: [String] = []
+    @State private var endpointScheduleBaselineDays: [ItineraryDay]?
+    @State private var droppedAttractionIds: [String]?
+    @State private var internationalArrivalTime: String?
+    @State private var internationalDepartureTime: String?
+    @State private var endpointArrivalReplanTask: Task<Void, Never>?
+    @State private var endpointDepartureReplanTask: Task<Void, Never>?
     @State private var arrivalReplanTask: Task<Void, Never>?
     @State private var schedulingAdjustments: [String] = []
 
@@ -153,6 +161,15 @@ struct ItineraryDetailView: View {
         .onAppear {
             editableDays = itinerary.days
             schedulingAdjustments = itinerary.schedulingAdjustments ?? []
+            internationalArrivalTime = itinerary.internationalArrivalTime
+            internationalDepartureTime = itinerary.internationalDepartureTime
+            endpointScheduleBaselineDays = itinerary.endpointScheduleBaselineDays
+            droppedAttractionIds = itinerary.droppedAttractionIds
+            if endpointScheduleBaselineDays == nil,
+               internationalArrivalTime == nil,
+               internationalDepartureTime == nil {
+                endpointScheduleBaselineDays = itinerary.days
+            }
         }
         .task(id: itinerary.id) {
             do {
@@ -177,6 +194,11 @@ struct ItineraryDetailView: View {
             guard !editMode.isEditing else { return }
             if let saved = appEnv.preferences.savedItineraries.first(where: { $0.id == itinerary.id }) {
                 editableDays = saved.days
+                internationalArrivalTime = saved.internationalArrivalTime
+                internationalDepartureTime = saved.internationalDepartureTime
+                endpointScheduleBaselineDays = saved.endpointScheduleBaselineDays ?? endpointScheduleBaselineDays
+                droppedAttractionIds = saved.droppedAttractionIds
+                schedulingAdjustments = saved.schedulingAdjustments ?? []
             }
         }
         .sheet(item: $addAttractionContext) { ctx in
@@ -250,6 +272,131 @@ struct ItineraryDetailView: View {
         }
     }
 
+    private func endpointReplannerOptions() -> PlanItineraryEndpointReplanner.Options {
+        PlanItineraryEndpointReplanner.Options(
+            pace: resolvedTripPace,
+            catalogById: attractionCache,
+            visitOrder: currentItinerary.visitOrder ?? tripCityIds,
+            droppedAttractionIds: currentItinerary.droppedAttractionIds ?? []
+        )
+    }
+
+    private func mergeDroppedIds(existing: [String]?, newIds: [String]) -> [String]? {
+        guard !newIds.isEmpty else { return existing }
+        var merged = existing ?? []
+        for id in newIds where !merged.contains(id) {
+            merged.append(id)
+        }
+        return merged
+    }
+
+    private func endpointBaselineDays() -> [ItineraryDay] {
+        endpointScheduleBaselineDays ?? endpointTripSnapshot ?? editableDays
+    }
+
+    private func applyEndpointTimes(
+        arrival: String?,
+        departure: String?,
+        clearingArrival: Bool = false,
+        clearingDeparture: Bool = false
+    ) {
+        let baseline = endpointBaselineDays()
+        let finalArrival: String? = clearingArrival ? nil : arrival
+        let finalDeparture: String? = clearingDeparture ? nil : departure
+
+        if !clearingArrival, !clearingDeparture, finalArrival != nil || finalDeparture != nil {
+            if endpointScheduleBaselineDays == nil {
+                endpointScheduleBaselineDays = baseline
+            }
+            if endpointTripSnapshot == nil {
+                endpointTripSnapshot = endpointScheduleBaselineDays ?? baseline
+                endpointAdjustmentsSnapshot = schedulingAdjustments
+            }
+        }
+
+        let result = PlanItineraryEndpointReplanner.replan(
+            days: baseline,
+            entryCityId: resolvedEntryCityId,
+            exitCityId: resolvedExitCityId,
+            arrivalTime: finalArrival,
+            departureTime: finalDeparture,
+            options: endpointReplannerOptions()
+        )
+
+        editableDays = result.days
+        internationalArrivalTime = finalArrival
+        internationalDepartureTime = finalDeparture
+        droppedAttractionIds = mergeDroppedIds(existing: droppedAttractionIds, newIds: result.droppedAttractionIds)
+
+        if clearingArrival || clearingDeparture {
+            if finalArrival == nil, finalDeparture == nil {
+                schedulingAdjustments = endpointAdjustmentsSnapshot
+            } else if !endpointAdjustmentsSnapshot.isEmpty {
+                schedulingAdjustments = endpointAdjustmentsSnapshot + result.adjustments
+            } else {
+                schedulingAdjustments = result.adjustments
+            }
+            endpointTripSnapshot = nil
+            endpointAdjustmentsSnapshot = []
+        } else {
+            schedulingAdjustments.append(contentsOf: result.adjustments)
+        }
+
+        persistItineraryOrder()
+    }
+
+    private func applyInternationalArrivalTime(_ arrivalTime: String?) {
+        endpointArrivalReplanTask?.cancel()
+        endpointArrivalReplanTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            guard !Task.isCancelled else { return }
+            applyEndpointTimes(
+                arrival: arrivalTime,
+                departure: internationalDepartureTime,
+                clearingArrival: arrivalTime == nil,
+                clearingDeparture: false
+            )
+        }
+    }
+
+    private func applyInternationalDepartureTime(_ departureTime: String?) {
+        endpointDepartureReplanTask?.cancel()
+        endpointDepartureReplanTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 350_000_000)
+            guard !Task.isCancelled else { return }
+            applyEndpointTimes(
+                arrival: internationalArrivalTime,
+                departure: departureTime,
+                clearingArrival: false,
+                clearingDeparture: departureTime == nil
+            )
+        }
+    }
+
+    private var internationalArrivalBookendCard: some View {
+        let entryId = resolvedEntryCityId
+        let name = cityNameById[entryId] ?? CityTravelHints.displayName(for: entryId)
+        return InternationalEndpointCard(
+            kind: .inbound,
+            cityId: entryId,
+            cityDisplayName: name,
+            flightTime: internationalArrivalTime,
+            onTimeChange: applyInternationalArrivalTime
+        )
+    }
+
+    private var internationalDepartureBookendCard: some View {
+        let exitId = resolvedExitCityId
+        let name = cityNameById[exitId] ?? CityTravelHints.displayName(for: exitId)
+        return InternationalEndpointCard(
+            kind: .outbound,
+            cityId: exitId,
+            cityDisplayName: name,
+            flightTime: internationalDepartureTime,
+            onTimeChange: applyInternationalDepartureTime
+        )
+    }
+
     private var resolvedTripPace: TripPace {
         if let raw = currentItinerary.pace, let pace = TripPace(rawValue: raw) {
             return pace
@@ -274,13 +421,27 @@ struct ItineraryDetailView: View {
             endDate: saved?.endDate ?? itinerary.endDate,
             visitOrder: saved?.visitOrder ?? itinerary.visitOrder,
             userEdited: saved?.userEdited ?? itinerary.userEdited,
-            droppedAttractionIds: saved?.droppedAttractionIds ?? itinerary.droppedAttractionIds,
+            droppedAttractionIds: droppedAttractionIds ?? saved?.droppedAttractionIds ?? itinerary.droppedAttractionIds,
             schedulingAdjustments: schedulingAdjustments.isEmpty
                 ? (saved?.schedulingAdjustments ?? itinerary.schedulingAdjustments)
                 : schedulingAdjustments,
             seasonHints: saved?.seasonHints ?? itinerary.seasonHints,
-            pace: saved?.pace ?? itinerary.pace
+            pace: saved?.pace ?? itinerary.pace,
+            internationalArrivalTime: internationalArrivalTime ?? saved?.internationalArrivalTime ?? itinerary.internationalArrivalTime,
+            internationalDepartureTime: internationalDepartureTime ?? saved?.internationalDepartureTime ?? itinerary.internationalDepartureTime,
+            endpointScheduleBaselineDays: endpointScheduleBaselineDays ?? saved?.endpointScheduleBaselineDays ?? itinerary.endpointScheduleBaselineDays
         )
+    }
+
+    private var resolvedEntryCityId: String {
+        let order = currentItinerary.visitOrder ?? tripCityIds
+        return order.first?.lowercased() ?? tripCityIds.first?.lowercased() ?? "beijing"
+    }
+
+    private var resolvedExitCityId: String {
+        let order = currentItinerary.visitOrder ?? tripCityIds
+        if order.count <= 1 { return resolvedEntryCityId }
+        return order.last?.lowercased() ?? resolvedEntryCityId
     }
 
     private var addAttractionButtonLabel: some View {
@@ -317,6 +478,13 @@ struct ItineraryDetailView: View {
                 .background(Theme.ColorToken.backgroundSubtle)
 
             List {
+                Section {
+                    internationalArrivalBookendCard
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Theme.ColorToken.background)
+                        .listRowSeparator(.hidden)
+                }
+
                 ForEach(editableDays) { day in
                     Section {
                         daySectionHeader(day)
@@ -493,6 +661,13 @@ struct ItineraryDetailView: View {
                     }
                 }
                 .onMove(perform: moveDays)
+
+                Section {
+                    internationalDepartureBookendCard
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Theme.ColorToken.background)
+                        .listRowSeparator(.hidden)
+                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)

@@ -230,6 +230,91 @@ enum CityTravelHints {
         ]
     }
 
+    /// Bookend card copy before the user sets an international landing time.
+    static func internationalArrivalPlaceholder(cityId: String) -> [String] {
+        let name = displayName(for: cityId)
+        return [
+            String(format: String(localized: "International arrival in %@"), name),
+            String(localized: "Set your landing time below"),
+            String(localized: "Sightseeing for this day updates after you confirm arrival"),
+        ]
+    }
+
+    /// Bookend card copy before the user sets an international departure time.
+    static func internationalDeparturePlaceholder(cityId: String) -> [String] {
+        let name = displayName(for: cityId)
+        return [
+            String(format: String(localized: "International departure from %@"), name),
+            String(localized: "Set your departure time below"),
+            String(localized: "Last-day sights adjust after you confirm your flight"),
+        ]
+    }
+
+    static func internationalArrivalItems(cityId: String, arrivalTime: String) -> [String] {
+        let name = displayName(for: cityId)
+        var lines = [
+            String(format: String(localized: "Land in %@ at %@"), name, arrivalTime),
+        ]
+        if PlanItineraryFlightTimes.isEveningArrival(arrivalTime) {
+            lines.append(String(localized: "Evening arrival — check in and rest"))
+            lines.append(String(localized: "Optional light evening stroll if you have energy"))
+        } else if PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
+            lines.append(String(localized: "Afternoon arrival — light sightseeing window"))
+            lines.append(String(localized: "Check in and settle at your hotel"))
+        } else {
+            lines.append(String(localized: "Morning arrival — full sightseeing day"))
+        }
+        return lines
+    }
+
+    static func internationalDepartureItems(cityId: String, departureTime: String) -> [String] {
+        let name = displayName(for: cityId)
+        var lines = [
+            String(format: String(localized: "Depart from %@ at %@"), name, departureTime),
+            String(localized: "Pack and hotel checkout"),
+            String(localized: "Allow extra time for airport or train station transfer"),
+        ]
+        if PlanItineraryFlightTimes.isMorningDeparture(departureTime) {
+            lines.append(String(localized: "Morning departure — lighter sightseeing before you leave"))
+        } else {
+            lines.append(String(localized: "Afternoon departure — morning sights still possible"))
+        }
+        return lines
+    }
+
+    /// First sightseeing day in the entry city (mirrors scheduler `firstEntrySight`).
+    static func resolveEntrySightseeingDayIndex(days: [ItineraryDay], visitOrder: [String]) -> Int? {
+        guard let entry = visitOrder.first?.lowercased(), !entry.isEmpty else { return nil }
+        return days.first { day in
+            isSightseeingDay(day) && primaryCityId(for: day) == entry
+        }?.dayIndex
+    }
+
+    /// Last sightseeing day in the exit city.
+    static func resolveExitSightseeingDayIndex(days: [ItineraryDay], visitOrder: [String]) -> Int? {
+        guard let exit = visitOrder.last?.lowercased(), !exit.isEmpty else { return nil }
+        return days.reversed().first { day in
+            isSightseeingDay(day) && primaryCityId(for: day) == exit
+        }?.dayIndex
+    }
+
+    private static func isSightseeingDay(_ day: ItineraryDay) -> Bool {
+        if day.intercityHop != nil, day.isExperienceSuggestions { return false }
+        if day.experienceItems.contains(where: {
+            $0.localizedCaseInsensitiveContains("travel from")
+                || $0.localizedCaseInsensitiveContains("intercity travel")
+        }) {
+            return false
+        }
+        return true
+    }
+
+    private static func primaryCityId(for day: ItineraryDay) -> String? {
+        if let cid = day.experienceCityId?.lowercased(), !cid.isEmpty { return cid }
+        if let hop = day.intercityHop, !day.isExperienceSuggestions { return hop.toCityId.lowercased() }
+        return day.activities.compactMap { $0.cityId?.lowercased() }.first
+    }
+
     /// Honest copy when scheduling left a sightseeing day empty (not a recommended rest day).
     static func unfilledSchedulingGapItems(cityId: String) -> [String] {
         let name = displayName(for: cityId)

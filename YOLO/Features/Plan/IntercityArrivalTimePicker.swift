@@ -1,8 +1,10 @@
 import SwiftUI
 
-/// HH:mm picker for intercity arrival at the destination city (Review flow).
+/// HH:mm picker for flight arrival/departure times (Review flow).
 struct IntercityArrivalTimePicker: View {
     let arrivalTime: String?
+    var toggleLabel: LocalizedStringKey = "Set arrival time at destination"
+    var pickerLabel: LocalizedStringKey = "Arrival time"
     let onChange: (String?) -> Void
 
     @State private var pickerDate: Date = Date()
@@ -11,7 +13,7 @@ struct IntercityArrivalTimePicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Toggle(isOn: $isEnabled) {
-                Text(String(localized: "Set arrival time at destination"))
+                Text(toggleLabel)
                     .font(Theme.FontToken.inter(12, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
             }
@@ -27,7 +29,7 @@ struct IntercityArrivalTimePicker: View {
 
             if isEnabled {
                 DatePicker(
-                    String(localized: "Arrival time"),
+                    pickerLabel,
                     selection: $pickerDate,
                     displayedComponents: .hourAndMinute
                 )
