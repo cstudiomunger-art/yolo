@@ -1423,9 +1423,14 @@ struct PlanCreateFlowView: View {
             alignedDays = Array(alignedDays.prefix(activityDays))
         } else if alignedDays.count < activityDays {
             let visitOrder = normalized.visitOrder ?? cityIds
+            let padCityId = fillerCityIdForPadding(
+                visitOrder: visitOrder,
+                droppedIds: normalized.droppedAttractionIds ?? []
+            )
             while alignedDays.count < activityDays {
                 let nextIndex = alignedDays.count + 1
-                let cityMap = timelineCityIdByDay(from: alignedDays, visitOrder: visitOrder)
+                var cityMap = timelineCityIdByDay(from: alignedDays, visitOrder: visitOrder)
+                cityMap[nextIndex] = padCityId
                 let filler = PlanItineraryDayFill.fillEmptyDays(
                     [ItineraryDay(
                         id: "day_\(nextIndex)",
@@ -1513,12 +1518,25 @@ struct PlanCreateFlowView: View {
                 map[day.dayIndex] = cid
             }
         }
-        if let exit = visitOrder.last?.lowercased() {
-            for index in 1...activityDays where map[index] == nil {
-                map[index] = exit
-            }
-        }
         return map
+    }
+
+    private func fillerCityIdForPadding(visitOrder: [String], droppedIds: [String]) -> String {
+        var demandByCity: [String: Double] = [:]
+        for id in droppedIds {
+            guard let row = attractionCache[id] else { continue }
+            let cid = row.cityId.lowercased()
+            demandByCity[cid, default: 0] += PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText)
+        }
+        if let best = demandByCity.max(by: { $0.value < $1.value })?.key {
+            return best
+        }
+        let mid = visitOrder.dropFirst().dropLast().max { a, b in
+            let da = attractionCache.values.filter { $0.cityId.lowercased() == a.lowercased() }.count
+            let db = attractionCache.values.filter { $0.cityId.lowercased() == b.lowercased() }.count
+            return da < db
+        }
+        return mid?.lowercased() ?? visitOrder.first?.lowercased() ?? "beijing"
     }
 
     private func loadAttractionCache(for trip: SampleItinerary) async {
@@ -1567,7 +1585,8 @@ struct PlanCreateFlowView: View {
                 arrivalTime: arrivalTime,
                 options: PlanItineraryIntercityReplanner.Options(
                     pace: tripPace,
-                    catalogById: attractionCache
+                    catalogById: attractionCache,
+                    droppedAttractionIds: trip.droppedAttractionIds ?? []
                 )
             )
             replaceReviewDays(newDays, extraAdjustments: adjustments)

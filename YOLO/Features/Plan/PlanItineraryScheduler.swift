@@ -66,12 +66,6 @@ enum PlanItineraryScheduler {
 
         let resolvedPace = pace
 
-        let pick = PlanItineraryPickAttractions.pick(
-            catalogByCity: catalogByCity,
-            cityDays: cityDays,
-            pace: resolvedPace
-        )
-
         let catalogById = Dictionary(uniqueKeysWithValues: attractions.map { ($0.id, $0) })
         var timeline = buildTimeline(tripDays: days, visitOrder: visitOrder, cityDays: cityDays, pace: resolvedPace)
         timeline = applyFlightAndPaceProfiles(
@@ -82,13 +76,24 @@ enum PlanItineraryScheduler {
             departureTime: departureTime,
             activityDaysExcludeCalendarEndpoints: true
         )
+
+        let sightseeingDays = sightseeingDaysPerCity(from: timeline)
+        let pick = PlanItineraryPickAttractions.pick(
+            catalogByCity: catalogByCity,
+            cityDays: sightseeingDays,
+            pace: resolvedPace
+        )
         var dayPlans = buildRuleDayPlans(
             timeline: timeline,
             candidatesByCity: pick.candidatesByCity,
-            catalogById: catalogById
+            catalogById: catalogById,
+            pace: resolvedPace
         )
 
         var adjustments: [String] = calibration.schedulingAdjustments
+        if timeline.count < days {
+            adjustments.append("Timeline has \(timeline.count) scheduled days within \(days)-day trip (no exit-city padding).")
+        }
         var repaired = validateAndRepair(
             tripDays: days,
             dayPlans: &dayPlans,
@@ -131,11 +136,18 @@ enum PlanItineraryScheduler {
                         toCityId: travelSlot.cityId,
                         hours: hours
                     )
+                let routeLabel = fromCity.isEmpty
+                    ? CityTravelHints.displayName(for: travelSlot.cityId)
+                    : CityTravelHints.hopDayRouteLabel(
+                        fromCityId: fromCity,
+                        toCityId: travelSlot.cityId
+                    )
                 var day = experienceDay(
                     dayIndex: dayIndex,
                     cityId: travelSlot.cityId,
                     travel: true,
-                    items: items
+                    items: items,
+                    cityName: routeLabel
                 )
                 let ids = repaired.assignments[dayIndex] ?? []
                 var activities: [ItineraryActivity] = []
@@ -233,6 +245,7 @@ enum PlanItineraryScheduler {
         _ = userNotes
 
         let cityIdByDayIndex = Dictionary(uniqueKeysWithValues: timeline.map { ($0.dayIndex, $0.cityId.lowercased()) })
+        let schedulingGapDays = Set(timeline.filter { $0.kind == "sightseeing" }.map(\.dayIndex))
 
         return PipelineResult(
             days: PlanItineraryDayFill.fillEmptyDays(
@@ -242,7 +255,8 @@ enum PlanItineraryScheduler {
                 arrivalTime: arrivalTime,
                 departureTime: departureTime,
                 cityIdByDayIndex: cityIdByDayIndex,
-                activityDaysExcludeCalendarEndpoints: true
+                activityDaysExcludeCalendarEndpoints: true,
+                schedulingGapDayIndices: schedulingGapDays
             ),
             visitOrder: visitOrder,
             droppedAttractionIds: pick.preDropped + repaired.dropped,
@@ -333,20 +347,20 @@ enum PlanItineraryScheduler {
             }
         }
 
-        while dayPtr <= tripDays {
-            let cityId = visitOrder.last?.lowercased() ?? "beijing"
-            slots.append(TimelineSlot(
-                dayIndex: dayPtr,
-                kind: "sightseeing",
-                cityId: cityId,
-                dayCapacity: PlanItineraryDuration.daySlotCapacity(.fullDay),
-                eveningCapacity: 1,
-                fromCityId: nil
-            ))
-            dayPtr += 1
-        }
-
         return Array(slots.prefix(tripDays))
+    }
+
+    /// Count actual sightseeing-capable days per city from timeline (post truncate).
+    private static func sightseeingDaysPerCity(from timeline: [TimelineSlot]) -> [String: Int] {
+        var counts: [String: Int] = [:]
+        for slot in timeline {
+            guard slot.dayCapacity > 0 || slot.eveningCapacity > 0 else { continue }
+            let kind = slot.kind
+            guard kind == "sightseeing" || CityTravelHints.isIntercityHopKind(kind) else { continue }
+            let cid = slot.cityId.lowercased()
+            counts[cid, default: 0] += 1
+        }
+        return counts
     }
 
     private static func applyFlightAndPaceProfiles(
@@ -397,6 +411,21 @@ enum PlanItineraryScheduler {
                 dayCapacity = min(dayCapacity, PlanItineraryPace.daySlotCapacity(profile: .departureDay, pace: pace))
             }
 
+            if isHopLike, let from = slot.fromCityId {
+                let hours = CityTravelHints.travelHours(from, slot.cityId)
+                let isTravel = slot.kind == "travel"
+                let windows = PlanItineraryFlightTimes.destinationWindows(
+                    arrivalAtDestination: nil,
+                    travelHours: hours,
+                    pace: pace,
+                    isTravelDay: isTravel
+                )
+                if !windows.allowsMorningOrigin {
+                    dayCapacity = min(dayCapacity, windows.daytimeCap + Double(CityTravelHints.commuteSlots(hours)))
+                }
+                eveningCapacity = max(eveningCapacity, windows.eveningCap)
+            }
+
             return TimelineSlot(
                 dayIndex: slot.dayIndex,
                 kind: slot.kind,
@@ -428,7 +457,8 @@ enum PlanItineraryScheduler {
     private static func buildRuleDayPlans(
         timeline: [TimelineSlot],
         candidatesByCity: [String: [String]],
-        catalogById: [String: Attraction]
+        catalogById: [String: Attraction],
+        pace: TripPace
     ) -> [DayPlanDraft] {
         var pools = candidatesByCity
         var plans: [DayPlanDraft] = []
@@ -440,16 +470,24 @@ enum PlanItineraryScheduler {
                 var toPool = pools[toCity] ?? []
                 let hours = CityTravelHints.travelHours(fromCity, toCity)
                 let commuteCost = Double(CityTravelHints.commuteSlots(hours))
+                let isTravel = slot.kind == "travel"
+                let windows = PlanItineraryFlightTimes.destinationWindows(
+                    arrivalAtDestination: nil,
+                    travelHours: hours,
+                    pace: pace,
+                    isTravelDay: isTravel
+                )
                 var amIds: [String] = []
                 var pmIds: [String] = []
                 var eveningIds: [String] = []
 
-                if let amIdx = fromPool.firstIndex(where: { id in
+                if windows.allowsMorningOrigin,
+                   let amIdx = fromPool.firstIndex(where: { id in
                     guard let row = catalogById[id], !row.isEveningOnly else { return false }
                     return PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText) <= 1
                 }) {
                     amIds.append(fromPool.remove(at: amIdx))
-                } else if amIds.isEmpty, slot.kind != "short_hop" {
+                } else if amIds.isEmpty, slot.kind != "short_hop", windows.allowsMorningOrigin {
                     for prevDay in (1..<slot.dayIndex).reversed() {
                         guard let prevIdx = plans.firstIndex(where: {
                             $0.dayIndex == prevDay && $0.cityId == fromCity
@@ -469,7 +507,8 @@ enum PlanItineraryScheduler {
                     }
                 }
 
-                let sightBudget = max(0, slot.dayCapacity - commuteCost)
+                let destDayCap = windows.daytimeCap
+                let sightBudget = max(0, min(slot.dayCapacity - (windows.allowsMorningOrigin ? commuteCost : 0), destDayCap))
                 var used = 0.0
                 for id in amIds {
                     used += PlanItineraryDuration.parseDurationSlots(catalogById[id]?.recommendedDurationText)
@@ -491,12 +530,12 @@ enum PlanItineraryScheduler {
                     }
                 }
 
-                if slot.eveningCapacity > 0,
+                if windows.eveningCap > 0,
                    let eveIdx = toPool.firstIndex(where: { catalogById[$0]?.isEveningOnly == true }) {
                     eveningIds.append(toPool.remove(at: eveIdx))
                 }
 
-                if pmIds.isEmpty,
+                if pmIds.isEmpty, windows.daytimeCap > 0,
                    let pmIdx = toPool.firstIndex(where: { catalogById[$0]?.isEveningOnly != true }) {
                     pmIds.append(toPool.remove(at: pmIdx))
                 }
@@ -729,7 +768,8 @@ enum PlanItineraryScheduler {
         dayIndex: Int,
         cityId: String,
         travel: Bool,
-        items: [String]? = nil
+        items: [String]? = nil,
+        cityName: String? = nil
     ) -> ItineraryDay {
         let resolvedItems = items ?? (travel
             ? CityTravelHints.travelExperienceItems(toCityId: cityId)
@@ -738,7 +778,7 @@ enum PlanItineraryScheduler {
             id: "day_\(dayIndex)",
             dayIndex: dayIndex,
             dateLabel: "Day \(dayIndex)",
-            cityName: CityTravelHints.displayName(for: cityId),
+            cityName: cityName ?? CityTravelHints.displayName(for: cityId),
             costEstimate: nil,
             activities: [],
             dayKind: .experienceSuggestions,

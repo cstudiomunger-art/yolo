@@ -19,7 +19,7 @@ import {
   daySlotCapacity,
   parseDurationSlots,
 } from "./itinerary-duration.ts";
-import { isAfternoonArrival, isMorningDeparture } from "./itinerary-flight-times.ts";
+import { destinationWindows, isAfternoonArrival, isMorningDeparture } from "./itinerary-flight-times.ts";
 import {
   daySlotCapacityForPace,
   defaultPace,
@@ -163,19 +163,18 @@ function buildTimeline(params: {
     }
   }
 
-  while (dayPtr <= tripDays) {
-    const cityId = visitOrder[visitOrder.length - 1]?.toLowerCase() ?? "beijing";
-    slots.push({
-      day_index: dayPtr,
-      kind: "sightseeing",
-      city_id: cityId,
-      day_capacity: daySlotCapacity("full_day"),
-      evening_capacity: 1,
-    });
-    dayPtr++;
-  }
-
   return slots.slice(0, tripDays);
+}
+
+function sightseeingDaysPerCity(timeline: TimelineSlot[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const slot of timeline) {
+    if (slot.day_capacity <= 0 && slot.evening_capacity <= 0) continue;
+    if (slot.kind !== "sightseeing" && !isIntercityHopKind(slot.kind)) continue;
+    const cid = slot.city_id.toLowerCase();
+    counts.set(cid, (counts.get(cid) ?? 0) + 1);
+  }
+  return counts;
 }
 
 function applyFlightAndPaceProfiles(
@@ -186,6 +185,7 @@ function applyFlightAndPaceProfiles(
     arrivalTime?: string | null;
     departureTime?: string | null;
     activityDaysExcludeCalendarEndpoints?: boolean;
+    regionByCity: Map<string, string | null>;
   },
 ): TimelineSlot[] {
   const {
@@ -194,6 +194,7 @@ function applyFlightAndPaceProfiles(
     arrivalTime,
     departureTime,
     activityDaysExcludeCalendarEndpoints = true,
+    regionByCity,
   } = params;
   const activeSlots = slots.filter((s) => s.kind !== "travel");
   const firstActive = activeSlots[0]?.day_index;
@@ -240,6 +241,20 @@ function applyFlightAndPaceProfiles(
       dayCapacity = Math.min(dayCapacity, daySlotCapacityForPace("departure_day", pace));
     }
 
+    if (isHopLike && slot.from_city_id) {
+      const hours = travelHours(slot.from_city_id, slot.city_id, regionByCity);
+      const windows = destinationWindows({
+        arrivalAtDestination: null,
+        travelHours: hours,
+        pace,
+        isTravelDay: slot.kind === "travel",
+      });
+      if (!windows.allowsMorningOrigin) {
+        dayCapacity = Math.min(dayCapacity, windows.daytimeCap + commuteSlots(hours));
+      }
+      eveningCapacity = Math.max(eveningCapacity, windows.eveningCap);
+    }
+
     return {
       ...slot,
       day_capacity: dayCapacity,
@@ -267,8 +282,12 @@ export function buildRuleDayPlans(params: {
   timeline: TimelineSlot[];
   candidatesByCity: Map<string, string[]>;
   catalogById: Map<string, AttractionRow>;
+  pace?: TripPace;
+  regionByCity?: Map<string, string | null>;
 }): DayPlanDraft[] {
   const { timeline, candidatesByCity, catalogById } = params;
+  const pace = params.pace ?? "standard";
+  const regionByCity = params.regionByCity ?? new Map<string, string | null>();
   const plans: DayPlanDraft[] = [];
   const pools = new Map<string, string[]>();
 
@@ -282,41 +301,56 @@ export function buildRuleDayPlans(params: {
       const toCity = slot.city_id.toLowerCase();
       let fromPool = [...(pools.get(fromCity) ?? [])];
       let toPool = [...(pools.get(toCity) ?? [])];
-      const hours = travelHours(fromCity, toCity);
+      const hours = travelHours(fromCity, toCity, regionByCity);
       const commuteCost = commuteSlots(hours);
+      const windows = destinationWindows({
+        arrivalAtDestination: null,
+        travelHours: hours,
+        pace,
+        isTravelDay: slot.kind === "travel",
+      });
       const amIds: string[] = [];
       const pmIds: string[] = [];
       const eveningIds: string[] = [];
 
-      const amIdx = fromPool.findIndex((id) => {
-        const row = catalogById.get(id);
-        return row != null && !isEveningOnlyAttraction(row) &&
-          parseDurationSlots(row.recommended_duration) <= 1;
-      });
-      if (amIdx >= 0) {
-        amIds.push(fromPool.splice(amIdx, 1)[0]);
-      } else if (amIds.length === 0 && slot.kind !== "short_hop") {
-        for (let d = slot.day_index - 1; d >= 1; d--) {
-          const prev = plans.find((p) => p.day_index === d && p.city_id === fromCity);
-          if (!prev?.attraction_ids.length) continue;
-          const stealIdx = prev.attraction_ids.findIndex((id) => {
-            const row = catalogById.get(id);
-            return row != null && !isEveningOnlyAttraction(row) &&
-              parseDurationSlots(row.recommended_duration) <= 1;
-          });
-          if (stealIdx < 0) continue;
-          const remainingDaytime = prev.attraction_ids.filter((id, idx) => {
-            if (idx === stealIdx) return false;
-            const row = catalogById.get(id);
-            return row != null && !isEveningOnlyAttraction(row);
-          });
-          if (remainingDaytime.length === 0) continue;
-          amIds.push(prev.attraction_ids.splice(stealIdx, 1)[0]);
-          break;
+      if (windows.allowsMorningOrigin) {
+        const amIdx = fromPool.findIndex((id) => {
+          const row = catalogById.get(id);
+          return row != null && !isEveningOnlyAttraction(row) &&
+            parseDurationSlots(row.recommended_duration) <= 1;
+        });
+        if (amIdx >= 0) {
+          amIds.push(fromPool.splice(amIdx, 1)[0]);
+        } else if (amIds.length === 0 && slot.kind !== "short_hop") {
+          for (let d = slot.day_index - 1; d >= 1; d--) {
+            const prev = plans.find((p) => p.day_index === d && p.city_id === fromCity);
+            if (!prev?.attraction_ids.length) continue;
+            const stealIdx = prev.attraction_ids.findIndex((id) => {
+              const row = catalogById.get(id);
+              return row != null && !isEveningOnlyAttraction(row) &&
+                parseDurationSlots(row.recommended_duration) <= 1;
+            });
+            if (stealIdx < 0) continue;
+            const remainingDaytime = prev.attraction_ids.filter((id, idx) => {
+              if (idx === stealIdx) return false;
+              const row = catalogById.get(id);
+              return row != null && !isEveningOnlyAttraction(row);
+            });
+            if (remainingDaytime.length === 0) continue;
+            amIds.push(prev.attraction_ids.splice(stealIdx, 1)[0]);
+            break;
+          }
         }
       }
 
-      const sightBudget = Math.max(0, slot.day_capacity - commuteCost);
+      const destDayCap = windows.daytimeCap;
+      const sightBudget = Math.max(
+        0,
+        Math.min(
+          slot.day_capacity - (windows.allowsMorningOrigin ? commuteCost : 0),
+          destDayCap,
+        ),
+      );
       let used = 0;
       for (const id of amIds) {
         const row = catalogById.get(id);
@@ -340,7 +374,7 @@ export function buildRuleDayPlans(params: {
         }
       }
 
-      if (slot.evening_capacity > 0) {
+      if (windows.eveningCap > 0) {
         const eveIdx = toPool.findIndex((id) => {
           const row = catalogById.get(id);
           return row != null && isEveningOnlyAttraction(row);
@@ -350,7 +384,7 @@ export function buildRuleDayPlans(params: {
         }
       }
 
-      if (pmIds.length === 0 && toPool.length > 0) {
+      if (pmIds.length === 0 && windows.daytimeCap > 0 && toPool.length > 0) {
         const pmIdx = toPool.findIndex((id) => {
           const row = catalogById.get(id);
           return row != null && !isEveningOnlyAttraction(row);
@@ -879,13 +913,6 @@ export function runItinerarySchedulerPipeline(params: {
   const cityDays = cityDaysCalibration.cityDays;
   const adjustments: string[] = [...cityDaysCalibration.schedulingAdjustments];
 
-  const { candidatesByCity, preDropped } = pickAttractionsBySlotBudget({
-    catalog,
-    cityDays,
-    mustSeeIds: parseAIMustSee(aiPlan),
-    pace,
-  });
-
   let timeline = buildTimeline({
     tripDays,
     visitOrder,
@@ -899,11 +926,24 @@ export function runItinerarySchedulerPipeline(params: {
     arrivalTime: params.arrivalTime,
     departureTime: params.departureTime,
     activityDaysExcludeCalendarEndpoints: true,
+    regionByCity,
+  });
+
+  if (timeline.length < tripDays) {
+    adjustments.push(`Timeline has ${timeline.length} scheduled days within ${tripDays}-day trip (no exit-city padding).`);
+  }
+
+  const sightseeingDays = sightseeingDaysPerCity(timeline);
+  const { candidatesByCity, preDropped } = pickAttractionsBySlotBudget({
+    catalog,
+    cityDays: sightseeingDays,
+    mustSeeIds: parseAIMustSee(aiPlan),
+    pace,
   });
 
   let dayPlans = parseAIDayPlans(aiPlan, catalogById);
   if (dayPlans.length === 0) {
-    dayPlans = buildRuleDayPlans({ timeline, candidatesByCity, catalogById });
+    dayPlans = buildRuleDayPlans({ timeline, candidatesByCity, catalogById, pace, regionByCity });
   } else {
     dayPlans = alignDayPlansToTimeline(dayPlans, timeline, adjustments);
     dayPlans = filterDayPlansToCandidates(

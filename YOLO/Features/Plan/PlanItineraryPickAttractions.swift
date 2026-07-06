@@ -16,6 +16,7 @@ enum PlanItineraryPickAttractions {
         var preDropped: [String] = []
 
         for (cityId, days) in cityDays {
+            let D = max(1, days)
             let pool = (catalogByCity[cityId] ?? []).sorted {
                 let pa = priorityRank($0.priority)
                 let pb = priorityRank($1.priority)
@@ -23,7 +24,8 @@ enum PlanItineraryPickAttractions {
                 return $0.displayOrder < $1.displayOrder
             }
 
-            let slotBudget = Double(max(1, days)) * PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: pace)
+            let slotsPerDay = PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: pace)
+            let slotBudget = Double(D) * slotsPerDay
             let dayPool = pool.filter { !PlanItineraryVisitHours.isEveningOnly($0) }
             let eveningPool = pool.filter { PlanItineraryVisitHours.isEveningOnly($0) }
             let mustIds = Set(dayPool.filter {
@@ -33,16 +35,35 @@ enum PlanItineraryPickAttractions {
             var picked: [String] = []
             var pickedSet = Set<String>()
             var usedSlots = 0.0
+            var daytimeCount = 0
 
-            for row in dayPool where mustIds.contains(row.id) {
+            func tryPick(_ row: Attraction, force: Bool = false) -> Bool {
+                let slots = PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText)
+                if !force, usedSlots + slots > slotBudget, !picked.isEmpty { return false }
+                picked.append(row.id)
+                pickedSet.insert(row.id)
+                usedSlots += slots
+                if !PlanItineraryVisitHours.isEveningOnly(row) { daytimeCount += 1 }
+                return true
+            }
+
+            // Guarantee ~1 daytime sight per sightseeing day (prefer short attractions).
+            for row in dayPool where !pickedSet.contains(row.id) {
+                guard daytimeCount < D else { break }
+                let slots = PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText)
+                guard slots <= 1 else { continue }
+                if usedSlots + slots <= slotBudget || daytimeCount == 0 {
+                    _ = tryPick(row, force: daytimeCount == 0)
+                }
+            }
+
+            for row in dayPool where mustIds.contains(row.id) && !pickedSet.contains(row.id) {
                 let slots = PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText)
                 if usedSlots + slots > slotBudget, !picked.isEmpty {
                     preDropped.append(row.id)
                     continue
                 }
-                picked.append(row.id)
-                pickedSet.insert(row.id)
-                usedSlots += slots
+                _ = tryPick(row)
             }
 
             for row in dayPool where !pickedSet.contains(row.id) {
@@ -51,17 +72,25 @@ enum PlanItineraryPickAttractions {
                     preDropped.append(row.id)
                     continue
                 }
-                picked.append(row.id)
-                pickedSet.insert(row.id)
-                usedSlots += slots
+                _ = tryPick(row)
             }
 
-            let eveningBudget = max(1, days)
-            for row in eveningPool.prefix(eveningBudget) {
+            // P0 monopoly guard: if only one big P0 picked, try one more short P1.
+            if daytimeCount < D,
+               let extra = dayPool.first(where: { row in
+                   !pickedSet.contains(row.id)
+                       && priorityRank(row.priority) <= 1
+                       && PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText) <= 1
+               }) {
+                _ = tryPick(extra, force: true)
+            }
+
+            let eveningBudget = min(1, D)
+            for row in eveningPool.prefix(eveningBudget) where !pickedSet.contains(row.id) {
                 picked.append(row.id)
                 pickedSet.insert(row.id)
             }
-            for row in eveningPool.dropFirst(eveningBudget) {
+            for row in eveningPool.dropFirst(eveningBudget) where !pickedSet.contains(row.id) {
                 preDropped.append(row.id)
             }
 

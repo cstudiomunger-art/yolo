@@ -9,7 +9,8 @@ enum PlanItineraryDayFill {
         arrivalTime: String? = nil,
         departureTime: String? = nil,
         cityIdByDayIndex: [Int: String] = [:],
-        activityDaysExcludeCalendarEndpoints: Bool = true
+        activityDaysExcludeCalendarEndpoints: Bool = true,
+        schedulingGapDayIndices: Set<Int> = []
     ) -> [ItineraryDay] {
         let dayIndices = days.map(\.dayIndex).sorted()
         let firstTripDay = dayIndices.first
@@ -32,7 +33,8 @@ enum PlanItineraryDayFill {
                 tripDayCount: dayIndices.count,
                 arrivalTime: arrivalTime,
                 departureTime: departureTime,
-                activityDaysExcludeCalendarEndpoints: activityDaysExcludeCalendarEndpoints
+                activityDaysExcludeCalendarEndpoints: activityDaysExcludeCalendarEndpoints,
+                isSchedulingGap: schedulingGapDayIndices.contains(day.dayIndex)
             )
             return ItineraryDay(
                 id: day.id,
@@ -61,8 +63,12 @@ enum PlanItineraryDayFill {
         tripDayCount: Int,
         arrivalTime: String?,
         departureTime: String?,
-        activityDaysExcludeCalendarEndpoints: Bool
+        activityDaysExcludeCalendarEndpoints: Bool,
+        isSchedulingGap: Bool
     ) -> [String] {
+        if isSchedulingGap {
+            return CityTravelHints.unfilledSchedulingGapItems(cityId: cityId)
+        }
         if !activityDaysExcludeCalendarEndpoints,
            dayIndex == firstTripDay,
            PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {

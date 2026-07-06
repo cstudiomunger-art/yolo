@@ -74,6 +74,7 @@ enum PlanItineraryGoldenTest {
         fails += testBlankDayExitCity()
         fails += testShortHopNoStealPrevDay()
         fails += testHopDayHeaderRouteLabel()
+        fails += testFullTravelDayRouteLabel()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -1443,6 +1444,34 @@ enum PlanItineraryGoldenTest {
         )
         let ok = label.contains("→") || (label.contains("Chongqing") && label.contains("Chengdu"))
         print(ok ? "✓ hop day section header uses route label" : "✗ hop header should be route label, got \(label)")
+        return ok ? 0 : 1
+    }
+
+    private static func testFullTravelDayRouteLabel() -> Int {
+        let cities = ["chengdu", "hangzhou"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 5,
+            attractions: attractions,
+            entryCityId: "chengdu",
+            exitCityId: "hangzhou",
+            applyNormalizer: false
+        )
+        guard let travelDay = trip.days.first(where: {
+            $0.isExperienceSuggestions && $0.intercityHop != nil
+        }) else {
+            print("✗ full travel day route: no travel experience day with hop")
+            return 1
+        }
+        let label = CityTravelHints.daySectionCityLabel(
+            day: travelDay,
+            cityNameById: ["chengdu": "Chengdu", "hangzhou": "Hangzhou"]
+        )
+        let ok = label.contains("→")
+            && label.lowercased().contains("chengdu")
+            && label.lowercased().contains("hangzhou")
+        print(ok ? "✓ full travel day header uses route label" : "✗ full travel day header should be Chengdu → Hangzhou, got \(label)")
         return ok ? 0 : 1
     }
 

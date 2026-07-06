@@ -35,29 +35,71 @@ enum PlanItineraryFlightTimes {
         return String(format: "%02d:%02d", h, m)
     }
 
-    /// Hop day: keep morning sights in origin city only if 09:00 + travel still before noon.
-    static func allowsMorningInOriginCity(travelHours: Double, arrivalAtDestination: String?) -> Bool {
-        if isAfternoonArrival(arrivalAtDestination) { return false }
-        if let arrival = parseMinuteOfDay(arrivalAtDestination) {
-            return arrival < 12 * 60
-        }
-        return (9 * 60) + Int(travelHours * 60) <= 12 * 60
-    }
-
     static func remainingDaytimeCapacity(
         arrivalAtDestination: String?,
         pace: TripPace,
         isTravelDay: Bool
     ) -> Double {
-        guard let mins = parseMinuteOfDay(arrivalAtDestination) else {
-            return PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: pace)
+        destinationWindows(
+            arrivalAtDestination: arrivalAtDestination,
+            travelHours: nil,
+            pace: pace,
+            isTravelDay: isTravelDay
+        ).daytimeCap
+    }
+
+    struct DestinationWindows {
+        let daytimeCap: Double
+        let eveningCap: Int
+        let allowsMorningOrigin: Bool
+        let resolvedArrival: String?
+    }
+
+    /// Unified arrival-window rules for scheduler generation and Review replan.
+    static func destinationWindows(
+        arrivalAtDestination: String?,
+        travelHours: Double?,
+        pace: TripPace,
+        isTravelDay: Bool
+    ) -> DestinationWindows {
+        let resolved = arrivalAtDestination?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let arrival = (resolved?.isEmpty == false) ? resolved : travelHours.map { suggestedArrivalAtDestination(travelHours: $0) }
+
+        guard let mins = parseMinuteOfDay(arrival) else {
+            let base = PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: pace)
+            let allowsMorning = travelHours.map {
+                allowsMorningInOriginCity(travelHours: $0, arrivalAtDestination: nil)
+            } ?? true
+            return DestinationWindows(daytimeCap: base, eveningCap: 1, allowsMorningOrigin: allowsMorning, resolvedArrival: arrival)
         }
-        if mins >= 17 * 60 { return 0 }
-        if mins >= 14 * 60 { return isTravelDay ? 0 : 1 }
-        if mins >= 12 * 60 { return 1 }
+
+        if mins >= 17 * 60 {
+            return DestinationWindows(daytimeCap: 0, eveningCap: 1, allowsMorningOrigin: false, resolvedArrival: arrival)
+        }
+        if mins >= 14 * 60 {
+            return DestinationWindows(
+                daytimeCap: isTravelDay ? 0 : 1,
+                eveningCap: 1,
+                allowsMorningOrigin: false,
+                resolvedArrival: arrival
+            )
+        }
+        if mins >= 12 * 60 {
+            return DestinationWindows(daytimeCap: 1, eveningCap: 0, allowsMorningOrigin: false, resolvedArrival: arrival)
+        }
+
         let base = PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: pace)
-        if isTravelDay { return max(1, base - 1) }
-        return max(0, base - 1)
+        let daytimeCap = isTravelDay ? max(1, base - 1) : max(0, base - 1)
+        return DestinationWindows(daytimeCap: daytimeCap, eveningCap: 1, allowsMorningOrigin: true, resolvedArrival: arrival)
+    }
+
+    static func allowsMorningInOriginCity(travelHours: Double, arrivalAtDestination: String?) -> Bool {
+        destinationWindows(
+            arrivalAtDestination: arrivalAtDestination,
+            travelHours: travelHours,
+            pace: .standard,
+            isTravelDay: false
+        ).allowsMorningOrigin
     }
 
     static func formatHHMM(from date: Date, calendar: Calendar = .current) -> String {

@@ -159,8 +159,8 @@ enum CityTravelHints {
         cityNameById: [String: String],
         attractionCache: [String: Attraction] = [:]
     ) -> String {
-        if let hop = day.intercityHop, !day.isExperienceSuggestions {
-            if !day.cityName.isEmpty { return day.cityName }
+        if let hop = day.intercityHop {
+            if !day.cityName.isEmpty, day.cityName.contains("→") { return day.cityName }
             return hopDayRouteLabel(fromCityId: hop.fromCityId, toCityId: hop.toCityId)
         }
         if day.isExperienceSuggestions, let cid = day.experienceCityId, !cid.isEmpty {
@@ -227,6 +227,15 @@ enum CityTravelHints {
             "Pack and hotel checkout",
             "Breakfast near your hotel",
             "Allow extra time for airport or train station transfer",
+        ]
+    }
+
+    /// Honest copy when scheduling left a sightseeing day empty (not a recommended rest day).
+    static func unfilledSchedulingGapItems(cityId: String) -> [String] {
+        let name = displayName(for: cityId)
+        return [
+            "行程偏紧，暂无推荐景点",
+            "可在 \(name) 自由探索或点 + 添加",
         ]
     }
 

@@ -297,6 +297,14 @@ export function departureMorningExperienceItems(cityId: string): string[] {
   ];
 }
 
+export function unfilledSchedulingGapItems(cityId: string): string[] {
+  const name = cityDisplayName(cityId);
+  return [
+    "行程偏紧，暂无推荐景点",
+    `可在 ${name} 自由探索或点 + 添加`,
+  ];
+}
+
 export function flexibleRestDayItems(cityId: string): string[] {
   const name = cityDisplayName(cityId);
   return [

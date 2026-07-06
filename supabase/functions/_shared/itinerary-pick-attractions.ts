@@ -38,6 +38,7 @@ export function pickAttractionsBySlotBudget(params: {
   const preDropped: string[] = [];
 
   for (const [cityId, days] of cityDays) {
+    const D = Math.max(1, days);
     const pool = [...(catalogByCity.get(cityId.toLowerCase()) ?? [])].sort((a, b) => {
       const pa = priorityRank(a.priority);
       const pb = priorityRank(b.priority);
@@ -45,7 +46,7 @@ export function pickAttractionsBySlotBudget(params: {
       return a.display_order - b.display_order;
     });
 
-    const slotBudget = Math.max(1, days) * daySlotCapacityForPace("full_day", pace);
+    const slotBudget = D * daySlotCapacityForPace("full_day", pace);
     const dayPool = pool.filter((r) => !isEveningOnlyAttraction(r));
     const eveningPool = pool.filter((r) => isEveningOnlyAttraction(r));
     const mustIds = new Set(
@@ -57,9 +58,23 @@ export function pickAttractionsBySlotBudget(params: {
     const picked: string[] = [];
     const pickedSet = new Set<string>();
     let usedSlots = 0;
+    let daytimeCount = 0;
 
     for (const row of dayPool) {
-      if (!mustIds.has(row.id)) continue;
+      if (pickedSet.has(row.id)) continue;
+      if (daytimeCount >= D) break;
+      const slots = parseDurationSlots(row.recommended_duration);
+      if (slots > 1) continue;
+      if (usedSlots + slots <= slotBudget || daytimeCount === 0) {
+        picked.push(row.id);
+        pickedSet.add(row.id);
+        usedSlots += slots;
+        daytimeCount++;
+      }
+    }
+
+    for (const row of dayPool) {
+      if (!mustIds.has(row.id) || pickedSet.has(row.id)) continue;
       const slots = parseDurationSlots(row.recommended_duration);
       if (usedSlots + slots > slotBudget && picked.length > 0) {
         preDropped.push(row.id);
@@ -68,6 +83,7 @@ export function pickAttractionsBySlotBudget(params: {
       picked.push(row.id);
       pickedSet.add(row.id);
       usedSlots += slots;
+      if (!isEveningOnlyAttraction(row)) daytimeCount++;
     }
 
     for (const row of dayPool) {
@@ -80,15 +96,29 @@ export function pickAttractionsBySlotBudget(params: {
       picked.push(row.id);
       pickedSet.add(row.id);
       usedSlots += slots;
+      if (!isEveningOnlyAttraction(row)) daytimeCount++;
     }
 
-    const eveningBudget = Math.max(1, days);
+    if (daytimeCount < D) {
+      const extra = dayPool.find((row) =>
+        !pickedSet.has(row.id)
+        && priorityRank(row.priority) <= 1
+        && parseDurationSlots(row.recommended_duration) <= 1
+      );
+      if (extra) {
+        picked.push(extra.id);
+        pickedSet.add(extra.id);
+      }
+    }
+
+    const eveningBudget = Math.min(1, D);
     for (const row of eveningPool.slice(0, eveningBudget)) {
+      if (pickedSet.has(row.id)) continue;
       picked.push(row.id);
       pickedSet.add(row.id);
     }
     for (const row of eveningPool.slice(eveningBudget)) {
-      preDropped.push(row.id);
+      if (!pickedSet.has(row.id)) preDropped.push(row.id);
     }
 
     candidatesByCity.set(cityId.toLowerCase(), picked);

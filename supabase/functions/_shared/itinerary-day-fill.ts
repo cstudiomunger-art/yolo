@@ -3,6 +3,7 @@ import {
   cityDisplayName,
   departureMorningExperienceItems,
   flexibleRestDayItems,
+  unfilledSchedulingGapItems,
 } from "./city-travel-hints.ts";
 import { isAfternoonArrival, isMorningDeparture } from "./itinerary-flight-times.ts";
 import type { ItineraryDay } from "./itinerary-assembler.ts";
@@ -44,6 +45,7 @@ function experienceItemsForBlankDay(params: {
   arrivalTime?: string | null;
   departureTime?: string | null;
   activityDaysExcludeCalendarEndpoints?: boolean;
+  isSchedulingGap?: boolean;
 }): string[] {
   const {
     dayIndex,
@@ -54,7 +56,11 @@ function experienceItemsForBlankDay(params: {
     arrivalTime,
     departureTime,
     activityDaysExcludeCalendarEndpoints = true,
+    isSchedulingGap = false,
   } = params;
+  if (isSchedulingGap) {
+    return unfilledSchedulingGapItems(cityId);
+  }
   if (
     !activityDaysExcludeCalendarEndpoints &&
     dayIndex === firstTripDay &&
@@ -76,6 +82,7 @@ export function fillEmptyItineraryDays(
     departureTime?: string | null;
     cityIdByDayIndex?: Record<number, string>;
     activityDaysExcludeCalendarEndpoints?: boolean;
+    schedulingGapDayIndices?: Set<number>;
   },
 ): ItineraryDay[] {
   const dayIndices = days.map((d) => d.day_index).sort((a, b) => a - b);
@@ -95,6 +102,7 @@ export function fillEmptyItineraryDays(
       arrivalTime: opts?.arrivalTime,
       departureTime: opts?.departureTime,
       activityDaysExcludeCalendarEndpoints: opts?.activityDaysExcludeCalendarEndpoints,
+      isSchedulingGap: opts?.schedulingGapDayIndices?.has(day.day_index) ?? false,
     });
     return {
       ...day,

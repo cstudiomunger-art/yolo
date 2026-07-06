@@ -23,10 +23,21 @@ export function slotDemandForCity(catalog: AttractionRow[], cityId: string): num
     .reduce((sum, a) => sum + parseDurationSlots(a.recommended_duration), 0);
 }
 
+export function minDemandDaysForCity(
+  catalog: AttractionRow[],
+  cityId: string,
+  pace: TripPace,
+): number {
+  const slotsPerDay = daySlotCapacityForPace("full_day", pace);
+  const demand = slotDemandForCity(catalog, cityId);
+  return Math.max(1, Math.ceil(demand / slotsPerDay));
+}
+
 export function cityDayWeights(
   cities: string[],
   catalog: AttractionRow[],
   metaByCity: Map<string, CityMetaRow>,
+  pace: TripPace = "standard",
 ): Map<string, number> {
   const weights = new Map<string, number>();
   for (const city of cities) {
@@ -35,9 +46,8 @@ export function cityDayWeights(
     const avg = meta?.avg_days_recommended != null
       ? Math.max(1, Number(meta.avg_days_recommended))
       : 2;
-    const slotDemand = slotDemandForCity(catalog, cid);
-    const w = avg + 0.25 * Math.ceil(slotDemand / 2);
-    weights.set(cid, Math.max(1, w));
+    const minD = minDemandDaysForCity(catalog, cid, pace);
+    weights.set(cid, Math.max(1, minD, avg));
   }
   return weights;
 }
@@ -54,7 +64,6 @@ export function reservedFullTravelDays(
   return count;
 }
 
-/** Hop / travel-lite / short_hop / intense same-day transitions (first day in dest city). */
 export function reservedHopTransitionDays(
   visitOrder: string[],
   regionByCity: Map<string, string | null>,
@@ -91,28 +100,52 @@ export function countLongTravelDays(
   return reservedFullTravelDays(visitOrder, regionByCity);
 }
 
-function clampCityDaysSum(
+function rebalanceCityDaysSum(
   map: Map<string, number>,
   visitOrder: string[],
+  catalog: AttractionRow[],
+  pace: TripPace,
   available: number,
 ): Map<string, number> {
   const result = new Map(map);
   let assigned = [...result.values()].reduce((a, b) => a + b, 0);
+  const exit = visitOrder[visitOrder.length - 1]?.toLowerCase();
+
   while (assigned > available) {
-    const richest = visitOrder.reduce((best, c) =>
-      (result.get(c.toLowerCase()) ?? 0) > (result.get(best.toLowerCase()) ?? 0) ? c : best
-    );
-    const cur = result.get(richest.toLowerCase()) ?? 1;
-    if (cur <= 1) break;
-    result.set(richest.toLowerCase(), cur - 1);
+    const donor = visitOrder
+      .map((c) => c.toLowerCase())
+      .filter((c) => (result.get(c) ?? 0) > 1)
+      .sort((a, b) => {
+        const surplusA = (result.get(a) ?? 0) - minDemandDaysForCity(catalog, a, pace);
+        const surplusB = (result.get(b) ?? 0) - minDemandDaysForCity(catalog, b, pace);
+        if (surplusA !== surplusB) return surplusB - surplusA;
+        if (a === exit) return 1;
+        if (b === exit) return -1;
+        return (result.get(b) ?? 0) - (result.get(a) ?? 0);
+      })[0];
+    if (!donor) break;
+    result.set(donor, (result.get(donor) ?? 1) - 1);
     assigned--;
   }
+
   while (assigned < available) {
-    const last = visitOrder[visitOrder.length - 1]?.toLowerCase();
-    if (!last) break;
-    result.set(last, (result.get(last) ?? 1) + 1);
+    const recipient = visitOrder
+      .map((c) => c.toLowerCase())
+      .sort((a, b) => {
+        const gapA = minDemandDaysForCity(catalog, a, pace) - (result.get(a) ?? 0);
+        const gapB = minDemandDaysForCity(catalog, b, pace) - (result.get(b) ?? 0);
+        if (gapA !== gapB) return gapB - gapA;
+        if (a === exit && gapA <= 0) return 1;
+        if (b === exit && gapB <= 0) return -1;
+        return slotDemandForCity(catalog, b) - slotDemandForCity(catalog, a);
+      })[0];
+    if (!recipient) break;
+    const gap = minDemandDaysForCity(catalog, recipient, pace) - (result.get(recipient) ?? 0);
+    if (gap <= 0 && recipient === exit) break;
+    result.set(recipient, (result.get(recipient) ?? 1) + 1);
     assigned++;
   }
+
   return result;
 }
 
@@ -122,12 +155,13 @@ export function distributeDaysAcrossCitiesV2(
   catalog: AttractionRow[],
   citiesMeta: CityMetaRow[],
   regionByCity: Map<string, string | null>,
+  pace: TripPace = "standard",
 ): Map<string, number> {
   if (visitOrder.length === 0) return new Map();
 
   const travelReserved = reservedIntercityDays(visitOrder, regionByCity, pace);
   const available = Math.max(visitOrder.length, tripDays - travelReserved);
-  return distributeDaysWithAvailable(available, visitOrder, catalog, citiesMeta);
+  return distributeDaysWithAvailable(available, visitOrder, catalog, citiesMeta, pace);
 }
 
 function distributeDaysWithAvailable(
@@ -135,25 +169,20 @@ function distributeDaysWithAvailable(
   visitOrder: string[],
   catalog: AttractionRow[],
   citiesMeta: CityMetaRow[],
+  pace: TripPace,
 ): Map<string, number> {
   const metaByCity = metaMap(citiesMeta);
-  const weights = cityDayWeights(visitOrder, catalog, metaByCity);
+  const weights = cityDayWeights(visitOrder, catalog, metaByCity, pace);
   const totalWeight = [...weights.values()].reduce((a, b) => a + b, 0) || 1;
 
   const map = new Map<string, number>();
-  let assigned = 0;
-
-  for (let i = 0; i < visitOrder.length; i++) {
-    const city = visitOrder[i].toLowerCase();
-    const w = weights.get(city) ?? 1;
-    const share = i === visitOrder.length - 1
-      ? Math.max(1, availableCityDays - assigned)
-      : Math.max(1, Math.round((availableCityDays * w) / totalWeight));
-    map.set(city, share);
-    assigned += share;
+  for (const city of visitOrder) {
+    const cid = city.toLowerCase();
+    const w = weights.get(cid) ?? 1;
+    map.set(cid, Math.max(1, Math.round((availableCityDays * w) / totalWeight)));
   }
 
-  return clampCityDaysSum(map, visitOrder, availableCityDays);
+  return rebalanceCityDaysSum(map, visitOrder, catalog, pace, availableCityDays);
 }
 
 export type CityDaysCalibration = {
@@ -180,12 +209,11 @@ function assessTightTrip(params: {
 
   let minDemandDays = 0;
   for (const city of visitOrder) {
-    const demand = slotDemandForCity(catalog, city);
-    minDemandDays += Math.ceil(demand / slotsPerDay);
+    minDemandDays += minDemandDaysForCity(catalog, city, pace);
   }
 
   const calendarNeed = [...cityDays.values()].reduce((a, b) => a + b, 0)
-    + reservedFullTravelDays(visitOrder, regionByCity);
+    + reservedIntercityDays(visitOrder, regionByCity, pace);
   if (calendarNeed > tripDays) {
     const msg = `行程 ${tripDays} 天偏紧：按景点体量建议至少 ${minDemandDays} 个观光日，已压缩分配。`;
     hints.push(msg);
@@ -203,10 +231,12 @@ function applyEntryCityMinDays(
   map: Map<string, number>,
   visitOrder: string[],
   tripDays: number,
+  catalog: AttractionRow[],
 ): Map<string, number> {
   if (tripDays < 8 || visitOrder.length < 3) return map;
   const entry = visitOrder[0]?.toLowerCase();
   if (!entry) return map;
+  const exit = visitOrder[visitOrder.length - 1]?.toLowerCase();
   const result = new Map(map);
   const minEntry = 2;
   let current = result.get(entry) ?? 1;
@@ -215,10 +245,18 @@ function applyEntryCityMinDays(
   const donors = visitOrder
     .slice(1)
     .map((c) => c.toLowerCase())
-    .sort((a, b) => (result.get(b) ?? 1) - (result.get(a) ?? 1));
+    .sort((a, b) => {
+      const demandA = slotDemandForCity(catalog, a);
+      const demandB = slotDemandForCity(catalog, b);
+      if (demandA !== demandB) return demandA - demandB;
+      return (result.get(b) ?? 1) - (result.get(a) ?? 1);
+    });
 
   for (const donor of donors) {
     if (current >= minEntry) break;
+    if (donor === exit && (result.get(donor) ?? 1) <= minDemandDaysForCity(catalog, donor, "standard")) {
+      continue;
+    }
     const spare = (result.get(donor) ?? 1) - 1;
     if (spare <= 0) continue;
     const take = Math.min(minEntry - current, spare);
@@ -241,7 +279,7 @@ export function calibrateCityDays(
   const travelReserved = reservedIntercityDays(visitOrder, regionByCity, pace);
   const available = Math.max(visitOrder.length, tripDays - travelReserved);
 
-  const ruleWeights = distributeDaysWithAvailable(available, visitOrder, catalog, citiesMeta);
+  const ruleWeights = distributeDaysWithAvailable(available, visitOrder, catalog, citiesMeta, pace);
 
   let cityDays: Map<string, number>;
   if (!aiWeights || Object.keys(aiWeights).length === 0) {
@@ -258,10 +296,10 @@ export function calibrateCityDays(
         merged.set(cid, rule);
       }
     }
-    cityDays = clampCityDaysSum(merged, visitOrder, available);
+    cityDays = rebalanceCityDaysSum(merged, visitOrder, catalog, pace, available);
   }
 
-  cityDays = applyEntryCityMinDays(cityDays, visitOrder, tripDays);
+  cityDays = applyEntryCityMinDays(cityDays, visitOrder, tripDays, catalog);
 
   const { hints, adjustments } = assessTightTrip({
     visitOrder,

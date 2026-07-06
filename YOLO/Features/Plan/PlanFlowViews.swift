@@ -198,7 +198,8 @@ struct ItineraryDetailView: View {
                 arrivalTime: arrivalTime,
                 options: PlanItineraryIntercityReplanner.Options(
                     pace: resolvedTripPace,
-                    catalogById: attractionCache
+                    catalogById: attractionCache,
+                    droppedAttractionIds: currentItinerary.droppedAttractionIds ?? []
                 )
             )
             editableDays = newDays
@@ -434,6 +435,9 @@ struct ItineraryDetailView: View {
     }
 
     private func experienceCityDisplayName(_ day: ItineraryDay) -> String {
+        if let hop = day.intercityHop {
+            return CityTravelHints.hopDayRouteLabel(fromCityId: hop.fromCityId, toCityId: hop.toCityId)
+        }
         guard let cid = day.experienceCityId else { return "" }
         return cityNameById[cid] ?? cid.capitalized
     }
@@ -625,11 +629,20 @@ struct ItineraryDetailView: View {
         days.map { day in
             let mapped = mapActivities(day.activities)
             if day.isExperienceSuggestions {
+                let resolvedCityName: String
+                if let hop = day.intercityHop {
+                    resolvedCityName = CityTravelHints.hopDayRouteLabel(
+                        fromCityId: hop.fromCityId,
+                        toCityId: hop.toCityId
+                    )
+                } else {
+                    resolvedCityName = day.experienceCityId.map { CityTravelHints.displayName(for: $0) } ?? day.cityName
+                }
                 return ItineraryDay(
                     id: day.id,
                     dayIndex: day.dayIndex,
                     dateLabel: day.dateLabel,
-                    cityName: day.experienceCityId.map { CityTravelHints.displayName(for: $0) } ?? day.cityName,
+                    cityName: resolvedCityName,
                     costEstimate: day.costEstimate,
                     activities: mapped,
                     dayKind: .experienceSuggestions,
