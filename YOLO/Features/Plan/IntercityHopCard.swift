@@ -40,7 +40,6 @@ struct IntercityHopCard: View {
                     .padding(.vertical, 2)
                 IntercityArrivalTimePicker(
                     arrivalTime: hop.arrivalTimeAtDestination,
-                    style: .compact,
                     onChange: onArrivalTimeChange
                 )
             }

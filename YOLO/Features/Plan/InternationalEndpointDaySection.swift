@@ -13,7 +13,7 @@ struct InternationalEndpointDaySection<ActivityRows: View, AddButton: View>: Vie
     @ViewBuilder let addAttractionButton: () -> AddButton
 
     private var showsLinkedActivities: Bool {
-        guard flightTime != nil, !(flightTime?.isEmpty ?? true) else { return false }
+        guard PlanItineraryFlightTimes.hasMeaningfulTime(flightTime) else { return false }
         return linkedDay != nil && !(linkedDay?.activities.isEmpty ?? true)
     }
 
@@ -37,7 +37,7 @@ struct InternationalEndpointDaySection<ActivityRows: View, AddButton: View>: Vie
                     activityRows()
                     addAttractionButton()
                 }
-            } else if flightTime != nil, !(flightTime?.isEmpty ?? true) {
+            } else if PlanItineraryFlightTimes.hasMeaningfulTime(flightTime) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(String(localized: "Planned sights"))
                         .font(Theme.FontToken.inter(11, weight: .semibold))

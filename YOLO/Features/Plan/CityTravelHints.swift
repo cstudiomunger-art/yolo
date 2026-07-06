@@ -307,7 +307,6 @@ enum CityTravelHints {
         let name = displayName(for: cityId)
         return [
             String(format: String(localized: "International arrival in %@"), name),
-            String(localized: "Set your landing time below"),
             String(localized: "Sightseeing for this day updates after you confirm arrival"),
         ]
     }
@@ -317,7 +316,6 @@ enum CityTravelHints {
         let name = displayName(for: cityId)
         return [
             String(format: String(localized: "International departure from %@"), name),
-            String(localized: "Set your departure time below"),
             String(localized: "Last-day sights adjust after you confirm your flight"),
         ]
     }
@@ -355,30 +353,95 @@ enum CityTravelHints {
     }
 
     /// First sightseeing day in the entry city (mirrors scheduler `firstEntrySight`).
-    static func resolveEntrySightseeingDayIndex(days: [ItineraryDay], visitOrder: [String]) -> Int? {
-        guard let entry = visitOrder.first?.lowercased(), !entry.isEmpty else { return nil }
+    static func resolveEntrySightseeingDayIndex(
+        days: [ItineraryDay],
+        visitOrder: [String],
+        entryCityId: String? = nil
+    ) -> Int? {
+        let entry = (entryCityId ?? visitOrder.first)?.lowercased() ?? ""
+        guard !entry.isEmpty else { return nil }
         return days.first { day in
             isSightseeingDay(day) && primaryCityId(for: day) == entry
         }?.dayIndex
     }
 
     /// Last sightseeing day in the exit city.
-    static func resolveExitSightseeingDayIndex(days: [ItineraryDay], visitOrder: [String]) -> Int? {
-        guard let exit = visitOrder.last?.lowercased(), !exit.isEmpty else { return nil }
+    static func resolveExitSightseeingDayIndex(
+        days: [ItineraryDay],
+        visitOrder: [String],
+        exitCityId: String? = nil
+    ) -> Int? {
+        let exit = (exitCityId ?? visitOrder.last)?.lowercased() ?? ""
+        guard !exit.isEmpty else { return nil }
         return days.reversed().first { day in
             isSightseeingDay(day) && primaryCityId(for: day) == exit
         }?.dayIndex
     }
 
     /// Array index for entry/exit sightseeing day (for bookend ↔ day list binding).
-    static func entrySightseeingDayArrayIndex(days: [ItineraryDay], visitOrder: [String]) -> Int? {
-        guard let dayIndex = resolveEntrySightseeingDayIndex(days: days, visitOrder: visitOrder) else { return nil }
+    static func entrySightseeingDayArrayIndex(
+        days: [ItineraryDay],
+        visitOrder: [String],
+        entryCityId: String? = nil
+    ) -> Int? {
+        guard let dayIndex = resolveEntrySightseeingDayIndex(
+            days: days,
+            visitOrder: visitOrder,
+            entryCityId: entryCityId
+        ) else { return nil }
         return days.firstIndex(where: { $0.dayIndex == dayIndex })
     }
 
-    static func exitSightseeingDayArrayIndex(days: [ItineraryDay], visitOrder: [String]) -> Int? {
-        guard let dayIndex = resolveExitSightseeingDayIndex(days: days, visitOrder: visitOrder) else { return nil }
+    static func exitSightseeingDayArrayIndex(
+        days: [ItineraryDay],
+        visitOrder: [String],
+        exitCityId: String? = nil
+    ) -> Int? {
+        guard let dayIndex = resolveExitSightseeingDayIndex(
+            days: days,
+            visitOrder: visitOrder,
+            exitCityId: exitCityId
+        ) else { return nil }
         return days.firstIndex(where: { $0.dayIndex == dayIndex })
+    }
+
+    /// When flight time is set, linked sightseeing activities render on the bookend card instead.
+    enum BookendActivityRelocation {
+        case none
+        case arrivalCard
+        case departureCard
+    }
+
+    static func bookendActivityRelocation(
+        day: ItineraryDay,
+        days: [ItineraryDay],
+        visitOrder: [String],
+        entryCityId: String,
+        exitCityId: String,
+        arrivalTime: String?,
+        departureTime: String?
+    ) -> BookendActivityRelocation {
+        if PlanItineraryFlightTimes.hasMeaningfulTime(arrivalTime),
+           let entryIdx = resolveEntrySightseeingDayIndex(
+               days: days,
+               visitOrder: visitOrder,
+               entryCityId: entryCityId
+           ),
+           day.dayIndex == entryIdx,
+           !day.activities.isEmpty {
+            return .arrivalCard
+        }
+        if PlanItineraryFlightTimes.hasMeaningfulTime(departureTime),
+           let exitIdx = resolveExitSightseeingDayIndex(
+               days: days,
+               visitOrder: visitOrder,
+               exitCityId: exitCityId
+           ),
+           day.dayIndex == exitIdx,
+           !day.activities.isEmpty {
+            return .departureCard
+        }
+        return .none
     }
 
     private static func isSightseeingDay(_ day: ItineraryDay) -> Bool {

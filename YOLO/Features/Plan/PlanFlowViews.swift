@@ -266,7 +266,7 @@ struct ItineraryDetailView: View {
                     droppedAttractionIds: currentItinerary.droppedAttractionIds ?? []
                 )
             )
-            editableDays = newDays
+            editableDays = fillDaysAfterReplan(newDays)
             schedulingAdjustments.append(contentsOf: adjustments)
             persistItineraryOrder()
         }
@@ -323,7 +323,7 @@ struct ItineraryDetailView: View {
             options: endpointReplannerOptions()
         )
 
-        editableDays = result.days
+        editableDays = fillDaysAfterReplan(result.days)
         internationalArrivalTime = finalArrival
         internationalDepartureTime = finalDeparture
         droppedAttractionIds = mergeDroppedIds(existing: droppedAttractionIds, newIds: result.droppedAttractionIds)
@@ -378,7 +378,11 @@ struct ItineraryDetailView: View {
         let name = cityNameById[entryId] ?? CityTravelHints.displayName(for: entryId)
         let trip = currentItinerary
         let order = trip.visitOrder ?? tripCityIds
-        let linkedIdx = CityTravelHints.entrySightseeingDayArrayIndex(days: trip.days, visitOrder: order)
+        let linkedIdx = CityTravelHints.entrySightseeingDayArrayIndex(
+            days: trip.days,
+            visitOrder: order,
+            entryCityId: entryId
+        )
         let linkedDay = linkedIdx.map { trip.days[$0] }
         return InternationalEndpointDaySection(
             kind: .inbound,
@@ -415,7 +419,11 @@ struct ItineraryDetailView: View {
         let name = cityNameById[exitId] ?? CityTravelHints.displayName(for: exitId)
         let trip = currentItinerary
         let order = trip.visitOrder ?? tripCityIds
-        let linkedIdx = CityTravelHints.exitSightseeingDayArrayIndex(days: trip.days, visitOrder: order)
+        let linkedIdx = CityTravelHints.exitSightseeingDayArrayIndex(
+            days: trip.days,
+            visitOrder: order,
+            exitCityId: exitId
+        )
         let linkedDay = linkedIdx.map { trip.days[$0] }
         return InternationalEndpointDaySection(
             kind: .outbound,
@@ -447,18 +455,35 @@ struct ItineraryDetailView: View {
         }
     }
 
-    private func activitiesShownAtInternationalBookend(day: ItineraryDay) -> Bool {
+    private func bookendRelocation(for day: ItineraryDay) -> CityTravelHints.BookendActivityRelocation {
         let trip = currentItinerary
         let order = trip.visitOrder ?? tripCityIds
-        if internationalArrivalTime != nil,
-           day.dayIndex == CityTravelHints.resolveEntrySightseeingDayIndex(days: trip.days, visitOrder: order) {
-            return true
+        return CityTravelHints.bookendActivityRelocation(
+            day: day,
+            days: trip.days,
+            visitOrder: order,
+            entryCityId: resolvedEntryCityId,
+            exitCityId: resolvedExitCityId,
+            arrivalTime: internationalArrivalTime ?? trip.internationalArrivalTime,
+            departureTime: internationalDepartureTime ?? trip.internationalDepartureTime
+        )
+    }
+
+    @ViewBuilder
+    private func bookendRelocationHint(_ relocation: CityTravelHints.BookendActivityRelocation) -> some View {
+        let text: LocalizedStringKey = switch relocation {
+        case .arrivalCard: "Planned sights shown under International arrival above"
+        case .departureCard: "Planned sights shown under International departure below"
+        case .none: ""
         }
-        if internationalDepartureTime != nil,
-           day.dayIndex == CityTravelHints.resolveExitSightseeingDayIndex(days: trip.days, visitOrder: order) {
-            return true
-        }
-        return false
+        Text(text)
+            .font(Theme.FontToken.inter(11))
+            .foregroundStyle(Theme.ColorToken.textMuted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
+            .listRowSeparator(.hidden)
+            .listRowBackground(Theme.ColorToken.background)
+            .moveDisabled(true)
     }
 
     private var resolvedTripPace: TripPace {
@@ -553,8 +578,10 @@ struct ItineraryDetailView: View {
                     Section {
                         daySectionHeader(day)
 
-                        if !activitiesShownAtInternationalBookend(day: day) {
-                        if day.intercityHop != nil && day.isExperienceSuggestions {
+                        let relocation = bookendRelocation(for: day)
+                        if relocation != .none {
+                            bookendRelocationHint(relocation)
+                        } else if day.intercityHop != nil && day.isExperienceSuggestions {
                             ExperienceSuggestionsDayCard(
                                 day: day,
                                 cityDisplayName: experienceCityDisplayName(day),
@@ -595,11 +622,21 @@ struct ItineraryDetailView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
-                        } else if day.isExperienceSuggestions {
+                        } else if day.isExperienceSuggestions || PlanItineraryDayFill.isBlank(day) {
+                            let trip = currentItinerary
+                            let displayDay = day.isExperienceSuggestions
+                                ? day
+                                : (PlanItineraryDayFill.fillEmptyDays(
+                                    [day],
+                                    visitOrder: trip.visitOrder ?? tripCityIds,
+                                    pace: resolvedTripPace,
+                                    arrivalTime: internationalArrivalTime ?? trip.internationalArrivalTime,
+                                    departureTime: internationalDepartureTime ?? trip.internationalDepartureTime
+                                ).first ?? day)
                             ExperienceSuggestionsDayCard(
-                                day: day,
-                                cityDisplayName: experienceCityDisplayName(day),
-                                onArrivalTimeChange: day.intercityHop != nil
+                                day: displayDay,
+                                cityDisplayName: experienceCityDisplayName(displayDay),
+                                onArrivalTimeChange: displayDay.intercityHop != nil
                                     ? { applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: $0) }
                                     : nil
                             )
@@ -611,7 +648,7 @@ struct ItineraryDetailView: View {
                             Button {
                                 guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
                                 let cityIds: [String] = {
-                                    if let cid = day.experienceCityId, !cid.isEmpty { return [cid] }
+                                    if let cid = displayDay.experienceCityId, !cid.isEmpty { return [cid] }
                                     return tripCityIds
                                 }()
                                 addAttractionContext = PlanAddAttractionContext(
@@ -628,7 +665,7 @@ struct ItineraryDetailView: View {
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
 
-                            if day.intercityHop == nil {
+                            if day.isExperienceSuggestions, day.intercityHop == nil {
                                 Button {
                                     convertExperienceDayToStandard(dayId: day.id)
                                 } label: {
@@ -697,6 +734,44 @@ struct ItineraryDetailView: View {
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
                         } else {
+                            if PlanItineraryDayFill.isBlank(day) {
+                                let trip = currentItinerary
+                                let displayDay = PlanItineraryDayFill.fillEmptyDays(
+                                    [day],
+                                    visitOrder: trip.visitOrder ?? tripCityIds,
+                                    pace: resolvedTripPace,
+                                    arrivalTime: internationalArrivalTime ?? trip.internationalArrivalTime,
+                                    departureTime: internationalDepartureTime ?? trip.internationalDepartureTime
+                                ).first ?? day
+                                ExperienceSuggestionsDayCard(
+                                    day: displayDay,
+                                    cityDisplayName: experienceCityDisplayName(displayDay)
+                                )
+                                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Theme.ColorToken.background)
+                                .moveDisabled(true)
+
+                                Button {
+                                    guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
+                                    let cityIds: [String] = {
+                                        if let cid = displayDay.experienceCityId, !cid.isEmpty { return [cid] }
+                                        return tripCityIds
+                                    }()
+                                    addAttractionContext = PlanAddAttractionContext(
+                                        dayIndex: dayIndex,
+                                        cityIds: cityIds
+                                    )
+                                } label: {
+                                    addAttractionButtonLabel
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(Theme.ColorToken.accent)
+                                .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 6, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Theme.ColorToken.background)
+                                .moveDisabled(true)
+                            } else {
                             ForEach(day.activities) { activity in
                                 activityRow(activity, dayId: day.id)
                             }
@@ -722,7 +797,7 @@ struct ItineraryDetailView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
-                        }
+                            }
                         }
                     }
                 }
@@ -940,6 +1015,34 @@ struct ItineraryDetailView: View {
                 sourcePlatform: act.sourcePlatform
             )
         }
+    }
+
+    private func fillDaysAfterReplan(_ days: [ItineraryDay]) -> [ItineraryDay] {
+        let trip = currentItinerary
+        let visitOrder = trip.visitOrder ?? tripCityIds
+        let cityMap = timelineCityIdByDay(from: days, visitOrder: visitOrder)
+        return PlanItineraryDayFill.fillEmptyDays(
+            days,
+            visitOrder: visitOrder,
+            pace: resolvedTripPace,
+            arrivalTime: internationalArrivalTime ?? trip.internationalArrivalTime,
+            departureTime: internationalDepartureTime ?? trip.internationalDepartureTime,
+            cityIdByDayIndex: cityMap
+        )
+    }
+
+    private func timelineCityIdByDay(from days: [ItineraryDay], visitOrder: [String]) -> [Int: String] {
+        var map: [Int: String] = [:]
+        for day in days {
+            if let cid = day.experienceCityId?.lowercased(), !cid.isEmpty {
+                map[day.dayIndex] = cid
+            } else if let hop = day.intercityHop {
+                map[day.dayIndex] = hop.toCityId.lowercased()
+            } else if let cid = day.activities.compactMap(\.cityId).first?.lowercased(), !cid.isEmpty {
+                map[day.dayIndex] = cid
+            }
+        }
+        return map
     }
 
     private func normalizeDays(_ days: [ItineraryDay]) -> [ItineraryDay] {

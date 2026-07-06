@@ -26,6 +26,11 @@ enum PlanItineraryFlightTimes {
         return mins >= 17 * 60
     }
 
+    /// Non-nil, non-empty, parseable HH:mm.
+    static func hasMeaningfulTime(_ time: String?) -> Bool {
+        parseMinuteOfDay(time) != nil
+    }
+
     /// Default assume 09:00 departure from origin + travel hours.
     static func suggestedArrivalAtDestination(travelHours: Double) -> String {
         let depart = 9 * 60

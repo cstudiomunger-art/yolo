@@ -114,7 +114,6 @@ struct ExperienceSuggestionsDayCard: View {
                     .frame(height: 1)
                 IntercityArrivalTimePicker(
                     arrivalTime: hop.arrivalTimeAtDestination,
-                    style: .compact,
                     onChange: onArrivalTimeChange
                 )
             }

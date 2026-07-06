@@ -990,7 +990,11 @@ struct PlanCreateFlowView: View {
             let name = cities.first(where: { $0.id.lowercased() == entryId.lowercased() })?.name
                 ?? CityTravelHints.displayName(for: entryId)
             let order = draftItinerary.visitOrder ?? reviewTripCityIds()
-            let linkedIdx = CityTravelHints.entrySightseeingDayArrayIndex(days: draftItinerary.days, visitOrder: order)
+            let linkedIdx = CityTravelHints.entrySightseeingDayArrayIndex(
+                days: draftItinerary.days,
+                visitOrder: order,
+                entryCityId: entryId
+            )
             let linkedDay = linkedIdx.map { draftItinerary.days[$0] }
             InternationalEndpointDaySection(
                 kind: .inbound,
@@ -1031,7 +1035,11 @@ struct PlanCreateFlowView: View {
             let name = cities.first(where: { $0.id.lowercased() == exitId.lowercased() })?.name
                 ?? CityTravelHints.displayName(for: exitId)
             let order = draftItinerary.visitOrder ?? reviewTripCityIds()
-            let linkedIdx = CityTravelHints.exitSightseeingDayArrayIndex(days: draftItinerary.days, visitOrder: order)
+            let linkedIdx = CityTravelHints.exitSightseeingDayArrayIndex(
+                days: draftItinerary.days,
+                visitOrder: order,
+                exitCityId: exitId
+            )
             let linkedDay = linkedIdx.map { draftItinerary.days[$0] }
             InternationalEndpointDaySection(
                 kind: .outbound,
@@ -1065,18 +1073,34 @@ struct PlanCreateFlowView: View {
         }
     }
 
-    private func activitiesShownAtInternationalBookend(day: ItineraryDay) -> Bool {
-        guard let trip = draftItinerary else { return false }
+    private func bookendRelocation(for day: ItineraryDay) -> CityTravelHints.BookendActivityRelocation {
+        guard let trip = draftItinerary else { return .none }
         let order = trip.visitOrder ?? reviewTripCityIds()
-        if trip.internationalArrivalTime != nil,
-           day.dayIndex == CityTravelHints.resolveEntrySightseeingDayIndex(days: trip.days, visitOrder: order) {
-            return true
+        return CityTravelHints.bookendActivityRelocation(
+            day: day,
+            days: trip.days,
+            visitOrder: order,
+            entryCityId: resolvedEntryCityId(),
+            exitCityId: resolvedExitCityId(),
+            arrivalTime: trip.internationalArrivalTime,
+            departureTime: trip.internationalDepartureTime
+        )
+    }
+
+    @ViewBuilder
+    private func bookendRelocationHint(_ relocation: CityTravelHints.BookendActivityRelocation) -> some View {
+        let text: LocalizedStringKey = switch relocation {
+        case .arrivalCard: "Planned sights shown under International arrival above"
+        case .departureCard: "Planned sights shown under International departure below"
+        case .none: ""
         }
-        if trip.internationalDepartureTime != nil,
-           day.dayIndex == CityTravelHints.resolveExitSightseeingDayIndex(days: trip.days, visitOrder: order) {
-            return true
-        }
-        return false
+        Text(text)
+            .font(Theme.FontToken.inter(11))
+            .foregroundStyle(Theme.ColorToken.textMuted)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
     }
 
     @ViewBuilder
@@ -1087,11 +1111,11 @@ struct PlanCreateFlowView: View {
             cityNameById: cityNameById,
             attractionCache: attractionCache
         )
-        let hideActivitiesAtBookend = activitiesShownAtInternationalBookend(day: day)
+        let relocation = bookendRelocation(for: day)
 
         Section {
-            if hideActivitiesAtBookend {
-                EmptyView()
+            if relocation != .none {
+                bookendRelocationHint(relocation)
             } else if let hop = day.intercityHop, day.isExperienceSuggestions {
                 let displayDay = day
                 ExperienceSuggestionsDayCard(
@@ -1188,8 +1212,8 @@ struct PlanCreateFlowView: View {
                         [day],
                         visitOrder: draftItinerary?.visitOrder ?? reviewTripCityIds(),
                         pace: tripPace,
-                        arrivalTime: nil,
-                        departureTime: nil
+                        arrivalTime: draftItinerary?.internationalArrivalTime,
+                        departureTime: draftItinerary?.internationalDepartureTime
                     ).first ?? day)
                 ExperienceSuggestionsDayCard(
                     day: displayDay,
@@ -1223,6 +1247,44 @@ struct PlanCreateFlowView: View {
                     .listRowSeparator(.hidden)
                 }
             } else {
+                if PlanItineraryDayFill.isBlank(day) {
+                    let displayDay = PlanItineraryDayFill.fillEmptyDays(
+                        [day],
+                        visitOrder: draftItinerary?.visitOrder ?? reviewTripCityIds(),
+                        pace: tripPace,
+                        arrivalTime: draftItinerary?.internationalArrivalTime,
+                        departureTime: draftItinerary?.internationalDepartureTime
+                    ).first ?? day
+                    ExperienceSuggestionsDayCard(
+                        day: displayDay,
+                        cityDisplayName: visited.isEmpty
+                            ? CityTravelHints.displayName(for: displayDay.experienceCityId ?? "beijing")
+                            : visited,
+                        showsActivities: displayDay.intercityHop == nil,
+                        onArrivalTimeChange: nil
+                    )
+                    .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+
+                    if reviewEditMode == .inactive {
+                        Button {
+                            let cityIds: [String] = {
+                                if let cid = displayDay.experienceCityId, !cid.isEmpty { return [cid] }
+                                return reviewTripCityIds()
+                            }()
+                            addAttractionContext = PlanAddAttractionContext(dayIndex: dayIndex, cityIds: cityIds)
+                        } label: {
+                            Label(String(localized: "Add attraction"), systemImage: "plus")
+                                .font(Theme.FontToken.inter(12, weight: .medium))
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(Theme.ColorToken.accent)
+                        .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    }
+                } else {
                 ForEach(day.activities) { activity in
                     reviewActivityRow(activity, dayIndex: dayIndex)
                         .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 4, trailing: Theme.screenPadding))
@@ -1246,6 +1308,7 @@ struct PlanCreateFlowView: View {
                     .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+                }
                 }
             }
         } header: {
@@ -1779,6 +1842,24 @@ struct PlanCreateFlowView: View {
         )
     }
 
+    private func fillDaysAfterReplan(
+        _ days: [ItineraryDay],
+        trip: SampleItinerary,
+        arrivalTime: String?,
+        departureTime: String?
+    ) -> [ItineraryDay] {
+        let visitOrder = trip.visitOrder ?? reviewTripCityIds()
+        let cityMap = timelineCityIdByDay(from: days, visitOrder: visitOrder)
+        return PlanItineraryDayFill.fillEmptyDays(
+            days,
+            visitOrder: visitOrder,
+            pace: tripPace,
+            arrivalTime: arrivalTime,
+            departureTime: departureTime,
+            cityIdByDayIndex: cityMap
+        )
+    }
+
     private func timelineCityIdByDay(from days: [ItineraryDay], visitOrder: [String]) -> [Int: String] {
         var map: [Int: String] = [:]
         for day in days {
@@ -1886,13 +1967,19 @@ struct PlanCreateFlowView: View {
         let resolvedArrival = internationalArrivalTime ?? trip.internationalArrivalTime
         let resolvedDeparture = internationalDepartureTime ?? trip.internationalDepartureTime
         let resolvedBaseline = endpointScheduleBaselineDays ?? trip.endpointScheduleBaselineDays
+        let filledDays = fillDaysAfterReplan(
+            days,
+            trip: trip,
+            arrivalTime: resolvedArrival,
+            departureTime: resolvedDeparture
+        )
         draftItinerary = SampleItinerary(
             id: trip.id,
             title: trip.title,
             meta: trip.meta,
             routeSummary: trip.routeSummary,
             estimatedBudget: trip.estimatedBudget,
-            days: days,
+            days: filledDays,
             shareSlug: trip.shareSlug,
             isShared: trip.isShared,
             startDate: trip.startDate,
