@@ -88,45 +88,181 @@ enum PlanItineraryCityDays {
         return min(count, tripDays)
     }
 
+    /// Per-city min/max when multi-city trips have enough calendar days.
+    private static func perCityBoundsActive(tripDays: Int, cityCount: Int) -> Bool {
+        tripDays >= 10 && cityCount >= 4
+    }
+
+    private static func perCityMinDays(tripDays: Int, cityCount: Int) -> Int {
+        perCityBoundsActive(tripDays: tripDays, cityCount: cityCount) ? 2 : 1
+    }
+
+    private static func cityDayCap(
+        cityId: String,
+        entryCityId: String?,
+        fairShare: Double
+    ) -> Int {
+        if cityId == entryCityId?.lowercased() {
+            return max(3, Int(ceil(fairShare * 1.75)))
+        }
+        return max(2, Int(ceil(fairShare * 1.5)))
+    }
+
+    private static func cityDayWeight(
+        cityId: String,
+        catalogByCity: [String: [Attraction]],
+        pace: TripPace
+    ) -> Double {
+        let pool = catalogByCity[cityId] ?? []
+        let minD = Double(minDemandDays(for: pool, pace: pace))
+        return max(1, minD, 2)
+    }
+
+    /// Clamp city day budgets so no destination monopolizes a long multi-city trip.
+    private static func applyPerCityBounds(
+        _ map: [String: Int],
+        visitOrder: [String],
+        tripDays: Int,
+        availableCityDays: Int,
+        catalogByCity: [String: [Attraction]],
+        pace: TripPace
+    ) -> [String: Int] {
+        guard perCityBoundsActive(tripDays: tripDays, cityCount: visitOrder.count) else { return map }
+
+        let entry = visitOrder.first?.lowercased()
+        let fairShare = Double(availableCityDays) / Double(visitOrder.count)
+        let floor = perCityMinDays(tripDays: tripDays, cityCount: visitOrder.count)
+        var result = map
+
+        for city in visitOrder {
+            let cid = city.lowercased()
+            result[cid] = max(result[cid] ?? 1, floor)
+        }
+
+        func totalDays() -> Int { result.values.reduce(0, +) }
+
+        var guardLoops = 0
+        while totalDays() > availableCityDays, guardLoops < 64 {
+            guardLoops += 1
+            let donor = visitOrder
+                .map { $0.lowercased() }
+                .filter { (result[$0] ?? 0) > floor }
+                .max { a, b in
+                    let overA = (result[a] ?? 0) - cityDayCap(cityId: a, entryCityId: entry, fairShare: fairShare)
+                    let overB = (result[b] ?? 0) - cityDayCap(cityId: b, entryCityId: entry, fairShare: fairShare)
+                    if overA != overB { return overA < overB }
+                    if a == entry { return true }
+                    if b == entry { return false }
+                    return slotDemand(for: catalogByCity[a] ?? [], cityId: a)
+                        < slotDemand(for: catalogByCity[b] ?? [], cityId: b)
+                }
+            guard let donor else { break }
+            result[donor, default: 1] -= 1
+        }
+
+        guardLoops = 0
+        while guardLoops < 64 {
+            guardLoops += 1
+            let overCap = visitOrder
+                .map { $0.lowercased() }
+                .first { (result[$0] ?? 0) > cityDayCap(cityId: $0, entryCityId: entry, fairShare: fairShare) }
+            guard let donor = overCap else { break }
+
+            let cap = cityDayCap(cityId: donor, entryCityId: entry, fairShare: fairShare)
+            result[donor, default: 1] = cap
+
+            let recipient = visitOrder
+                .map { $0.lowercased() }
+                .min { a, b in
+                    let allocA = result[a] ?? 1
+                    let allocB = result[b] ?? 1
+                    if allocA != allocB { return allocA > allocB }
+                    let capA = cityDayCap(cityId: a, entryCityId: entry, fairShare: fairShare)
+                    let capB = cityDayCap(cityId: b, entryCityId: entry, fairShare: fairShare)
+                    let headroomA = capA - allocA
+                    let headroomB = capB - allocB
+                    return headroomA < headroomB
+                }
+            guard let recipient else { break }
+            let recipientCap = cityDayCap(cityId: recipient, entryCityId: entry, fairShare: fairShare)
+            guard (result[recipient] ?? 1) < recipientCap else { break }
+            result[recipient, default: 1] += 1
+        }
+
+        return result
+    }
+
     /// Rebalance cityDays until simulated timeline matches tripDays (hop days live inside city budget).
     static func closeTimelineSlotCount(
         cityDays: [String: Int],
         visitOrder: [String],
         catalogByCity: [String: [Attraction]],
         tripDays: Int,
+        availableCityDays: Int,
         pace: TripPace
     ) -> [String: Int] {
         var result = cityDays
         let exit = visitOrder.last?.lowercased()
+        let boundsActive = perCityBoundsActive(tripDays: tripDays, cityCount: visitOrder.count)
+        let floor = perCityMinDays(tripDays: tripDays, cityCount: visitOrder.count)
+        let entry = visitOrder.first?.lowercased()
+        let fairShare = Double(availableCityDays) / Double(max(1, visitOrder.count))
 
         func slotCount() -> Int {
             simulateTimelineSlotCount(tripDays: tripDays, visitOrder: visitOrder, cityDays: result, pace: pace)
         }
 
+        func cap(for city: String) -> Int {
+            cityDayCap(cityId: city, entryCityId: entry, fairShare: fairShare)
+        }
+
         var guardLoops = 0
         while slotCount() < tripDays, guardLoops < 64 {
             guardLoops += 1
-            let recipient = visitOrder
-                .map { $0.lowercased() }
-                .max { a, b in
-                    let gapA = minDemandDays(for: catalogByCity[a] ?? [], pace: pace) - (result[a] ?? 0)
-                    let gapB = minDemandDays(for: catalogByCity[b] ?? [], pace: pace) - (result[b] ?? 0)
-                    if gapA != gapB { return gapA < gapB }
-                    if a == exit, gapA <= 0 { return true }
-                    if b == exit, gapB <= 0 { return false }
-                    return slotDemand(for: catalogByCity[a] ?? [], cityId: a)
-                        < slotDemand(for: catalogByCity[b] ?? [], cityId: b)
+            let recipient: String?
+            if boundsActive {
+                let belowFloor = visitOrder
+                    .map { $0.lowercased() }
+                    .filter { (result[$0] ?? 0) < floor }
+                if !belowFloor.isEmpty {
+                    recipient = belowFloor.min { (result[$0] ?? 0) < (result[$1] ?? 0) }
+                } else {
+                    recipient = visitOrder
+                        .map { $0.lowercased() }
+                        .filter { (result[$0] ?? 0) < cap(for: $0) }
+                        .min { a, b in
+                            let weightA = cityDayWeight(cityId: a, catalogByCity: catalogByCity, pace: pace)
+                            let weightB = cityDayWeight(cityId: b, catalogByCity: catalogByCity, pace: pace)
+                            let ratioA = Double(result[a] ?? 1) / weightA
+                            let ratioB = Double(result[b] ?? 1) / weightB
+                            return ratioA > ratioB
+                        }
                 }
+            } else {
+                recipient = visitOrder
+                    .map { $0.lowercased() }
+                    .max { a, b in
+                        let gapA = minDemandDays(for: catalogByCity[a] ?? [], pace: pace) - (result[a] ?? 0)
+                        let gapB = minDemandDays(for: catalogByCity[b] ?? [], pace: pace) - (result[b] ?? 0)
+                        if gapA != gapB { return gapA < gapB }
+                        if a == exit, gapA <= 0 { return true }
+                        if b == exit, gapB <= 0 { return false }
+                        return slotDemand(for: catalogByCity[a] ?? [], cityId: a)
+                            < slotDemand(for: catalogByCity[b] ?? [], cityId: b)
+                    }
+            }
             guard let recipient else { break }
+            if boundsActive, (result[recipient] ?? 0) >= cap(for: recipient) { break }
             result[recipient, default: 1] += 1
         }
 
+        let minDonorDays = boundsActive ? floor : 1
         guardLoops = 0
         while slotCount() > tripDays, guardLoops < 64 {
             guardLoops += 1
             let donor = visitOrder
                 .map { $0.lowercased() }
-                .filter { (result[$0] ?? 0) > 1 }
+                .filter { (result[$0] ?? 0) > minDonorDays }
                 .max { a, b in
                     let surplusA = (result[a] ?? 0) - minDemandDays(for: catalogByCity[a] ?? [], pace: pace)
                     let surplusB = (result[b] ?? 0) - minDemandDays(for: catalogByCity[b] ?? [], pace: pace)
@@ -192,11 +328,21 @@ enum PlanItineraryCityDays {
             catalogByCity: catalogByCity
         )
 
+        cityDays = applyPerCityBounds(
+            cityDays,
+            visitOrder: visitOrder,
+            tripDays: tripDays,
+            availableCityDays: available,
+            catalogByCity: catalogByCity,
+            pace: pace
+        )
+
         cityDays = closeTimelineSlotCount(
             cityDays: cityDays,
             visitOrder: visitOrder,
             catalogByCity: catalogByCity,
             tripDays: tripDays,
+            availableCityDays: available,
             pace: pace
         )
 

@@ -77,6 +77,8 @@ enum PlanItineraryGoldenTest {
         fails += testHopDayHeaderRouteLabel()
         fails += testFullTravelDayRouteLabel()
         fails += testRuleBasedEnrichAnnotatesHopAfterNormalize()
+        fails += testSixCityFourteenDayCityDayBalance()
+        fails += testChengduShortHopHasPureSightseeingDay()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -1574,6 +1576,50 @@ enum PlanItineraryGoldenTest {
         print(ok
             ? "✓ hopSafeNormalize + annotate restores chongqing→chengdu hop after overflow"
             : "✗ normalize should re-inject intercity hop and strip wrong-city overflow")
+        return ok ? 0 : 1
+    }
+
+    private static func testSixCityFourteenDayCityDayBalance() -> Int {
+        let cities = ["chongqing", "chengdu", "shanghai", "suzhou", "nanjing", "beijing"]
+        let attractions = mockCatalog(cities: cities, perCity: 8)
+        let catalogByCity = Dictionary(grouping: attractions, by: { $0.cityId.lowercased() })
+        let calibration = PlanItineraryCityDays.calibrateCityDays(
+            visitOrder: cities,
+            aiWeights: nil,
+            catalogByCity: catalogByCity,
+            tripDays: 14,
+            pace: .standard
+        )
+        let cq = calibration.cityDays["chongqing"] ?? 0
+        let cd = calibration.cityDays["chengdu"] ?? 0
+        let allAtLeastTwo = cities.allSatisfy { (calibration.cityDays[$0] ?? 0) >= 2 }
+        let ok = cq <= 3 && cd >= 2 && allAtLeastTwo
+        print(ok
+            ? "✓ 14-day 6-city balances city days (CQ≤3, CD≥2, each≥2)"
+            : "✗ city day balance: chongqing=\(cq) chengdu=\(cd) map=\(calibration.cityDays)")
+        return ok ? 0 : 1
+    }
+
+    private static func testChengduShortHopHasPureSightseeingDay() -> Int {
+        let cities = ["chongqing", "chengdu", "shanghai", "suzhou", "nanjing", "beijing"]
+        let attractions = mockCatalog(cities: cities, perCity: 8)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 14,
+            attractions: attractions,
+            entryCityId: "chongqing",
+            exitCityId: "beijing",
+            applyNormalizer: false
+        )
+        let pureChengduDays = trip.days.filter { day in
+            !day.isExperienceSuggestions
+                && day.intercityHop == nil
+                && day.activities.contains { $0.cityId == "chengdu" }
+        }
+        let ok = !pureChengduDays.isEmpty
+        print(ok
+            ? "✓ chengdu has a dedicated sightseeing day beyond short-hop transfer"
+            : "✗ chengdu only has hop/travel days, no pure sightseeing day")
         return ok ? 0 : 1
     }
 

@@ -180,6 +180,104 @@ export function simulateTimelineSlotCount(
   return Math.min(count, tripDays);
 }
 
+function perCityBoundsActive(tripDays: number, cityCount: number): boolean {
+  return tripDays >= 10 && cityCount >= 4;
+}
+
+function perCityMinDays(tripDays: number, cityCount: number): number {
+  return perCityBoundsActive(tripDays, cityCount) ? 2 : 1;
+}
+
+function cityDayCap(
+  cityId: string,
+  entryCityId: string | null | undefined,
+  fairShare: number,
+): number {
+  if (cityId === entryCityId?.toLowerCase()) {
+    return Math.max(3, Math.ceil(fairShare * 1.75));
+  }
+  return Math.max(2, Math.ceil(fairShare * 1.5));
+}
+
+function cityDayWeight(
+  cityId: string,
+  catalog: AttractionRow[],
+  pace: TripPace,
+): number {
+  const minD = minDemandDaysForCity(catalog, cityId, pace);
+  return Math.max(1, minD, 2);
+}
+
+function applyPerCityBounds(
+  map: Map<string, number>,
+  visitOrder: string[],
+  tripDays: number,
+  availableCityDays: number,
+  catalog: AttractionRow[],
+  pace: TripPace,
+): Map<string, number> {
+  if (!perCityBoundsActive(tripDays, visitOrder.length)) return map;
+
+  const entry = visitOrder[0]?.toLowerCase();
+  const fairShare = availableCityDays / visitOrder.length;
+  const floor = perCityMinDays(tripDays, visitOrder.length);
+  const result = new Map(map);
+
+  for (const city of visitOrder) {
+    const cid = city.toLowerCase();
+    result.set(cid, Math.max(result.get(cid) ?? 1, floor));
+  }
+
+  const totalDays = () => [...result.values()].reduce((a, b) => a + b, 0);
+
+  let guardLoops = 0;
+  while (totalDays() > availableCityDays && guardLoops < 64) {
+    guardLoops++;
+    const donor = visitOrder
+      .map((c) => c.toLowerCase())
+      .filter((c) => (result.get(c) ?? 0) > floor)
+      .sort((a, b) => {
+        const overA = (result.get(a) ?? 0) - cityDayCap(a, entry, fairShare);
+        const overB = (result.get(b) ?? 0) - cityDayCap(b, entry, fairShare);
+        if (overA !== overB) return overB - overA;
+        if (a === entry) return -1;
+        if (b === entry) return 1;
+        return slotDemandForCity(catalog, b) - slotDemandForCity(catalog, a);
+      })[0];
+    if (!donor) break;
+    result.set(donor, (result.get(donor) ?? 1) - 1);
+  }
+
+  guardLoops = 0;
+  while (guardLoops < 64) {
+    guardLoops++;
+    const overCapCity = visitOrder
+      .map((c) => c.toLowerCase())
+      .find((c) => (result.get(c) ?? 0) > cityDayCap(c, entry, fairShare));
+    if (!overCapCity) break;
+
+    const cap = cityDayCap(overCapCity, entry, fairShare);
+    result.set(overCapCity, cap);
+
+    const recipient = visitOrder
+      .map((c) => c.toLowerCase())
+      .sort((a, b) => {
+        const allocA = result.get(a) ?? 1;
+        const allocB = result.get(b) ?? 1;
+        if (allocA !== allocB) return allocA - allocB;
+        const headroomA = cityDayCap(a, entry, fairShare) - allocA;
+        const headroomB = cityDayCap(b, entry, fairShare) - allocB;
+        return headroomB - headroomA;
+      })[0];
+    if (!recipient) break;
+    const recipientCap = cityDayCap(recipient, entry, fairShare);
+    if ((result.get(recipient) ?? 1) >= recipientCap) break;
+    result.set(recipient, (result.get(recipient) ?? 1) + 1);
+  }
+
+  return result;
+}
+
 export function closeTimelineSlotCount(
   cityDays: Map<string, number>,
   visitOrder: string[],
@@ -187,9 +285,14 @@ export function closeTimelineSlotCount(
   tripDays: number,
   regionByCity: Map<string, string | null>,
   pace: TripPace,
+  availableCityDays: number,
 ): Map<string, number> {
   const result = new Map(cityDays);
   const exit = visitOrder[visitOrder.length - 1]?.toLowerCase();
+  const boundsActive = perCityBoundsActive(tripDays, visitOrder.length);
+  const floor = perCityMinDays(tripDays, visitOrder.length);
+  const entry = visitOrder[0]?.toLowerCase();
+  const fairShare = availableCityDays / Math.max(1, visitOrder.length);
 
   const slotCount = () => simulateTimelineSlotCount(
     tripDays,
@@ -199,29 +302,56 @@ export function closeTimelineSlotCount(
     pace,
   );
 
+  const cap = (city: string) => cityDayCap(city, entry, fairShare);
+
   let guardLoops = 0;
   while (slotCount() < tripDays && guardLoops < 64) {
     guardLoops++;
-    const recipient = visitOrder
-      .map((c) => c.toLowerCase())
-      .sort((a, b) => {
-        const gapA = minDemandDaysForCity(catalog, a, pace) - (result.get(a) ?? 0);
-        const gapB = minDemandDaysForCity(catalog, b, pace) - (result.get(b) ?? 0);
-        if (gapA !== gapB) return gapB - gapA;
-        if (a === exit && gapA <= 0) return 1;
-        if (b === exit && gapB <= 0) return -1;
-        return slotDemandForCity(catalog, b) - slotDemandForCity(catalog, a);
-      })[0];
+    let recipient: string | undefined;
+    if (boundsActive) {
+      const belowFloor = visitOrder
+        .map((c) => c.toLowerCase())
+        .filter((c) => (result.get(c) ?? 0) < floor);
+      if (belowFloor.length > 0) {
+        recipient = belowFloor.sort(
+          (a, b) => (result.get(a) ?? 0) - (result.get(b) ?? 0),
+        )[0];
+      } else {
+        recipient = visitOrder
+          .map((c) => c.toLowerCase())
+          .filter((c) => (result.get(c) ?? 0) < cap(c))
+          .sort((a, b) => {
+            const weightA = cityDayWeight(a, catalog, pace);
+            const weightB = cityDayWeight(b, catalog, pace);
+            const ratioA = (result.get(a) ?? 1) / weightA;
+            const ratioB = (result.get(b) ?? 1) / weightB;
+            return ratioA - ratioB;
+          })[0];
+      }
+    } else {
+      recipient = visitOrder
+        .map((c) => c.toLowerCase())
+        .sort((a, b) => {
+          const gapA = minDemandDaysForCity(catalog, a, pace) - (result.get(a) ?? 0);
+          const gapB = minDemandDaysForCity(catalog, b, pace) - (result.get(b) ?? 0);
+          if (gapA !== gapB) return gapB - gapA;
+          if (a === exit && gapA <= 0) return 1;
+          if (b === exit && gapB <= 0) return -1;
+          return slotDemandForCity(catalog, b) - slotDemandForCity(catalog, a);
+        })[0];
+    }
     if (!recipient) break;
+    if (boundsActive && (result.get(recipient) ?? 0) >= cap(recipient)) break;
     result.set(recipient, (result.get(recipient) ?? 1) + 1);
   }
 
+  const minDonorDays = boundsActive ? floor : 1;
   guardLoops = 0;
   while (slotCount() > tripDays && guardLoops < 64) {
     guardLoops++;
     const donor = visitOrder
       .map((c) => c.toLowerCase())
-      .filter((c) => (result.get(c) ?? 0) > 1)
+      .filter((c) => (result.get(c) ?? 0) > minDonorDays)
       .sort((a, b) => {
         const surplusA = (result.get(a) ?? 0) - minDemandDaysForCity(catalog, a, pace);
         const surplusB = (result.get(b) ?? 0) - minDemandDaysForCity(catalog, b, pace);
@@ -393,7 +523,8 @@ export function calibrateCityDays(
   }
 
   cityDays = applyEntryCityMinDays(cityDays, visitOrder, tripDays, catalog);
-  cityDays = closeTimelineSlotCount(cityDays, visitOrder, catalog, tripDays, regionByCity, pace);
+  cityDays = applyPerCityBounds(cityDays, visitOrder, tripDays, available, catalog, pace);
+  cityDays = closeTimelineSlotCount(cityDays, visitOrder, catalog, tripDays, regionByCity, pace, available);
 
   const { hints, adjustments } = assessTightTrip({
     visitOrder,

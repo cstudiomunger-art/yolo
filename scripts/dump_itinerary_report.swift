@@ -64,6 +64,48 @@ enum DumpItineraryReport {
                 "guangzhou": ["Canton Tower", "Chen Clan", "Shamian", "Baiyun Mountain", "Yuexiu Park", "Beijing Road", "Chimelong", "Pearl River"],
             ]
         )
+
+        print("\n========== SCENARIO E: User screenshot 6-city × 14 days (CQ entry) ==========\n")
+        let screenshotCities = ["chongqing", "chengdu", "shanghai", "suzhou", "nanjing", "beijing"]
+        let screenshotCatalog = buildCatalog(cities: screenshotCities, perCity: 8, namedSpots: [
+            "chongqing": ["Hongyadong", "Guanyinqiao", "Jiefangbei", "Liziba", "Wulong", "Ciqikou", "Dazu", "Hotpot Street"],
+            "chengdu": ["Panda Base", "Jinli", "Wuhou Shrine", "Du Fu Cottage", "Kuanzhai Alley", "Leshan", "Qingcheng", "Tianfu Square"],
+            "shanghai": ["The Bund", "Yu Garden", "French Concession", "Pudong", "Nanjing Road", "Xujiahui", "Disney", "Zhujiajiao"],
+            "suzhou": ["Humble Garden", "Tiger Hill", "Pingjiang", "Suzhou Museum", "Jinji Lake", "Zhouzhuang", "Tongli", "Shantang"],
+            "nanjing": ["Sun Yat-sen", "Confucius Temple", "City Wall", "Nanjing Museum", "Xuanwu Lake", "Presidential Palace", "Qinhuai", "Ming Tomb"],
+            "beijing": ["Forbidden City", "Temple of Heaven", "Summer Palace", "Great Wall", "Hutong", "798 Art", "Lama Temple", "Tiananmen"],
+        ])
+        let catalogByCity = Dictionary(grouping: screenshotCatalog, by: { $0.cityId.lowercased() })
+        let calibration = PlanItineraryCityDays.calibrateCityDays(
+            visitOrder: screenshotCities,
+            aiWeights: nil,
+            catalogByCity: catalogByCity,
+            tripDays: 14,
+            pace: .standard
+        )
+        let budgetLine = screenshotCities
+            .map { "\(CityTravelHints.displayName(for: $0))=\(calibration.cityDays[$0] ?? 0)" }
+            .joined(separator: ", ")
+        print("City day budget: \(budgetLine)")
+        print("Available city-days: \(calibration.availableCityDays) · Reserved travel: \(calibration.reservedTravelDays)\n")
+        dumpScenario(
+            cities: screenshotCities,
+            tripDays: 14,
+            entry: "chongqing",
+            exit: "beijing",
+            pace: .standard,
+            arrivalTime: "14:00",
+            perCity: 8,
+            calendarStart: "2026-07-06",
+            namedSpots: [
+                "chongqing": ["Hongyadong", "Guanyinqiao", "Jiefangbei", "Liziba", "Wulong", "Ciqikou", "Dazu", "Hotpot Street"],
+                "chengdu": ["Panda Base", "Jinli", "Wuhou Shrine", "Du Fu Cottage", "Kuanzhai Alley", "Leshan", "Qingcheng", "Tianfu Square"],
+                "shanghai": ["The Bund", "Yu Garden", "French Concession", "Pudong", "Nanjing Road", "Xujiahui", "Disney", "Zhujiajiao"],
+                "suzhou": ["Humble Garden", "Tiger Hill", "Pingjiang", "Suzhou Museum", "Jinji Lake", "Zhouzhuang", "Tongli", "Shantang"],
+                "nanjing": ["Sun Yat-sen", "Confucius Temple", "City Wall", "Nanjing Museum", "Xuanwu Lake", "Presidential Palace", "Qinhuai", "Ming Tomb"],
+                "beijing": ["Forbidden City", "Temple of Heaven", "Summer Palace", "Great Wall", "Hutong", "798 Art", "Lama Temple", "Tiananmen"],
+            ]
+        )
     }
 
     private static func dumpScenario(
