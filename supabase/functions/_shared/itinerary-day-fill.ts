@@ -61,11 +61,7 @@ function experienceItemsForBlankDay(params: {
   if (isSchedulingGap) {
     return unfilledSchedulingGapItems(cityId);
   }
-  if (
-    !activityDaysExcludeCalendarEndpoints &&
-    dayIndex === firstTripDay &&
-    isAfternoonArrival(arrivalTime)
-  ) {
+  if (dayIndex === firstTripDay && isAfternoonArrival(arrivalTime)) {
     return arrivalAfternoonExperienceItems(cityId);
   }
   if (dayIndex === lastTripDay && tripDayCount > 1 && isMorningDeparture(departureTime)) {

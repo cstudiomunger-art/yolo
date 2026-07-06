@@ -69,8 +69,7 @@ enum PlanItineraryDayFill {
         if isSchedulingGap {
             return CityTravelHints.unfilledSchedulingGapItems(cityId: cityId)
         }
-        if !activityDaysExcludeCalendarEndpoints,
-           dayIndex == firstTripDay,
+        if dayIndex == firstTripDay,
            PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
             return CityTravelHints.arrivalAfternoonExperienceItems(cityId: cityId)
         }

@@ -57,6 +57,91 @@ enum PlanItineraryCityDays {
         return max(1, Int(ceil(demand / slotsPerDay)))
     }
 
+    static func simulateTimelineSlotCount(
+        tripDays: Int,
+        visitOrder: [String],
+        cityDays: [String: Int],
+        pace: TripPace = .standard
+    ) -> Int {
+        var dayPtr = 1
+        var count = 0
+
+        for (i, city) in visitOrder.enumerated() {
+            let cityId = city.lowercased()
+            if i > 0 {
+                let prev = visitOrder[i - 1]
+                if CityTravelHints.needsTravelDay(prev, cityId),
+                   CityTravelHints.commuteSlots(CityTravelHints.travelHours(prev, cityId)) >= 2,
+                   dayPtr <= tripDays {
+                    count += 1
+                    dayPtr += 1
+                }
+            }
+
+            let budget = cityDays[cityId] ?? 1
+            for _ in 0..<budget where dayPtr <= tripDays {
+                count += 1
+                dayPtr += 1
+            }
+        }
+
+        return min(count, tripDays)
+    }
+
+    /// Rebalance cityDays until simulated timeline matches tripDays (hop days live inside city budget).
+    static func closeTimelineSlotCount(
+        cityDays: [String: Int],
+        visitOrder: [String],
+        catalogByCity: [String: [Attraction]],
+        tripDays: Int,
+        pace: TripPace
+    ) -> [String: Int] {
+        var result = cityDays
+        let exit = visitOrder.last?.lowercased()
+
+        func slotCount() -> Int {
+            simulateTimelineSlotCount(tripDays: tripDays, visitOrder: visitOrder, cityDays: result, pace: pace)
+        }
+
+        var guardLoops = 0
+        while slotCount() < tripDays, guardLoops < 64 {
+            guardLoops += 1
+            let recipient = visitOrder
+                .map { $0.lowercased() }
+                .max { a, b in
+                    let gapA = minDemandDays(for: catalogByCity[a] ?? [], pace: pace) - (result[a] ?? 0)
+                    let gapB = minDemandDays(for: catalogByCity[b] ?? [], pace: pace) - (result[b] ?? 0)
+                    if gapA != gapB { return gapA < gapB }
+                    if a == exit, gapA <= 0 { return true }
+                    if b == exit, gapB <= 0 { return false }
+                    return slotDemand(for: catalogByCity[a] ?? [], cityId: a)
+                        < slotDemand(for: catalogByCity[b] ?? [], cityId: b)
+                }
+            guard let recipient else { break }
+            result[recipient, default: 1] += 1
+        }
+
+        guardLoops = 0
+        while slotCount() > tripDays, guardLoops < 64 {
+            guardLoops += 1
+            let donor = visitOrder
+                .map { $0.lowercased() }
+                .filter { (result[$0] ?? 0) > 1 }
+                .max { a, b in
+                    let surplusA = (result[a] ?? 0) - minDemandDays(for: catalogByCity[a] ?? [], pace: pace)
+                    let surplusB = (result[b] ?? 0) - minDemandDays(for: catalogByCity[b] ?? [], pace: pace)
+                    if surplusA != surplusB { return surplusA < surplusB }
+                    if a == exit { return true }
+                    if b == exit { return false }
+                    return (result[a] ?? 0) < (result[b] ?? 0)
+                }
+            guard let donor else { break }
+            result[donor, default: 1] -= 1
+        }
+
+        return result
+    }
+
     static func calibrateCityDays(
         visitOrder: [String],
         aiWeights: [String: Int]?,
@@ -65,7 +150,7 @@ enum PlanItineraryCityDays {
         pace: TripPace = .standard,
         avgDaysByCity: [String: Int] = [:]
     ) -> Calibration {
-        let travelReserved = reservedIntercityDays(visitOrder: visitOrder, pace: pace)
+        let travelReserved = reservedFullTravelDays(visitOrder: visitOrder)
         let available = max(visitOrder.count, tripDays - travelReserved)
 
         let rule = distributeDaysAcrossCitiesV2(
@@ -105,6 +190,14 @@ enum PlanItineraryCityDays {
             visitOrder: visitOrder,
             tripDays: tripDays,
             catalogByCity: catalogByCity
+        )
+
+        cityDays = closeTimelineSlotCount(
+            cityDays: cityDays,
+            visitOrder: visitOrder,
+            catalogByCity: catalogByCity,
+            tripDays: tripDays,
+            pace: pace
         )
 
         let (hints, adjustments) = assessTightTrip(
@@ -266,7 +359,12 @@ enum PlanItineraryCityDays {
             minDemandDaysTotal += ceil(demand / slotsPerDay)
         }
 
-        let calendarNeed = cityDays.values.reduce(0, +) + reservedIntercityDays(visitOrder: visitOrder, pace: pace)
+        let calendarNeed = simulateTimelineSlotCount(
+            tripDays: tripDays,
+            visitOrder: visitOrder,
+            cityDays: cityDays,
+            pace: pace
+        )
         if calendarNeed > tripDays {
             let msg = "行程 \(tripDays) 天偏紧：按景点体量建议至少 \(Int(minDemandDaysTotal)) 个观光日，已压缩分配。"
             hints.append(msg)

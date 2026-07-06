@@ -19,7 +19,7 @@ import {
   daySlotCapacity,
   parseDurationSlots,
 } from "./itinerary-duration.ts";
-import { destinationWindows, isAfternoonArrival, isMorningDeparture } from "./itinerary-flight-times.ts";
+import { destinationWindows, hopDaySightBudget, isAfternoonArrival, isMorningDeparture } from "./itinerary-flight-times.ts";
 import {
   daySlotCapacityForPace,
   defaultPace,
@@ -181,6 +181,7 @@ function applyFlightAndPaceProfiles(
   slots: TimelineSlot[],
   params: {
     tripDays: number;
+    visitOrder: string[];
     pace: TripPace;
     arrivalTime?: string | null;
     departureTime?: string | null;
@@ -190,6 +191,7 @@ function applyFlightAndPaceProfiles(
 ): TimelineSlot[] {
   const {
     tripDays,
+    visitOrder,
     pace,
     arrivalTime,
     departureTime,
@@ -202,6 +204,8 @@ function applyFlightAndPaceProfiles(
   const sightseeing = slots.filter((s) => s.kind === "sightseeing");
   const firstSight = sightseeing[0]?.day_index;
   const lastSight = sightseeing[sightseeing.length - 1]?.day_index;
+  const entryCity = visitOrder[0]?.toLowerCase();
+  const firstEntrySight = sightseeing.find((s) => s.city_id.toLowerCase() === entryCity)?.day_index;
 
   return slots.map((slot) => {
     const isSightseeing = slot.kind === "sightseeing";
@@ -237,22 +241,30 @@ function applyFlightAndPaceProfiles(
         eveningCapacity = Math.max(eveningCapacity, 1);
       }
     }
+    if (
+      activityDaysExcludeCalendarEndpoints &&
+      slot.day_index === firstEntrySight &&
+      isAfternoonArrival(arrivalTime) &&
+      isSightseeing
+    ) {
+      dayCapacity = 0;
+      eveningCapacity = Math.max(eveningCapacity, 1);
+    }
     if (slot.day_index === anchorLast && isMorningDeparture(departureTime)) {
       dayCapacity = Math.min(dayCapacity, daySlotCapacityForPace("departure_day", pace));
     }
 
     if (isHopLike && slot.from_city_id) {
       const hours = travelHours(slot.from_city_id, slot.city_id, regionByCity);
-      const windows = destinationWindows({
+      const hopBudget = hopDaySightBudget({
+        hopKind: slot.kind,
+        pace,
         arrivalAtDestination: null,
         travelHours: hours,
-        pace,
-        isTravelDay: slot.kind === "travel",
+        slotDayCapacity: dayCapacity,
       });
-      if (!windows.allowsMorningOrigin) {
-        dayCapacity = Math.min(dayCapacity, windows.daytimeCap + commuteSlots(hours));
-      }
-      eveningCapacity = Math.max(eveningCapacity, windows.eveningCap);
+      dayCapacity = Math.min(dayCapacity, hopBudget.destDaytimeCap + hopBudget.commuteCost);
+      eveningCapacity = Math.max(eveningCapacity, hopBudget.eveningCap);
     }
 
     return {
@@ -284,10 +296,12 @@ export function buildRuleDayPlans(params: {
   catalogById: Map<string, AttractionRow>;
   pace?: TripPace;
   regionByCity?: Map<string, string | null>;
+  hopReservedByDayIndex?: Map<number, string>;
 }): DayPlanDraft[] {
   const { timeline, candidatesByCity, catalogById } = params;
   const pace = params.pace ?? "standard";
   const regionByCity = params.regionByCity ?? new Map<string, string | null>();
+  const hopReservedByDayIndex = params.hopReservedByDayIndex ?? new Map<number, string>();
   const plans: DayPlanDraft[] = [];
   const pools = new Map<string, string[]>();
 
@@ -302,18 +316,18 @@ export function buildRuleDayPlans(params: {
       let fromPool = [...(pools.get(fromCity) ?? [])];
       let toPool = [...(pools.get(toCity) ?? [])];
       const hours = travelHours(fromCity, toCity, regionByCity);
-      const commuteCost = commuteSlots(hours);
-      const windows = destinationWindows({
+      const hopBudget = hopDaySightBudget({
+        hopKind: slot.kind,
+        pace,
         arrivalAtDestination: null,
         travelHours: hours,
-        pace,
-        isTravelDay: slot.kind === "travel",
+        slotDayCapacity: slot.day_capacity,
       });
       const amIds: string[] = [];
       const pmIds: string[] = [];
       const eveningIds: string[] = [];
 
-      if (windows.allowsMorningOrigin) {
+      if (hopBudget.allowsMorningOrigin) {
         const amIdx = fromPool.findIndex((id) => {
           const row = catalogById.get(id);
           return row != null && !isEveningOnlyAttraction(row) &&
@@ -343,15 +357,21 @@ export function buildRuleDayPlans(params: {
         }
       }
 
-      const destDayCap = windows.daytimeCap;
+      const destDayCap = hopBudget.destDaytimeCap;
       const sightBudget = Math.max(
         0,
         Math.min(
-          slot.day_capacity - (windows.allowsMorningOrigin ? commuteCost : 0),
+          slot.day_capacity - (hopBudget.allowsMorningOrigin ? hopBudget.commuteCost : 0),
           destDayCap,
         ),
       );
       let used = 0;
+      const reserved = hopReservedByDayIndex.get(slot.day_index);
+      if (reserved && toPool.includes(reserved) && !isEveningOnlyAttraction(catalogById.get(reserved)!)) {
+        pmIds.push(reserved);
+        used += parseDurationSlots(catalogById.get(reserved)?.recommended_duration);
+        toPool = toPool.filter((id) => id !== reserved);
+      }
       for (const id of amIds) {
         const row = catalogById.get(id);
         used += row ? parseDurationSlots(row.recommended_duration) : 1;
@@ -374,7 +394,7 @@ export function buildRuleDayPlans(params: {
         }
       }
 
-      if (windows.eveningCap > 0) {
+      if (hopBudget.eveningCap > 0) {
         const eveIdx = toPool.findIndex((id) => {
           const row = catalogById.get(id);
           return row != null && isEveningOnlyAttraction(row);
@@ -384,7 +404,7 @@ export function buildRuleDayPlans(params: {
         }
       }
 
-      if (pmIds.length === 0 && windows.daytimeCap > 0 && toPool.length > 0) {
+      if (pmIds.length === 0 && hopBudget.destDaytimeCap > 0 && toPool.length > 0) {
         const pmIdx = toPool.findIndex((id) => {
           const row = catalogById.get(id);
           return row != null && !isEveningOnlyAttraction(row);
@@ -720,17 +740,134 @@ function sightseeingBudgetForDay(
   day: number,
   timeline: TimelineSlot[],
   regionByCity: Map<string, string | null>,
+  pace: TripPace,
 ): { dayCapacity: number; eveningCap: number } {
   const slot = timeline.find((t) => t.day_index === day);
   if (!slot) {
     return { dayCapacity: daySlotCapacity("full_day"), eveningCap: 0 };
   }
-  let dayCapacity = slot.day_capacity;
-  if ((slot.kind === "hop" || slot.kind === "travel_lite") && slot.from_city_id) {
+  if (isIntercityHopKind(slot.kind) && slot.from_city_id) {
     const hours = travelHours(slot.from_city_id, slot.city_id, regionByCity);
-    dayCapacity = Math.max(0, dayCapacity - commuteSlots(hours));
+    const hopBudget = hopDaySightBudget({
+      hopKind: slot.kind,
+      pace,
+      arrivalAtDestination: null,
+      travelHours: hours,
+      slotDayCapacity: slot.day_capacity,
+    });
+    if (slot.kind === "short_hop") {
+      return { dayCapacity: hopBudget.destDaytimeCap, eveningCap: hopBudget.eveningCap };
+    }
+    if (hopBudget.allowsMorningOrigin) {
+      return { dayCapacity: Math.max(0, hopBudget.destDaytimeCap), eveningCap: hopBudget.eveningCap };
+    }
+    return { dayCapacity: hopBudget.destDaytimeCap, eveningCap: hopBudget.eveningCap };
   }
-  return { dayCapacity, eveningCap: slot.evening_capacity };
+  return { dayCapacity: slot.day_capacity, eveningCap: slot.evening_capacity };
+}
+
+function hopDayBackfillCandidate(
+  destCityId: string,
+  preDropped: string[],
+  catalog: AttractionRow[],
+  catalogById: Map<string, AttractionRow>,
+  excludeIds: Set<string>,
+): string | null {
+  for (const id of preDropped) {
+    const row = catalogById.get(id);
+    if (
+      excludeIds.has(id)
+      || row?.city_id.toLowerCase() !== destCityId
+      || (row && isEveningOnlyAttraction(row))
+      || parseDurationSlots(row?.recommended_duration) > 1
+    ) continue;
+    return id;
+  }
+  const pool = catalog
+    .filter((r) => r.city_id.toLowerCase() === destCityId)
+    .sort((a, b) => a.display_order - b.display_order);
+  const row = pool.find((r) =>
+    !excludeIds.has(r.id)
+    && !isEveningOnlyAttraction(r)
+    && parseDurationSlots(r.recommended_duration) <= 1
+  );
+  return row?.id ?? null;
+}
+
+function backfillHopDaysAndScanUnassigned(params: {
+  assignments: AIAssignment[];
+  dropped: string[];
+  timeline: TimelineSlot[];
+  candidatesByCity: Map<string, string[]>;
+  preDropped: string[];
+  catalogById: Map<string, AttractionRow>;
+  catalog: AttractionRow[];
+  pace: TripPace;
+  regionByCity: Map<string, string | null>;
+}): { assignments: AIAssignment[]; dropped: string[]; adjustments: string[] } {
+  const {
+    assignments,
+    dropped,
+    timeline,
+    candidatesByCity,
+    preDropped,
+    catalogById,
+    catalog,
+    pace,
+    regionByCity,
+  } = params;
+  const adjustments: string[] = [];
+  const assignedIds = new Set(assignments.flatMap((a) => a.attraction_ids));
+
+  for (const slot of timeline) {
+    if (!isIntercityHopKind(slot.kind) || slot.kind === "travel" || !slot.from_city_id) continue;
+    const dest = slot.city_id.toLowerCase();
+    const hopBudget = hopDaySightBudget({
+      hopKind: slot.kind,
+      pace,
+      arrivalAtDestination: null,
+      travelHours: travelHours(slot.from_city_id, dest, regionByCity),
+      slotDayCapacity: slot.day_capacity,
+    });
+    if (hopBudget.destDaytimeCap <= 0) continue;
+
+    const assignment = assignments.find((a) => a.day_index === slot.day_index);
+    const daytimeOnDest = (assignment?.attraction_ids ?? []).filter((id) => {
+      const row = catalogById.get(id);
+      return row && !isEveningOnlyAttraction(row) && row.city_id.toLowerCase() === dest;
+    });
+    if (daytimeOnDest.length > 0) continue;
+
+    const backfill = hopDayBackfillCandidate(
+      dest,
+      [...preDropped, ...dropped],
+      catalog,
+      catalogById,
+      assignedIds,
+    );
+    if (!backfill) {
+      adjustments.push(`Hop day ${slot.day_index} (${dest}): no afternoon sight could be scheduled.`);
+      continue;
+    }
+    if (assignment) {
+      assignment.attraction_ids.push(backfill);
+    } else {
+      assignments.push({ day_index: slot.day_index, attraction_ids: [backfill] });
+    }
+    assignedIds.add(backfill);
+    adjustments.push(`Backfilled hop day ${slot.day_index} with ${backfill}`);
+  }
+
+  for (const [cityId, ids] of candidatesByCity) {
+    for (const id of ids) {
+      if (assignedIds.has(id)) continue;
+      const name = catalogById.get(id)?.name ?? id;
+      adjustments.push(`未能排入行程：${name}（${cityId}）`);
+      if (!dropped.includes(id)) dropped.push(id);
+    }
+  }
+
+  return { assignments, dropped, adjustments };
 }
 
 export function validateAndRepair(params: {
@@ -740,6 +877,7 @@ export function validateAndRepair(params: {
   catalogById: Map<string, AttractionRow>;
   startDate: Date | null;
   regionByCity?: Map<string, string | null>;
+  pace?: TripPace;
 }): {
   assignments: AIAssignment[];
   dropped: string[];
@@ -747,14 +885,15 @@ export function validateAndRepair(params: {
 } {
   const { tripDays, dayPlans, timeline, catalogById, startDate } = params;
   const regionByCity = params.regionByCity ?? new Map<string, string | null>();
+  const pace = params.pace ?? "standard";
   const adjustments: string[] = [];
   const dropped: string[] = [];
   const planByDay = new Map(dayPlans.map((p) => [p.day_index, p]));
   const capacityByDay = new Map(
-    timeline.map((t) => [t.day_index, sightseeingBudgetForDay(t.day_index, timeline, regionByCity).dayCapacity]),
+    timeline.map((t) => [t.day_index, sightseeingBudgetForDay(t.day_index, timeline, regionByCity, pace).dayCapacity]),
   );
   const eveningCapByDay = new Map(
-    timeline.map((t) => [t.day_index, sightseeingBudgetForDay(t.day_index, timeline, regionByCity).eveningCap]),
+    timeline.map((t) => [t.day_index, sightseeingBudgetForDay(t.day_index, timeline, regionByCity, pace).eveningCap]),
   );
   const allowedCitiesByDay = allowedCitiesFromTimeline(timeline);
   const assignments: AIAssignment[] = [];
@@ -922,6 +1061,7 @@ export function runItinerarySchedulerPipeline(params: {
   });
   timeline = applyFlightAndPaceProfiles(timeline, {
     tripDays,
+    visitOrder,
     pace,
     arrivalTime: params.arrivalTime,
     departureTime: params.departureTime,
@@ -929,21 +1069,31 @@ export function runItinerarySchedulerPipeline(params: {
     regionByCity,
   });
 
-  if (timeline.length < tripDays) {
-    adjustments.push(`Timeline has ${timeline.length} scheduled days within ${tripDays}-day trip (no exit-city padding).`);
-  }
-
   const sightseeingDays = sightseeingDaysPerCity(timeline);
-  const { candidatesByCity, preDropped } = pickAttractionsBySlotBudget({
+  const timelineRefs = timeline.map((s) => ({
+    day_index: s.day_index,
+    kind: s.kind,
+    city_id: s.city_id,
+    from_city_id: s.from_city_id,
+  }));
+  const { candidatesByCity, preDropped, hopReservedByDayIndex } = pickAttractionsBySlotBudget({
     catalog,
     cityDays: sightseeingDays,
     mustSeeIds: parseAIMustSee(aiPlan),
     pace,
+    timeline: timelineRefs,
   });
 
   let dayPlans = parseAIDayPlans(aiPlan, catalogById);
   if (dayPlans.length === 0) {
-    dayPlans = buildRuleDayPlans({ timeline, candidatesByCity, catalogById, pace, regionByCity });
+    dayPlans = buildRuleDayPlans({
+      timeline,
+      candidatesByCity,
+      catalogById,
+      pace,
+      regionByCity,
+      hopReservedByDayIndex,
+    });
   } else {
     dayPlans = alignDayPlansToTimeline(dayPlans, timeline, adjustments);
     dayPlans = filterDayPlansToCandidates(
@@ -962,7 +1112,23 @@ export function runItinerarySchedulerPipeline(params: {
     catalogById,
     startDate,
     regionByCity,
+    pace,
   });
+
+  const backfill = backfillHopDaysAndScanUnassigned({
+    assignments,
+    dropped,
+    timeline,
+    candidatesByCity,
+    preDropped,
+    catalogById,
+    catalog,
+    pace,
+    regionByCity,
+  });
+  assignments = backfill.assignments;
+  dropped = backfill.dropped;
+  adjustments.push(...backfill.adjustments);
 
   const geoAdj: string[] = [];
   const allowedForGeo = mergeAllowedCitiesForHops(timeline, dayPlans, pace, regionByCity);

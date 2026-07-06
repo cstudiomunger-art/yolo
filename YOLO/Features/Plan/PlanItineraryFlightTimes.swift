@@ -38,13 +38,15 @@ enum PlanItineraryFlightTimes {
     static func remainingDaytimeCapacity(
         arrivalAtDestination: String?,
         pace: TripPace,
-        isTravelDay: Bool
+        isTravelDay: Bool,
+        hopKind: String? = nil
     ) -> Double {
         destinationWindows(
             arrivalAtDestination: arrivalAtDestination,
             travelHours: nil,
             pace: pace,
-            isTravelDay: isTravelDay
+            isTravelDay: isTravelDay,
+            hopKind: hopKind
         ).daytimeCap
     }
 
@@ -60,7 +62,8 @@ enum PlanItineraryFlightTimes {
         arrivalAtDestination: String?,
         travelHours: Double?,
         pace: TripPace,
-        isTravelDay: Bool
+        isTravelDay: Bool,
+        hopKind: String? = nil
     ) -> DestinationWindows {
         let resolved = arrivalAtDestination?.trimmingCharacters(in: .whitespacesAndNewlines)
         let arrival = (resolved?.isEmpty == false) ? resolved : travelHours.map { suggestedArrivalAtDestination(travelHours: $0) }
@@ -73,24 +76,72 @@ enum PlanItineraryFlightTimes {
             return DestinationWindows(daytimeCap: base, eveningCap: 1, allowsMorningOrigin: allowsMorning, resolvedArrival: arrival)
         }
 
+        var daytimeCap: Double
+        var eveningCap: Int
+        var allowsMorningOrigin: Bool
+
         if mins >= 17 * 60 {
-            return DestinationWindows(daytimeCap: 0, eveningCap: 1, allowsMorningOrigin: false, resolvedArrival: arrival)
-        }
-        if mins >= 14 * 60 {
-            return DestinationWindows(
-                daytimeCap: isTravelDay ? 0 : 1,
-                eveningCap: 1,
-                allowsMorningOrigin: false,
-                resolvedArrival: arrival
-            )
-        }
-        if mins >= 12 * 60 {
-            return DestinationWindows(daytimeCap: 1, eveningCap: 0, allowsMorningOrigin: false, resolvedArrival: arrival)
+            daytimeCap = 0
+            eveningCap = 1
+            allowsMorningOrigin = false
+        } else if mins >= 14 * 60 {
+            daytimeCap = isTravelDay ? 0 : 1
+            eveningCap = 1
+            allowsMorningOrigin = false
+        } else if mins >= 12 * 60 {
+            daytimeCap = 1
+            eveningCap = 0
+            allowsMorningOrigin = false
+        } else {
+            let base = PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: pace)
+            daytimeCap = isTravelDay ? max(1, base - 1) : max(0, base - 1)
+            eveningCap = 1
+            allowsMorningOrigin = true
         }
 
-        let base = PlanItineraryPace.daySlotCapacity(profile: .fullDay, pace: pace)
-        let daytimeCap = isTravelDay ? max(1, base - 1) : max(0, base - 1)
-        return DestinationWindows(daytimeCap: daytimeCap, eveningCap: 1, allowsMorningOrigin: true, resolvedArrival: arrival)
+        if let kind = hopKind,
+           CityTravelHints.isIntercityHopKind(kind),
+           kind != "travel",
+           mins < 17 * 60 {
+            daytimeCap = max(1, daytimeCap)
+        }
+
+        return DestinationWindows(
+            daytimeCap: daytimeCap,
+            eveningCap: eveningCap,
+            allowsMorningOrigin: allowsMorningOrigin,
+            resolvedArrival: arrival
+        )
+    }
+
+    /// Single source of truth for hop-day destination sight capacity (scheduler + validate + replan).
+    static func hopDaySightBudget(
+        hopKind: String,
+        pace: TripPace,
+        arrivalAtDestination: String?,
+        travelHours: Double?,
+        slotDayCapacity: Double
+    ) -> (destDaytimeCap: Double, eveningCap: Int, allowsMorningOrigin: Bool, commuteCost: Double) {
+        let hours = travelHours ?? 0
+        let commute = Double(CityTravelHints.commuteSlots(hours))
+        let isTravel = hopKind == "travel"
+        let windows = destinationWindows(
+            arrivalAtDestination: arrivalAtDestination,
+            travelHours: travelHours,
+            pace: pace,
+            isTravelDay: isTravel,
+            hopKind: hopKind
+        )
+
+        if isTravel {
+            return (0, windows.eveningCap, windows.allowsMorningOrigin, commute)
+        }
+        if hopKind == "short_hop" {
+            return (min(slotDayCapacity, windows.daytimeCap), windows.eveningCap, windows.allowsMorningOrigin, 0)
+        }
+
+        let destCap = windows.daytimeCap
+        return (min(slotDayCapacity, destCap), windows.eveningCap, windows.allowsMorningOrigin, commute)
     }
 
     static func allowsMorningInOriginCity(travelHours: Double, arrivalAtDestination: String?) -> Bool {

@@ -71,6 +71,7 @@ enum PlanItineraryGoldenTest {
         fails += testEntryCityMinDaysOnLongTrip()
         fails += testSuggestEntryExitTwoAndSixCities()
         fails += testChongqingChengduShortHop()
+        fails += testRelaxedShortHopAfternoonSight()
         fails += testBlankDayExitCity()
         fails += testShortHopNoStealPrevDay()
         fails += testHopDayHeaderRouteLabel()
@@ -687,12 +688,16 @@ enum PlanItineraryGoldenTest {
             attractions: [museum],
             arrivalTime: "15:00"
         )
-        guard let first = trip.days.first else {
+        guard !trip.days.isEmpty else {
             print("✗ afternoon arrival: missing first day")
             return 1
         }
-        let ok = !first.isExperienceSuggestions && !first.activities.isEmpty
-        print(ok ? "✓ first activity day keeps sights despite afternoon arrival" : "✗ first day should not be arrival experience card")
+        // Phase 4: 15:00 arrival → first day has no daytime budget; museum schedules on day 2.
+        let museumLater = trip.days.contains { day in
+            day.dayIndex > 1 && day.activities.contains { $0.attractionId == "museum" }
+        }
+        let ok = museumLater
+        print(ok ? "✓ afternoon arrival: museum schedules after first day" : "✗ museum should move to day 2 after afternoon arrival")
         return ok ? 0 : 1
     }
 
@@ -1393,6 +1398,32 @@ enum PlanItineraryGoldenTest {
         let ok = hop != nil && !hop!.isExperienceSuggestions
             && routeLabel.contains("Chongqing") && routeLabel.contains("Chengdu")
         print(ok ? "✓ chongqing→chengdu short hop has intercity_hop card" : "✗ ≤2h hop missing intercity card or route label")
+        return ok ? 0 : 1
+    }
+
+    private static func testRelaxedShortHopAfternoonSight() -> Int {
+        let cities = ["chongqing", "chengdu"]
+        let attractions = mockCatalog(cities: cities, perCity: 8)
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 6,
+            attractions: attractions,
+            pace: .relaxed,
+            entryCityId: "chongqing",
+            exitCityId: "chengdu",
+            applyNormalizer: false
+        )
+        guard let hopDay = trip.days.first(where: {
+            $0.intercityHop?.fromCityId == "chongqing" && $0.intercityHop?.toCityId == "chengdu"
+        }) else {
+            print("✗ relaxed short-hop: missing hop day")
+            return 1
+        }
+        let pmChengdu = hopDay.activities.filter {
+            $0.cityId == "chengdu" && $0.timeSlot != "Evening" && $0.timeSlot != "Morning"
+        }
+        let ok = !pmChengdu.isEmpty
+        print(ok ? "✓ relaxed short_hop schedules ≥1 chengdu afternoon sight" : "✗ relaxed short_hop hop day has 0 chengdu daytime sights")
         return ok ? 0 : 1
     }
 

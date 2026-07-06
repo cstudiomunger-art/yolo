@@ -33,6 +33,13 @@ enum PlanItineraryPace {
     /// Hop days pack AM sight + commute + PM sight (intense only).
     static let hopDaySlotCapacity: Double = 3
 
+    static func hopDaySlotBudget(pace: TripPace) -> Double {
+        switch pace {
+        case .intense: return hopDaySlotCapacity
+        case .relaxed, .standard: return 1
+        }
+    }
+
     static func daySlotCapacity(profile: DayScheduleProfile, pace: TripPace) -> Double {
         if profile == .departureDay { return 1 }
         if profile == .arrivalDay { return 1 }

@@ -91,11 +91,13 @@ enum PlanItineraryIntercityReplanner {
     ) -> (day: ItineraryDay, adjustments: [String], overflow: [ItineraryActivity]) {
         let from = hop.fromCityId.lowercased()
         let to = hop.toCityId.lowercased()
+        let hopKind = inferredHopKind(from: from, to: to, pace: options.pace)
         let windows = PlanItineraryFlightTimes.destinationWindows(
             arrivalAtDestination: arrivalTime,
             travelHours: hop.travelHours,
             pace: options.pace,
-            isTravelDay: false
+            isTravelDay: false,
+            hopKind: hopKind
         )
         let allowsMorning = windows.allowsMorningOrigin
         let capacity = windows.daytimeCap
@@ -204,7 +206,8 @@ enum PlanItineraryIntercityReplanner {
             arrivalAtDestination: arrivalTime,
             travelHours: hop.travelHours,
             pace: options.pace,
-            isTravelDay: true
+            isTravelDay: true,
+            hopKind: "travel"
         )
 
         if let arrivalTime, PlanItineraryFlightTimes.isEveningArrival(arrivalTime) {
@@ -473,5 +476,14 @@ enum PlanItineraryIntercityReplanner {
             hotelId: act.hotelId,
             sourcePlatform: act.sourcePlatform
         )
+    }
+
+    private static func inferredHopKind(from: String, to: String, pace: TripPace) -> String {
+        let hours = CityTravelHints.travelHours(from, to)
+        let slots = CityTravelHints.commuteSlots(hours)
+        if pace == .intense, CityTravelHints.canIntenseSameDayHop(from, to) { return "hop" }
+        if slots == 0 { return "short_hop" }
+        if slots == 1 { return "travel_lite" }
+        return "travel"
     }
 }

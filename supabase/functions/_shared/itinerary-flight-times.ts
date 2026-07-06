@@ -1,5 +1,6 @@
 /** Parse HH:mm and classify arrival/departure windows for slot shaping. */
 
+import { commuteSlots } from "./city-travel-hints.ts";
 import { daySlotCapacityForPace, type TripPace } from "./itinerary-pace.ts";
 
 export function parseMinuteOfDay(hhmm: string | null | undefined): number | null {
@@ -60,8 +61,9 @@ export function destinationWindows(params: {
   travelHours?: number | null;
   pace: TripPace;
   isTravelDay: boolean;
+  hopKind?: string | null;
 }): DestinationWindows {
-  const { arrivalAtDestination, travelHours, pace, isTravelDay } = params;
+  const { arrivalAtDestination, travelHours, pace, isTravelDay, hopKind } = params;
   const trimmed = String(arrivalAtDestination ?? "").trim();
   const arrival = trimmed.length > 0
     ? trimmed
@@ -97,8 +99,60 @@ export function destinationWindows(params: {
   }
 
   const base = daySlotCapacityForPace("full_day", pace);
-  const daytimeCap = isTravelDay ? Math.max(1, base - 1) : Math.max(0, base - 1);
+  let daytimeCap = isTravelDay ? Math.max(1, base - 1) : Math.max(0, base - 1);
+  if (
+    hopKind
+    && ["hop", "travel_lite", "short_hop"].includes(hopKind)
+    && mins < 17 * 60
+  ) {
+    daytimeCap = Math.max(1, daytimeCap);
+  }
   return { daytimeCap, eveningCap: 1, allowsMorningOrigin: true, resolvedArrival: arrival };
+}
+
+export function hopDaySightBudget(params: {
+  hopKind: string;
+  pace: TripPace;
+  arrivalAtDestination?: string | null;
+  travelHours?: number | null;
+  slotDayCapacity: number;
+}): {
+  destDaytimeCap: number;
+  eveningCap: number;
+  allowsMorningOrigin: boolean;
+  commuteCost: number;
+} {
+  const { hopKind, pace, arrivalAtDestination, travelHours, slotDayCapacity } = params;
+  const windows = destinationWindows({
+    arrivalAtDestination,
+    travelHours,
+    pace,
+    isTravelDay: hopKind === "travel",
+    hopKind,
+  });
+  const commuteCost = travelHours != null ? commuteSlots(travelHours) : 0;
+  if (hopKind === "travel") {
+    return {
+      destDaytimeCap: 0,
+      eveningCap: windows.eveningCap,
+      allowsMorningOrigin: windows.allowsMorningOrigin,
+      commuteCost,
+    };
+  }
+  if (hopKind === "short_hop") {
+    return {
+      destDaytimeCap: Math.min(slotDayCapacity, windows.daytimeCap),
+      eveningCap: windows.eveningCap,
+      allowsMorningOrigin: windows.allowsMorningOrigin,
+      commuteCost: 0,
+    };
+  }
+  return {
+    destDaytimeCap: Math.min(slotDayCapacity, windows.daytimeCap),
+    eveningCap: windows.eveningCap,
+    allowsMorningOrigin: windows.allowsMorningOrigin,
+    commuteCost,
+  };
 }
 
 export function remainingDaytimeCapacity(params: {

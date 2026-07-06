@@ -149,6 +149,94 @@ function rebalanceCityDaysSum(
   return result;
 }
 
+export function simulateTimelineSlotCount(
+  tripDays: number,
+  visitOrder: string[],
+  cityDays: Map<string, number>,
+  regionByCity: Map<string, string | null>,
+  pace: TripPace = "standard",
+): number {
+  let dayPtr = 1;
+  let count = 0;
+
+  for (let i = 0; i < visitOrder.length; i++) {
+    const cityId = visitOrder[i].toLowerCase();
+    if (i > 0) {
+      const prev = visitOrder[i - 1].toLowerCase();
+      const h = travelHours(prev, cityId, regionByCity);
+      if (commuteSlots(h) >= 2 && dayPtr <= tripDays) {
+        count++;
+        dayPtr++;
+      }
+    }
+
+    const budget = cityDays.get(cityId) ?? 1;
+    for (let b = 0; b < budget && dayPtr <= tripDays; b++) {
+      count++;
+      dayPtr++;
+    }
+  }
+
+  return Math.min(count, tripDays);
+}
+
+export function closeTimelineSlotCount(
+  cityDays: Map<string, number>,
+  visitOrder: string[],
+  catalog: AttractionRow[],
+  tripDays: number,
+  regionByCity: Map<string, string | null>,
+  pace: TripPace,
+): Map<string, number> {
+  const result = new Map(cityDays);
+  const exit = visitOrder[visitOrder.length - 1]?.toLowerCase();
+
+  const slotCount = () => simulateTimelineSlotCount(
+    tripDays,
+    visitOrder,
+    result,
+    regionByCity,
+    pace,
+  );
+
+  let guardLoops = 0;
+  while (slotCount() < tripDays && guardLoops < 64) {
+    guardLoops++;
+    const recipient = visitOrder
+      .map((c) => c.toLowerCase())
+      .sort((a, b) => {
+        const gapA = minDemandDaysForCity(catalog, a, pace) - (result.get(a) ?? 0);
+        const gapB = minDemandDaysForCity(catalog, b, pace) - (result.get(b) ?? 0);
+        if (gapA !== gapB) return gapB - gapA;
+        if (a === exit && gapA <= 0) return 1;
+        if (b === exit && gapB <= 0) return -1;
+        return slotDemandForCity(catalog, b) - slotDemandForCity(catalog, a);
+      })[0];
+    if (!recipient) break;
+    result.set(recipient, (result.get(recipient) ?? 1) + 1);
+  }
+
+  guardLoops = 0;
+  while (slotCount() > tripDays && guardLoops < 64) {
+    guardLoops++;
+    const donor = visitOrder
+      .map((c) => c.toLowerCase())
+      .filter((c) => (result.get(c) ?? 0) > 1)
+      .sort((a, b) => {
+        const surplusA = (result.get(a) ?? 0) - minDemandDaysForCity(catalog, a, pace);
+        const surplusB = (result.get(b) ?? 0) - minDemandDaysForCity(catalog, b, pace);
+        if (surplusA !== surplusB) return surplusB - surplusA;
+        if (a === exit) return 1;
+        if (b === exit) return -1;
+        return (result.get(b) ?? 0) - (result.get(a) ?? 0);
+      })[0];
+    if (!donor) break;
+    result.set(donor, (result.get(donor) ?? 1) - 1);
+  }
+
+  return result;
+}
+
 export function distributeDaysAcrossCitiesV2(
   tripDays: number,
   visitOrder: string[],
@@ -159,7 +247,7 @@ export function distributeDaysAcrossCitiesV2(
 ): Map<string, number> {
   if (visitOrder.length === 0) return new Map();
 
-  const travelReserved = reservedIntercityDays(visitOrder, regionByCity, pace);
+  const travelReserved = reservedFullTravelDays(visitOrder, regionByCity);
   const available = Math.max(visitOrder.length, tripDays - travelReserved);
   return distributeDaysWithAvailable(available, visitOrder, catalog, citiesMeta, pace);
 }
@@ -212,8 +300,13 @@ function assessTightTrip(params: {
     minDemandDays += minDemandDaysForCity(catalog, city, pace);
   }
 
-  const calendarNeed = [...cityDays.values()].reduce((a, b) => a + b, 0)
-    + reservedIntercityDays(visitOrder, regionByCity, pace);
+  const calendarNeed = simulateTimelineSlotCount(
+    tripDays,
+    visitOrder,
+    cityDays,
+    regionByCity,
+    pace,
+  );
   if (calendarNeed > tripDays) {
     const msg = `行程 ${tripDays} 天偏紧：按景点体量建议至少 ${minDemandDays} 个观光日，已压缩分配。`;
     hints.push(msg);
@@ -276,7 +369,7 @@ export function calibrateCityDays(
   regionByCity: Map<string, string | null>,
   pace: TripPace = "standard",
 ): CityDaysCalibration {
-  const travelReserved = reservedIntercityDays(visitOrder, regionByCity, pace);
+  const travelReserved = reservedFullTravelDays(visitOrder, regionByCity);
   const available = Math.max(visitOrder.length, tripDays - travelReserved);
 
   const ruleWeights = distributeDaysWithAvailable(available, visitOrder, catalog, citiesMeta, pace);
@@ -300,6 +393,7 @@ export function calibrateCityDays(
   }
 
   cityDays = applyEntryCityMinDays(cityDays, visitOrder, tripDays, catalog);
+  cityDays = closeTimelineSlotCount(cityDays, visitOrder, catalog, tripDays, regionByCity, pace);
 
   const { hints, adjustments } = assessTightTrip({
     visitOrder,
