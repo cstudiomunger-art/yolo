@@ -11,7 +11,8 @@ struct IntercityArrivalTimePicker: View {
     var style: Style = .compact
     var toggleLabel: LocalizedStringKey = "Set arrival time at destination"
     var pickerLabel: LocalizedStringKey = "Arrival time"
-    var setTimeSummaryFormat: LocalizedStringKey = "Arrive at %@"
+    /// Localization key for `String(format:)` when a time is already set (e.g. `"Arrive at %@"`).
+    var summaryFormatKey: String = "Arrive at %@"
     let onChange: (String?) -> Void
 
     @State private var pickerDate: Date = Date()
@@ -41,7 +42,7 @@ struct IntercityArrivalTimePicker: View {
                 withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
             } label: {
                 HStack(spacing: 8) {
-                    Text(compactHeaderLabel)
+                    compactHeaderText
                         .font(Theme.FontToken.inter(12, weight: .medium))
                         .foregroundStyle(Theme.ColorToken.textPrimary)
                     Spacer(minLength: 0)
@@ -68,11 +69,18 @@ struct IntercityArrivalTimePicker: View {
         }
     }
 
-    private var compactHeaderLabel: String {
+    @ViewBuilder
+    private var compactHeaderText: some View {
         if let arrivalTime, !arrivalTime.isEmpty {
-            return String(format: String(localized: setTimeSummaryFormat), arrivalTime)
+            Text(
+                String(
+                    format: String(localized: String.LocalizationValue(summaryFormatKey)),
+                    arrivalTime
+                )
+            )
+        } else {
+            Text(toggleLabel)
         }
-        return String(localized: toggleLabel)
     }
 
     @ViewBuilder

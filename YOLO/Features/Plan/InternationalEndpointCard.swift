@@ -107,7 +107,7 @@ struct InternationalEndpointCard: View {
                 style: .compact,
                 toggleLabel: kind.toggleLabel,
                 pickerLabel: kind.pickerLabel,
-                setTimeSummaryFormat: kind == .inbound ? "Land at %@" : "Depart at %@",
+                summaryFormatKey: kind == .inbound ? "Land at %@" : "Depart at %@",
                 onChange: onTimeChange
             )
         }
