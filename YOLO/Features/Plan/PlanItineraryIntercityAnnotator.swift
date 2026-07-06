@@ -79,6 +79,38 @@ enum PlanItineraryIntercityAnnotator {
         return map
     }
 
+    /// Fills gaps between hop/activity anchors so blank middle days inherit the correct city block.
+    static func completeCityIdByDayIndex(
+        from days: [ItineraryDay],
+        visitOrder: [String],
+        seed: [Int: String] = [:]
+    ) -> [Int: String] {
+        var map = inferCityIdByDayIndex(from: days, visitOrder: visitOrder)
+        for (dayIndex, cityId) in seed {
+            let normalized = cityId.lowercased()
+            guard !normalized.isEmpty else { continue }
+            map[dayIndex] = normalized
+        }
+        let sorted = days.sorted { $0.dayIndex < $1.dayIndex }
+        var trailing: String?
+        for day in sorted {
+            if let cityId = map[day.dayIndex] {
+                trailing = cityId
+            } else if let trailing {
+                map[day.dayIndex] = trailing
+            }
+        }
+        var leading: String?
+        for day in sorted.reversed() {
+            if let cityId = map[day.dayIndex] {
+                leading = cityId
+            } else if let leading {
+                map[day.dayIndex] = leading
+            }
+        }
+        return map
+    }
+
     private static func hopCardItems(fromCity: String, toCity: String, hours: Double) -> [String] {
         if CityTravelHints.commuteSlots(hours) >= 2 {
             return CityTravelHints.buildTravelDayContent(fromCityId: fromCity, toCityId: toCity, hours: hours)

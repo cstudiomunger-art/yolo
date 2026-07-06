@@ -374,6 +374,7 @@ enum PlanItineraryIntercityReplanner {
         var queue = overflow
         var adjustments: [String] = []
         let to = toCityId.lowercased()
+        let cityMap = PlanItineraryIntercityAnnotator.completeCityIdByDayIndex(from: days, visitOrder: [])
 
         for dayIdx in result.indices {
             let day = result[dayIdx]
@@ -383,6 +384,7 @@ enum PlanItineraryIntercityReplanner {
             let dayCity = day.experienceCityId?.lowercased()
                 ?? day.intercityHop?.toCityId.lowercased()
                 ?? day.activities.compactMap(\.cityId).first?.lowercased()
+                ?? cityMap[day.dayIndex]
 
             let acceptsDestination = dayCity == to
                 || day.activities.contains(where: { $0.cityId?.lowercased() == to })

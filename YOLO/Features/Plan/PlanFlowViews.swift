@@ -1020,9 +1020,21 @@ struct ItineraryDetailView: View {
     private func fillDaysAfterReplan(_ days: [ItineraryDay]) -> [ItineraryDay] {
         let trip = currentItinerary
         let visitOrder = trip.visitOrder ?? tripCityIds
-        let cityMap = timelineCityIdByDay(from: days, visitOrder: visitOrder)
-        return PlanItineraryDayFill.fillEmptyDays(
+        let cityMap = PlanItineraryIntercityAnnotator.completeCityIdByDayIndex(
+            from: days,
+            visitOrder: visitOrder,
+            seed: timelineCityIdByDay(from: days, visitOrder: visitOrder)
+        )
+        let replenished = PlanItineraryDayFill.replenishBlankSightseeingDays(
             days,
+            visitOrder: visitOrder,
+            pace: resolvedTripPace,
+            catalogById: attractionCache,
+            droppedAttractionIds: droppedAttractionIds ?? trip.droppedAttractionIds ?? [],
+            cityIdByDayIndex: cityMap
+        )
+        return PlanItineraryDayFill.fillEmptyDays(
+            replenished,
             visitOrder: visitOrder,
             pace: resolvedTripPace,
             arrivalTime: internationalArrivalTime ?? trip.internationalArrivalTime,

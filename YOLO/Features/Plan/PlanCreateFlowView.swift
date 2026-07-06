@@ -1721,9 +1721,21 @@ struct PlanCreateFlowView: View {
                 visitOrder: visitOrder,
                 cityIdByDayIndex: baselineMap
             )
-            let cityMap = timelineCityIdByDay(from: annotated, visitOrder: visitOrder)
-            let filledDays = PlanItineraryDayFill.fillEmptyDays(
+            let cityMap = PlanItineraryIntercityAnnotator.completeCityIdByDayIndex(
+                from: annotated,
+                visitOrder: visitOrder,
+                seed: timelineCityIdByDay(from: annotated, visitOrder: visitOrder)
+            )
+            let replenished = PlanItineraryDayFill.replenishBlankSightseeingDays(
                 annotated,
+                visitOrder: visitOrder,
+                pace: tripPace,
+                catalogById: attractionCache,
+                droppedAttractionIds: trip.droppedAttractionIds ?? [],
+                cityIdByDayIndex: cityMap
+            )
+            let filledDays = PlanItineraryDayFill.fillEmptyDays(
+                replenished,
                 visitOrder: visitOrder,
                 pace: tripPace,
                 arrivalTime: arrivalHHMM,
@@ -1849,9 +1861,21 @@ struct PlanCreateFlowView: View {
         departureTime: String?
     ) -> [ItineraryDay] {
         let visitOrder = trip.visitOrder ?? reviewTripCityIds()
-        let cityMap = timelineCityIdByDay(from: days, visitOrder: visitOrder)
-        return PlanItineraryDayFill.fillEmptyDays(
+        let cityMap = PlanItineraryIntercityAnnotator.completeCityIdByDayIndex(
+            from: days,
+            visitOrder: visitOrder,
+            seed: timelineCityIdByDay(from: days, visitOrder: visitOrder)
+        )
+        let replenished = PlanItineraryDayFill.replenishBlankSightseeingDays(
             days,
+            visitOrder: visitOrder,
+            pace: tripPace,
+            catalogById: attractionCache,
+            droppedAttractionIds: trip.droppedAttractionIds ?? [],
+            cityIdByDayIndex: cityMap
+        )
+        return PlanItineraryDayFill.fillEmptyDays(
+            replenished,
             visitOrder: visitOrder,
             pace: tripPace,
             arrivalTime: arrivalTime,
