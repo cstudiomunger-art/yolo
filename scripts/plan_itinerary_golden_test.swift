@@ -68,6 +68,7 @@ enum PlanItineraryGoldenTest {
         fails += testClearArrivalTimeRestoresSnapshot()
         fails += testNormalizePreservesIntenseHopDayDualCities()
         fails += testTravelDayEveningArrivalReplans()
+        fails += testTravelDayArrivalReplanNoDuplicateAcrossDays()
         fails += testEntryCityMinDaysOnLongTrip()
         fails += testSuggestEntryExitTwoAndSixCities()
         fails += testChongqingChengduShortHop()
@@ -1282,6 +1283,56 @@ enum PlanItineraryGoldenTest {
         let ok = updated.activities.count == 1
             && updated.activities.first?.attractionId == "sh1"
         print(ok ? "✓ travel day 19:00 keeps evening-only activity" : "✗ travel evening replan wrong")
+        return ok ? 0 : 1
+    }
+
+    private static func testTravelDayArrivalReplanNoDuplicateAcrossDays() -> Int {
+        let temple = mockAttraction(id: "bj_temple", cityId: "beijing", name: "Temple of Heaven", displayOrder: 0)
+        let summer = mockAttraction(id: "bj_summer", cityId: "beijing", name: "Summer Palace", displayOrder: 1)
+        let forbidden = mockAttraction(id: "bj_forbidden", cityId: "beijing", name: "Forbidden City", displayOrder: 2)
+        let catalog = [temple.id: temple, summer.id: summer, forbidden.id: forbidden]
+        let hop = ItineraryIntercityHop(
+            fromCityId: "hangzhou",
+            toCityId: "beijing",
+            travelHours: 5,
+            items: ["Travel from Hangzhou to Beijing"]
+        )
+        let travelDay = ItineraryDay(
+            id: "day_1",
+            dayIndex: 1,
+            dateLabel: "Day 1",
+            cityName: "Hangzhou → Beijing",
+            costEstimate: nil,
+            activities: [],
+            dayKind: .experienceSuggestions,
+            experienceItems: ["Travel from Hangzhou to Beijing"],
+            experienceCityId: "beijing",
+            intercityHop: hop
+        )
+        let nextDay = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "Beijing",
+            costEstimate: nil,
+            activities: [mockActivity(id: "bj_temple", cityId: "beijing", name: "Temple of Heaven")]
+        )
+        let (newDays, _) = PlanItineraryIntercityReplanner.replan(
+            days: [travelDay, nextDay],
+            dayIndex: 1,
+            arrivalTime: "12:01",
+            options: .init(pace: .standard, catalogById: catalog)
+        )
+        let allIds = newDays.flatMap { $0.activities.compactMap(\.attractionId) }
+        let uniqueIds = Set(allIds)
+        let travelActs = newDays[0].activities.compactMap(\.attractionId)
+        let nextActs = newDays[1].activities.compactMap(\.attractionId)
+        let noDup = allIds.count == uniqueIds.count
+        let travelSkipsTemple = !travelActs.contains("bj_temple")
+        let nextKeepsTemple = nextActs.contains("bj_temple")
+        let travelBackfilled = !travelActs.isEmpty
+        let ok = noDup && travelSkipsTemple && nextKeepsTemple && travelBackfilled
+        print(ok ? "✓ travel day replan skips sights already on later days" : "✗ travel day replan duplicated sights across days")
         return ok ? 0 : 1
     }
 

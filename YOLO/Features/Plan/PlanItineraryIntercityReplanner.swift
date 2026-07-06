@@ -38,11 +38,14 @@ enum PlanItineraryIntercityReplanner {
             arrivalTimeAtDestination: resolvedArrival
         )
 
+        let tripScheduledIds = scheduledAttractionIds(in: result)
+
         if day.isExperienceSuggestions {
             let (updatedDay, travelAdj, overflow) = replanTravelDay(
                 day: day,
                 hop: hop,
                 arrivalTime: resolvedArrival,
+                tripScheduledIds: tripScheduledIds,
                 options: options
             )
             result[idx] = updatedDay
@@ -63,6 +66,7 @@ enum PlanItineraryIntercityReplanner {
                 day: day,
                 hop: hop,
                 arrivalTime: resolvedArrival,
+                tripScheduledIds: tripScheduledIds,
                 options: options
             )
             result[idx] = updatedDay
@@ -83,10 +87,15 @@ enum PlanItineraryIntercityReplanner {
         return (result, adjustments)
     }
 
+    private static func scheduledAttractionIds(in days: [ItineraryDay]) -> Set<String> {
+        Set(days.flatMap { $0.activities.compactMap(\.attractionId) })
+    }
+
     private static func replanHopDay(
         day: ItineraryDay,
         hop: ItineraryIntercityHop,
         arrivalTime: String?,
+        tripScheduledIds: Set<String>,
         options: Options
     ) -> (day: ItineraryDay, adjustments: [String], overflow: [ItineraryActivity]) {
         let from = hop.fromCityId.lowercased()
@@ -153,14 +162,13 @@ enum PlanItineraryIntercityReplanner {
             adjustments.append("Removed morning sights in \(CityTravelHints.displayName(for: from)) due to late arrival")
         }
 
-        let scheduledIds = Set((day.activities.compactMap(\.attractionId)))
         let backfill = backfillActivities(
             cityId: to,
             daytimeCap: capacity,
             eveningCap: eveningCap,
             usedDaytime: used,
             eveningCount: eveningActs.count,
-            excludeIds: scheduledIds,
+            excludeIds: tripScheduledIds,
             dayIndex: day.dayIndex,
             startActIndex: morningActs.count + keptDest.count + eveningActs.count,
             options: options
@@ -196,6 +204,7 @@ enum PlanItineraryIntercityReplanner {
         day: ItineraryDay,
         hop: ItineraryIntercityHop,
         arrivalTime: String?,
+        tripScheduledIds: Set<String>,
         options: Options
     ) -> (day: ItineraryDay, adjustments: [String], overflow: [ItineraryActivity]) {
         let to = hop.toCityId.lowercased()
@@ -251,14 +260,13 @@ enum PlanItineraryIntercityReplanner {
             }
         }
 
-        let scheduledIds = Set(day.activities.compactMap(\.attractionId))
         let backfill = backfillActivities(
             cityId: to,
             daytimeCap: capacity,
             eveningCap: eveningCap,
             usedDaytime: daytimeUsed,
             eveningCount: eveningCount,
-            excludeIds: scheduledIds,
+            excludeIds: tripScheduledIds,
             dayIndex: day.dayIndex,
             startActIndex: kept.count,
             options: options
@@ -390,9 +398,11 @@ enum PlanItineraryIntercityReplanner {
                 return sum + activityDuration(act, catalogById: options.catalogById)
             }
 
+            let existingIds = Set(day.activities.compactMap(\.attractionId))
             var placed: [ItineraryActivity] = []
             var remaining: [ItineraryActivity] = []
             for act in queue {
+                if let aid = act.attractionId, existingIds.contains(aid) { continue }
                 let dur = activityDuration(act, catalogById: options.catalogById)
                 if used + dur <= cap {
                     used += dur
