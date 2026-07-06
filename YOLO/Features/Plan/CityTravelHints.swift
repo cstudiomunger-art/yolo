@@ -117,9 +117,7 @@ enum CityTravelHints {
     ) -> [String] {
         let from = displayName(for: fromCityId)
         let to = displayName(for: toCityId)
-        let journey = hours.truncatingRemainder(dividingBy: 1) == 0
-            ? "\(Int(hours))h"
-            : String(format: "~%.1fh", hours)
+        let journey = journeyHoursLabel(hours)
         var lines = [
             "Travel from \(from) to \(to)",
             "Estimated journey: \(journey) (HSR / flight)",
@@ -139,6 +137,80 @@ enum CityTravelHints {
             lines.append("Set your actual arrival time below")
         }
         return lines
+    }
+
+    /// Compact UI summary for intercity hop / travel-day cards (1–2 lines).
+    struct IntercityCardSummary {
+        let routeTitle: String
+        let contextLine: String?
+    }
+
+    static func journeyHoursLabel(_ hours: Double) -> String {
+        hours.truncatingRemainder(dividingBy: 1) == 0
+            ? "\(Int(hours))h"
+            : String(format: "~%.1fh", hours)
+    }
+
+    static func intercityCardSummary(
+        fromCityId: String,
+        toCityId: String,
+        travelHours: Double,
+        arrivalTime: String?,
+        isFullTravelDay: Bool = false
+    ) -> IntercityCardSummary {
+        let route = routeLabel(from: [fromCityId, toCityId])
+        let journey = journeyHoursLabel(travelHours)
+        let routeTitle = String(
+            format: String(localized: "Intercity route summary format"),
+            locale: .current,
+            route,
+            journey
+        )
+        let to = displayName(for: toCityId)
+        let slots = commuteSlots(travelHours)
+        let contextLine: String? = {
+            if let arrival = arrivalTime, !arrival.isEmpty {
+                if PlanItineraryFlightTimes.isEveningArrival(arrival) {
+                    return String(
+                        format: String(localized: "Evening arrival in %@ — check in and rest"),
+                        locale: .current,
+                        to
+                    )
+                }
+                if PlanItineraryFlightTimes.isAfternoonArrival(arrival) {
+                    return String(
+                        format: String(localized: "Afternoon sightseeing in %@"),
+                        locale: .current,
+                        to
+                    )
+                }
+                return String(
+                    format: String(localized: "Morning commute — afternoon in %@"),
+                    locale: .current,
+                    to
+                )
+            }
+            if isFullTravelDay || slots >= 2 {
+                return String(
+                    format: String(localized: "Full travel day — check in and rest in %@"),
+                    locale: .current,
+                    to
+                )
+            }
+            if slots == 0 {
+                return String(
+                    format: String(localized: "Short hop — afternoon sightseeing in %@"),
+                    locale: .current,
+                    to
+                )
+            }
+            return String(
+                format: String(localized: "Afternoon sightseeing in %@"),
+                locale: .current,
+                to
+            )
+        }()
+        return IntercityCardSummary(routeTitle: routeTitle, contextLine: contextLine)
     }
 
     static func hopDayRouteLabel(fromCityId: String, toCityId: String) -> String {

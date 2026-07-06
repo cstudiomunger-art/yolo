@@ -12,6 +12,14 @@ struct ExperienceSuggestionsDayCard: View {
             || day.experienceItems.contains { $0.localizedCaseInsensitiveContains("intercity travel") }
     }
 
+    private var isFullTravelDay: Bool {
+        if let hop = day.intercityHop {
+            return CityTravelHints.commuteSlots(hop.travelHours) >= 2
+                || day.experienceItems.contains { $0.localizedCaseInsensitiveContains("full travel day") }
+        }
+        return false
+    }
+
     private var isArrivalDay: Bool {
         guard let first = day.experienceItems.first else { return false }
         let lower = first.lowercased()
@@ -43,6 +51,41 @@ struct ExperienceSuggestionsDayCard: View {
     }
 
     var body: some View {
+        if isTravelDay, let hop = day.intercityHop {
+            VStack(alignment: .leading, spacing: 8) {
+                IntercityHopCard(
+                    hop: hop,
+                    isFullTravelDay: isFullTravelDay,
+                    onArrivalTimeChange: onArrivalTimeChange
+                )
+                if showsActivities, !day.activities.isEmpty {
+                    eveningPlansSection
+                }
+            }
+        } else {
+            legacyCardBody
+        }
+    }
+
+    private var eveningPlansSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(String(localized: "Evening plans"))
+                .font(Theme.FontToken.inter(11, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+
+            ForEach(day.activities) { activity in
+                Text(activity.name)
+                    .font(Theme.FontToken.inter(12, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textPrimary)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+    }
+
+    private var legacyCardBody: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
                 Text(cardEmoji)
@@ -71,6 +114,7 @@ struct ExperienceSuggestionsDayCard: View {
                     .frame(height: 1)
                 IntercityArrivalTimePicker(
                     arrivalTime: hop.arrivalTimeAtDestination,
+                    style: .compact,
                     onChange: onArrivalTimeChange
                 )
             }

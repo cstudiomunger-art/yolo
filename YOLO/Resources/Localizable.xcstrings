@@ -1085,6 +1085,96 @@
     "Intercity travel" : {
 
     },
+    "Intercity route summary format" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@  ·  %@ 高铁/航班"
+          }
+        }
+      }
+    },
+    "Afternoon sightseeing in %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下午可在 %@ 游玩"
+          }
+        }
+      }
+    },
+    "Arrive at %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抵达时间 %@"
+          }
+        }
+      }
+    },
+    "Land at %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "落地时间 %@"
+          }
+        }
+      }
+    },
+    "Depart at %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出发时间 %@"
+          }
+        }
+      }
+    },
+    "Evening arrival in %@ — check in and rest" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "晚间抵达 %@ — 入住休息"
+          }
+        }
+      }
+    },
+    "Full travel day — check in and rest in %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全天赶路 — 抵达 %@ 后入住休息"
+          }
+        }
+      }
+    },
+    "Morning commute — afternoon in %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上午赶路 — 下午在 %@ 游玩"
+          }
+        }
+      }
+    },
+    "Short hop — afternoon sightseeing in %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "短途 — 下午可在 %@ 游玩"
+          }
+        }
+      }
+    },
     "International arrival" : {
       "localizations" : {
         "zh-Hans" : {

@@ -104,8 +104,10 @@ struct InternationalEndpointCard: View {
 
             IntercityArrivalTimePicker(
                 arrivalTime: flightTime,
+                style: .compact,
                 toggleLabel: kind.toggleLabel,
                 pickerLabel: kind.pickerLabel,
+                setTimeSummaryFormat: kind == .inbound ? "Land at %@" : "Depart at %@",
                 onChange: onTimeChange
             )
         }
