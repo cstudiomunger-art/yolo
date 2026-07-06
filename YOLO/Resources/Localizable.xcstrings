@@ -137,7 +137,7 @@
         }
       }
     },
-    "%lld activity days" : {
+    "%lld activity days · excludes arrival & departure" : {
 
     },
     "%lld attractions" : {
@@ -266,9 +266,6 @@
 
     },
     "▾" : {
-
-    },
-    "★ %@" : {
 
     },
     "⚠️" : {
@@ -467,6 +464,9 @@
 
     },
     "Agreed to terms and privacy policy" : {
+
+    },
+    "AI unavailable — built with on-device scheduling rules" : {
 
     },
     "Alipay" : {
@@ -749,6 +749,9 @@
     "Curated options, English staff noted" : {
 
     },
+    "Custom" : {
+
+    },
     "Daily schedule" : {
 
     },
@@ -894,6 +897,9 @@
     "Ended · View history" : {
 
     },
+    "Endpoint mode" : {
+
+    },
     "Enter a valid email address." : {
 
     },
@@ -910,9 +916,6 @@
 
     },
     "Evening plans" : {
-
-    },
-    "Excludes start and end days" : {
 
     },
     "Expired" : {
@@ -1383,6 +1386,9 @@
     "Reading List" : {
 
     },
+    "Recommended" : {
+
+    },
     "Recommended hospitals · %@" : {
 
     },
@@ -1603,9 +1609,6 @@
     "Standard" : {
 
     },
-    "Suggested route: %@" : {
-
-    },
     "Start date" : {
 
     },
@@ -1640,6 +1643,9 @@
 
     },
     "Subscribe · %@" : {
+
+    },
+    "Suggested route: %@" : {
 
     },
     "Support" : {
@@ -1724,6 +1730,9 @@
     "Traveler" : {
 
     },
+    "Trip dates" : {
+
+    },
     "Trip ended" : {
 
     },
@@ -1737,6 +1746,9 @@
 
     },
     "Trip pace" : {
+
+    },
+    "Trip preferences" : {
 
     },
     "Trip reminders" : {
@@ -1914,6 +1926,9 @@
 
     },
     "Your purchase history will appear here after your first transaction." : {
+
+    },
+    "Your route: %@" : {
 
     },
     "Your Trip" : {

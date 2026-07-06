@@ -5,20 +5,62 @@ enum PlanRoute: Hashable {
     case detail(SampleItinerary)
 }
 
+struct PlanSectionCard<Content: View>: View {
+    let title: String
+    var subtitle: String?
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(Theme.FontToken.inter(12, weight: .semibold))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+            if let subtitle, !subtitle.isEmpty {
+                Text(subtitle)
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+            VStack(spacing: 0) {
+                content()
+            }
+            .padding(.horizontal, 12)
+            .background(Theme.ColorToken.backgroundSubtle)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+    }
+}
+
 struct FlowLayoutTags: View {
     let tags: [String]
 
     var body: some View {
-        HStack(spacing: 6) {
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 96), spacing: 8, alignment: .leading)],
+            alignment: .leading,
+            spacing: 8
+        ) {
             ForEach(tags, id: \.self) { tag in
-                Text("★ \(tag)")
-                    .font(Theme.FontToken.inter(10))
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 3)
-                    .background(Theme.ColorToken.backgroundSubtle)
-                    .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                selectedCityChip(tag)
             }
         }
+    }
+
+    private func selectedCityChip(_ name: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: "star.fill")
+                .font(.system(size: 8, weight: .bold))
+                .foregroundStyle(Theme.ColorToken.accent)
+            Text(name)
+                .font(Theme.FontToken.inter(11, weight: .medium))
+                .foregroundStyle(Theme.ColorToken.textPrimary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Theme.ColorToken.backgroundSubtle)
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(Theme.ColorToken.accent.opacity(0.35), lineWidth: 1))
+        .fixedSize(horizontal: true, vertical: false)
     }
 }
 

@@ -54,6 +54,7 @@ enum PlanItineraryGoldenTest {
         fails += testGeoRepairStripsWrongCityDay()
         fails += testLateDaysOnlyUseTimelineCity()
         fails += testCustomEntryExitVisitOrder()
+        fails += testCustomEntryExitFiveCityShanghaiBeijing()
         fails += testIntenseHopDayForNearbyCities()
         fails += testStandardTravelLiteHasIntercityHop()
         fails += testSixCitySeventeenDayLinearRoute()
@@ -803,6 +804,33 @@ enum PlanItineraryGoldenTest {
         let order = trip.visitOrder ?? []
         let ok = order.first == "shanghai" && order.last == "beijing"
         print(ok ? "✓ custom landing/return cities anchor visit order" : "✗ visit order should start shanghai and end beijing, got \(order)")
+        return ok ? 0 : 1
+    }
+
+    private static func testCustomEntryExitFiveCityShanghaiBeijing() -> Int {
+        let cities = ["chongqing", "chengdu", "shanghai", "hangzhou", "beijing"]
+        let attractions = mockCatalog(cities: cities, perCity: 5)
+        let autoOrder = CityTravelHints.visitOrder(cityIds: cities, cities: [])
+        let customOrder = CityTravelHints.visitOrder(
+            cityIds: cities,
+            cities: [],
+            entryCityId: "shanghai",
+            exitCityId: "beijing"
+        )
+        let trip = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 14,
+            attractions: attractions,
+            entryCityId: "shanghai",
+            exitCityId: "beijing"
+        )
+        let order = trip.visitOrder ?? []
+        let ok = order.first == "shanghai"
+            && order.last == "beijing"
+            && customOrder.first == "shanghai"
+            && customOrder.last == "beijing"
+            && autoOrder.first != "shanghai"
+        print(ok ? "✓ 5-city custom shanghai/beijing endpoints anchor visit order" : "✗ 5-city custom endpoints wrong: \(order)")
         return ok ? 0 : 1
     }
 

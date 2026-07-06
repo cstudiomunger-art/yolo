@@ -297,17 +297,11 @@ enum CityTravelHints {
         let visitOrder: [String]
     }
 
-    /// Suggest international landing/return cities from selected stops using shortest route order.
-    static func suggestEntryExit(cityIds: [String], cities: [City]) -> EndpointSuggestion {
+    static func catalogWeights(
+        for cityIds: [String],
+        cities: [City]
+    ) -> (catalogCountByCity: [String: Int], avgDaysByCity: [String: Int]) {
         let unique = Array(Set(cityIds.map { $0.lowercased() }.filter { !$0.isEmpty }))
-        guard !unique.isEmpty else {
-            return EndpointSuggestion(entryCityId: "beijing", exitCityId: "beijing", visitOrder: ["beijing"])
-        }
-        if unique.count == 1 {
-            let only = unique[0]
-            return EndpointSuggestion(entryCityId: only, exitCityId: only, visitOrder: [only])
-        }
-
         var catalogCountByCity: [String: Int] = [:]
         var avgDaysByCity: [String: Int] = [:]
         for city in cities {
@@ -321,16 +315,45 @@ enum CityTravelHints {
         for cid in unique {
             catalogCountByCity[cid, default: 1] = catalogCountByCity[cid, default: 1]
         }
+        return (catalogCountByCity, avgDaysByCity)
+    }
 
-        let visitOrder = inferVisitOrder(
+    /// Visit order for selected cities, optionally anchored by landing/return endpoints.
+    static func visitOrder(
+        cityIds: [String],
+        cities: [City],
+        entryCityId: String? = nil,
+        exitCityId: String? = nil
+    ) -> [String] {
+        let unique = Array(Set(cityIds.map { $0.lowercased() }.filter { !$0.isEmpty }))
+        guard !unique.isEmpty else { return ["beijing"] }
+        if unique.count == 1 { return unique }
+        let weights = catalogWeights(for: unique, cities: cities)
+        return inferVisitOrder(
             cityIds: unique,
-            catalogCountByCity: catalogCountByCity,
-            avgDaysByCity: avgDaysByCity
+            catalogCountByCity: weights.catalogCountByCity,
+            avgDaysByCity: weights.avgDaysByCity,
+            entryCityId: entryCityId,
+            exitCityId: exitCityId
         )
+    }
+
+    /// Suggest international landing/return cities from selected stops using shortest route order.
+    static func suggestEntryExit(cityIds: [String], cities: [City]) -> EndpointSuggestion {
+        let unique = Array(Set(cityIds.map { $0.lowercased() }.filter { !$0.isEmpty }))
+        guard !unique.isEmpty else {
+            return EndpointSuggestion(entryCityId: "beijing", exitCityId: "beijing", visitOrder: ["beijing"])
+        }
+        if unique.count == 1 {
+            let only = unique[0]
+            return EndpointSuggestion(entryCityId: only, exitCityId: only, visitOrder: [only])
+        }
+
+        let order = visitOrder(cityIds: unique, cities: cities)
         return EndpointSuggestion(
-            entryCityId: visitOrder.first ?? unique[0],
-            exitCityId: visitOrder.last ?? unique[0],
-            visitOrder: visitOrder
+            entryCityId: order.first ?? unique[0],
+            exitCityId: order.last ?? unique[0],
+            visitOrder: order
         )
     }
 }

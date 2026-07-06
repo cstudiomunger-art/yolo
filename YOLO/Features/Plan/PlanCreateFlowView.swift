@@ -13,7 +13,7 @@ struct PlanCreateFlowView: View {
     @State private var selectedCityIds: Set<String> = []
     @State private var entryCityId: String?
     @State private var exitCityId: String?
-    @State private var entryExitUserEdited = false
+    @State private var endpointMode: EndpointSelectionMode = .suggested
     @State private var arrivalDate = Date()
     @State private var departureDate = Calendar.current.date(byAdding: .day, value: 9, to: Date()) ?? Date()
     @State private var showArrivalPicker = false
@@ -49,6 +49,7 @@ struct PlanCreateFlowView: View {
     @State private var generationTask: Task<Void, Never>?
     @State private var visaCheckTask: Task<Void, Never>?
     @State private var generationEpoch = 0
+    @State private var reviewBackStep: Step = .dates
 
     private let visaCountries: [PassportCountry] = ISO3166.all
 
@@ -71,6 +72,20 @@ struct PlanCreateFlowView: View {
         case generating
         case failed
         case review
+    }
+
+    private enum EndpointSelectionMode: String, CaseIterable, Identifiable {
+        case suggested
+        case custom
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .suggested: String(localized: "Recommended")
+            case .custom: String(localized: "Custom")
+            }
+        }
     }
 
     private var filteredCities: [City] {
@@ -123,9 +138,8 @@ struct PlanCreateFlowView: View {
         .background(Theme.ColorToken.background)
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
-        // On the visa step the system back should return to the dates step (an in-flow step),
-        // not pop the whole create flow.
-        .navigationBarBackButtonHidden(step == .visa)
+        // Custom back on visa/review — system back would pop the whole create flow to Plan.
+        .navigationBarBackButtonHidden(step == .visa || step == .review)
         .toolbar {
             if step == .visa {
                 ToolbarItem(placement: .topBarLeading) {
@@ -142,6 +156,13 @@ struct PlanCreateFlowView: View {
                         }
                         .font(Theme.FontToken.inter(12, weight: .medium))
                     } else {
+                        Button { goBackFromReview() } label: {
+                            Image(systemName: "chevron.left").font(.system(size: 17, weight: .semibold))
+                        }
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    if reviewEditMode == .inactive {
                         Button(String(localized: "Reorder")) {
                             reviewEditMode = .active
                         }
@@ -194,7 +215,11 @@ struct PlanCreateFlowView: View {
             }
         }
         .onChange(of: selectedCityIds) { _, _ in
-            applySuggestedEntryExit(force: false)
+            if endpointMode == .suggested {
+                applySuggestedEntryExit(force: true)
+            } else {
+                applySuggestedEntryExit(force: false)
+            }
             tripPace = TripPace.defaultPace(tripDays: activityDays, cityCount: selectedCityIds.count)
         }
         .onChange(of: activityDays) { _, _ in
@@ -251,7 +276,9 @@ struct PlanCreateFlowView: View {
             VStack(spacing: 0) {
                 Divider()
                 primaryButton(String(localized: "Continue")) {
-                    applySuggestedEntryExit(force: true)
+                    if endpointMode == .suggested {
+                        applySuggestedEntryExit(force: true)
+                    }
                     step = .dates
                 }
                 .disabled(selectedCityIds.isEmpty)
@@ -279,44 +306,106 @@ struct PlanCreateFlowView: View {
         )
     }
 
+    private var resolvedVisitOrder: [String] {
+        CityTravelHints.visitOrder(
+            cityIds: Array(selectedCityIds),
+            cities: cities,
+            entryCityId: resolvedEntryCityId(),
+            exitCityId: resolvedExitCityId()
+        )
+    }
+
+    private var resolvedRouteLabel: String {
+        CityTravelHints.routeLabel(from: resolvedVisitOrder)
+    }
+
     private var entryExitCitySection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(String(localized: "Flight endpoints"))
-                .font(Theme.FontToken.inter(12, weight: .semibold))
-                .foregroundStyle(Theme.ColorToken.textSecondary)
-            Text(String(localized: "Pick where you land in China and which city you fly home from. We'll order the middle cities for the shortest route."))
-                .font(Theme.FontToken.inter(11))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-            Text(String(format: String(localized: "Suggested route: %@"), CityTravelHints.routeLabel(from: endpointSuggestion.visitOrder)))
-                .font(Theme.FontToken.inter(11, weight: .medium))
-                .foregroundStyle(Theme.ColorToken.textSecondary)
-            VStack(spacing: 0) {
-                entryExitCityRow(
-                    label: String(localized: "Landing city"),
-                    selection: Binding(
-                        get: { entryCityId ?? endpointSuggestion.entryCityId },
-                        set: {
-                            entryCityId = $0
-                            entryExitUserEdited = true
-                        }
-                    )
-                )
-                Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
-                entryExitCityRow(
-                    label: String(localized: "Return from"),
-                    selection: Binding(
-                        get: { exitCityId ?? endpointSuggestion.exitCityId },
-                        set: {
-                            exitCityId = $0
-                            entryExitUserEdited = true
-                        }
-                    )
-                )
+        PlanSectionCard(
+            title: String(localized: "Flight endpoints"),
+            subtitle: String(localized: "Pick where you land in China and which city you fly home from. We'll order the middle cities for the shortest route.")
+        ) {
+            VStack(alignment: .leading, spacing: 12) {
+                Picker(String(localized: "Endpoint mode"), selection: $endpointMode) {
+                    ForEach(EndpointSelectionMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: endpointMode) { _, mode in
+                    if mode == .suggested {
+                        applySuggestedEntryExit(force: true)
+                    }
+                }
+
+                Text(routePreviewText)
+                    .font(Theme.FontToken.inter(11, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
+
+                VStack(spacing: 0) {
+                    if endpointMode == .suggested {
+                        endpointReadOnlyRow(
+                            label: String(localized: "Landing city"),
+                            cityId: resolvedEntryCityId()
+                        )
+                        Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                        endpointReadOnlyRow(
+                            label: String(localized: "Return from"),
+                            cityId: resolvedExitCityId()
+                        )
+                    } else {
+                        entryExitCityRow(
+                            label: String(localized: "Landing city"),
+                            selection: Binding(
+                                get: { entryCityId ?? endpointSuggestion.entryCityId },
+                                set: {
+                                    entryCityId = $0.lowercased()
+                                    endpointMode = .custom
+                                }
+                            )
+                        )
+                        Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                        entryExitCityRow(
+                            label: String(localized: "Return from"),
+                            selection: Binding(
+                                get: { exitCityId ?? endpointSuggestion.exitCityId },
+                                set: {
+                                    exitCityId = $0.lowercased()
+                                    endpointMode = .custom
+                                }
+                            )
+                        )
+                    }
+                }
             }
-            .padding(.horizontal, 12)
-            .background(Theme.ColorToken.backgroundSubtle)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .padding(.vertical, 4)
         }
+    }
+
+    private var routePreviewText: String {
+        let prefix = endpointMode == .suggested
+            ? String(localized: "Suggested route: %@")
+            : String(localized: "Your route: %@")
+        return String(format: prefix, resolvedRouteLabel)
+    }
+
+    private func endpointReadOnlyRow(label: String, cityId: String) -> some View {
+        HStack {
+            Text(label)
+                .font(Theme.FontToken.inter(13))
+                .foregroundStyle(Theme.ColorToken.textSecondary)
+            Spacer()
+            Text(endpointCityLabel(cityId))
+                .font(Theme.FontToken.inter(13, weight: .medium))
+                .foregroundStyle(Theme.ColorToken.textPrimary)
+        }
+        .padding(.vertical, 10)
+    }
+
+    private func endpointCityLabel(_ cityId: String) -> String {
+        if let city = cities.first(where: { $0.id.lowercased() == cityId.lowercased() }) {
+            return "\(city.emoji ?? "📍") \(city.name)"
+        }
+        return CityTravelHints.displayName(for: cityId)
     }
 
     private func entryExitCityRow(label: String, selection: Binding<String>) -> some View {
@@ -402,18 +491,25 @@ struct PlanCreateFlowView: View {
                     .font(Theme.FontToken.inter(12))
                     .foregroundStyle(Theme.ColorToken.textMuted)
 
-                dateRow(label: String(localized: "Start date"), date: arrivalDate) {
-                    showArrivalPicker = true
+                PlanSectionCard(title: String(localized: "Trip dates")) {
+                    planDateRow(label: String(localized: "Start date"), date: arrivalDate) {
+                        showArrivalPicker = true
+                    }
+                    Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                    planDateRow(label: String(localized: "End date"), date: departureDate) {
+                        showDeparturePicker = true
+                    }
+                    Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+                    Text(String(format: String(localized: "%lld activity days · excludes arrival & departure"), activityDays))
+                        .font(Theme.FontToken.inter(11, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 2)
+                        .background(Theme.ColorToken.accent.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .padding(.top, 4)
                 }
-                dateRow(label: String(localized: "End date"), date: departureDate) {
-                    showDeparturePicker = true
-                }
-
-                Text(String(format: String(localized: "%lld activity days"), activityDays))
-                    .font(Theme.FontToken.inter(12, weight: .medium))
-                Text(String(localized: "Excludes start and end days"))
-                    .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
 
                 if let tightTripWarning {
                     Text(tightTripWarning)
@@ -422,69 +518,81 @@ struct PlanCreateFlowView: View {
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Theme.ColorToken.warningBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
 
                 if selectedCityIds.count > 1 {
                     entryExitCitySection
                 }
 
-                paceSection
-                flightTimesSection
-
+                tripPreferencesSection
                 visaInputsSection
-
+            }
+            .padding(Theme.screenPadding)
+            .padding(.bottom, 8)
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 0) {
+                Divider()
                 primaryButton(String(localized: "Generate itinerary")) {
                     enterVisaCheck()
                 }
+                .padding(.horizontal, Theme.screenPadding)
+                .padding(.top, 12)
+                .padding(.bottom, 6)
             }
-            .padding(Theme.screenPadding)
+            .background(Theme.ColorToken.background)
         }
     }
 
-    private var paceSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(String(localized: "Trip pace"))
-                .font(Theme.FontToken.inter(12, weight: .semibold))
-                .foregroundStyle(Theme.ColorToken.textSecondary)
-            Picker(String(localized: "Trip pace"), selection: $tripPace) {
-                ForEach(TripPace.allCases) { pace in
-                    Text("\(pace.label) — \(pace.subtitle)").tag(pace)
+    private var tripPreferencesSection: some View {
+        PlanSectionCard(title: String(localized: "Trip preferences")) {
+            HStack {
+                Text(String(localized: "Trip pace"))
+                    .font(Theme.FontToken.inter(13))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
+                Spacer()
+                Picker(String(localized: "Trip pace"), selection: $tripPace) {
+                    ForEach(TripPace.allCases) { pace in
+                        Text("\(pace.label) — \(pace.subtitle)").tag(pace)
+                    }
                 }
+                .labelsHidden()
+                .font(Theme.FontToken.inter(13, weight: .medium))
+                .tint(Theme.ColorToken.textPrimary)
             }
-            .pickerStyle(.menu)
+            .padding(.vertical, 10)
+
+            Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(String(localized: "Flight times (optional)"))
+                    .font(Theme.FontToken.inter(13))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
+                    .padding(.top, 10)
+                DatePicker(
+                    String(localized: "Arrival time"),
+                    selection: $arrivalTime,
+                    displayedComponents: .hourAndMinute
+                )
+                .font(Theme.FontToken.inter(13))
+                DatePicker(
+                    String(localized: "Departure time"),
+                    selection: $departureTime,
+                    displayedComponents: .hourAndMinute
+                )
+                .font(Theme.FontToken.inter(13))
+                Text(String(localized: "Afternoon arrival → first day evening only; morning departure → lighter last day."))
+                    .font(Theme.FontToken.inter(10))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+                    .padding(.bottom, 4)
+            }
         }
     }
 
-    private var flightTimesSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(String(localized: "Flight times (optional)"))
-                .font(Theme.FontToken.inter(12, weight: .semibold))
-                .foregroundStyle(Theme.ColorToken.textSecondary)
-            DatePicker(
-                String(localized: "Arrival time"),
-                selection: $arrivalTime,
-                displayedComponents: .hourAndMinute
-            )
-            .font(Theme.FontToken.inter(13))
-            DatePicker(
-                String(localized: "Departure time"),
-                selection: $departureTime,
-                displayedComponents: .hourAndMinute
-            )
-            .font(Theme.FontToken.inter(13))
-            Text(String(localized: "Afternoon arrival → first day evening only; morning departure → lighter last day."))
-                .font(Theme.FontToken.inter(10))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-        }
-    }
-
-    // 签证相关输入: 国籍 / 出发国 / 下一程国 — 让生成前的签证核对更准(尤其过境 240h 依赖下一程)。
     private var visaInputsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Visa details (for accurate checks)")
-                .font(Theme.FontToken.inter(12, weight: .semibold))
-                .foregroundStyle(Theme.ColorToken.textSecondary)
-            VStack(spacing: 0) {
+            PlanSectionCard(title: String(localized: "Visa details (for accurate checks)")) {
                 planCountryRow(.nationality, code: natCode)
                 Rectangle().fill(Theme.ColorToken.border).frame(height: 0.5)
                 planCountryRow(.departure, code: depCode)
@@ -505,9 +613,6 @@ struct PlanCreateFlowView: View {
                 .tint(Theme.ColorToken.success)
                 .padding(.vertical, 8)
             }
-            .padding(.horizontal, 12)
-            .background(Theme.ColorToken.backgroundSubtle)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
             Text("Defaults assume round-trip to the same country. A third country or HK/Macau as next stop may qualify for transit visa-free. Passport validity under \(minValidityMonths) months blocks both visa-free entry and visa applications.")
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(Theme.ColorToken.textMuted)
@@ -1152,6 +1257,12 @@ struct PlanCreateFlowView: View {
         generationEpoch += 1
     }
 
+    private func goBackFromReview() {
+        reviewEditMode = .inactive
+        cancelPendingGeneration()
+        step = reviewBackStep
+    }
+
     private func loadCities() async {
         do {
             cities = try await appEnv.content.fetchCities()
@@ -1197,7 +1308,7 @@ struct PlanCreateFlowView: View {
             cities: cities
         )
 
-        if force || !entryExitUserEdited {
+        if force || endpointMode == .suggested {
             entryCityId = suggestion.entryCityId
             exitCityId = suggestion.exitCityId
             return
@@ -1315,7 +1426,7 @@ struct PlanCreateFlowView: View {
             ids.append(slug)
         }
         selectedCityIds = Set(ids)
-        entryExitUserEdited = false
+        endpointMode = .suggested
         applySuggestedEntryExit(force: true)
         startGeneration()
     }
@@ -1328,7 +1439,7 @@ struct PlanCreateFlowView: View {
             ids.append(option.slug)
         }
         selectedCityIds = Set(ids)
-        entryExitUserEdited = false
+        endpointMode = .suggested
         applySuggestedEntryExit(force: true)
         startGeneration()
     }
@@ -1336,6 +1447,7 @@ struct PlanCreateFlowView: View {
     private func startGeneration(epoch: Int? = nil) {
         generationTask?.cancel()
         let activeEpoch = epoch ?? generationEpoch
+        reviewBackStep = (step == .visa && visaRec != nil) ? .visa : .dates
         step = .generating
         failureMessage = nil
         generationMessage = String(localized: "Planning your days…")
@@ -1726,6 +1838,26 @@ struct PlanCreateFlowView: View {
     }
 
     // MARK: - UI helpers
+
+    private func planDateRow(label: String, date: Date, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(label)
+                    .font(Theme.FontToken.inter(13))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
+                Spacer()
+                Text(PlanTripDateMath.formatDisplayDate(date))
+                    .font(Theme.FontToken.inter(13, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.textGhost)
+            }
+            .contentShape(Rectangle())
+            .padding(.vertical, 10)
+        }
+        .buttonStyle(.plain)
+    }
 
     private func dateRow(label: String, date: Date, action: @escaping () -> Void) -> some View {
         Button(action: action) {
