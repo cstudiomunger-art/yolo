@@ -128,8 +128,12 @@ enum CityTravelHints {
                 lines.append("Evening arrival — check in and rest")
             } else if PlanItineraryFlightTimes.isAfternoonArrival(arrival) {
                 lines.append("Afternoon arrival — light sightseeing window")
-            } else {
+            } else if PlanItineraryFlightTimes.isEarlyMorningArrival(arrival) {
+                lines.append("Early arrival — full day for sightseeing")
+            } else if PlanItineraryFlightTimes.isLateMorningCommuteArrival(arrival) {
                 lines.append("Morning commute — afternoon sightseeing window")
+            } else {
+                lines.append("Morning arrival — afternoon sightseeing window")
             }
         } else {
             let suggested = PlanItineraryFlightTimes.suggestedArrivalAtDestination(travelHours: hours)
@@ -179,13 +183,27 @@ enum CityTravelHints {
                 }
                 if PlanItineraryFlightTimes.isAfternoonArrival(arrival) {
                     return String(
-                        format: String(localized: "Afternoon sightseeing in %@"),
+                        format: String(localized: "Afternoon arrival in %@ — light sightseeing"),
+                        locale: .current,
+                        to
+                    )
+                }
+                if PlanItineraryFlightTimes.isEarlyMorningArrival(arrival) {
+                    return String(
+                        format: String(localized: "Early arrival — full day in %@"),
+                        locale: .current,
+                        to
+                    )
+                }
+                if PlanItineraryFlightTimes.isLateMorningCommuteArrival(arrival) {
+                    return String(
+                        format: String(localized: "Morning commute — afternoon in %@"),
                         locale: .current,
                         to
                     )
                 }
                 return String(
-                    format: String(localized: "Morning commute — afternoon in %@"),
+                    format: String(localized: "Morning arrival — afternoon in %@"),
                     locale: .current,
                     to
                 )

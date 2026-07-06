@@ -1123,7 +1123,7 @@ struct PlanCreateFlowView: View {
                     cityDisplayName: visited.isEmpty
                         ? CityTravelHints.displayName(for: displayDay.experienceCityId ?? hop.toCityId)
                         : visited,
-                    showsActivities: false,
+                    showsActivities: !day.activities.isEmpty,
                     onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: dayIndex, arrivalTime: $0) }
                 )
                 .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))

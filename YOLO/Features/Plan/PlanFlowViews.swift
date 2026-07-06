@@ -585,7 +585,7 @@ struct ItineraryDetailView: View {
                             ExperienceSuggestionsDayCard(
                                 day: day,
                                 cityDisplayName: experienceCityDisplayName(day),
-                                showsActivities: false,
+                                showsActivities: !day.activities.isEmpty,
                                 onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: $0) }
                             )
                             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))

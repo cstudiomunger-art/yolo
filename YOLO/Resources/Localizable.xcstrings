@@ -1347,6 +1347,36 @@
         }
       }
     },
+    "Early arrival — full day in %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清晨抵达 — 全天可在 %@ 游玩"
+          }
+        }
+      }
+    },
+    "Afternoon arrival in %@ — light sightseeing" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下午抵达 %@ — 轻松 1 站 + 可选晚间"
+          }
+        }
+      }
+    },
+    "Morning arrival — afternoon in %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上午抵达 — 下午在 %@ 游玩"
+          }
+        }
+      }
+    },
     "Morning departure — lighter sightseeing before you leave" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1810,6 +1840,7 @@
       }
     },
     "Set your departure time below" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1820,6 +1851,7 @@
       }
     },
     "Set your landing time below" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
