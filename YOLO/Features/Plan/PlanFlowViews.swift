@@ -279,7 +279,48 @@ struct ItineraryDetailView: View {
                     Section {
                         daySectionHeader(day)
 
-                        if day.isExperienceSuggestions {
+                        if day.intercityHop != nil && day.isExperienceSuggestions {
+                            ExperienceSuggestionsDayCard(
+                                day: day,
+                                cityDisplayName: experienceCityDisplayName(day),
+                                showsActivities: false,
+                                onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: $0) }
+                            )
+                            .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Theme.ColorToken.background)
+                            .moveDisabled(true)
+
+                            ForEach(day.activities) { activity in
+                                activityRow(activity, dayId: day.id)
+                            }
+                            .onMove { source, destination in
+                                moveActivities(dayId: day.id, from: source, to: destination)
+                            }
+                            .onDelete { offsets in
+                                deleteActivities(dayId: day.id, at: offsets)
+                            }
+
+                            Button {
+                                guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
+                                let cityIds: [String] = {
+                                    if let cid = day.experienceCityId, !cid.isEmpty { return [cid] }
+                                    return tripCityIds
+                                }()
+                                addAttractionContext = PlanAddAttractionContext(
+                                    dayIndex: dayIndex,
+                                    cityIds: cityIds
+                                )
+                            } label: {
+                                addAttractionButtonLabel
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(Theme.ColorToken.accent)
+                            .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 6, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Theme.ColorToken.background)
+                            .moveDisabled(true)
+                        } else if day.isExperienceSuggestions {
                             ExperienceSuggestionsDayCard(
                                 day: day,
                                 cityDisplayName: experienceCityDisplayName(day),
@@ -490,22 +531,15 @@ struct ItineraryDetailView: View {
                         .font(Theme.FontToken.inter(10, weight: .medium))
                         .foregroundStyle(Theme.ColorToken.textDisabled)
                 }
-                HStack(spacing: 6) {
-                    if !activity.timeSlot.isEmpty {
-                        Text(activity.timeSlot)
-                            .font(Theme.FontToken.inter(10, weight: .medium))
-                            .foregroundStyle(Theme.ColorToken.accent)
-                    }
-                    if let aid = activity.attractionId,
-                       attractionCache[aid]?.requiresAdvanceBooking == true {
-                        Text(String(localized: "Reservation"))
-                            .font(Theme.FontToken.inter(9, weight: .medium))
-                            .foregroundStyle(Theme.ColorToken.warning)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Theme.ColorToken.warningBackground)
-                            .clipShape(Capsule())
-                    }
+                if let aid = activity.attractionId,
+                   attractionCache[aid]?.requiresAdvanceBooking == true {
+                    Text(String(localized: "Reservation"))
+                        .font(Theme.FontToken.inter(9, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.warning)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Theme.ColorToken.warningBackground)
+                        .clipShape(Capsule())
                 }
                 Text(activity.name)
                     .font(Theme.FontToken.inter(13, weight: .medium))

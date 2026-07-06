@@ -76,6 +76,7 @@ enum PlanItineraryGoldenTest {
         fails += testShortHopNoStealPrevDay()
         fails += testHopDayHeaderRouteLabel()
         fails += testFullTravelDayRouteLabel()
+        fails += testRuleBasedEnrichAnnotatesHopAfterNormalize()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -1503,6 +1504,76 @@ enum PlanItineraryGoldenTest {
             && label.lowercased().contains("chengdu")
             && label.lowercased().contains("hangzhou")
         print(ok ? "✓ full travel day header uses route label" : "✗ full travel day header should be Chengdu → Hangzhou, got \(label)")
+        return ok ? 0 : 1
+    }
+
+    private static func testRuleBasedEnrichAnnotatesHopAfterNormalize() -> Int {
+        let cities = ["chongqing", "chengdu"]
+        let attractions = mockCatalog(cities: cities, perCity: 6)
+        let base = PlanItineraryAssembler.build(
+            cities: cities,
+            tripDays: 5,
+            attractions: attractions,
+            entryCityId: "chongqing",
+            exitCityId: "chengdu",
+            applyNormalizer: false
+        )
+        guard let originalHop = base.days.first(where: {
+            $0.intercityHop?.fromCityId == "chongqing" && $0.intercityHop?.toCityId == "chengdu"
+        }) else {
+            print("✗ rule-based annotate: baseline missing chongqing→chengdu hop day")
+            return 1
+        }
+
+        let wrongAct = mockActivity(id: "chongqing_ciqikou", cityId: "chongqing", name: "Ciqikou")
+        let corruptedDays = base.days.map { day -> ItineraryDay in
+            guard day.dayIndex == originalHop.dayIndex else {
+                return day.withIntercityHop(nil)
+            }
+            return ItineraryDay(
+                id: day.id,
+                dayIndex: day.dayIndex,
+                dateLabel: day.dateLabel,
+                cityName: "Chengdu",
+                costEstimate: day.costEstimate,
+                activities: [wrongAct],
+                dayKind: day.dayKind,
+                experienceItems: day.experienceItems,
+                experienceCityId: "chengdu",
+                intercityHop: nil
+            )
+        }
+
+        let corrupted = SampleItinerary(
+            id: base.id,
+            title: base.title,
+            meta: base.meta,
+            routeSummary: base.routeSummary,
+            estimatedBudget: base.estimatedBudget,
+            days: corruptedDays,
+            visitOrder: base.visitOrder
+        )
+        let catalogById = Dictionary(uniqueKeysWithValues: attractions.map { ($0.id, $0) })
+        let normalized = PlanItineraryNormalizer.hopSafeNormalize(
+            corrupted,
+            selectedCityIds: cities,
+            catalogById: catalogById,
+            pace: .standard
+        )
+
+        let hop = normalized.days.first {
+            $0.intercityHop?.fromCityId == "chongqing" && $0.intercityHop?.toCityId == "chengdu"
+        }
+        let strayChongqingOnChengduDay = normalized.days.contains { day in
+            day.intercityHop == nil
+                && !day.isExperienceSuggestions
+                && day.experienceCityId == "chengdu"
+                && day.activities.contains { $0.cityId == "chongqing" }
+        }
+        let ok = hop != nil && !strayChongqingOnChengduDay
+        print(ok
+            ? "✓ hopSafeNormalize + annotate restores chongqing→chengdu hop after overflow"
+            : "✗ normalize should re-inject intercity hop and strip wrong-city overflow")
         return ok ? 0 : 1
     }
 

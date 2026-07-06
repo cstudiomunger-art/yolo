@@ -3,6 +3,7 @@ import SwiftUI
 struct ExperienceSuggestionsDayCard: View {
     let day: ItineraryDay
     let cityDisplayName: String
+    var showsActivities: Bool = true
     var onArrivalTimeChange: ((String?) -> Void)? = nil
 
     private var isTravelDay: Bool {
@@ -66,7 +67,7 @@ struct ExperienceSuggestionsDayCard: View {
                 )
             }
 
-            if !day.activities.isEmpty {
+            if showsActivities, !day.activities.isEmpty {
                 Rectangle()
                     .fill(Theme.ColorToken.borderLight)
                     .frame(height: 1)
@@ -76,17 +77,9 @@ struct ExperienceSuggestionsDayCard: View {
                     .foregroundStyle(Theme.ColorToken.textSecondary)
 
                 ForEach(day.activities) { activity in
-                    HStack(alignment: .top, spacing: 8) {
-                        if !activity.timeSlot.isEmpty {
-                            Text(activity.timeSlot)
-                                .font(Theme.FontToken.inter(10, weight: .medium))
-                                .foregroundStyle(Theme.ColorToken.accent)
-                                .frame(minWidth: 58, alignment: .leading)
-                        }
-                        Text(activity.name)
-                            .font(Theme.FontToken.inter(12, weight: .medium))
-                            .foregroundStyle(Theme.ColorToken.textPrimary)
-                    }
+                    Text(activity.name)
+                        .font(Theme.FontToken.inter(12, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.textPrimary)
                 }
             }
 

@@ -699,7 +699,10 @@ export function buildItineraryPipeline(params: {
   });
 
   const regionByCity = regionMap(params.citiesMeta);
-  const annotatedDays = annotateIntercityHops(itinerary.days, regionByCity);
+  const annotatedDays = annotateIntercityHops(itinerary.days, regionByCity, {
+    visitOrder: scheduled.visitOrder,
+    cityIdByDayIndex: scheduled.cityIdByDayIndex,
+  });
   const filledDays = fillEmptyItineraryDays(annotatedDays, scheduled.visitOrder, {
     arrivalTime: params.arrivalTime,
     departureTime: params.departureTime,

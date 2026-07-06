@@ -882,7 +882,48 @@ struct PlanCreateFlowView: View {
         )
 
         Section {
-            if day.intercityHop != nil && !day.isExperienceSuggestions {
+            if let hop = day.intercityHop, day.isExperienceSuggestions {
+                let displayDay = day
+                ExperienceSuggestionsDayCard(
+                    day: displayDay,
+                    cityDisplayName: visited.isEmpty
+                        ? CityTravelHints.displayName(for: displayDay.experienceCityId ?? hop.toCityId)
+                        : visited,
+                    showsActivities: false,
+                    onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: dayIndex, arrivalTime: $0) }
+                )
+                .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+
+                ForEach(day.activities) { activity in
+                    reviewActivityRow(activity, dayIndex: dayIndex)
+                        .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 4, trailing: Theme.screenPadding))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+                .onMove { source, destination in
+                    moveReviewActivities(dayIndex: dayIndex, from: source, to: destination)
+                }
+
+                if reviewEditMode == .inactive {
+                    Button {
+                        let cityIds: [String] = {
+                            if let cid = displayDay.experienceCityId, !cid.isEmpty { return [cid] }
+                            return reviewTripCityIds()
+                        }()
+                        addAttractionContext = PlanAddAttractionContext(dayIndex: dayIndex, cityIds: cityIds)
+                    } label: {
+                        Label(String(localized: "Add attraction"), systemImage: "plus")
+                            .font(Theme.FontToken.inter(12, weight: .medium))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.ColorToken.accent)
+                    .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+            } else if day.intercityHop != nil && !day.isExperienceSuggestions {
                 let split = PlanItineraryHopUI.splitActivities(day)
                 ForEach(split.morning) { activity in
                     reviewActivityRow(activity, dayIndex: dayIndex)
@@ -945,6 +986,7 @@ struct PlanCreateFlowView: View {
                     cityDisplayName: visited.isEmpty
                         ? CityTravelHints.displayName(for: displayDay.experienceCityId ?? "beijing")
                         : visited,
+                    showsActivities: displayDay.intercityHop == nil,
                     onArrivalTimeChange: displayDay.intercityHop != nil
                         ? { applyIntercityArrivalTime(dayIndex: dayIndex, arrivalTime: $0) }
                         : nil
@@ -1043,11 +1085,6 @@ struct PlanCreateFlowView: View {
                             Text(cityLabel)
                                 .font(Theme.FontToken.inter(10, weight: .medium))
                                 .foregroundStyle(Theme.ColorToken.textDisabled)
-                        }
-                        if !activity.timeSlot.isEmpty {
-                            Text(activity.timeSlot)
-                                .font(Theme.FontToken.inter(10, weight: .medium))
-                                .foregroundStyle(Theme.ColorToken.accent)
                         }
                         if let aid = activity.attractionId,
                            attractionCache[aid]?.requiresAdvanceBooking == true {
@@ -1387,7 +1424,15 @@ struct PlanCreateFlowView: View {
                 departureTime: departureHHMM
             )
         } else {
-            let annotated = PlanItineraryIntercityAnnotator.annotate(trip.days)
+            let baselineMap = PlanItineraryIntercityAnnotator.inferCityIdByDayIndex(
+                from: trip.days,
+                visitOrder: visitOrder
+            )
+            let annotated = PlanItineraryIntercityAnnotator.annotate(
+                trip.days,
+                visitOrder: visitOrder,
+                cityIdByDayIndex: baselineMap
+            )
             let cityMap = timelineCityIdByDay(from: annotated, visitOrder: visitOrder)
             let filledDays = PlanItineraryDayFill.fillEmptyDays(
                 annotated,

@@ -14,9 +14,16 @@ enum PlanItineraryNormalizer {
         if trip.userEdited { return trip }
         guard !trip.days.isEmpty else { return trip }
 
+        let visitOrder = trip.visitOrder ?? deriveVisitOrder(from: trip.days, fallback: selectedCityIds)
+        let baselineCityMap = PlanItineraryIntercityAnnotator.inferCityIdByDayIndex(
+            from: trip.days,
+            visitOrder: visitOrder
+        )
+
         var days = trip.days
         var pool: [ItineraryActivity] = []
         var seenAttractionIds = Set<String>()
+        var adjustments = trip.schedulingAdjustments ?? []
 
         for index in days.indices {
             guard !days[index].isExperienceSuggestions else { continue }
@@ -41,6 +48,8 @@ enum PlanItineraryNormalizer {
             }
         }
 
+        stripWrongCityActivities(from: &days, pool: &pool, cityIdByDayIndex: baselineCityMap)
+
         for index in days.indices {
             guard !days[index].isExperienceSuggestions else { continue }
             let dayCapacity = PlanItinerarySlotBudget.daytimeCapacity(
@@ -59,7 +68,28 @@ enum PlanItineraryNormalizer {
             pool.append(contentsOf: trimmed.overflow)
         }
 
-        let visitOrder = trip.visitOrder ?? deriveVisitOrder(from: days, fallback: selectedCityIds)
+        for activity in pool {
+            let placed = placeActivity(
+                activity,
+                into: &days,
+                catalogById: catalogById,
+                pace: pace,
+                arrivalTime: arrivalTime,
+                departureTime: departureTime,
+                cityIdByDayIndex: baselineCityMap
+            )
+            if !placed {
+                let label = activity.attractionId ?? activity.name
+                adjustments.append(String(localized: "Could not place \(label) during normalize"))
+            }
+        }
+
+        days = PlanItineraryIntercityAnnotator.annotate(
+            days,
+            visitOrder: visitOrder,
+            cityIdByDayIndex: baselineCityMap
+        )
+
         let route = CityTravelHints.routeLabel(from: visitOrder)
 
         days = PlanItineraryDayFill.fillEmptyDays(
@@ -67,19 +97,14 @@ enum PlanItineraryNormalizer {
             visitOrder: visitOrder,
             pace: pace,
             arrivalTime: arrivalTime,
-            departureTime: departureTime
+            departureTime: departureTime,
+            cityIdByDayIndex: baselineCityMap
         )
 
         let dayCount = days.count
         let title = titleMatchesRoute(trip.title, route: route)
             ? trip.title
             : "\(dayCount)-Day \(route) Trip"
-
-        var adjustments = trip.schedulingAdjustments ?? []
-        for activity in pool {
-            let label = activity.attractionId ?? activity.name
-            adjustments.append(String(localized: "Could not place \(label) during normalize"))
-        }
 
         return SampleItinerary(
             id: trip.id,
@@ -112,6 +137,12 @@ enum PlanItineraryNormalizer {
         if trip.userEdited { return trip }
         guard !trip.days.isEmpty else { return trip }
 
+        let visitOrder = trip.visitOrder ?? deriveVisitOrder(from: trip.days, fallback: selectedCityIds)
+        let baselineCityMap = PlanItineraryIntercityAnnotator.inferCityIdByDayIndex(
+            from: trip.days,
+            visitOrder: visitOrder
+        )
+
         var days = trip.days
         var pool: [ItineraryActivity] = []
         var seenAttractionIds = Set<String>()
@@ -140,6 +171,8 @@ enum PlanItineraryNormalizer {
             }
         }
 
+        stripWrongCityActivities(from: &days, pool: &pool, cityIdByDayIndex: baselineCityMap)
+
         for index in days.indices {
             guard !days[index].isExperienceSuggestions else { continue }
             let dayCapacity = PlanItinerarySlotBudget.daytimeCapacity(
@@ -158,15 +191,21 @@ enum PlanItineraryNormalizer {
             pool.append(contentsOf: trimmed.overflow)
         }
 
+        var adjustments = trip.schedulingAdjustments ?? []
         for activity in pool {
-            placeActivity(
+            let placed = placeActivity(
                 activity,
                 into: &days,
                 catalogById: catalogById,
                 pace: pace,
                 arrivalTime: arrivalTime,
-                departureTime: departureTime
+                departureTime: departureTime,
+                cityIdByDayIndex: baselineCityMap
             )
+            if !placed {
+                let label = activity.attractionId ?? activity.name
+                adjustments.append(String(localized: "Could not place \(label) during normalize"))
+            }
         }
 
         // Scheduler already inserts dedicated travel days — do not overwrite them.
@@ -191,7 +230,12 @@ enum PlanItineraryNormalizer {
             )
         }
 
-        let visitOrder = trip.visitOrder ?? deriveVisitOrder(from: days, fallback: selectedCityIds)
+        days = PlanItineraryIntercityAnnotator.annotate(
+            days,
+            visitOrder: visitOrder,
+            cityIdByDayIndex: baselineCityMap
+        )
+
         let route = CityTravelHints.routeLabel(from: visitOrder)
 
         days = PlanItineraryDayFill.fillEmptyDays(
@@ -199,19 +243,14 @@ enum PlanItineraryNormalizer {
             visitOrder: visitOrder,
             pace: pace,
             arrivalTime: arrivalTime,
-            departureTime: departureTime
+            departureTime: departureTime,
+            cityIdByDayIndex: baselineCityMap
         )
 
         let dayCount = days.count
         let title = titleMatchesRoute(trip.title, route: route)
             ? trip.title
             : "\(dayCount)-Day \(route) Trip"
-
-        var adjustments = trip.schedulingAdjustments ?? []
-        for activity in pool {
-            let label = activity.attractionId ?? activity.name
-            adjustments.append(String(localized: "Could not place \(label) during normalize"))
-        }
 
         return SampleItinerary(
             id: trip.id,
@@ -258,24 +297,54 @@ enum PlanItineraryNormalizer {
         return (keep, overflow)
     }
 
+    private static func stripWrongCityActivities(
+        from days: inout [ItineraryDay],
+        pool: inout [ItineraryActivity],
+        cityIdByDayIndex: [Int: String]
+    ) {
+        for index in days.indices {
+            guard !days[index].isExperienceSuggestions else { continue }
+            guard days[index].intercityHop == nil else { continue }
+            guard let canonical = cityIdByDayIndex[days[index].dayIndex]?.lowercased(), !canonical.isEmpty else {
+                continue
+            }
+            var keep: [ItineraryActivity] = []
+            for act in days[index].activities {
+                if let cid = act.cityId?.lowercased(), !cid.isEmpty, cid != canonical {
+                    pool.append(act)
+                } else {
+                    keep.append(act)
+                }
+            }
+            days[index] = days[index].withActivities(keep)
+        }
+    }
+
     private static func placeActivity(
         _ activity: ItineraryActivity,
         into days: inout [ItineraryDay],
         catalogById: [String: Attraction],
         pace: TripPace,
         arrivalTime: String?,
-        departureTime: String?
-    ) {
-        guard let city = activity.cityId else { return }
+        departureTime: String?,
+        cityIdByDayIndex: [Int: String] = [:]
+    ) -> Bool {
+        guard let city = activity.cityId else { return false }
         let targetCity = city.lowercased()
         for index in days.indices {
             guard !days[index].isExperienceSuggestions else { continue }
             if let hop = days[index].intercityHop {
                 let allowed = [hop.fromCityId.lowercased(), hop.toCityId.lowercased()]
                 guard allowed.contains(targetCity) else { continue }
-            } else if let scheduled = days[index].experienceCityId?.lowercased(), !scheduled.isEmpty,
-                      scheduled != targetCity {
-                continue
+            } else {
+                if let scheduled = days[index].experienceCityId?.lowercased(), !scheduled.isEmpty,
+                   scheduled != targetCity {
+                    continue
+                }
+                if let canonical = cityIdByDayIndex[days[index].dayIndex]?.lowercased(), !canonical.isEmpty,
+                   canonical != targetCity {
+                    continue
+                }
             }
             let dayCapacity = PlanItinerarySlotBudget.daytimeCapacity(
                 dayIndex: days[index].dayIndex,
@@ -305,10 +374,10 @@ enum PlanItineraryNormalizer {
             }
             if compatible {
                 days[index] = days[index].withActivities(days[index].activities + [activity])
-                return
+                return true
             }
         }
-        // No compatible day found: silently drop instead of forcing a mixed-city day.
+        return false
     }
 
     private static func insertTravelDays(into days: inout [ItineraryDay]) {
