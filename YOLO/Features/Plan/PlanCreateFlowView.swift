@@ -1460,6 +1460,7 @@ struct PlanCreateFlowView: View {
         visaChecking = true
         visaRec = nil
         visaRoutes = []
+        let visitOrder = resolvedVisitOrder
         visaCheckTask = Task {
             // Already holds a China visa → visa-free routing is moot, skip the whole check.
             if hasChinaVisa {
@@ -1476,7 +1477,8 @@ struct PlanCreateFlowView: View {
             await appEnv.visaData.load()
             guard !Task.isCancelled, epoch == generationEpoch else { return }
             let data = appEnv.visaData.data
-            let slugs = Array(selectedCityIds)
+            // Visit order anchors entry/exit ports in VisaCoarseCheck and route-card display.
+            let slugs = visitOrder
             // Passport-validity gate: pass nil when sufficient (no GATE0); 0 when the user says
             // it's below the floor → engine returns GATE0 red (neither visa-free nor a visa works).
             let validMonths: Int? = passportValidEnough ? nil : 0
@@ -1531,8 +1533,13 @@ struct PlanCreateFlowView: View {
             ids.append(slug)
         }
         selectedCityIds = Set(ids)
-        endpointMode = .suggested
-        applySuggestedEntryExit(force: true)
+        let keepCustomEndpoints = route.kind == .interest && endpointMode == .custom
+        if keepCustomEndpoints {
+            syncEntryExitCities()
+        } else {
+            endpointMode = .suggested
+            applySuggestedEntryExit(force: true)
+        }
         startGeneration()
     }
 

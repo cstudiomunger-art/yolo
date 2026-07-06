@@ -14,7 +14,7 @@ struct VisaRoute: Identifiable {
     let title: String
     let badge: String
     let badgeTone: Tone
-    let cities: [String]       // app content-city ids (display/write-back order)
+    let cities: [String]       // app content-city ids in visit order (entry → … → exit)
     let addedCity: String?     // advisory transit-exit city (display name) for the friendly route
     /// Content-city slug for `addedCity` (e.g. "hongkong"). When this city exists in the content
     /// catalog, adopting the route folds it into the itinerary as a real stop; until then the
@@ -42,6 +42,8 @@ enum VisaTripChecker {
     /// candidate tweaks and re-run the engine to verify each route actually goes green.
     /// City swap is NOT here — it's interactive (`swapPlan`), so the user picks the replacement
     /// from a city list rather than us auto-choosing the most popular one.
+    /// `appCities` must be in visit order (first = landing, last = return) so Original picks
+    /// matches Flight endpoints and coarse entry/exit ports stay aligned.
     static func routes(query: VisaQuery, appCities: [String], data: VisaDataSet,
                        recommendation rec: VisaRecommendation) -> [VisaRoute] {
         guard !rec.isEnough else { return [] }
