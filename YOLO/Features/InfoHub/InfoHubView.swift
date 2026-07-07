@@ -13,7 +13,7 @@ struct InfoHubView: View {
                 VStack(spacing: 12) {
                     actionCard("🚨", "Emergency", "Call 110 · embassy by nationality · medical card") { appEnv.navigation.presentEmergency() }
                     actionCard("🛂", "Visa", "Does your route qualify · rules explained") { appEnv.navigation.presentVisaChecker() }
-                    actionCard("💳", "Payment", "Card binding / foreign cards / cash tiers") { appEnv.navigation.presentPaymentHelper() }
+                    actionCard("💳", "Payment", "Paying in China · mobile pay, cash backup, troubleshooting") { appEnv.navigation.presentPaymentHelper() }
                     NavigationLink { InternetAccessGuideView() } label: { cardBody("🌐", "Internet access", "Legal options · SIM cards · roaming") }
                         .buttonStyle(.plain)
                     NavigationLink { TransportView() } label: { cardBody("🚄", "Transport", "High-speed rail · taxis · metro") }
