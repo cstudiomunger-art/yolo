@@ -92,8 +92,6 @@ struct PaymentGuideSegmentOption: Identifiable {
 
 enum PaymentGuideContent {
 
-    static let brandMeta = "Guide · Paying in China"
-
     static let hubEyebrow = "Payment Guide"
     static let hubTitle = "Paying in China"
     static let hubIntroBold = "About 90% of payments can be done from your phone."

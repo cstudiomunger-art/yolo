@@ -11,7 +11,6 @@ struct PaymentHelperHomeView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    PaymentGuideBrandBar()
                     PaymentGuideHero()
                     PaymentGuideRule()
 
@@ -97,6 +96,7 @@ private struct PaymentGuideSubPage<Content: View>: View {
                 PaymentGuidePagePad { content() }
             }
         }
+        .safeAreaPadding(.top, 8)
         .background(Theme.ColorToken.background)
     }
 }

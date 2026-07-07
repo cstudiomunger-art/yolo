@@ -5,36 +5,10 @@ import SwiftUI
 enum PaymentGuideLayout {
     static let horizontalPadding: CGFloat = Theme.screenPadding
     static let bottomPadding: CGFloat = 48
-    static let subNavTopPadding: CGFloat = 64
+    static let subNavTopPadding: CGFloat = 8
 }
 
-// MARK: - Brand & Hero
-
-struct PaymentGuideBrandBar: View {
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 0) {
-            HStack(spacing: 0) {
-                Text("YOLO ")
-                    .font(Theme.FontToken.playfair(20, weight: .bold))
-                    .foregroundStyle(Theme.ColorToken.textPrimary)
-                Text("HAPPY")
-                    .font(Theme.FontToken.playfair(20, weight: .bold))
-                    .foregroundStyle(Theme.ColorToken.accent)
-            }
-            Spacer(minLength: 8)
-            Text(PaymentGuideContent.brandMeta)
-                .font(Theme.FontToken.inter(12))
-                .foregroundStyle(Theme.ColorToken.textMuted)
-                .kerning(0.6)
-        }
-        .padding(.top, PaymentGuideLayout.subNavTopPadding)
-        .padding(.horizontal, PaymentGuideLayout.horizontalPadding)
-        .padding(.bottom, 16)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Theme.ColorToken.border).frame(height: 1)
-        }
-    }
-}
+// MARK: - Hero
 
 struct PaymentGuideHero: View {
     var body: some View {
@@ -59,7 +33,7 @@ struct PaymentGuideHero: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, PaymentGuideLayout.horizontalPadding)
-        .padding(.top, 24)
+        .padding(.top, 16)
         .padding(.bottom, 8)
     }
 }
@@ -300,7 +274,7 @@ struct PaymentGuidePagePad<Content: View>: View {
             content()
         }
         .padding(.horizontal, PaymentGuideLayout.horizontalPadding)
-        .padding(.top, 20)
+        .padding(.top, 12)
         .padding(.bottom, PaymentGuideLayout.bottomPadding)
     }
 }
