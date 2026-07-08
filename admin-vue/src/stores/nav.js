@@ -4,7 +4,7 @@ import { ref } from "vue";
 /**
  * Drives the main work area from sidebar tree clicks.
  * selection kinds:
- *   { kind:'table',  tableKey, fixedCityId? }      filtered list
+ *   { kind:'table',  tableKey, fixedCityId?, settingsSection? }  filtered list / single-row anchor
  *   { kind:'record', tableKey, id }                edit existing row
  *   { kind:'new',    tableKey, presets? }          create row
  *   { kind:'placeholder', label }                  not-yet-built hub

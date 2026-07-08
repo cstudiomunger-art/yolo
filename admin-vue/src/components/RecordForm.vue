@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, ref } from "vue";
+import { reactive, computed, ref, watch } from "vue";
 import FieldInput from "@/components/fields/FieldInput.vue";
 import { upsertRow, deleteRow } from "@/lib/crud";
 import { slugify } from "@/lib/storage";
@@ -10,6 +10,7 @@ const props = defineProps({
   initial: { type: Object, default: null },
   presets: { type: Object, default: null }, // seed values for a new record
   deletable: { type: Boolean, default: true }, // show 删除 when editing an existing row
+  initialSection: { type: String, default: "" }, // app_settings section key, e.g. legal_section
 });
 const emit = defineEmits(["saved", "cancel", "deleted"]);
 
@@ -69,6 +70,48 @@ const visibleFields = computed(() =>
     return true;
   })
 );
+
+function fieldVisible(f) {
+  if (!showAdvanced.value && f.advanced) return false;
+  if (!showAdvanced.value && f.type === "slug") return false;
+  if (f.showWhen && !f.showWhen.values.includes(form[f.showWhen.field])) return false;
+  return true;
+}
+
+const groupedSections = computed(() => {
+  if (!props.schema.groupedSections) return null;
+  const sections = [{ key: "_general", label: "基础开关", hint: "", fields: [] }];
+  let cur = sections[0];
+  for (const f of props.schema.fields) {
+    if (f.type === "section") {
+      cur = { key: f.key, label: f.label || f.key, hint: f.hint || "", fields: [] };
+      sections.push(cur);
+      continue;
+    }
+    if (fieldVisible(f)) cur.fields.push(f);
+  }
+  return sections.filter((s) => s.fields.length > 0 || s.key !== "_general");
+});
+
+const activeSection = ref(props.initialSection || "_general");
+
+watch(
+  () => props.initialSection,
+  (section) => {
+    if (!section || !groupedSections.value) return;
+    if (groupedSections.value.some((s) => s.key === section)) activeSection.value = section;
+  },
+  { immediate: true }
+);
+
+const activeSectionMeta = computed(() =>
+  groupedSections.value?.find((s) => s.key === activeSection.value) || null
+);
+
+const fieldsToRender = computed(() => {
+  if (!groupedSections.value) return visibleFields.value;
+  return activeSectionMeta.value?.fields || [];
+});
 
 function buildPayload() {
   const payload = {};
@@ -212,8 +255,23 @@ const hasAdvanced = props.schema.fields.some((f) => f.advanced);
 
     <div v-if="error" class="status-bar error">{{ error }}</div>
 
+    <div v-if="groupedSections" class="settings-nav">
+      <button
+        v-for="s in groupedSections"
+        :key="s.key"
+        type="button"
+        class="settings-chip"
+        :class="{ active: activeSection === s.key }"
+        @click="activeSection = s.key"
+      >
+        {{ s.label }}
+      </button>
+    </div>
+
+    <div v-if="activeSectionMeta?.hint" class="section-hint">{{ activeSectionMeta.hint }}</div>
+
     <FieldInput
-      v-for="f in visibleFields"
+      v-for="f in fieldsToRender"
       :key="f.key"
       :field="f"
       :record="form"
@@ -247,5 +305,33 @@ const hasAdvanced = props.schema.fields.some((f) => f.advanced);
 }
 .adv {
   margin-top: 8px;
+}
+.settings-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.settings-chip {
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.settings-chip:hover {
+  border-color: var(--accent);
+}
+.settings-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.section-hint {
+  color: var(--muted);
+  font-size: 13px;
+  margin: -6px 0 14px;
 }
 </style>

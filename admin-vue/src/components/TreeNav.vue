@@ -66,6 +66,8 @@ const GROUPS = [
   ] },
   { id: "config", label: "全局配置", leaves: [
     { label: "应用配置", table: "app_settings" },
+    { label: "法律与合规文档", table: "app_settings", settingsSection: "legal_section" },
+    { label: "紧急联系", table: "emergency_config" },
   ] },
   { id: "emergency", label: "🆘 紧急", leaves: [
     { label: "紧急联系", table: "emergency_config" },
@@ -200,7 +202,13 @@ function pickSubArea(sa) {
 }
 function pickLeaf(leaf) {
   if (leaf.hubId) nav.select({ kind: "hub", hubId: leaf.hubId });
-  else if (leaf.table && TABLES[leaf.table]) nav.select({ kind: "table", tableKey: leaf.table });
+  else if (leaf.table && TABLES[leaf.table]) {
+    nav.select({
+      kind: "table",
+      tableKey: leaf.table,
+      settingsSection: leaf.settingsSection || null,
+    });
+  }
   else nav.select({ kind: "placeholder", label: `「${leaf.label}」待迁移` });
 }
 
@@ -335,7 +343,12 @@ function isActive(sel) {
           v-for="(leaf, i) in g.leaves"
           :key="i"
           class="row lvl1 leaf"
-          :class="{ active: (leaf.hubId && isActive({ kind: 'hub', hubId: leaf.hubId })) || (leaf.table && isActive({ kind: 'table', tableKey: leaf.table })) }"
+          :class="{ active: (leaf.hubId && isActive({ kind: 'hub', hubId: leaf.hubId }))
+            || (leaf.table && isActive({
+              kind: 'table',
+              tableKey: leaf.table,
+              settingsSection: leaf.settingsSection || null,
+            })) }"
           @click="pickLeaf(leaf)"
         >
           {{ leaf.label }}

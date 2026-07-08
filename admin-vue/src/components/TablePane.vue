@@ -1,7 +1,9 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
+import { storeToRefs } from "pinia";
 import { TABLES } from "@/schema/tables";
 import { useRefCache } from "@/stores/refCache";
+import { useNav } from "@/stores/nav";
 import TableList from "@/components/TableList.vue";
 import RecordForm from "@/components/RecordForm.vue";
 import {
@@ -15,6 +17,8 @@ const props = defineProps({
 });
 
 const refCache = useRefCache();
+const nav = useNav();
+const { selection } = storeToRefs(nav);
 const schema = computed(() => TABLES[props.tableKey]);
 
 const rows = ref([]);
@@ -35,6 +39,12 @@ const CHECKLIST_TYPES = [
 
 const isSingle = computed(() => schema.value?.single === true);
 const isChecklist = computed(() => props.tableKey === "checklist_items");
+const pageTitle = computed(() => {
+  if (props.tableKey === "app_settings" && selection.value.settingsSection === "legal_section") {
+    return "法律与合规文档";
+  }
+  return schema.value?.label || props.tableKey;
+});
 
 // persisted (non-fixed) filters per table, mirroring the legacy admin
 const cityStoreKey = computed(() => `cms_city_filter_${props.tableKey}`);
@@ -149,7 +159,7 @@ watch(() => [props.tableKey, props.fixedCityId], load);
   <div v-else>
     <div class="page-head">
       <h1>
-        {{ schema.label }}
+        {{ pageTitle }}
         <span v-if="fixedCityId" class="scope">· {{ refCache.cityLabel(fixedCityId) }}</span>
       </h1>
       <button v-if="!isSingle && !editing && !schema.noCreate" class="btn" @click="onCreate">+ 新建</button>
@@ -160,11 +170,12 @@ watch(() => [props.tableKey, props.fixedCityId], load);
 
     <RecordForm
       v-else-if="editing"
-      :key="editing[schema.pk] || '_new_'"
+      :key="(editing[schema.pk] || '_new_') + '|' + (selection.settingsSection || '')"
       :table-key="tableKey"
       :schema="schema"
       :initial="editing._new ? null : editing"
       :presets="editing._new ? editing : null"
+      :initial-section="selection.settingsSection || ''"
       @saved="onSaved"
       @deleted="onSaved"
       @cancel="onCancel"
