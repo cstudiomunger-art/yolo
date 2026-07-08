@@ -41,6 +41,7 @@ struct EmailAuthSheet: View {
                 }
             }
         }
+        .sheetDragToDismiss()
     }
 
     // MARK: - Form

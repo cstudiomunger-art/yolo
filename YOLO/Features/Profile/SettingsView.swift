@@ -40,6 +40,7 @@ struct SettingsView: View {
                 CountryPickerView(mode: .profileEdit)
                     .environment(appEnv)
             }
+            .sheetDragToDismiss()
         }
         .sheet(isPresented: $showAbout) {
             AboutChinaGoView()

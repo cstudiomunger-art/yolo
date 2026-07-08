@@ -1247,6 +1247,7 @@ private struct HotelSearchSheet: View {
         .task(id: cityId) {
             await loadHotels()
         }
+        .sheetDragToDismiss()
     }
 
     private func loadHotels() async {
@@ -1324,6 +1325,7 @@ struct HotelSearchView: View {
                 }
             }
         }
+        .sheetDragToDismiss()
     }
 }
 
@@ -1576,6 +1578,7 @@ struct ShareItinerarySheet: View {
                 }
             }
         }
+        .sheetDragToDismiss()
     }
 
     @ViewBuilder

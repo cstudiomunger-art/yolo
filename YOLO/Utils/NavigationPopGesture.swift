@@ -12,20 +12,54 @@ private struct NavigationSwipeBackEnabler: UIViewControllerRepresentable {
     }
 
     final class EnablerViewController: UIViewController, UIGestureRecognizerDelegate {
+        private weak var observedNavigationController: UINavigationController?
+
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
             refreshGesture()
         }
 
+        override func viewDidLayoutSubviews() {
+            super.viewDidLayoutSubviews()
+            refreshGesture()
+        }
+
         func refreshGesture() {
-            guard let nav = navigationController,
+            guard let nav = resolvedNavigationController(),
                   let pop = nav.interactivePopGestureRecognizer else { return }
+            observedNavigationController = nav
             pop.isEnabled = nav.viewControllers.count > 1
             pop.delegate = self
         }
 
         func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-            (navigationController?.viewControllers.count ?? 0) > 1
+            (resolvedNavigationController()?.viewControllers.count ?? 0) > 1
+        }
+
+        private func resolvedNavigationController() -> UINavigationController? {
+            if let navigationController { return navigationController }
+
+            var current: UIViewController? = parent
+            while let controller = current {
+                if let nav = controller as? UINavigationController { return nav }
+                if let nav = controller.navigationController { return nav }
+                current = controller.parent
+            }
+
+            return findNavigationController(in: view.window?.rootViewController)
+        }
+
+        private func findNavigationController(in root: UIViewController?) -> UINavigationController? {
+            guard let root else { return nil }
+            if let nav = root as? UINavigationController { return nav }
+            if let nav = root.navigationController, nav.viewControllers.contains(root) { return nav }
+            for child in root.children {
+                if let nav = findNavigationController(in: child) { return nav }
+            }
+            if let presented = root.presentedViewController {
+                return findNavigationController(in: presented)
+            }
+            return nil
         }
     }
 }

@@ -35,6 +35,7 @@ struct SharedItineraryView: View {
                 await load()
             }
         }
+        .sheetDragToDismiss()
     }
 
     private func load() async {

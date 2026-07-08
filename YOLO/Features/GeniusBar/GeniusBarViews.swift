@@ -331,6 +331,7 @@ struct GeniusBarHistoryView: View {
         .listStyle(.plain)
         .navigationTitle("History")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationSwipeBackEnabled()
         .navigationDestination(item: $chatIntent) { GeniusBarChatView(intent: $0) }
     }
 
@@ -448,6 +449,7 @@ struct GeniusBarChatView: View {
         }
         .navigationTitle("Chat")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationSwipeBackEnabled()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

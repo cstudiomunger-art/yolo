@@ -87,6 +87,7 @@ struct ItineraryEditorView: View {
             }
             .onAppear(perform: loadFromItinerary)
         }
+        .sheetDragToDismiss()
     }
 
     @ViewBuilder

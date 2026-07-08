@@ -103,6 +103,7 @@ struct CultureTipDetailView: View {
         }
         .navigationTitle("\(tip.emoji) \(tip.title)")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationSwipeBackEnabled()
     }
 
     private func comparisonRow(label: String, text: String, positive: Bool) -> some View {

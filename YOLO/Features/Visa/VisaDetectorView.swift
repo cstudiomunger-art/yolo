@@ -104,6 +104,7 @@ struct VisaDetectorView: View {
                                 data: appEnv.visaData.data, routes: routes)
             }
         }
+        .sheetDragToDismiss()
     }
 
     // MARK: - Sections
@@ -503,6 +504,7 @@ struct CountrySelectSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
         }
+        .sheetDragToDismiss()
     }
 
     private func row(flag: String, name: String, code: String) -> some View {
@@ -569,6 +571,7 @@ private struct PortSelectSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
         }
+        .sheetDragToDismiss()
     }
 }
 
@@ -617,6 +620,7 @@ private struct CitySelectSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
+        .sheetDragToDismiss()
     }
 }
 

@@ -38,6 +38,7 @@ struct InternetAccessGuideView: View {
         }
         .navigationTitle("Internet Access")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationSwipeBackEnabled()
         .task { await appEnv.infoHub.load() }
     }
 }
@@ -71,6 +72,7 @@ struct TransportView: View {
         }
         .navigationTitle("Transport")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationSwipeBackEnabled()
         .task { await appEnv.infoHub.load() }
     }
 

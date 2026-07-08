@@ -35,6 +35,7 @@ struct AboutChinaGoView: View {
                 }
             }
         }
+        .sheetDragToDismiss()
     }
 
     private func aboutRow(_ title: String, _ detail: String) -> some View {

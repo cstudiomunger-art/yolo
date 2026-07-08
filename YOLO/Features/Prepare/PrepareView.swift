@@ -557,5 +557,6 @@ struct ReadingListView: View {
                 }
             }
         }
+        .sheetDragToDismiss()
     }
 }

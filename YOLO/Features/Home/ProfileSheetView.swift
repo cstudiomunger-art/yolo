@@ -38,6 +38,7 @@ struct ProfileSheetView: View {
                             }
                         }
                 }
+                .sheetDragToDismiss()
             }
             .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
                 if isAuthenticated {
@@ -70,6 +71,7 @@ struct ProfileSheetView: View {
                 }
             }
         }
+        .sheetDragToDismiss()
     }
 
     // MARK: - Identity section

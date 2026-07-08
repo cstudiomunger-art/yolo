@@ -85,6 +85,7 @@ struct MembershipCenterView: View {
                     }
                 }
             }
+            .sheetDragToDismiss()
         }
     }
 

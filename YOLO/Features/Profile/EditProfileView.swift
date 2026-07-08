@@ -46,6 +46,7 @@ struct EditProfileView: View {
                 Task { await handlePhotoSelection(item) }
             }
         }
+        .sheetDragToDismiss()
     }
 
     // MARK: - Sections

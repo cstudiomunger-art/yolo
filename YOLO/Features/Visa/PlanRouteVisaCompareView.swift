@@ -43,6 +43,7 @@ struct PlanRouteVisaCompareView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } } }
         }
+        .sheetDragToDismiss()
     }
 
     private func routeCard(_ route: VisaRoute) -> some View {

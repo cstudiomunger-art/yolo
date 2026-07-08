@@ -195,6 +195,7 @@ extension View {
                         }
                     }
             }
+            .sheetDragToDismiss()
         }
     }
 }

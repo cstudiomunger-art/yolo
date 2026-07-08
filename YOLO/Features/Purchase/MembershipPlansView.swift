@@ -97,6 +97,7 @@ struct MembershipPlansView: View {
             .onChange(of: appEnv.purchase.availablePlans.count) { _, _ in ensureSelection() }
         }
         .presentationDetents([.large])
+        .sheetDragToDismiss()
     }
 
     // MARK: - Preview-ended bar

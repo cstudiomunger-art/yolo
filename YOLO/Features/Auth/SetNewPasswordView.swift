@@ -31,6 +31,7 @@ struct SetNewPasswordView: View {
             .navigationTitle(String(localized: "New password"))
             .navigationBarTitleDisplayMode(.inline)
         }
+        .sheetDragToDismiss()
     }
 
     @ViewBuilder

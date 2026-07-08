@@ -2345,6 +2345,7 @@ struct PlanCreateFlowView: View {
                 }
         }
         .presentationDetents([.medium])
+        .sheetDragToDismiss()
     }
 }
 
@@ -2479,8 +2480,10 @@ struct PlanAttractionPickerSheet: View {
                         appEnv.navigation.guideAddToItineraryHandler = nil
                     }
                 }
+                .sheetDragToDismiss()
             }
         }
+        .sheetDragToDismiss()
     }
 
     private func bootstrap() async {

@@ -74,6 +74,7 @@ struct VisaVerdictView: View {
                 PlanRouteVisaCompareView(routes: routes)
             }
         }
+        .sheetDragToDismiss()
     }
 
     // MARK: - Cities
