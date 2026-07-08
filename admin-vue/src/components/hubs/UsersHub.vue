@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { supabase } from "@/lib/supabase";
+import { supabase, isAdmin, addExistingUserAsAdmin, removeAdmin, createAdminUser } from "@/lib/supabase";
 import { useRefCache } from "@/stores/refCache";
 import MultiCheck from "@/components/fields/MultiCheck.vue";
 import DateTimePicker from "@/components/fields/DateTimePicker.vue";
@@ -10,11 +10,20 @@ const refCache = useRefCache();
 const profiles = ref([]);
 const plans = ref([]); // active plans for selectors
 const adminUsers = ref([]);
+const adminUserIds = ref(new Set()); // for quick lookup
 const search = ref("");
 const statusFilter = ref("");
 const error = ref("");
 const toast = ref("");
 function showToast(m) { toast.value = m; setTimeout(() => (toast.value = ""), 1800); }
+
+// ═══════════════════════════════════════════════════════════════
+// Admin Management State
+// ═══════════════════════════════════════════════════════════════
+const showCreateAdminDialog = ref(false);
+const newAdminEmail = ref("");
+const newAdminPassword = ref("");
+const creatingAdmin = ref(false);
 
 const PROFILE_COLS =
   "id,email,display_name,avatar_url,avatar_status,country_code," +
@@ -39,6 +48,8 @@ async function loadList() {
   profiles.value = pr.data || [];
   plans.value = (pl.data || []).filter((p) => p.is_active);
   adminUsers.value = au.error ? [] : (au.data || []);
+  // Update admin user IDs Set for quick lookup
+  adminUserIds.value = new Set(adminUsers.value.map((a) => a.user_id));
 }
 
 // ── helpers ──
@@ -276,6 +287,78 @@ async function setRefundStatus(r, status) {
   showToast("已更新");
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Admin Management Functions
+// ═══════════════════════════════════════════════════════════════
+const isAdminUser = computed(() => {
+  return detail.value ? adminUserIds.value.has(detail.value.id) : false;
+});
+
+async function addAsAdmin() {
+  if (!detail.value) return;
+  const email = detail.value.email;
+  const userId = detail.value.id;
+  if (!confirm(`确认将「${email}」添加为管理员？`)) return;
+  try {
+    await addExistingUserAsAdmin(userId, email);
+    showToast("已添加为管理员");
+    await loadList();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  }
+}
+
+async function removeAdminAccess() {
+  if (!detail.value) return;
+  const email = detail.value.email;
+  const userId = detail.value.id;
+  if (!confirm(`确认移除「${email}」的管理员权限？`)) return;
+  try {
+    await removeAdmin(userId);
+    showToast("已移除管理员权限");
+    await loadList();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  }
+}
+
+async function deleteAdminFromList(admin) {
+  if (!confirm(`确认移除「${admin.email}」的管理员权限？`)) return;
+  try {
+    await removeAdmin(admin.user_id);
+    showToast("已移除管理员权限");
+    await loadList();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  }
+}
+
+async function createNewAdminUser() {
+  const email = newAdminEmail.value.trim();
+  const password = newAdminPassword.value;
+  if (!email || !password) {
+    showToast("请填写邮箱和密码");
+    return;
+  }
+  creatingAdmin.value = true;
+  try {
+    const result = await createAdminUser(email, password);
+    if (result.ok) {
+      showToast(`管理员「${email}」创建成功`);
+      newAdminEmail.value = "";
+      newAdminPassword.value = "";
+      showCreateAdminDialog.value = false;
+      await loadList();
+    } else {
+      showToast("创建失败：" + (result.error || "未知错误"));
+    }
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  } finally {
+    creatingAdmin.value = false;
+  }
+}
+
 async function saveDetail() {
   savingDetail.value = true;
   const d = detail.value;
@@ -339,6 +422,23 @@ onMounted(async () => { await refCache.load(); await loadList(); });
           <img v-if="detail.avatar_url" :src="detail.avatar_url" class="avatar-lg" alt="" />
           <span v-else class="muted">未上传头像</span>
           <span class="muted small">注册 {{ fmtDateTime(detail.created_at) }} · 更新 {{ fmtDateTime(detail.updated_at) }}</span>
+        </div>
+
+        <!-- Admin Status -->
+        <div class="admin-status-row">
+          <span class="admin-status-label">CMS 管理员权限：</span>
+          <span v-if="isAdminUser" class="badge green">已授权</span>
+          <span v-else class="badge gray">无权限</span>
+          <button
+            v-if="isAdminUser"
+            class="btn btn-danger btn-sm"
+            @click="removeAdminAccess"
+          >移除管理员权限</button>
+          <button
+            v-else
+            class="btn btn-sm"
+            @click="addAsAdmin"
+          >添加为管理员</button>
         </div>
       </section>
 
@@ -540,21 +640,54 @@ onMounted(async () => { await refCache.load(); await loadList(); });
 
       <section class="card mt">
         <h3>CMS 管理员</h3>
+        <div class="admin-controls">
+          <button class="btn btn-sm" @click="showCreateAdminDialog = true">+ 创建新管理员</button>
+          <button class="btn btn-secondary btn-sm" @click="loadList">刷新列表</button>
+        </div>
         <p class="muted small">
-          新增管理员请在 Supabase SQL 中向 <code>admin_users</code> 插入对应 <code>auth.users</code> 的 UUID。
+          也可以在用户详情中直接添加/移除管理员权限。
         </p>
         <table class="data-table">
-          <thead><tr><th>邮箱</th><th>用户 UUID</th><th>添加时间</th></tr></thead>
+          <thead><tr><th>邮箱</th><th>用户 UUID</th><th>添加时间</th><th>操作</th></tr></thead>
           <tbody>
             <tr v-for="a in adminUsers" :key="a.user_id">
               <td>{{ a.email || "—" }}</td>
               <td><code>{{ a.user_id }}</code></td>
               <td class="muted small">{{ fmtDateTime(a.created_at) }}</td>
+              <td>
+                <button
+                  class="btn btn-danger btn-sm"
+                  @click="deleteAdminFromList(a)"
+                >移除</button>
+              </td>
             </tr>
-            <tr v-if="!adminUsers.length"><td colspan="3" class="center muted">暂无管理员记录</td></tr>
+            <tr v-if="!adminUsers.length"><td colspan="4" class="center muted">暂无管理员记录</td></tr>
           </tbody>
         </table>
       </section>
+
+      <!-- Create Admin Dialog -->
+      <div v-if="showCreateAdminDialog" class="modal-overlay" @click.self="showCreateAdminDialog = false">
+        <div class="modal-card">
+          <h3>创建新管理员</h3>
+          <div class="modal-body">
+            <label class="f">
+              <span>邮箱</span>
+              <input v-model="newAdminEmail" type="email" placeholder="admin@example.com" />
+            </label>
+            <label class="f">
+              <span>密码</span>
+              <input v-model="newAdminPassword" type="password" placeholder="至少 6 位" />
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" @click="showCreateAdminDialog = false">取消</button>
+            <button class="btn" :disabled="creatingAdmin" @click="createNewAdminUser">
+              {{ creatingAdmin ? "创建中..." : "创建" }}
+            </button>
+          </div>
+        </div>
+      </div>
     </template>
 
     <div class="toast" :class="{ on: toast }">{{ toast }}</div>
@@ -674,4 +807,47 @@ onMounted(async () => { await refCache.load(); await loadList(); });
 
 .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 1100; }
 .toast.on { opacity: 1; }
+
+/* Admin status */
+.admin-status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.admin-status-label { font-size: 14px; font-weight: 600; }
+
+/* Admin controls */
+.admin-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 400px;
+  max-width: 500px;
+}
+.modal-card h3 { margin: 0 0 16px; font-size: 18px; }
+.modal-body { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 </style>
