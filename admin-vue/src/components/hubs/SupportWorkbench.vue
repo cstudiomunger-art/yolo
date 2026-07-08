@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { supabase } from "@/lib/supabase";
+import { uploadAgentAvatar } from "@/lib/storage";
 import { useRefCache } from "@/stores/refCache";
 
 const refCache = useRefCache();
@@ -21,6 +22,14 @@ const openAgents = ref({}); // agentId|"_none" → expanded
 const activeId = ref("");
 const messages = ref([]);
 const loadingThread = ref(false);
+
+// Agent editing
+const showAgentDialog = ref(false);
+const editingAgent = ref(null);
+const agentAvatarFile = ref(null);
+const agentAvatarInput = ref(null);
+const savingAgent = ref(false);
+const uploadingAgentAvatar = ref(false);
 
 const STATUS_LABEL = { open: "进行中", closed: "已关闭" };
 const AGENT_STATUS = {
@@ -132,6 +141,125 @@ async function toggleStatus() {
 
 function toggleAgent(key) { openAgents.value[key] = !openAgents.value[key]; }
 
+// ═══════════════════════════════════════════════════════════════
+// Agent Management Functions
+// ═══════════════════════════════════════════════════════════════
+function openAgentDialog(agent = null) {
+  if (agent) {
+    editingAgent.value = { ...agent, languages: [...(agent.languages || [])] };
+  } else {
+    editingAgent.value = {
+      id: null,
+      name: "",
+      role: "",
+      status: "offline",
+      languages: [],
+      display_order: agents.value.length,
+      is_active: true,
+    };
+  }
+  showAgentDialog.value = true;
+}
+
+function closeAgentDialog() {
+  showAgentDialog.value = false;
+  editingAgent.value = null;
+  agentAvatarFile.value = null;
+}
+
+function triggerAgentAvatarUpload() {
+  agentAvatarInput.value?.click();
+}
+
+function onAgentAvatarFileChange(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    showToast("请选择图片文件");
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showToast("图片大小不能超过 5MB");
+    return;
+  }
+  agentAvatarFile.value = file;
+}
+
+async function uploadAgentAvatarToServer() {
+  if (!agentAvatarFile.value || !editingAgent.value?.id) return null;
+  uploadingAgentAvatar.value = true;
+  try {
+    const url = await uploadAgentAvatar(agentAvatarFile.value, editingAgent.value.id);
+    return url;
+  } catch (e) {
+    showToast("头像上传失败：" + (e.message || e));
+    return null;
+  } finally {
+    uploadingAgentAvatar.value = false;
+  }
+}
+
+async function saveAgent() {
+  const a = editingAgent.value;
+  if (!a) return;
+  if (!a.name.trim()) {
+    showToast("请填写姓名");
+    return;
+  }
+
+  savingAgent.value = true;
+  try {
+    // Upload avatar if new file selected
+    let avatarUrl = a.avatar_url;
+    if (agentAvatarFile.value && a.id) {
+      const uploaded = await uploadAgentAvatarToServer();
+      if (uploaded) avatarUrl = uploaded;
+    }
+
+    const data = {
+      name: a.name.trim(),
+      role: a.role?.trim() || "",
+      status: a.status || "offline",
+      languages: a.languages || [],
+      avatar_url: avatarUrl || "",
+      display_order: a.display_order || 0,
+      is_active: a.is_active !== false,
+    };
+
+    let result;
+    if (a.id) {
+      // Update existing agent
+      result = await supabase.from("support_agents").update(data).eq("id", a.id);
+    } else {
+      // Create new agent - requires user_id
+      showToast("新客服需先在用户详情中添加");
+      closeAgentDialog();
+      return;
+    }
+
+    if (result.error) throw result.error;
+    showToast("保存成功");
+    closeAgentDialog();
+    await loadAll();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  } finally {
+    savingAgent.value = false;
+  }
+}
+
+async function deleteAgent(agent) {
+  if (!confirm(`确认删除客服「${agent.name}」？`)) return;
+  try {
+    const { error: e } = await supabase.from("support_agents").delete().eq("id", agent.id);
+    if (e) throw e;
+    showToast("已删除");
+    await loadAll();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  }
+}
+
 onMounted(loadAll);
 </script>
 
@@ -232,6 +360,58 @@ onMounted(loadAll);
       </section>
     </div>
 
+    <!-- Agent Edit Dialog -->
+    <div v-if="showAgentDialog" class="modal-overlay" @click.self="closeAgentDialog">
+      <div class="modal-card">
+        <h3>{{ editingAgent?.id ? "编辑客服" : "新客服" }}</h3>
+        <div class="modal-body">
+          <div class="avatar-upload-wrapper">
+            <img v-if="editingAgent?.avatar_url || agentAvatarFile"
+                 :src="agentAvatarFile ? URL.createObjectURL(agentAvatarFile) : editingAgent.avatar_url"
+                 class="avatar-preview-lg" alt="头像" />
+            <span v-else class="avatar-placeholder">头像</span>
+            <input ref="agentAvatarInput" type="file" accept="image/*" hidden @change="onAgentAvatarFileChange" />
+            <button class="btn btn-secondary btn-sm" @click="triggerAgentAvatarUpload">
+              {{ uploadingAgentAvatar ? "上传中..." : "更换" }}
+            </button>
+          </div>
+          <div class="fgrid">
+            <label class="f">
+              <span>姓名</span>
+              <input v-model="editingAgent.name" type="text" />
+            </label>
+            <label class="f">
+              <span>线路/专长</span>
+              <input v-model="editingAgent.role" type="text" placeholder="如 北京 · 签证" />
+            </label>
+            <label class="f">
+              <span>状态</span>
+              <select v-model="editingAgent.status">
+                <option value="online">在线</option>
+                <option value="busy">忙碌</option>
+                <option value="offline">离线</option>
+              </select>
+            </label>
+            <label class="f">
+              <span>排序</span>
+              <input v-model.number="editingAgent.display_order" type="number" />
+            </label>
+          </div>
+          <label class="chk">
+            <input type="checkbox" v-model="editingAgent.is_active" />
+            启用
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button v-if="editingAgent?.id" class="btn btn-danger" @click="deleteAgent(editingAgent)">删除</button>
+          <button class="btn btn-secondary" @click="closeAgentDialog">取消</button>
+          <button class="btn" :disabled="savingAgent" @click="saveAgent">
+            {{ savingAgent ? "保存中..." : "保存" }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" :class="{ on: toast }">{{ toast }}</div>
   </div>
 </template>
@@ -300,4 +480,62 @@ onMounted(loadAll);
 .small { font-size: 11px; }
 .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 1100; }
 .toast.on { opacity: 1; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 400px;
+  max-width: 500px;
+}
+.modal-card h3 { margin: 0 0 16px; font-size: 18px; }
+.modal-body { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Avatar upload */
+.avatar-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: var(--surface2);
+  border-radius: 12px;
+}
+.avatar-preview-lg {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+}
+.avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+
+/* Form */
+.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.f { display: block; font-size: 12px; color: var(--muted); }
+.f input, .f select { margin-top: 4px; width: 100%; }
 </style>

@@ -1,21 +1,21 @@
 {
-  "generatedAt": "2026-07-08T08:43:05.892Z",
+  "generatedAt": "2026-07-08T09:09:13.929Z",
   "cityFilter": null,
   "totalExpected": 683,
   "matchedInDb": 683,
-  "ok": 305,
-  "textIssues": 356,
+  "ok": 361,
+  "textIssues": 298,
   "coverIssues": 65,
   "missingInDb": 0,
   "extraInDb": 60,
   "unmatchedFolders": 1,
   "issueCounts": {
-    "name_zh_mismatch": 16,
-    "name_en_missing": 118,
-    "body_not_from_md": 50,
-    "body_empty": 138,
+    "name_zh_mismatch": 17,
+    "name_en_missing": 116,
+    "body_not_from_md": 36,
+    "body_empty": 184,
     "cover_no_local_image": 41,
-    "md_body_missing": 129,
+    "md_body_missing": 23,
     "cover_missing": 24
   },
   "byCity": {
@@ -34,13 +34,13 @@
     "hangzhou": {
       "expected": 139,
       "ok": 99,
-      "textIssues": 0,
+      "textIssues": 40,
       "coverIssues": 0
     },
     "shanghai": {
       "expected": 116,
-      "ok": 34,
-      "textIssues": 27,
+      "ok": 76,
+      "textIssues": 11,
       "coverIssues": 11
     },
     "chengdu": {
@@ -51,7 +51,7 @@
     },
     "chongqing": {
       "expected": 116,
-      "ok": 0,
+      "ok": 14,
       "textIssues": 101,
       "coverIssues": 24
     }

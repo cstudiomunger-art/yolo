@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { supabase, isAdmin, addExistingUserAsAdmin, removeAdmin, createAdminUser } from "@/lib/supabase";
+import { uploadUserAvatar } from "@/lib/storage";
 import { useRefCache } from "@/stores/refCache";
 import MultiCheck from "@/components/fields/MultiCheck.vue";
 import DateTimePicker from "@/components/fields/DateTimePicker.vue";
@@ -25,6 +26,25 @@ const newAdminEmail = ref("");
 const newAdminPassword = ref("");
 const creatingAdmin = ref(false);
 
+// ═══════════════════════════════════════════════════════════════
+// Support Agent Management State
+// ═══════════════════════════════════════════════════════════════
+const supportAgents = ref([]);
+const showCreateAgentDialog = ref(false);
+const newAgentName = ref("");
+const newAgentRole = ref("");
+const newAgentStatus = ref("offline");
+const newAgentLanguages = ref([]);
+const creatingAgent = ref(false);
+const uploadingAvatar = ref(false);
+const avatarInput = ref(null);
+
+// ═══════════════════════════════════════════════════════════════
+// Avatar Upload State
+// ═══════════════════════════════════════════════════════════════
+const showAvatarUploadDialog = ref(false);
+const avatarFile = ref(null);
+
 const PROFILE_COLS =
   "id,email,display_name,avatar_url,avatar_status,country_code," +
   "has_completed_onboarding,departure_date,purchased_attraction_ids," +
@@ -39,15 +59,17 @@ const EVENT_LABELS = {
 
 async function loadList() {
   error.value = "";
-  const [pr, pl, au] = await Promise.all([
+  const [pr, pl, au, sa] = await Promise.all([
     supabase.from("profiles").select(PROFILE_COLS).order("updated_at", { ascending: false }),
     supabase.from("membership_plans").select("id,name_zh,name_en,plan_type,access_flags,price_label,is_active").order("display_order"),
     supabase.from("admin_users").select("user_id,email,created_at").order("created_at", { ascending: false }),
+    supabase.from("support_agents").select("id,user_id,name,role,status,languages,avatar_url,display_order,is_active").order("display_order"),
   ]);
   if (pr.error) error.value = pr.error.message;
   profiles.value = pr.data || [];
   plans.value = (pl.data || []).filter((p) => p.is_active);
   adminUsers.value = au.error ? [] : (au.data || []);
+  supportAgents.value = sa.error ? [] : (sa.data || []);
   // Update admin user IDs Set for quick lookup
   adminUserIds.value = new Set(adminUsers.value.map((a) => a.user_id));
 }
@@ -114,6 +136,15 @@ const AVATAR_STATUS = {
   approved: { cls: "green", label: "已通过" },
   rejected: { cls: "red", label: "已拒绝" },
 };
+
+// Support agent computed
+const isSupportAgent = computed(() => {
+  return detail.value ? supportAgents.value.some((a) => a.user_id === detail.value.id) : false;
+});
+
+const agentDetail = computed(() => {
+  return detail.value ? supportAgents.value.find((a) => a.user_id === detail.value.id) : null;
+});
 
 // ── detail ──
 const detail = ref(null); // full profile row
@@ -359,6 +390,129 @@ async function createNewAdminUser() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Support Agent Management Functions
+// ═══════════════════════════════════════════════════════════════
+async function addAsSupportAgent() {
+  if (!detail.value) return;
+  const name = detail.value.display_name || detail.value.email || "客服";
+  const userId = detail.value.id;
+  if (!confirm(`确认将「${name}」添加为客服？`)) return;
+  try {
+    const { error: e } = await supabase.from("support_agents").insert({
+      user_id: userId,
+      name: name,
+      role: "",
+      status: "offline",
+      languages: [],
+      display_order: supportAgents.value.length,
+      is_active: true,
+    });
+    if (e) throw e;
+    showToast("已添加为客服");
+    await loadList();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  }
+}
+
+async function removeSupportAgentAccess() {
+  if (!detail.value) return;
+  const agent = agentDetail.value;
+  if (!agent) return;
+  if (!confirm(`确认移除该用户的客服权限？`)) return;
+  try {
+    const { error: e } = await supabase.from("support_agents").delete().eq("id", agent.id);
+    if (e) throw e;
+    showToast("已移除客服权限");
+    await loadList();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  }
+}
+
+async function deleteAgentFromList(agent) {
+  if (!confirm(`确认删除客服「${agent.name}」？`)) return;
+  try {
+    const { error: e } = await supabase.from("support_agents").delete().eq("id", agent.id);
+    if (e) throw e;
+    showToast("已删除客服");
+    await loadList();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Avatar Upload Functions
+// ═══════════════════════════════════════════════════════════════
+function triggerAvatarUpload() {
+  avatarInput.value?.click();
+}
+
+function onAvatarFileChange(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    showToast("请选择图片文件");
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showToast("图片大小不能超过 5MB");
+    return;
+  }
+  avatarFile.value = file;
+  showAvatarUploadDialog.value = true;
+}
+
+async function uploadAvatar() {
+  if (!avatarFile.value || !detail.value) return;
+  uploadingAvatar.value = true;
+  try {
+    const url = await uploadUserAvatar(avatarFile.value, detail.value.id);
+    const { error: e } = await supabase.from("profiles").update({
+      avatar_url: url,
+      avatar_status: "approved",
+      updated_at: new Date().toISOString(),
+    }).eq("id", detail.value.id);
+    if (e) throw e;
+    detail.value.avatar_url = url;
+    detail.value.avatar_status = "approved";
+    showToast("头像上传成功");
+    showAvatarUploadDialog.value = false;
+    avatarFile.value = null;
+    await loadList();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  } finally {
+    uploadingAvatar.value = false;
+  }
+}
+
+function cancelAvatarUpload() {
+  showAvatarUploadDialog.value = false;
+  avatarFile.value = null;
+}
+
+function clearAvatar() {
+  if (!detail.value) return;
+  if (!confirm("确认清除该用户头像？")) return;
+  supabase.from("profiles").update({
+    avatar_url: null,
+    avatar_status: null,
+    updated_at: new Date().toISOString(),
+  }).eq("id", detail.value.id).then(({ error: e }) => {
+    if (e) {
+      showToast("失败：" + e.message);
+      return;
+    }
+    detail.value.avatar_url = null;
+    detail.value.avatar_status = null;
+    showToast("头像已清除");
+    loadList();
+  });
+}
+
 async function saveDetail() {
   savingDetail.value = true;
   const d = detail.value;
@@ -421,8 +575,13 @@ onMounted(async () => { await refCache.load(); await loadList(); });
         <div class="avatar-row">
           <img v-if="detail.avatar_url" :src="detail.avatar_url" class="avatar-lg" alt="" />
           <span v-else class="muted">未上传头像</span>
-          <span class="muted small">注册 {{ fmtDateTime(detail.created_at) }} · 更新 {{ fmtDateTime(detail.updated_at) }}</span>
+          <div class="avatar-actions">
+            <input ref="avatarInput" type="file" accept="image/*" hidden @change="onAvatarFileChange" />
+            <button class="btn btn-secondary btn-sm" @click="triggerAvatarUpload">更换头像</button>
+            <button v-if="detail.avatar_url" class="btn btn-secondary btn-sm" @click="clearAvatar">清除</button>
+          </div>
         </div>
+        <div class="muted small avatar-meta">注册 {{ fmtDateTime(detail.created_at) }} · 更新 {{ fmtDateTime(detail.updated_at) }}</div>
 
         <!-- Admin Status -->
         <div class="admin-status-row">
@@ -439,6 +598,23 @@ onMounted(async () => { await refCache.load(); await loadList(); });
             class="btn btn-sm"
             @click="addAsAdmin"
           >添加为管理员</button>
+        </div>
+
+        <!-- Support Agent Status -->
+        <div class="admin-status-row">
+          <span class="admin-status-label">客服权限：</span>
+          <span v-if="isSupportAgent" class="badge green">已添加</span>
+          <span v-else class="badge gray">无权限</span>
+          <button
+            v-if="isSupportAgent"
+            class="btn btn-danger btn-sm"
+            @click="removeSupportAgentAccess"
+          >移除客服权限</button>
+          <button
+            v-else
+            class="btn btn-sm"
+            @click="addAsSupportAgent"
+          >添加为客服</button>
         </div>
       </section>
 
@@ -666,6 +842,41 @@ onMounted(async () => { await refCache.load(); await loadList(); });
         </table>
       </section>
 
+      <section class="card mt">
+        <h3>客服坐席</h3>
+        <div class="admin-controls">
+          <button class="btn btn-secondary btn-sm" @click="loadList">刷新列表</button>
+        </div>
+        <p class="muted small">
+          客服可以在用户详情中添加，也可在此管理。
+        </p>
+        <table class="data-table">
+          <thead><tr><th>头像</th><th>姓名</th><th>线路/专长</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr v-for="a in supportAgents" :key="a.id">
+              <td class="center">
+                <img v-if="a.avatar_url" :src="a.avatar_url" class="avatar" alt="" />
+                <span v-else class="avatar-init">{{ (a.name || "?")[0].toUpperCase() }}</span>
+              </td>
+              <td>{{ a.name || "—" }}</td>
+              <td>{{ a.role || "—" }}</td>
+              <td>
+                <span class="badge" :class="{
+                  green: a.status === 'online',
+                  yellow: a.status === 'busy',
+                  gray: a.status === 'offline'
+                }">{{ a.status }}</span>
+                <span v-if="!a.is_active" class="badge red">已停用</span>
+              </td>
+              <td>
+                <button class="btn btn-danger btn-sm" @click="deleteAgentFromList(a)">删除</button>
+              </td>
+            </tr>
+            <tr v-if="!supportAgents.length"><td colspan="5" class="center muted">暂无客服坐席</td></tr>
+          </tbody>
+        </table>
+      </section>
+
       <!-- Create Admin Dialog -->
       <div v-if="showCreateAdminDialog" class="modal-overlay" @click.self="showCreateAdminDialog = false">
         <div class="modal-card">
@@ -684,6 +895,26 @@ onMounted(async () => { await refCache.load(); await loadList(); });
             <button class="btn btn-secondary" @click="showCreateAdminDialog = false">取消</button>
             <button class="btn" :disabled="creatingAdmin" @click="createNewAdminUser">
               {{ creatingAdmin ? "创建中..." : "创建" }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Avatar Upload Dialog -->
+      <div v-if="showAvatarUploadDialog" class="modal-overlay" @click.self="cancelAvatarUpload">
+        <div class="modal-card">
+          <h3>上传头像</h3>
+          <div class="modal-body">
+            <div class="avatar-preview-wrapper">
+              <img v-if="avatarFile" :src="URL.createObjectURL(avatarFile)" class="avatar-preview-lg" alt="预览" />
+              <span v-else class="muted">请选择图片</span>
+            </div>
+            <p class="muted small">支持 JPG、PNG 格式，最大 5MB</p>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" @click="cancelAvatarUpload">取消</button>
+            <button class="btn" :disabled="uploadingAvatar" @click="uploadAvatar">
+              {{ uploadingAvatar ? "上传中..." : "确认上传" }}
             </button>
           </div>
         </div>
@@ -725,7 +956,10 @@ onMounted(async () => { await refCache.load(); await loadList(); });
 .avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
 .avatar-init { display: inline-flex; width: 32px; height: 32px; border-radius: 50%; background: var(--surface2); align-items: center; justify-content: center; font-weight: 600; }
 .avatar-lg { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+.avatar-preview-lg { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
 .avatar-row { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.avatar-actions { display: flex; gap: 8px; }
+.avatar-meta { margin-top: 4px; }
 
 /* badges */
 .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; background: var(--surface2); color: var(--muted); white-space: nowrap; }
@@ -850,4 +1084,17 @@ onMounted(async () => { await refCache.load(); await loadList(); });
 .modal-card h3 { margin: 0 0 16px; font-size: 18px; }
 .modal-body { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Avatar preview */
+.avatar-preview-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--surface2);
+  overflow: hidden;
+  margin: 0 auto;
+}
 </style>

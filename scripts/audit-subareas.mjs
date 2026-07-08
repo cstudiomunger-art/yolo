@@ -15,6 +15,16 @@ const OUT_REPORT = join(OUT_DIR, "sub_areas_audit_report.json");
 const OUT_SUMMARY = join(OUT_DIR, "sub_areas_audit_summary.md");
 const OUT_STATS = join(OUT_DIR, "sub_areas_audit_stats.json");
 const OUT_FIX_SQL = join(OUT_DIR, "sub_areas_fix_from_md.sql");
+const OUT_FULL_LIST = join(OUT_DIR, "sub_areas_audit_full_list.md");
+
+const CITY_ZH = {
+  nanjing: "南京",
+  suzhou: "苏州",
+  hangzhou: "杭州",
+  shanghai: "上海",
+  chengdu: "成都",
+  chongqing: "重庆",
+};
 
 const ATTRACTION_ALIASES = {
   苏州十二国色: "苏州河十二国色",
@@ -199,48 +209,6 @@ function namesMatch(a, b) {
   return sa.includes(sb) || sb.includes(sa);
 }
 
-function extractEnglishDescription(content, mdFieldSources) {
-  const lines = content.split(/\r?\n/);
-  const englishParts = [];
-  let start = -1;
-
-  for (let i = 0; i < lines.length; i += 1) {
-    const line = lines[i];
-    if (/长文描述\s*\/\s*Description|Detailed Description/i.test(line)) {
-      start = i;
-      const inline = fieldValueFromLine(line, "长文描述 / Description");
-      if (inline) {
-        const eng = extractEnglishFromMixedLine(inline);
-        if (eng) englishParts.push(eng);
-      }
-      break;
-    }
-  }
-
-  if (start >= 0) {
-    for (let i = start + 1; i < lines.length; i += 1) {
-      const trimmed = lines[i].trim();
-      if (!trimmed) continue;
-      if (/^\*\*[^*]+\*\*\s*$/.test(trimmed)) break;
-      if (/^---+$/.test(trimmed)) break;
-      if (/^\-\s+\*\*/.test(trimmed)) break;
-      const plain = cleanMdMarks(trimmed);
-      if (!plain) continue;
-      if (cjkRatio(plain) < 0.35 && /[A-Za-z]/.test(plain)) {
-        englishParts.push(plain);
-      } else {
-        const mixed = extractEnglishFromMixedLine(plain);
-        if (mixed) englishParts.push(mixed);
-      }
-    }
-    if (englishParts.length) {
-      mdFieldSources.body = `长文描述 / Description @ line ${start + 1}`;
-    }
-  }
-
-  return englishParts.join(" ").replace(/\s+/g, " ").trim();
-}
-
 function sectionBodyByHeading(content, headingPattern) {
   const lines = content.split(/\r?\n/);
   let inSection = false;
@@ -249,7 +217,8 @@ function sectionBodyByHeading(content, headingPattern) {
     const trimmed = line.trim();
     if (/^##\s+/.test(trimmed)) {
       if (inSection) break;
-      if (headingPattern.test(trimmed)) {
+      const normalized = trimmed.replace(/^##\s*(?:[0-9]+\.\s*)?/, "## ");
+      if (headingPattern.test(trimmed) || headingPattern.test(normalized)) {
         inSection = true;
         continue;
       }
@@ -257,6 +226,204 @@ function sectionBodyByHeading(content, headingPattern) {
     if (inSection) out.push(line);
   }
   return out.join("\n").trim();
+}
+
+function stripYamlFrontMatter(content) {
+  const trimmed = String(content || "").trimStart();
+  if (!trimmed.startsWith("---")) return content;
+  const end = trimmed.indexOf("\n---\n", 3);
+  if (end < 0) return content;
+  return trimmed.slice(end + 5);
+}
+
+function splitBilingualParts(content) {
+  const text = stripYamlFrontMatter(content);
+  const parts = text.split(/\n---\n/);
+  if (parts.length <= 1) return { zhPart: text, enPart: "" };
+  return { zhPart: parts[0], enPart: parts[parts.length - 1] };
+}
+
+function sectionBodyByLabel(text, labelRe) {
+  const lines = text.split(/\r?\n/);
+  let inSection = false;
+  const out = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (/^##\s+/.test(trimmed)) {
+      if (inSection) break;
+      if (labelRe.test(trimmed.replace(/^##\s*(?:[0-9]+\.\s*)?/, ""))) {
+        inSection = true;
+        continue;
+      }
+    }
+    if (inSection) out.push(line);
+  }
+  return out.join("\n").trim();
+}
+
+function collectEnglishFromDescriptionLines(lines, startIdx, mdFieldSources, fieldLabel) {
+  const englishParts = [];
+  for (let i = startIdx + 1; i < lines.length; i += 1) {
+    const trimmed = lines[i].trim();
+    if (!trimmed) continue;
+    if (/^\*\*[^*]+\*\*\s*$/.test(trimmed)) break;
+    if (/^##\s+/.test(trimmed)) break;
+    if (/^---+$/.test(trimmed)) break;
+    if (/^(?:详细地址|门票|开放|交通|名字|摘要)/.test(cleanMdMarks(trimmed))) break;
+    const plain = cleanMdMarks(trimmed);
+    if (!plain) continue;
+    if (cjkRatio(plain) < 0.35 && /[A-Za-z]/.test(plain)) {
+      englishParts.push(plain);
+    } else {
+      const mixed = extractEnglishFromMixedLine(plain);
+      if (mixed) englishParts.push(mixed);
+    }
+  }
+  if (englishParts.length) mdFieldSources.body = `${fieldLabel} @ line ${startIdx + 1}`;
+  return englishParts.join(" ").replace(/\s+/g, " ").trim();
+}
+
+function extractEnglishDescription(content, mdFieldSources) {
+  const lines = content.split(/\r?\n/);
+  const labelRes = [
+    /(?:长文)?描述\s*\/\s*(?:Long\s+)?Description/i,
+    /Long Description/i,
+    /Detailed Description/i,
+  ];
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (/^\*\*(?:长文)?描述\s*\/\s*(?:Long\s+)?Description\*\*\s*$/i.test(trimmed)) {
+      const body = collectEnglishFromDescriptionLines(lines, i, mdFieldSources, "长文描述 / Long Description block");
+      if (body) return body;
+    }
+    if (!labelRes.some((re) => re.test(line))) continue;
+
+    const fieldLabel = /长文描述/i.test(line)
+      ? "长文描述 / Description"
+      : /Long Description/i.test(line)
+        ? "Long Description"
+        : "描述 / Description";
+    const inline =
+      fieldValueFromLine(line, "长文描述 / Description") ||
+      fieldValueFromLine(line, "长文描述 / Long Description") ||
+      fieldValueFromLine(line, "描述 / Description") ||
+      fieldValueFromLine(line, "描述 / Long Description");
+    const englishParts = [];
+    if (inline) {
+      const eng = extractEnglishFromMixedLine(inline);
+      if (eng) englishParts.push(eng);
+    }
+    for (let j = i + 1; j < lines.length; j += 1) {
+      const t = lines[j].trim();
+      if (!t) continue;
+      if (/^\*\*[^*]+\*\*\s*$/.test(t)) break;
+      if (/^##\s+/.test(t)) break;
+      if (/^---+$/.test(t)) break;
+      const plain = cleanMdMarks(t);
+      if (/^(?:详细地址|门票|开放|交通|名字|摘要)/.test(plain)) break;
+      if (cjkRatio(plain) < 0.35 && /[A-Za-z]/.test(plain)) englishParts.push(plain);
+      else {
+        const mixed = extractEnglishFromMixedLine(plain);
+        if (mixed) englishParts.push(mixed);
+      }
+    }
+    if (englishParts.length) {
+      mdFieldSources.body = `${fieldLabel} @ line ${i + 1}`;
+      return englishParts.join(" ").replace(/\s+/g, " ").trim();
+    }
+  }
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const plain = cleanMdMarks(lines[i]);
+    if (/^长文描述\s*[:：]/.test(plain)) {
+      const body = collectEnglishFromDescriptionLines(lines, i, mdFieldSources, "长文描述");
+      if (body) return body;
+    }
+  }
+
+  return "";
+}
+
+function extractBodyPlainEn(content, mdFieldSources) {
+  let bodyPlainEn = extractEnglishDescription(content, mdFieldSources);
+  if (bodyPlainEn) return bodyPlainEn;
+
+  for (const re of [
+    /\*\*Long Description\*\*\s*[:：]\s*(.+)/i,
+    /\*\*Detailed Description\*\*\s*[:：]\s*(.+)/i,
+    /Long Description:\s*(.+)/i,
+    /Long Description：\s*(.+)/i,
+  ]) {
+    const m = content.match(re);
+    if (m) {
+      mdFieldSources.body = "inline Long Description";
+      return cleanMdMarks(m[1]).replace(/\s+/g, " ").trim();
+    }
+  }
+
+  for (const pattern of [
+    /^##\s*详细描述/i,
+    /^##\s*长文描述/i,
+    /^##\s*描述/i,
+    /^##\s*长文描述\s*\/\s*Detailed Description/i,
+  ]) {
+    const detailSection = sectionBodyByHeading(content, pattern);
+    if (detailSection) {
+      bodyPlainEn = englishFromSectionText(detailSection);
+      if (bodyPlainEn) {
+        mdFieldSources.body = "## 详细描述 / 长文描述 section";
+        return bodyPlainEn;
+      }
+    }
+  }
+
+  const { zhPart, enPart } = splitBilingualParts(content);
+  if (enPart) {
+    const enSources = {};
+    bodyPlainEn = extractEnglishDescription(enPart, enSources);
+    if (!bodyPlainEn) {
+      const longSec =
+        sectionBodyByLabel(enPart, /^Long Description/i) ||
+        sectionBodyByLabel(enPart, /^Detailed Description/i);
+      if (longSec) {
+        bodyPlainEn = englishFromSectionText(longSec);
+        if (bodyPlainEn) enSources.body = "## Long Description section (EN doc)";
+      }
+    }
+    if (bodyPlainEn) {
+      mdFieldSources.body = enSources.body || "English section after ---";
+      return bodyPlainEn;
+    }
+  }
+
+  if (!/^#\s+/m.test(zhPart) && zhPart.split(/\r?\n/)[0] && /^[^#\n].+\/.+/.test(zhPart.split(/\r?\n/)[0].trim())) {
+    const inline = zhPart
+      .split(/\r?\n/)
+      .map((x) => cleanMdMarks(x))
+      .filter(Boolean);
+    const longIdx = inline.findIndex((x) => /^长文描述[:：]/.test(x));
+    if (longIdx >= 0) {
+      const engParts = [];
+      for (let i = longIdx; i < inline.length; i += 1) {
+        const line = inline[i].replace(/^长文描述[:：]\s*/, "");
+        if (i > longIdx && /^(详细地址|门票|开放|交通|摘要)/.test(line)) break;
+        if (cjkRatio(line) < 0.35 && /[A-Za-z]/.test(line)) engParts.push(line);
+        else {
+          const mixed = extractEnglishFromMixedLine(line);
+          if (mixed) engParts.push(mixed);
+        }
+      }
+      bodyPlainEn = engParts.join(" ").replace(/\s+/g, " ").trim();
+      if (bodyPlainEn) {
+        mdFieldSources.body = "inline 长文描述 block";
+        return bodyPlainEn;
+      }
+    }
+  }
+
+  return "";
 }
 
 function englishFromSectionText(text) {
@@ -287,11 +454,15 @@ function parseMdContent(content, { fallbackStem = "", headingTitle = "" } = {}) 
     if (parsed.nameZh) nameZh = parsed.nameZh;
     if (parsed.nameEn) nameEn = parsed.nameEn;
     mdFieldSources.name = `h1: ${h1.trim().slice(0, 100)}`;
-  } else if (lines[0] && /^[^#\n].+\/.+/.test(lines[0].trim())) {
-    const parsed = splitZhEn(cleanMdMarks(lines[0]));
-    if (parsed.nameZh) nameZh = parsed.nameZh;
-    if (parsed.nameEn) nameEn = parsed.nameEn;
-    mdFieldSources.name = `first line: ${lines[0].trim().slice(0, 100)}`;
+  } else if (lines[0]?.trim()) {
+    let nameValue = cleanMdMarks(lines[0]);
+    if (/^名字\s*[:：]/.test(nameValue)) nameValue = fieldValueFromLine(lines[0], "名字");
+    if (nameValue.includes("/") && /^[^#\n]/.test(lines[0].trim())) {
+      const parsed = splitZhEn(nameValue);
+      if (parsed.nameZh) nameZh = parsed.nameZh;
+      if (parsed.nameEn) nameEn = parsed.nameEn;
+      mdFieldSources.name = `first line: ${lines[0].trim().slice(0, 100)}`;
+    }
   }
 
   for (let i = 0; i < lines.length; i += 1) {
@@ -343,53 +514,7 @@ function parseMdContent(content, { fallbackStem = "", headingTitle = "" } = {}) 
   nameZh = stripLeadingOrder(nameZh);
   nameEn = stripLeadingOrder(nameEn);
 
-  let bodyPlainEn = extractEnglishDescription(content, mdFieldSources);
-  if (!bodyPlainEn) {
-    for (const re of [
-      /\*\*Long Description\*\*\s*[:：]\s*(.+)/i,
-      /\*\*Detailed Description\*\*\s*[:：]\s*(.+)/i,
-      /Long Description:\s*(.+)/i,
-      /Long Description：\s*(.+)/i,
-    ]) {
-      const m = content.match(re);
-      if (m) {
-        bodyPlainEn = cleanMdMarks(m[1]).replace(/\s+/g, " ").trim();
-        mdFieldSources.body = `inline Long Description`;
-        break;
-      }
-    }
-  }
-  if (!bodyPlainEn) {
-    const detailSection =
-      sectionBodyByHeading(content, /^##\s*详细描述/i) ||
-      sectionBodyByHeading(content, /^##\s*长文描述/i) ||
-      sectionBodyByHeading(content, /^##\s*长文描述\s*\/\s*Detailed Description/i);
-    if (detailSection) {
-      bodyPlainEn = englishFromSectionText(detailSection);
-      if (bodyPlainEn) mdFieldSources.body = "## 详细描述 / 长文描述 section";
-    }
-  }
-  if (!bodyPlainEn && !h1 && lines[0] && /^[^#\n].+\/.+/.test(lines[0].trim())) {
-    const inline = content
-      .split(/\r?\n/)
-      .map((x) => cleanMdMarks(x))
-      .filter(Boolean);
-    const longIdx = inline.findIndex((x) => /^长文描述[:：]/.test(x));
-    if (longIdx >= 0) {
-      const engParts = [];
-      for (let i = longIdx; i < inline.length; i += 1) {
-        const line = inline[i].replace(/^长文描述[:：]\s*/, "");
-        if (i > longIdx && /^(详细地址|门票|开放|交通|摘要)/.test(line)) break;
-        if (cjkRatio(line) < 0.35 && /[A-Za-z]/.test(line)) engParts.push(line);
-        else {
-          const mixed = extractEnglishFromMixedLine(line);
-          if (mixed) engParts.push(mixed);
-        }
-      }
-      bodyPlainEn = engParts.join(" ").replace(/\s+/g, " ").trim();
-      if (bodyPlainEn) mdFieldSources.body = "inline 长文描述 block";
-    }
-  }
+  let bodyPlainEn = extractBodyPlainEn(content, mdFieldSources);
 
   const bodyHtml = toHtml(bodyPlainEn);
 
@@ -989,6 +1114,131 @@ function buildSummary(auditRows, stats) {
   return lines.join("\n");
 }
 
+function translateHistoricalNote(note) {
+  if (!note) return "";
+  return String(note)
+    .replace(/^historical unmatched image \((.+)\)$/, "历史导入时图片未匹配（$1）")
+    .replace(/^still unmatched after patch \((.+)\)$/, "补丁后仍未匹配（$1）")
+    .replace(/^missing image in (.+)$/, "本地图片缺失（$1）");
+}
+
+function statusLabelZh(status) {
+  const map = {
+    ok: "通过",
+    name_zh_mismatch: "中文名不符",
+    name_en_missing: "英文名问题",
+    body_empty: "正文为空",
+    body_not_from_md: "正文不符",
+    md_body_missing: "md 无英文正文",
+    cover_missing: "缺封面",
+    cover_no_local_image: "封面无本地图",
+    missing_in_db: "DB 缺失",
+  };
+  return map[status] || status;
+}
+
+function describeIssuesZh(row) {
+  if (row.status === "ok") return "无问题：中文名、英文名、正文、封面均与 md / 本地图片一致";
+
+  const parts = [];
+  const act = row.actual || {};
+  const expZh = row.nameZh || "（空）";
+  const expEn = row.nameEn || "（空）";
+  const actZh = act.name_zh || "（空）";
+  const actEn = act.name_en || "（空）";
+
+  for (const issue of row.issues) {
+    switch (issue) {
+      case "name_zh_mismatch":
+        parts.push(`中文名不一致：DB 为「${actZh}」，md 应为「${expZh}」`);
+        break;
+      case "name_en_missing":
+        if (!act.name_en) parts.push(`英文名为空或占位：DB 为「${actEn}」，md 应为「${expEn}」`);
+        else parts.push(`英文名不一致：DB 为「${actEn}」，md 应为「${expEn}」`);
+        break;
+      case "body_empty":
+        parts.push(`正文为空：DB 无 body，md 有英文长文描述（约 ${row.expectedBodyLength || 0} 字）`);
+        break;
+      case "body_not_from_md":
+        parts.push(
+          `正文与 md 不符：DB 正文约 ${act.bodyLength || 0} 字，md 英文长文约 ${row.expectedBodyLength || 0} 字，需以 md 为准`
+        );
+        break;
+      case "md_body_missing":
+        parts.push("md 未提取到英文正文（「长文描述/描述 / Description」无英文段落，或格式暂不支持）");
+        break;
+      case "cover_missing":
+        parts.push("封面缺失：DB 无 cover_image_path");
+        break;
+      case "cover_no_local_image":
+        parts.push(
+          row.localImageName
+            ? `本地图片未配对：DB 有封面 URL，但素材目录未找到对应图片（期望：${row.localImageName}）`
+            : "本地图片未配对：DB 有封面 URL，但素材目录找不到对应图片文件"
+        );
+        break;
+      case "missing_in_db":
+        parts.push("DB 缺失：线上 sub_areas 无此子景点记录");
+        break;
+      default:
+        parts.push(issue);
+    }
+  }
+
+  if (row.dbId && row.dbId !== row.id) {
+    parts.push(`（按名称匹配到 DB 记录 ${row.dbId}，非序号 ${row.id}）`);
+  }
+
+  return parts.join("；");
+}
+
+function buildFullListChinese(auditRows, stats, unmatchedFolders, extraInDb) {
+  const esc = (s) => String(s || "").replace(/\|/g, "\\|").replace(/\n/g, " ");
+  const lines = [
+    "# 子景点核对完整列表",
+    "",
+    `生成时间：${stats.generatedAt}`,
+    "",
+    "说明：以 Downloads md 为名称/正文标准，封面以本地图片目录核对。每条「问题说明」用中文描述具体差异。",
+    "",
+    "| # | 城市 | 景点 | ID | 中文名 | 核对结果 | 问题说明 | 历史备注 |",
+    "|---|------|------|----|--------|----------|----------|----------|",
+  ];
+
+  let n = 0;
+  for (const city of ["nanjing", "suzhou", "hangzhou", "shanghai", "chengdu", "chongqing"]) {
+    const cr = auditRows
+      .filter((r) => r.city === city)
+      .sort((a, b) => a.attractionFolder.localeCompare(b.attractionFolder, "zh-Hans-CN") || a.sortIndex - b.sortIndex);
+    for (const row of cr) {
+      n += 1;
+      lines.push(
+        `| ${n} | ${CITY_ZH[city] || city} | ${esc(row.attractionFolder)} | ${esc(row.id)} | ${esc(row.nameZh)} | ${statusLabelZh(row.status)} | ${esc(describeIssuesZh(row))} | ${esc(translateHistoricalNote(row.historicalNote))} |`
+      );
+    }
+  }
+
+  lines.push("");
+  lines.push("## 未纳入审计的景点文件夹");
+  if (unmatchedFolders.length) {
+    for (const u of unmatchedFolders) {
+      lines.push(
+        `- **${CITY_ZH[u.city] || u.city} / ${u.folderName}**：${u.reason === "attraction_not_found" ? "attractions 表找不到对应主景点，子景点未计入上表" : u.reason}`
+      );
+    }
+  } else {
+    lines.push("- 无");
+  }
+
+  lines.push("");
+  lines.push(`## DB 多余条目（${extraInDb.length} 条，md 源中无对应子景点）`);
+  for (const e of extraInDb) {
+    lines.push(`- ${e.id}｜${e.attraction_id}｜${e.name_zh}`);
+  }
+
+  return lines.join("\n");
+}
+
 async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
   const { url, key } = getSupabaseConfig();
@@ -1172,6 +1422,16 @@ async function main() {
   );
   writeFileSync(OUT_STATS, `${JSON.stringify(stats, null, 2)}\n`, "utf8");
   writeFileSync(OUT_SUMMARY, buildSummary(auditRows, stats), "utf8");
+  writeFileSync(
+    OUT_FULL_LIST,
+    `${buildFullListChinese(
+      auditRows,
+      stats,
+      unmatchedFolders,
+      extraInDb.map((r) => ({ id: r.id, attraction_id: r.attraction_id, name_zh: r.name_zh }))
+    )}\n`,
+    "utf8"
+  );
 
   if (fixSql || fixRows.length) {
     writeFileSync(OUT_FIX_SQL, buildFixSql(fixRows), "utf8");

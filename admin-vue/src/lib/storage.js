@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 
 export const COVER_BUCKET = "cover-images";
 export const AUDIO_BUCKET = "audio-guides";
+export const AVATARS_BUCKET = "avatars";
 
 /** Slugify identical to legacy core.js App.slugify. */
 export function slugify(text, prefix) {
@@ -107,4 +108,22 @@ export async function uploadPhraseAudioFile(file, phraseId) {
   if (!phraseId) throw new Error("请先填写内容（生成 id）后再上传音频");
   const ext = (file.name.split(".").pop() || "m4a").toLowerCase().replace(/[^a-z0-9]/g, "") || "m4a";
   return uploadStorageFile(AUDIO_BUCKET, `phrases/${phraseId}.${ext}`, file, normalizeAudioContentType(file));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Avatar Upload Functions
+// ═══════════════════════════════════════════════════════════════
+
+/** User avatar → avatars/{userId}.{ext} */
+export async function uploadUserAvatar(file, userId) {
+  if (!userId) throw new Error("用户 ID 不能为空");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  return uploadStorageFile(AVATARS_BUCKET, `${userId}.${ext}`, file, file.type || "image/jpeg");
+}
+
+/** Support agent avatar → avatars/agents/{agentId}.{ext} */
+export async function uploadAgentAvatar(file, agentId) {
+  if (!agentId) throw new Error("客服 ID 不能为空");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  return uploadStorageFile(AVATARS_BUCKET, `agents/${agentId}.${ext}`, file, file.type || "image/jpeg");
 }
