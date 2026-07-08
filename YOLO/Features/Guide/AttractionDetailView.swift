@@ -108,6 +108,7 @@ struct AttractionDetailView: View {
         .navigationTitle(display.name)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .navigationSwipeBack { handleBack() }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {

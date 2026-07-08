@@ -79,6 +79,7 @@ private struct PaymentGuideScreenView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .navigationSwipeBackEnabled()
         .toolbar(.hidden, for: .navigationBar)
     }
 }

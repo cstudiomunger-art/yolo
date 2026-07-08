@@ -53,6 +53,7 @@ struct ChecklistItemDetailView: View {
         }
         .background(Theme.ColorToken.background)
         .navigationBarBackButtonHidden(true)
+        .navigationSwipeBackEnabled()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {

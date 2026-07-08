@@ -97,6 +97,12 @@ final class AudioQueuePlayer {
     @ObservationIgnored private var pendingSeek: Double?
     @ObservationIgnored private var nowPlayingTitle = ""
     @ObservationIgnored private var nowPlayingArtist = ""
+    @ObservationIgnored private var interruptionObserver: NSObjectProtocol?
+    @ObservationIgnored private var shouldResumeAfterInterruption = false
+
+    init() {
+        setupInterruptionHandling()
+    }
 
     // MARK: Derived
     var currentTrack: AudioTrack? {
@@ -234,13 +240,14 @@ final class AudioQueuePlayer {
         durationSeconds = max(guide.durationSeconds, 1)
         progress = 0
 
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-        try? AVAudioSession.sharedInstance().setActive(true)
+        AudioSessionService.configureForPlayback()
 
         AudioNowPlayingService.configureRemoteCommands(
             play: { [weak self] in self?.resumeIfPaused() },
             pause: { [weak self] in self?.pauseIfPlaying() },
-            toggle: { [weak self] in self?.togglePlay() }
+            toggle: { [weak self] in self?.togglePlay() },
+            next: { [weak self] in self?.next() },
+            previous: { [weak self] in self?.previous() }
         )
 
         guard let url = MediaURLResolver.playbackURL(for: guide, preferLocal: preferLocalPlayback) else {
@@ -476,5 +483,30 @@ final class AudioQueuePlayer {
                 }
             }
         }
+    }
+
+    private func setupInterruptionHandling() {
+        guard interruptionObserver == nil else { return }
+        interruptionObserver = AudioSessionService.observeInterruptions(
+            onBegan: { [weak self] in
+                Task { @MainActor in
+                    self?.shouldResumeAfterInterruption = self?.isPlaying == true
+                }
+            },
+            onEndedShouldResume: { [weak self] in
+                Task { @MainActor in
+                    self?.resumeAfterInterruptionIfNeeded()
+                }
+            }
+        )
+    }
+
+    private func resumeAfterInterruptionIfNeeded() {
+        guard shouldResumeAfterInterruption else { return }
+        shouldResumeAfterInterruption = false
+        guard canPlay, !isPlaying else { return }
+        player?.play()
+        isPlaying = true
+        syncNowPlaying()
     }
 }

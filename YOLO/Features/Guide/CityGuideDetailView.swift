@@ -27,6 +27,7 @@ struct CityGuideDetailView: View {
         .navigationTitle(display.titleEn)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .navigationSwipeBackEnabled()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button { dismiss() } label: {

@@ -7,7 +7,9 @@ enum AudioNowPlayingService {
     static func configureRemoteCommands(
         play: @escaping () -> Void,
         pause: @escaping () -> Void,
-        toggle: @escaping () -> Void
+        toggle: @escaping () -> Void,
+        next: (() -> Void)? = nil,
+        previous: (() -> Void)? = nil
     ) {
         let center = MPRemoteCommandCenter.shared()
         center.playCommand.isEnabled = true
@@ -17,6 +19,8 @@ enum AudioNowPlayingService {
         center.playCommand.removeTarget(nil)
         center.pauseCommand.removeTarget(nil)
         center.togglePlayPauseCommand.removeTarget(nil)
+        center.nextTrackCommand.removeTarget(nil)
+        center.previousTrackCommand.removeTarget(nil)
 
         center.playCommand.addTarget { _ in
             play()
@@ -29,6 +33,26 @@ enum AudioNowPlayingService {
         center.togglePlayPauseCommand.addTarget { _ in
             toggle()
             return .success
+        }
+
+        if let next {
+            center.nextTrackCommand.isEnabled = true
+            center.nextTrackCommand.addTarget { _ in
+                next()
+                return .success
+            }
+        } else {
+            center.nextTrackCommand.isEnabled = false
+        }
+
+        if let previous {
+            center.previousTrackCommand.isEnabled = true
+            center.previousTrackCommand.addTarget { _ in
+                previous()
+                return .success
+            }
+        } else {
+            center.previousTrackCommand.isEnabled = false
         }
     }
 

@@ -72,6 +72,7 @@ struct SubAreaDetailView: View {
         .navigationTitle(subArea?.nameEn ?? route.attractionName)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
+        .navigationSwipeBackEnabled()
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {

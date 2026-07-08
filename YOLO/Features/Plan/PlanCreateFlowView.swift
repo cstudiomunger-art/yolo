@@ -142,6 +142,7 @@ struct PlanCreateFlowView: View {
         .navigationBarTitleDisplayMode(.inline)
         // Custom back on visa/review — system back would pop the whole create flow to Plan.
         .navigationBarBackButtonHidden(step == .visa || step == .review)
+        .navigationSwipeBackEnabled(step != .visa && step != .review)
         .toolbar {
             if step == .visa {
                 ToolbarItem(placement: .topBarLeading) {
