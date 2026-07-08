@@ -8,32 +8,43 @@ private struct NavigationSwipeBackEnabler: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: EnablerViewController, context: Context) {
-        uiViewController.refreshGesture()
+        uiViewController.scheduleRefreshGesture()
     }
 
     final class EnablerViewController: UIViewController, UIGestureRecognizerDelegate {
-        private weak var observedNavigationController: UINavigationController?
+        private var refreshScheduled = false
 
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
-            refreshGesture()
+            scheduleRefreshGesture()
         }
 
-        override func viewDidLayoutSubviews() {
-            super.viewDidLayoutSubviews()
-            refreshGesture()
+        func scheduleRefreshGesture() {
+            guard !refreshScheduled else { return }
+            refreshScheduled = true
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                refreshScheduled = false
+                refreshGesture()
+            }
         }
 
         func refreshGesture() {
             guard let nav = resolvedNavigationController(),
                   let pop = nav.interactivePopGestureRecognizer else { return }
-            observedNavigationController = nav
-            pop.isEnabled = nav.viewControllers.count > 1
-            pop.delegate = self
+
+            let shouldEnable = nav.viewControllers.count > 1
+            if pop.isEnabled != shouldEnable {
+                pop.isEnabled = shouldEnable
+            }
+            if pop.delegate !== self {
+                pop.delegate = self
+            }
         }
 
         func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-            (resolvedNavigationController()?.viewControllers.count ?? 0) > 1
+            guard let nav = resolvedNavigationController() else { return false }
+            return nav.viewControllers.count > 1
         }
 
         private func resolvedNavigationController() -> UINavigationController? {
@@ -44,20 +55,6 @@ private struct NavigationSwipeBackEnabler: UIViewControllerRepresentable {
                 if let nav = controller as? UINavigationController { return nav }
                 if let nav = controller.navigationController { return nav }
                 current = controller.parent
-            }
-
-            return findNavigationController(in: view.window?.rootViewController)
-        }
-
-        private func findNavigationController(in root: UIViewController?) -> UINavigationController? {
-            guard let root else { return nil }
-            if let nav = root as? UINavigationController { return nav }
-            if let nav = root.navigationController, nav.viewControllers.contains(root) { return nav }
-            for child in root.children {
-                if let nav = findNavigationController(in: child) { return nav }
-            }
-            if let presented = root.presentedViewController {
-                return findNavigationController(in: presented)
             }
             return nil
         }
@@ -75,7 +72,19 @@ private struct NavigationSwipeBackDisabler: UIViewControllerRepresentable {
     final class DisablerViewController: UIViewController {
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
-            navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+            resolvedNavigationController()?.interactivePopGestureRecognizer?.isEnabled = false
+        }
+
+        private func resolvedNavigationController() -> UINavigationController? {
+            if let navigationController { return navigationController }
+
+            var current: UIViewController? = parent
+            while let controller = current {
+                if let nav = controller as? UINavigationController { return nav }
+                if let nav = controller.navigationController { return nav }
+                current = controller.parent
+            }
+            return nil
         }
     }
 }

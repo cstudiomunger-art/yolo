@@ -207,6 +207,7 @@ struct PlanCreateFlowView: View {
         .sheet(isPresented: $showVisaDetector) {
             VisaDetectorView(presetCitySlugs: Array(selectedCityIds),
                              presetStart: arrivalDate, presetEnd: departureDate)
+                .sheetDragToDismiss()
         }
         .sheet(item: $editingCountry) { field in
             countryPickerSheet(field)

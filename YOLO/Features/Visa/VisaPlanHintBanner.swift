@@ -26,6 +26,7 @@ struct VisaPlanHintBanner: View {
         }
         .sheet(isPresented: $showDetector) {
             VisaDetectorView(presetCitySlugs: citySlugs, presetStart: start, presetEnd: end)
+                .sheetDragToDismiss()
         }
     }
 

@@ -104,7 +104,6 @@ struct VisaDetectorView: View {
                                 data: appEnv.visaData.data, routes: routes)
             }
         }
-        .sheetDragToDismiss()
     }
 
     // MARK: - Sections
