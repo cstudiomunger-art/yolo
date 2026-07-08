@@ -22,7 +22,8 @@
   .console{display:none;height:100vh;grid-template-rows:auto 1fr}
   .topbar{display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
   .topbar .logo{font-weight:700}.topbar .logo span{color:var(--accent)}
-  .topbar .who{font-size:12px;color:var(--muted)}
+  .topbar .who{font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+  .topbar .who:hover{color:var(--ink)}
   .agentAvatar{width:32px;height:32px;border-radius:50%;background:var(--ink);background-size:cover;background-position:center;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;flex:none;border:1px solid var(--border)}
   .agentAvatar:hover{opacity:.85}
   .topbar .spacer{flex:1}
@@ -58,6 +59,26 @@
   .lightbox.open{display:flex}
   .lightbox img{max-width:94vw;max-height:94vh;border-radius:6px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
   .lightbox .lb-close{position:absolute;top:16px;right:20px;border:none;background:none;color:#fff;font-size:30px;line-height:1;cursor:pointer;opacity:.9}
+  /* profile modal */
+  .profileModal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:1001;padding:16px}
+  .profileModal.open{display:flex}
+  .profileCard{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;width:380px;max-width:92vw;max-height:90vh;overflow-y:auto}
+  .profileCard h2{font-size:18px;margin-bottom:4px}
+  .profileCard .sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+  .profileAvatarRow{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  .profileAvatar{width:64px;height:64px;border-radius:50%;background:var(--ink);background-size:cover;background-position:center;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex:none;border:1px solid var(--border)}
+  .profileAvatarBtn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600}
+  .profileAvatarBtn:hover{border-color:var(--ink)}
+  .pfField{margin-bottom:12px}
+  .pfField label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+  .pfField input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:9px;font-size:14px}
+  .pfField .hint{font-size:11px;color:var(--muted);margin-top:4px}
+  .profileActions{display:flex;gap:8px;margin-top:18px}
+  .profileActions button{flex:1;padding:11px;border-radius:9px;font-size:14px;font-weight:600;border:1px solid var(--border)}
+  .profileCancel{background:#fff;color:var(--ink)}
+  .profileSave{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+  .profileSave:disabled{opacity:.6;cursor:not-allowed}
+  .profileErr{color:var(--danger);font-size:12px;margin-top:10px;min-height:16px}
   .tx{font-size:10px;color:var(--muted);margin-top:4px}
   .row.me .tx{text-align:right}
   .bub .tx{font-size:11px;opacity:.7;margin-top:3px}
@@ -94,7 +115,7 @@
       <div class="logo">China<span>Go</span> · 客服</div>
       <label for="avatarInput" id="agentAvatar" class="agentAvatar" title="点击上传/更换头像"></label>
       <input id="avatarInput" type="file" accept="image/*" style="display:none">
-      <div class="who" id="who"></div>
+      <div class="who" id="who" title="编辑个人信息"></div>
       <div class="spacer"></div>
       <button class="statusbtn" id="autoTrBtn" title="自动翻译收到的消息"><span id="autoTrText">🌐 自动翻译：关</span></button>
       <button class="statusbtn" id="statusBtn"><span class="dot" id="statusDot"></span><span id="statusText">离线</span></button>
@@ -136,6 +157,39 @@
   <div class="lightbox" id="lightbox">
     <button class="lb-close" id="lbClose" aria-label="关闭">&times;</button>
     <img id="lbImg" src="" alt="预览">
+  </div>
+
+  <div class="profileModal" id="profileModal">
+    <div class="profileCard">
+      <h2>个人信息</h2>
+      <p class="sub">修改后将同步到 App Genius Bar 展示</p>
+      <div class="profileAvatarRow">
+        <div class="profileAvatar" id="profileAvatar"></div>
+        <label for="avatarInput" class="profileAvatarBtn">更换头像</label>
+      </div>
+      <div class="pfField">
+        <label for="pfName">姓名</label>
+        <input id="pfName" type="text" placeholder="显示姓名" autocomplete="name">
+      </div>
+      <div class="pfField">
+        <label for="pfRole">线路 / 专长</label>
+        <input id="pfRole" type="text" placeholder="如 北京 · 签证">
+      </div>
+      <div class="pfField">
+        <label for="pfLanguages">语言</label>
+        <input id="pfLanguages" type="text" placeholder="中文, English">
+        <div class="hint">多个语言用逗号分隔</div>
+      </div>
+      <div class="pfField">
+        <label for="pfSocial">社交主页 URL</label>
+        <input id="pfSocial" type="url" placeholder="https://…（可选）">
+      </div>
+      <div class="profileActions">
+        <button type="button" class="profileCancel" id="profileCancel">取消</button>
+        <button type="button" class="profileSave" id="profileSave">保存</button>
+      </div>
+      <div class="profileErr" id="profileErr"></div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8/dist/umd/supabase.min.js"></script>
@@ -201,8 +255,12 @@
       agent = agents[0];
       $("login").style.display = "none";
       $("console").style.display = "grid";
-      $("who").textContent = agent.name + " · " + (agent.role || "");
+      renderWho();
       renderAgentAvatar();
+      $("who").onclick = openProfileModal;
+      $("profileCancel").onclick = closeProfileModal;
+      $("profileSave").onclick = saveProfile;
+      $("profileModal").addEventListener("click", (e) => { if (e.target === $("profileModal")) closeProfileModal(); });
       renderAutoTr();
       $("autoTrBtn").onclick = () => {
         autoTranslate = !autoTranslate;
@@ -244,10 +302,73 @@
         .subscribe();
     }
 
+    function renderWho(){
+      if (!agent) return;
+      $("who").textContent = agent.name + " · " + (agent.role || "");
+    }
+
+    function applyAvatarToEl(el){
+      if (!el || !agent) return;
+      if (agent.avatar_url){ el.style.backgroundImage = `url('${agent.avatar_url}')`; el.textContent = ""; }
+      else { el.style.backgroundImage = ""; el.textContent = ((agent.avatar_seed || (agent.name||"")[0]) || "?"); }
+    }
+
     function renderAgentAvatar(){
-      const el = $("agentAvatar");
-      if (agent && agent.avatar_url){ el.style.backgroundImage = `url('${agent.avatar_url}')`; el.textContent = ""; }
-      else { el.style.backgroundImage = ""; el.textContent = ((agent && (agent.avatar_seed || (agent.name||"")[0])) || "?"); }
+      applyAvatarToEl($("agentAvatar"));
+      applyAvatarToEl($("profileAvatar"));
+    }
+
+    function openProfileModal(){
+      if (!agent) return;
+      $("pfName").value = agent.name || "";
+      $("pfRole").value = agent.role || "";
+      $("pfLanguages").value = (agent.languages || []).join(", ");
+      $("pfSocial").value = agent.social_url || "";
+      $("profileErr").textContent = "";
+      $("profileSave").disabled = false;
+      $("profileSave").textContent = "保存";
+      renderAgentAvatar();
+      $("profileModal").classList.add("open");
+    }
+
+    function closeProfileModal(){
+      $("profileModal").classList.remove("open");
+      $("profileErr").textContent = "";
+    }
+
+    function parseLanguages(raw){
+      return raw.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+    }
+
+    async function saveProfile(){
+      if (!agent) return;
+      const trimmedName = $("pfName").value.trim();
+      const trimmedRole = $("pfRole").value.trim();
+      const trimmedSocial = $("pfSocial").value.trim();
+      const parsedLanguages = parseLanguages($("pfLanguages").value);
+      $("profileErr").textContent = "";
+      if (!trimmedName){ $("profileErr").textContent = "请填写姓名"; return; }
+      const payload = {
+        name: trimmedName,
+        role: trimmedRole,
+        languages: parsedLanguages,
+        social_url: trimmedSocial,
+        avatar_seed: trimmedName[0] || agent.avatar_seed || "",
+        updated_at: new Date().toISOString()
+      };
+      $("profileSave").disabled = true;
+      $("profileSave").textContent = "保存中…";
+      const { error } = await sb.from("support_agents").update(payload).eq("id", agent.id);
+      if (error){
+        $("profileErr").textContent = error.message;
+        $("profileSave").disabled = false;
+        $("profileSave").textContent = "保存";
+        return;
+      }
+      Object.assign(agent, payload);
+      renderWho();
+      renderAgentAvatar();
+      closeProfileModal();
     }
 
     $("avatarInput").addEventListener("change", async (e) => {
@@ -495,7 +616,12 @@
     });
     $("lightbox").addEventListener("click", closeLightbox);        // click anywhere (backdrop/image) closes
     $("lbClose").addEventListener("click", closeLightbox);
-    document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape"){
+        if ($("profileModal").classList.contains("open")) closeProfileModal();
+        else closeLightbox();
+      }
+    });
 
     $("imgInput").addEventListener("change", async (e) => {
       const file = e.target.files[0];
