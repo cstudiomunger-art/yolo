@@ -1,0 +1,20 @@
+-- unmatched patch only
+UPDATE common_phrases SET audio_url='', updated_at=NOW() WHERE id='phrase_common_024';
+UPDATE common_phrases SET audio_url='', updated_at=NOW() WHERE id='phrase_common_025';
+UPDATE common_phrases SET audio_url='', updated_at=NOW() WHERE id='phrase_common_026';
+UPDATE common_phrases SET audio_url='', updated_at=NOW() WHERE id='phrase_common_027';
+UPDATE common_phrases SET audio_url='', updated_at=NOW() WHERE id='phrase_common_028';
+UPDATE common_phrases SET audio_url='', updated_at=NOW() WHERE id='phrase_common_029';
+UPDATE common_phrases SET audio_url='', updated_at=NOW() WHERE id='phrase_common_030';
+UPDATE common_phrases SET audio_url='', updated_at=NOW() WHERE id='phrase_common_031';
+UPDATE common_phrases SET audio_url='', updated_at=NOW() WHERE id='phrase_common_032';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/xujiahui_source_scenic_area_sa_01.jpg', updated_at=NOW() WHERE id='xujiahui_source_scenic_area_sa_01';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/xujiahui_source_scenic_area_sa_02.jpg', updated_at=NOW() WHERE id='xujiahui_source_scenic_area_sa_02';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/xujiahui_source_scenic_area_sa_03.jpg', updated_at=NOW() WHERE id='xujiahui_source_scenic_area_sa_03';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/xujiahui_source_scenic_area_sa_04.jpg', updated_at=NOW() WHERE id='xujiahui_source_scenic_area_sa_04';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/xujiahui_source_scenic_area_sa_05.jpg', updated_at=NOW() WHERE id='xujiahui_source_scenic_area_sa_05';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/xujiahui_source_scenic_area_sa_06.jpg', updated_at=NOW() WHERE id='xujiahui_source_scenic_area_sa_06';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/xujiahui_source_scenic_area_sa_07.jpg', updated_at=NOW() WHERE id='xujiahui_source_scenic_area_sa_07';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/xujiahui_source_scenic_area_sa_08.png', updated_at=NOW() WHERE id='xujiahui_source_scenic_area_sa_08';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/xujiahui_source_scenic_area_sa_09.jpg', updated_at=NOW() WHERE id='xujiahui_source_scenic_area_sa_09';
+UPDATE sub_areas SET cover_image_path='https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/patch-v2/chongqing_jiujie_sa_04.jpg', updated_at=NOW() WHERE id='chongqing_jiujie_sa_04';

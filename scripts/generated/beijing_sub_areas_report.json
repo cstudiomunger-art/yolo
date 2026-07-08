@@ -1,0 +1,631 @@
+{
+  "generatedAt": "2026-07-07T07:21:29.784Z",
+  "sourceRoot": "/Users/vesperal/Desktop/北京子景点内容",
+  "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/beijing_sub_areas_upsert.sql",
+  "totalSubAreas": 81,
+  "unmatchedImages": [],
+  "usesServiceRole": true,
+  "folders": [
+    {
+      "folderName": "北海公园",
+      "attractionId": "beijing_beihai_park",
+      "subAreas": [
+        {
+          "id": "beijing_beihai_park_bj_sa_01",
+          "seq": "1",
+          "title": "南门与团城 / South Gate & Circular City",
+          "imageFile": "01-南门与团城.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_01.jpg"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_02",
+          "seq": "2",
+          "title": "永安桥 / Yong'an Bridge",
+          "imageFile": "02-永安桥.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_02.jpg"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_03",
+          "seq": "3",
+          "title": "琼华岛·永安寺与白塔 / Jade Flower Island · Yong'an Temple & White Dagoba",
+          "imageFile": "03-琼华岛·永安寺与白塔.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_03.png"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_04",
+          "seq": "4",
+          "title": "琼华岛·琼岛春阴碑与阅古楼 / Jade Flower Island · Qiong Island Spring Shade Stele & Yuegu Tower",
+          "imageFile": "04-琼华岛·琼岛春阴碑与阅古楼.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_04.jpg"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_05",
+          "seq": "5",
+          "title": "琼华岛·漪澜堂、道宁斋与铜仙承露盘 / Jade Flower Island · Yilan Hall, Daoning Studio & Bronze Immortal Holding Dew Plate",
+          "imageFile": "05-琼华岛·漪澜堂道宁斋与铜仙承露盘.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_05.jpg"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_06",
+          "seq": "6",
+          "title": "东岸·濠濮间与画舫斋 / East Shore · Haopu Retreat & Painted Boat Studio",
+          "imageFile": "06-东岸·濠濮间与画舫斋.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_06.jpg"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_07",
+          "seq": "7",
+          "title": "静心斋 / Jingxin Studio (Quiet Heart Studio)",
+          "imageFile": "07-静心斋.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_07.jpg"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_08",
+          "seq": "8",
+          "title": "西天梵境与九龙壁 / Western Heavenly Paradise & Nine-Dragon Wall",
+          "imageFile": "08-西天梵境与九龙壁.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_08.jpg"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_09",
+          "seq": "9",
+          "title": "快雪堂与铁影壁 / Kuai Xue Tang (Quick Snow Hall) & Iron Shadow Wall",
+          "imageFile": "09-快雪堂与铁影壁.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_09.jpg"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_10",
+          "seq": "10",
+          "title": "阐福寺与小西天 / Chanfu Temple & Little Western Heaven",
+          "imageFile": "10-阐福寺与小西天.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_10.jpg"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_11",
+          "seq": "11",
+          "title": "五龙亭 / Five Dragon Pavilions",
+          "imageFile": "11-五龙亭.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_beihai_park_bj_sa_11.jpg"
+        }
+      ]
+    },
+    {
+      "folderName": "十三陵",
+      "attractionId": "beijing_ming_tombs",
+      "subAreas": [
+        {
+          "id": "beijing_ming_tombs_bj_sa_01",
+          "seq": "1",
+          "title": "石牌坊与大红门 / Stone Archway and Great Red Gate",
+          "imageFile": "01_石牌坊与大红门.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_ming_tombs_bj_sa_01.jpg"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_02",
+          "seq": "2",
+          "title": "神功圣德碑亭与神路 / Stele Pavilion of Divine Merit and Sacred Way",
+          "imageFile": "02_神功圣德碑亭与神路.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_ming_tombs_bj_sa_02.jpg"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_03",
+          "seq": "3",
+          "title": "石像生群与棂星门 / Stone Statues and Dragon and Phoenix Gate",
+          "imageFile": "03_石像生群与棂星门.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_ming_tombs_bj_sa_03.jpg"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_04",
+          "seq": "4",
+          "title": "长陵与博物馆 / Changling Tomb and Museum",
+          "imageFile": "04_长陵与博物馆.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_ming_tombs_bj_sa_04.jpg"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_05",
+          "seq": "5",
+          "title": "定陵与地宫 / Dingling Tomb and Underground Palace",
+          "imageFile": "05_定陵与地宫.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_ming_tombs_bj_sa_05.png"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_06",
+          "seq": "6",
+          "title": "昭陵 / Zhaoling Tomb",
+          "imageFile": "06_昭陵.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_ming_tombs_bj_sa_06.jpg"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_07",
+          "seq": "7",
+          "title": "景陵、康陵与永陵 / Jingling, Kangling and Yongling Tombs",
+          "imageFile": "07-1_景陵.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_ming_tombs_bj_sa_07.jpg"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_08",
+          "seq": "8",
+          "title": "思陵 / Siling Tomb",
+          "imageFile": "08_思陵.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_ming_tombs_bj_sa_08.jpg"
+        }
+      ]
+    },
+    {
+      "folderName": "国家博物馆",
+      "attractionId": "beijing_national_museum",
+      "subAreas": [
+        {
+          "id": "beijing_national_museum_bj_sa_01",
+          "seq": "1",
+          "title": "古代中国陈列 / Ancient China Exhibition",
+          "imageFile": "01_古代中国陈列.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_01.jpg"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_02",
+          "seq": "2",
+          "title": "复兴之路 / The Road of Rejuvenation",
+          "imageFile": "02_复兴之路.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_02.jpg"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_03",
+          "seq": "3",
+          "title": "二层专题·科技的力量、风展红旗与德化白瓷 / Second-Floor Special Exhibitions: The Power of Science and Technology, Red Flags Unfurled, and Dehua White Porcelain",
+          "imageFile": "03_二层专题-科技的力量.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_03.jpg"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_04",
+          "seq": "4",
+          "title": "古代瓷器 / Ancient Chinese Porcelain",
+          "imageFile": "04_古代瓷器.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_04.jpg"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_05",
+          "seq": "5",
+          "title": "古代玉器 / Ancient Chinese Jade",
+          "imageFile": "05_古代玉器.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_05.jpg"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_06",
+          "seq": "6",
+          "title": "古代钱币与铜镜 / Ancient Chinese Coins and Bronze Mirrors",
+          "imageFile": "06_古代钱币与铜镜.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_06.jpg"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_07",
+          "seq": "7",
+          "title": "古代佛造像 / Ancient Chinese Buddhist Sculpture",
+          "imageFile": "07_古代佛造像.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_07.jpg"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_08",
+          "seq": "8",
+          "title": "古代服饰与饮食文化 / Ancient Chinese Costume and Food Culture",
+          "imageFile": "08_古代服饰与饮食文化.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_08.jpg"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_09",
+          "seq": "9",
+          "title": "数说犀尊与清代书画 / The Digitised Rhinoceros Zun and Qing-Dynasty Calligraphy and Painting",
+          "imageFile": "09_数说犀尊与清代书画.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_09.png"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_10",
+          "seq": "10",
+          "title": "英模蜡像（结束语） / Wax Figures of Heroes and Models (Epilogue)",
+          "imageFile": "10_结束语-英模蜡像.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_national_museum_bj_sa_10.png"
+        }
+      ]
+    },
+    {
+      "folderName": "天坛",
+      "attractionId": "beijing_temple_of_heaven",
+      "subAreas": [
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_01",
+          "seq": "1",
+          "title": "圜丘坛 / Circular Mound Altar",
+          "imageFile": "1.圜丘坛.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_temple_of_heaven_bj_sa_01.png"
+        },
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_02",
+          "seq": "2",
+          "title": "皇穹宇与回音壁 / Imperial Vault of Heaven & Echo Wall",
+          "imageFile": "2.皇穹宇与回音壁.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_temple_of_heaven_bj_sa_02.png"
+        },
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_03",
+          "seq": "3",
+          "title": "丹陛桥 / Danbi Bridge (Sacred Way Bridge)",
+          "imageFile": "3.丹陛桥.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_temple_of_heaven_bj_sa_03.png"
+        },
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_04",
+          "seq": "4",
+          "title": "祈年殿 / Hall of Prayer for Good Harvests",
+          "imageFile": "4.祈年殿.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_temple_of_heaven_bj_sa_04.png"
+        },
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_05",
+          "seq": "5",
+          "title": "北门 / North Gate",
+          "imageFile": "5.结束语·北门.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_temple_of_heaven_bj_sa_05.png"
+        }
+      ]
+    },
+    {
+      "folderName": "恭王府",
+      "attractionId": "beijing_prince_gong_mansion",
+      "subAreas": [
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_01",
+          "seq": "1",
+          "title": "宫门 / Palace Gate",
+          "imageFile": "01-宫门.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_01.jpg"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_02",
+          "seq": "2",
+          "title": "银安殿与嘉乐堂 / Yin'an Hall and Jiale Hall",
+          "imageFile": "02-银安殿与嘉乐堂.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_02.jpg"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_03",
+          "seq": "3",
+          "title": "葆光室与锡晋斋 / Baoguang Chamber and Xijin Studio",
+          "imageFile": "03-葆光室与锡晋斋.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_03.jpg"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_04",
+          "seq": "4",
+          "title": "后罩楼 / Rear Cover Building",
+          "imageFile": "04-后罩楼.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_04.jpg"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_05",
+          "seq": "5",
+          "title": "西洋门与独乐峰 / Western-Style Gate and Dule Peak",
+          "imageFile": "05-西洋门与独乐峰.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_05.png"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_06",
+          "seq": "6",
+          "title": "蝠池与安善堂 / Bat Pool and Anshan Hall",
+          "imageFile": "06-蝠池与安善堂.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_06.jpg"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_07",
+          "seq": "7",
+          "title": "流杯亭、竹子院与牡丹园 / Winding Cup Pavilion, Bamboo Courtyard, and Peony Garden",
+          "imageFile": "07-流杯亭竹子院与牡丹园.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_07.png"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_08",
+          "seq": "8",
+          "title": "怡神所与蝠厅 / Yishen Chamber and Bat Hall",
+          "imageFile": "08-怡神所与蝠厅.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_08.png"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_09",
+          "seq": "9",
+          "title": "平步青云路、邀月台、滴翠岩与福字碑 / Path to the Clouds, Moon-Inviting Terrace, Emerald Rock, and the \"Fu\" Stele",
+          "imageFile": "09-平步青云路邀月台滴翠岩与福字碑.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_09.png"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_10",
+          "seq": "10",
+          "title": "方塘水榭、妙香亭、龙王庙与箭道 / Square Pond Pavilion, Miaoxiang Pavilion, Dragon King Temple, and Archery Range",
+          "imageFile": "10-方塘水榭妙香亭龙王庙与箭道.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_10.jpg"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_11",
+          "seq": "11",
+          "title": "乐道堂与多福轩 / Ledao Hall and Duofu Pavilion",
+          "imageFile": "11-乐道堂与多福轩.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_prince_gong_mansion_bj_sa_11.png"
+        }
+      ]
+    },
+    {
+      "folderName": "慕田峪长城",
+      "attractionId": "beijing_mutianyu_great_wall",
+      "subAreas": [
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_01",
+          "seq": "1",
+          "title": "大角楼 / Great Corner Tower",
+          "imageFile": "1.大角楼.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_mutianyu_great_wall_bj_sa_01.png"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_02",
+          "seq": "2",
+          "title": "正关台 / Zhengguantai Pass",
+          "imageFile": "2.正关台.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_mutianyu_great_wall_bj_sa_02.jpg"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_03",
+          "seq": "3",
+          "title": "六号敌楼与缆车站 / Tower No. 6 and Cable Car Station",
+          "imageFile": "3.六号敌楼与缆车站.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_mutianyu_great_wall_bj_sa_03.png"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_04",
+          "seq": "4",
+          "title": "非诚勿扰取景地 / \"If You Are the One\" Filming Location",
+          "imageFile": "4.非诚勿扰取景地.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_mutianyu_great_wall_bj_sa_04.jpg"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_05",
+          "seq": "5",
+          "title": "毛主席石刻与界碑 / Chairman Mao Stone Inscription and Boundary Marker",
+          "imageFile": "5.毛主席石刻与界碑.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_mutianyu_great_wall_bj_sa_05.png"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_06",
+          "seq": "6",
+          "title": "好汉坡 / Hero Slope",
+          "imageFile": "6.好汉坡.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_mutianyu_great_wall_bj_sa_06.jpg"
+        }
+      ]
+    },
+    {
+      "folderName": "故宫",
+      "attractionId": "beijing_forbidden_city",
+      "subAreas": [
+        {
+          "id": "beijing_forbidden_city_bj_sa_01",
+          "seq": "1",
+          "title": "午门与金水桥 / Meridian Gate and Golden Water Bridge",
+          "imageFile": "01_午门与金水桥.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_01.jpg"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_02",
+          "seq": "2",
+          "title": "太和门与外朝东西路 / Gate of Supreme Harmony and East-West Wings of Outer Court",
+          "imageFile": "02_太和门与外朝东西路.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_02.png"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_03",
+          "seq": "3",
+          "title": "太和殿 / Hall of Supreme Harmony",
+          "imageFile": "03_太和殿.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_03.png"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_04",
+          "seq": "4",
+          "title": "中和殿与保和殿 / Hall of Central Harmony and Hall of Preserving Harmony",
+          "imageFile": "04_中和殿与保和殿.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_04.jpg"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_05",
+          "seq": "5",
+          "title": "后三宫·乾清宫、交泰殿与坤宁宫 / Three Rear Palaces: Palace of Heavenly Purity, Hall of Union, and Palace of Earthly Tranquility",
+          "imageFile": "05_后三宫·乾清宫交泰殿坤宁宫.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_05.jpg"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_06",
+          "seq": "6",
+          "title": "养心殿与军机处 / Hall of Mental Cultivation and Grand Council",
+          "imageFile": "06_养心殿与军机处.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_06.png"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_07",
+          "seq": "7",
+          "title": "东西六宫 / Six Eastern and Western Palaces",
+          "imageFile": "07_东西六宫.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_07.png"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_08",
+          "seq": "8",
+          "title": "慈宁宫·雕塑馆 / Palace of Compassion and Tranquility - Sculpture Gallery",
+          "imageFile": "08_慈宁宫·雕塑馆.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_08.png"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_09",
+          "seq": "9",
+          "title": "奉先殿·钟表馆与宁寿宫·珍宝馆 / Hall of Ancestral Worship - Clock Gallery & Palace of Tranquil Longevity - Treasure Gallery",
+          "imageFile": "09_奉先殿·钟表馆与宁寿宫·珍宝馆.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_09.jpg"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_10",
+          "seq": "10",
+          "title": "乾隆花园与御花园 / Qianlong Garden and Imperial Garden",
+          "imageFile": "10_乾隆花园与御花园.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_10.jpg"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_11",
+          "seq": "11",
+          "title": "神武门、角楼与东西华门 / Gate of Divine Might, Corner Towers, and East-West Prosperity Gates",
+          "imageFile": "11_神武门、角楼与东西华门.jpg",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_forbidden_city_bj_sa_11.jpg"
+        }
+      ]
+    },
+    {
+      "folderName": "雍和宫",
+      "attractionId": "beijing_lama_temple",
+      "subAreas": [
+        {
+          "id": "beijing_lama_temple_bj_sa_01",
+          "seq": "1",
+          "title": "牌楼院与昭泰门 / Archway Courtyard and Zhaotai Gate",
+          "imageFile": "1.牌楼院与昭泰门.JPG",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_lama_temple_bj_sa_01.jpg"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_02",
+          "seq": "2",
+          "title": "钟鼓楼与天王殿 / Bell and Drum Towers and the Hall of the Heavenly Kings",
+          "imageFile": "2.钟鼓楼与天王殿.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_lama_temple_bj_sa_02.png"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_03",
+          "seq": "3",
+          "title": "喇嘛说碑亭与铜铸须弥山 / Stele Pavilion of \"On Lamaism\" and the Bronze Mount Sumeru",
+          "imageFile": "3.喇嘛说碑亭与铜铸须弥山.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_lama_temple_bj_sa_03.png"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_04",
+          "seq": "4",
+          "title": "雍和宫殿·大雄宝殿 / Yonghe Palace (Mahavira Hall)",
+          "imageFile": "4.雍和宫殿·大雄宝殿.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_lama_temple_bj_sa_04.png"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_05",
+          "seq": "5",
+          "title": "永佑殿 / Yongyou Hall",
+          "imageFile": "5.永佑殿.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_lama_temple_bj_sa_05.png"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_06",
+          "seq": "6",
+          "title": "四大扎仓 / Four Monastic Colleges (Dratsang)",
+          "imageFile": "6.四大扎仓.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_lama_temple_bj_sa_06.png"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_07",
+          "seq": "7",
+          "title": "法轮殿 / Falun Hall (Wheel of the Law Hall)",
+          "imageFile": "7.法轮殿.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_lama_temple_bj_sa_07.png"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_08",
+          "seq": "8",
+          "title": "万福阁 / Pavilion of Ten Thousand Blessings (Wanfu Pavilion)",
+          "imageFile": "8.万福阁.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_lama_temple_bj_sa_08.png"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_09",
+          "seq": "9",
+          "title": "观音洞与绥成殿（结束语） / Guanyin Grotto and Suicheng Hall (Epilogue)",
+          "imageFile": "9.结束语·观音洞与绥成殿.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_lama_temple_bj_sa_09.png"
+        }
+      ]
+    },
+    {
+      "folderName": "颐和园",
+      "attractionId": "beijing_summer_palace",
+      "subAreas": [
+        {
+          "id": "beijing_summer_palace_bj_sa_01",
+          "seq": "1",
+          "title": "东宫门与仁寿殿 / East Palace Gate and Hall of Benevolence and Longevity",
+          "imageFile": "1.东宫门与仁寿殿.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_01.png"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_02",
+          "seq": "2",
+          "title": "德和园 / Garden of Virtue and Harmony",
+          "imageFile": "2.德和园.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_02.png"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_03",
+          "seq": "3",
+          "title": "玉澜堂与乐寿堂 / Hall of Jade Ripples and Hall of Joyful Longevity",
+          "imageFile": "3.玉澜堂与乐寿堂.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_03.png"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_04",
+          "seq": "4",
+          "title": "长廊 / Long Corridor",
+          "imageFile": "4.长廊 .png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_04.png"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_05",
+          "seq": "5",
+          "title": "排云殿、佛香阁与智慧海 / Hall of Dispelling Clouds, Tower of Buddhist Incense and Sea of Wisdom",
+          "imageFile": "5.排云殿、佛香阁与智慧海.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_05.png"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_06",
+          "seq": "6",
+          "title": "石舫 / Marble Boat",
+          "imageFile": "6.石舫.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_06.png"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_07",
+          "seq": "7",
+          "title": "昆明湖 / Kunming Lake",
+          "imageFile": "7.昆明湖.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_07.png"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_08",
+          "seq": "8",
+          "title": "十七孔桥与南湖岛 / Seventeen-Arch Bridge and South Lake Island",
+          "imageFile": "8.十七孔桥与南湖岛.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_08.png"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_09",
+          "seq": "9",
+          "title": "铜牛 / Bronze Ox",
+          "imageFile": "9.铜牛.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_09.png"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_10",
+          "seq": "10",
+          "title": "新建宫门 / Newly Built Palace Gate (Concluding Remarks)",
+          "imageFile": "10.结束语·新建宫门.png",
+          "coverUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/cover-images/sub-areas/beijing/beijing_summer_palace_bj_sa_10.png"
+        }
+      ]
+    }
+  ]
+}

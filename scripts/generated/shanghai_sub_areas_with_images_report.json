@@ -1,0 +1,1255 @@
+{
+  "generatedAt": "2026-07-07T14:56:53.230Z",
+  "sourceMdRoot": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/上海子景点-文字信息",
+  "imageRoot": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点",
+  "attractions": [
+    {
+      "folderName": "东方明珠广播电视塔",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/东方明珠广播电视塔",
+      "attractionId": "oriental_pearl_radio_television_tower",
+      "attractionNameZh": "东方明珠广播电视塔",
+      "count": 7,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "检票口.md",
+          "image": "1. 检票口（塔底入口）.png",
+          "nameZh": "检票口",
+          "nameEn": "Ticket Gate",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "主观光层.md",
+          "image": "2. 主观光层（263 米）.png",
+          "nameZh": "主观光层",
+          "nameEn": "Main Observation Deck",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "太空舱.md",
+          "image": "3. 太空舱（350 米）.png",
+          "nameZh": "米太空舱",
+          "nameEn": "Meter Space Capsule",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "全透明悬空观光廊.md",
+          "image": "4. 全透明悬空观光廊（259 米）.png",
+          "nameZh": "全透明悬空观光廊",
+          "nameEn": "Transparent Glass Skywalk (Sky Observatory)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "户外观光层.md",
+          "image": "5. 户外观光层（90 米）.png",
+          "nameZh": "户外观光层",
+          "nameEn": "Outdoor Observation Terrace",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "更上海环动多媒体秀.md",
+          "image": "6. 更上海环动多媒体秀（78 米）.png",
+          "nameZh": "更上海环动多媒体秀",
+          "nameEn": "\"More Shanghai\" 360° Immersive Multimedia Show",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "上海城市历史发展陈列馆.md",
+          "image": "7. 上海城市历史发展陈列馆.png",
+          "nameZh": "上海城市历史发展陈列馆",
+          "nameEn": "Shanghai History Development Exhibition Hall",
+          "coverSource": "sql",
+          "hasBody": true
+        }
+      ],
+      "reused": 7,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "陆家嘴金融区",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/陆家嘴金融区",
+      "attractionId": "lujiazui_financial_district",
+      "attractionNameZh": "陆家嘴金融区",
+      "count": 9,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "陆家嘴中心绿地.md",
+          "image": "1. 陆家嘴中心绿地.png",
+          "nameZh": "陆家嘴中心绿地",
+          "nameEn": "Lujiazui Central Greenland",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "东方明珠广播电视塔.md",
+          "image": "2. 东方明珠广播电视塔.png",
+          "nameZh": "东方明珠广播电视塔",
+          "nameEn": "Oriental Pearl TV Tower (Oriental Pearl Radio & Television Tower)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "上海海洋水族馆.md",
+          "image": "3. 上海海洋水族馆.png",
+          "nameZh": "上海海洋水族馆",
+          "nameEn": "Shanghai Ocean Aquarium",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "金茂大厦.md",
+          "image": "4. 金茂大厦.png",
+          "nameZh": "金茂大厦",
+          "nameEn": "Jin Mao Tower",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "上海环球金融中心.md",
+          "image": "5. 上海环球金融中心.png",
+          "nameZh": "上海环球金融中心",
+          "nameEn": "Shanghai World Financial Center (SWFC)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "吴昌硕纪念馆.md",
+          "image": "7. 吴昌硕纪念馆.png",
+          "nameZh": "吴昌硕纪念馆",
+          "nameEn": "Wu Changshuo Memorial Hall",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "世纪大道.md",
+          "image": "8. 世纪大道.png",
+          "nameZh": "世纪大道",
+          "nameEn": "Century Avenue",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "浦东滨江大道.md",
+          "image": "9. 浦东滨江大道.png",
+          "nameZh": "浦东滨江大道",
+          "nameEn": "Pudong Riverside Promenade (Dongchang Wharf to Taitongzhan Wharf Section)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "上海中心大厦.md",
+          "image": "",
+          "nameZh": "上海中心大厦（上海之巅）",
+          "nameEn": "Shanghai Tower (Top of Shanghai Observation Hall)",
+          "coverSource": "sql",
+          "hasBody": true
+        }
+      ],
+      "reused": 9,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "南外滩轻纺面料市场",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/南外滩轻纺面料市场",
+      "attractionId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "attractionNameZh": "南外滩轻纺面料市场",
+      "count": 9,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "市场入口大厅.md",
+          "image": "1. 市场入口大厅.png",
+          "nameZh": "市场入口大厅",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "一楼-成衣与皮具区.md",
+          "image": "2. 一楼 - 成衣与皮具区.png",
+          "nameZh": "一楼-成衣与皮具区",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "一楼-Kate&Kevin定制工坊.md",
+          "image": "3.一楼-Kate&Kevin定制工坊.png",
+          "nameZh": "一楼-Kate&Kevin定制工坊",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "二楼-西装定制核心区.md",
+          "image": "4.二楼-西装定制核心区.png",
+          "nameZh": "二楼-西装定制核心区",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "二楼-进口面料坊.md",
+          "image": "5.二楼-进口面料坊.png",
+          "nameZh": "二楼-进口面料坊",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "三楼-旗袍与中式服装区.md",
+          "image": "6.三楼-旗袍与中式服装区.png",
+          "nameZh": "三楼-旗袍与中式服装区",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "三楼-传统面料零售区.md",
+          "image": "7.三楼-传统面料零售区.png",
+          "nameZh": "三楼-传统面料零售区",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "四楼-羊绒与杂项区.md",
+          "image": "8.四楼-羊绒与杂项区.png",
+          "nameZh": "四楼-羊绒与杂项区",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "黄浦邮政国际寄送服务台.md",
+          "image": "9.黄浦邮政国际寄送服务台.png",
+          "nameZh": "黄浦邮政国际寄送服务台",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        }
+      ],
+      "reused": 9,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "上海博物馆",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/上海博物馆",
+      "attractionId": "shanghai_museum",
+      "attractionNameZh": "上海博物馆",
+      "count": 10,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "中国古代青铜馆.md",
+          "image": "1. 中国古代青铜馆.png",
+          "nameZh": "中国古代青铜馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "中国古代雕塑馆.md",
+          "image": "2. 中国古代雕塑馆.png",
+          "nameZh": "中国古代雕塑馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "中国古代陶瓷馆.md",
+          "image": "3. 中国古代陶瓷馆.png",
+          "nameZh": "中国古代陶瓷馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "中国历代书法馆.md",
+          "image": "4. 中国历代书法馆.png",
+          "nameZh": "中国历代书法馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "中国历代绘画馆.md",
+          "image": "5. 中国历代绘画馆.png",
+          "nameZh": "中国历代绘画馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "中国历代玺印馆.md",
+          "image": "6. 中国历代玺印馆.png",
+          "nameZh": "中国历代玺印馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "中国古代玉器馆.md",
+          "image": "7. 中国古代玉器馆.png",
+          "nameZh": "中国古代玉器馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "中国历代钱币馆.md",
+          "image": "8. 中国历代钱币馆.png",
+          "nameZh": "中国历代钱币馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "中国明清家具馆.md",
+          "image": "9. 中国明清家具馆.png",
+          "nameZh": "中国明清家具馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 9,
+          "file": "解说词-中国少数民族工艺馆.md",
+          "image": "10. 中国少数民族工艺馆.png",
+          "nameZh": "解说词-中国少数民族工艺馆",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        }
+      ],
+      "reused": 10,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "上海迪士尼度假区",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/上海迪士尼度假区",
+      "attractionId": "shanghai_disney_resort",
+      "attractionNameZh": "上海迪士尼度假区",
+      "count": 10,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "米奇大街.md",
+          "image": "1. 米奇大街.png",
+          "nameZh": "米奇大街",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "奇想花园.md",
+          "image": "2. 奇想花园.png",
+          "nameZh": "奇想花园",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "探险岛.md",
+          "image": "3. 探险岛.png",
+          "nameZh": "探险岛",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "宝藏湾.md",
+          "image": "4. 宝藏湾.png",
+          "nameZh": "宝藏湾",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "梦幻世界.md",
+          "image": "5. 梦幻世界.png",
+          "nameZh": "梦幻世界",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "明日世界.md",
+          "image": "6. 明日世界.png",
+          "nameZh": "明日世界",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "玩具总动员乐园.md",
+          "image": "7. 玩具总动员乐园.png",
+          "nameZh": "玩具总动员乐园",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "疯狂动物城.md",
+          "image": "8. 疯狂动物城.png",
+          "nameZh": "疯狂动物城",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "迪士尼小镇.md",
+          "image": "9. 迪士尼小镇.png",
+          "nameZh": "迪士尼小镇",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 9,
+          "file": "星愿公园.md",
+          "image": "10. 星愿公园.png",
+          "nameZh": "星愿公园",
+          "nameEn": "",
+          "coverSource": "sql",
+          "hasBody": true
+        }
+      ],
+      "reused": 10,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "上海外滩",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/上海外滩",
+      "attractionId": "the_bund_shanghai",
+      "attractionNameZh": "上海外滩",
+      "count": 12,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "十六铺码头.md",
+          "image": "1. 十六铺码头.png",
+          "nameZh": "十六铺码头",
+          "nameEn": "Shiliupu Wharf",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "外滩十八号.md",
+          "image": "2. 外滩十八号.png",
+          "nameZh": "外滩十八号",
+          "nameEn": "Bund 18",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "亚细亚大楼（外滩一号）.md",
+          "image": "3. 亚细亚大楼（外滩一号）.png",
+          "nameZh": "亚细亚大楼（外滩一号）",
+          "nameEn": "Asia Building (Bund No. 1)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "上海总会（华尔道夫酒店）.md",
+          "image": "4. 上海总会（华尔道夫酒店）.png",
+          "nameZh": "上海总会（华尔道夫酒店）",
+          "nameEn": "上海总会（华尔道夫酒店） / Shanghai Club (Waldorf Astoria Shanghai on the Bund)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "原汇丰银行大楼.md",
+          "image": "5. 原汇丰银行大楼.png",
+          "nameZh": "原汇丰银行大楼",
+          "nameEn": "Former HSBC Building",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "海关大楼.md",
+          "image": "6. 海关大楼.png",
+          "nameZh": "海关大楼",
+          "nameEn": "海关大楼 / Customs House (Shanghai)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "和平饭店.md",
+          "image": "7. 和平饭店.png",
+          "nameZh": "和平饭店",
+          "nameEn": "和平饭店 / Peace Hotel (Fairmont Peace Hotel)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "陈毅广场与陈毅铜像.md",
+          "image": "8. 陈毅广场与陈毅铜像.png",
+          "nameZh": "陈毅广场与陈毅铜像",
+          "nameEn": "陈毅广场与陈毅铜像 / Chen Yi Square and Bronze Statue of Chen Yi",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "外滩牛.md",
+          "image": "9. 外滩牛.png",
+          "nameZh": "外滩牛",
+          "nameEn": "外滩牛 / Bund Bull (Shanghai Financial Bull)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 9,
+          "file": "上海市人民英雄纪念塔.md",
+          "image": "10. 上海市人民英雄纪念塔.png",
+          "nameZh": "上海市人民英雄纪念塔",
+          "nameEn": "上海市人民英雄纪念塔 / Shanghai People's Heroes Memorial Tower",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 10,
+          "file": "外白渡桥.md",
+          "image": "11. 外白渡桥.png",
+          "nameZh": "外白渡桥",
+          "nameEn": "外白渡桥 / Waibaidu Bridge (Garden Bridge of Shanghai)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 11,
+          "file": "外滩源.md",
+          "image": "12. 外滩源.png",
+          "nameZh": "外滩源",
+          "nameEn": "外滩源 / The Origin of the Bund (Waitanyuan)",
+          "coverSource": "sql",
+          "hasBody": true
+        }
+      ],
+      "reused": 12,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "苏州十二国色",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/苏州河十二国色 ",
+      "attractionId": "suzhou_creek_twelve_nations_colors",
+      "attractionNameZh": "苏州河十二国色",
+      "count": 12,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "高陵集市（鹅黄色）.md",
+          "image": "1. 高陵集市（鹅黄色）.png",
+          "nameZh": "高陵集市（鹅黄色）",
+          "nameEn": "高陵集市（鹅黄色） / Gaoling Market (Goose-yellow)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "曹杨新村（月白色）.md",
+          "image": "2. 曹杨新村（月白色）.png",
+          "nameZh": "曹杨新村（月白色）",
+          "nameEn": "曹杨新村（月白色） / Caoyang New Village (Moon-white)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "玉佛寺（朱红色）.md",
+          "image": "3. 玉佛寺（朱红色）.png",
+          "nameZh": "玉佛寺（朱红色）",
+          "nameEn": "玉佛寺（朱红色） / Jade Buddha Temple (Vermilion)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "M50创意园（翠绿色）.md",
+          "image": "4. M50 创意园（翠绿色）.png",
+          "nameZh": "M50创意园（翠绿色）",
+          "nameEn": "M50创意园（翠绿色） / M50 Creative Park (Emerald-green)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "雾苑堂茶室（天青色）.md",
+          "image": "6. 雾苑堂茶室（天青色）.png",
+          "nameZh": "雾苑堂茶室（天青色）",
+          "nameEn": "雾苑堂茶室（天青色） / Wuyuantang Tea House (Sky-blue-grey)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "竹丝编非遗体验馆（竹青色）.md",
+          "image": "7. 竹丝编非遗体验馆（竹青色）.png",
+          "nameZh": "竹丝编非遗体验馆（竹青色）",
+          "nameEn": "竹丝编非遗体验馆（竹青色） / Bamboo Silk Weaving Intangible Heritage Hall (Bamboo-green)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "顾正红纪念馆（玄采色）.md",
+          "image": "8. 顾正红纪念馆（玄采色）.png",
+          "nameZh": "顾正红纪念馆（玄采色）",
+          "nameEn": "顾正红纪念馆（玄采色） / Gu Zhenghong Memorial Hall (Mystic-black)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "苏州河工业文明展示馆（丁香色）.md",
+          "image": "9. 苏州河工业文明展示馆（丁香色）.png",
+          "nameZh": "苏州河工业文明展示馆（丁香色）",
+          "nameEn": "苏州河工业文明展示馆（丁香色） / Suzhou Creek Industrial Civilization Exhibition Hall (Lilac)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "半马苏河公园（钴蓝色）.md",
+          "image": "10. 半马苏河公园（钴蓝色）.png",
+          "nameZh": "半马苏河公园（钴蓝色）",
+          "nameEn": "Banma Suhe Park (Cobalt-blue)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 9,
+          "file": "百禧公园（紫棠色）.md",
+          "image": "11. 百禧公园（紫棠色）.png",
+          "nameZh": "百禧公园（紫棠色）",
+          "nameEn": "百禧公园（紫棠色） / Baixi Park (Purple-tang)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 10,
+          "file": "鸿寿坊（琥珀色）.md",
+          "image": "12. 鸿寿坊（琥珀色）.png",
+          "nameZh": "鸿寿坊（琥珀色）",
+          "nameEn": "鸿寿坊（琥珀色） / Hongshoufang (Amber)",
+          "coverSource": "upload",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 11,
+          "file": "创享塔（木槿色）.md",
+          "image": "",
+          "nameZh": "创享塔（木槿色）",
+          "nameEn": "创享塔（木槿色） / The X Tower Chuangxiangta (Hibiscus)",
+          "coverSource": "",
+          "hasBody": true
+        }
+      ],
+      "reused": 0,
+      "uploaded": 11,
+      "missing": 1
+    },
+    {
+      "folderName": "田子坊",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/田子坊",
+      "attractionId": "tianzifang",
+      "attractionNameZh": " 田子坊",
+      "count": 9,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "泰康路主入口.md",
+          "image": "1. 泰康路主入口.png",
+          "nameZh": "田子坊 · 泰康路主入口",
+          "nameEn": "Taikang Road Main Entrance",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "石库门里弄建筑群.md",
+          "image": "2. 石库门里弄建筑群.png",
+          "nameZh": "田子坊 · 石库门里弄建筑群",
+          "nameEn": "Shikumen Lilong Architectural Cluster",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "陈逸飞工作室旧址.md",
+          "image": "3. 陈逸飞工作室旧址.png",
+          "nameZh": "田子坊 · 陈逸飞工作室旧址",
+          "nameEn": "Chen Yifei Former Studio",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "守白艺术中心.md",
+          "image": "4. 守白艺术中心.png",
+          "nameZh": "田子坊 · 守白艺术中心",
+          "nameEn": "Shoubai Art Center",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "画家楼天台.md",
+          "image": "5. 画家楼.png",
+          "nameZh": "田子坊 · 画家楼天台",
+          "nameEn": "Painter's Building Rooftop",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "气味图书馆.md",
+          "image": "6. 气味图书馆.png",
+          "nameZh": "田子坊 · 气味图书馆",
+          "nameEn": "Demete / Odor Library",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "金粉世家.md",
+          "image": "7. 金粉世家.png",
+          "nameZh": "田子坊 · 金粉世家",
+          "nameEn": "Jin Fen Shi Jia (Golden Powder Family)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "248弄弄堂.md",
+          "image": "8. 248 弄弄堂（天成里）.png",
+          "nameZh": "田子坊 · 248 弄弄堂",
+          "nameEn": "Lane 248 (248 Nong)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "274弄艺术长廊.md",
+          "image": "9. 274 弄艺术长廊（平原邨）.png",
+          "nameZh": "田子坊 · 274 弄艺术长廊",
+          "nameEn": "Lane 274 Art Corridor (274 Nong)",
+          "coverSource": "sql",
+          "hasBody": true
+        }
+      ],
+      "reused": 9,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "武康路",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/武康路",
+      "attractionId": "wukang_road",
+      "attractionNameZh": "武康路",
+      "count": 9,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "武康大楼（诺曼底公寓）.md",
+          "image": "1. 武康大楼（诺曼底公寓）.JPG",
+          "nameZh": "武康大楼（原诺曼底公寓",
+          "nameEn": "武康路 1 号）",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "宋庆龄故居.md",
+          "image": "2. 宋庆龄故居.JPG",
+          "nameZh": "武康路 · 宋庆龄故居",
+          "nameEn": "Former Residence of Soong Ching-ling (No. 393 Wukang Road)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "黄兴故居老房子艺术中心.md",
+          "image": "3. 黄兴故居（老房子艺术中心）.JPG",
+          "nameZh": "黄兴故居",
+          "nameEn": "武康路 393 弄黄兴故居老房子艺术中心",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "周璇旧居.md",
+          "image": "4. 周璇旧居.JPG",
+          "nameZh": "武康路 · 周璇旧居",
+          "nameEn": "Former Residence of Zhou Xuan (No. 1, Lane 391, Wukang Road)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "意大利总领事馆旧址.md",
+          "image": "5. 意大利总领事馆旧址.JPG",
+          "nameZh": "武康路 · 意大利总领事馆旧址",
+          "nameEn": "Former Italian Consulate-General Residence (No. 390 Wukang Road)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "武康庭.md",
+          "image": "6. 武康庭.JPG",
+          "nameZh": "武康路 · 武康庭",
+          "nameEn": "武康庭（Wukang Mansion Courtyard / 武康路 376—378 号）",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "罗密欧阳台（德利那齐宅）.md",
+          "image": "7. 罗密欧阳台（德利那齐宅）.JPG",
+          "nameZh": "罗密欧阳台（武康路 210 号",
+          "nameEn": "原德利那齐宅）",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "巴金故居.md",
+          "image": "8. 巴金故居.JPG",
+          "nameZh": "武康路 · 巴金故居",
+          "nameEn": "Former Residence of Ba Jin (No. 113 Wukang Road)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "密丹公寓.md",
+          "image": "9. 密丹公寓.JPG",
+          "nameZh": "密丹公寓（武康路 115 号",
+          "nameEn": "Medan Apartments）",
+          "coverSource": "sql",
+          "hasBody": true
+        }
+      ],
+      "reused": 9,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "徐家汇源景区",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/徐家汇源",
+      "attractionId": "xujiahui_source_scenic_area",
+      "attractionNameZh": "徐家汇源景区",
+      "count": 9,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "徐家汇书院.md",
+          "image": "1. 徐家汇书院.JPG",
+          "nameZh": "徐家汇书院",
+          "nameEn": "",
+          "coverSource": "db-id",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "徐家汇天主堂.md",
+          "image": "2. 徐家汇天主堂.JPG",
+          "nameZh": "徐家汇天主堂",
+          "nameEn": "",
+          "coverSource": "db-id",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "上海气象博物馆（徐家汇观象台旧址）.md",
+          "image": "3. 上海气象博物馆（徐家汇观象台旧址）.JPG",
+          "nameZh": "上海气象博物馆（徐家汇观象台旧址）",
+          "nameEn": "",
+          "coverSource": "db-id",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "徐汇公学旧址（崇思楼）.md",
+          "image": "4. 徐汇公学旧址（崇思楼）.png",
+          "nameZh": "徐汇公学旧址（崇思楼）",
+          "nameEn": "",
+          "coverSource": "db-id",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "百代小楼（《义勇军进行曲》灌制地纪念馆）.md",
+          "image": "5. 百代小楼（《义勇军进行曲》灌制地纪念馆）.JPG",
+          "nameZh": "百代小楼（《义勇军进行曲》灌制地纪念馆）",
+          "nameEn": "",
+          "coverSource": "db-id",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "上海电影博物馆.md",
+          "image": "6. 上海电影博物馆.JPG",
+          "nameZh": "上海电影博物馆",
+          "nameEn": "",
+          "coverSource": "db-id",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "光启公园与徐光启纪念馆.md",
+          "image": "7. 光启公园与徐光启纪念馆.JPG",
+          "nameZh": "光启公园与徐光启纪念馆",
+          "nameEn": "",
+          "coverSource": "db-id",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "土山湾博物馆.md",
+          "image": "8. 土山湾博物馆.JPG",
+          "nameZh": "土山湾博物馆",
+          "nameEn": "",
+          "coverSource": "db-id",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "圣母院旧址（上海老站）.md",
+          "image": "9. 圣母院旧址（上海老站）.JPG",
+          "nameZh": "圣母院旧址（上海老站）",
+          "nameEn": "",
+          "coverSource": "db-id",
+          "hasBody": true
+        }
+      ],
+      "reused": 9,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "豫园",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/豫园",
+      "attractionId": "yu_garden",
+      "attractionNameZh": "豫园",
+      "count": 11,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "1.三穗堂.md",
+          "image": "01_三穗堂.jpg",
+          "nameZh": "三穗堂",
+          "nameEn": "Sansui Hall",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "2.仰山堂卷雨楼.md",
+          "image": "02_仰山堂卷雨楼.jpg",
+          "nameZh": "仰山堂·卷雨楼",
+          "nameEn": "Yangshan Hall & Juanyu Lou",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "3.大假山.md",
+          "image": "03_大假山.jpg",
+          "nameZh": "大假山",
+          "nameEn": "The Great Rockery",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "4.萃秀堂.md",
+          "image": "04_萃秀堂.jpg",
+          "nameZh": "萃秀堂",
+          "nameEn": "Cuixiu Hall",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "5.万花楼.md",
+          "image": "05_万花楼.jpg",
+          "nameZh": "万花楼",
+          "nameEn": "Wanhua Lou",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "6.点春堂.md",
+          "image": "06_点春堂.jpg",
+          "nameZh": "点春堂",
+          "nameEn": "Dianchun Hall",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "7.玉玲珑.md",
+          "image": "07_玉玲珑.jpg",
+          "nameZh": "玉玲珑",
+          "nameEn": "Yulinglong (Jade Camellia Stone)",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "8.玉华堂.md",
+          "image": "08_玉华堂.jpg",
+          "nameZh": "玉华堂",
+          "nameEn": "Yuhua Hall",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "9.会景楼.md",
+          "image": "09_会景楼.jpg",
+          "nameZh": "会景楼",
+          "nameEn": "Huijing Lou",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 9,
+          "file": "10.得月楼.md",
+          "image": "10_得月楼.jpg",
+          "nameZh": "得月楼",
+          "nameEn": "Deyue Lou",
+          "coverSource": "sql",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 10,
+          "file": "11.内园.md",
+          "image": "11_内园.jpg",
+          "nameZh": "内园",
+          "nameEn": "Inner Garden",
+          "coverSource": "sql",
+          "hasBody": true
+        }
+      ],
+      "reused": 11,
+      "uploaded": 0,
+      "missing": 0
+    },
+    {
+      "folderName": "朱家角古镇",
+      "imageDir": "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）/上海子景点/朱家角古镇",
+      "attractionId": "zhujiajiao_ancient_town",
+      "attractionNameZh": "朱家角古镇",
+      "count": 9,
+      "items": [
+        {
+          "sortOrder": 0,
+          "file": "1.放生桥.md",
+          "image": "",
+          "nameZh": "放生桥",
+          "nameEn": "Fangsheng Bridge",
+          "coverSource": "",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 1,
+          "file": "2.北大街.md",
+          "image": "",
+          "nameZh": "北大街",
+          "nameEn": "North Street (Bei Dajie)",
+          "coverSource": "",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 2,
+          "file": "3.涵大隆酱园.md",
+          "image": "",
+          "nameZh": "涵大隆酱园",
+          "nameEn": "Handalong Sauce Garden",
+          "coverSource": "",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 3,
+          "file": "4.泰安桥.md",
+          "image": "",
+          "nameZh": "泰安桥",
+          "nameEn": "Tai'an Bridge",
+          "coverSource": "",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 4,
+          "file": "5.圆津禅院.md",
+          "image": "",
+          "nameZh": "圆津禅院",
+          "nameEn": "Yuanjin Chan Temple",
+          "coverSource": "",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 5,
+          "file": "6.廊桥.md",
+          "image": "",
+          "nameZh": "廊桥",
+          "nameEn": "Covered Bridge (Langqiao)",
+          "coverSource": "",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 6,
+          "file": "7.城隍庙.md",
+          "image": "",
+          "nameZh": "城隍庙",
+          "nameEn": "City God Temple (Zhujiajiao Chenghuang Miao)",
+          "coverSource": "",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 7,
+          "file": "8.课植园.md",
+          "image": "",
+          "nameZh": "课植园",
+          "nameEn": "Kezhi Garden",
+          "coverSource": "",
+          "hasBody": true
+        },
+        {
+          "sortOrder": 8,
+          "file": "9.大清邮局.md",
+          "image": "",
+          "nameZh": "大清邮局",
+          "nameEn": "Da Qing Post Office",
+          "coverSource": "",
+          "hasBody": true
+        }
+      ],
+      "reused": 0,
+      "uploaded": 0,
+      "missing": 9
+    }
+  ],
+  "unmatchedAttractions": [],
+  "missingImages": [
+    {
+      "attraction": "苏州河十二国色",
+      "md": "创享塔（木槿色）.md",
+      "nameZh": "创享塔（木槿色）"
+    },
+    {
+      "attraction": "朱家角古镇",
+      "md": "1.放生桥.md",
+      "nameZh": "放生桥"
+    },
+    {
+      "attraction": "朱家角古镇",
+      "md": "2.北大街.md",
+      "nameZh": "北大街"
+    },
+    {
+      "attraction": "朱家角古镇",
+      "md": "3.涵大隆酱园.md",
+      "nameZh": "涵大隆酱园"
+    },
+    {
+      "attraction": "朱家角古镇",
+      "md": "4.泰安桥.md",
+      "nameZh": "泰安桥"
+    },
+    {
+      "attraction": "朱家角古镇",
+      "md": "5.圆津禅院.md",
+      "nameZh": "圆津禅院"
+    },
+    {
+      "attraction": "朱家角古镇",
+      "md": "6.廊桥.md",
+      "nameZh": "廊桥"
+    },
+    {
+      "attraction": "朱家角古镇",
+      "md": "7.城隍庙.md",
+      "nameZh": "城隍庙"
+    },
+    {
+      "attraction": "朱家角古镇",
+      "md": "8.课植园.md",
+      "nameZh": "课植园"
+    },
+    {
+      "attraction": "朱家角古镇",
+      "md": "9.大清邮局.md",
+      "nameZh": "大清邮局"
+    }
+  ],
+  "stats": {
+    "totalRows": 116,
+    "reusedCoverUrls": 95,
+    "newlyUploadedImages": 11,
+    "missingImages": 10,
+    "emptyBody": 0
+  }
+}

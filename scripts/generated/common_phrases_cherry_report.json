@@ -1,0 +1,283 @@
+{
+  "generatedAt": "2026-07-08T03:44:18.876Z",
+  "sourceDir": "/Users/vesperal/Downloads/通用普通话音频_Cherry",
+  "stats": {
+    "phrases": 23,
+    "reusedFromSql": 23,
+    "reusedFromDb": 0,
+    "reusedFromStorage": 0,
+    "newlyUploaded": 0,
+    "uploaded": 23
+  },
+  "phrases": [
+    {
+      "id": "phrase_common_001",
+      "cn": "你好",
+      "en": "Hello",
+      "file": "01_你好.mp3",
+      "sortOrder": 0,
+      "storagePath": "phrases/phrase_common_001.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_001.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_002",
+      "cn": "谢谢",
+      "en": "Thank you",
+      "file": "02_谢谢.mp3",
+      "sortOrder": 1,
+      "storagePath": "phrases/phrase_common_002.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_002.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_003",
+      "cn": "不好意思",
+      "en": "Excuse me / Sorry",
+      "file": "03_不好意思.mp3",
+      "sortOrder": 2,
+      "storagePath": "phrases/phrase_common_003.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_003.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_004",
+      "cn": "我听不懂",
+      "en": "I don't understand",
+      "file": "04_我听不懂.mp3",
+      "sortOrder": 3,
+      "storagePath": "phrases/phrase_common_004.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_004.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_005",
+      "cn": "我不会说中文",
+      "en": "I don't speak Chinese",
+      "file": "05_我不会说中文.mp3",
+      "sortOrder": 4,
+      "storagePath": "phrases/phrase_common_005.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_005.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_006",
+      "cn": "请帮我写下来",
+      "en": "Please write it down for me",
+      "file": "06_请帮我写下来.mp3",
+      "sortOrder": 5,
+      "storagePath": "phrases/phrase_common_006.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_006.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_007",
+      "cn": "你会说英语吗",
+      "en": "Do you speak English?",
+      "file": "07_你会说英语吗.mp3",
+      "sortOrder": 6,
+      "storagePath": "phrases/phrase_common_007.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_007.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_008",
+      "cn": "我要去这个地址",
+      "en": "I want to go to this address",
+      "file": "08_我要去这个地址.mp3",
+      "sortOrder": 7,
+      "storagePath": "phrases/phrase_common_008.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_008.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_009",
+      "cn": "到了请告诉我",
+      "en": "Please tell me when we arrive",
+      "file": "09_到了请告诉我.mp3",
+      "sortOrder": 8,
+      "storagePath": "phrases/phrase_common_009.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_009.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_010",
+      "cn": "往哪边走",
+      "en": "Which way should I go?",
+      "file": "10_往哪边走.mp3",
+      "sortOrder": 9,
+      "storagePath": "phrases/phrase_common_010.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_010.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_011",
+      "cn": "最近的洗手间在哪",
+      "en": "Where is the nearest restroom?",
+      "file": "11_最近的洗手间在哪.mp3",
+      "sortOrder": 10,
+      "storagePath": "phrases/phrase_common_011.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_011.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_012",
+      "cn": "哪个出口离这里近",
+      "en": "Which exit is closest to this place?",
+      "file": "12_哪个出口离这里近.mp3",
+      "sortOrder": 11,
+      "storagePath": "phrases/phrase_common_012.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_012.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_013",
+      "cn": "菜单有英文吗",
+      "en": "Do you have an English menu?",
+      "file": "13_菜单有英文吗.mp3",
+      "sortOrder": 12,
+      "storagePath": "phrases/phrase_common_013.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_013.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_014",
+      "cn": "有图片菜单吗",
+      "en": "Do you have a picture menu?",
+      "file": "14_有图片菜单吗.mp3",
+      "sortOrder": 13,
+      "storagePath": "phrases/phrase_common_014.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_014.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_015",
+      "cn": "来一份这个",
+      "en": "One of these, please",
+      "file": "15_来一份这个.mp3",
+      "sortOrder": 14,
+      "storagePath": "phrases/phrase_common_015.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_015.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_016",
+      "cn": "不要辣",
+      "en": "Not spicy, please",
+      "file": "16_不要辣.mp3",
+      "sortOrder": 15,
+      "storagePath": "phrases/phrase_common_016.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_016.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_017",
+      "cn": "买单",
+      "en": "The bill, please",
+      "file": "17_买单.mp3",
+      "sortOrder": 16,
+      "storagePath": "phrases/phrase_common_017.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_017.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_018",
+      "cn": "你这瓜保熟吗",
+      "en": "Is this melon ripe (sweet)?",
+      "file": "18_你这瓜保熟吗.mp3",
+      "sortOrder": 17,
+      "storagePath": "phrases/phrase_common_018.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_018.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_019",
+      "cn": "能用支付宝或者微信吗",
+      "en": "Can I pay with Alipay or WeChat?",
+      "file": "19_能用支付宝或者微信吗.mp3",
+      "sortOrder": 18,
+      "storagePath": "phrases/phrase_common_019.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_019.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_020",
+      "cn": "请帮帮我",
+      "en": "Please help me",
+      "file": "20_请帮帮我.mp3",
+      "sortOrder": 19,
+      "storagePath": "phrases/phrase_common_020.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_020.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_021",
+      "cn": "请打 110",
+      "en": "Please call 110",
+      "file": "21_请打 110.mp3",
+      "sortOrder": 20,
+      "storagePath": "phrases/phrase_common_021.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_021.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_022",
+      "cn": "请帮我打 120",
+      "en": "Please call 120 for me",
+      "file": "22_请帮我打 120.mp3",
+      "sortOrder": 21,
+      "storagePath": "phrases/phrase_common_022.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_022.mp3",
+      "audioSource": "sql"
+    },
+    {
+      "id": "phrase_common_023",
+      "cn": "我的护照丢了",
+      "en": "I lost my passport",
+      "file": "23_我的护照丢了.mp3",
+      "sortOrder": 22,
+      "storagePath": "phrases/phrase_common_023.mp3",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_023.mp3",
+      "audioSource": "sql"
+    }
+  ],
+  "newIds": [
+    "phrase_common_001",
+    "phrase_common_002",
+    "phrase_common_003",
+    "phrase_common_004",
+    "phrase_common_005",
+    "phrase_common_006",
+    "phrase_common_007",
+    "phrase_common_008",
+    "phrase_common_009",
+    "phrase_common_010",
+    "phrase_common_011",
+    "phrase_common_012",
+    "phrase_common_013",
+    "phrase_common_014",
+    "phrase_common_015",
+    "phrase_common_016",
+    "phrase_common_017",
+    "phrase_common_018",
+    "phrase_common_019",
+    "phrase_common_020",
+    "phrase_common_021",
+    "phrase_common_022",
+    "phrase_common_023"
+  ],
+  "deletedIds": [
+    "hello",
+    "howmuch",
+    "nospicy",
+    "thanks",
+    "toilet"
+  ],
+  "legacySeedIds": [
+    "hello",
+    "thanks",
+    "howmuch",
+    "nospicy",
+    "toilet"
+  ]
+}

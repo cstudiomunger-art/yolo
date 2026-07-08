@@ -1,0 +1,1954 @@
+{
+  "generatedAt": "2026-07-08T04:00:28.970Z",
+  "cities": [
+    {
+      "cityId": "beijing",
+      "sourcePath": "/Users/vesperal/Desktop/EN_Beijing_Hotel_Recommendations.md",
+      "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/hotels_beijing_upsert.sql",
+      "imported": [
+        {
+          "id": "hotel_beijing_summer_palace_hotel",
+          "tierCode": "B1-1",
+          "name": "Summer Palace Hotel",
+          "chineseName": "北京颐和宾馆",
+          "sortOrder": 0,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 857,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_rosewood_beijing",
+          "tierCode": "B1-2",
+          "name": "Rosewood Beijing",
+          "chineseName": "北京瑰丽酒店",
+          "sortOrder": 1,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 357,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_the_peninsula_beijing",
+          "tierCode": "B1-3",
+          "name": "The Peninsula Beijing",
+          "chineseName": "北京王府半岛酒店",
+          "sortOrder": 2,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 357,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_mandarin_oriental_qianmen_beijing",
+          "tierCode": "B1-4",
+          "name": "Mandarin Oriental Qianmen, Beijing",
+          "chineseName": "北京前门文华东方酒店",
+          "sortOrder": 3,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 571,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_park_hyatt_beijing",
+          "tierCode": "B1-5",
+          "name": "Park Hyatt Beijing",
+          "chineseName": "北京柏悦酒店",
+          "sortOrder": 4,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 257,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_bulgari_hotel_beijing",
+          "tierCode": "B1-6",
+          "name": "Bulgari Hotel Beijing",
+          "chineseName": "北京宝格丽酒店",
+          "sortOrder": 5,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 429,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_waldorf_astoria_beijing",
+          "tierCode": "B1-7",
+          "name": "Waldorf Astoria Beijing",
+          "chineseName": "北京华尔道夫酒店",
+          "sortOrder": 6,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 357,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_nuo_hotel_beijing",
+          "tierCode": "B1-8",
+          "name": "NUO Hotel Beijing",
+          "chineseName": "北京诺金酒店",
+          "sortOrder": 7,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 214,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_jianguo_hotel_qianmen_beijing",
+          "tierCode": "B2-1",
+          "name": "Jianguo Hotel Qianmen Beijing",
+          "chineseName": "北京前门建国饭店",
+          "sortOrder": 10,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_novotel_beijing_xin_qiao",
+          "tierCode": "B2-2",
+          "name": "Novotel Beijing Xin Qiao",
+          "chineseName": "北京新桥诺富特酒店",
+          "sortOrder": 11,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 71,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_hilton_beijing_wangfujing",
+          "tierCode": "B2-3",
+          "name": "Hilton Beijing Wangfujing",
+          "chineseName": "北京王府井希尔顿酒店",
+          "sortOrder": 12,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 86,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_muji_hotel_beijing",
+          "tierCode": "B2-4",
+          "name": "MUJI HOTEL BEIJING",
+          "chineseName": "MUJI HOTEL（无印良品酒店）",
+          "sortOrder": 13,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_atour_hotel_beijing_wangfujing_dengshiko",
+          "tierCode": "B2-5",
+          "name": "Atour Hotel Beijing Wangfujing Dengshikou",
+          "chineseName": "北京王府井灯市口亚朵酒店",
+          "sortOrder": 14,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_ji_hotel_beijing_qianmen_dashilan",
+          "tierCode": "B2-6",
+          "name": "Ji Hotel Beijing Qianmen Dashilan",
+          "chineseName": "全季酒店(北京前门地铁站店)",
+          "sortOrder": 15,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 50,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_holiday_inn_express_beijing_dongzhimen",
+          "tierCode": "B2-7",
+          "name": "Holiday Inn Express Beijing Dongzhimen",
+          "chineseName": "北京东直门智选假日酒店",
+          "sortOrder": 16,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 71,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_atour_s_hotel_beijing_sanlitun_guoan",
+          "tierCode": "B2-8",
+          "name": "Atour S Hotel Beijing Sanlitun Guoan",
+          "chineseName": "北京三里屯国安亚朵S酒店",
+          "sortOrder": 17,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 79,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_peking_youth_hostel",
+          "tierCode": "B3-1",
+          "name": "Peking Youth Hostel",
+          "chineseName": "北平国际青年旅舍（南锣鼓巷）",
+          "sortOrder": 20,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_qianmen_hostel",
+          "tierCode": "B3-2",
+          "name": "Qianmen Hostel",
+          "chineseName": "前门青年旅舍",
+          "sortOrder": 21,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_beijing_peking_station_hostel",
+          "tierCode": "B3-3",
+          "name": "Peking Station Hostel",
+          "chineseName": "北平北京站青年旅舍",
+          "sortOrder": 22,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        }
+      ],
+      "skipped": [
+        {
+          "tierCode": "B3-4",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        },
+        {
+          "tierCode": "B3-5",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        },
+        {
+          "tierCode": "B3-6",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        },
+        {
+          "tierCode": "B3-7",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        },
+        {
+          "tierCode": "B3-8",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        }
+      ],
+      "namingMismatches": [
+        {
+          "tierCode": "B1-1",
+          "overviewName": "Aman Summer Palace",
+          "detailName": "Summer Palace Hotel"
+        },
+        {
+          "tierCode": "B1-4",
+          "overviewName": "Mandarin Oriental Qianmen",
+          "detailName": "Mandarin Oriental Qianmen, Beijing"
+        },
+        {
+          "tierCode": "B2-1",
+          "overviewName": "Jianguo Hotel Qianmen",
+          "detailName": "Jianguo Hotel Qianmen Beijing"
+        },
+        {
+          "tierCode": "B2-3",
+          "overviewName": "Hilton Garden Inn Beijing Wangfujing",
+          "detailName": "Hilton Beijing Wangfujing"
+        },
+        {
+          "tierCode": "B2-5",
+          "overviewName": "Atour Hotel Beijing Wangfujing",
+          "detailName": "Atour Hotel Beijing Wangfujing Dengshikou"
+        },
+        {
+          "tierCode": "B2-6",
+          "overviewName": "Ji Hotel Beijing Qianmen",
+          "detailName": "Ji Hotel Beijing Qianmen Dashilan"
+        },
+        {
+          "tierCode": "B2-8",
+          "overviewName": "Atour S Hotel Beijing Sanlitun",
+          "detailName": "Atour S Hotel Beijing Sanlitun Guoan"
+        },
+        {
+          "tierCode": "B3-3",
+          "overviewName": "Far East International Youth Hostel",
+          "detailName": "Peking Station Hostel"
+        }
+      ],
+      "deletedIds": [
+        "beijing_"
+      ],
+      "stats": {
+        "imported": 19,
+        "skipped": 5,
+        "deleted": 1
+      }
+    },
+    {
+      "cityId": "shanghai",
+      "sourcePath": "/Users/vesperal/Desktop/EN_Shanghai_Hotel_Recommendations.md",
+      "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/hotels_shanghai_upsert.sql",
+      "imported": [
+        {
+          "id": "hotel_shanghai_fairmont_peace_hotel_shanghai",
+          "tierCode": "S1-1",
+          "name": "Fairmont Peace Hotel, Shanghai",
+          "chineseName": "上海和平饭店（费尔蒙）",
+          "sortOrder": 0,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 357,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_the_peninsula_shanghai",
+          "tierCode": "S1-2",
+          "name": "The Peninsula Shanghai",
+          "chineseName": "上海半岛酒店",
+          "sortOrder": 1,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 429,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_the_ritz_carlton_shanghai_pudong",
+          "tierCode": "S1-3",
+          "name": "The Ritz-Carlton Shanghai, Pudong",
+          "chineseName": "上海浦东丽思卡尔顿酒店",
+          "sortOrder": 2,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 286,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_bulgari_hotel_shanghai",
+          "tierCode": "S1-4",
+          "name": "Bulgari Hotel Shanghai",
+          "chineseName": "上海宝格丽酒店",
+          "sortOrder": 3,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 429,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_amanyangyun",
+          "tierCode": "S1-5",
+          "name": "Amanyangyun",
+          "chineseName": "上海养云安缦",
+          "sortOrder": 4,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 714,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_the_puli_hotel_and_spa",
+          "tierCode": "S1-6",
+          "name": "The PuLi Hotel and Spa",
+          "chineseName": "上海璞丽酒店",
+          "sortOrder": 5,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 286,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_the_middle_house",
+          "tierCode": "S1-7",
+          "name": "The Middle House",
+          "chineseName": "上海镛舍酒店",
+          "sortOrder": 6,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 286,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_waldorf_astoria_shanghai_on_the_bund",
+          "tierCode": "S1-8",
+          "name": "Waldorf Astoria Shanghai on the Bund",
+          "chineseName": "上海外滩华尔道夫酒店",
+          "sortOrder": 7,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 400,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_jin_jiang_hotel_shanghai",
+          "tierCode": "S2-1",
+          "name": "Jin Jiang Hotel Shanghai",
+          "chineseName": "上海锦江饭店",
+          "sortOrder": 10,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 86,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_radisson_collection_hotel_hyland_shangha",
+          "tierCode": "S2-2",
+          "name": "Radisson Collection Hotel, Hyland Shanghai",
+          "chineseName": "上海丽笙精选海仑宾馆（原索菲特海仑宾馆）",
+          "sortOrder": 11,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_hotel_indigo_shanghai_on_the_bund",
+          "tierCode": "S2-3",
+          "name": "Hotel Indigo Shanghai on the Bund",
+          "chineseName": "上海外滩英迪格酒店",
+          "sortOrder": 12,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_holiday_inn_express_shanghai_nanjing_roa",
+          "tierCode": "S2-4",
+          "name": "Holiday Inn Express Shanghai Nanjing Road Central",
+          "chineseName": "南京路智选假日（上海南京路智选假日酒店）",
+          "sortOrder": 13,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 79,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_atour_hotel_shanghai_people_s_square",
+          "tierCode": "S2-5",
+          "name": "Atour Hotel Shanghai People's Square",
+          "chineseName": "上海人民广场南京路步行街亚朵酒店",
+          "sortOrder": 14,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 71,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_ji_hotel_shanghai_the_bund_sichuan_middl",
+          "tierCode": "S2-6",
+          "name": "JI Hotel (Shanghai The Bund Sichuan Middle Road)",
+          "chineseName": "全季酒店(上海外滩四川中路店)",
+          "sortOrder": 15,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 57,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_crystal_orange_hotel_shanghai_yu_garden_",
+          "tierCode": "S2-7",
+          "name": "Crystal Orange Hotel Shanghai Yu Garden On the Bund",
+          "chineseName": "桔子水晶酒店（上海外滩豫园店）",
+          "sortOrder": 16,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 71,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_ibis_shanghai_yu_garden",
+          "tierCode": "S2-8",
+          "name": "ibis Shanghai Yu Garden",
+          "chineseName": "宜必思酒店（上海豫园店）",
+          "sortOrder": 17,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 50,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_captain_hostel_the_bund",
+          "tierCode": "S3-1",
+          "name": "Captain Hostel (The Bund)",
+          "chineseName": "上海船长青年酒店（外滩店）",
+          "sortOrder": 20,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 14,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_mingtown_hiker_youth_hostel",
+          "tierCode": "S3-2",
+          "name": "Mingtown Hiker Youth Hostel",
+          "chineseName": "明堂上海徒步者青年旅舍",
+          "sortOrder": 21,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_mingtown_nanjing_road_youth_hostel",
+          "tierCode": "S3-3",
+          "name": "Mingtown Nanjing Road Youth Hostel",
+          "chineseName": "明堂上海南京路青年旅舍",
+          "sortOrder": 22,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_blue_mountain_youth_hostel",
+          "tierCode": "S3-4",
+          "name": "Blue Mountain Youth Hostel",
+          "chineseName": "上海蓝山国际青年旅舍",
+          "sortOrder": 23,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_shanghai_le_tour_traveler_s_rest_youth_hostel",
+          "tierCode": "S3-5",
+          "name": "Le Tour Traveler's Rest Youth Hostel",
+          "chineseName": "上海乐途静安国际青年旅舍",
+          "sortOrder": 24,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 14,
+          "warnings": []
+        }
+      ],
+      "skipped": [],
+      "namingMismatches": [
+        {
+          "tierCode": "S1-1",
+          "overviewName": "Fairmont Peace Hotel",
+          "detailName": "Fairmont Peace Hotel, Shanghai"
+        },
+        {
+          "tierCode": "S2-1",
+          "overviewName": "Jin Jiang Hotel",
+          "detailName": "Jin Jiang Hotel Shanghai"
+        },
+        {
+          "tierCode": "S2-6",
+          "overviewName": "Ji Hotel Shanghai The Bund",
+          "detailName": "JI Hotel (Shanghai The Bund Sichuan Middle Road)"
+        },
+        {
+          "tierCode": "S2-7",
+          "overviewName": "Crystal Orange Hotel Shanghai The Bund",
+          "detailName": "Crystal Orange Hotel Shanghai Yu Garden On the Bund"
+        },
+        {
+          "tierCode": "S2-8",
+          "overviewName": "ibis Shanghai People's Square",
+          "detailName": "ibis Shanghai Yu Garden"
+        },
+        {
+          "tierCode": "S3-1",
+          "overviewName": "Captain Hostel",
+          "detailName": "Captain Hostel (The Bund)"
+        }
+      ],
+      "deletedIds": [],
+      "stats": {
+        "imported": 21,
+        "skipped": 0,
+        "deleted": 0
+      }
+    },
+    {
+      "cityId": "chongqing",
+      "sourcePath": "/Users/vesperal/Desktop/EN_Chongqing_Hotel_Recommendations.md",
+      "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/hotels_chongqing_upsert.sql",
+      "imported": [
+        {
+          "id": "hotel_chongqing_niccolo_chongqing",
+          "tierCode": "C1-1",
+          "name": "Niccolo Chongqing",
+          "chineseName": "重庆尼依格罗酒店",
+          "sortOrder": 0,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 171,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_the_westin_chongqing_liberation_square",
+          "tierCode": "C1-2",
+          "name": "The Westin Chongqing Liberation Square",
+          "chineseName": "重庆解放碑威斯汀酒店",
+          "sortOrder": 1,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_jw_marriott_hotel_chongqing",
+          "tierCode": "C1-3",
+          "name": "JW Marriott Hotel Chongqing",
+          "chineseName": "重庆JW万豪酒店",
+          "sortOrder": 2,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_sheraton_chongqing_hotel",
+          "tierCode": "C1-4",
+          "name": "Sheraton Chongqing Hotel",
+          "chineseName": "重庆南滨路喜来登大酒店",
+          "sortOrder": 3,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_intercontinental_chongqing",
+          "tierCode": "C1-5",
+          "name": "InterContinental Chongqing",
+          "chineseName": "重庆洲际酒店",
+          "sortOrder": 4,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_banyan_tree_chongqing_beibei",
+          "tierCode": "C1-6",
+          "name": "Banyan Tree Chongqing Beibei",
+          "chineseName": "重庆北碚悦榕庄",
+          "sortOrder": 5,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 214,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_kempinski_hotel_chongqing",
+          "tierCode": "C1-7",
+          "name": "Kempinski Hotel Chongqing",
+          "chineseName": "重庆南滨路凯宾斯基酒店",
+          "sortOrder": 6,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_mercure_chongqing_jiefangbei",
+          "tierCode": "C2-1",
+          "name": "Mercure Chongqing Jiefangbei",
+          "chineseName": "重庆解放碑美居酒店",
+          "sortOrder": 10,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_atour_hotel_chongqing_jiefangbei",
+          "tierCode": "C2-2",
+          "name": "Atour Hotel Chongqing Jiefangbei",
+          "chineseName": "重庆解放碑亚朵酒店",
+          "sortOrder": 11,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 57,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_ji_hotel_chongqing_guanyinqiao",
+          "tierCode": "C2-3",
+          "name": "Ji Hotel Chongqing Guanyinqiao",
+          "chineseName": "全季酒店重庆观音桥步行街店",
+          "sortOrder": 12,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 50,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_crystal_orange_hotel_chongqing_jiefangbe",
+          "tierCode": "C2-4",
+          "name": "Crystal Orange Hotel Chongqing Jiefangbei",
+          "chineseName": "重庆解放碑桔子水晶酒店",
+          "sortOrder": 13,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_ibis_chongqing_jiefangbei",
+          "tierCode": "C2-5",
+          "name": "ibis Chongqing Jiefangbei",
+          "chineseName": "重庆解放碑宜必思酒店",
+          "sortOrder": 14,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 43,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_riverside_international_youth_hostel_yue",
+          "tierCode": "C3-1",
+          "name": "Riverside International Youth Hostel (Yuejiang Laoyuan)",
+          "chineseName": "重庆阅江老院青年旅舍",
+          "sortOrder": 20,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_backpacker_ten_years_hostel_shanchengxia",
+          "tierCode": "C3-2",
+          "name": "Backpacker Ten Years Hostel (Shanchengxiang)",
+          "chineseName": "重庆背包十年青年旅舍（解放碑·山城巷店）",
+          "sortOrder": 21,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_zonextra_hostel",
+          "tierCode": "C3-3",
+          "name": "Zonextra Hostel",
+          "chineseName": "重庆东十三区青年旅舍",
+          "sortOrder": 22,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_chishan_culture_hostel",
+          "tierCode": "C3-4",
+          "name": "Chishan Culture Hostel",
+          "chineseName": "重庆吃山文化青年旅店",
+          "sortOrder": 23,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chongqing_yolo_eling_art_gallery_hotel",
+          "tierCode": "C3-5",
+          "name": "YOLO Eling Art Gallery Hotel",
+          "chineseName": "YOLO鹅岭美术馆酒店(重庆鹅岭二厂文创公园店)",
+          "sortOrder": 24,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        }
+      ],
+      "skipped": [],
+      "namingMismatches": [],
+      "deletedIds": [],
+      "stats": {
+        "imported": 17,
+        "skipped": 0,
+        "deleted": 0
+      }
+    },
+    {
+      "cityId": "nanjing",
+      "sourcePath": "/Users/vesperal/Desktop/EN_Nanjing_Hotel_Recommendations.md",
+      "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/hotels_nanjing_upsert.sql",
+      "imported": [
+        {
+          "id": "hotel_nanjing_shangri_la_hotel_nanjing",
+          "tierCode": "N1-1",
+          "name": "Shangri-La Hotel, Nanjing",
+          "chineseName": "南京香格里拉大酒店",
+          "sortOrder": 0,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 129,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_fairmont_nanjing",
+          "tierCode": "N1-2",
+          "name": "Fairmont Nanjing",
+          "chineseName": "南京金奥费尔蒙酒店",
+          "sortOrder": 1,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 129,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_the_ritz_carlton_nanjing",
+          "tierCode": "N1-3",
+          "name": "The Ritz-Carlton, Nanjing",
+          "chineseName": "南京丽思卡尔顿酒店",
+          "sortOrder": 2,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 143,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_intercontinental_nanjing",
+          "tierCode": "N1-4",
+          "name": "InterContinental Nanjing",
+          "chineseName": "南京绿地洲际酒店",
+          "sortOrder": 3,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_the_westin_nanjing",
+          "tierCode": "N1-5",
+          "name": "The Westin Nanjing",
+          "chineseName": "南京威斯汀大酒店",
+          "sortOrder": 4,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_jinling_hotel_nanjing",
+          "tierCode": "N1-6",
+          "name": "Jinling Hotel Nanjing",
+          "chineseName": "南京金陵饭店",
+          "sortOrder": 5,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_the_mansion_hotel_nanjing_mgallery_accor",
+          "tierCode": "N1-7",
+          "name": "The Mansion Hotel Nanjing - MGallery (Accor)",
+          "chineseName": "南京颐和公馆",
+          "sortOrder": 6,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 171,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_grand_hotel_nanjing",
+          "tierCode": "N2-1",
+          "name": "Grand Hotel Nanjing",
+          "chineseName": "南京古南都饭店",
+          "sortOrder": 10,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_mercure_nanjing_olympic",
+          "tierCode": "N2-2",
+          "name": "Mercure Nanjing Olympic",
+          "chineseName": "南京美居酒店（新街口/奥体片区）",
+          "sortOrder": 11,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_novotel_nanjing_center",
+          "tierCode": "N2-3",
+          "name": "Novotel Nanjing Center",
+          "chineseName": "南京中心大酒店诺富特",
+          "sortOrder": 12,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_atour_hotel_nanjing_xinjiekou",
+          "tierCode": "N2-4",
+          "name": "Atour Hotel Nanjing Xinjiekou",
+          "chineseName": "南京新街口亚朵酒店",
+          "sortOrder": 13,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 57,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_ji_hotel_nanjing_confucius_temple",
+          "tierCode": "N2-5",
+          "name": "Ji Hotel Nanjing Confucius Temple",
+          "chineseName": "南京夫子庙全季酒店",
+          "sortOrder": 14,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 50,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_crystal_orange_hotel_nanjing_xinjiekou",
+          "tierCode": "N2-7",
+          "name": "Crystal Orange Hotel Nanjing Xinjiekou",
+          "chineseName": "南京新街口桔子水晶酒店",
+          "sortOrder": 16,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_ibis_nanjing_zhonghua_confucius_temple",
+          "tierCode": "N2-8",
+          "name": "ibis Nanjing Zhonghua / Confucius Temple",
+          "chineseName": "南京宜必思酒店（中华路·夫子庙店，近新街口）",
+          "sortOrder": 17,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 43,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_nanjing_fuzimiao_international_youth_hos",
+          "tierCode": "N3-1",
+          "name": "Nanjing Fuzimiao International Youth Hostel",
+          "chineseName": "南京夫子庙国际青年旅舍",
+          "sortOrder": 20,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_laomendong_old_town_hostel",
+          "tierCode": "N3-2",
+          "name": "Laomendong Old Town Hostel",
+          "chineseName": "南京老门东青年旅舍",
+          "sortOrder": 21,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_kuangye_hostel_nanjing_xinjiekou",
+          "tierCode": "N3-3",
+          "name": "Kuangye Hostel (Nanjing Xinjiekou)",
+          "chineseName": "旷野青年旅舍（南京新街口店）",
+          "sortOrder": 22,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_nanjing_bilin_youth_hostel_nanjing_confucius_tem",
+          "tierCode": "N3-4",
+          "name": "Bilin Youth Hostel (Nanjing Confucius Temple Sanshanjie Metro Station)",
+          "chineseName": "比邻青年旅舍（南京夫子庙三山街地铁站店）",
+          "sortOrder": 23,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        }
+      ],
+      "skipped": [],
+      "namingMismatches": [],
+      "deletedIds": [],
+      "stats": {
+        "imported": 18,
+        "skipped": 0,
+        "deleted": 0
+      }
+    },
+    {
+      "cityId": "hangzhou",
+      "sourcePath": "/Users/vesperal/Desktop/EN_Hangzhou_Hotel_Recommendations.md",
+      "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/hotels_hangzhou_upsert.sql",
+      "imported": [
+        {
+          "id": "hotel_hangzhou_four_seasons_hotel_hangzhou_at_west_lake",
+          "tierCode": "H1-1",
+          "name": "Four Seasons Hotel Hangzhou at West Lake",
+          "chineseName": "杭州西子湖四季酒店",
+          "sortOrder": 0,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 429,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_amanfayun",
+          "tierCode": "H1-2",
+          "name": "Amanfayun",
+          "chineseName": "杭州法云安缦",
+          "sortOrder": 1,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 571,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_west_lake_state_guest_house_liu_villa",
+          "tierCode": "H1-3",
+          "name": "West Lake State Guest House (Liu Villa)",
+          "chineseName": "杭州西湖国宾馆（刘庄）",
+          "sortOrder": 2,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 257,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_park_hyatt_hangzhou",
+          "tierCode": "H1-4",
+          "name": "Park Hyatt Hangzhou",
+          "chineseName": "杭州柏悦酒店",
+          "sortOrder": 3,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 171,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_grand_hyatt_hangzhou",
+          "tierCode": "H1-5",
+          "name": "Grand Hyatt Hangzhou",
+          "chineseName": "杭州君悦酒店",
+          "sortOrder": 4,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 171,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_hyatt_regency_hangzhou_international_air",
+          "tierCode": "H1-6",
+          "name": "Hyatt Regency Hangzhou International Airport",
+          "chineseName": "杭州萧山机场凯悦酒店",
+          "sortOrder": 5,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_banyan_tree_hangzhou",
+          "tierCode": "H1-7",
+          "name": "Banyan Tree Hangzhou",
+          "chineseName": "杭州西溪悦榕庄",
+          "sortOrder": 6,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 214,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_conrad_hangzhou",
+          "tierCode": "H1-8",
+          "name": "Conrad Hangzhou",
+          "chineseName": "杭州康莱德酒店",
+          "sortOrder": 7,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 129,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_hangzhou_xinxin_hotel",
+          "tierCode": "H2-1",
+          "name": "Hangzhou Xinxin Hotel",
+          "chineseName": "杭州新新饭店",
+          "sortOrder": 10,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 86,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_mercure_hangzhou_west_lake",
+          "tierCode": "H2-2",
+          "name": "Mercure Hangzhou West Lake",
+          "chineseName": "杭州西湖美居酒店",
+          "sortOrder": 11,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_novotel_hangzhou",
+          "tierCode": "H2-3",
+          "name": "Novotel Hangzhou",
+          "chineseName": "杭州新天地诺富特酒店",
+          "sortOrder": 12,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_atour_hotel_hangzhou_hubin",
+          "tierCode": "H2-4",
+          "name": "Atour Hotel Hangzhou Hubin",
+          "chineseName": "杭州湖滨亚朵酒店",
+          "sortOrder": 13,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_ji_hotel_hangzhou_west_lake",
+          "tierCode": "H2-5",
+          "name": "Ji Hotel Hangzhou West Lake",
+          "chineseName": "杭州西湖全季酒店",
+          "sortOrder": 14,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 57,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_crystal_orange_hotel_hangzhou_wulin",
+          "tierCode": "H2-6",
+          "name": "Crystal Orange Hotel Hangzhou Wulin",
+          "chineseName": "杭州武林桔子水晶酒店",
+          "sortOrder": 15,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_ibis_hangzhou_west_lake",
+          "tierCode": "H2-7",
+          "name": "ibis Hangzhou West Lake",
+          "chineseName": "杭州西湖宜必思酒店",
+          "sortOrder": 16,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 43,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_hangzhou_international_youth_hostel_ming",
+          "tierCode": "H3-1",
+          "name": "Hangzhou International Youth Hostel (Mingtown)",
+          "chineseName": "杭州国际青年旅舍（明堂·西湖店）",
+          "sortOrder": 20,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 14,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_westlake_youth_hostel_hangzhou_traveller",
+          "tierCode": "H3-2",
+          "name": "Westlake Youth Hostel (Hangzhou Travellers Hostel)",
+          "chineseName": "杭州过客青年旅馆（西湖之南）",
+          "sortOrder": 21,
+          "acceptsForeigners": true,
+          "isActive": false,
+          "priceMinUsd": 13,
+          "warnings": [
+            "marked_inactive_by_plan"
+          ]
+        },
+        {
+          "id": "hotel_hangzhou_wushanyi_international_youth_hostel",
+          "tierCode": "H3-3",
+          "name": "Wushanyi International Youth Hostel",
+          "chineseName": "杭州吴山驿国际青年旅舍",
+          "sortOrder": 22,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_hangzhou_hofang_guest_house_hofang_international_",
+          "tierCode": "H3-4",
+          "name": "Hofang Guest House (Hofang International Youth Hostel)",
+          "chineseName": "杭州荷方国际青年旅舍",
+          "sortOrder": 23,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 14,
+          "warnings": []
+        }
+      ],
+      "skipped": [
+        {
+          "tierCode": "H2-8",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        },
+        {
+          "tierCode": "H3-5",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        },
+        {
+          "tierCode": "H3-6",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        },
+        {
+          "tierCode": "H3-7",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        },
+        {
+          "tierCode": "H3-8",
+          "reason": "no_detail_section",
+          "detail": "listed in overview only"
+        }
+      ],
+      "namingMismatches": [
+        {
+          "tierCode": "H1-3",
+          "overviewName": "West Lake State Guest House",
+          "detailName": "West Lake State Guest House (Liu Villa)"
+        },
+        {
+          "tierCode": "H1-6",
+          "overviewName": "Hyatt Regency Hangzhou",
+          "detailName": "Hyatt Regency Hangzhou International Airport"
+        },
+        {
+          "tierCode": "H2-4",
+          "overviewName": "Holiday Inn Express Hangzhou Wulin",
+          "detailName": "Atour Hotel Hangzhou Hubin"
+        },
+        {
+          "tierCode": "H2-5",
+          "overviewName": "Atour Hotel Hangzhou Hubin",
+          "detailName": "Ji Hotel Hangzhou West Lake"
+        },
+        {
+          "tierCode": "H2-6",
+          "overviewName": "Ji Hotel Hangzhou West Lake",
+          "detailName": "Crystal Orange Hotel Hangzhou Wulin"
+        },
+        {
+          "tierCode": "H2-7",
+          "overviewName": "Crystal Orange Hotel Hangzhou Wulin",
+          "detailName": "ibis Hangzhou West Lake"
+        },
+        {
+          "tierCode": "H3-1",
+          "overviewName": "Hangzhou International Youth Hostel",
+          "detailName": "Hangzhou International Youth Hostel (Mingtown)"
+        },
+        {
+          "tierCode": "H3-2",
+          "overviewName": "Westlake Youth Hostel",
+          "detailName": "Westlake Youth Hostel (Hangzhou Travellers Hostel)"
+        },
+        {
+          "tierCode": "H3-4",
+          "overviewName": "Hofang Guest House",
+          "detailName": "Hofang Guest House (Hofang International Youth Hostel)"
+        }
+      ],
+      "deletedIds": [],
+      "stats": {
+        "imported": 19,
+        "skipped": 5,
+        "deleted": 0
+      }
+    },
+    {
+      "cityId": "suzhou",
+      "sourcePath": "/Users/vesperal/Desktop/EN_Suzhou_Hotel_Recommendations.md",
+      "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/hotels_suzhou_upsert.sql",
+      "imported": [
+        {
+          "id": "hotel_suzhou_niccolo_suzhou",
+          "tierCode": "Z1-1",
+          "name": "Niccolo Suzhou",
+          "chineseName": "苏州尼依格罗酒店",
+          "sortOrder": 0,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 143,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_w_suzhou",
+          "tierCode": "Z1-2",
+          "name": "W Suzhou",
+          "chineseName": "苏州W酒店",
+          "sortOrder": 1,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 129,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_kempinski_hotel_suzhou",
+          "tierCode": "Z1-3",
+          "name": "Kempinski Hotel Suzhou",
+          "chineseName": "苏州金鸡湖凯宾斯基大酒店",
+          "sortOrder": 2,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_intercontinental_suzhou",
+          "tierCode": "Z1-4",
+          "name": "InterContinental Suzhou",
+          "chineseName": "苏州洲际酒店",
+          "sortOrder": 3,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_shangri_la_hotel_suzhou",
+          "tierCode": "Z1-5",
+          "name": "Shangri-La Hotel, Suzhou",
+          "chineseName": "苏州香格里拉大酒店",
+          "sortOrder": 4,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_pan_pacific_suzhou",
+          "tierCode": "Z1-6",
+          "name": "Pan Pacific Suzhou",
+          "chineseName": "苏州吴宫泛太平洋酒店",
+          "sortOrder": 5,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_garden_hotel_suzhou",
+          "tierCode": "Z1-7",
+          "name": "Garden Hotel Suzhou",
+          "chineseName": "苏州南园宾馆",
+          "sortOrder": 6,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_scholars_hotel_pingjiang_mansion",
+          "tierCode": "Z1-8",
+          "name": "Scholars Hotel Pingjiang Mansion",
+          "chineseName": "苏州书香府邸·平江府酒店",
+          "sortOrder": 7,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 129,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_nanlin_hotel_suzhou",
+          "tierCode": "Z2-1",
+          "name": "Nanlin Hotel Suzhou",
+          "chineseName": "苏州南林饭店",
+          "sortOrder": 10,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 71,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_mercure_suzhou_jinji_lake",
+          "tierCode": "Z2-2",
+          "name": "Mercure Suzhou Jinji Lake",
+          "chineseName": "苏州工业园区美居酒店",
+          "sortOrder": 11,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_novotel_suzhou_sip",
+          "tierCode": "Z2-3",
+          "name": "Novotel Suzhou SIP",
+          "chineseName": "苏州诺富特酒店（工业园区）",
+          "sortOrder": 12,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_voco_suzhou_guanqian",
+          "tierCode": "Z2-4",
+          "name": "voco Suzhou Guanqian",
+          "chineseName": "voco 苏州观前街酒店",
+          "sortOrder": 13,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 71,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_atour_hotel_suzhou_guanqian",
+          "tierCode": "Z2-5",
+          "name": "Atour Hotel Suzhou Guanqian",
+          "chineseName": "苏州观前街亚朵酒店",
+          "sortOrder": 14,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 57,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_ji_hotel_suzhou_pingjiang_road",
+          "tierCode": "Z2-6",
+          "name": "Ji Hotel Suzhou Pingjiang Road",
+          "chineseName": "苏州平江路全季酒店",
+          "sortOrder": 15,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 50,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_crystal_orange_hotel_suzhou_guanqian",
+          "tierCode": "Z2-7",
+          "name": "Crystal Orange Hotel Suzhou Guanqian",
+          "chineseName": "苏州观前街桔子水晶酒店",
+          "sortOrder": 16,
+          "acceptsForeigners": false,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_ibis_suzhou_guanqian",
+          "tierCode": "Z2-8",
+          "name": "ibis Suzhou Guanqian",
+          "chineseName": "苏州观前街宜必思酒店",
+          "sortOrder": 17,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 43,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_mingtown_suzhou_international_youth_host",
+          "tierCode": "Z3-1",
+          "name": "Mingtown Suzhou International Youth Hostel",
+          "chineseName": "苏州明堂青年旅舍（平江路店）",
+          "sortOrder": 20,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_meetu_zhai_international_youth_hostel",
+          "tierCode": "Z3-2",
+          "name": "Meetu (Zhai) International Youth Hostel",
+          "chineseName": "窄·遇见设计师服务青旅（苏州观前街平江路店）",
+          "sortOrder": 21,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_suzhou_blue_gate_youth_hostel",
+          "tierCode": "Z3-3",
+          "name": "Suzhou Blue Gate Youth Hostel",
+          "chineseName": "苏州蓝色大门青年旅舍",
+          "sortOrder": 22,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_bufu_shaohua_youth_hostel_suzhou_youth_h",
+          "tierCode": "Z3-4",
+          "name": "Bufu Shaohua Youth Hostel / Suzhou Youth Hostel Zhuozhengyuan Shizilin",
+          "chineseName": "苏州不负韶华青年旅馆（＝不负韶华青年旅舍·苏州拙政园狮子林店）",
+          "sortOrder": 23,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_desti_youth_park_suzhou",
+          "tierCode": "Z3-5",
+          "name": "Desti Youth Park Suzhou",
+          "chineseName": "背包十年青年旅舍（苏州山塘街店）",
+          "sortOrder": 24,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_suzhou_panmen_youth_hostel_suzhou",
+          "tierCode": "Z3-8",
+          "name": "Panmen Youth Hostel Suzhou",
+          "chineseName": "苏州盘门青年旅舍",
+          "sortOrder": 27,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        }
+      ],
+      "skipped": [
+        {
+          "tierCode": "Z3-6",
+          "reason": "incomplete_fields",
+          "detail": "missing: Chinese Address, English Address, Accepts Foreign Passport, English Service"
+        },
+        {
+          "tierCode": "Z3-7",
+          "reason": "duplicate_merged",
+          "detail": "Suzhou Humble Administrator's Garden · Lion Grove Garden Youth Hostel ⚠️ Duplicate of Z3-4, merged"
+        }
+      ],
+      "namingMismatches": [
+        {
+          "tierCode": "Z1-5",
+          "overviewName": "Shangri-La Hotel Suzhou",
+          "detailName": "Shangri-La Hotel, Suzhou"
+        },
+        {
+          "tierCode": "Z2-4",
+          "overviewName": "⚠️ Guanqian Holiday Inn Express → actually voco Guanqian",
+          "detailName": "voco Suzhou Guanqian"
+        },
+        {
+          "tierCode": "Z3-2",
+          "overviewName": "Meetu Int'l Youth Hostel",
+          "detailName": "Meetu (Zhai) International Youth Hostel"
+        },
+        {
+          "tierCode": "Z3-4",
+          "overviewName": "Bufu Shaohua Youth Hostel (= Humble Administrator's Garden / Lion Grove Garden Branch)",
+          "detailName": "Bufu Shaohua Youth Hostel / Suzhou Youth Hostel Zhuozhengyuan Shizilin"
+        }
+      ],
+      "deletedIds": [],
+      "stats": {
+        "imported": 22,
+        "skipped": 2,
+        "deleted": 0
+      }
+    },
+    {
+      "cityId": "chengdu",
+      "sourcePath": "/Users/vesperal/Desktop/ZH_Chengdu_Hotel_Recommendations_EN.md",
+      "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/hotels_chengdu_upsert.sql",
+      "imported": [
+        {
+          "id": "hotel_chengdu_temple_house",
+          "tierCode": "T1-1",
+          "name": "The Temple House Chengdu",
+          "chineseName": "成都博舍酒店",
+          "sortOrder": 0,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 214,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_niccolo",
+          "tierCode": "T1-2",
+          "name": "Niccolo Chengdu",
+          "chineseName": "成都尼依格罗酒店",
+          "sortOrder": 1,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 171,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_wanda_reign",
+          "tierCode": "T1-3",
+          "name": "Wanda Reign Chengdu",
+          "chineseName": "成都万达瑞华酒店",
+          "sortOrder": 2,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_jw_marriott",
+          "tierCode": "T1-4",
+          "name": "JW Marriott Hotel Chengdu",
+          "chineseName": "成都JW万豪酒店",
+          "sortOrder": 3,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_shangri_la",
+          "tierCode": "T1-5",
+          "name": "Shangri-La Hotel Chengdu",
+          "chineseName": "成都香格里拉大酒店",
+          "sortOrder": 4,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 114,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_palm_springs",
+          "tierCode": "T1-6",
+          "name": "Palm Springs Hotel Chengdu, Vignette Collection",
+          "chineseName": "洲至奢选成都棕榈泉酒店",
+          "sortOrder": 5,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_intercontinental_century_city",
+          "tierCode": "T1-7",
+          "name": "InterContinental Century City Chengdu by IHG",
+          "chineseName": "成都世纪城洲际酒店",
+          "sortOrder": 6,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 100,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_hanshi_wuhou",
+          "tierCode": "T1-8",
+          "name": "Hanshi Hotel – Chengdu Jinli Wuhou Temple Branch",
+          "chineseName": "汉式主题精品酒店（成都锦里武侯祠店）",
+          "sortOrder": 7,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 57,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_holiday_inn_express_gulou",
+          "tierCode": "T2-1",
+          "name": "Holiday Inn Express Chengdu Gulou by IHG",
+          "chineseName": "成都鼓楼智选假日酒店",
+          "sortOrder": 10,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 50,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_hampton_chunxi",
+          "tierCode": "T2-2",
+          "name": "Hampton by Hilton Chengdu Chunxi Road",
+          "chineseName": "成都春熙路汉普顿酒店",
+          "sortOrder": 11,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 64,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_hilton_garden_kuanzhai",
+          "tierCode": "T2-3",
+          "name": "Hilton Garden Inn Chengdu Kuanzhai Alley",
+          "chineseName": "成都宽窄巷子希尔顿花园酒店",
+          "sortOrder": 12,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 71,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_atour_taikoo_li",
+          "tierCode": "T2-4",
+          "name": "Atour Hotel Chengdu Taikoo Li Chunxi Road Pedestrian",
+          "chineseName": "成都太古里春熙路步行街亚朵酒店",
+          "sortOrder": 13,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 50,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_ji_kuanzhai",
+          "tierCode": "T2-5",
+          "name": "Ji Hotel Chengdu Kuanzhai Alley",
+          "chineseName": "全季成都宽窄巷子酒店",
+          "sortOrder": 14,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 40,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_mercure_downtown",
+          "tierCode": "T2-6",
+          "name": "Mercure Chengdu Downtown",
+          "chineseName": "成都市中心美居酒店（宽窄巷）",
+          "sortOrder": 15,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 43,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_novotel_chunxi",
+          "tierCode": "T2-7",
+          "name": "Novotel Chengdu Chunxi Road",
+          "chineseName": "成都春熙路诺富特酒店",
+          "sortOrder": 16,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 57,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_courtyard_south",
+          "tierCode": "T2-8",
+          "name": "Courtyard by Marriott Chengdu South",
+          "chineseName": "成都天府南万怡酒店",
+          "sortOrder": 17,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 57,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_mix_hostel",
+          "tierCode": "T3-1",
+          "name": "Chengdu Mix Hostel – Cicada Zen Yard (Poshpacker)",
+          "chineseName": "成都驴友记青年旅舍（Poshpacker品牌）",
+          "sortOrder": 20,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_flipflop_hostel",
+          "tierCode": "T3-2",
+          "name": "Poshpacker – Chengdu Flipflop Hostel",
+          "chineseName": "成都拖板鞋青年旅舍（Poshpacker品牌）",
+          "sortOrder": 21,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 12,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_mrs_panda_hostel",
+          "tierCode": "T3-3",
+          "name": "Mrs Panda Hostel Chengdu",
+          "chineseName": "成都Mrs熊猫青年旅舍",
+          "sortOrder": 22,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 14,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_lazybones_hostel",
+          "tierCode": "T3-4",
+          "name": "Sonderia Hostel & Bar – Lazybones Hostel (Wenshu Temple Side)",
+          "chineseName": "成都Sonderia懒骨头青年旅舍（文殊院旁）",
+          "sortOrder": 23,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_dreams_travel_hostel",
+          "tierCode": "T3-5",
+          "name": "Chengdu Dreams Travel International Youth Hostel",
+          "chineseName": "成都梦之旅国际青年旅舍",
+          "sortOrder": 24,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 6,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_desti_hostel_taikoo_li",
+          "tierCode": "T3-6",
+          "name": "Chengdu Desti Youth Park Hostel – Taikoo Li",
+          "chineseName": "成都贝宝时年青年旅舍（太古里店）",
+          "sortOrder": 25,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 13,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_loft_hostel",
+          "tierCode": "T3-7",
+          "name": "The Loft Design Hostel Chengdu",
+          "chineseName": "成都阁楼设计青年旅舍",
+          "sortOrder": 26,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 11,
+          "warnings": []
+        },
+        {
+          "id": "hotel_chengdu_atour_light_taikoo_li",
+          "tierCode": "T3-8",
+          "name": "Atour Light Hotel Chengdu Taikoo Li Chunxi Road Metro Station",
+          "chineseName": "成都太古里春熙路地铁站亚朵轻居酒店",
+          "sortOrder": 27,
+          "acceptsForeigners": true,
+          "isActive": true,
+          "priceMinUsd": 21,
+          "warnings": []
+        }
+      ],
+      "skipped": [],
+      "namingMismatches": [
+        {
+          "tierCode": "T1-6",
+          "overviewName": "Palm Springs Chengdu, Vignette Collection",
+          "detailName": "Palm Springs Hotel Chengdu, Vignette Collection"
+        },
+        {
+          "tierCode": "T1-7",
+          "overviewName": "InterContinental Century City Chengdu",
+          "detailName": "InterContinental Century City Chengdu by IHG"
+        },
+        {
+          "tierCode": "T1-8",
+          "overviewName": "Hanshi Hotel – Wuhou Temple Branch",
+          "detailName": "Hanshi Hotel – Chengdu Jinli Wuhou Temple Branch"
+        },
+        {
+          "tierCode": "T2-1",
+          "overviewName": "Holiday Inn Express Chengdu Gulou",
+          "detailName": "Holiday Inn Express Chengdu Gulou by IHG"
+        },
+        {
+          "tierCode": "T2-4",
+          "overviewName": "Atour Hotel Chengdu Taikoo Li Chunxi Road",
+          "detailName": "Atour Hotel Chengdu Taikoo Li Chunxi Road Pedestrian"
+        },
+        {
+          "tierCode": "T3-1",
+          "overviewName": "Chengdu Mix Hostel (Poshpacker)",
+          "detailName": "Chengdu Mix Hostel – Cicada Zen Yard (Poshpacker)"
+        },
+        {
+          "tierCode": "T3-2",
+          "overviewName": "Flipflop Hostel Chengdu (Poshpacker)",
+          "detailName": "Poshpacker – Chengdu Flipflop Hostel"
+        },
+        {
+          "tierCode": "T3-3",
+          "overviewName": "Mrs Panda Hostel",
+          "detailName": "Mrs Panda Hostel Chengdu"
+        },
+        {
+          "tierCode": "T3-4",
+          "overviewName": "Sonderia Lazybones Hostel",
+          "detailName": "Sonderia Hostel & Bar – Lazybones Hostel (Wenshu Temple Side)"
+        },
+        {
+          "tierCode": "T3-5",
+          "overviewName": "Dreams Travel International Youth Hostel",
+          "detailName": "Chengdu Dreams Travel International Youth Hostel"
+        },
+        {
+          "tierCode": "T3-6",
+          "overviewName": "Desti Youth Park Hostel – Taikoo Li",
+          "detailName": "Chengdu Desti Youth Park Hostel – Taikoo Li"
+        },
+        {
+          "tierCode": "T3-7",
+          "overviewName": "The Loft Design Hostel",
+          "detailName": "The Loft Design Hostel Chengdu"
+        },
+        {
+          "tierCode": "T3-8",
+          "overviewName": "Atour Light Hotel Taikoo Li Chengdu",
+          "detailName": "Atour Light Hotel Chengdu Taikoo Li Chunxi Road Metro Station"
+        }
+      ],
+      "deletedIds": [],
+      "stats": {
+        "imported": 24,
+        "skipped": 0,
+        "deleted": 0
+      }
+    }
+  ],
+  "stats": {
+    "cities": 7,
+    "imported": 140,
+    "skipped": 12,
+    "deleted": 1
+  },
+  "chengduIds": [
+    "hotel_chengdu_temple_house",
+    "hotel_chengdu_niccolo",
+    "hotel_chengdu_wanda_reign",
+    "hotel_chengdu_jw_marriott",
+    "hotel_chengdu_shangri_la",
+    "hotel_chengdu_palm_springs",
+    "hotel_chengdu_intercontinental_century_city",
+    "hotel_chengdu_hanshi_wuhou",
+    "hotel_chengdu_holiday_inn_express_gulou",
+    "hotel_chengdu_hampton_chunxi",
+    "hotel_chengdu_hilton_garden_kuanzhai",
+    "hotel_chengdu_atour_taikoo_li",
+    "hotel_chengdu_ji_kuanzhai",
+    "hotel_chengdu_mercure_downtown",
+    "hotel_chengdu_novotel_chunxi",
+    "hotel_chengdu_courtyard_south",
+    "hotel_chengdu_mix_hostel",
+    "hotel_chengdu_flipflop_hostel",
+    "hotel_chengdu_mrs_panda_hostel",
+    "hotel_chengdu_lazybones_hostel",
+    "hotel_chengdu_dreams_travel_hostel",
+    "hotel_chengdu_desti_hostel_taikoo_li",
+    "hotel_chengdu_loft_hostel",
+    "hotel_chengdu_atour_light_taikoo_li"
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-07-07T14:37:37.259Z",
+  "inputDirCount": 15,
+  "totalRows": 149,
+  "reusedCoverUrls": 0,
+  "newlyUploadedImages": 149,
+  "missingImages": 0,
+  "unmatchedAttractions": [],
+  "missingItems": [],
+  "attractions": [
+    {
+      "name": "法喜寺",
+      "count": 10
+    },
+    {
+      "name": "大运河拱宸桥",
+      "count": 10
+    },
+    {
+      "name": "河坊街（清河坊历史街区）",
+      "count": 10
+    },
+    {
+      "name": "京杭大运河（杭州段）",
+      "count": 10
+    },
+    {
+      "name": "雷峰塔",
+      "count": 7
+    },
+    {
+      "name": "良渚古城遗址公园",
+      "count": 10
+    },
+    {
+      "name": "灵隐寺",
+      "count": 10
+    },
+    {
+      "name": "六和塔",
+      "count": 10
+    },
+    {
+      "name": "千岛湖景区",
+      "count": 10
+    },
+    {
+      "name": "中国丝绸博物馆",
+      "count": 10
+    },
+    {
+      "name": "西湖",
+      "count": 12
+    },
+    {
+      "name": "西湖文化广场",
+      "count": 10
+    },
+    {
+      "name": "西溪国家湿地公园",
+      "count": 10
+    },
+    {
+      "name": "小河直街",
+      "count": 10
+    },
+    {
+      "name": "浙江省博物馆",
+      "count": 10
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "basedOn": "/Users/vesperal/Desktop/YOLO/scripts/generated/all_content_patch_unmatched_v2_report.json",
+  "generatedAt": "2026-07-07T09:08:01.609Z",
+  "patched": {
+    "attractions": [],
+    "images": [
+      "chongqing_hongya_cave_sa_01",
+      "chongqing_hongya_cave_sa_02",
+      "chongqing_hongya_cave_sa_03",
+      "chongqing_hongya_cave_sa_04",
+      "chongqing_hongya_cave_sa_05",
+      "chongqing_hongya_cave_sa_06",
+      "chongqing_hongya_cave_sa_07",
+      "chongqing_hongya_cave_sa_08",
+      "chongqing_hongya_cave_sa_09",
+      "chongqing_hongya_cave_sa_10",
+      "chongqing_hongya_cave_sa_11",
+      "chongqing_hongya_cave_sa_12",
+      "chongqing_hongya_cave_sa_13",
+      "chongqing_hongya_cave_sa_14",
+      "chongqing_hongya_cave_sa_15",
+      "chongqing_ciqikou_old_town_sa_01",
+      "chongqing_ciqikou_old_town_sa_02",
+      "chongqing_ciqikou_old_town_sa_03",
+      "chongqing_ciqikou_old_town_sa_04",
+      "chongqing_ciqikou_old_town_sa_05",
+      "chongqing_ciqikou_old_town_sa_06",
+      "chongqing_ciqikou_old_town_sa_07",
+      "chongqing_ciqikou_old_town_sa_08",
+      "chongqing_ciqikou_old_town_sa_09",
+      "chongqing_ciqikou_old_town_sa_10",
+      "chongqing_jiefangbei_sa_01",
+      "chongqing_jiefangbei_sa_02",
+      "chongqing_jiefangbei_sa_03",
+      "chongqing_jiefangbei_sa_04",
+      "chongqing_jiefangbei_sa_05",
+      "chongqing_jiefangbei_sa_06"
+    ],
+    "audios": []
+  },
+  "stillUnmatched": {
+    "attractions": [],
+    "images": [
+      "backend:zhujiajiao_ancient_town_sa_01",
+      "backend:zhujiajiao_ancient_town_sa_02",
+      "backend:zhujiajiao_ancient_town_sa_03",
+      "backend:zhujiajiao_ancient_town_sa_04",
+      "backend:zhujiajiao_ancient_town_sa_05",
+      "backend:zhujiajiao_ancient_town_sa_06",
+      "backend:zhujiajiao_ancient_town_sa_07",
+      "backend:zhujiajiao_ancient_town_sa_08",
+      "backend:zhujiajiao_ancient_town_sa_09"
+    ],
+    "audios": []
+  },
+  "confirmedEmptyAudio": []
+}

@@ -1,0 +1,890 @@
+{
+  "generatedAt": "2026-07-08T06:53:03.357Z",
+  "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/beijing_sub_areas_from_guides_upsert.sql",
+  "totalSubAreas": 81,
+  "totalAttractions": 9,
+  "attractions": [
+    {
+      "sourceFile": "/Users/vesperal/Desktop/北京雍和宫景点导览.md",
+      "attractionKey": "雍和宫",
+      "attractionId": "beijing_lama_temple",
+      "subAreaCount": 9,
+      "subAreas": [
+        {
+          "id": "beijing_lama_temple_bj_sa_01",
+          "attraction_id": "beijing_lama_temple",
+          "name_zh": "牌楼院与昭泰门",
+          "name_en": "Archway Courtyard and Zhaotai Gate",
+          "body_length": 915,
+          "sort_order": 0,
+          "seq": "1",
+          "heading": "牌楼院与昭泰门 / Archway Courtyard and Zhaotai Gate"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_02",
+          "attraction_id": "beijing_lama_temple",
+          "name_zh": "钟鼓楼与天王殿",
+          "name_en": "Bell and Drum Towers and the Hall of the Heavenly Kings",
+          "body_length": 1000,
+          "sort_order": 1,
+          "seq": "2",
+          "heading": "钟鼓楼与天王殿 / Bell and Drum Towers and the Hall of the Heavenly Kings"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_03",
+          "attraction_id": "beijing_lama_temple",
+          "name_zh": "喇嘛说碑亭与铜铸须弥山",
+          "name_en": "Stele Pavilion of \"On Lamaism\" and the Bronze Mount Sumeru",
+          "body_length": 873,
+          "sort_order": 2,
+          "seq": "3",
+          "heading": "喇嘛说碑亭与铜铸须弥山 / Stele Pavilion of \"On Lamaism\" and the Bronze Mount Sumeru"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_04",
+          "attraction_id": "beijing_lama_temple",
+          "name_zh": "雍和宫殿·大雄宝殿",
+          "name_en": "Yonghe Palace (Mahavira Hall)",
+          "body_length": 896,
+          "sort_order": 3,
+          "seq": "4",
+          "heading": "雍和宫殿·大雄宝殿 / Yonghe Palace (Mahavira Hall)"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_05",
+          "attraction_id": "beijing_lama_temple",
+          "name_zh": "永佑殿",
+          "name_en": "Yongyou Hall",
+          "body_length": 812,
+          "sort_order": 4,
+          "seq": "5",
+          "heading": "永佑殿 / Yongyou Hall"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_06",
+          "attraction_id": "beijing_lama_temple",
+          "name_zh": "四大扎仓",
+          "name_en": "Four Monastic Colleges (Dratsang)",
+          "body_length": 869,
+          "sort_order": 5,
+          "seq": "6",
+          "heading": "四大扎仓 / Four Monastic Colleges (Dratsang)"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_07",
+          "attraction_id": "beijing_lama_temple",
+          "name_zh": "法轮殿",
+          "name_en": "Falun Hall (Wheel of the Law Hall)",
+          "body_length": 986,
+          "sort_order": 6,
+          "seq": "7",
+          "heading": "法轮殿 / Falun Hall (Wheel of the Law Hall)"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_08",
+          "attraction_id": "beijing_lama_temple",
+          "name_zh": "万福阁",
+          "name_en": "Pavilion of Ten Thousand Blessings (Wanfu Pavilion)",
+          "body_length": 916,
+          "sort_order": 7,
+          "seq": "8",
+          "heading": "万福阁 / Pavilion of Ten Thousand Blessings (Wanfu Pavilion)"
+        },
+        {
+          "id": "beijing_lama_temple_bj_sa_09",
+          "attraction_id": "beijing_lama_temple",
+          "name_zh": "观音洞与绥成殿（结束语）",
+          "name_en": "Guanyin Grotto and Suicheng Hall (Epilogue)",
+          "body_length": 1025,
+          "sort_order": 8,
+          "seq": "9",
+          "heading": "观音洞与绥成殿（结束语） / Guanyin Grotto and Suicheng Hall (Epilogue)"
+        }
+      ]
+    },
+    {
+      "sourceFile": "/Users/vesperal/Desktop/北京颐和园景点导览.md",
+      "attractionKey": "颐和园",
+      "attractionId": "beijing_summer_palace",
+      "subAreaCount": 10,
+      "subAreas": [
+        {
+          "id": "beijing_summer_palace_bj_sa_01",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "东宫门与仁寿殿",
+          "name_en": "East Palace Gate and Hall of Benevolence and Longevity",
+          "body_length": 917,
+          "sort_order": 0,
+          "seq": "1",
+          "heading": "东宫门与仁寿殿 / East Palace Gate and Hall of Benevolence and Longevity"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_02",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "德和园",
+          "name_en": "Garden of Virtue and Harmony",
+          "body_length": 883,
+          "sort_order": 1,
+          "seq": "2",
+          "heading": "德和园 / Garden of Virtue and Harmony"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_03",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "玉澜堂与乐寿堂",
+          "name_en": "Hall of Jade Ripples and Hall of Joyful Longevity",
+          "body_length": 945,
+          "sort_order": 2,
+          "seq": "3",
+          "heading": "玉澜堂与乐寿堂 / Hall of Jade Ripples and Hall of Joyful Longevity"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_04",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "长廊",
+          "name_en": "Long Corridor",
+          "body_length": 887,
+          "sort_order": 3,
+          "seq": "4",
+          "heading": "长廊 / Long Corridor"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_05",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "排云殿、佛香阁与智慧海",
+          "name_en": "Hall of Dispelling Clouds, Tower of Buddhist Incense and Sea of Wisdom",
+          "body_length": 996,
+          "sort_order": 4,
+          "seq": "5",
+          "heading": "排云殿、佛香阁与智慧海 / Hall of Dispelling Clouds, Tower of Buddhist Incense and Sea of Wisdom"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_06",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "石舫",
+          "name_en": "Marble Boat",
+          "body_length": 1009,
+          "sort_order": 5,
+          "seq": "6",
+          "heading": "石舫 / Marble Boat"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_07",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "昆明湖",
+          "name_en": "Kunming Lake",
+          "body_length": 836,
+          "sort_order": 6,
+          "seq": "7",
+          "heading": "昆明湖 / Kunming Lake"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_08",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "十七孔桥与南湖岛",
+          "name_en": "Seventeen-Arch Bridge and South Lake Island",
+          "body_length": 1024,
+          "sort_order": 7,
+          "seq": "8",
+          "heading": "十七孔桥与南湖岛 / Seventeen-Arch Bridge and South Lake Island"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_09",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "铜牛",
+          "name_en": "Bronze Ox",
+          "body_length": 876,
+          "sort_order": 8,
+          "seq": "9",
+          "heading": "铜牛 / Bronze Ox"
+        },
+        {
+          "id": "beijing_summer_palace_bj_sa_10",
+          "attraction_id": "beijing_summer_palace",
+          "name_zh": "新建宫门",
+          "name_en": "Newly Built Palace Gate",
+          "body_length": 1013,
+          "sort_order": 9,
+          "seq": "10",
+          "heading": "新建宫门 / Newly Built Palace Gate (Concluding Remarks)"
+        }
+      ]
+    },
+    {
+      "sourceFile": "/Users/vesperal/Desktop/北京天坛景点导览.md",
+      "attractionKey": "天坛",
+      "attractionId": "beijing_temple_of_heaven",
+      "subAreaCount": 5,
+      "subAreas": [
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_01",
+          "attraction_id": "beijing_temple_of_heaven",
+          "name_zh": "圜丘坛",
+          "name_en": "Circular Mound Altar",
+          "body_length": 1083,
+          "sort_order": 0,
+          "seq": "1",
+          "heading": "圜丘坛 / Circular Mound Altar"
+        },
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_02",
+          "attraction_id": "beijing_temple_of_heaven",
+          "name_zh": "皇穹宇与回音壁",
+          "name_en": "Imperial Vault of Heaven & Echo Wall",
+          "body_length": 1237,
+          "sort_order": 1,
+          "seq": "2",
+          "heading": "皇穹宇与回音壁 / Imperial Vault of Heaven & Echo Wall"
+        },
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_03",
+          "attraction_id": "beijing_temple_of_heaven",
+          "name_zh": "丹陛桥",
+          "name_en": "Danbi Bridge (Sacred Way Bridge)",
+          "body_length": 1150,
+          "sort_order": 2,
+          "seq": "3",
+          "heading": "丹陛桥 / Danbi Bridge (Sacred Way Bridge)"
+        },
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_04",
+          "attraction_id": "beijing_temple_of_heaven",
+          "name_zh": "祈年殿",
+          "name_en": "Hall of Prayer for Good Harvests",
+          "body_length": 1324,
+          "sort_order": 3,
+          "seq": "4",
+          "heading": "祈年殿 / Hall of Prayer for Good Harvests"
+        },
+        {
+          "id": "beijing_temple_of_heaven_bj_sa_05",
+          "attraction_id": "beijing_temple_of_heaven",
+          "name_zh": "北门",
+          "name_en": "North Gate",
+          "body_length": 904,
+          "sort_order": 4,
+          "seq": "5",
+          "heading": "北门 / North Gate"
+        }
+      ]
+    },
+    {
+      "sourceFile": "/Users/vesperal/Desktop/北京十三陵景点导览.md",
+      "attractionKey": "十三陵",
+      "attractionId": "beijing_ming_tombs",
+      "subAreaCount": 8,
+      "subAreas": [
+        {
+          "id": "beijing_ming_tombs_bj_sa_01",
+          "attraction_id": "beijing_ming_tombs",
+          "name_zh": "石牌坊与大红门",
+          "name_en": "Stone Archway and Great Red Gate",
+          "body_length": 701,
+          "sort_order": 0,
+          "seq": "1",
+          "heading": "石牌坊与大红门 / Stone Archway and Great Red Gate"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_02",
+          "attraction_id": "beijing_ming_tombs",
+          "name_zh": "神功圣德碑亭与神路",
+          "name_en": "Stele Pavilion of Divine Merit and Sacred Way",
+          "body_length": 763,
+          "sort_order": 1,
+          "seq": "2",
+          "heading": "神功圣德碑亭与神路 / Stele Pavilion of Divine Merit and Sacred Way"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_03",
+          "attraction_id": "beijing_ming_tombs",
+          "name_zh": "石像生群与棂星门",
+          "name_en": "Stone Statues and Dragon and Phoenix Gate",
+          "body_length": 778,
+          "sort_order": 2,
+          "seq": "3",
+          "heading": "石像生群与棂星门 / Stone Statues and Dragon and Phoenix Gate"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_04",
+          "attraction_id": "beijing_ming_tombs",
+          "name_zh": "长陵与博物馆",
+          "name_en": "Changling Tomb and Museum",
+          "body_length": 799,
+          "sort_order": 3,
+          "seq": "4",
+          "heading": "长陵与博物馆 / Changling Tomb and Museum"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_05",
+          "attraction_id": "beijing_ming_tombs",
+          "name_zh": "定陵与地宫",
+          "name_en": "Dingling Tomb and Underground Palace",
+          "body_length": 819,
+          "sort_order": 4,
+          "seq": "5",
+          "heading": "定陵与地宫 / Dingling Tomb and Underground Palace"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_06",
+          "attraction_id": "beijing_ming_tombs",
+          "name_zh": "昭陵",
+          "name_en": "Zhaoling Tomb",
+          "body_length": 767,
+          "sort_order": 5,
+          "seq": "6",
+          "heading": "昭陵 / Zhaoling Tomb"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_07",
+          "attraction_id": "beijing_ming_tombs",
+          "name_zh": "景陵、康陵与永陵",
+          "name_en": "Jingling, Kangling and Yongling Tombs",
+          "body_length": 917,
+          "sort_order": 6,
+          "seq": "7",
+          "heading": "景陵、康陵与永陵 / Jingling, Kangling and Yongling Tombs"
+        },
+        {
+          "id": "beijing_ming_tombs_bj_sa_08",
+          "attraction_id": "beijing_ming_tombs",
+          "name_zh": "思陵",
+          "name_en": "Siling Tomb",
+          "body_length": 841,
+          "sort_order": 7,
+          "seq": "8",
+          "heading": "思陵 / Siling Tomb"
+        }
+      ]
+    },
+    {
+      "sourceFile": "/Users/vesperal/Desktop/北京慕田峪长城景点导览.md",
+      "attractionKey": "慕田峪长城",
+      "attractionId": "beijing_mutianyu_great_wall",
+      "subAreaCount": 6,
+      "subAreas": [
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_01",
+          "attraction_id": "beijing_mutianyu_great_wall",
+          "name_zh": "大角楼",
+          "name_en": "Great Corner Tower",
+          "body_length": 978,
+          "sort_order": 0,
+          "seq": "1",
+          "heading": "大角楼 / Great Corner Tower"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_02",
+          "attraction_id": "beijing_mutianyu_great_wall",
+          "name_zh": "正关台",
+          "name_en": "Zhengguantai Pass",
+          "body_length": 1102,
+          "sort_order": 1,
+          "seq": "2",
+          "heading": "正关台 / Zhengguantai Pass"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_03",
+          "attraction_id": "beijing_mutianyu_great_wall",
+          "name_zh": "六号敌楼与缆车站",
+          "name_en": "Tower No. 6 and Cable Car Station",
+          "body_length": 1020,
+          "sort_order": 2,
+          "seq": "3",
+          "heading": "六号敌楼与缆车站 / Tower No. 6 and Cable Car Station"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_04",
+          "attraction_id": "beijing_mutianyu_great_wall",
+          "name_zh": "非诚勿扰取景地",
+          "name_en": "\"If You Are the One\" Filming Location",
+          "body_length": 975,
+          "sort_order": 3,
+          "seq": "4",
+          "heading": "非诚勿扰取景地 / \"If You Are the One\" Filming Location"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_05",
+          "attraction_id": "beijing_mutianyu_great_wall",
+          "name_zh": "毛主席石刻与界碑",
+          "name_en": "Chairman Mao Stone Inscription and Boundary Marker",
+          "body_length": 1092,
+          "sort_order": 4,
+          "seq": "5",
+          "heading": "毛主席石刻与界碑 / Chairman Mao Stone Inscription and Boundary Marker"
+        },
+        {
+          "id": "beijing_mutianyu_great_wall_bj_sa_06",
+          "attraction_id": "beijing_mutianyu_great_wall",
+          "name_zh": "好汉坡",
+          "name_en": "Hero Slope",
+          "body_length": 1119,
+          "sort_order": 5,
+          "seq": "6",
+          "heading": "好汉坡 / Hero Slope"
+        }
+      ]
+    },
+    {
+      "sourceFile": "/Users/vesperal/Desktop/北京国家博物馆景点导览.md",
+      "attractionKey": "国家博物馆",
+      "attractionId": "beijing_national_museum",
+      "subAreaCount": 10,
+      "subAreas": [
+        {
+          "id": "beijing_national_museum_bj_sa_01",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "古代中国陈列",
+          "name_en": "Ancient China Exhibition",
+          "body_length": 798,
+          "sort_order": 0,
+          "seq": "1",
+          "heading": "古代中国陈列 / Ancient China Exhibition"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_02",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "复兴之路",
+          "name_en": "The Road of Rejuvenation",
+          "body_length": 767,
+          "sort_order": 1,
+          "seq": "2",
+          "heading": "复兴之路 / The Road of Rejuvenation"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_03",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "二层专题·科技的力量、风展红旗与德化白瓷",
+          "name_en": "Second-Floor Special Exhibitions: The Power of Science and Technology, Red Flags Unfurled, and Dehua White Porcelain",
+          "body_length": 845,
+          "sort_order": 2,
+          "seq": "3",
+          "heading": "二层专题·科技的力量、风展红旗与德化白瓷 / Second-Floor Special Exhibitions: The Power of Science and Technology, Red Flags Unfurled, and Dehua White Porcelain"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_04",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "古代瓷器",
+          "name_en": "Ancient Chinese Porcelain",
+          "body_length": 837,
+          "sort_order": 3,
+          "seq": "4",
+          "heading": "古代瓷器 / Ancient Chinese Porcelain"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_05",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "古代玉器",
+          "name_en": "Ancient Chinese Jade",
+          "body_length": 838,
+          "sort_order": 4,
+          "seq": "5",
+          "heading": "古代玉器 / Ancient Chinese Jade"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_06",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "古代钱币与铜镜",
+          "name_en": "Ancient Chinese Coins and Bronze Mirrors",
+          "body_length": 787,
+          "sort_order": 5,
+          "seq": "6",
+          "heading": "古代钱币与铜镜 / Ancient Chinese Coins and Bronze Mirrors"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_07",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "古代佛造像",
+          "name_en": "Ancient Chinese Buddhist Sculpture",
+          "body_length": 837,
+          "sort_order": 6,
+          "seq": "7",
+          "heading": "古代佛造像 / Ancient Chinese Buddhist Sculpture"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_08",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "古代服饰与饮食文化",
+          "name_en": "Ancient Chinese Costume and Food Culture",
+          "body_length": 822,
+          "sort_order": 7,
+          "seq": "8",
+          "heading": "古代服饰与饮食文化 / Ancient Chinese Costume and Food Culture"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_09",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "数说犀尊与清代书画",
+          "name_en": "The Digitised Rhinoceros Zun and Qing-Dynasty Calligraphy and Painting",
+          "body_length": 870,
+          "sort_order": 8,
+          "seq": "9",
+          "heading": "数说犀尊与清代书画 / The Digitised Rhinoceros Zun and Qing-Dynasty Calligraphy and Painting"
+        },
+        {
+          "id": "beijing_national_museum_bj_sa_10",
+          "attraction_id": "beijing_national_museum",
+          "name_zh": "英模蜡像（结束语）",
+          "name_en": "Wax Figures of Heroes and Models (Epilogue)",
+          "body_length": 773,
+          "sort_order": 9,
+          "seq": "10",
+          "heading": "英模蜡像（结束语） / Wax Figures of Heroes and Models (Epilogue)"
+        }
+      ]
+    },
+    {
+      "sourceFile": "/Users/vesperal/Desktop/北京故宫景点导览.md",
+      "attractionKey": "故宫",
+      "attractionId": "beijing_forbidden_city",
+      "subAreaCount": 11,
+      "subAreas": [
+        {
+          "id": "beijing_forbidden_city_bj_sa_01",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "午门与金水桥",
+          "name_en": "Meridian Gate and Golden Water Bridge",
+          "body_length": 919,
+          "sort_order": 0,
+          "seq": "1",
+          "heading": "午门与金水桥 / Meridian Gate and Golden Water Bridge"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_02",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "太和门与外朝东西路",
+          "name_en": "Gate of Supreme Harmony and East-West Wings of Outer Court",
+          "body_length": 1066,
+          "sort_order": 1,
+          "seq": "2",
+          "heading": "太和门与外朝东西路 / Gate of Supreme Harmony and East-West Wings of Outer Court"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_03",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "太和殿",
+          "name_en": "Hall of Supreme Harmony",
+          "body_length": 1170,
+          "sort_order": 2,
+          "seq": "3",
+          "heading": "太和殿 / Hall of Supreme Harmony"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_04",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "中和殿与保和殿",
+          "name_en": "Hall of Central Harmony and Hall of Preserving Harmony",
+          "body_length": 1422,
+          "sort_order": 3,
+          "seq": "4",
+          "heading": "中和殿与保和殿 / Hall of Central Harmony and Hall of Preserving Harmony"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_05",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "后三宫·乾清宫、交泰殿与坤宁宫",
+          "name_en": "Three Rear Palaces: Palace of Heavenly Purity, Hall of Union, and Palace of Earthly Tranquility",
+          "body_length": 1247,
+          "sort_order": 4,
+          "seq": "5",
+          "heading": "后三宫·乾清宫、交泰殿与坤宁宫 / Three Rear Palaces: Palace of Heavenly Purity, Hall of Union, and Palace of Earthly Tranquility"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_06",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "养心殿与军机处",
+          "name_en": "Hall of Mental Cultivation and Grand Council",
+          "body_length": 1109,
+          "sort_order": 5,
+          "seq": "6",
+          "heading": "养心殿与军机处 / Hall of Mental Cultivation and Grand Council"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_07",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "东西六宫",
+          "name_en": "Six Eastern and Western Palaces",
+          "body_length": 1126,
+          "sort_order": 6,
+          "seq": "7",
+          "heading": "东西六宫 / Six Eastern and Western Palaces"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_08",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "慈宁宫·雕塑馆",
+          "name_en": "Palace of Compassion and Tranquility - Sculpture Gallery",
+          "body_length": 1301,
+          "sort_order": 7,
+          "seq": "8",
+          "heading": "慈宁宫·雕塑馆 / Palace of Compassion and Tranquility - Sculpture Gallery"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_09",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "奉先殿·钟表馆与宁寿宫·珍宝馆",
+          "name_en": "Hall of Ancestral Worship - Clock Gallery & Palace of Tranquil Longevity - Treasure Gallery",
+          "body_length": 1778,
+          "sort_order": 8,
+          "seq": "9",
+          "heading": "奉先殿·钟表馆与宁寿宫·珍宝馆 / Hall of Ancestral Worship - Clock Gallery & Palace of Tranquil Longevity - Treasure Gallery"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_10",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "乾隆花园与御花园",
+          "name_en": "Qianlong Garden and Imperial Garden",
+          "body_length": 1843,
+          "sort_order": 9,
+          "seq": "10",
+          "heading": "乾隆花园与御花园 / Qianlong Garden and Imperial Garden"
+        },
+        {
+          "id": "beijing_forbidden_city_bj_sa_11",
+          "attraction_id": "beijing_forbidden_city",
+          "name_zh": "神武门、角楼与东西华门",
+          "name_en": "Gate of Divine Might, Corner Towers, and East-West Prosperity Gates",
+          "body_length": 1606,
+          "sort_order": 10,
+          "seq": "11",
+          "heading": "神武门、角楼与东西华门 / Gate of Divine Might, Corner Towers, and East-West Prosperity Gates"
+        }
+      ]
+    },
+    {
+      "sourceFile": "/Users/vesperal/Desktop/北京恭王府景点导览.md",
+      "attractionKey": "恭王府",
+      "attractionId": "beijing_prince_gong_mansion",
+      "subAreaCount": 11,
+      "subAreas": [
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_01",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "宫门",
+          "name_en": "Palace Gate",
+          "body_length": 754,
+          "sort_order": 0,
+          "seq": "1",
+          "heading": "宫门 / Palace Gate"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_02",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "银安殿与嘉乐堂",
+          "name_en": "Yin'an Hall and Jiale Hall",
+          "body_length": 800,
+          "sort_order": 1,
+          "seq": "2",
+          "heading": "银安殿与嘉乐堂 / Yin'an Hall and Jiale Hall"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_03",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "葆光室与锡晋斋",
+          "name_en": "Baoguang Chamber and Xijin Studio",
+          "body_length": 919,
+          "sort_order": 2,
+          "seq": "3",
+          "heading": "葆光室与锡晋斋 / Baoguang Chamber and Xijin Studio"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_04",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "后罩楼",
+          "name_en": "Rear Cover Building",
+          "body_length": 918,
+          "sort_order": 3,
+          "seq": "4",
+          "heading": "后罩楼 / Rear Cover Building"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_05",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "西洋门与独乐峰",
+          "name_en": "Western-Style Gate and Dule Peak",
+          "body_length": 929,
+          "sort_order": 4,
+          "seq": "5",
+          "heading": "西洋门与独乐峰 / Western-Style Gate and Dule Peak"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_06",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "蝠池与安善堂",
+          "name_en": "Bat Pool and Anshan Hall",
+          "body_length": 864,
+          "sort_order": 5,
+          "seq": "6",
+          "heading": "蝠池与安善堂 / Bat Pool and Anshan Hall"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_07",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "流杯亭、竹子院与牡丹园",
+          "name_en": "Winding Cup Pavilion, Bamboo Courtyard, and Peony Garden",
+          "body_length": 1011,
+          "sort_order": 6,
+          "seq": "7",
+          "heading": "流杯亭、竹子院与牡丹园 / Winding Cup Pavilion, Bamboo Courtyard, and Peony Garden"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_08",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "怡神所与蝠厅",
+          "name_en": "Yishen Chamber and Bat Hall",
+          "body_length": 901,
+          "sort_order": 7,
+          "seq": "8",
+          "heading": "怡神所与蝠厅 / Yishen Chamber and Bat Hall"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_09",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "平步青云路、邀月台、滴翠岩与福字碑",
+          "name_en": "Path to the Clouds, Moon-Inviting Terrace, Emerald Rock, and the \"Fu\" Stele",
+          "body_length": 995,
+          "sort_order": 8,
+          "seq": "9",
+          "heading": "平步青云路、邀月台、滴翠岩与福字碑 / Path to the Clouds, Moon-Inviting Terrace, Emerald Rock, and the \"Fu\" Stele"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_10",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "方塘水榭、妙香亭、龙王庙与箭道",
+          "name_en": "Square Pond Pavilion, Miaoxiang Pavilion, Dragon King Temple, and Archery Range",
+          "body_length": 1081,
+          "sort_order": 9,
+          "seq": "10",
+          "heading": "方塘水榭、妙香亭、龙王庙与箭道 / Square Pond Pavilion, Miaoxiang Pavilion, Dragon King Temple, and Archery Range"
+        },
+        {
+          "id": "beijing_prince_gong_mansion_bj_sa_11",
+          "attraction_id": "beijing_prince_gong_mansion",
+          "name_zh": "乐道堂与多福轩",
+          "name_en": "Ledao Hall and Duofu Pavilion",
+          "body_length": 935,
+          "sort_order": 10,
+          "seq": "11",
+          "heading": "乐道堂与多福轩 / Ledao Hall and Duofu Pavilion"
+        }
+      ]
+    },
+    {
+      "sourceFile": "/Users/vesperal/Desktop/北京北海公园景点导览.md",
+      "attractionKey": "北海公园",
+      "attractionId": "beijing_beihai_park",
+      "subAreaCount": 11,
+      "subAreas": [
+        {
+          "id": "beijing_beihai_park_bj_sa_01",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "南门与团城",
+          "name_en": "South Gate & Circular City",
+          "body_length": 831,
+          "sort_order": 0,
+          "seq": "1",
+          "heading": "南门与团城 / South Gate & Circular City"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_02",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "永安桥",
+          "name_en": "Yong'an Bridge",
+          "body_length": 849,
+          "sort_order": 1,
+          "seq": "2",
+          "heading": "永安桥 / Yong'an Bridge"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_03",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "琼华岛·永安寺与白塔",
+          "name_en": "Jade Flower Island · Yong'an Temple & White Dagoba",
+          "body_length": 849,
+          "sort_order": 2,
+          "seq": "3",
+          "heading": "琼华岛·永安寺与白塔 / Jade Flower Island · Yong'an Temple & White Dagoba"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_04",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "琼华岛·琼岛春阴碑与阅古楼",
+          "name_en": "Jade Flower Island · Qiong Island Spring Shade Stele & Yuegu Tower",
+          "body_length": 953,
+          "sort_order": 3,
+          "seq": "4",
+          "heading": "琼华岛·琼岛春阴碑与阅古楼 / Jade Flower Island · Qiong Island Spring Shade Stele & Yuegu Tower"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_05",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "琼华岛·漪澜堂、道宁斋与铜仙承露盘",
+          "name_en": "Jade Flower Island · Yilan Hall, Daoning Studio & Bronze Immortal Holding Dew Plate",
+          "body_length": 977,
+          "sort_order": 4,
+          "seq": "5",
+          "heading": "琼华岛·漪澜堂、道宁斋与铜仙承露盘 / Jade Flower Island · Yilan Hall, Daoning Studio & Bronze Immortal Holding Dew Plate"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_06",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "东岸·濠濮间与画舫斋",
+          "name_en": "East Shore · Haopu Retreat & Painted Boat Studio",
+          "body_length": 924,
+          "sort_order": 5,
+          "seq": "6",
+          "heading": "东岸·濠濮间与画舫斋 / East Shore · Haopu Retreat & Painted Boat Studio"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_07",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "静心斋",
+          "name_en": "Jingxin Studio (Quiet Heart Studio)",
+          "body_length": 853,
+          "sort_order": 6,
+          "seq": "7",
+          "heading": "静心斋 / Jingxin Studio (Quiet Heart Studio)"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_08",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "西天梵境与九龙壁",
+          "name_en": "Western Heavenly Paradise & Nine-Dragon Wall",
+          "body_length": 1057,
+          "sort_order": 7,
+          "seq": "8",
+          "heading": "西天梵境与九龙壁 / Western Heavenly Paradise & Nine-Dragon Wall"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_09",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "快雪堂与铁影壁",
+          "name_en": "Kuai Xue Tang (Quick Snow Hall) & Iron Shadow Wall",
+          "body_length": 1043,
+          "sort_order": 8,
+          "seq": "9",
+          "heading": "快雪堂与铁影壁 / Kuai Xue Tang (Quick Snow Hall) & Iron Shadow Wall"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_10",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "阐福寺与小西天",
+          "name_en": "Chanfu Temple & Little Western Heaven",
+          "body_length": 1000,
+          "sort_order": 9,
+          "seq": "10",
+          "heading": "阐福寺与小西天 / Chanfu Temple & Little Western Heaven"
+        },
+        {
+          "id": "beijing_beihai_park_bj_sa_11",
+          "attraction_id": "beijing_beihai_park",
+          "name_zh": "五龙亭",
+          "name_en": "Five Dragon Pavilions",
+          "body_length": 1055,
+          "sort_order": 10,
+          "seq": "11",
+          "heading": "五龙亭 / Five Dragon Pavilions"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-07-08T06:20:37.330Z",
+  "sourceRoot": "/Users/vesperal/Desktop/重庆文化探索补充",
+  "cityId": "chongqing",
+  "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/chongqing_cultural_guides_upsert.sql",
+  "guides": [
+    {
+      "id": "chongqing_republican_citywalk",
+      "city_id": "chongqing",
+      "source_file": "Chongqing_Republican_Era_Citywalk_revised.md",
+      "title_en": "Chongqing's Time Capsule: A Citywalk Through Republican-Era Architecture",
+      "title_zh": "民国建筑 Citywalk",
+      "subtitle": "Chongqing served as China's wartime capital during the Republican era (1912–1949), and it still holds one of the country's richest collections of buildings from that period.",
+      "icon": "🚶",
+      "badge": "Citywalk",
+      "body_length": 15144,
+      "meta_items": [
+        {
+          "icon": "📍",
+          "label": "Stops",
+          "value": "4 districts"
+        }
+      ],
+      "display_order": 0
+    },
+    {
+      "id": "chongqing_palace_museum_southern_relocation",
+      "city_id": "chongqing",
+      "source_file": "Anderson_Warehouse_Memorial_REVISED.md",
+      "title_en": "A Warehouse That Saved a Nation's Treasures",
+      "title_zh": "故宫文物南迁纪念馆",
+      "subtitle": "On the south bank of the Yangtze in Chongqing, tucked into the old Ciyun Temple neighborhood off Nanbin Road, stands a cluster of plain brick warehouses built into the hillside.",
+      "icon": "🏛",
+      "badge": "Culture",
+      "body_length": 9462,
+      "meta_items": [],
+      "display_order": 1
+    }
+  ]
+}

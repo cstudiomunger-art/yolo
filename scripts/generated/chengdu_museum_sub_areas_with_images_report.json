@@ -1,0 +1,80 @@
+{
+  "generatedAt": "2026-07-07T14:46:54.229Z",
+  "totalRows": 10,
+  "reusedCoverUrls": 10,
+  "newlyUploadedImages": 0,
+  "missingImages": 0,
+  "missingItems": [],
+  "files": [
+    {
+      "sortOrder": 0,
+      "file": "正门大厅.md",
+      "nameZh": "正门大厅",
+      "nameEn": "Main Entrance Hall",
+      "body": "<p>The Main Entrance Hall is the entrance space and core atrium of the new Chengdu Museum building, with a soaring ceiling of tens of meters, creating a magnificent and imposing atmosphere. The hall's design integrates modern architectural language with ancient Shu cultural elements.</p>"
+    },
+    {
+      "sortOrder": 1,
+      "file": "负一楼·人与自然——贝林捐赠展.md",
+      "nameZh": "负一楼·人与自然——贝林捐赠展",
+      "nameEn": "B1F · \"Man and Nature\" — Behring Donation Exhibition",
+      "body": "<p>\"Man and Nature — Behring Donation Exhibition\" is located on the basement level 1 of Chengdu Museum, and is the first nature-themed exhibition since the museum's establishment.</p>"
+    },
+    {
+      "sortOrder": 2,
+      "file": "二楼·九天开出一成都——先秦时期的成都.md",
+      "nameZh": "二楼·九天开出一成都——先秦时期的成都",
+      "nameEn": "2F · \"From Nine Heavens Emerged Chengdu\" — Chengdu in the Pre-Qin Period",
+      "body": "<p>\"From nine heavens emerged a Chengdu\" is taken from the Tang Dynasty poet Li Bai's poem \"Song of the Emperor's Western Journey to the Southern Capital,\" with the full line reading \"From nine heavens emerged a Chengdu, with ten thousand households and a thousand gates forming a picture scroll.\"</p>"
+    },
+    {
+      "sortOrder": 3,
+      "file": "二楼·西蜀称天府——两汉魏晋南北朝时期的成都.md",
+      "nameZh": "二楼·西蜀称天府——两汉魏晋南北朝时期的成都",
+      "nameEn": "2F · \"Western Shu Known as Land of Abundance\" — Chengdu in the Han, Wei, Jin, Southern and Northern Dynasties Period",
+      "body": "<p>The \"Western Shu Known as Land of Abundance\" gallery is located on the 2nd floor of Chengdu Museum, as the second part of the \"Flowers Weigh Down Brocade City — Chengdu Historical and Cultural Exhibition (Ancient Period).\"</p>"
+    },
+    {
+      "sortOrder": 4,
+      "file": "三楼·喧然名都会——隋唐五代宋元时期的成都.md",
+      "nameZh": "三楼·喧然名都会——隋唐五代宋元时期的成都",
+      "nameEn": "3F · \"A Bustling Famous Metropolis\" — Chengdu in the Sui, Tang, Five Dynasties, Song, and Yuan Period",
+      "body": "<p>\"A bustling famous metropolis\" is taken from the Tang Dynasty poet Du Fu's poem \"Chengdu Fu,\" with the line \"A bustling famous metropolis, with flutes and sheng pipes alternating.\"</p>"
+    },
+    {
+      "sortOrder": 5,
+      "file": "三楼·丹楼生晚辉——明清时期的成都.md",
+      "nameZh": "三楼·丹楼生晚辉——明清时期的成都",
+      "nameEn": "3F · \"Red Towers Glow in the Evening\" — Chengdu in the Ming and Qing Period",
+      "body": "<p>\"Red towers glow in the evening\" is taken from the poem of Yang Shen, a Ming Dynasty scholar from Sichuan. The gallery is located on the 3rd floor of Chengdu Museum.</p>"
+    },
+    {
+      "sortOrder": 6,
+      "file": "四楼·花重锦官城——成都历史文化陈列（近世篇）.md",
+      "nameZh": "四楼·花重锦官城——成都历史文化陈列（近世篇）",
+      "nameEn": "4F · \"Flowers Weigh Down Brocade City\" — Chengdu Historical and Cultural Exhibition (Modern Period)",
+      "body": "<p>\"Flowers Weigh Down Brocade City — Chengdu Historical and Cultural Exhibition (Modern Period)\" is located on the 4th floor of Chengdu Museum, focusing on Chengdu's modern history from the mid-19th century to the mid-20th century.</p>"
+    },
+    {
+      "sortOrder": 7,
+      "file": "四楼·花重锦官城——成都历史文化陈列（民俗篇）.md",
+      "nameZh": "四楼·花重锦官城——成都历史文化陈列（民俗篇）",
+      "nameEn": "4F · \"Flowers Weigh Down Brocade City\" — Chengdu Historical and Cultural Exhibition (Folk Customs Section)",
+      "body": "<p>\"Flowers Weigh Down Brocade City — Chengdu Historical and Cultural Exhibition (Folk Customs Section)\" is located on the 4th floor of Chengdu Museum.</p>"
+    },
+    {
+      "sortOrder": 8,
+      "file": "五楼·影舞万象——中国皮影展.md",
+      "nameZh": "五楼·影舞万象——中国皮影展",
+      "nameEn": "5F · \"Shadow Dance of All Phenomena\" — Chinese Shadow Puppetry Exhibition",
+      "body": "<p>\"Shadow Dance of All Phenomena — Chinese Shadow Puppetry Exhibition\" is located on the 5th floor of Chengdu Museum. It is one of the museum's most distinctive permanent exhibitions and the largest and finest shadow puppetry thematic exhibition in China.</p>"
+    },
+    {
+      "sortOrder": 9,
+      "file": "五楼·偶戏大千——中国木偶展.md",
+      "nameZh": "五楼·偶戏大千——中国木偶展",
+      "nameEn": "5F · \"Puppet Theater of the Great Thousand\" — Chinese Puppet Exhibition",
+      "body": "<p>\"Puppet Theater of the Great Thousand — Chinese Puppet Exhibition\" is located on the 5th floor of Chengdu Museum, adjacent to the \"Shadow Dance of All Phenomena — Chinese Shadow Puppetry Exhibition.\"</p>"
+    }
+  ]
+}
