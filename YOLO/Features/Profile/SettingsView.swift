@@ -209,6 +209,20 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
                 rowDivider
+                NavigationLink {
+                    LegalDocumentView(kind: .gdpr)
+                } label: {
+                    navRowLabel(String(localized: "GDPR Compliance Framework"), value: nil)
+                }
+                .buttonStyle(.plain)
+                rowDivider
+                NavigationLink {
+                    LegalDocumentView(kind: .aiDisclosure)
+                } label: {
+                    navRowLabel(String(localized: "AI Content Disclosure"), value: nil)
+                }
+                .buttonStyle(.plain)
+                rowDivider
                 navRow(String(localized: "Send Feedback"), value: nil) { openFeedbackEmail() }
                 rowDivider
                 navRow(

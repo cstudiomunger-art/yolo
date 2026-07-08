@@ -44,6 +44,8 @@ struct AppBranding: Codable, Equatable {
         ],
         privacyPolicyBody: "",
         termsOfServiceBody: "",
+        gdprComplianceBody: "",
+        aiContentDisclosureBody: "",
         shareWebBaseURL: "https://yolo.cstudiomunger.workers.dev"
     )
 
@@ -64,6 +66,8 @@ struct AppBranding: Codable, Equatable {
     let flightPlatforms: [FlightPlatform]
     let privacyPolicyBody: String
     let termsOfServiceBody: String
+    let gdprComplianceBody: String
+    let aiContentDisclosureBody: String
     let shareWebBaseURL: String
 
     init(
@@ -84,6 +88,8 @@ struct AppBranding: Codable, Equatable {
         flightPlatforms: [FlightPlatform] = AppBranding.fallback.flightPlatforms,
         privacyPolicyBody: String = "",
         termsOfServiceBody: String = "",
+        gdprComplianceBody: String = "",
+        aiContentDisclosureBody: String = "",
         shareWebBaseURL: String = "https://yolo.cstudiomunger.workers.dev"
     ) {
         self.supportEmail = supportEmail
@@ -103,6 +109,8 @@ struct AppBranding: Codable, Equatable {
         self.flightPlatforms = flightPlatforms
         self.privacyPolicyBody = privacyPolicyBody
         self.termsOfServiceBody = termsOfServiceBody
+        self.gdprComplianceBody = gdprComplianceBody
+        self.aiContentDisclosureBody = aiContentDisclosureBody
         self.shareWebBaseURL = shareWebBaseURL
     }
 
@@ -125,6 +133,8 @@ struct AppBranding: Codable, Equatable {
         flightPlatforms = (try? c.decode([FlightPlatform].self, forKey: .flightPlatforms)) ?? Self.fallback.flightPlatforms
         privacyPolicyBody = try c.decodeIfPresent(String.self, forKey: .privacyPolicyBody) ?? ""
         termsOfServiceBody = try c.decodeIfPresent(String.self, forKey: .termsOfServiceBody) ?? ""
+        gdprComplianceBody = try c.decodeIfPresent(String.self, forKey: .gdprComplianceBody) ?? ""
+        aiContentDisclosureBody = try c.decodeIfPresent(String.self, forKey: .aiContentDisclosureBody) ?? ""
         shareWebBaseURL = try c.decodeIfPresent(String.self, forKey: .shareWebBaseURL) ?? Self.fallback.shareWebBaseURL
     }
 
@@ -133,7 +143,7 @@ struct AppBranding: Codable, Equatable {
         case assistantGreetingGeneral, assistantGreetingPlanning
         case planAlertMessage, planAlertLinkAttractionId, planAlertLinkCityId, planAlertLinkLabel
         case freeAudioPreviewSeconds, freeTextPreviewChars, freeVisitorTipsCount, paywall, flightPlatforms
-        case privacyPolicyBody, termsOfServiceBody, shareWebBaseURL
+        case privacyPolicyBody, termsOfServiceBody, gdprComplianceBody, aiContentDisclosureBody, shareWebBaseURL
     }
 
 }
@@ -215,6 +225,8 @@ struct AppSettingsRow: Decodable {
     let flightPlatforms: [FlightPlatform]?
     let privacyPolicyBody: String?
     let termsOfServiceBody: String?
+    let gdprComplianceBody: String?
+    let aiContentDisclosureBody: String?
     let shareWebBaseURL: String?
 
     // Keys are camelCase; JSONDecoder.convertFromSnakeCase maps use_remote_ai → useRemoteAI.
@@ -253,6 +265,8 @@ struct AppSettingsRow: Decodable {
         case flightPlatforms
         case privacyPolicyBody
         case termsOfServiceBody
+        case gdprComplianceBody
+        case aiContentDisclosureBody
         case shareWebBaseURL
     }
 
@@ -289,6 +303,8 @@ struct AppSettingsRow: Decodable {
         flightPlatforms = try container.decodeIfPresent([FlightPlatform].self, forKey: .flightPlatforms)
         privacyPolicyBody = try container.decodeIfPresent(String.self, forKey: .privacyPolicyBody)
         termsOfServiceBody = try container.decodeIfPresent(String.self, forKey: .termsOfServiceBody)
+        gdprComplianceBody = try container.decodeIfPresent(String.self, forKey: .gdprComplianceBody)
+        aiContentDisclosureBody = try container.decodeIfPresent(String.self, forKey: .aiContentDisclosureBody)
         shareWebBaseURL = try container.decodeIfPresent(String.self, forKey: .shareWebBaseURL)
     }
 
@@ -341,6 +357,8 @@ struct AppSettingsRow: Decodable {
             flightPlatforms: flightPlatforms ?? defaults.flightPlatforms,
             privacyPolicyBody: privacyPolicyBody ?? defaults.privacyPolicyBody,
             termsOfServiceBody: termsOfServiceBody ?? defaults.termsOfServiceBody,
+            gdprComplianceBody: gdprComplianceBody ?? defaults.gdprComplianceBody,
+            aiContentDisclosureBody: aiContentDisclosureBody ?? defaults.aiContentDisclosureBody,
             shareWebBaseURL: shareWebBaseURL ?? defaults.shareWebBaseURL
         )
         let aiDefaults = AISettings.fallback

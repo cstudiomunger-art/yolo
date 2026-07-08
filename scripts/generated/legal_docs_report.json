@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-07-08T04:05:57.756Z",
+  "sqlPath": "/Users/vesperal/Desktop/YOLO/scripts/generated/legal_docs_upsert.sql",
+  "docs": [
+    {
+      "id": "privacy",
+      "column": "privacy_policy_body",
+      "sourcePath": "/Users/vesperal/Desktop/01-Privacy-Policy.md",
+      "markdownChars": 22966,
+      "htmlChars": 27685,
+      "htmlSha256Prefix": "91c86130b3a77a9e",
+      "htmlPreview": "<h1>Privacy Policy</h1><p><strong>Last Updated:</strong> June 29, 2026 <strong>Effective Date:</strong> June 29, 2026</p><h2>1. Introduction</h2><p>Chengdu Yuliu Technology Co., Ltd. (&quot;<strong>Yu"
+    },
+    {
+      "id": "terms",
+      "column": "terms_of_service_body",
+      "sourcePath": "/Users/vesperal/Desktop/02-Terms-of-Service.md",
+      "markdownChars": 20841,
+      "htmlChars": 23358,
+      "htmlSha256Prefix": "c727cafaf1933255",
+      "htmlPreview": "<h1>Terms of Service</h1><p><strong>Last Updated:</strong> June 29, 2026 <strong>Effective Date:</strong> June 29, 2026</p><h2>1. Introduction</h2><p>Welcome to <strong>YOLO HAPPY</strong> (the &quot;"
+    },
+    {
+      "id": "gdpr",
+      "column": "gdpr_compliance_body",
+      "sourcePath": "/Users/vesperal/Desktop/03-GDPR-Compliance-Framework.md",
+      "markdownChars": 19321,
+      "htmlChars": 24159,
+      "htmlSha256Prefix": "4265abb8cd846ca8",
+      "htmlPreview": "<h1>GDPR Data Privacy Compliance Framework</h1><blockquote><p><strong>Company:</strong> Chengdu Yuliu Technology Co., Ltd.</p></blockquote><blockquote><p><strong>Product:</strong> YOLO HAPPY · iOS App"
+    },
+    {
+      "id": "ai_disclosure",
+      "column": "ai_content_disclosure_body",
+      "sourcePath": "/Users/vesperal/Desktop/04-AI-Content-Disclosure.md",
+      "markdownChars": 18484,
+      "htmlChars": 22598,
+      "htmlSha256Prefix": "49b396afbba09e75",
+      "htmlPreview": "<h1>AI Content Generation — Compliance Disclosure</h1><blockquote><p><strong>Company:</strong> Chengdu Yuliu Technology Co., Ltd.</p></blockquote><blockquote><p><strong>Product:</strong> YOLO HAPPY · "
+    }
+  ],
+  "stats": {
+    "documents": 4,
+    "totalHtmlChars": 97800
+  }
+}

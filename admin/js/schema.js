@@ -116,6 +116,16 @@
         { key: "paywall_footnote", type: "textarea", label: "底部说明" },
         { key: "flight_section", type: "section", label: "机票平台链接" },
         { key: "flight_platforms", type: "flight_platform_list", label: "机票预订平台" },
+        {
+          key: "legal_section",
+          type: "section",
+          label: "法律与合规文档",
+          hint: "HTML 正文；App Settings 与 LegalDocumentView 直接渲染。修改后保存即可生效。",
+        },
+        { key: "privacy_policy_body", type: "richtext", label: "Privacy Policy（HTML）" },
+        { key: "terms_of_service_body", type: "richtext", label: "Terms of Service（HTML）" },
+        { key: "gdpr_compliance_body", type: "richtext", label: "GDPR Compliance Framework（HTML）" },
+        { key: "ai_content_disclosure_body", type: "richtext", label: "AI Content Disclosure（HTML）" },
       ],
     },
     assistant_scenarios: {

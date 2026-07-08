@@ -46,6 +46,7 @@
       defaultExpanded: true,
       items: [
         { kind: "table", table: "app_settings", label: "应用配置", expandSections: true },
+        { kind: "table", table: "app_settings", label: "法律与合规文档", settingsAnchor: "grp-legal_section" },
         { kind: "table", table: "emergency_config", label: "紧急联系" },
       ],
     },
@@ -494,7 +495,10 @@
         } else if (item.expandSections) {
           globalHtml += App.renderSettingsNavItem(item);
         } else {
-          globalHtml += `<button type="button" class="nav-btn" data-nav-table="${App.escapeHtml(item.table)}">${App.escapeHtml(item.label)}</button>`;
+          const anchorAttr = item.settingsAnchor
+            ? ` data-settings-anchor="${App.escapeHtml(item.settingsAnchor)}"`
+            : "";
+          globalHtml += `<button type="button" class="nav-btn" data-nav-table="${App.escapeHtml(item.table)}"${anchorAttr}>${App.escapeHtml(item.label)}</button>`;
         }
       }
       globalHtml += `</div></section>`;
@@ -715,6 +719,9 @@
       } else if (btn.dataset.navView) {
         App.navigateTo({ kind: "view", view: btn.dataset.navView });
       } else if (btn.dataset.navTable) {
+        if (btn.dataset.settingsAnchor) {
+          App.pendingSettingsAnchor = btn.dataset.settingsAnchor;
+        }
         App.navigateTo({ kind: "table", table: btn.dataset.navTable });
       }
     });
