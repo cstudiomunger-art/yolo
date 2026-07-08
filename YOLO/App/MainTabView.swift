@@ -190,7 +190,7 @@ struct ChinaGoTabBar: View {
                 let tabWidth = geometry.size.width / tabCount
 
                 RoundedRectangle(cornerRadius: pillCornerRadius, style: .continuous)
-                    .fill(Color.white.opacity(0.55))
+                    .fill(Theme.ColorToken.backgroundSubtle.opacity(0.85))
                     .frame(width: tabWidth - pillInset * 2, height: geometry.size.height)
                     .offset(x: CGFloat(selectedTab.index) * tabWidth + pillInset)
                     .animation(TabBarMotion.selection, value: selectedTab)
@@ -202,7 +202,7 @@ struct ChinaGoTabBar: View {
                 .shadow(color: .black.opacity(0.08), radius: 16, y: 4)
                 .overlay(
                     RoundedRectangle(cornerRadius: barCornerRadius, style: .continuous)
-                        .stroke(Color.white.opacity(0.7), lineWidth: 1)
+                        .stroke(Theme.ColorToken.border, lineWidth: 1)
                 )
         }
         .animation(TabBarMotion.selection, value: selectedTab)

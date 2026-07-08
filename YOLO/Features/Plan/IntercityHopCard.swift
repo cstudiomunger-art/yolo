@@ -47,7 +47,7 @@ struct IntercityHopCard: View {
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.ColorToken.backgroundSubtle)
-        .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+        .cardBorderStyle(borderColor: Theme.ColorToken.borderLight)
     }
 }
 

@@ -122,7 +122,7 @@ struct SubAreaDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 if let cover = area.coverImagePath {
                     Button { fullScreenImagePath = cover } label: {
-                        CoverImageView(path: cover, height: 200, cornerRadius: 0)
+                        CoverImageView(path: cover, height: 200)
                     }
                     .buttonStyle(.plain)
                 }
@@ -222,12 +222,7 @@ struct SubAreaDetailView: View {
                 showPaywall = true
             } label: {
                 Text(String(localized: "Unlock"))
-                    .font(Theme.FontToken.inter(12, weight: .medium))
-                    .tracking(0.8)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 11)
-                    .background(Theme.ColorToken.textPrimary)
+                    .emphasisButtonStyle()
             }
             .buttonStyle(.plain)
         }

@@ -52,10 +52,10 @@ struct OnboardingPagerView: View {
             } label: {
                 Text(page == pages.count - 1 ? "Get Started" : "Next")
                     .font(Theme.FontToken.inter(14, weight: .medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Theme.ColorToken.textPrimary)
+                    .background(Theme.ColorToken.surfaceEmphasis)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)

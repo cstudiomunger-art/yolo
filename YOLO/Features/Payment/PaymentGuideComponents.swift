@@ -126,7 +126,7 @@ struct PaymentGuideActionRow: View {
                 }
                 Text(action.description)
                     .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Color(hex: 0x999999))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
                     .lineSpacing(3)
             }
 
@@ -154,7 +154,7 @@ struct PaymentGuideSOSBar: View {
                 (Text("Payment failed?").fontWeight(.medium).foregroundStyle(Theme.ColorToken.textPrimary)
                  + Text(" \(PaymentGuideContent.sosBody)").fontWeight(.light))
                     .font(Theme.FontToken.inter(12))
-                    .foregroundStyle(Color(hex: 0x555555))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
                     .lineSpacing(4)
 
                 Text(PaymentGuideContent.sosLink)
@@ -199,7 +199,7 @@ struct PaymentGuideMiniTileView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(13)
-        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+        .cardBorderStyle()
         .contentShape(Rectangle())
     }
 }
@@ -308,7 +308,7 @@ struct PaymentGuideStepView: View {
                 .padding(.top, 2)
 
             VStack(alignment: .leading, spacing: 0) {
-                PaymentGuideRichText(step.title, size: 13, weight: .light, color: Color(hex: 0x333333))
+                PaymentGuideRichText(step.title, size: 13, weight: .light, color: Theme.ColorToken.textPrimary)
 
                 if let note = step.note, !note.isEmpty {
                     Text(note)
@@ -324,7 +324,7 @@ struct PaymentGuideStepView: View {
                         if let tr = step.sayTranslation {
                             Text(" — \(tr)")
                                 .font(Theme.FontToken.inter(11))
-                                .foregroundStyle(Color(hex: 0x333333))
+                                .foregroundStyle(Theme.ColorToken.textPrimary)
                         }
                     }
                     .padding(.vertical, 4)
@@ -450,7 +450,7 @@ struct PaymentGuideBrandChips: View {
             ForEach(chips, id: \.self) { chip in
                 Text(chip)
                     .font(Theme.FontToken.inter(11))
-                    .foregroundStyle(Color(hex: 0x444444))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 5)
                     .overlay(
@@ -506,8 +506,8 @@ struct PaymentGuideSegment: View {
                         HStack(alignment: .top, spacing: 6) {
                             Text("\(index + 1).")
                                 .font(Theme.FontToken.inter(13))
-                                .foregroundStyle(Color(hex: 0x333333))
-                            PaymentGuideRichText(step, size: 13, weight: .light, color: Color(hex: 0x333333))
+                                .foregroundStyle(Theme.ColorToken.textPrimary)
+                            PaymentGuideRichText(step, size: 13, weight: .light, color: Theme.ColorToken.textPrimary)
                         }
                         .padding(.vertical, 4)
                     }
@@ -524,7 +524,7 @@ struct PaymentGuideCallout: View {
     var warn: Bool = false
 
     var body: some View {
-        PaymentGuideRichText(text, size: 12, weight: .light, color: warn ? Color(hex: 0x555555) : Theme.ColorToken.textSecondary)
+        PaymentGuideRichText(text, size: 12, weight: .light, color: warn ? Theme.ColorToken.textSecondary : Theme.ColorToken.textSecondary)
             .lineSpacing(4)
             .padding(.vertical, 12)
             .padding(.horizontal, 14)
@@ -569,7 +569,7 @@ struct PaymentGuideChecklist: View {
                     HStack(alignment: .top, spacing: 12) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 2)
-                                .stroke(done ? Theme.ColorToken.success : Color(hex: 0xDDDDDD), lineWidth: 1)
+                                .stroke(done ? Theme.ColorToken.success : Theme.ColorToken.border, lineWidth: 1)
                                 .frame(width: 16, height: 16)
                                 .background(done ? Theme.ColorToken.success : Color.clear)
                             if done {

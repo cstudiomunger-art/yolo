@@ -217,14 +217,14 @@ struct AttractionDetailView: View {
                 EmptyView()
             } else if images.count == 1, let path = images.first {
                 Button { fullScreenImagePath = path } label: {
-                    CoverImageView(path: path, height: 220, cornerRadius: 0)
+                    CoverImageView(path: path, height: 220)
                 }
                 .buttonStyle(.plain)
             } else {
                 TabView(selection: $carouselIndex) {
                     ForEach(Array(images.enumerated()), id: \.offset) { index, path in
                         Button { fullScreenImagePath = path } label: {
-                            CoverImageView(path: path, height: 220, cornerRadius: 0)
+                            CoverImageView(path: path, height: 220)
                         }
                         .buttonStyle(.plain)
                         .tag(index)
@@ -253,7 +253,7 @@ struct AttractionDetailView: View {
                 }
             }
             if let en = display.addressEn, !en.isEmpty {
-                Text("📍 \(en)")
+                Text(en)
                     .font(Theme.FontToken.inter(12))
                     .foregroundStyle(Theme.ColorToken.textMuted)
                     .fixedSize(horizontal: false, vertical: true)
@@ -404,7 +404,9 @@ struct AttractionDetailView: View {
                 infoRow(icon, line)
             }
             if let zh = display.addressZh, !zh.isEmpty {
-                infoRow("📍", zh)
+                Text(zh)
+                    .font(Theme.FontToken.inter(12))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
             }
         }
     }
@@ -496,12 +498,7 @@ struct AttractionDetailView: View {
                 showPaywall = true
             } label: {
                 Text(String(localized: "Unlock"))
-                    .font(Theme.FontToken.inter(12, weight: .medium))
-                    .tracking(0.8)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 11)
-                    .background(Theme.ColorToken.textPrimary)
+                    .emphasisButtonStyle()
             }
             .buttonStyle(.plain)
         }

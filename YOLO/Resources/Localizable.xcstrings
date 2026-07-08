@@ -7,7 +7,13 @@
     "  +%lld more" : {
 
     },
+    " — %@" : {
+
+    },
     " · %lld days" : {
+
+    },
+    " %@" : {
 
     },
     "— We can't help with" : {
@@ -169,6 +175,9 @@
     "%lld-day stay permitted" : {
 
     },
+    "%lld." : {
+
+    },
     "%lld/%lld" : {
       "localizations" : {
         "en" : {
@@ -188,9 +197,6 @@
           }
         }
       }
-    },
-    "%lld%% ready" : {
-
     },
     "•" : {
 
@@ -261,7 +267,7 @@
     "▾" : {
 
     },
-    "⚠️" : {
+    "⚠" : {
 
     },
     "⚠️ 24-hour transit: activity limited to the port zone. Leaving the zone requires a temporary entry permit; you cannot freely visit other cities." : {
@@ -330,16 +336,7 @@
     "💬 Common phrases" : {
 
     },
-    "💴" : {
-
-    },
-    "📄 Detailed guides" : {
-
-    },
     "📍" : {
-
-    },
-    "📍 %@" : {
 
     },
     "📚 Read Before You Go" : {
@@ -357,16 +354,10 @@
     "🔔" : {
 
     },
-    "🔗 Reference links" : {
-
-    },
     "🔗 Ticket links (external · not tracked)" : {
 
     },
     "🗣 Dialect gems · long-press a card for large text" : {
-
-    },
-    "🗣️ Show this phrase to the merchant →" : {
 
     },
     "🗺" : {
@@ -496,10 +487,10 @@
     "Agreed to terms and privacy policy" : {
 
     },
-    "AI unavailable — built with on-device scheduling rules" : {
+    "AI Content Disclosure" : {
 
     },
-    "Alipay" : {
+    "AI unavailable — built with on-device scheduling rules" : {
 
     },
     "All cached content has been removed." : {
@@ -521,19 +512,10 @@
     "Almost ready…" : {
 
     },
-    "Already in China" : {
-
-    },
-    "Alternatives (subject to live platform rules)" : {
-
-    },
     "An account with this email already exists. Try signing in instead." : {
 
     },
     "Anyone with the link can view this trip read-only in a browser or the app." : {
-
-    },
-    "App" : {
 
     },
     "Apple sign-in failed. Please try again." : {
@@ -634,9 +616,6 @@
           }
         }
       }
-    },
-    "Check off what you've already done (self-report is fine)" : {
-
     },
     "Check the admin: city, enabled status, and foreign-guest acceptance must match this trip." : {
 
@@ -895,13 +874,7 @@
     "Detailed check (departure / port / onward ticket)" : {
 
     },
-    "Detailed guide" : {
-
-    },
     "Details" : {
-
-    },
-    "Didn't work? Troubleshoot" : {
 
     },
     "Display name" : {
@@ -1079,6 +1052,9 @@
         }
       }
     },
+    "GDPR Compliance Framework" : {
+
+    },
     "Generate itinerary" : {
 
     },
@@ -1122,9 +1098,6 @@
 
     },
     "Hide translation" : {
-
-    },
-    "Hide troubleshooting" : {
 
     },
     "High-speed rail / ticket links open externally and are not recorded in your booking trace." : {
@@ -1512,7 +1485,7 @@
     "Passwords do not match." : {
 
     },
-    "Payment Helper" : {
+    "Payment failed?" : {
 
     },
     "Phrases / Dialect" : {
@@ -1585,6 +1558,7 @@
       }
     },
     "Planned sights shown under International departure below" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1598,9 +1572,6 @@
 
     },
     "Platform bookings and selections, all in one place" : {
-
-    },
-    "Play recording" : {
 
     },
     "Playlist" : {
@@ -1626,6 +1597,7 @@
       }
     },
     "Post-arrival sights shown under International arrival above" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1638,16 +1610,10 @@
     "Practical Info" : {
 
     },
-    "Pre-departure prep" : {
-
-    },
     "Pre-trip Q&A · finding local help · payment & card binding · emergency support in China" : {
 
     },
     "Preferences" : {
-
-    },
-    "Prefilled from your profile: %@" : {
 
     },
     "Prep Checklist" : {
@@ -1929,9 +1895,6 @@
     "Show to locals · Large text" : {
 
     },
-    "Show to merchant" : {
-
-    },
     "Show translation" : {
 
     },
@@ -1999,9 +1962,6 @@
     "🆘" : {
 
     },
-    "🆘 Rescue" : {
-
-    },
     "Standard" : {
 
     },
@@ -2026,16 +1986,10 @@
     "Static Demo" : {
 
     },
-    "Still stuck? Get human help (card binding) →" : {
-
-    },
     "Storage" : {
 
     },
     "Storage bucket not set up yet. Run: supabase db push" : {
-
-    },
-    "Subject to live platform rules" : {
 
     },
     "Subscribe" : {
@@ -2288,16 +2242,7 @@
     "We'll show visa rules and travel tips for your country" : {
 
     },
-    "WeChat" : {
-
-    },
     "Welcome back!" : {
-
-    },
-    "Works offline" : {
-
-    },
-    "Works offline · no network needed" : {
 
     },
     "YOLO" : {

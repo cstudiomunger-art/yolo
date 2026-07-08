@@ -1,11 +1,37 @@
 import SwiftUI
 
+enum CoverImageRounding {
+    case all
+    case topOnly
+}
+
+extension View {
+    @ViewBuilder
+    func coverClipShape(radius: CGFloat, rounding: CoverImageRounding = .all) -> some View {
+        switch rounding {
+        case .all:
+            clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
+        case .topOnly:
+            clipShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: radius,
+                    bottomLeadingRadius: 0,
+                    bottomTrailingRadius: 0,
+                    topTrailingRadius: radius,
+                    style: .continuous
+                )
+            )
+        }
+    }
+}
+
 /// Loads CMS cover paths via `MediaURLResolver`, with disk cache for offline viewing.
 struct CoverImageView: View {
     let path: String?
     var height: CGFloat = 120
     var width: CGFloat?
-    var cornerRadius: CGFloat = 4
+    var cornerRadius: CGFloat = Theme.CornerRadius.medium
+    var rounding: CoverImageRounding = .all
 
     @State private var loadedImage: UIImage?
 
@@ -30,7 +56,7 @@ struct CoverImageView: View {
                 }
             }
             .clipped()
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .coverClipShape(radius: cornerRadius, rounding: rounding)
             .task(id: path) {
                 await loadImage()
             }

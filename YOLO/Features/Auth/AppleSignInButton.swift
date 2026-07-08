@@ -12,6 +12,8 @@ struct AppleSignInButton: View {
 
     @State private var currentNonce: String?
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         SignInWithAppleButton(.continue) { request in
             let nonce = Nonce.random()
@@ -22,7 +24,7 @@ struct AppleSignInButton: View {
         } onCompletion: { result in
             handle(result)
         }
-        .signInWithAppleButtonStyle(.white)
+        .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
         .frame(height: 48)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .overlay(

@@ -1150,7 +1150,7 @@ struct BookYourTripView: View {
                                 Text("→")
                             }
                             .padding(14)
-                            .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                            .cardBorderStyle()
                         }
                         .buttonStyle(.plain)
                     }
@@ -1206,7 +1206,7 @@ struct BookYourTripView: View {
                         .font(Theme.FontToken.inter(11, weight: .medium))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                        .cardBorderStyle()
                 }
             }
         }
@@ -1448,7 +1448,7 @@ struct HotelCardView: View {
                                 .font(Theme.FontToken.inter(10, weight: .medium))
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 6)
-                                .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                                .cardBorderStyle(radius: Theme.CornerRadius.small)
                         }
                     }
                 }
@@ -1666,8 +1666,8 @@ struct ShareItinerarySheet: View {
                     Text(linkCopied ? String(localized: "Copied!") : String(localized: "Copy Link"))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.ColorToken.textPrimary)
-                        .foregroundStyle(.white)
+                        .background(Theme.ColorToken.surfaceEmphasis)
+                        .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
                 }
                 .buttonStyle(.plain)
 

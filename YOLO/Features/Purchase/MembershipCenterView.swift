@@ -205,7 +205,7 @@ struct MembershipCenterView: View {
             }
             .buttonStyle(.plain)
         }
-        .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+        .cardBorderStyle(borderColor: Theme.ColorToken.borderLight)
     }
 
     private func requestPurchaseHistory() {
@@ -263,18 +263,23 @@ private struct PlanSummaryRow: View {
             } label: {
                 Text(String(localized: "Subscribe"))
                     .font(Theme.FontToken.inter(12, weight: .medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(plan.isBestValue ? Theme.ColorToken.onSurfaceEmphasis : .white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-                    .background(plan.isBestValue ? Theme.ColorToken.textPrimary : Theme.ColorToken.accent)
+                    .background(plan.isBestValue ? Theme.ColorToken.surfaceEmphasis : Theme.ColorToken.accent)
             }
             .buttonStyle(.plain)
             .disabled(appEnv.purchase.isPurchasing)
         }
         .padding(14)
-        .overlay(Rectangle().stroke(
-            plan.isBestValue ? Theme.ColorToken.accent : Theme.ColorToken.borderLight, lineWidth: 1
-        ))
+        .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.medium, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.CornerRadius.medium, style: .continuous)
+                .stroke(
+                    plan.isBestValue ? Theme.ColorToken.accent : Theme.ColorToken.borderLight,
+                    lineWidth: 1
+                )
+        )
         .loginSheet(isPresented: $showLogin, appEnv: appEnv)
     }
 }

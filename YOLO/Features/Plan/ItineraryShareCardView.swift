@@ -31,10 +31,8 @@ struct ItineraryShareCardView: View {
                 endPoint: .bottom
             )
         )
-        .overlay(
-            Rectangle()
-                .stroke(Theme.ColorToken.border, lineWidth: 1)
-        )
+        .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.large, style: .continuous))
+        .cardBorderStyle(radius: Theme.CornerRadius.large)
     }
 
     private var header: some View {
@@ -85,8 +83,8 @@ struct ItineraryShareCardView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.85))
-        .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+        .background(Theme.ColorToken.backgroundSubtle)
+        .cardBorderStyle(radius: Theme.CornerRadius.medium)
     }
 
     private var footer: some View {
@@ -107,6 +105,7 @@ struct ItineraryShareCardView: View {
 enum ItineraryShareImageRenderer {
     static func render(itinerary: SampleItinerary, scale: CGFloat? = nil) -> UIImage? {
         let card = ItineraryShareCardView(itinerary: itinerary)
+            .preferredColorScheme(.light)
         let renderer = ImageRenderer(content: card)
         renderer.scale = scale ?? Theme.DisplayScale.primary
         return renderer.uiImage

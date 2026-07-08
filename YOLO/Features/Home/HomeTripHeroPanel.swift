@@ -173,10 +173,7 @@ struct HomeTripHeroPanel: View {
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.ColorToken.background)
-        .overlay(
-            RoundedRectangle(cornerRadius: 4, style: .continuous)
-                .stroke(Theme.ColorToken.border, lineWidth: 1)
-        )
+        .cardBorderStyle(radius: Theme.CornerRadius.large)
     }
 
     private func tripSummaryColumn(_ content: HeroCardContent) -> some View {

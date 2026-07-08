@@ -182,10 +182,10 @@ struct VisaDetectorView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Theme.ColorToken.textPrimary)
-            .foregroundStyle(.white)
+            .background(Theme.ColorToken.surfaceEmphasis)
+            .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
             .clipShape(RoundedRectangle(cornerRadius: 14))
-            .shadow(color: Theme.ColorToken.textPrimary.opacity(ready ? 0.18 : 0), radius: 10, y: 4)
+            .shadow(color: Theme.ColorToken.surfaceEmphasis.opacity(ready ? 0.18 : 0), radius: 10, y: 4)
         }
         .buttonStyle(.plain)
         .disabled(!ready)

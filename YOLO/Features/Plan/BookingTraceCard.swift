@@ -55,14 +55,14 @@ struct BookingTraceCard: View {
         VStack(alignment: .leading, spacing: 2) {
             Text("My Booking Trace")
                 .font(Theme.FontToken.playfair(15, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
             Text("Platform bookings and selections, all in one place")
                 .font(Theme.FontToken.inter(10))
-                .foregroundStyle(.white.opacity(0.62))
+                .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis.opacity(0.62))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Theme.ColorToken.textPrimary)
+        .background(Theme.ColorToken.surfaceEmphasis)
     }
 
     private func group(label: String, items: [TracedItem]) -> some View {

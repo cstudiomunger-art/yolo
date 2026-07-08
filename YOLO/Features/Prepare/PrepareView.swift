@@ -303,7 +303,7 @@ struct PrepareView: View {
         .frame(maxWidth: .infinity)
         .padding(20)
         .background(Theme.ColorToken.backgroundSubtle)
-        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+        .cardBorderStyle()
         .padding(.top, 16)
     }
 
@@ -487,7 +487,7 @@ struct ChecklistRowView: View {
                                     .foregroundStyle(Theme.ColorToken.textMuted)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
-                                    .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                                    .cardBorderStyle(radius: Theme.CornerRadius.small)
                             }
                             .buttonStyle(.plain)
                         } else {

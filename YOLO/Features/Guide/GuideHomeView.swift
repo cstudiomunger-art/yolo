@@ -142,7 +142,12 @@ struct GuideHomeView: View {
         } label: {
             VStack(spacing: 0) {
                 ZStack(alignment: .bottomLeading) {
-                    cityCover(city, height: 180)
+                    cityCover(
+                        city,
+                        height: 180,
+                        cornerRadius: Theme.CornerRadius.large,
+                        rounding: .topOnly
+                    )
                     LinearGradient(
                         colors: [.clear, .black.opacity(0.55)],
                         startPoint: .top,
@@ -171,7 +176,8 @@ struct GuideHomeView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
             }
-            .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.large, style: .continuous))
+            .cardBorderStyle(radius: Theme.CornerRadius.large)
         }
         .buttonStyle(.plain)
     }
@@ -182,7 +188,12 @@ struct GuideHomeView: View {
         } label: {
             VStack(spacing: 0) {
                 ZStack(alignment: .topTrailing) {
-                    cityCover(city, height: 140)
+                    cityCover(
+                        city,
+                        height: 140,
+                        cornerRadius: Theme.CornerRadius.large,
+                        rounding: .topOnly
+                    )
                     LinearGradient(
                         colors: [.clear, .black.opacity(0.4)],
                         startPoint: .center,
@@ -197,7 +208,7 @@ struct GuideHomeView: View {
                             .padding(.horizontal, 7)
                             .padding(.vertical, 2)
                             .background(.black.opacity(0.35))
-                            .overlay(Rectangle().stroke(.white.opacity(0.25), lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.CornerRadius.small, style: .continuous).stroke(.white.opacity(0.25), lineWidth: 1))
                             .padding(10)
                     }
                 }
@@ -224,7 +235,8 @@ struct GuideHomeView: View {
             }
             .frame(width: 232, alignment: .leading)
             .background(Theme.ColorToken.background)
-            .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.large, style: .continuous))
+            .cardBorderStyle(radius: Theme.CornerRadius.large)
         }
         .buttonStyle(.plain)
     }
@@ -234,7 +246,12 @@ struct GuideHomeView: View {
             onSelectCity(city)
         } label: {
             VStack(spacing: 0) {
-                cityCover(city, height: 100)
+                cityCover(
+                    city,
+                    height: 100,
+                    cornerRadius: Theme.CornerRadius.large,
+                    rounding: .topOnly
+                )
                     .frame(maxWidth: .infinity)
 
                 VStack(alignment: .leading, spacing: 0) {
@@ -267,7 +284,8 @@ struct GuideHomeView: View {
                 }
             }
             .background(Theme.ColorToken.background)
-            .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.large, style: .continuous))
+            .cardBorderStyle(radius: Theme.CornerRadius.large)
         }
         .buttonStyle(.plain)
     }
@@ -275,9 +293,19 @@ struct GuideHomeView: View {
     // MARK: - Shared helpers
 
     @ViewBuilder
-    private func cityCover(_ city: City, height: CGFloat) -> some View {
+    private func cityCover(
+        _ city: City,
+        height: CGFloat,
+        cornerRadius: CGFloat = Theme.CornerRadius.medium,
+        rounding: CoverImageRounding = .all
+    ) -> some View {
         if let cover = city.coverImagePath {
-            CoverImageView(path: cover, height: height, cornerRadius: 0)
+            CoverImageView(
+                path: cover,
+                height: height,
+                cornerRadius: cornerRadius,
+                rounding: rounding
+            )
         } else {
             ZStack {
                 Theme.ColorToken.backgroundSubtle
@@ -286,6 +314,7 @@ struct GuideHomeView: View {
             }
             .frame(height: height)
             .frame(maxWidth: .infinity)
+            .coverClipShape(radius: cornerRadius, rounding: rounding)
         }
     }
 

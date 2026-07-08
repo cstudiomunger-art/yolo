@@ -30,6 +30,7 @@ struct RootView: View {
             Task { await appEnv.refreshVisaRule() }
         }
         .onChange(of: scenePhase) { _, newPhase in
+            appEnv.audioPlayer.handleScenePhase(newPhase)
             if newPhase == .active {
                 let now = Date()
                 if appEnv.auth.isAuthenticated, now.timeIntervalSince(lastMembershipRefresh) > 15 {

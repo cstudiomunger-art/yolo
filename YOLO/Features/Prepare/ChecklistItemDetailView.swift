@@ -83,10 +83,10 @@ struct ChecklistItemDetailView: View {
             } label: {
                 Text(status == .done ? "Marked as Done" : "Mark as Done")
                     .font(Theme.FontToken.inter(13, weight: .medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Theme.ColorToken.textPrimary)
+                    .background(Theme.ColorToken.surfaceEmphasis)
             }
             .buttonStyle(.plain)
             .disabled(status == .done)
@@ -100,7 +100,7 @@ struct ChecklistItemDetailView: View {
                     .foregroundStyle(Theme.ColorToken.textSecondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                    .cardBorderStyle()
             }
             .buttonStyle(.plain)
             .disabled(status == .skipped)

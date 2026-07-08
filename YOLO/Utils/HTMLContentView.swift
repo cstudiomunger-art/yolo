@@ -100,6 +100,7 @@ private struct HTMLWebContentView: View {
     let lineSpacing: CGFloat
     var allowsInteraction: Bool = true
 
+    @Environment(\.colorScheme) private var colorScheme
     @State private var contentHeight: CGFloat = 120
 
     var body: some View {
@@ -108,6 +109,7 @@ private struct HTMLWebContentView: View {
             fontSize: fontSize,
             foregroundColor: foregroundColor,
             lineSpacing: lineSpacing,
+            colorScheme: colorScheme,
             allowsInteraction: allowsInteraction,
             contentHeight: $contentHeight
         )
@@ -121,6 +123,7 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
     let fontSize: CGFloat
     let foregroundColor: Color
     let lineSpacing: CGFloat
+    let colorScheme: ColorScheme
     let allowsInteraction: Bool
     @Binding var contentHeight: CGFloat
 
@@ -142,7 +145,12 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
     func updateUIView(_ webView: WKWebView, context: Context) {
         context.coordinator.contentHeight = $contentHeight
         webView.isUserInteractionEnabled = allowsInteraction
-        let uiColor = UIColor(foregroundColor)
+        let textHex = foregroundColor.resolvedHex(colorScheme: colorScheme)
+        let borderHex = Theme.ColorToken.border.resolvedHex(colorScheme: colorScheme)
+        let subtleHex = Theme.ColorToken.backgroundSubtle.resolvedHex(colorScheme: colorScheme)
+        let stripeHex = Theme.ColorToken.borderLight.resolvedHex(colorScheme: colorScheme)
+        let accentHex = Theme.ColorToken.accent.resolvedHex(colorScheme: colorScheme)
+        let cornerRadius = Int(Theme.CornerRadius.medium)
         let displayHtml = HTMLContentView.htmlForDisplay(html)
         let wrapped = """
         <!DOCTYPE html><html><head>
@@ -155,7 +163,7 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
         body {
           font-family: -apple-system, sans-serif;
           font-size: \(fontSize)px;
-          color: \(uiColor.hexString);
+          color: \(textHex);
           line-height: \(fontSize + lineSpacing)px;
           margin: 0;
           padding: 0;
@@ -165,16 +173,16 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
         * { background-color: transparent !important; }
         p { margin: 0 0 0.6em 0; }
         ul, ol { margin: 0.4em 0; padding-left: 1.2em; }
-        a { color: #c45c26; }
-        img { max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0; display: block; }
+        a { color: \(accentHex); }
+        img { max-width: 100%; height: auto; border-radius: \(cornerRadius)px; margin: 8px 0; display: block; }
         h2 { font-size: 1.15em; font-weight: 600; margin: 1em 0 0.5em; }
         h3 { font-size: 1.05em; font-weight: 600; margin: 0.8em 0 0.4em; }
-        hr { border: none; border-top: 1px solid #ddd; margin: 1em 0; }
+        hr { border: none; border-top: 1px solid \(borderHex); margin: 1em 0; }
         blockquote {
           margin: 0.6em 0;
           padding: 8px 12px;
-          border-left: 3px solid #c45c26;
-          background-color: #f7f6f3 !important;
+          border-left: 3px solid \(accentHex);
+          background-color: \(subtleHex) !important;
           color: inherit;
         }
         table {
@@ -184,14 +192,14 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
           font-size: 0.92em;
         }
         th, td {
-          border: 1px solid #ddd;
+          border: 1px solid \(borderHex);
           padding: 6px 8px;
           text-align: left;
           vertical-align: top;
           word-break: break-word;
         }
-        th { background-color: #f0efeb !important; font-weight: 600; }
-        tr:nth-child(even) td { background-color: #faf9f7 !important; }
+        th { background-color: \(subtleHex) !important; font-weight: 600; }
+        tr:nth-child(even) td { background-color: \(stripeHex) !important; }
         </style>
         </head><body>\(displayHtml)</body></html>
         """
@@ -217,16 +225,5 @@ private struct HTMLWebViewRepresentable: UIViewRepresentable {
                 }
             }
         }
-    }
-}
-
-private extension UIColor {
-    var hexString: String {
-        var r: CGFloat = 0
-        var g: CGFloat = 0
-        var b: CGFloat = 0
-        var a: CGFloat = 0
-        getRed(&r, green: &g, blue: &b, alpha: &a)
-        return String(format: "#%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
     }
 }

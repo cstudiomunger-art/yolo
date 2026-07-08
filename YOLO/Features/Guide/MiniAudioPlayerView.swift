@@ -292,9 +292,9 @@ private struct FloatingNoteButton: View {
             // handled by onTapGesture; dragging by the high-priority DragGesture below.
             Image(systemName: player.isPlaying ? "waveform" : "music.note")
                 .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
                 .frame(width: buttonSize, height: buttonSize)
-                .background(Circle().fill(Theme.ColorToken.textPrimary))
+                .background(Circle().fill(Theme.ColorToken.surfaceEmphasis))
                 .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
                 .contentShape(Circle())
                 .onTapGesture {
@@ -308,7 +308,7 @@ private struct FloatingNoteButton: View {
                     .font(.system(size: 9, weight: .bold))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
                     .frame(width: 18, height: 18)
-                    .background(Circle().fill(Color.white))
+                    .background(Circle().fill(Theme.ColorToken.surfaceFloating))
                     .overlay(Circle().stroke(Theme.ColorToken.border, lineWidth: 0.5))
                     .shadow(color: .black.opacity(0.15), radius: 3, y: 1)
             }

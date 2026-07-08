@@ -99,7 +99,8 @@ struct CityGuideAudioSection: View {
                     startOrToggle()
                 } label: {
                     Text(isPlayingThis ? String(localized: "⏸ Pause") : String(localized: "▶ Play"))
-                        .font(Theme.FontToken.inter(12, weight: .medium))
+                        .font(Theme.FontToken.inter(14, weight: .medium))
+                        .padding(.vertical, 4)
                 }
                 .buttonStyle(.plain)
                 .disabled(displayMode == .loading || !canPlayThis)

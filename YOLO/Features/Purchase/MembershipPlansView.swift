@@ -219,22 +219,22 @@ struct MembershipPlansView: View {
             } label: {
                 VStack(spacing: 3) {
                     if appEnv.purchase.isPurchasing {
-                        ProgressView().tint(.white)
+                        ProgressView().tint(Theme.ColorToken.onSurfaceEmphasis)
                     } else {
                         Text(ctaMain)
                             .font(Theme.FontToken.inter(13, weight: .medium))
                             .tracking(0.6)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
                         if !ctaSub.isEmpty {
                             Text(ctaSub)
                                 .font(Theme.FontToken.inter(9))
-                                .foregroundStyle(.white.opacity(0.6))
+                                .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis.opacity(0.6))
                         }
                     }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Theme.ColorToken.textPrimary)
+                .background(Theme.ColorToken.surfaceEmphasis)
             }
             .buttonStyle(.plain)
             .disabled(appEnv.purchase.isPurchasing || selectedPlan == nil)
@@ -344,7 +344,8 @@ private struct PlanOptionCard: View {
                                 .tracking(0.5)
                                 .foregroundStyle(Theme.ColorToken.success)
                                 .padding(.horizontal, 6).padding(.vertical, 1)
-                                .overlay(Rectangle().stroke(Theme.ColorToken.success, lineWidth: 1))
+                                .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.small, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: Theme.CornerRadius.small, style: .continuous).stroke(Theme.ColorToken.success, lineWidth: 1))
                                 .padding(.top, 4)
                         }
                     }
@@ -369,11 +370,13 @@ private struct PlanOptionCard: View {
                 }
             }
             .padding(14)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.medium, style: .continuous))
             .overlay(
-                Rectangle().stroke(
-                    isSelected ? accent : Theme.ColorToken.borderLight,
-                    lineWidth: isSelected ? 1.5 : 1
-                )
+                RoundedRectangle(cornerRadius: Theme.CornerRadius.medium, style: .continuous)
+                    .stroke(
+                        isSelected ? accent : Theme.ColorToken.borderLight,
+                        lineWidth: isSelected ? 1.5 : 1
+                    )
             )
             .overlay(alignment: .topTrailing) {
                 if plan.isBestValue {

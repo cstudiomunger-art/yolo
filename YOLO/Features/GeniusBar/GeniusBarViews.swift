@@ -273,7 +273,7 @@ struct GeniusBarHomeView: View {
     @ViewBuilder
     private func agentAvatar(_ agent: SupportAgent, size: CGFloat) -> some View {
         CachedAvatarImage(urlString: agent.avatarUrl) {
-            Circle().fill(LinearGradient(colors: [Theme.ColorToken.accent, Theme.ColorToken.textPrimary], startPoint: .topLeading, endPoint: .bottomTrailing))
+            Circle().fill(LinearGradient(colors: [Theme.ColorToken.accent, Theme.ColorToken.surfaceEmphasis], startPoint: .topLeading, endPoint: .bottomTrailing))
                 .overlay(Text(agent.avatarSeed.isEmpty ? String(agent.name.prefix(1)) : agent.avatarSeed)
                     .font(Theme.FontToken.playfair(20, weight: .bold)).foregroundStyle(.white))
         }
@@ -505,7 +505,7 @@ struct GeniusBarChatView: View {
                         .font(Theme.FontToken.inter(13))
                         .foregroundStyle(msg.isFromUser ? .white : Theme.ColorToken.textPrimary)
                         .padding(.horizontal, 13).padding(.vertical, 10)
-                        .background(msg.isFromUser ? Theme.ColorToken.success : Theme.ColorToken.background)
+                        .background(msg.isFromUser ? Theme.ColorToken.success : Theme.ColorToken.chatAI)
                         .overlay(RoundedRectangle(cornerRadius: 16).stroke(msg.isFromUser ? .clear : Theme.ColorToken.border, lineWidth: 1))
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                     if translatedVisible(msg), let t = msg.bodyTranslated, !t.isEmpty {

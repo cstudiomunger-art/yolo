@@ -4,55 +4,45 @@ import UIKit
 
 @MainActor
 enum AudioNowPlayingService {
-    static func configureRemoteCommands(
-        play: @escaping () -> Void,
-        pause: @escaping () -> Void,
-        toggle: @escaping () -> Void,
-        next: (() -> Void)? = nil,
-        previous: (() -> Void)? = nil
+    private static var isConfigured = false
+
+    /// Install lock-screen / Control Center handlers once for the app lifetime.
+    static func installRemoteCommandsIfNeeded(
+        play: @escaping @MainActor () -> Void,
+        pause: @escaping @MainActor () -> Void,
+        toggle: @escaping @MainActor () -> Void,
+        next: @escaping @MainActor () -> Void,
+        previous: @escaping @MainActor () -> Void
     ) {
+        guard !isConfigured else { return }
+        isConfigured = true
+
         let center = MPRemoteCommandCenter.shared()
         center.playCommand.isEnabled = true
         center.pauseCommand.isEnabled = true
         center.togglePlayPauseCommand.isEnabled = true
-
-        center.playCommand.removeTarget(nil)
-        center.pauseCommand.removeTarget(nil)
-        center.togglePlayPauseCommand.removeTarget(nil)
-        center.nextTrackCommand.removeTarget(nil)
-        center.previousTrackCommand.removeTarget(nil)
+        center.nextTrackCommand.isEnabled = true
+        center.previousTrackCommand.isEnabled = true
 
         center.playCommand.addTarget { _ in
-            play()
+            Task { @MainActor in play() }
             return .success
         }
         center.pauseCommand.addTarget { _ in
-            pause()
+            Task { @MainActor in pause() }
             return .success
         }
         center.togglePlayPauseCommand.addTarget { _ in
-            toggle()
+            Task { @MainActor in toggle() }
             return .success
         }
-
-        if let next {
-            center.nextTrackCommand.isEnabled = true
-            center.nextTrackCommand.addTarget { _ in
-                next()
-                return .success
-            }
-        } else {
-            center.nextTrackCommand.isEnabled = false
+        center.nextTrackCommand.addTarget { _ in
+            Task { @MainActor in next() }
+            return .success
         }
-
-        if let previous {
-            center.previousTrackCommand.isEnabled = true
-            center.previousTrackCommand.addTarget { _ in
-                previous()
-                return .success
-            }
-        } else {
-            center.previousTrackCommand.isEnabled = false
+        center.previousTrackCommand.addTarget { _ in
+            Task { @MainActor in previous() }
+            return .success
         }
     }
 

@@ -94,7 +94,7 @@ struct HomeHeroCountryVisaRow: View {
                 .padding(.horizontal, 8)
                 .padding(.vertical, 2)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    RoundedRectangle(cornerRadius: Theme.CornerRadius.small, style: .continuous)
                         .stroke(visaBadgeColor(visa), lineWidth: 1)
                 )
 

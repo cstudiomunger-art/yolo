@@ -215,10 +215,7 @@ struct AudioGuideSection: View {
             if showUnlockedToast {
                 Text(String(localized: "🎧 Audio guide unlocked!"))
                     .font(Theme.FontToken.inter(11, weight: .medium))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(Theme.ColorToken.textPrimary)
+                    .emphasisButtonStyle(horizontalPadding: 14, verticalPadding: 8)
                     .padding(.bottom, 4)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .onAppear {
@@ -270,7 +267,8 @@ struct AudioGuideSection: View {
                         Text(String(format: String(localized: "▶ Preview (%lld min free)"), previewMinutes))
                     }
                 }
-                .font(Theme.FontToken.inter(12, weight: .medium))
+                .font(Theme.FontToken.inter(14, weight: .medium))
+                .padding(.vertical, 2)
                 .foregroundStyle(canPlayThis ? Theme.ColorToken.textPrimary : Theme.ColorToken.textMuted)
                 .buttonStyle(.plain)
                 .disabled(!canPlayThis)
@@ -308,12 +306,7 @@ struct AudioGuideSection: View {
                 showPurchase = true
             } label: {
                 Text(String(localized: "Unlock Audio Guide"))
-                    .font(Theme.FontToken.inter(12, weight: .medium))
-                    .tracking(0.8)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 11)
-                    .background(Theme.ColorToken.textPrimary)
+                    .emphasisButtonStyle()
             }
             .buttonStyle(.plain)
             .fixedSize()
@@ -327,7 +320,8 @@ struct AudioGuideSection: View {
                 startOrToggle()
             } label: {
                 Text(isPlayingThis ? String(localized: "⏸ Pause") : String(localized: "▶ Play"))
-                    .font(Theme.FontToken.inter(12, weight: .medium))
+                    .font(Theme.FontToken.inter(14, weight: .medium))
+                    .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
             .disabled(displayMode == .loading || !canPlayThis)

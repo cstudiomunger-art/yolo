@@ -36,6 +36,15 @@ function sqlStr(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
+function dollarQuote(value, tag) {
+  const marker = `$yolo_legal_${tag}$`;
+  const text = String(value ?? "");
+  if (text.includes(marker)) {
+    throw new Error(`Dollar-quote tag collision for ${tag}`);
+  }
+  return `${marker}${text}${marker}`;
+}
+
 function escapeHtml(s) {
   return String(s || "")
     .replace(/&/g, "&amp;")
@@ -220,17 +229,12 @@ function sha256(text) {
   return createHash("sha256").update(text, "utf8").digest("hex").slice(0, 16);
 }
 
-function main() {
-  mkdirSync(OUT_DIR, { recursive: true });
-
+export function loadLegalDocuments() {
   const docs = [];
-  const setClauses = [];
-
   for (const source of SOURCES) {
     const markdown = readFileSync(source.path, "utf8");
     const html = mdLegalToHtml(markdown);
     if (!html.trim()) throw new Error(`Empty HTML for ${source.path}`);
-
     docs.push({
       id: source.id,
       column: source.column,
@@ -239,19 +243,36 @@ function main() {
       htmlChars: html.length,
       htmlSha256Prefix: sha256(html),
       htmlPreview: html.slice(0, 200),
+      html,
     });
-    setClauses.push(`  ${source.column} = ${sqlStr(html)}`);
   }
+  return docs;
+}
 
-  const sql = `-- Generated legal documents for app_settings (id=global)
+function buildLegalDocsSql(docs) {
+  const statements = docs.map((doc, index) => {
+    const quoted = dollarQuote(doc.html, doc.column);
+    return `-- ${index + 1}/${docs.length} ${doc.column} (${doc.htmlChars} chars)
+UPDATE app_settings
+SET ${doc.column} = ${quoted},
+    updated_at = NOW()
+WHERE id = 'global';`;
+  });
+
+  return `-- Generated legal documents for app_settings (id=global)
 -- Sources: Privacy Policy, Terms of Service, GDPR Framework, AI Content Disclosure
 -- Generated: ${new Date().toISOString()}
+-- Run all statements below, or one at a time if the SQL editor struggles with large pastes.
 
-UPDATE app_settings SET
-${setClauses.join(",\n")},
-  updated_at = NOW()
-WHERE id = 'global';
+${statements.join("\n\n")}
 `;
+}
+
+function main() {
+  mkdirSync(OUT_DIR, { recursive: true });
+
+  const docs = loadLegalDocuments();
+  const sql = buildLegalDocsSql(docs);
 
   writeFileSync(OUT_SQL, sql, "utf8");
   writeFileSync(

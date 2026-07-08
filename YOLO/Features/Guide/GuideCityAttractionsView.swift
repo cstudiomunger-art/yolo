@@ -43,7 +43,7 @@ struct GuideCityAttractionsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 if let cover = city.coverImagePath {
-                    CoverImageView(path: cover, height: 160, cornerRadius: 0)
+                    CoverImageView(path: cover, height: 160)
                 }
                 if let desc = city.description, !desc.isEmpty {
                     HTMLContentView(content: desc, fontSize: 13, lineSpacing: 4, allowsInteraction: false)

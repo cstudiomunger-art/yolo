@@ -76,10 +76,8 @@ struct HomeQuickAccessGrid: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity, minHeight: 124, maxHeight: 124, alignment: .topLeading)
-            .overlay(
-                RoundedRectangle(cornerRadius: 4, style: .continuous)
-                    .stroke(Theme.ColorToken.border, lineWidth: 1)
-            )
+            .background(Theme.ColorToken.background)
+            .cardBorderStyle(radius: Theme.CornerRadius.large)
         }
         .buttonStyle(.plain)
     }

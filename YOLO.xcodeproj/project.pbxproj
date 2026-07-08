@@ -271,7 +271,7 @@
 				CODE_SIGN_ENTITLEMENTS = YOLO/YOLO.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = BDP55924RH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -279,9 +279,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "YOLO HAPPY";
 				INFOPLIST_KEY_CFBundleURLTypes = "{\n    CFBundleURLName = \"com.yolohappy.auth\";\n    CFBundleURLSchemes =     (\n        yoloapp\n    );\n}";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save itinerary images when you share your trip.";
-				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -314,7 +314,7 @@
 				CODE_SIGN_ENTITLEMENTS = YOLO/YOLO.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = BDP55924RH;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -322,9 +322,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "YOLO HAPPY";
 				INFOPLIST_KEY_CFBundleURLTypes = "{\n    CFBundleURLName = \"com.yolohappy.auth\";\n    CFBundleURLSchemes =     (\n        yoloapp\n    );\n}";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save itinerary images when you share your trip.";
-				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

@@ -22,10 +22,10 @@ struct NotificationPermissionView: View {
                 Task { await requestPermission() }
             }
             .font(Theme.FontToken.inter(14, weight: .medium))
-            .foregroundStyle(.white)
+            .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Theme.ColorToken.textPrimary)
+            .background(Theme.ColorToken.surfaceEmphasis)
             Button("Maybe Later") { complete() }
                 .font(Theme.FontToken.inter(13))
                 .foregroundStyle(Theme.ColorToken.textMuted)

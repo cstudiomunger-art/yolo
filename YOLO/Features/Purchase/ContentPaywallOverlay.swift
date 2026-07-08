@@ -57,12 +57,7 @@ struct ContentPaywallOverlay: View {
                             showPaywall = true
                         } label: {
                             Text(String(localized: "Unlock the Guide →"))
-                                .font(Theme.FontToken.inter(12, weight: .medium))
-                                .tracking(0.8)
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 11)
-                                .background(Theme.ColorToken.textPrimary)
+                                .emphasisButtonStyle()
                         }
                         .buttonStyle(.plain)
                         .fixedSize()

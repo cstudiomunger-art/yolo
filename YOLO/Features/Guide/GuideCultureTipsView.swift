@@ -116,6 +116,6 @@ struct CultureTipDetailView: View {
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.ColorToken.backgroundSubtle)
-        .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+        .cardBorderStyle()
     }
 }

@@ -262,7 +262,7 @@ struct PlanCreateFlowView: View {
                         .font(Theme.FontToken.inter(13))
                 }
                 .padding(12)
-                .overlay(Rectangle().stroke(Theme.ColorToken.border, lineWidth: 1))
+                .cardBorderStyle()
 
                 if !selectedCityIds.isEmpty {
                     selectedCityChips
@@ -460,13 +460,15 @@ struct PlanCreateFlowView: View {
                             ? Theme.ColorToken.backgroundSubtle
                             : Theme.ColorToken.background
                     )
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.medium, style: .continuous))
                     .overlay(
-                        Rectangle().stroke(
-                            selectedCityIds.contains(city.id)
-                                ? Theme.ColorToken.accent
-                                : Theme.ColorToken.border,
-                            lineWidth: 1
-                        )
+                        RoundedRectangle(cornerRadius: Theme.CornerRadius.medium, style: .continuous)
+                            .stroke(
+                                selectedCityIds.contains(city.id)
+                                    ? Theme.ColorToken.accent
+                                    : Theme.ColorToken.border,
+                                lineWidth: 1
+                            )
                     )
                 }
                 .buttonStyle(.plain)
@@ -478,7 +480,12 @@ struct PlanCreateFlowView: View {
     private func cityCover(_ city: City) -> some View {
         if let path = city.coverImagePath?.trimmingCharacters(in: .whitespacesAndNewlines),
            !path.isEmpty {
-            CoverImageView(path: path, height: 88, cornerRadius: 0)
+            CoverImageView(
+                path: path,
+                height: 88,
+                cornerRadius: Theme.CornerRadius.medium,
+                rounding: .topOnly
+            )
         } else {
             ZStack {
                 Theme.ColorToken.backgroundSubtle
@@ -487,6 +494,7 @@ struct PlanCreateFlowView: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 88)
+            .coverClipShape(radius: Theme.CornerRadius.medium, rounding: .topOnly)
         }
     }
 
@@ -1438,10 +1446,8 @@ struct PlanCreateFlowView: View {
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Theme.ColorToken.backgroundSubtle)
-            .overlay(Rectangle().stroke(Theme.ColorToken.borderLight, lineWidth: 1))
+            .cardBorderStyle(borderColor: Theme.ColorToken.borderLight)
     }
-
-    // MARK: - Actions
 
     private func cancelPendingGeneration() {
         generationTask?.cancel()
@@ -2319,10 +2325,10 @@ struct PlanCreateFlowView: View {
         Button(action: action) {
             Text(title)
                 .font(Theme.FontToken.inter(12, weight: .medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 15)
-                .background(Theme.ColorToken.textPrimary)
+                .background(Theme.ColorToken.surfaceEmphasis)
         }
         .buttonStyle(.plain)
     }
@@ -2391,17 +2397,7 @@ struct PlanAttractionPickerSheet: View {
                                     selectCity(city.id)
                                 } label: {
                                     Text("\(city.emoji ?? "") \(city.name)")
-                                        .font(Theme.FontToken.inter(11, weight: .medium))
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 8)
-                                        .background(
-                                            selectedCityId == city.id
-                                                ? Theme.ColorToken.textPrimary
-                                                : Theme.ColorToken.backgroundSubtle
-                                        )
-                                        .foregroundStyle(
-                                            selectedCityId == city.id ? .white : Theme.ColorToken.textSecondary
-                                        )
+                                        .selectedChipStyle(isSelected: selectedCityId == city.id)
                                 }
                                 .buttonStyle(.plain)
                             }

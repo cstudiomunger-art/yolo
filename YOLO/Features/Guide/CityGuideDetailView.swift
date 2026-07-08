@@ -83,14 +83,14 @@ struct CityGuideDetailView: View {
             EmptyView()
         } else if images.count == 1, let path = images.first {
             Button { fullScreenImagePath = path } label: {
-                CoverImageView(path: path, height: 220, cornerRadius: 0)
+                CoverImageView(path: path, height: 220)
             }
             .buttonStyle(.plain)
         } else {
             TabView(selection: $carouselIndex) {
                 ForEach(Array(images.enumerated()), id: \.offset) { index, path in
                     Button { fullScreenImagePath = path } label: {
-                        CoverImageView(path: path, height: 220, cornerRadius: 0)
+                        CoverImageView(path: path, height: 220)
                     }
                     .buttonStyle(.plain)
                     .tag(index)

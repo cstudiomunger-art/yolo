@@ -88,6 +88,7 @@ final class AudioQueuePlayer {
     @ObservationIgnored private var playerItem: AVPlayerItem?
     @ObservationIgnored private var timeObserver: Any?
     @ObservationIgnored private var statusObservation: NSKeyValueObservation?
+    @ObservationIgnored private var timeControlObservation: NSKeyValueObservation?
     @ObservationIgnored private var endObserver: NSObjectProtocol?
     @ObservationIgnored private var hasFullAccess = true
     @ObservationIgnored private var freeTrialSeconds: Double = 180
@@ -98,10 +99,14 @@ final class AudioQueuePlayer {
     @ObservationIgnored private var nowPlayingTitle = ""
     @ObservationIgnored private var nowPlayingArtist = ""
     @ObservationIgnored private var interruptionObserver: NSObjectProtocol?
+    @ObservationIgnored private var routeChangeObserver: NSObjectProtocol?
     @ObservationIgnored private var shouldResumeAfterInterruption = false
+    @ObservationIgnored private var wantsPlayback = false
 
     init() {
+        installRemoteCommands()
         setupInterruptionHandling()
+        setupRouteChangeHandling()
     }
 
     // MARK: Derived
@@ -129,6 +134,23 @@ final class AudioQueuePlayer {
 
     /// Whether the currently loaded track is locked to a preview.
     var currentTrackIsPreview: Bool { !hasFullAccess }
+
+    // MARK: Scene lifecycle
+
+    func handleScenePhase(_ phase: ScenePhase) {
+        switch phase {
+        case .inactive, .background:
+            guard isVisible, wantsPlayback || isPlaying || (player?.rate ?? 0) > 0 else { return }
+            _ = AudioSessionService.activateForPlayback()
+        case .active:
+            syncPlaybackStateFromPlayer()
+            if wantsPlayback, !isPlaying, canPlay {
+                _ = beginPlayback()
+            }
+        @unknown default:
+            break
+        }
+    }
 
     // MARK: Queue control
 
@@ -191,6 +213,7 @@ final class AudioQueuePlayer {
 
     /// X button: stop everything and hide the floating player.
     func close() {
+        wantsPlayback = false
         teardownPlayer()
         progress = 0
         mode = .idle
@@ -199,6 +222,7 @@ final class AudioQueuePlayer {
         isVisible = false
         isExpanded = false
         AudioNowPlayingService.clear()
+        AudioSessionService.deactivateWhenIdle()
     }
 
     /// Re-resolve access for the current track (call after a purchase / subscription change).
@@ -235,26 +259,18 @@ final class AudioQueuePlayer {
         self.hasFullAccess = hasFullAccess
         self.freeTrialSeconds = hasFullAccess ? .greatestFiniteMagnitude : freeTrialSeconds
         shouldAutoPlay = autoPlay
+        wantsPlayback = autoPlay
         nowPlayingTitle = track.title
         nowPlayingArtist = track.artist
         durationSeconds = max(guide.durationSeconds, 1)
         progress = 0
-
-        AudioSessionService.configureForPlayback()
-
-        AudioNowPlayingService.configureRemoteCommands(
-            play: { [weak self] in self?.resumeIfPaused() },
-            pause: { [weak self] in self?.pauseIfPlaying() },
-            toggle: { [weak self] in self?.togglePlay() },
-            next: { [weak self] in self?.next() },
-            previous: { [weak self] in self?.previous() }
-        )
 
         guard let url = MediaURLResolver.playbackURL(for: guide, preferLocal: preferLocalPlayback) else {
             markUnavailable()
             return
         }
 
+        _ = AudioSessionService.activateForPlayback()
         startStreaming(url: url)
     }
 
@@ -263,12 +279,24 @@ final class AudioQueuePlayer {
 
         mode = .loading
         let item = AVPlayerItem(url: url)
+        if url.scheme?.lowercased() == "http" || url.scheme?.lowercased() == "https" {
+            item.canUseNetworkResourcesForLiveStreamingWhilePaused = true
+            item.preferredForwardBufferDuration = 30
+        }
         playerItem = item
-        player = AVPlayer(playerItem: item)
+        let avPlayer = AVPlayer(playerItem: item)
+        avPlayer.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+        player = avPlayer
 
         statusObservation = item.observe(\.status, options: [.initial, .new]) { [weak self] item, _ in
             DispatchQueue.main.async {
                 self?.handleItemStatus(item)
+            }
+        }
+
+        timeControlObservation = avPlayer.observe(\.timeControlStatus, options: [.initial, .new]) { [weak self] _, _ in
+            DispatchQueue.main.async {
+                self?.syncPlaybackStateFromPlayer()
             }
         }
 
@@ -296,14 +324,27 @@ final class AudioQueuePlayer {
         return segments.enumerated().last(where: { $0.element.startSeconds <= seconds })?.offset
     }
 
+    private func installRemoteCommands() {
+        AudioNowPlayingService.installRemoteCommandsIfNeeded(
+            play: { [weak self] in self?.resumeIfPaused() },
+            pause: { [weak self] in self?.pauseIfPlaying() },
+            toggle: { [weak self] in self?.togglePlay() },
+            next: { [weak self] in self?.next() },
+            previous: { [weak self] in self?.previous() }
+        )
+    }
+
     private func resumeIfPaused() {
-        guard canPlay, !isPlaying else { return }
-        togglePlay()
+        syncPlaybackStateFromPlayer()
+        guard canPlay else { return }
+        if isPlaying { return }
+        _ = beginPlayback()
     }
 
     private func pauseIfPlaying() {
+        syncPlaybackStateFromPlayer()
         guard isPlaying else { return }
-        togglePlay()
+        pausePlayback()
     }
 
     func togglePlay() {
@@ -314,24 +355,47 @@ final class AudioQueuePlayer {
             return
         }
 
-        guard let player, let item = playerItem else { return }
+        guard let item = playerItem else { return }
 
-        switch item.status {
-        case .readyToPlay:
-            if isPlaying {
-                player.pause()
-                isPlaying = false
-                syncNowPlaying()
-            } else {
-                player.play()
-                isPlaying = true
-                syncNowPlaying()
-            }
-        case .failed:
+        if item.status == .failed {
             fallbackAfterStreamFailure()
-        default:
-            mode = .loading
+            return
         }
+
+        syncPlaybackStateFromPlayer()
+        if isPlaying {
+            pausePlayback()
+        } else {
+            _ = beginPlayback()
+        }
+    }
+
+    @discardableResult
+    private func beginPlayback() -> Bool {
+        guard canPlay, let player, playerItem?.status == .readyToPlay else {
+            #if DEBUG
+            print("[Audio] beginPlayback blocked: canPlay=\(canPlay) status=\(String(describing: playerItem?.status))")
+            #endif
+            return false
+        }
+
+        if !hasFullAccess && progress >= effectiveMaxTime {
+            if let track = currentTrack { onTrialEnded?(track) }
+            return false
+        }
+
+        _ = AudioSessionService.activateForPlayback()
+
+        wantsPlayback = true
+        player.play()
+        syncPlaybackStateFromPlayer()
+        return player.rate > 0
+    }
+
+    private func pausePlayback() {
+        wantsPlayback = false
+        player?.pause()
+        syncPlaybackStateFromPlayer()
     }
 
     func seek(to seconds: Double) {
@@ -340,6 +404,35 @@ final class AudioQueuePlayer {
         guard canPlay else { return }
         player?.seek(to: CMTime(seconds: capped, preferredTimescale: 600))
         syncNowPlaying()
+    }
+
+    private func syncPlaybackStateFromPlayer() {
+        guard let player else {
+            if isPlaying {
+                isPlaying = false
+                syncNowPlaying()
+            }
+            return
+        }
+
+        let isAudible = player.rate > 0
+        let lockScreenPlaying = isAudible
+            || player.timeControlStatus == .waitingToPlayAtSpecifiedRate
+
+        if isAudible {
+            let current = player.currentTime().seconds
+            if current.isFinite, current >= 0 {
+                progress = current
+            }
+        }
+
+        let playingStateChanged = isPlaying != isAudible
+        if playingStateChanged {
+            isPlaying = isAudible
+        }
+        if playingStateChanged || lockScreenPlaying {
+            syncNowPlaying(lockScreenPlaying: lockScreenPlaying)
+        }
     }
 
     /// Tears down the AVPlayer only, keeping the queue + visibility intact (used when switching tracks).
@@ -355,14 +448,14 @@ final class AudioQueuePlayer {
         pendingSeek = nil
     }
 
-    private func syncNowPlaying() {
+    private func syncNowPlaying(lockScreenPlaying: Bool? = nil) {
         guard !nowPlayingTitle.isEmpty else { return }
         AudioNowPlayingService.update(
             title: nowPlayingTitle,
             artist: nowPlayingArtist,
             duration: TimeInterval(durationSeconds),
             elapsed: progress,
-            isPlaying: isPlaying
+            isPlaying: lockScreenPlaying ?? isPlaying
         )
     }
 
@@ -373,6 +466,8 @@ final class AudioQueuePlayer {
         endObserver = nil
         statusObservation?.invalidate()
         statusObservation = nil
+        timeControlObservation?.invalidate()
+        timeControlObservation = nil
         if let timeObserver, let player {
             player.removeTimeObserver(timeObserver)
         }
@@ -403,7 +498,7 @@ final class AudioQueuePlayer {
             syncNowPlaying()
             if shouldAutoPlay {
                 shouldAutoPlay = false
-                togglePlay()
+                _ = beginPlayback()
             }
         case .failed:
             fallbackAfterStreamFailure()
@@ -421,7 +516,7 @@ final class AudioQueuePlayer {
             preferLocalPlayback = false
             AudioDownloadService.shared.discardLocalFile(guideId: guide.id)
             let savedProgress = progress
-            let wasPlaying = isPlaying
+            let wasPlaying = wantsPlayback || isPlaying
             if let remote = MediaURLResolver.playbackURL(for: guide, preferLocal: false) {
                 shouldAutoPlay = wasPlaying
                 pendingSeek = savedProgress
@@ -435,6 +530,7 @@ final class AudioQueuePlayer {
         player = nil
         playerItem = nil
         isPlaying = false
+        wantsPlayback = false
         progress = min(progress, effectiveMaxTime)
         markUnavailable()
     }
@@ -445,25 +541,30 @@ final class AudioQueuePlayer {
         player = nil
         playerItem = nil
         isPlaying = false
+        wantsPlayback = false
         mode = .unavailable(String(localized: "Audio not available yet."))
     }
 
     /// A locked preview reached its cap: pause and surface the paywall.
     private func handleTrialEnded() {
+        wantsPlayback = false
         isPlaying = false
         progress = effectiveMaxTime
         player?.pause()
+        syncNowPlaying()
         if let track = currentTrack { onTrialEnded?(track) }
     }
 
     /// A full track played to the end: auto-advance to the next queue item if any.
     private func handleTrackFinished() {
+        wantsPlayback = false
         isPlaying = false
         if canGoNext {
             next()
         } else {
             progress = Double(durationSeconds)
             player?.pause()
+            syncNowPlaying()
         }
     }
 
@@ -490,7 +591,8 @@ final class AudioQueuePlayer {
         interruptionObserver = AudioSessionService.observeInterruptions(
             onBegan: { [weak self] in
                 Task { @MainActor in
-                    self?.shouldResumeAfterInterruption = self?.isPlaying == true
+                    guard let self else { return }
+                    self.shouldResumeAfterInterruption = self.wantsPlayback || self.isPlaying || (self.player?.rate ?? 0) > 0
                 }
             },
             onEndedShouldResume: { [weak self] in
@@ -501,12 +603,22 @@ final class AudioQueuePlayer {
         )
     }
 
+    private func setupRouteChangeHandling() {
+        guard routeChangeObserver == nil else { return }
+        routeChangeObserver = AudioSessionService.observeRouteChanges(
+            onOldDeviceUnavailable: { [weak self] in
+                Task { @MainActor in
+                    self?.pausePlayback()
+                }
+            }
+        )
+    }
+
     private func resumeAfterInterruptionIfNeeded() {
         guard shouldResumeAfterInterruption else { return }
         shouldResumeAfterInterruption = false
+        syncPlaybackStateFromPlayer()
         guard canPlay, !isPlaying else { return }
-        player?.play()
-        isPlaying = true
-        syncNowPlaying()
+        _ = beginPlayback()
     }
 }

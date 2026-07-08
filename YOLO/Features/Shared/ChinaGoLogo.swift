@@ -68,9 +68,9 @@ struct ProfileAvatarButton: View {
     private var initialsView: some View {
         Text(initials)
             .font(Theme.FontToken.inter(size * 0.4, weight: .medium))
-            .foregroundStyle(.white)
+            .foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Theme.ColorToken.textPrimary)
+            .background(Theme.ColorToken.surfaceEmphasis)
     }
 
     private var initials: String {

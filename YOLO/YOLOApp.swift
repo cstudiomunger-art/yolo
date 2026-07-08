@@ -15,7 +15,6 @@ struct YOLOApp: App {
         UserDefaultsKeys.migrateLegacyKeysIfNeeded()
         OfflineCacheLocations.bootstrap()
         _ = TelemetryService.shared
-        AudioSessionService.configureForPlayback()
 
         if let key = AppConfig.revenueCatApiKey {
             #if DEBUG

@@ -76,14 +76,14 @@ struct EmergencyView: View {
             HStack(spacing: 12) {
                 Text("💬").font(.system(size: 22))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Need a real person? Genius Bar").font(Theme.FontToken.inter(13, weight: .semibold)).foregroundStyle(.white)
-                    Text("Emergency situations — reach our team directly").font(Theme.FontToken.inter(10)).foregroundStyle(.white.opacity(0.6))
+                    Text("Need a real person? Genius Bar").font(Theme.FontToken.inter(13, weight: .semibold)).foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
+                    Text("Emergency situations — reach our team directly").font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.onSurfaceEmphasis.opacity(0.6))
                 }
                 Spacer()
-                Image(systemName: "chevron.right").foregroundStyle(.white.opacity(0.5))
+                Image(systemName: "chevron.right").foregroundStyle(Theme.ColorToken.onSurfaceEmphasis.opacity(0.5))
             }
             .padding(15)
-            .background(Theme.ColorToken.textPrimary)
+            .background(Theme.ColorToken.surfaceEmphasis)
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)

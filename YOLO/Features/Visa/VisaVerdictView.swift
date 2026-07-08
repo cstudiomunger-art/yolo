@@ -50,7 +50,7 @@ struct VisaVerdictView: View {
                             Text("View visa-friendly routes →")
                                 .font(Theme.FontToken.inter(13, weight: .semibold))
                                 .frame(maxWidth: .infinity).padding(.vertical, 12)
-                                .background(Theme.ColorToken.textPrimary).foregroundStyle(.white)
+                                .background(Theme.ColorToken.surfaceEmphasis).foregroundStyle(Theme.ColorToken.onSurfaceEmphasis)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                         .buttonStyle(.plain)
