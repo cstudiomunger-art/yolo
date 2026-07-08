@@ -65,9 +65,28 @@ export const useRefCache = defineStore("refCache", () => {
     return u ? u.email || u.display_name || u.id : id;
   }
 
+  function scenarioLabel(id) {
+    if (!id) return "—";
+    const s = scenarios.value.find((x) => x.id === id);
+    return s ? s.label || id : id;
+  }
+
+  function countryLabel(code) {
+    if (!code) return "—";
+    const c = countries.value.find((x) => x.code === code);
+    return c ? `${c.flag || ""} ${c.name}`.trim() : code;
+  }
+
+  function visaCountryLabel(code) {
+    if (!code) return "—";
+    const c = countriesV2.value.find((x) => x.country_code === code);
+    return c ? `${c.flag_emoji || ""} ${c.name_zh || ""}`.trim() || code : code;
+  }
+
   return {
     cities, attractions, audioGuides, scenarios, countries,
     users, ports, countriesV2, visaPoliciesV2, loaded,
     load, cityLabel, attractionLabel, attractionsForCity, userLabel,
+    scenarioLabel, countryLabel, visaCountryLabel,
   };
 });

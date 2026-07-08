@@ -11,6 +11,7 @@ import PaymentMatch from "@/components/fields/PaymentMatch.vue";
 import ItineraryBuilder from "@/components/fields/ItineraryBuilder.vue";
 import MarkdownField from "@/components/fields/MarkdownField.vue";
 import VoiceVariantsEditor from "@/components/fields/VoiceVariantsEditor.vue";
+import StringListEditor from "@/components/fields/StringListEditor.vue";
 import {
   uploadCoverImage,
   uploadSubAreaAudioFile,
@@ -264,7 +265,13 @@ async function onAudioFile(e) {
 
     <RichText v-else-if="isType('richtext')" v-model="val" :entity-id="entityId" />
 
-    <input v-else-if="isType('tags', 'string_list')" v-model="csv" type="text" placeholder="逗号分隔" />
+    <input v-else-if="isType('tags')" v-model="csv" type="text" placeholder="逗号分隔" />
+
+    <StringListEditor
+      v-else-if="isType('string_list')"
+      v-model="val"
+      :placeholder="f.hint || ''"
+    />
 
     <select v-else-if="isType('ref_city')" v-model="val">
       <option v-if="f.allowEmpty" :value="null">— 不设置 —</option>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, watch } from "vue";
+import { ref, reactive, watch, computed } from "vue";
 import { useNav } from "@/stores/nav";
 import { useRefCache } from "@/stores/refCache";
 import { TABLES } from "@/schema/tables";
@@ -26,6 +26,12 @@ watch(
         .eq("attraction_id", openAttraction.value).order("sort_order");
       subAreasByAttraction[openAttraction.value] = data || [];
     }
+    if (openAttraction.value && attrPanel.value === "audio") {
+      const { data } = await supabase
+        .from("audio_guides").select("id,attraction_id,title_en,sort_order,is_main_guide")
+        .eq("attraction_id", openAttraction.value).order("sort_order");
+      audioGuidesByAttraction[openAttraction.value] = data || [];
+    }
   }
 );
 
@@ -36,11 +42,22 @@ const attractionsOpen = ref(false); // 景点 node under the open city
 const openAttraction = ref(null);
 const attrPanel = ref(null); // 'sub' | 'audio' | null — accordion under the open attraction
 const openChecklistCities = ref(false); // 行前清单「城市」子节点折叠
+const openAppSettings = ref(false); // 应用配置 section 子树
 
 // ---- lazy caches ----
 const attractionsByCity = reactive({});
 const subAreasByAttraction = reactive({});
+const audioGuidesByAttraction = reactive({});
 const loading = reactive({});
+
+const APP_SETTINGS_SECTIONS = computed(() => {
+  const fields = TABLES.app_settings?.fields || [];
+  const sections = [{ key: "_general", label: "基础开关" }];
+  fields.filter((f) => f.type === "section").forEach((f) => {
+    sections.push({ key: f.key, label: f.label || f.key });
+  });
+  return sections;
+});
 
 // city-level panels → each opens that table filtered to the city (城市概览 edits the city row)
 const CITY_PANELS = [
@@ -64,11 +81,7 @@ const GROUPS = [
     { label: "🏷️ 景点定价", hubId: "pricing" },
     { label: "💳 购买记录", hubId: "transactions" },
   ] },
-  { id: "config", label: "全局配置", leaves: [
-    { label: "应用配置", table: "app_settings" },
-    { label: "法律与合规文档", table: "app_settings", settingsSection: "legal_section" },
-    { label: "紧急联系", table: "emergency_config" },
-  ] },
+  { id: "config", label: "全局配置" },
   { id: "emergency", label: "🆘 紧急", leaves: [
     { label: "紧急联系", table: "emergency_config" },
     { label: "帮助列表", table: "emergency_help_items" },
@@ -84,6 +97,8 @@ const GROUPS = [
   { id: "culture", label: "文化", leaves: [{ label: "文化贴士", table: "culture_tips" }] },
   { id: "visa", label: "🛂 签证引擎 v2", leaves: [
     { label: "🛂 签证工作台", hubId: "visa" },
+    { label: "政策框架 v2", table: "visa_policies_v2" },
+    { label: "政策适用 v2（国籍×窗口）", table: "visa_policy_grants_v2" },
     { label: "护照国家（国籍）", table: "passport_countries" },
     { label: "国家受控词表", table: "visa_countries" },
     { label: "城市维表", table: "visa_cities" },
@@ -169,7 +184,7 @@ async function toggleAttraction(a) {
 }
 
 async function toggleSub(attractionId) {
-  attrPanel.value = attrPanel.value === "sub" ? null : "sub"; // accordion with 音频导览
+  attrPanel.value = attrPanel.value === "sub" ? null : "sub";
   if (attrPanel.value === "sub" && !subAreasByAttraction[attractionId]) {
     loading[`a:${attractionId}`] = true;
     const { data } = await supabase
@@ -180,6 +195,36 @@ async function toggleSub(attractionId) {
   }
 }
 
+async function toggleAudio(attractionId) {
+  attrPanel.value = attrPanel.value === "audio" ? null : "audio";
+  if (attrPanel.value === "audio" && !audioGuidesByAttraction[attractionId]) {
+    loading[`ag:${attractionId}`] = true;
+    const { data } = await supabase
+      .from("audio_guides").select("id,attraction_id,title_en,sort_order,is_main_guide")
+      .eq("attraction_id", attractionId).order("sort_order");
+    audioGuidesByAttraction[attractionId] = data || [];
+    loading[`ag:${attractionId}`] = false;
+  }
+}
+
+function pickAppSettings(sectionKey) {
+  nav.select({
+    kind: "table",
+    tableKey: "app_settings",
+    settingsSection: sectionKey === "_general" ? null : sectionKey,
+  });
+}
+
+function appSettingsActive(sectionKey) {
+  const s = nav.selection;
+  if (s.kind !== "table" || s.tableKey !== "app_settings") return false;
+  const cur = s.settingsSection || "_general";
+  return cur === sectionKey;
+}
+
+function pickAudioGuide(g) {
+  nav.select({ kind: "record", tableKey: "audio_guides", id: g.id });
+}
 
 function pickPanel(cityId, panel) {
   if (panel.id === "overview") nav.select({ kind: "record", tableKey: "cities", id: cityId });
@@ -293,6 +338,21 @@ function isActive(sel) {
                       @click="pickSubArea(sa)"
                     >{{ sa.name_en }}</button>
                   </div>
+
+                  <button class="row lvl4" @click="toggleAudio(a.id)">
+                    <span class="caret" :class="{ open: attrPanel === 'audio' }">▶</span>
+                    语音导览 <span class="muted">({{ (audioGuidesByAttraction[a.id] || []).length }})</span>
+                  </button>
+                  <div v-show="attrPanel === 'audio'" class="children">
+                    <div v-if="loading[`ag:${a.id}`]" class="muted lvl5">加载中…</div>
+                    <button
+                      v-for="g in audioGuidesByAttraction[a.id] || []"
+                      :key="g.id"
+                      class="row lvl5 leaf"
+                      :class="{ active: isActive({ kind: 'record', tableKey: 'audio_guides', id: g.id }) }"
+                      @click="pickAudioGuide(g)"
+                    >{{ g.title_en || g.id }}{{ g.is_main_guide ? " ★" : "" }}</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -333,8 +393,34 @@ function isActive(sel) {
       </div>
     </div>
 
+    <!-- 全局配置（应用配置 section 子树） -->
+    <div class="grp">
+      <button class="grp-head" @click="toggleGroup('config')">
+        <span class="caret" :class="{ open: openGroup === 'config' }">▶</span> 全局配置
+      </button>
+      <div v-show="openGroup === 'config'" class="grp-body">
+        <button class="row lvl1" @click="openAppSettings = !openAppSettings">
+          <span class="caret" :class="{ open: openAppSettings }">▶</span> 应用配置
+        </button>
+        <div v-show="openAppSettings" class="children">
+          <button
+            v-for="s in APP_SETTINGS_SECTIONS"
+            :key="s.key"
+            class="row lvl2 leaf"
+            :class="{ active: appSettingsActive(s.key) }"
+            @click="pickAppSettings(s.key)"
+          >{{ s.label }}</button>
+        </div>
+        <button
+          class="row lvl1 leaf"
+          :class="{ active: isActive({ kind: 'table', tableKey: 'emergency_config' }) }"
+          @click="nav.select({ kind: 'table', tableKey: 'emergency_config' })"
+        >紧急联系</button>
+      </div>
+    </div>
+
     <!-- other top-level groups -->
-    <div v-for="g in GROUPS" :key="g.id" class="grp">
+    <div v-for="g in GROUPS.filter((x) => x.id !== 'config')" :key="g.id" class="grp">
       <button class="grp-head" @click="toggleGroup(g.id)">
         <span class="caret" :class="{ open: openGroup === g.id }">▶</span> {{ g.label }}
       </button>

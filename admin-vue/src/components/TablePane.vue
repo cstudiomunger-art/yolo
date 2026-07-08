@@ -40,10 +40,22 @@ const CHECKLIST_TYPES = [
 const isSingle = computed(() => schema.value?.single === true);
 const isChecklist = computed(() => props.tableKey === "checklist_items");
 const pageTitle = computed(() => {
-  if (props.tableKey === "app_settings" && selection.value.settingsSection === "legal_section") {
-    return "法律与合规文档";
+  if (props.tableKey === "app_settings" && selection.value.settingsSection) {
+    const section = APP_SETTINGS_SECTIONS.value.find(
+      (s) => s.key === selection.value.settingsSection
+    );
+    if (section) return section.label;
   }
   return schema.value?.label || props.tableKey;
+});
+
+const APP_SETTINGS_SECTIONS = computed(() => {
+  const fields = TABLES.app_settings?.fields || [];
+  const sections = [{ key: "_general", label: "基础开关" }];
+  fields.filter((f) => f.type === "section").forEach((f) => {
+    sections.push({ key: f.key, label: f.label || f.key });
+  });
+  return sections;
 });
 
 // persisted (non-fixed) filters per table, mirroring the legacy admin

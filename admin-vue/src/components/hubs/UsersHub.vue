@@ -9,6 +9,7 @@ const refCache = useRefCache();
 
 const profiles = ref([]);
 const plans = ref([]); // active plans for selectors
+const adminUsers = ref([]);
 const search = ref("");
 const statusFilter = ref("");
 const error = ref("");
@@ -29,13 +30,15 @@ const EVENT_LABELS = {
 
 async function loadList() {
   error.value = "";
-  const [pr, pl] = await Promise.all([
+  const [pr, pl, au] = await Promise.all([
     supabase.from("profiles").select(PROFILE_COLS).order("updated_at", { ascending: false }),
     supabase.from("membership_plans").select("id,name_zh,name_en,plan_type,access_flags,price_label,is_active").order("display_order"),
+    supabase.from("admin_users").select("user_id,email,created_at").order("created_at", { ascending: false }),
   ]);
   if (pr.error) error.value = pr.error.message;
   profiles.value = pr.data || [];
   plans.value = (pl.data || []).filter((p) => p.is_active);
+  adminUsers.value = au.error ? [] : (au.data || []);
 }
 
 // ── helpers ──
@@ -534,6 +537,24 @@ onMounted(async () => { await refCache.load(); await loadList(); });
           <tr v-if="!filtered.length"><td colspan="8" class="center muted">暂无用户</td></tr>
         </tbody>
       </table>
+
+      <section class="card mt">
+        <h3>CMS 管理员</h3>
+        <p class="muted small">
+          新增管理员请在 Supabase SQL 中向 <code>admin_users</code> 插入对应 <code>auth.users</code> 的 UUID。
+        </p>
+        <table class="data-table">
+          <thead><tr><th>邮箱</th><th>用户 UUID</th><th>添加时间</th></tr></thead>
+          <tbody>
+            <tr v-for="a in adminUsers" :key="a.user_id">
+              <td>{{ a.email || "—" }}</td>
+              <td><code>{{ a.user_id }}</code></td>
+              <td class="muted small">{{ fmtDateTime(a.created_at) }}</td>
+            </tr>
+            <tr v-if="!adminUsers.length"><td colspan="3" class="center muted">暂无管理员记录</td></tr>
+          </tbody>
+        </table>
+      </section>
     </template>
 
     <div class="toast" :class="{ on: toast }">{{ toast }}</div>

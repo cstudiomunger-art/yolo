@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { useRefCache } from "@/stores/refCache";
+import { formatListCell } from "@/lib/listFormat";
 
 const props = defineProps({
   schema: { type: Object, required: true },
@@ -16,13 +17,7 @@ const columns = computed(
 );
 
 function cell(row, col) {
-  const v = row[col.key];
-  if (col.ref === "attraction") return refCache.attractionLabel(v);
-  if (col.ref === "city") return refCache.cityLabel(v);
-  if (typeof v === "boolean") return v ? "✓" : "—";
-  if (v == null || v === "") return "—";
-  if (Array.isArray(v)) return v.join(", ");
-  return String(v);
+  return formatListCell(col, row, refCache);
 }
 </script>
 
@@ -36,7 +31,21 @@ function cell(row, col) {
     </thead>
     <tbody>
       <tr v-for="row in rows" :key="row[pk]" @click="emit('edit', row)">
-        <td v-for="c in columns" :key="c.key">{{ cell(row, c) }}</td>
+        <td v-for="c in columns" :key="c.key">
+          <img
+            v-if="cell(row, c).kind === 'img'"
+            class="list-thumb"
+            :src="cell(row, c).src"
+            alt=""
+            loading="lazy"
+          />
+          <span
+            v-else-if="cell(row, c).kind === 'tag'"
+            class="tag"
+            :class="cell(row, c).on ? 'on' : 'off'"
+          >{{ cell(row, c).text }}</span>
+          <span v-else :class="{ muted: cell(row, c).muted }">{{ cell(row, c).text }}</span>
+        </td>
         <td class="ops" @click.stop>
           <button
             v-if="!schema.noDelete"
@@ -65,6 +74,7 @@ function cell(row, col) {
   text-align: left;
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
+  vertical-align: middle;
 }
 .list th {
   color: var(--muted);
@@ -85,5 +95,31 @@ function cell(row, col) {
   color: var(--muted);
   text-align: center;
   padding: 28px;
+}
+.muted {
+  color: var(--muted);
+}
+.list-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: var(--surface2);
+  color: var(--muted);
+}
+.tag.on {
+  background: rgba(46, 158, 91, 0.15);
+  color: #2e9e5b;
+}
+.tag.off {
+  background: var(--surface2);
+  color: var(--muted);
 }
 </style>
