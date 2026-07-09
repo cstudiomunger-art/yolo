@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import { supabase } from "@/lib/supabase";
 import { uploadAgentAvatar } from "@/lib/storage";
+import { compressImage } from "@/lib/imageUtils";
 import { useRefCache } from "@/stores/refCache";
 
 const refCache = useRefCache();
@@ -30,6 +31,10 @@ const agentAvatarFile = ref(null);
 const agentAvatarInput = ref(null);
 const savingAgent = ref(false);
 const uploadingAgentAvatar = ref(false);
+const compressedAgentAvatarFile = ref(null);
+const compressingAgentAvatar = ref(false);
+const originalAgentImageInfo = ref(null);
+const compressedAgentImageInfo = ref(null);
 
 const STATUS_LABEL = { open: "进行中", closed: "已关闭" };
 const AGENT_STATUS = {
@@ -58,6 +63,19 @@ async function loadAll() {
 
 function userEmail(id) { return refCache.userLabel(id); }
 function fmtTime(d) { return d ? new Date(d).toLocaleString("zh-CN") : ""; }
+function formatFileSize(bytes) {
+  if (!bytes) return "—";
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
+function formatCompressionDiff(original, compressed) {
+  const diff = original - compressed;
+  const ratio = (diff / original) * 100;
+  if (ratio > 0) return `节省 ${ratio.toFixed(0)}%`;
+  if (ratio < 0) return `增加 ${Math.abs(ratio).toFixed(0)}%`;
+  return "0%";
+}
 
 // conversations after filters
 const filteredConvos = computed(() => {
@@ -165,6 +183,9 @@ function closeAgentDialog() {
   showAgentDialog.value = false;
   editingAgent.value = null;
   agentAvatarFile.value = null;
+  compressedAgentAvatarFile.value = null;
+  originalAgentImageInfo.value = null;
+  compressedAgentImageInfo.value = null;
 }
 
 function triggerAgentAvatarUpload() {
@@ -178,18 +199,54 @@ function onAgentAvatarFileChange(e) {
     showToast("请选择图片文件");
     return;
   }
-  if (file.size > 5 * 1024 * 1024) {
-    showToast("图片大小不能超过 5MB");
+  if (file.size > 10 * 1024 * 1024) {
+    showToast("图片大小不能超过 10MB");
     return;
   }
+
+  // Show original image info
+  originalAgentImageInfo.value = {
+    size: file.size,
+    type: file.type,
+    name: file.name,
+  };
+
   agentAvatarFile.value = file;
+  compressedAgentAvatarFile.value = null;
+  compressedAgentImageInfo.value = null;
+
+  // Auto compress if image is large
+  if (file.size > 500 * 1024) {
+    compressAgentAvatar();
+  }
+}
+
+async function compressAgentAvatar() {
+  if (!agentAvatarFile.value) return;
+  compressingAgentAvatar.value = true;
+  try {
+    const compressed = await compressImage(agentAvatarFile.value, 800, 800, 0.8);
+    compressedAgentAvatarFile.value = new File([compressed], `compressed_${agentAvatarFile.value.name}`, {
+      type: "image/jpeg",
+    });
+    compressedAgentImageInfo.value = {
+      size: compressed.size,
+      type: "image/jpeg",
+    };
+    showToast("图片已压缩");
+  } catch (e) {
+    showToast("压缩失败：" + (e.message || e));
+  } finally {
+    compressingAgentAvatar.value = false;
+  }
 }
 
 async function uploadAgentAvatarToServer() {
-  if (!agentAvatarFile.value || !editingAgent.value?.id) return null;
+  const fileToUpload = compressedAgentAvatarFile.value || agentAvatarFile.value;
+  if (!fileToUpload || !editingAgent.value?.id) return null;
   uploadingAgentAvatar.value = true;
   try {
-    const url = await uploadAgentAvatar(agentAvatarFile.value, editingAgent.value.id);
+    const url = await uploadAgentAvatar(fileToUpload, editingAgent.value.id);
     return url;
   } catch (e) {
     showToast("头像上传失败：" + (e.message || e));
@@ -211,7 +268,7 @@ async function saveAgent() {
   try {
     // Upload avatar if new file selected
     let avatarUrl = a.avatar_url;
-    if (agentAvatarFile.value && a.id) {
+    if (compressedAgentAvatarFile.value && a.id) {
       const uploaded = await uploadAgentAvatarToServer();
       if (uploaded) avatarUrl = uploaded;
     }
@@ -366,13 +423,38 @@ onMounted(loadAll);
         <h3>{{ editingAgent?.id ? "编辑客服" : "新客服" }}</h3>
         <div class="modal-body">
           <div class="avatar-upload-wrapper">
-            <img v-if="editingAgent?.avatar_url || agentAvatarFile"
-                 :src="agentAvatarFile ? URL.createObjectURL(agentAvatarFile) : editingAgent.avatar_url"
-                 class="avatar-preview-lg" alt="头像" />
+            <img
+              v-if="compressedAgentAvatarFile || editingAgent?.avatar_url || agentAvatarFile"
+              :src="compressedAgentAvatarFile
+                ? URL.createObjectURL(compressedAgentAvatarFile)
+                : (agentAvatarFile ? URL.createObjectURL(agentAvatarFile) : editingAgent.avatar_url)"
+              class="avatar-preview-lg"
+              alt="头像"
+            />
             <span v-else class="avatar-placeholder">头像</span>
             <input ref="agentAvatarInput" type="file" accept="image/*" hidden @change="onAgentAvatarFileChange" />
             <button class="btn btn-secondary btn-sm" @click="triggerAgentAvatarUpload">
               {{ uploadingAgentAvatar ? "上传中..." : "更换" }}
+            </button>
+          </div>
+
+          <!-- Image Info -->
+          <div v-if="originalAgentImageInfo" class="image-info">
+            <div class="info-row">
+              <span class="info-label">原始:</span>
+              <span class="info-value">{{ formatFileSize(originalAgentImageInfo.size) }}</span>
+            </div>
+            <div v-if="compressedAgentImageInfo" class="info-row">
+              <span class="info-label">压缩后:</span>
+              <span class="info-value">{{ formatFileSize(compressedAgentImageInfo.size) }}</span>
+              <span class="info-badge green">
+                {{ formatCompressionDiff(originalAgentImageInfo.size, compressedAgentImageInfo.size) }}
+              </span>
+            </div>
+          </div>
+          <div v-if="!compressedAgentAvatarFile && agentAvatarFile" class="mt">
+            <button class="btn btn-secondary btn-sm" :disabled="compressingAgentAvatar" @click="compressAgentAvatar">
+              {{ compressingAgentAvatar ? "压缩中..." : "手动压缩图片" }}
             </button>
           </div>
           <div class="fgrid">
@@ -533,6 +615,38 @@ onMounted(loadAll);
   justify-content: center;
   color: var(--muted);
 }
+
+/* Image Info */
+.image-info {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 10px;
+}
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.info-label {
+  color: var(--muted);
+  min-width: 40px;
+}
+.info-value {
+  font-weight: 600;
+}
+.info-badge {
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  margin-left: auto;
+}
+.info-badge.green {
+  background: rgba(46, 158, 91, 0.15);
+  color: #2e9e5b;
+}
+.mt { margin-top: 6px; }
 
 /* Form */
 .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

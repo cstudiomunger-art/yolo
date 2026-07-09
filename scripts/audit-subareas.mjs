@@ -31,8 +31,8 @@ const ATTRACTION_ALIASES = {
   徐家汇源景区: "徐家汇源",
   国家博物馆: "国博",
   成都博物院: "成都博物馆",
-  成都熊猫基地: "成都大熊猫繁育研究基地",
-  大熊猫基地: "成都大熊猫繁育研究基地",
+  成都熊猫基地: "大熊猫基地",
+  成都大熊猫繁育研究基地: "大熊猫基地",
   南京博物馆: "南京博物院",
   磁器口古镇: "磁器口",
   解放碑: "解放碑广场",
@@ -43,6 +43,7 @@ const ATTRACTION_ALIASES = {
   成都青羊宫子景点信息: "青羊宫",
   成都杜甫草堂景点信息: "杜甫草堂",
   四川博物院子景点信息: "四川博物院",
+  成都博物院子景点信息: "四川博物院",
   成都博物馆子景点信息: "成都博物馆",
 };
 
@@ -52,11 +53,16 @@ const IMAGE_DIR_ALIASES = {
   洪崖洞: "重庆洪崖洞民俗风貌区",
   磁器口: "磁器口古镇",
   解放碑广场: "解放碑",
-  成都熊猫基地: "大熊猫基地",
+  成都熊猫基地: "成都熊猫基地",
+  熊猫基地: "成都熊猫基地",
   成都武侯祠: "武侯祠",
   成都青羊宫: "青羊宫",
   成都杜甫草堂: "杜甫草堂",
   四川博物院: "四川博物院",
+  博物院: "四川博物院",
+  博物馆: "成都博物馆",
+  磁器口古镇: "磁器口",
+  解放碑: "解放碑广场",
   成都博物馆: "成都博物馆",
 };
 
@@ -68,8 +74,10 @@ const TEXT_DIR_ALIASES = {
   武侯祠: "成都武侯祠子景点信息",
   青羊宫: "成都青羊宫子景点信息",
   杜甫草堂: "成都杜甫草堂景点信息",
-  四川博物院: "四川博物院子景点信息",
+  四川博物院: "成都博物院子景点信息",
   成都博物馆: "成都博物馆子景点信息",
+  博物院: "四川博物院",
+  熊猫基地: "成都熊猫基地",
 };
 
 const args = process.argv.slice(2);
@@ -340,6 +348,22 @@ function extractEnglishDescription(content, mdFieldSources) {
     if (/^长文描述\s*[:：]/.test(plain)) {
       const body = collectEnglishFromDescriptionLines(lines, i, mdFieldSources, "长文描述");
       if (body) return body;
+      const summaryEng = extractEnglishFromMixedLine(plain.replace(/^长文描述\s*[:：]\s*/, ""));
+      if (summaryEng) {
+        mdFieldSources.body = `长文描述 inline (English only)`;
+        return summaryEng;
+      }
+    }
+  }
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const plain = cleanMdMarks(lines[i]);
+    if (/^摘要\s*[:：]/.test(plain)) {
+      const eng = extractEnglishFromMixedLine(plain.replace(/^摘要\s*[:：]\s*/, ""));
+      if (eng) {
+        mdFieldSources.body = "摘要 fallback (English)";
+        return eng;
+      }
     }
   }
 
@@ -454,6 +478,20 @@ function parseMdContent(content, { fallbackStem = "", headingTitle = "" } = {}) 
     if (parsed.nameZh) nameZh = parsed.nameZh;
     if (parsed.nameEn) nameEn = parsed.nameEn;
     mdFieldSources.name = `h1: ${h1.trim().slice(0, 100)}`;
+    if (!nameEn) {
+      const h1Idx = lines.findIndex((l) => l === h1);
+      const nextLine = lines.slice(h1Idx + 1).find((l) => l.trim());
+      if (nextLine) {
+        const bold = nextLine.trim().match(/^\*\*(.+)\*\*$/);
+        if (bold) {
+          const candidate = stripLeadingOrder(cleanMdMarks(bold[1]));
+          if (/[A-Za-z]/.test(candidate) && cjkRatio(candidate) < 0.35) {
+            nameEn = candidate;
+            mdFieldSources.name = `h1 + subtitle: ${nextLine.trim().slice(0, 100)}`;
+          }
+        }
+      }
+    }
   } else if (lines[0]?.trim()) {
     let nameValue = cleanMdMarks(lines[0]);
     if (/^名字\s*[:：]/.test(nameValue)) nameValue = fieldValueFromLine(lines[0], "名字");
@@ -462,6 +500,21 @@ function parseMdContent(content, { fallbackStem = "", headingTitle = "" } = {}) 
       if (parsed.nameZh) nameZh = parsed.nameZh;
       if (parsed.nameEn) nameEn = parsed.nameEn;
       mdFieldSources.name = `first line: ${lines[0].trim().slice(0, 100)}`;
+    }
+  }
+
+  if (!nameZh || !nameEn) {
+    for (let i = 0; i < Math.min(lines.length, 20); i += 1) {
+      const plain = cleanMdMarks(lines[i]);
+      if (!/^名字\s*[:：]/.test(plain)) continue;
+      const value = fieldValueFromLine(lines[i], "名字") || plain.replace(/^名字\s*[:：]\s*/, "");
+      const parsed = splitZhEn(value);
+      if (parsed.nameZh && !nameZh) nameZh = parsed.nameZh;
+      if (parsed.nameEn && !nameEn) nameEn = parsed.nameEn;
+      if (parsed.nameZh || parsed.nameEn) {
+        mdFieldSources.name = `plain 名字: ${lines[i].trim().slice(0, 100)}`;
+        break;
+      }
     }
   }
 
@@ -479,7 +532,12 @@ function parseMdContent(content, { fallbackStem = "", headingTitle = "" } = {}) 
       break;
     }
     if (/名字\s*\/\s*Name/i.test(trimmed) && /[:：]/.test(trimmed)) {
-      let value = fieldValueFromLine(trimmed, "名字 / Name");
+      let value = fieldValueFromLine(trimmed.replace(/\*\*/g, ""), "名字 / Name");
+      if (!value) {
+        const m = trimmed.match(/名字\s*\/\s*Name\s*[:：]\s*(.+)/i);
+        if (m) value = cleanMdMarks(m[1]);
+      }
+      value = cleanMdMarks(value).replace(/^[：:]+/, "").trim();
       if (!value) {
         const next = lines.slice(i + 1).find((l) => l.trim());
         value = next ? cleanMdMarks(next) : "";
@@ -515,6 +573,17 @@ function parseMdContent(content, { fallbackStem = "", headingTitle = "" } = {}) 
   nameEn = stripLeadingOrder(nameEn);
 
   let bodyPlainEn = extractBodyPlainEn(content, mdFieldSources);
+
+  if (!nameEn && bodyPlainEn) {
+    let m = bodyPlainEn.match(/^((?:The|A|An)\s[^,]{4,80})/);
+    if (!m) m = bodyPlainEn.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+){0,4})/);
+    if (m) {
+      nameEn = stripLeadingOrder(m[1]);
+      if (!mdFieldSources.name?.includes("body")) {
+        mdFieldSources.name = `${mdFieldSources.name || "fallbackStem"} + body opening`;
+      }
+    }
+  }
 
   const bodyHtml = toHtml(bodyPlainEn);
 
@@ -569,9 +638,31 @@ function listImages(dir) {
 
 function findImage(images, ...targets) {
   const cleaned = targets.filter(Boolean).map((t) => stripLeadingOrder(cleanMdMarks(t)));
+  const manualAliases = {
+    茅屋故居: ["茅草故居"],
+    "山门（天王殿）": ["天王殿", "文殊院-天王殿", "文殊院天王殿"],
+    "正门（照壁）": ["照壁", "文殊院-照壁"],
+    "三大士殿（观音殿）": ["三大士殿", "文殊院-三大士殿"],
+    "五楼：重逢 1980·八十年代生活情境街区": ["五楼重逢1980", "重逢1980"],
+    "Test Spirit 街巷": ["Test Sprit", "Sprit街巷", "Test_Sprit"],
+    "T²国际当代艺术中心": ["T2国际当代艺术中心", "T2"],
+  };
+  const expanded = [...cleaned];
+  for (const t of cleaned) {
+    if (manualAliases[t]) expanded.push(...manualAliases[t]);
+    const paren = t.split(/[（(]/)[0];
+    if (paren && paren !== t) expanded.push(paren);
+  }
   for (const img of images) {
-    if (cleaned.some((t) => namesMatch(img.label, t))) return img;
-    if (cleaned.some((t) => namesMatch(img.label.split(/[（(]/)[0], t))) return img;
+    const labels = [
+      img.label,
+      img.label.replace(/^文殊院[-_]?/i, ""),
+      basename(img.name, extname(img.name)).replace(/^文殊院[-_]?/i, ""),
+    ];
+    for (const lab of labels) {
+      if (expanded.some((t) => namesMatch(lab, t))) return img;
+      if (expanded.some((t) => namesMatch(lab.split(/[（(]/)[0], t))) return img;
+    }
   }
   return null;
 }
@@ -1444,7 +1535,27 @@ async function main() {
   if (fixRows.length) console.log(`Fix SQL: ${OUT_FIX_SQL} (${fixRows.length} rows)`);
 }
 
-main().catch((err) => {
-  console.error(err.message || err);
-  process.exit(1);
-});
+export {
+  parseMdContent,
+  listImages,
+  findImage,
+  parseImageMeta,
+  resolveAttraction,
+  isValidAttractionRecord,
+  collectChengdu,
+  collectChongqing,
+  buildExpectedItem,
+  cleanMdMarks,
+  stripLeadingOrder,
+};
+
+import { fileURLToPath } from "url";
+
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+
+if (isMain) {
+  main().catch((err) => {
+    console.error(err.message || err);
+    process.exit(1);
+  });
+}

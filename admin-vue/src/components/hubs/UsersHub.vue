@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import { supabase, isAdmin, addExistingUserAsAdmin, removeAdmin, createAdminUser } from "@/lib/supabase";
 import { uploadUserAvatar } from "@/lib/storage";
+import { compressImage } from "@/lib/imageUtils";
 import { useRefCache } from "@/stores/refCache";
 import MultiCheck from "@/components/fields/MultiCheck.vue";
 import DateTimePicker from "@/components/fields/DateTimePicker.vue";
@@ -44,6 +45,10 @@ const avatarInput = ref(null);
 // ═══════════════════════════════════════════════════════════════
 const showAvatarUploadDialog = ref(false);
 const avatarFile = ref(null);
+const compressedAvatarFile = ref(null);
+const compressingAvatar = ref(false);
+const originalImageInfo = ref(null);
+const compressedImageInfo = ref(null);
 
 const PROFILE_COLS =
   "id,email,display_name,avatar_url,avatar_status,country_code," +
@@ -106,6 +111,19 @@ function isExpiredMembership(p) {
 }
 function fmtDate(d) { return d ? new Date(d).toLocaleDateString("zh-CN") : "—"; }
 function fmtDateTime(d) { return d ? new Date(d).toLocaleString("zh-CN") : "—"; }
+function formatFileSize(bytes) {
+  if (!bytes) return "—";
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
+function formatCompressionDiff(original, compressed) {
+  const diff = original - compressed;
+  const ratio = (diff / original) * 100;
+  if (ratio > 0) return `节省 ${ratio.toFixed(0)}%`;
+  if (ratio < 0) return `增加 ${Math.abs(ratio).toFixed(0)}%`;
+  return "0%";
+}
 
 const stats = computed(() => {
   const r = profiles.value;
@@ -457,19 +475,54 @@ function onAvatarFileChange(e) {
     showToast("请选择图片文件");
     return;
   }
-  if (file.size > 5 * 1024 * 1024) {
-    showToast("图片大小不能超过 5MB");
+  if (file.size > 10 * 1024 * 1024) {
+    showToast("图片大小不能超过 10MB");
     return;
   }
+
+  // Show original image info
+  originalImageInfo.value = {
+    size: file.size,
+    type: file.type,
+    name: file.name,
+  };
+
   avatarFile.value = file;
+  compressedAvatarFile.value = null;
+  compressedImageInfo.value = null;
   showAvatarUploadDialog.value = true;
+
+  // Auto compress if image is large
+  if (file.size > 500 * 1024) {
+    compressAvatarImage();
+  }
+}
+
+async function compressAvatarImage() {
+  if (!avatarFile.value) return;
+  compressingAvatar.value = true;
+  try {
+    const compressed = await compressImage(avatarFile.value, 800, 800, 0.8);
+    compressedAvatarFile.value = new File([compressed], `compressed_${avatarFile.value.name}`, {
+      type: "image/jpeg",
+    });
+    compressedImageInfo.value = {
+      size: compressed.size,
+      type: "image/jpeg",
+    };
+    showToast(`图片已压缩`);
+  } catch (e) {
+    showToast("压缩失败：" + (e.message || e));
+  } finally {
+    compressingAvatar.value = false;
+  }
 }
 
 async function uploadAvatar() {
-  if (!avatarFile.value || !detail.value) return;
+  if (!compressedAvatarFile.value || !detail.value) return;
   uploadingAvatar.value = true;
   try {
-    const url = await uploadUserAvatar(avatarFile.value, detail.value.id);
+    const url = await uploadUserAvatar(compressedAvatarFile.value, detail.value.id);
     const { error: e } = await supabase.from("profiles").update({
       avatar_url: url,
       avatar_status: "approved",
@@ -481,6 +534,7 @@ async function uploadAvatar() {
     showToast("头像上传成功");
     showAvatarUploadDialog.value = false;
     avatarFile.value = null;
+    compressedAvatarFile.value = null;
     await loadList();
   } catch (e) {
     showToast("失败：" + (e.message || e));
@@ -492,6 +546,9 @@ async function uploadAvatar() {
 function cancelAvatarUpload() {
   showAvatarUploadDialog.value = false;
   avatarFile.value = null;
+  compressedAvatarFile.value = null;
+  originalImageInfo.value = null;
+  compressedImageInfo.value = null;
 }
 
 function clearAvatar() {
@@ -906,14 +963,47 @@ onMounted(async () => { await refCache.load(); await loadList(); });
           <h3>上传头像</h3>
           <div class="modal-body">
             <div class="avatar-preview-wrapper">
-              <img v-if="avatarFile" :src="URL.createObjectURL(avatarFile)" class="avatar-preview-lg" alt="预览" />
+              <img
+                v-if="compressedAvatarFile || avatarFile"
+                :src="URL.createObjectURL(compressedAvatarFile || avatarFile)"
+                class="avatar-preview-lg"
+                alt="预览"
+              />
               <span v-else class="muted">请选择图片</span>
             </div>
-            <p class="muted small">支持 JPG、PNG 格式，最大 5MB</p>
+
+            <!-- Image Info -->
+            <div v-if="originalImageInfo" class="image-info">
+              <div class="info-row">
+                <span class="info-label">原始:</span>
+                <span class="info-value">{{ formatFileSize(originalImageInfo.size) }}</span>
+              </div>
+              <div v-if="compressedImageInfo" class="info-row">
+                <span class="info-label">压缩后:</span>
+                <span class="info-value">{{ formatFileSize(compressedImageInfo.size) }}</span>
+                <span class="info-badge green">
+                  {{ formatCompressionDiff(originalImageInfo.size, compressedImageInfo.size) }}
+                </span>
+              </div>
+            </div>
+
+            <p class="muted small">支持 JPG、PNG 格式，最大 10MB，大图片会自动压缩</p>
           </div>
           <div class="modal-actions">
+            <button
+              v-if="!compressedAvatarFile && avatarFile"
+              class="btn btn-secondary"
+              :disabled="compressingAvatar"
+              @click="compressAvatarImage"
+            >
+              {{ compressingAvatar ? "压缩中..." : "手动压缩" }}
+            </button>
             <button class="btn btn-secondary" @click="cancelAvatarUpload">取消</button>
-            <button class="btn" :disabled="uploadingAvatar" @click="uploadAvatar">
+            <button
+              class="btn"
+              :disabled="uploadingAvatar || !compressedAvatarFile"
+              @click="uploadAvatar"
+            >
               {{ uploadingAvatar ? "上传中..." : "确认上传" }}
             </button>
           </div>
@@ -1096,5 +1186,37 @@ onMounted(async () => { await refCache.load(); await loadList(); });
   background: var(--surface2);
   overflow: hidden;
   margin: 0 auto;
+}
+
+/* Image Info */
+.image-info {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.info-label {
+  color: var(--muted);
+  min-width: 50px;
+}
+.info-value {
+  font-weight: 600;
+}
+.info-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  margin-left: auto;
+}
+.info-badge.green {
+  background: rgba(46, 158, 91, 0.15);
+  color: #2e9e5b;
 }
 </style>
