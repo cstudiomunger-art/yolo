@@ -5,12 +5,14 @@ enum PlanItineraryIntercityAnnotator {
     static func annotate(
         _ days: [ItineraryDay],
         visitOrder: [String] = [],
-        cityIdByDayIndex: [Int: String]? = nil
+        cityIdByDayIndex: [Int: String]? = nil,
+        suppressedDayIndexes: Set<Int> = []
     ) -> [ItineraryDay] {
         let sorted = days.sorted { $0.dayIndex < $1.dayIndex }
         let baselineMap = cityIdByDayIndex ?? inferCityIdByDayIndex(from: sorted, visitOrder: visitOrder)
 
         return sorted.enumerated().map { index, day in
+            if suppressedDayIndexes.contains(day.dayIndex) { return day }
             if day.intercityHop != nil { return day }
             guard index > 0 else { return day }
             let prev = sorted[index - 1]

@@ -23,6 +23,8 @@ struct PlanCreateFlowView: View {
     @State private var draftItinerary: SampleItinerary?
     @State private var attractionCache: [String: Attraction] = [:]
     @State private var addAttractionContext: PlanAddAttractionContext?
+    @State private var addIntercityHopContext: PlanAddIntercityHopContext?
+    @State private var hopDeleteConfirmDayIndex: Int?
     @State private var visaRec: VisaRecommendation?
     @State private var visaRoutes: [VisaRoute] = []
     @State private var visaQuery: VisaQuery?
@@ -203,6 +205,43 @@ struct PlanCreateFlowView: View {
                 }
                 addAttractionContext = nil
             }
+        }
+        .sheet(item: $addIntercityHopContext) { ctx in
+            let days = draftItinerary?.days ?? []
+            let defaults = PlanItineraryHelpers.inferDefaultFromTo(
+                calendarDayIndex: ctx.calendarDayIndex,
+                days: days,
+                visitOrder: draftItinerary?.visitOrder ?? reviewTripCityIds()
+            )
+            let cityNameById = Dictionary(uniqueKeysWithValues: cities.map { ($0.id, $0.name) })
+            IntercityHopEditorSheet(
+                cityIds: reviewTripCityIds(),
+                cityNameById: cityNameById,
+                defaultFromCityId: defaults.from,
+                defaultToCityId: defaults.to
+            ) { from, to in
+                insertReviewIntercityHop(calendarDayIndex: ctx.calendarDayIndex, fromCityId: from, toCityId: to)
+                addIntercityHopContext = nil
+            }
+        }
+        .alert(
+            String(localized: "Remove intercity travel?"),
+            isPresented: Binding(
+                get: { hopDeleteConfirmDayIndex != nil },
+                set: { if !$0 { hopDeleteConfirmDayIndex = nil } }
+            )
+        ) {
+            Button(String(localized: "Remove"), role: .destructive) {
+                if let dayIndex = hopDeleteConfirmDayIndex {
+                    removeReviewIntercityHop(calendarDayIndex: dayIndex)
+                }
+                hopDeleteConfirmDayIndex = nil
+            }
+            Button(String(localized: "Cancel"), role: .cancel) {
+                hopDeleteConfirmDayIndex = nil
+            }
+        } message: {
+            Text(String(localized: "Activities on this day will be kept."))
         }
         .sheet(isPresented: $showVisaDetector) {
             VisaDetectorView(presetCitySlugs: Array(selectedCityIds),
@@ -942,7 +981,7 @@ struct PlanCreateFlowView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(draftItinerary.title)
                                 .font(Theme.FontToken.playfair(18, weight: .semibold))
-                            Text(draftItinerary.meta)
+                            Text(draftItinerary.displayMeta)
                                 .font(Theme.FontToken.inter(11))
                                 .foregroundStyle(Theme.ColorToken.textMuted)
                             Text(draftItinerary.routeSummary)
@@ -1093,7 +1132,9 @@ struct PlanCreateFlowView: View {
                         ? CityTravelHints.displayName(for: displayDay.experienceCityId ?? hop.toCityId)
                         : visited,
                     showsActivities: !day.activities.isEmpty || !draftIntercityManualRows(dayIndex: dayIndex).isEmpty,
-                    onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: dayIndex, arrivalTime: $0) }
+                    showsDeleteHop: reviewEditMode == .inactive,
+                    onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: $0) },
+                    onDeleteHop: { hopDeleteConfirmDayIndex = day.dayIndex }
                 )
                 .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
                 .listRowBackground(Color.clear)
@@ -1149,9 +1190,14 @@ struct PlanCreateFlowView: View {
                     moveReviewActivities(dayIndex: dayIndex, from: source, to: destination)
                 }
                 if let hop = day.intercityHop {
-                    IntercityHopCard(hop: hop) { time in
-                        applyIntercityArrivalTime(dayIndex: dayIndex, arrivalTime: time)
-                    }
+                    IntercityHopCard(
+                        hop: hop,
+                        showsDelete: reviewEditMode == .inactive,
+                        onArrivalTimeChange: { time in
+                            applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: time)
+                        },
+                        onDelete: { hopDeleteConfirmDayIndex = day.dayIndex }
+                    )
                         .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
@@ -1212,8 +1258,12 @@ struct PlanCreateFlowView: View {
                         ? CityTravelHints.displayName(for: displayDay.experienceCityId ?? "beijing")
                         : visited,
                     showsActivities: displayDay.intercityHop == nil,
+                    showsDeleteHop: displayDay.intercityHop != nil && reviewEditMode == .inactive,
                     onArrivalTimeChange: displayDay.intercityHop != nil
-                        ? { applyIntercityArrivalTime(dayIndex: dayIndex, arrivalTime: $0) }
+                        ? { applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: $0) }
+                        : nil,
+                    onDeleteHop: displayDay.intercityHop != nil && reviewEditMode == .inactive
+                        ? { hopDeleteConfirmDayIndex = day.dayIndex }
                         : nil
                 )
                 .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
@@ -1236,6 +1286,13 @@ struct PlanCreateFlowView: View {
                     .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+
+                    if canAddReviewIntercityHop(for: day) {
+                        reviewAddIntercityTravelButton(
+                            arrayDayIndex: dayIndex,
+                            calendarDayIndex: day.dayIndex
+                        )
+                    }
                 }
             } else {
                 if PlanItineraryDayFill.isBlank(day) {
@@ -1274,6 +1331,13 @@ struct PlanCreateFlowView: View {
                         .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+
+                        if canAddReviewIntercityHop(for: day) {
+                            reviewAddIntercityTravelButton(
+                                arrayDayIndex: dayIndex,
+                                calendarDayIndex: day.dayIndex
+                            )
+                        }
                     }
                 } else {
                 ForEach(day.activities) { activity in
@@ -1299,12 +1363,19 @@ struct PlanCreateFlowView: View {
                     .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+
+                    if canAddReviewIntercityHop(for: day) {
+                        reviewAddIntercityTravelButton(
+                            arrayDayIndex: dayIndex,
+                            calendarDayIndex: day.dayIndex
+                        )
+                    }
                 }
                 }
             }
         } header: {
             VStack(alignment: .leading, spacing: 4) {
-                Text(day.dateLabel)
+                Text(draftItinerary?.displayDateLabel(for: day) ?? day.dateLabel)
                     .font(Theme.FontToken.playfair(14, weight: .semibold))
                 if !visited.isEmpty {
                     Text(visited)
@@ -1385,6 +1456,13 @@ struct PlanCreateFlowView: View {
         let tripIds = reviewTripCityIds()
         let activityCityId = activity.cityId ?? activity.attractionId.flatMap { attractionCache[$0]?.cityId }
         let cityLabel = activityCityId.flatMap { id in cities.first(where: { $0.id == id })?.name }
+        let isIntercityManual = draftItinerary.map {
+            PlanItineraryHelpers.isIntercityManualActivity(
+                activity.id,
+                calendarDayIndex: $0.days[dayIndex].dayIndex,
+                in: $0
+            )
+        } ?? false
 
         return HStack(alignment: .top, spacing: 12) {
             Button {
@@ -1412,6 +1490,15 @@ struct PlanCreateFlowView: View {
                             Text(cityLabel)
                                 .font(Theme.FontToken.inter(10, weight: .medium))
                                 .foregroundStyle(Theme.ColorToken.textDisabled)
+                        }
+                        if isIntercityManual {
+                            Text(String(localized: "Added by you"))
+                                .font(Theme.FontToken.inter(9, weight: .medium))
+                                .foregroundStyle(Theme.ColorToken.accent)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Theme.ColorToken.accent.opacity(0.12))
+                                .clipShape(Capsule())
                         }
                         if let aid = activity.attractionId,
                            attractionCache[aid]?.requiresAdvanceBooking == true {
@@ -1443,7 +1530,7 @@ struct PlanCreateFlowView: View {
 
             if reviewEditMode == .inactive {
                 Button {
-                    removeActivity(dayIndex: dayIndex, activityId: activity.id)
+                    removeReviewActivity(dayIndex: dayIndex, activityId: activity.id)
                 } label: {
                     Image(systemName: "trash")
                         .font(.system(size: 14))
@@ -1761,7 +1848,8 @@ struct PlanCreateFlowView: View {
             let annotated = PlanItineraryIntercityAnnotator.annotate(
                 trip.days,
                 visitOrder: visitOrder,
-                cityIdByDayIndex: baselineMap
+                cityIdByDayIndex: baselineMap,
+                suppressedDayIndexes: Set(trip.suppressedIntercityDayIndexes ?? [])
             )
             let cityMap = PlanItineraryIntercityAnnotator.completeCityIdByDayIndex(
                 from: annotated,
@@ -1965,6 +2053,47 @@ struct PlanCreateFlowView: View {
     private func draftIntercityManualRows(dayIndex: Int) -> [ItineraryActivity] {
         guard let trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return [] }
         return trip.intercityManual(forDayIndex: trip.days[dayIndex].dayIndex)
+    }
+
+    private func removeReviewIntercityHop(calendarDayIndex: Int) {
+        guard let trip = draftItinerary else { return }
+        draftItinerary = PlanItineraryHelpers.removeIntercityHop(
+            calendarDayIndex: calendarDayIndex,
+            from: trip
+        )
+    }
+
+    private func insertReviewIntercityHop(calendarDayIndex: Int, fromCityId: String, toCityId: String) {
+        guard let trip = draftItinerary else { return }
+        draftItinerary = PlanItineraryHelpers.insertIntercityHop(
+            calendarDayIndex: calendarDayIndex,
+            fromCityId: fromCityId,
+            toCityId: toCityId,
+            allowedCityIds: reviewTripCityIds(),
+            into: trip
+        )
+    }
+
+    private func canAddReviewIntercityHop(for day: ItineraryDay) -> Bool {
+        day.intercityHop == nil && reviewEditMode == .inactive
+    }
+
+    @ViewBuilder
+    private func reviewAddIntercityTravelButton(arrayDayIndex: Int, calendarDayIndex: Int) -> some View {
+        Button {
+            addIntercityHopContext = PlanAddIntercityHopContext(
+                calendarDayIndex: calendarDayIndex,
+                arrayDayIndex: arrayDayIndex
+            )
+        } label: {
+            Label(String(localized: "Add intercity travel"), systemImage: "train.side.front.car")
+                .font(Theme.FontToken.inter(12, weight: .medium))
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(Theme.ColorToken.textSecondary)
+        .listRowInsets(EdgeInsets(top: 0, leading: Theme.screenPadding, bottom: 12, trailing: Theme.screenPadding))
+        .listRowBackground(Color.clear)
+        .listRowSeparator(.hidden)
     }
 
     private func loadAttractionCache(for trip: SampleItinerary) async {
@@ -2309,12 +2438,17 @@ struct PlanCreateFlowView: View {
         attractionCache[attraction.id] = attraction
     }
 
-    private func removeActivity(dayIndex: Int, activityId: String) {
+    private func removeReviewActivity(dayIndex: Int, activityId: String) {
         guard let trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return }
-        let day = trip.days[dayIndex]
-        var days = trip.days
-        days[dayIndex] = day.withActivities(day.activities.filter { $0.id != activityId })
-        draftItinerary = trip.withDays(days).markingUserEdited()
+        draftItinerary = PlanItineraryHelpers.removeActivity(
+            arrayDayIndex: dayIndex,
+            activityId: activityId,
+            from: trip
+        ).markingUserEdited()
+    }
+
+    private func removeActivity(dayIndex: Int, activityId: String) {
+        removeReviewActivity(dayIndex: dayIndex, activityId: activityId)
     }
 
     private func moveReviewActivities(dayIndex: Int, from source: IndexSet, to destination: Int) {

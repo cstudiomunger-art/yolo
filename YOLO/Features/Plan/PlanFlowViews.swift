@@ -73,14 +73,16 @@ struct ItineraryDetailView: View {
     let itinerary: SampleItinerary
     @State private var segment: DetailSegment = .itinerary
     @State private var showShare = false
-    @State private var showEdit = false
     @State private var editableDays: [ItineraryDay] = []
     @State private var editMode: EditMode = .inactive
     @State private var attractionCache: [String: Attraction] = [:]
     @State private var cities: [City] = []
     @State private var addAttractionContext: PlanAddAttractionContext?
+    @State private var addIntercityHopContext: PlanAddIntercityHopContext?
+    @State private var hopDeleteConfirmDayIndex: Int?
     @State private var intercityManualActivities: [String: [ItineraryActivity]]?
     @State private var intercityScheduleBaselineByDayIndex: [String: [ItineraryActivity]]?
+    @State private var suppressedIntercityDayIndexes: [Int]?
     @State private var endpointTripSnapshot: [ItineraryDay]?
     @State private var endpointAdjustmentsSnapshot: [String] = []
     @State private var endpointScheduleBaselineDays: [ItineraryDay]?
@@ -103,16 +105,10 @@ struct ItineraryDetailView: View {
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
                 Spacer()
-                HStack(spacing: 16) {
-                    Button("Edit") { showEdit = true }
-                        .font(Theme.FontToken.inter(11, weight: .medium))
-                        .foregroundStyle(Theme.ColorToken.textMuted)
-                        .textCase(.uppercase)
-                    Button("⬆ Share") { showShare = true }
-                        .font(Theme.FontToken.inter(11, weight: .medium))
-                        .foregroundStyle(Theme.ColorToken.accent)
-                        .textCase(.uppercase)
-                }
+                Button("⬆ Share") { showShare = true }
+                    .font(Theme.FontToken.inter(11, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.accent)
+                    .textCase(.uppercase)
             }
             .padding(.horizontal, Theme.screenPadding)
             .padding(.vertical, 12)
@@ -120,7 +116,7 @@ struct ItineraryDetailView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(itinerary.title)
                     .font(Theme.FontToken.playfair(18, weight: .semibold))
-                Text(itinerary.meta)
+                Text(currentItinerary.displayMeta)
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
                 Text(String(format: String(localized: "%lld days total"), currentItinerary.days.count))
@@ -155,16 +151,6 @@ struct ItineraryDetailView: View {
         .sheet(isPresented: $showShare) {
             ShareItinerarySheet(itinerary: currentItinerary)
         }
-        .sheet(isPresented: $showEdit) {
-            ItineraryEditorView(itinerary: currentItinerary) { updated in
-                editableDays = updated.days
-                intercityManualActivities = updated.intercityManualActivities
-                intercityScheduleBaselineByDayIndex = updated.intercityScheduleBaselineByDayIndex
-                internationalArrivalActivities = updated.internationalArrivalActivities
-                internationalDepartureActivities = updated.internationalDepartureActivities
-                endpointScheduleBaselineDays = updated.endpointScheduleBaselineDays
-            }
-        }
         .onAppear {
             editableDays = itinerary.days
             schedulingAdjustments = itinerary.schedulingAdjustments ?? []
@@ -174,6 +160,7 @@ struct ItineraryDetailView: View {
             internationalDepartureActivities = itinerary.internationalDepartureActivities
             intercityManualActivities = itinerary.intercityManualActivities
             intercityScheduleBaselineByDayIndex = itinerary.intercityScheduleBaselineByDayIndex
+            suppressedIntercityDayIndexes = itinerary.suppressedIntercityDayIndexes
             endpointScheduleBaselineDays = itinerary.endpointScheduleBaselineDays
             droppedAttractionIds = itinerary.droppedAttractionIds
             if endpointScheduleBaselineDays == nil,
@@ -211,6 +198,7 @@ struct ItineraryDetailView: View {
                 internationalDepartureActivities = saved.internationalDepartureActivities
                 intercityManualActivities = saved.intercityManualActivities
                 intercityScheduleBaselineByDayIndex = saved.intercityScheduleBaselineByDayIndex
+                suppressedIntercityDayIndexes = saved.suppressedIntercityDayIndexes
                 endpointScheduleBaselineDays = saved.endpointScheduleBaselineDays ?? endpointScheduleBaselineDays
                 droppedAttractionIds = saved.droppedAttractionIds
                 schedulingAdjustments = saved.schedulingAdjustments ?? []
@@ -227,6 +215,41 @@ struct ItineraryDetailView: View {
                 }
                 addAttractionContext = nil
             }
+        }
+        .sheet(item: $addIntercityHopContext) { ctx in
+            let defaults = PlanItineraryHelpers.inferDefaultFromTo(
+                calendarDayIndex: ctx.calendarDayIndex,
+                days: editableDays,
+                visitOrder: currentItinerary.visitOrder ?? tripCityIds
+            )
+            IntercityHopEditorSheet(
+                cityIds: tripCityIds,
+                cityNameById: cityNameById,
+                defaultFromCityId: defaults.from,
+                defaultToCityId: defaults.to
+            ) { from, to in
+                insertIntercityHop(calendarDayIndex: ctx.calendarDayIndex, fromCityId: from, toCityId: to)
+                addIntercityHopContext = nil
+            }
+        }
+        .alert(
+            String(localized: "Remove intercity travel?"),
+            isPresented: Binding(
+                get: { hopDeleteConfirmDayIndex != nil },
+                set: { if !$0 { hopDeleteConfirmDayIndex = nil } }
+            )
+        ) {
+            Button(String(localized: "Remove"), role: .destructive) {
+                if let dayIndex = hopDeleteConfirmDayIndex {
+                    removeIntercityHop(calendarDayIndex: dayIndex)
+                }
+                hopDeleteConfirmDayIndex = nil
+            }
+            Button(String(localized: "Cancel"), role: .cancel) {
+                hopDeleteConfirmDayIndex = nil
+            }
+        } message: {
+            Text(String(localized: "Activities on this day will be kept."))
         }
     }
 
@@ -476,7 +499,7 @@ struct ItineraryDetailView: View {
             onTimeChange: applyInternationalArrivalTime
         ) {
             ForEach(bookendActivities) { activity in
-                activityRow(activity, dayId: "bookend-arrival")
+                activityRow(activity, arrayDayIndex: nil)
             }
         } addAttractionButton: {
             if !editMode.isEditing,
@@ -511,7 +534,7 @@ struct ItineraryDetailView: View {
             onTimeChange: applyInternationalDepartureTime
         ) {
             ForEach(bookendActivities) { activity in
-                activityRow(activity, dayId: "bookend-departure")
+                activityRow(activity, arrayDayIndex: nil)
             }
         } addAttractionButton: {
             if !editMode.isEditing,
@@ -567,8 +590,59 @@ struct ItineraryDetailView: View {
             internationalArrivalActivities: internationalArrivalActivities ?? saved?.internationalArrivalActivities ?? itinerary.internationalArrivalActivities,
             internationalDepartureActivities: internationalDepartureActivities ?? saved?.internationalDepartureActivities ?? itinerary.internationalDepartureActivities,
             intercityManualActivities: intercityManualActivities ?? saved?.intercityManualActivities ?? itinerary.intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex ?? saved?.intercityScheduleBaselineByDayIndex ?? itinerary.intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex ?? saved?.intercityScheduleBaselineByDayIndex ?? itinerary.intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: suppressedIntercityDayIndexes ?? saved?.suppressedIntercityDayIndexes ?? itinerary.suppressedIntercityDayIndexes
         )
+    }
+
+    private func applyTripUpdate(_ trip: SampleItinerary) {
+        editableDays = trip.days
+        intercityManualActivities = trip.intercityManualActivities
+        intercityScheduleBaselineByDayIndex = trip.intercityScheduleBaselineByDayIndex
+        suppressedIntercityDayIndexes = trip.suppressedIntercityDayIndexes
+        persistItineraryOrder()
+    }
+
+    private func removeIntercityHop(calendarDayIndex: Int) {
+        let updated = PlanItineraryHelpers.removeIntercityHop(
+            calendarDayIndex: calendarDayIndex,
+            from: currentItinerary
+        )
+        applyTripUpdate(updated)
+    }
+
+    private func insertIntercityHop(calendarDayIndex: Int, fromCityId: String, toCityId: String) {
+        let updated = PlanItineraryHelpers.insertIntercityHop(
+            calendarDayIndex: calendarDayIndex,
+            fromCityId: fromCityId,
+            toCityId: toCityId,
+            allowedCityIds: tripCityIds,
+            into: currentItinerary
+        )
+        applyTripUpdate(updated)
+    }
+
+    private func canAddIntercityHop(for day: ItineraryDay) -> Bool {
+        day.intercityHop == nil && !editMode.isEditing
+    }
+
+    @ViewBuilder
+    private func addIntercityTravelButton(arrayDayIndex: Int, calendarDayIndex: Int) -> some View {
+        Button {
+            addIntercityHopContext = PlanAddIntercityHopContext(
+                calendarDayIndex: calendarDayIndex,
+                arrayDayIndex: arrayDayIndex
+            )
+        } label: {
+            Label(String(localized: "Add intercity travel"), systemImage: "train.side.front.car")
+                .font(Theme.FontToken.inter(11, weight: .medium))
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(Theme.ColorToken.textSecondary)
+        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 6, trailing: 16))
+        .listRowSeparator(.hidden)
+        .listRowBackground(Theme.ColorToken.background)
+        .moveDisabled(true)
     }
 
     private var resolvedEntryCityId: String {
@@ -623,16 +697,19 @@ struct ItineraryDetailView: View {
                         .listRowSeparator(.hidden)
                 }
 
-                ForEach(editableDays) { day in
+                ForEach(Array(editableDays.enumerated()), id: \.element.id) { arrayDayIndex, day in
                     Section {
                         daySectionHeader(day)
+                        let showsHopTrash = day.intercityHop != nil
 
                         if day.intercityHop != nil && day.isExperienceSuggestions {
                             ExperienceSuggestionsDayCard(
                                 day: day,
                                 cityDisplayName: experienceCityDisplayName(day),
                                 showsActivities: !day.activities.isEmpty || !intercityManualRows(for: day).isEmpty,
-                                onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: $0) }
+                                showsDeleteHop: !editMode.isEditing,
+                                onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: $0) },
+                                onDeleteHop: { hopDeleteConfirmDayIndex = day.dayIndex }
                             )
                             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
                             .listRowSeparator(.hidden)
@@ -640,7 +717,11 @@ struct ItineraryDetailView: View {
                             .moveDisabled(true)
 
                             ForEach(day.activities) { activity in
-                                activityRow(activity, dayId: day.id)
+                                activityRow(
+                                    activity,
+                                    arrayDayIndex: arrayDayIndex,
+                                    showsTrashOnHopDay: showsHopTrash
+                                )
                             }
                             .onMove { source, destination in
                                 moveActivities(dayId: day.id, from: source, to: destination)
@@ -650,20 +731,24 @@ struct ItineraryDetailView: View {
                             }
 
                             ForEach(intercityManualRows(for: day)) { activity in
-                                activityRow(activity, dayId: "\(day.id)-manual")
+                                activityRow(
+                                    activity,
+                                    arrayDayIndex: arrayDayIndex,
+                                    isIntercityManual: true,
+                                    showsTrashOnHopDay: showsHopTrash
+                                )
                             }
                             .onDelete { offsets in
                                 deleteIntercityManual(dayIndex: day.dayIndex, at: offsets)
                             }
 
                             Button {
-                                guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
                                 let cityIds: [String] = {
                                     if let cid = day.experienceCityId, !cid.isEmpty { return [cid] }
                                     return tripCityIds
                                 }()
                                 addAttractionContext = PlanAddAttractionContext(
-                                    dayIndex: dayIndex,
+                                    dayIndex: arrayDayIndex,
                                     cityIds: cityIds,
                                     intercityManual: true
                                 )
@@ -737,7 +822,11 @@ struct ItineraryDetailView: View {
                         } else if day.intercityHop != nil {
                             let split = PlanItineraryHopUI.splitActivities(day)
                             ForEach(split.morning) { activity in
-                                activityRow(activity, dayId: day.id)
+                                activityRow(
+                                    activity,
+                                    arrayDayIndex: arrayDayIndex,
+                                    showsTrashOnHopDay: showsHopTrash
+                                )
                             }
                             .onMove { source, destination in
                                 moveActivities(dayId: day.id, from: source, to: destination)
@@ -746,16 +835,25 @@ struct ItineraryDetailView: View {
                                 deleteActivities(dayId: day.id, at: offsets)
                             }
                             if let hop = day.intercityHop {
-                                IntercityHopCard(hop: hop) { time in
-                                    applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: time)
-                                }
+                                IntercityHopCard(
+                                    hop: hop,
+                                    showsDelete: !editMode.isEditing,
+                                    onArrivalTimeChange: { time in
+                                        applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: time)
+                                    },
+                                    onDelete: { hopDeleteConfirmDayIndex = day.dayIndex }
+                                )
                                 .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Theme.ColorToken.background)
                                 .moveDisabled(true)
                             }
                             ForEach(split.afternoon) { activity in
-                                activityRow(activity, dayId: day.id)
+                                activityRow(
+                                    activity,
+                                    arrayDayIndex: arrayDayIndex,
+                                    showsTrashOnHopDay: showsHopTrash
+                                )
                             }
                             .onMove { source, destination in
                                 let offset = split.morning.count
@@ -774,16 +872,20 @@ struct ItineraryDetailView: View {
                             }
 
                             ForEach(intercityManualRows(for: day)) { activity in
-                                activityRow(activity, dayId: "\(day.id)-manual")
+                                activityRow(
+                                    activity,
+                                    arrayDayIndex: arrayDayIndex,
+                                    isIntercityManual: true,
+                                    showsTrashOnHopDay: showsHopTrash
+                                )
                             }
                             .onDelete { offsets in
                                 deleteIntercityManual(dayIndex: day.dayIndex, at: offsets)
                             }
 
                             Button {
-                                guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
                                 addAttractionContext = PlanAddAttractionContext(
-                                    dayIndex: dayIndex,
+                                    dayIndex: arrayDayIndex,
                                     cityIds: tripCityIds,
                                     intercityManual: true
                                 )
@@ -834,9 +936,20 @@ struct ItineraryDetailView: View {
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Theme.ColorToken.background)
                                 .moveDisabled(true)
+
+                                if canAddIntercityHop(for: day) {
+                                    addIntercityTravelButton(
+                                        arrayDayIndex: arrayDayIndex,
+                                        calendarDayIndex: day.dayIndex
+                                    )
+                                }
                             } else {
                             ForEach(day.activities) { activity in
-                                activityRow(activity, dayId: day.id)
+                                activityRow(
+                                    activity,
+                                    arrayDayIndex: arrayDayIndex,
+                                    showsTrashOnHopDay: showsHopTrash
+                                )
                             }
                             .onMove { source, destination in
                                 moveActivities(dayId: day.id, from: source, to: destination)
@@ -860,6 +973,13 @@ struct ItineraryDetailView: View {
                             .listRowSeparator(.hidden)
                             .listRowBackground(Theme.ColorToken.background)
                             .moveDisabled(true)
+
+                            if canAddIntercityHop(for: day) {
+                                addIntercityTravelButton(
+                                    arrayDayIndex: arrayDayIndex,
+                                    calendarDayIndex: day.dayIndex
+                                )
+                            }
                             }
                         }
                     }
@@ -912,7 +1032,7 @@ struct ItineraryDetailView: View {
         )
         return VStack(alignment: .leading, spacing: 4) {
             HStack {
-                Text("Day \(day.dayIndex) · \(day.dateLabel)")
+                Text("Day \(day.dayIndex) · \(currentItinerary.displayDateLabel(for: day))")
                     .font(Theme.FontToken.playfair(14, weight: .semibold))
                 Spacer()
                 if let cost = day.costEstimate {
@@ -934,12 +1054,17 @@ struct ItineraryDetailView: View {
         .moveDisabled(true)
     }
 
-    private func activityRow(_ activity: ItineraryActivity, dayId: String) -> some View {
-        let dayIndex = editableDays.firstIndex(where: { $0.id == dayId }) ?? 0
+    private func activityRow(
+        _ activity: ItineraryActivity,
+        arrayDayIndex: Int?,
+        isIntercityManual: Bool = false,
+        showsTrashOnHopDay: Bool = false
+    ) -> some View {
         let activityCityId = activity.cityId ?? activity.attractionId.flatMap { attractionCache[$0]?.cityId }
         let showCity = tripCityIds.count > 1
         let cityLabel = activityCityId.flatMap { cityNameById[$0] }
         let isEditing = editMode.isEditing
+        let showTrash = showsTrashOnHopDay && !isEditing && arrayDayIndex != nil
 
         let rowContent = HStack(alignment: .top, spacing: 10) {
             if !isEditing {
@@ -951,6 +1076,15 @@ struct ItineraryDetailView: View {
                     Text(cityLabel)
                         .font(Theme.FontToken.inter(10, weight: .medium))
                         .foregroundStyle(Theme.ColorToken.textDisabled)
+                }
+                if isIntercityManual {
+                    Text(String(localized: "Added by you"))
+                        .font(Theme.FontToken.inter(9, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.accent)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Theme.ColorToken.accent.opacity(0.12))
+                        .clipShape(Capsule())
                 }
                 if let aid = activity.attractionId,
                    attractionCache[aid]?.requiresAdvanceBooking == true {
@@ -980,22 +1114,35 @@ struct ItineraryDetailView: View {
         }
         .padding(.vertical, 4)
 
-        return Group {
-            if isEditing {
-                rowContent
-            } else if let aid = activity.attractionId {
-                Button {
-                    appEnv.navigation.openGuide(
-                        attractionId: aid,
-                        cityId: activityCityId,
-                        presentation: .planDay(dayIndex: dayIndex)
-                    )
-                } label: {
+        return HStack(alignment: .top, spacing: 10) {
+            Group {
+                if isEditing {
+                    rowContent
+                } else if let aid = activity.attractionId, let arrayDayIndex {
+                    Button {
+                        appEnv.navigation.openGuide(
+                            attractionId: aid,
+                            cityId: activityCityId,
+                            presentation: .planDay(dayIndex: arrayDayIndex)
+                        )
+                    } label: {
+                        rowContent
+                    }
+                    .buttonStyle(.plain)
+                } else {
                     rowContent
                 }
+            }
+
+            if showTrash, let arrayDayIndex {
+                Button {
+                    removePlanActivity(arrayDayIndex: arrayDayIndex, activityId: activity.id)
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.ColorToken.urgent)
+                }
                 .buttonStyle(.plain)
-            } else {
-                rowContent
             }
         }
         .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 6, trailing: 16))
@@ -1016,6 +1163,28 @@ struct ItineraryDetailView: View {
 
     private func intercityManualRows(for day: ItineraryDay) -> [ItineraryActivity] {
         intercityManualActivities?[String(day.dayIndex)] ?? []
+    }
+
+    private func removePlanActivity(arrayDayIndex: Int, activityId: String) {
+        guard editableDays.indices.contains(arrayDayIndex) else { return }
+        let calendarDayIndex = editableDays[arrayDayIndex].dayIndex
+        if intercityManualActivities?[String(calendarDayIndex)]?.contains(where: { $0.id == activityId }) == true {
+            var manual = intercityManualActivities ?? [:]
+            let key = String(calendarDayIndex)
+            var list = manual[key] ?? []
+            list.removeAll { $0.id == activityId }
+            if list.isEmpty {
+                manual.removeValue(forKey: key)
+            } else {
+                manual[key] = list
+            }
+            intercityManualActivities = manual.isEmpty ? nil : manual
+        } else {
+            var activities = editableDays[arrayDayIndex].activities
+            activities.removeAll { $0.id == activityId }
+            editableDays[arrayDayIndex] = editableDays[arrayDayIndex].withActivities(activities)
+        }
+        persistItineraryOrder()
     }
 
     private func deleteIntercityManual(dayIndex: Int, at offsets: IndexSet) {
@@ -1190,6 +1359,7 @@ private struct HotelSheetCity: Identifiable {
 
 /// Lets a hotel card add itself to a chosen day of the active trip (booking trace).
 struct HotelTripAdder {
+    let itinerary: SampleItinerary
     /// Standard (non-experience) days available to pick.
     let days: [ItineraryDay]
     /// Hotel ids already traced into the trip (to show "已加入").
@@ -1251,7 +1421,7 @@ struct BookYourTripView: View {
         let addedHotelIds = Set(
             itin.days.flatMap(\.activities).compactMap { $0.kind == .hotel ? $0.hotelId : nil }
         )
-        return HotelTripAdder(days: standardDays, addedHotelIds: addedHotelIds) { hotel, day in
+        return HotelTripAdder(itinerary: itin, days: standardDays, addedHotelIds: addedHotelIds) { hotel, day in
             addHotel(hotel, to: day)
         }
     }
@@ -1435,7 +1605,7 @@ struct HotelCardView: View {
                 .buttonStyle(.plain)
                 .confirmationDialog("Add to which day?", isPresented: $showDayPicker, titleVisibility: .visible) {
                     ForEach(adder.days) { day in
-                        Button("Day \(day.dayIndex) · \(day.dateLabel.isEmpty ? "Day \(day.dayIndex)" : day.dateLabel)") {
+                        Button("Day \(day.dayIndex) · \(adder.itinerary.displayDateLabel(for: day))") {
                             adder.add(hotel, day)
                         }
                     }
@@ -1814,6 +1984,11 @@ struct ShareItinerarySheet: View {
 
         appEnv.preferences.updateItineraryShareState(updated)
         await appEnv.profileSync.syncItineraries()
+        if let syncError = appEnv.profileSync.lastSyncError, !syncError.isEmpty {
+            linkSaveError = String(localized: "Could not save share link. Please try again.")
+            shareSlug = nil
+            return
+        }
         TelemetryService.shared.logEvent("itinerary_share_link_enabled")
     }
 }

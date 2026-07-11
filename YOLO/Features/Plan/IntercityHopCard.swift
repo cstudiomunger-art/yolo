@@ -4,7 +4,9 @@ import SwiftUI
 struct IntercityHopCard: View {
     let hop: ItineraryIntercityHop
     var isFullTravelDay: Bool = false
+    var showsDelete: Bool = true
     var onArrivalTimeChange: ((String?) -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
 
     private var summary: CityTravelHints.IntercityCardSummary {
         CityTravelHints.intercityCardSummary(
@@ -24,6 +26,16 @@ struct IntercityHopCard: View {
                     .font(Theme.FontToken.inter(13, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 4)
+                if showsDelete, let onDelete {
+                    Button(action: onDelete) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(String(localized: "Remove intercity travel"))
+                }
             }
 
             if let contextLine = summary.contextLine {

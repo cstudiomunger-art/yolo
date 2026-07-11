@@ -42,16 +42,38 @@ extension SampleItinerary {
         return TripStatus.make(start: range.start, end: range.end, now: now)
     }
 
-    /// 解析 `PlanTripDateMath.formatTripMeta` 产出的 "Jun 20, 2026 – Jun 27, 2026"。
+    /// 解析 `PlanTripDateMath.formatTripMeta` 产出的 "Jun 20, 2026 – Jun 27, 2026"（也尝试设备 locale 以兼容旧数据）。
     static func parseMetaDateRange(_ meta: String) -> (start: Date, end: Date)? {
         let parts = meta.components(separatedBy: " – ")
         guard parts.count == 2 else { return nil }
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        guard let start = formatter.date(from: parts[0].trimmingCharacters(in: .whitespaces)),
-              let end = formatter.date(from: parts[1].trimmingCharacters(in: .whitespaces))
-        else { return nil }
-        return (start, end)
+        for locale in [PlanTripDateMath.displayLocale, Locale.current] {
+            let formatter = DateFormatter()
+            formatter.locale = locale
+            formatter.dateStyle = .medium
+            formatter.timeStyle = .none
+            if let start = formatter.date(from: parts[0].trimmingCharacters(in: .whitespaces)),
+               let end = formatter.date(from: parts[1].trimmingCharacters(in: .whitespaces)) {
+                return (start, end)
+            }
+        }
+        return nil
+    }
+}
+
+extension SampleItinerary {
+    /// English date range for UI; prefers structured dates over persisted `meta` text.
+    var displayMeta: String {
+        if let start = startDate, let end = endDate {
+            return PlanTripDateMath.formatTripMeta(arrival: start, departure: end)
+        }
+        return meta
+    }
+
+    func displayDateLabel(for day: ItineraryDay) -> String {
+        if let start = startDate,
+           let date = PlanTripDateMath.calendarDate(forDayIndex: day.dayIndex, tripStart: start) {
+            return PlanTripDateMath.formatDisplayDate(date)
+        }
+        return day.dateLabel
     }
 }

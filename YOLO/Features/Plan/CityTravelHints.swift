@@ -164,75 +164,46 @@ enum CityTravelHints {
     ) -> IntercityCardSummary {
         let route = routeLabel(from: [fromCityId, toCityId])
         let journey = journeyHoursLabel(travelHours)
-        let routeTitle = String(
-            format: String(localized: "Intercity route summary format"),
-            locale: .current,
-            route,
-            journey
-        )
+        let routeTitle = "\(route) · \(journey) (HSR / flight)"
         let to = displayName(for: toCityId)
         let slots = commuteSlots(travelHours)
         let contextLine: String? = {
             if let arrival = arrivalTime, !arrival.isEmpty {
                 if PlanItineraryFlightTimes.isEveningArrival(arrival) {
-                    return String(
-                        format: String(localized: "Evening arrival in %@ — check in and rest"),
-                        locale: .current,
-                        to
-                    )
+                    return "Evening arrival in \(to) — check in and rest"
                 }
                 if PlanItineraryFlightTimes.isAfternoonArrival(arrival) {
-                    return String(
-                        format: String(localized: "Afternoon arrival in %@ — light sightseeing"),
-                        locale: .current,
-                        to
-                    )
+                    return "Afternoon arrival in \(to) — light sightseeing"
                 }
                 if PlanItineraryFlightTimes.isEarlyMorningArrival(arrival) {
-                    return String(
-                        format: String(localized: "Early arrival — full day in %@"),
-                        locale: .current,
-                        to
-                    )
+                    return "Early arrival — full day in \(to)"
                 }
                 if PlanItineraryFlightTimes.isLateMorningCommuteArrival(arrival) {
-                    return String(
-                        format: String(localized: "Morning commute — afternoon in %@"),
-                        locale: .current,
-                        to
-                    )
+                    return "Morning commute — afternoon in \(to)"
                 }
-                return String(
-                    format: String(localized: "Morning arrival — afternoon in %@"),
-                    locale: .current,
-                    to
-                )
+                return "Morning arrival — afternoon in \(to)"
             }
             if isFullTravelDay || slots >= 2 {
-                return String(
-                    format: String(localized: "Full travel day — check in and rest in %@"),
-                    locale: .current,
-                    to
-                )
+                return "Full travel day — check in and rest in \(to)"
             }
             if slots == 0 {
-                return String(
-                    format: String(localized: "Short hop — afternoon sightseeing in %@"),
-                    locale: .current,
-                    to
-                )
+                return "Short hop — afternoon sightseeing in \(to)"
             }
-            return String(
-                format: String(localized: "Afternoon sightseeing in %@"),
-                locale: .current,
-                to
-            )
+            return "Afternoon sightseeing in \(to)"
         }()
         return IntercityCardSummary(routeTitle: routeTitle, contextLine: contextLine)
     }
 
     static func hopDayRouteLabel(fromCityId: String, toCityId: String) -> String {
         routeLabel(from: [fromCityId, toCityId])
+    }
+
+    /// Card bullet copy for an intercity hop (compact or full travel day).
+    static func hopCardItems(fromCityId: String, toCityId: String, hours: Double) -> [String] {
+        if commuteSlots(hours) >= 2 {
+            return buildTravelDayContent(fromCityId: fromCityId, toCityId: toCityId, hours: hours)
+        }
+        return buildHopCardContent(fromCityId: fromCityId, toCityId: toCityId, hours: hours)
     }
 
     static func displayName(for cityId: String) -> String {
@@ -324,8 +295,8 @@ enum CityTravelHints {
     static func internationalArrivalPlaceholder(cityId: String) -> [String] {
         let name = displayName(for: cityId)
         return [
-            String(format: String(localized: "International arrival in %@"), name),
-            String(localized: "Sightseeing for this day updates after you confirm arrival"),
+            "International arrival in \(name)",
+            "Sightseeing for this day updates after you confirm arrival",
         ]
     }
 
@@ -333,24 +304,24 @@ enum CityTravelHints {
     static func internationalDeparturePlaceholder(cityId: String) -> [String] {
         let name = displayName(for: cityId)
         return [
-            String(format: String(localized: "International departure from %@"), name),
-            String(localized: "Last-day sights adjust after you confirm your flight"),
+            "International departure from \(name)",
+            "Last-day sights adjust after you confirm your flight",
         ]
     }
 
     static func internationalArrivalItems(cityId: String, arrivalTime: String) -> [String] {
         let name = displayName(for: cityId)
         var lines = [
-            String(format: String(localized: "Land in %@ at %@"), name, arrivalTime),
+            "Land in \(name) at \(arrivalTime)",
         ]
         if PlanItineraryFlightTimes.isEveningArrival(arrivalTime) {
-            lines.append(String(localized: "Evening arrival — check in and rest"))
-            lines.append(String(localized: "Optional light evening stroll if you have energy"))
+            lines.append("Evening arrival — check in and rest")
+            lines.append("Optional light evening stroll if you have energy")
         } else if PlanItineraryFlightTimes.isAfternoonArrival(arrivalTime) {
-            lines.append(String(localized: "Afternoon arrival — light sightseeing window"))
-            lines.append(String(localized: "Check in and settle at your hotel"))
+            lines.append("Afternoon arrival — light sightseeing window")
+            lines.append("Check in and settle at your hotel")
         } else {
-            lines.append(String(localized: "Morning arrival — full sightseeing day"))
+            lines.append("Morning arrival — full sightseeing day")
         }
         return lines
     }
@@ -358,14 +329,14 @@ enum CityTravelHints {
     static func internationalDepartureItems(cityId: String, departureTime: String) -> [String] {
         let name = displayName(for: cityId)
         var lines = [
-            String(format: String(localized: "Depart from %@ at %@"), name, departureTime),
-            String(localized: "Pack and hotel checkout"),
-            String(localized: "Allow extra time for airport or train station transfer"),
+            "Depart from \(name) at \(departureTime)",
+            "Pack and hotel checkout",
+            "Allow extra time for airport or train station transfer",
         ]
         if PlanItineraryFlightTimes.isMorningDeparture(departureTime) {
-            lines.append(String(localized: "Morning departure — lighter sightseeing before you leave"))
+            lines.append("Morning departure — lighter sightseeing before you leave")
         } else {
-            lines.append(String(localized: "Afternoon departure — morning sights still possible"))
+            lines.append("Afternoon departure — morning sights still possible")
         }
         return lines
     }
@@ -492,8 +463,8 @@ enum CityTravelHints {
     static func unfilledSchedulingGapItems(cityId: String) -> [String] {
         let name = displayName(for: cityId)
         return [
-            "行程偏紧，暂无推荐景点",
-            "可在 \(name) 自由探索或点 + 添加",
+            "Tight schedule — no recommended sights for this slot",
+            "Explore \(name) freely or tap + Add",
         ]
     }
 

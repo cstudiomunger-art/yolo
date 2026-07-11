@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-07-11T07:21:12.149Z",
+  "cities": [
+    "shanghai",
+    "nanjing",
+    "beijing",
+    "chengdu",
+    "suzhou"
+  ],
+  "canonicalIdCount": 515,
+  "attractionsWithDuplicates": 0,
+  "rowsToDelete": 0,
+  "duplicateGroups": []
+}

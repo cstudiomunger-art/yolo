@@ -34,7 +34,9 @@ enum ItineraryShareService {
             return slug.isEmpty ? nil : slug
         }
         let parts = url.path.split(separator: "/").map(String.init)
-        guard parts.count >= 2, parts[parts.count - 2] == "i" else { return nil }
+        guard parts.count >= 2 else { return nil }
+        let marker = parts[parts.count - 2]
+        guard marker == "i" || marker == "share" else { return nil }
         let slug = parts.last ?? ""
         return slug.isEmpty ? nil : slug
     }

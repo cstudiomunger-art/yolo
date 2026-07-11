@@ -152,7 +152,8 @@ struct CityGuide: Identifiable, Hashable, Codable {
             titleEn: title,
             durationSeconds: audioDurationSeconds,
             audioUrl: direct,
-            quote: audioQuote
+            quote: audioQuote,
+            transcript: audioTranscript
         )
     }
 

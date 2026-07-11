@@ -87,7 +87,8 @@ enum PlanItineraryNormalizer {
         days = PlanItineraryIntercityAnnotator.annotate(
             days,
             visitOrder: visitOrder,
-            cityIdByDayIndex: baselineCityMap
+            cityIdByDayIndex: baselineCityMap,
+            suppressedDayIndexes: Set(trip.suppressedIntercityDayIndexes ?? [])
         )
 
         let route = CityTravelHints.routeLabel(from: visitOrder)
@@ -129,7 +130,8 @@ enum PlanItineraryNormalizer {
             internationalArrivalActivities: trip.internationalArrivalActivities,
             internationalDepartureActivities: trip.internationalDepartureActivities,
             intercityManualActivities: trip.intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: trip.intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: trip.intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: trip.suppressedIntercityDayIndexes
         )
     }
 
@@ -240,7 +242,8 @@ enum PlanItineraryNormalizer {
         days = PlanItineraryIntercityAnnotator.annotate(
             days,
             visitOrder: visitOrder,
-            cityIdByDayIndex: baselineCityMap
+            cityIdByDayIndex: baselineCityMap,
+            suppressedDayIndexes: Set(trip.suppressedIntercityDayIndexes ?? [])
         )
 
         let route = CityTravelHints.routeLabel(from: visitOrder)
@@ -282,7 +285,8 @@ enum PlanItineraryNormalizer {
             internationalArrivalActivities: trip.internationalArrivalActivities,
             internationalDepartureActivities: trip.internationalDepartureActivities,
             intercityManualActivities: trip.intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: trip.intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: trip.intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: trip.suppressedIntercityDayIndexes
         )
     }
 

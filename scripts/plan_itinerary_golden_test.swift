@@ -26,6 +26,7 @@ import Foundation
 //     YOLO/Features/Plan/PlanItinerarySlotBudget.swift \
 //     YOLO/Features/Plan/PlanItineraryNormalizer.swift \
 //     YOLO/Features/Plan/PlanItineraryAssembler.swift \
+//     YOLO/Features/Plan/PlanItineraryHelpers.swift \
 //     scripts/markdown_plain_stub.swift \
 //     scripts/plan_itinerary_golden_test.swift \
 //     -o /tmp/plan_itinerary_golden_test
@@ -104,6 +105,12 @@ enum PlanItineraryGoldenTest {
         fails += testItineraryEditorPreservesIntercityManualMetadata()
         fails += testGeoRepairSplitsDayTripFromUrban()
         fails += testDayTripFlagSplitsFromUrbanWithoutHardcodedId()
+        fails += testRemoveIntercityManualFromMetadata()
+        fails += testRemoveReviewActivityPrefersManualLayer()
+        fails += testRemoveIntercityHopKeepsEveningActivities()
+        fails += testRemoveIntercityHopMergesManualLayer()
+        fails += testInsertIntercityHopSplitsActivitiesByCity()
+        fails += testSuppressedDaySkipsAnnotator()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -2386,6 +2393,60 @@ enum PlanItineraryGoldenTest {
         return ok ? 0 : 1
     }
 
+    private static func testRemoveIntercityManualFromMetadata() -> Int {
+        let algo = mockActivity(id: "algo1", cityId: "chengdu", name: "Algorithm sight")
+        let manual = mockActivity(id: "manual1", cityId: "chengdu", name: "Manual sight")
+        let hopDay = ItineraryDay(
+            id: "day_3", dayIndex: 3, dateLabel: "Day 3", cityName: "CQ → CD", costEstimate: nil,
+            activities: [algo],
+            intercityHop: ItineraryIntercityHop(
+                fromCityId: "chongqing", toCityId: "chengdu", travelHours: 1.5, items: ["Travel"]
+            )
+        )
+        var trip = SampleItinerary(
+            id: "t1", title: "Test", meta: "", routeSummary: "cq-cd", estimatedBudget: "", days: [hopDay],
+            intercityManualActivities: ["3": [manual]]
+        )
+        trip = PlanItineraryHelpers.removeIntercityManual(
+            activityId: manual.id,
+            calendarDayIndex: 3,
+            from: trip
+        )
+        let manualLeft = trip.intercityManual(forDayIndex: 3)
+        let algoLeft = trip.days[0].activities.map(\.id)
+        let ok = manualLeft.isEmpty && algoLeft == ["algo1"]
+        print(ok
+            ? "✓ removeIntercityManual clears metadata without touching algorithm sights"
+            : "✗ manual remove should leave algorithm activities (manual=\(manualLeft.map(\.id)) algo=\(algoLeft))")
+        return ok ? 0 : 1
+    }
+
+    private static func testRemoveReviewActivityPrefersManualLayer() -> Int {
+        let manual = mockActivity(id: "manual_only", cityId: "chengdu", name: "Manual only")
+        let hopDay = ItineraryDay(
+            id: "day_5", dayIndex: 5, dateLabel: "Day 5", cityName: "CQ → CD", costEstimate: nil,
+            activities: [],
+            intercityHop: ItineraryIntercityHop(
+                fromCityId: "chongqing", toCityId: "chengdu", travelHours: 1.5, items: ["Travel"]
+            )
+        )
+        var trip = SampleItinerary(
+            id: "t1", title: "Test", meta: "", routeSummary: "cq-cd", estimatedBudget: "", days: [hopDay],
+            intercityManualActivities: ["5": [manual]]
+        )
+        trip = PlanItineraryHelpers.removeActivity(
+            arrayDayIndex: 0,
+            activityId: manual.id,
+            from: trip
+        )
+        let ok = trip.intercityManual(forDayIndex: 5).isEmpty
+            && PlanItineraryHelpers.isIntercityManualActivity(manual.id, calendarDayIndex: 5, in: trip) == false
+        print(ok
+            ? "✓ removeActivity prefers intercity manual metadata over algorithm list"
+            : "✗ removeActivity should delete manual-only hop sight from metadata")
+        return ok ? 0 : 1
+    }
+
     private static func testBlankDayExitCity() -> Int {
         let sixIds = ["beijing", "nanjing", "suzhou", "hangzhou", "shanghai", "guangzhou"]
         let attractions = mockCatalog(cities: sixIds, perCity: 4)
@@ -2404,6 +2465,153 @@ enum PlanItineraryGoldenTest {
         let cityId = last.experienceCityId ?? last.activities.compactMap(\.cityId).first
         let ok = cityId == "guangzhou"
         print(ok ? "✓ trailing blank day uses exit city guangzhou" : "✗ last day city should be guangzhou, got \(cityId ?? "nil")")
+        return ok ? 0 : 1
+    }
+
+    private static func testRemoveIntercityHopKeepsEveningActivities() -> Int {
+        let evening = mockActivity(id: "eve1", cityId: "hangzhou", name: "Hefang Street", timeSlot: "Evening")
+        let travelDay = ItineraryDay(
+            id: "day_7",
+            dayIndex: 7,
+            dateLabel: "Day 7",
+            cityName: "Chongqing → Hangzhou",
+            costEstimate: nil,
+            activities: [evening],
+            dayKind: .experienceSuggestions,
+            experienceItems: ["Travel from Chongqing to Hangzhou"],
+            experienceCityId: "hangzhou",
+            intercityHop: ItineraryIntercityHop(
+                fromCityId: "chongqing",
+                toCityId: "hangzhou",
+                travelHours: 6,
+                items: ["Travel"]
+            )
+        )
+        let trip = SampleItinerary(
+            id: "t1",
+            title: "Test",
+            meta: "",
+            routeSummary: "cq-hz",
+            estimatedBudget: "",
+            days: [travelDay]
+        )
+        let updated = PlanItineraryHelpers.removeIntercityHop(calendarDayIndex: 7, from: trip)
+        let day = updated.days[0]
+        let ok = day.intercityHop == nil
+            && day.dayKind == .standard
+            && day.activities.count == 1
+            && day.activities[0].name == "Hefang Street"
+            && updated.userEdited
+        print(ok
+            ? "✓ removeIntercityHop keeps evening activities as standard day"
+            : "✗ travel hop remove should preserve activities (kind=\(day.dayKind) acts=\(day.activities.count))")
+        return ok ? 0 : 1
+    }
+
+    private static func testRemoveIntercityHopMergesManualLayer() -> Int {
+        let algo = mockActivity(id: "algo1", cityId: "hangzhou", name: "Algo", timeSlot: "Evening")
+        let manual = mockActivity(id: "manual1", cityId: "hangzhou", name: "Manual", timeSlot: "Evening")
+        let travelDay = ItineraryDay(
+            id: "day_2",
+            dayIndex: 2,
+            dateLabel: "Day 2",
+            cityName: "CQ → HZ",
+            costEstimate: nil,
+            activities: [algo],
+            dayKind: .experienceSuggestions,
+            experienceItems: ["Travel"],
+            experienceCityId: "hangzhou",
+            intercityHop: ItineraryIntercityHop(
+                fromCityId: "chongqing",
+                toCityId: "hangzhou",
+                travelHours: 6,
+                items: ["Travel"]
+            )
+        )
+        var trip = SampleItinerary(
+            id: "t1",
+            title: "Test",
+            meta: "",
+            routeSummary: "cq-hz",
+            estimatedBudget: "",
+            days: [travelDay],
+            intercityManualActivities: ["2": [manual]]
+        )
+        trip = PlanItineraryHelpers.removeIntercityHop(calendarDayIndex: 2, from: trip)
+        let names = Set(trip.days[0].activities.map(\.name))
+        let ok = trip.intercityManual(forDayIndex: 2).isEmpty
+            && names == Set(["Algo", "Manual"])
+            && (trip.suppressedIntercityDayIndexes ?? []).contains(2)
+        print(ok
+            ? "✓ removeIntercityHop merges manual layer and suppresses day"
+            : "✗ manual merge failed (names=\(names) suppressed=\(trip.suppressedIntercityDayIndexes ?? []))")
+        return ok ? 0 : 1
+    }
+
+    private static func testInsertIntercityHopSplitsActivitiesByCity() -> Int {
+        let morning = mockActivity(id: "m1", cityId: "chongqing", name: "CQ AM", timeSlot: "Morning")
+        let afternoon = mockActivity(id: "a1", cityId: "chengdu", name: "CD PM", timeSlot: "Afternoon")
+        let day = ItineraryDay(
+            id: "day_4",
+            dayIndex: 4,
+            dateLabel: "Day 4",
+            cityName: "Chengdu",
+            costEstimate: nil,
+            activities: [morning, afternoon]
+        )
+        let trip = SampleItinerary(
+            id: "t1",
+            title: "Test",
+            meta: "",
+            routeSummary: "cq-cd",
+            estimatedBudget: "",
+            days: [day],
+            visitOrder: ["chongqing", "chengdu"]
+        )
+        let updated = PlanItineraryHelpers.insertIntercityHop(
+            calendarDayIndex: 4,
+            fromCityId: "chongqing",
+            toCityId: "chengdu",
+            allowedCityIds: ["chongqing", "chengdu"],
+            into: trip
+        )
+        let hopDay = updated.days[0]
+        let morningActs = hopDay.activities.filter { $0.cityId == "chongqing" }
+        let afternoonActs = hopDay.activities.filter { $0.cityId == "chengdu" }
+        let ok = hopDay.intercityHop?.fromCityId == "chongqing"
+            && hopDay.intercityHop?.toCityId == "chengdu"
+            && hopDay.dayKind == .standard
+            && morningActs.count == 1
+            && afternoonActs.count == 1
+            && morningActs[0].timeSlot == "Morning"
+        print(ok
+            ? "✓ insertIntercityHop splits activities by city on standard hop day"
+            : "✗ insert hop split failed (morning=\(morningActs.count) afternoon=\(afternoonActs.count))")
+        return ok ? 0 : 1
+    }
+
+    private static func testSuppressedDaySkipsAnnotator() -> Int {
+        let chongqingAct = mockActivity(id: "cq1", cityId: "chongqing", name: "CQ sight")
+        let chengduAct = mockActivity(id: "cd1", cityId: "chengdu", name: "CD sight")
+        let days = [
+            ItineraryDay(
+                id: "d1", dayIndex: 1, dateLabel: "D1", cityName: "Chongqing", costEstimate: nil,
+                activities: [chongqingAct], experienceCityId: "chongqing"
+            ),
+            ItineraryDay(
+                id: "d2", dayIndex: 2, dateLabel: "D2", cityName: "Chengdu", costEstimate: nil,
+                activities: [chengduAct], experienceCityId: "chengdu"
+            ),
+        ]
+        let annotated = PlanItineraryIntercityAnnotator.annotate(
+            days,
+            visitOrder: ["chongqing", "chengdu"],
+            suppressedDayIndexes: [2]
+        )
+        let ok = annotated[1].intercityHop == nil
+        print(ok
+            ? "✓ suppressed day skips intercity annotator"
+            : "✗ annotator should not inject hop on suppressed day 2")
         return ok ? 0 : 1
     }
 

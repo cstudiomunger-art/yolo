@@ -2,6 +2,9 @@ import Foundation
 
 /// Trip span uses arrival + departure calendar days; activity days exclude both endpoints.
 enum PlanTripDateMath {
+    /// Plan/itinerary UI is English-first for international travelers.
+    static let displayLocale = Locale(identifier: "en_US")
+
     static let minActivityDays = 1
     static let maxActivityDays = 21
 
@@ -35,22 +38,31 @@ enum PlanTripDateMath {
     }
 
     static func formatDisplayDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
+        displayDateFormatter().string(from: date)
     }
 
     static func formatTripMeta(arrival: Date, departure: Date) -> String {
         "\(formatDisplayDate(arrival)) – \(formatDisplayDate(departure))"
     }
 
+    /// Calendar date for itinerary day index (day 1 = trip start / arrival).
+    static func calendarDate(forDayIndex dayIndex: Int, tripStart: Date) -> Date? {
+        let cal = Calendar.current
+        return cal.date(byAdding: .day, value: dayIndex - 1, to: cal.startOfDay(for: tripStart))
+    }
+
+    private static func displayDateFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.locale = displayLocale
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }
+
     /// Labels for each activity day between arrival and departure.
     static func activityDateLabels(arrival: Date, count: Int) -> [String] {
         let cal = Calendar.current
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
+        let formatter = displayDateFormatter()
         guard count > 0,
               let first = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: arrival)) else {
             return []

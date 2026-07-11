@@ -1,0 +1,66 @@
+{
+  "verifiedAt": "2026-07-11T06:15:55.403Z",
+  "dryRunStats": {
+    "totalRows": 126,
+    "attractionFolders": 13,
+    "missingImages": 0,
+    "emptyBody": 0,
+    "emptyNameEn": 0,
+    "unmatchedFolders": 0
+  },
+  "sampleChecks": [
+    {
+      "id": "suzhou_lingering_garden_sa_01",
+      "db_name_zh": "古木交柯",
+      "exp_name_zh": "古木交柯",
+      "names_match": true,
+      "db_body_len": 670,
+      "exp_body_md_len": 670,
+      "body_is_html": false,
+      "body_needs_update": false,
+      "audio_url_present": true,
+      "db_cover_present": true,
+      "exp_has_local_image": true
+    },
+    {
+      "id": "suzhou_pingjiang_road_sa_10",
+      "db_name_zh": "全晋会馆 - 苏州戏曲博物馆",
+      "exp_name_zh": "全晋会馆 - 苏州戏曲博物馆",
+      "names_match": true,
+      "db_body_len": 872,
+      "exp_body_md_len": 872,
+      "body_is_html": false,
+      "body_needs_update": false,
+      "audio_url_present": true,
+      "db_cover_present": true,
+      "exp_has_local_image": true
+    },
+    {
+      "id": "suzhou_canglang_pavilion_sa_01",
+      "db_name_zh": "面水轩",
+      "exp_name_zh": "面水轩",
+      "names_match": true,
+      "db_body_len": 644,
+      "exp_body_md_len": 644,
+      "body_is_html": false,
+      "body_needs_update": false,
+      "audio_url_present": true,
+      "db_cover_present": true,
+      "exp_has_local_image": true
+    },
+    {
+      "id": "suzhou_humble_administrators_garden_sa_05",
+      "db_name_zh": "小飞虹",
+      "exp_name_zh": "小飞虹",
+      "names_match": true,
+      "db_body_len": 823,
+      "exp_body_md_len": 823,
+      "body_is_html": false,
+      "body_needs_update": false,
+      "audio_url_present": true,
+      "db_cover_present": true,
+      "exp_has_local_image": true
+    }
+  ],
+  "note": "apply 需 SUPABASE_SERVICE_ROLE_KEY；upsert 不更新 audio_url"
+}

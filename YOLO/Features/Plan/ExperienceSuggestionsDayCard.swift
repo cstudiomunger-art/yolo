@@ -4,7 +4,9 @@ struct ExperienceSuggestionsDayCard: View {
     let day: ItineraryDay
     let cityDisplayName: String
     var showsActivities: Bool = true
+    var showsDeleteHop: Bool = true
     var onArrivalTimeChange: ((String?) -> Void)? = nil
+    var onDeleteHop: (() -> Void)? = nil
 
     private var isTravelDay: Bool {
         day.intercityHop != nil
@@ -56,7 +58,9 @@ struct ExperienceSuggestionsDayCard: View {
                 IntercityHopCard(
                     hop: hop,
                     isFullTravelDay: isFullTravelDay,
-                    onArrivalTimeChange: onArrivalTimeChange
+                    showsDelete: showsDeleteHop,
+                    onArrivalTimeChange: onArrivalTimeChange,
+                    onDelete: onDeleteHop
                 )
                 if showsActivities, !day.activities.isEmpty {
                     eveningPlansSection

@@ -762,7 +762,13 @@ enum PlanItineraryScheduler {
         for (cityId, ids) in candidatesByCity {
             for id in ids where !assignedIds.contains(id) {
                 let name = catalogById[id]?.name ?? id
-                adjustments.append("未能排入行程：\(name)（\(cityId)）")
+                adjustments.append(
+                    String(
+                        format: String(localized: "Could not schedule: %1$@ (%2$@)", locale: PlanTripDateMath.displayLocale),
+                        name,
+                        cityId
+                    )
+                )
                 if !dropped.contains(id) {
                     dropped.append(id)
                 }

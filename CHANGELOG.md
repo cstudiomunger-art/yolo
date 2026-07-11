@@ -2,6 +2,31 @@
 
 ---
 
+## 音频解说词（查看解说词）
+
+### 功能
+- **解说词字段**：`audio_guides.transcript`、`sub_areas.audio_transcript`；后台 Admin 可编辑 Markdown 解说词
+- **播放器入口**：景点/子区域音频卡片、迷你播放器、城市指南均提供「查看解说词」按钮
+- **付费截断**：未解锁时按 `freeTextPreviewChars` 预览解说词，复用 `ContentPaywallOverlay` 与解锁 CTA；已解锁或免费内容显示全文
+- **跟曲走**：迷你播放器切歌后 Sheet 文稿与访问态随当前曲目更新
+
+### 主要改动文件
+| 文件 | 改动内容 |
+|------|----------|
+| `supabase/migrations/126_audio_transcript.sql` | 解说词数据库字段 |
+| `admin-vue/src/schema/tables.js` / `admin/js/schema.js` | 后台解说词编辑 |
+| `Models/AudioModels.swift` | `AudioGuide.transcript` |
+| `Models/AttractionModels.swift` | `SubArea.audioTranscript` |
+| `Models/CityModels.swift` / `AudioVoiceModels.swift` | 解说词透传 |
+| `Services/ContentCacheStore.swift` | 缓存版本 `md_v2` |
+| `Features/Guide/AudioTranscriptViews.swift` | 解说词按钮与 Sheet |
+| `Features/Guide/AudioGuideSection.swift` | 锁定/解锁态接入 |
+| `Features/Guide/MiniAudioPlayerView.swift` | 迷你播放器接入 |
+| `Features/Guide/CityGuideAudioSection.swift` | 内联折叠改为 Sheet |
+| `Resources/Localizable.xcstrings` | 「查看解说词」文案 |
+
+---
+
 ## 音频播放模块布局优化 & 音色切换
 
 ### 功能

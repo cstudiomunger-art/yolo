@@ -1,2 +1,3 @@
-# Rewrite /i/<slug> to share.html (target must NOT match /i/* or Cloudflare reports infinite loop)
-/i/*  /share.html  200
+# Pass slug via query so share.html can read it after internal rewrite (pathname may become /share.html).
+/i/:slug      /share.html?slug=:slug      200
+/share/:slug  /share.html?slug=:slug      200

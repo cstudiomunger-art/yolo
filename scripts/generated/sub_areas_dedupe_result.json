@@ -1,0 +1,670 @@
+{
+  "generatedAt": "2026-07-11T07:20:53.286Z",
+  "mode": "apply",
+  "cityFilter": "all",
+  "audioMigrations": 76,
+  "rowsToDelete": 77,
+  "sampleMigrations": [
+    {
+      "keepId": "beijing_forbidden_city_sa_01",
+      "fromId": "beijing_forbidden_city_bj_sa_01",
+      "attractionName": "故宫",
+      "nameZh": "午门与金水桥",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_001.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_02",
+      "fromId": "beijing_forbidden_city_bj_sa_02",
+      "attractionName": "故宫",
+      "nameZh": "太和门与外朝东西路",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_004.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_03",
+      "fromId": "beijing_forbidden_city_bj_sa_03",
+      "attractionName": "故宫",
+      "nameZh": "太和殿",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_003.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_04",
+      "fromId": "beijing_forbidden_city_bj_sa_04",
+      "attractionName": "故宫",
+      "nameZh": "中和殿与保和殿",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_006.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_05",
+      "fromId": "beijing_forbidden_city_bj_sa_05",
+      "attractionName": "故宫",
+      "nameZh": "后三宫·乾清宫、交泰殿与坤宁宫",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_005.mp3"
+    }
+  ],
+  "sampleDeletes": [
+    "beijing_forbidden_city_bj_sa_01",
+    "beijing_forbidden_city_bj_sa_02",
+    "beijing_forbidden_city_bj_sa_03",
+    "beijing_forbidden_city_bj_sa_04",
+    "beijing_forbidden_city_bj_sa_05",
+    "beijing_forbidden_city_bj_sa_06",
+    "beijing_forbidden_city_bj_sa_07",
+    "beijing_forbidden_city_bj_sa_08",
+    "beijing_forbidden_city_bj_sa_09",
+    "beijing_forbidden_city_bj_sa_10"
+  ],
+  "deleteIds": [
+    "beijing_forbidden_city_bj_sa_01",
+    "beijing_forbidden_city_bj_sa_02",
+    "beijing_forbidden_city_bj_sa_03",
+    "beijing_forbidden_city_bj_sa_04",
+    "beijing_forbidden_city_bj_sa_05",
+    "beijing_forbidden_city_bj_sa_06",
+    "beijing_forbidden_city_bj_sa_07",
+    "beijing_forbidden_city_bj_sa_08",
+    "beijing_forbidden_city_bj_sa_09",
+    "beijing_forbidden_city_bj_sa_10",
+    "beijing_forbidden_city_bj_sa_11",
+    "beijing_beihai_park_bj_sa_01",
+    "beijing_beihai_park_bj_sa_02",
+    "beijing_beihai_park_bj_sa_03",
+    "beijing_beihai_park_bj_sa_04",
+    "beijing_beihai_park_bj_sa_05",
+    "beijing_beihai_park_bj_sa_06",
+    "beijing_beihai_park_bj_sa_07",
+    "beijing_beihai_park_bj_sa_08",
+    "beijing_beihai_park_bj_sa_09",
+    "beijing_beihai_park_bj_sa_10",
+    "beijing_beihai_park_bj_sa_11",
+    "beijing_prince_gong_mansion_bj_sa_01",
+    "beijing_prince_gong_mansion_bj_sa_02",
+    "beijing_prince_gong_mansion_bj_sa_03",
+    "beijing_prince_gong_mansion_bj_sa_04",
+    "beijing_prince_gong_mansion_bj_sa_05",
+    "beijing_prince_gong_mansion_bj_sa_06",
+    "beijing_prince_gong_mansion_bj_sa_07",
+    "beijing_prince_gong_mansion_bj_sa_08",
+    "beijing_prince_gong_mansion_bj_sa_09",
+    "beijing_prince_gong_mansion_bj_sa_10",
+    "beijing_prince_gong_mansion_bj_sa_11",
+    "beijing_national_museum_bj_sa_01",
+    "beijing_national_museum_bj_sa_02",
+    "beijing_national_museum_bj_sa_03",
+    "beijing_national_museum_bj_sa_04",
+    "beijing_national_museum_bj_sa_05",
+    "beijing_national_museum_bj_sa_06",
+    "beijing_national_museum_bj_sa_07",
+    "beijing_national_museum_bj_sa_08",
+    "beijing_national_museum_bj_sa_09",
+    "beijing_national_museum_bj_sa_10",
+    "beijing_summer_palace_bj_sa_01",
+    "beijing_summer_palace_bj_sa_02",
+    "beijing_summer_palace_bj_sa_03",
+    "beijing_summer_palace_bj_sa_04",
+    "beijing_summer_palace_bj_sa_05",
+    "beijing_summer_palace_bj_sa_06",
+    "beijing_summer_palace_bj_sa_07",
+    "beijing_summer_palace_bj_sa_08",
+    "beijing_summer_palace_bj_sa_09",
+    "beijing_summer_palace_bj_sa_10",
+    "beijing_lama_temple_bj_sa_01",
+    "beijing_lama_temple_bj_sa_02",
+    "beijing_lama_temple_bj_sa_03",
+    "beijing_lama_temple_bj_sa_04",
+    "beijing_lama_temple_bj_sa_05",
+    "beijing_lama_temple_bj_sa_06",
+    "beijing_lama_temple_bj_sa_07",
+    "beijing_lama_temple_bj_sa_08",
+    "beijing_lama_temple_bj_sa_09",
+    "beijing_ming_tombs_bj_sa_01",
+    "beijing_ming_tombs_bj_sa_02",
+    "beijing_ming_tombs_bj_sa_03",
+    "beijing_ming_tombs_bj_sa_04",
+    "beijing_ming_tombs_bj_sa_05",
+    "beijing_ming_tombs_bj_sa_06",
+    "beijing_ming_tombs_bj_sa_08",
+    "beijing_mutianyu_great_wall_bj_sa_01",
+    "beijing_mutianyu_great_wall_bj_sa_02",
+    "beijing_mutianyu_great_wall_bj_sa_03",
+    "beijing_mutianyu_great_wall_bj_sa_04",
+    "beijing_mutianyu_great_wall_bj_sa_05",
+    "beijing_mutianyu_great_wall_bj_sa_06",
+    "suzhou_creek_twelve_nations_colors_sa_05",
+    "beijing_ming_tombs_bj_sa_07"
+  ],
+  "uniqueMigrations": [
+    {
+      "keepId": "beijing_forbidden_city_sa_01",
+      "fromId": "beijing_forbidden_city_bj_sa_01",
+      "attractionName": "故宫",
+      "nameZh": "午门与金水桥",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_001.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_02",
+      "fromId": "beijing_forbidden_city_bj_sa_02",
+      "attractionName": "故宫",
+      "nameZh": "太和门与外朝东西路",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_004.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_03",
+      "fromId": "beijing_forbidden_city_bj_sa_03",
+      "attractionName": "故宫",
+      "nameZh": "太和殿",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_003.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_04",
+      "fromId": "beijing_forbidden_city_bj_sa_04",
+      "attractionName": "故宫",
+      "nameZh": "中和殿与保和殿",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_006.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_05",
+      "fromId": "beijing_forbidden_city_bj_sa_05",
+      "attractionName": "故宫",
+      "nameZh": "后三宫·乾清宫、交泰殿与坤宁宫",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_005.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_06",
+      "fromId": "beijing_forbidden_city_bj_sa_06",
+      "attractionName": "故宫",
+      "nameZh": "养心殿与军机处",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_009.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_07",
+      "fromId": "beijing_forbidden_city_bj_sa_07",
+      "attractionName": "故宫",
+      "nameZh": "东西六宫",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_007.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_08",
+      "fromId": "beijing_forbidden_city_bj_sa_08",
+      "attractionName": "故宫",
+      "nameZh": "慈宁宫·雕塑馆",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_008.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_09",
+      "fromId": "beijing_forbidden_city_bj_sa_09",
+      "attractionName": "故宫",
+      "nameZh": "奉先殿·钟表馆与宁寿宫·珍宝馆",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_009.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_10",
+      "fromId": "beijing_forbidden_city_bj_sa_10",
+      "attractionName": "故宫",
+      "nameZh": "乾隆花园与御花园",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_010.mp3"
+    },
+    {
+      "keepId": "beijing_forbidden_city_sa_11",
+      "fromId": "beijing_forbidden_city_bj_sa_11",
+      "attractionName": "故宫",
+      "nameZh": "神武门、角楼与东西华门",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_002.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_01",
+      "fromId": "beijing_beihai_park_bj_sa_01",
+      "attractionName": "北海公园",
+      "nameZh": "南门与团城",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_001.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_02",
+      "fromId": "beijing_beihai_park_bj_sa_02",
+      "attractionName": "北海公园",
+      "nameZh": "永安桥",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_002.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_03",
+      "fromId": "beijing_beihai_park_bj_sa_03",
+      "attractionName": "北海公园",
+      "nameZh": "琼华岛·永安寺与白塔",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_003.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_04",
+      "fromId": "beijing_beihai_park_bj_sa_04",
+      "attractionName": "北海公园",
+      "nameZh": "琼华岛·琼岛春阴碑与阅古楼",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_004.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_05",
+      "fromId": "beijing_beihai_park_bj_sa_05",
+      "attractionName": "北海公园",
+      "nameZh": "琼华岛·漪澜堂、道宁斋与铜仙承露盘",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_005.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_06",
+      "fromId": "beijing_beihai_park_bj_sa_06",
+      "attractionName": "北海公园",
+      "nameZh": "东岸·濠濮间与画舫斋",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_006.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_07",
+      "fromId": "beijing_beihai_park_bj_sa_07",
+      "attractionName": "北海公园",
+      "nameZh": "静心斋",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_007.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_08",
+      "fromId": "beijing_beihai_park_bj_sa_08",
+      "attractionName": "北海公园",
+      "nameZh": "西天梵境与九龙壁",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_008.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_09",
+      "fromId": "beijing_beihai_park_bj_sa_09",
+      "attractionName": "北海公园",
+      "nameZh": "快雪堂与铁影壁",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_009.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_10",
+      "fromId": "beijing_beihai_park_bj_sa_10",
+      "attractionName": "北海公园",
+      "nameZh": "阐福寺与小西天",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_010.mp3"
+    },
+    {
+      "keepId": "beijing_beihai_park_sa_11",
+      "fromId": "beijing_beihai_park_bj_sa_11",
+      "attractionName": "北海公园",
+      "nameZh": "五龙亭",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_beihai_park_011.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_01",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_01",
+      "attractionName": "恭王府",
+      "nameZh": "宫门",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_001.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_02",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_02",
+      "attractionName": "恭王府",
+      "nameZh": "银安殿与嘉乐堂",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_002.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_03",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_03",
+      "attractionName": "恭王府",
+      "nameZh": "葆光室与锡晋斋",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_003.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_04",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_04",
+      "attractionName": "恭王府",
+      "nameZh": "后罩楼",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_004.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_05",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_05",
+      "attractionName": "恭王府",
+      "nameZh": "西洋门与独乐峰",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_005.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_06",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_06",
+      "attractionName": "恭王府",
+      "nameZh": "蝠池与安善堂",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_003.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_07",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_07",
+      "attractionName": "恭王府",
+      "nameZh": "流杯亭、竹子院与牡丹园",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_007.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_08",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_08",
+      "attractionName": "恭王府",
+      "nameZh": "怡神所与蝠厅",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_006.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_09",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_09",
+      "attractionName": "恭王府",
+      "nameZh": "平步青云路、邀月台、滴翠岩与福字碑",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_009.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_10",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_10",
+      "attractionName": "恭王府",
+      "nameZh": "方塘水榭、妙香亭、龙王庙与箭道",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_010.mp3"
+    },
+    {
+      "keepId": "beijing_prince_gong_mansion_sa_11",
+      "fromId": "beijing_prince_gong_mansion_bj_sa_11",
+      "attractionName": "恭王府",
+      "nameZh": "乐道堂与多福轩",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_008.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_01",
+      "fromId": "beijing_national_museum_bj_sa_01",
+      "attractionName": "国博",
+      "nameZh": "古代中国陈列",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_001.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_02",
+      "fromId": "beijing_national_museum_bj_sa_02",
+      "attractionName": "国博",
+      "nameZh": "复兴之路",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_002.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_03",
+      "fromId": "beijing_national_museum_bj_sa_03",
+      "attractionName": "国博",
+      "nameZh": "二层专题·科技的力量、风展红旗与德化白瓷",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_003.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_04",
+      "fromId": "beijing_national_museum_bj_sa_04",
+      "attractionName": "国博",
+      "nameZh": "古代瓷器",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_004.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_05",
+      "fromId": "beijing_national_museum_bj_sa_05",
+      "attractionName": "国博",
+      "nameZh": "古代玉器",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_005.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_06",
+      "fromId": "beijing_national_museum_bj_sa_06",
+      "attractionName": "国博",
+      "nameZh": "古代钱币与铜镜",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_008.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_07",
+      "fromId": "beijing_national_museum_bj_sa_07",
+      "attractionName": "国博",
+      "nameZh": "古代佛造像",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_007.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_08",
+      "fromId": "beijing_national_museum_bj_sa_08",
+      "attractionName": "国博",
+      "nameZh": "古代服饰与饮食文化",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_006.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_09",
+      "fromId": "beijing_national_museum_bj_sa_09",
+      "attractionName": "国博",
+      "nameZh": "数说犀尊与清代书画",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_009.mp3"
+    },
+    {
+      "keepId": "beijing_national_museum_sa_10",
+      "fromId": "beijing_national_museum_bj_sa_10",
+      "attractionName": "国博",
+      "nameZh": "英模蜡像（结束语）",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_010.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_01",
+      "fromId": "beijing_summer_palace_bj_sa_01",
+      "attractionName": "颐和园",
+      "nameZh": "东宫门与仁寿殿",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_001.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_02",
+      "fromId": "beijing_summer_palace_bj_sa_02",
+      "attractionName": "颐和园",
+      "nameZh": "德和园",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_002.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_03",
+      "fromId": "beijing_summer_palace_bj_sa_03",
+      "attractionName": "颐和园",
+      "nameZh": "玉澜堂与乐寿堂",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_003.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_04",
+      "fromId": "beijing_summer_palace_bj_sa_04",
+      "attractionName": "颐和园",
+      "nameZh": "长廊",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_004.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_05",
+      "fromId": "beijing_summer_palace_bj_sa_05",
+      "attractionName": "颐和园",
+      "nameZh": "排云殿、佛香阁与智慧海",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_005.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_06",
+      "fromId": "beijing_summer_palace_bj_sa_06",
+      "attractionName": "颐和园",
+      "nameZh": "石舫",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_006.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_07",
+      "fromId": "beijing_summer_palace_bj_sa_07",
+      "attractionName": "颐和园",
+      "nameZh": "昆明湖",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_007.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_08",
+      "fromId": "beijing_summer_palace_bj_sa_08",
+      "attractionName": "颐和园",
+      "nameZh": "十七孔桥与南湖岛",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_008.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_09",
+      "fromId": "beijing_summer_palace_bj_sa_09",
+      "attractionName": "颐和园",
+      "nameZh": "铜牛",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_009.mp3"
+    },
+    {
+      "keepId": "beijing_summer_palace_sa_10",
+      "fromId": "beijing_summer_palace_bj_sa_10",
+      "attractionName": "颐和园",
+      "nameZh": "新建宫门",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_summer_palace_010.mp3"
+    },
+    {
+      "keepId": "beijing_lama_temple_sa_01",
+      "fromId": "beijing_lama_temple_bj_sa_01",
+      "attractionName": "雍和宫",
+      "nameZh": "牌楼院与昭泰门",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_lama_temple_001.mp3"
+    },
+    {
+      "keepId": "beijing_lama_temple_sa_02",
+      "fromId": "beijing_lama_temple_bj_sa_02",
+      "attractionName": "雍和宫",
+      "nameZh": "钟鼓楼与天王殿",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_lama_temple_002.mp3"
+    },
+    {
+      "keepId": "beijing_lama_temple_sa_03",
+      "fromId": "beijing_lama_temple_bj_sa_03",
+      "attractionName": "雍和宫",
+      "nameZh": "喇嘛说碑亭与铜铸须弥山",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_lama_temple_003.mp3"
+    },
+    {
+      "keepId": "beijing_lama_temple_sa_04",
+      "fromId": "beijing_lama_temple_bj_sa_04",
+      "attractionName": "雍和宫",
+      "nameZh": "雍和宫殿·大雄宝殿",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_lama_temple_004.mp3"
+    },
+    {
+      "keepId": "beijing_lama_temple_sa_05",
+      "fromId": "beijing_lama_temple_bj_sa_05",
+      "attractionName": "雍和宫",
+      "nameZh": "永佑殿",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_lama_temple_005.mp3"
+    },
+    {
+      "keepId": "beijing_lama_temple_sa_06",
+      "fromId": "beijing_lama_temple_bj_sa_06",
+      "attractionName": "雍和宫",
+      "nameZh": "四大扎仓",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_lama_temple_006.mp3"
+    },
+    {
+      "keepId": "beijing_lama_temple_sa_07",
+      "fromId": "beijing_lama_temple_bj_sa_07",
+      "attractionName": "雍和宫",
+      "nameZh": "法轮殿",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_lama_temple_007.mp3"
+    },
+    {
+      "keepId": "beijing_lama_temple_sa_08",
+      "fromId": "beijing_lama_temple_bj_sa_08",
+      "attractionName": "雍和宫",
+      "nameZh": "万福阁",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_lama_temple_008.mp3"
+    },
+    {
+      "keepId": "beijing_lama_temple_sa_09",
+      "fromId": "beijing_lama_temple_bj_sa_09",
+      "attractionName": "雍和宫",
+      "nameZh": "观音洞与绥成殿（结束语）",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_lama_temple_009.mp3"
+    },
+    {
+      "keepId": "beijing_ming_tombs_sa_01",
+      "fromId": "beijing_ming_tombs_bj_sa_01",
+      "attractionName": "十三陵",
+      "nameZh": "石牌坊与大红门",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_ming_tombs_001.mp3"
+    },
+    {
+      "keepId": "beijing_ming_tombs_sa_02",
+      "fromId": "beijing_ming_tombs_bj_sa_02",
+      "attractionName": "十三陵",
+      "nameZh": "神功圣德碑亭与神路",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_ming_tombs_002.mp3"
+    },
+    {
+      "keepId": "beijing_ming_tombs_sa_03",
+      "fromId": "beijing_ming_tombs_bj_sa_03",
+      "attractionName": "十三陵",
+      "nameZh": "石像生群与棂星门",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_ming_tombs_003.mp3"
+    },
+    {
+      "keepId": "beijing_ming_tombs_sa_04",
+      "fromId": "beijing_ming_tombs_bj_sa_04",
+      "attractionName": "十三陵",
+      "nameZh": "长陵与博物馆",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_ming_tombs_004.mp3"
+    },
+    {
+      "keepId": "beijing_ming_tombs_sa_05",
+      "fromId": "beijing_ming_tombs_bj_sa_05",
+      "attractionName": "十三陵",
+      "nameZh": "定陵与地宫",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_ming_tombs_005.mp3"
+    },
+    {
+      "keepId": "beijing_ming_tombs_sa_06",
+      "fromId": "beijing_ming_tombs_bj_sa_06",
+      "attractionName": "十三陵",
+      "nameZh": "昭陵",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_ming_tombs_006.mp3"
+    },
+    {
+      "keepId": "beijing_ming_tombs_sa_10",
+      "fromId": "beijing_ming_tombs_bj_sa_08",
+      "attractionName": "十三陵",
+      "nameZh": "思陵",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_ming_tombs_008.mp3"
+    },
+    {
+      "keepId": "beijing_mutianyu_great_wall_sa_01",
+      "fromId": "beijing_mutianyu_great_wall_bj_sa_01",
+      "attractionName": "慕田峪长城",
+      "nameZh": "大角楼",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_mutianyu_great_wall_001.mp3"
+    },
+    {
+      "keepId": "beijing_mutianyu_great_wall_sa_02",
+      "fromId": "beijing_mutianyu_great_wall_bj_sa_02",
+      "attractionName": "慕田峪长城",
+      "nameZh": "正关台",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_mutianyu_great_wall_002.mp3"
+    },
+    {
+      "keepId": "beijing_mutianyu_great_wall_sa_03",
+      "fromId": "beijing_mutianyu_great_wall_bj_sa_03",
+      "attractionName": "慕田峪长城",
+      "nameZh": "六号敌楼与缆车站",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_mutianyu_great_wall_003.mp3"
+    },
+    {
+      "keepId": "beijing_mutianyu_great_wall_sa_04",
+      "fromId": "beijing_mutianyu_great_wall_bj_sa_04",
+      "attractionName": "慕田峪长城",
+      "nameZh": "非诚勿扰取景地",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_mutianyu_great_wall_004.mp3"
+    },
+    {
+      "keepId": "beijing_mutianyu_great_wall_sa_05",
+      "fromId": "beijing_mutianyu_great_wall_bj_sa_05",
+      "attractionName": "慕田峪长城",
+      "nameZh": "毛主席石刻与界碑",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_mutianyu_great_wall_005.mp3"
+    },
+    {
+      "keepId": "beijing_mutianyu_great_wall_sa_06",
+      "fromId": "beijing_mutianyu_great_wall_bj_sa_06",
+      "attractionName": "慕田峪长城",
+      "nameZh": "好汉坡",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_mutianyu_great_wall_002.mp3"
+    },
+    {
+      "keepId": "beijing_ming_tombs_sa_07",
+      "fromId": "beijing_ming_tombs_bj_sa_07",
+      "attractionName": "十三陵",
+      "nameZh": "景陵、康陵与永陵",
+      "via": "bj_pattern",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_ming_tombs_007.mp3"
+    }
+  ]
+}

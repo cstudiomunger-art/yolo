@@ -82,7 +82,7 @@ struct HomeTripHeroPanel: View {
         return HeroCardContent(
             citiesLine: trip.routeSummary.isEmpty ? citiesLine : "📍 \(trip.routeSummary)",
             title: trip.title,
-            datesLine: trip.meta,
+            datesLine: trip.displayMeta,
             budgetLine: budget.isEmpty ? nil : budget,
             status: trip.tripStatus(),
             prepCompleted: prepCompleted,
@@ -95,10 +95,7 @@ struct HomeTripHeroPanel: View {
     }
 
     private static func formatDepartureDateOnly(_ departureDate: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: departureDate)
+        PlanTripDateMath.formatDisplayDate(departureDate)
     }
 
     // MARK: - Card UI

@@ -5,10 +5,13 @@ import Foundation
 /// every country worldwide — not just the ~90 visa-relevant nationalities in `passport_countries`.
 /// Flag emoji is derived from the alpha-2 code at runtime (no need to store it).
 enum ISO3166 {
-    static let all: [PassportCountry] = raw.enumerated().map {
-        let code = $0.element.0
+    private static let excludedCodes: Set<String> = ["TW"]
+
+    static let all: [PassportCountry] = raw.enumerated().compactMap { index, entry in
+        let code = entry.0
+        guard !excludedCodes.contains(code) else { return nil }
         let english = Locale(identifier: "en").localizedString(forRegionCode: code) ?? code
-        return PassportCountry(code: code, name: english, flag: flag(code), displayOrder: $0.offset)
+        return PassportCountry(code: code, name: english, flag: flag(code), displayOrder: index)
     }
 
     /// Regional-indicator flag emoji for an alpha-2 code (A→🇦 …).
@@ -78,7 +81,7 @@ enum ISO3166 {
         ("SB", "所罗门群岛"), ("SO", "索马里"), ("ZA", "南非"), ("GS", "南乔治亚和南桑威奇群岛"),
         ("SS", "南苏丹"), ("ES", "西班牙"), ("LK", "斯里兰卡"), ("SD", "苏丹"),
         ("SR", "苏里南"), ("SJ", "斯瓦尔巴和扬马延"), ("SE", "瑞典"), ("CH", "瑞士"),
-        ("SY", "叙利亚"), ("TW", "中国台湾省"), ("TJ", "塔吉克斯坦"), ("TZ", "坦桑尼亚"),
+        ("SY", "叙利亚"), ("TJ", "塔吉克斯坦"), ("TZ", "坦桑尼亚"),
         ("TH", "泰国"), ("TL", "东帝汶"), ("TG", "多哥"), ("TK", "托克劳"),
         ("TO", "汤加"), ("TT", "特立尼达和多巴哥"), ("TN", "突尼斯"), ("TR", "土耳其"),
         ("TM", "土库曼斯坦"), ("TC", "特克斯和凯科斯群岛"), ("TV", "图瓦卢"), ("UG", "乌干达"),

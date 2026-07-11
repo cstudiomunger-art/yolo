@@ -19,6 +19,11 @@ const KNOWN_ROOTS = [
   "/Users/vesperal/Downloads/后台填写信息汇总（照片+文字信息）",
   "/Users/vesperal/Desktop/成都子景点",
   "/Users/vesperal/Desktop/重庆子景点",
+  "/Users/vesperal/Desktop/新子景点信息",
+  "/Users/vesperal/Desktop/新上海子景点信息",
+  "/Users/vesperal/Desktop/新南京子景点信息",
+  "/Users/vesperal/Desktop/北京",
+  "/Users/vesperal/Desktop/成都",
 ];
 
 const FILE_RE = /^(\d{2})\.(.+)\.(md|jpg)$/i;

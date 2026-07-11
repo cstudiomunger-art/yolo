@@ -1,0 +1,1411 @@
+# shanghai 子景点 canonical 导入确认清单
+
+生成时间：2026-07-11T07:02:09.713Z
+源目录：`/Users/vesperal/Desktop/新上海子景点信息`
+总条数：106
+
+> 请核对主景点映射、中英文名、正文与图片配对。确认无误后运行 `--apply`。
+
+## 东方明珠广播电视塔（oriental_pearl_radio_television_tower）
+
+### 1. 检票口
+- 来源 md：`新上海子景点信息/东方明珠广播电视塔/01.检票口.md`
+- 配对图片：`01.检票口.jpg`
+- sub_area id：`oriental_pearl_radio_television_tower_sa_01`
+- sort_order：0
+- **中文名**：检票口
+- **英文名**：Ticket Gate
+- **正文（英文）**：
+
+```
+The Ticket Gate of the Oriental Pearl TV Tower is located at the south podium entrance, adjacent to the Lujiazui Riverside Walk and facing Century Avenue. Designed with a "bright pearl" motif, its facade combines silver-white metal and glass, paired with LED ticker displays showing real-time queue and boarding information. Visitors must present their e-ticket QR code or ID card (swipe-to-enter), and pass through security and metal detectors. Inside the gate is the prelude hall, offering accessible lanes, luggage lockers, a baby-care room, and group reception counters. High-speed elevators at 9 m/s take guests directly to each observation level, with no fixed batch restrictions during opening hours. On holidays, arrive an hour early to avoid peak queues; on regular days, completing the ticket check before 9:30 offers a near-private tower experience.
+```
+
+### 2. 主观光层
+- 来源 md：`新上海子景点信息/东方明珠广播电视塔/02.主观光层.md`
+- 配对图片：`02.主观光层.jpg`
+- sub_area id：`oriental_pearl_radio_television_tower_sa_02`
+- sort_order：1
+- **中文名**：主观光层
+- **英文名**：Main Observation Deck
+- **正文（英文）**：
+
+```
+Long Description: The Main Observation Deck sits inside the tower's third sphere at 263 meters — the original core observation level open to the public. With a 20-meter inner diameter, the circular walkway is fully glazed, offering sweeping views of the Bund's historic buildings, Pudong's skyscrapers, and the winding Huangpu River. Sunset (around 17:30–18:30, seasonally shifting) brings Shanghai's most celebrated "golden hour" as city lights come on. The deck features transparent floor windows, photo spots, vending machines, and a light-snack corner. A wide-angle lens and a phone's night mode are recommended; be aware of glass glare, so press close to the glass or pick a column-free spot. The level connects by elevator to the 259m Skywalk, 350m Space Capsule, 78m "More Shanghai" immersive show, and the 0m Shanghai History Exhibition.
+```
+
+### 3. 351 米太空舱
+- 来源 md：`新上海子景点信息/东方明珠广播电视塔/03.351 米太空舱.md`
+- 配对图片：`03.351 米太空舱.jpg`
+- sub_area id：`oriental_pearl_radio_television_tower_sa_03`
+- sort_order：2
+- **中文名**：351 米太空舱
+- **英文名**：351-Meter Space Capsule
+- **正文（英文）**：
+
+```
+The 351-Meter Space Capsule sits inside the tower's highest sphere, originally completed in 2008 and upgraded in 2023 into a "space + metaverse" immersive experience venue. With a 14-meter inner diameter, its walls combine starry ceilings and mirrored metals, paired with holographic projections and surround sound, creating a "spacewalk" atmosphere. Highlights include 360° views of Shanghai's four skylines (Lujiazui, the Bund, North Bund, Xuhui Riverside), AI interactive photo booths (generating "astronaut" souvenir images), VR immersive "China Space Station" simulations, and remote-controlled "Yutu Lunar Rover" demos on the floor. The outer deck is a closed observation corridor with double-glazed safety glass, offering unobstructed full-city photography. Capacity is capped at 30 people with 10-minute rotations.
+```
+
+### 4. 全透明悬空观光廊
+- 来源 md：`新上海子景点信息/东方明珠广播电视塔/04.全透明悬空观光廊.md`
+- 配对图片：`04.全透明悬空观光廊.jpg`
+- sub_area id：`oriental_pearl_radio_television_tower_sa_04`
+- sort_order：3
+- **中文名**：全透明悬空观光廊
+- **英文名**：Transparent Glass Skywalk (Sky Observatory)
+- **正文（英文）**：
+
+```
+The Transparent Glass Skywalk runs along the underside of the tower's second sphere at 259 meters. Below the walkway, visitors can see Lujiazui's core traffic, the tower's signature "pearl-string" silhouette, the riverside promenade, and the Bund's historic skyline. The corridor features 6 "brave photo spots," with LED screens embedded beneath the glass that play a "star river" animation at night. The glass can support up to 800 kg per square meter, with a limit of 8 people per section. The skywalk is temporarily closed during strong winds, rain, or snow.
+```
+
+### 5. 户外观光层
+- 来源 md：`新上海子景点信息/东方明珠广播电视塔/05.户外观光层.md`
+- 配对图片：`05.户外观光层.jpg`
+- sub_area id：`oriental_pearl_radio_television_tower_sa_05`
+- sort_order：4
+- **中文名**：户外观光层
+- **英文名**：Outdoor Observation Terrace
+- **正文（英文）**：
+
+```
+From here, visitors look up at the 351m Space Capsule "jade pillar" and down on the S-shaped bend of the Huangpu River and the Bund skyline. A breeze of Beaufort 3–5 makes for a refreshing experience; the terrace closes in winds above Beaufort 6. Access is via a dedicated gate on the 350m elevator level. No seating is provided; a 15–30 minute stay is recommended.
+```
+
+### 6. 更上海环动多媒体秀
+- 来源 md：`新上海子景点信息/东方明珠广播电视塔/06.更上海环动多媒体秀.md`
+- 配对图片：`06.更上海环动多媒体秀.jpg`
+- sub_area id：`oriental_pearl_radio_television_tower_sa_06`
+- sort_order：5
+- **中文名**：更上海环动多媒体秀
+- **英文名**："More Shanghai" 360° Immersive Multimedia Show
+- **正文（英文）**：
+
+```
+Long Description: The "More Shanghai" Immersive Multimedia Show is located at 78 meters on the tower's main shaft. The theater has a 30-meter inner diameter with a 360° wraparound screen and a synchronized "motion floor" projection; seats rotate 360 degrees. The 10-minute show uses five chapters — River, Sea, Tide, Wind, Charm — to trace Shanghai's century-long evolution: from the 1843 treaty-port opening, 1920s Bund construction, 1949 liberation, 1990 Pudong development, 2010 World Expo, 2020 urban renewal, to 2035 planning vision. Capacity is 80 people, with a show every 15 minutes. It is best watched as a mid-tour interlude, serving as a "city-background lesson" before ascending the main observation levels.
+```
+
+### 7. 上海城市历史发展陈列馆
+- 来源 md：`新上海子景点信息/东方明珠广播电视塔/07.上海城市历史发展陈列馆.md`
+- 配对图片：`07.上海城市历史发展陈列馆.jpg`
+- sub_area id：`oriental_pearl_radio_television_tower_sa_07`
+- sort_order：6
+- **中文名**：上海城市历史发展陈列馆
+- **英文名**：Shanghai History Development Exhibition Hall
+- **正文（英文）**：
+
+```
+The Shanghai History Development Exhibition Hall occupies approximately 6,000 square meters on Level 0 of the Oriental Pearl TV Tower's podium, one of China's earliest "tower + museum" themed venues. The hall is divided into five sections — Prelude, Shanghai before the Treaty Port, Rise of the Modern City, New China's Shanghai, and Pudong Development & New Shanghai — displaying more than 1,000 items including vintage photographs, archives, wax figure scenes, physical models, and interactive installations.
+```
+
+## 陆家嘴金融区（lujiazui_financial_district）
+
+### 8. 陆家嘴中心绿地
+- 来源 md：`新上海子景点信息/陆家嘴金融区/01.陆家嘴中心绿地.md`
+- 配对图片：`01.陆家嘴中心绿地.jpg`
+- sub_area id：`lujiazui_financial_district_sa_01`
+- sort_order：0
+- **中文名**：陆家嘴中心绿地
+- **英文名**：Lujiazui Central Greenland
+- **正文（英文）**：
+
+```
+Lujiazui Central Greenland, located at 717 Lujiazui Ring Road, Pudong New Area, is a rare open urban green space situated at the heart of Shanghai's skyscraper cluster. Covering approximately 100,000 square meters and planted with cool-season turf imported from Europe, it features a striking steel "Pearl" sculpture and a circular sunken plaza at its center. Surrounded by the Jin Mao Tower, Shanghai World Financial Center, and Shanghai Tower—the three tallest buildings in China—it creates a remarkable "city within a garden, garden within a city" experience. Connected to the Huangpu River, the Oriental Pearl TV Tower, and the Riverside Promenade, it serves as a "green living room" for office workers and tourists alike, and is especially beautiful in spring when magnolias bloom and in autumn when ginkgo leaves turn golden.
+```
+
+### 9. 东方明珠广播电视塔
+- 来源 md：`新上海子景点信息/陆家嘴金融区/02.东方明珠广播电视塔.md`
+- 配对图片：`02.东方明珠广播电视塔.jpg`
+- sub_area id：`lujiazui_financial_district_sa_02`
+- sort_order：1
+- **中文名**：东方明珠广播电视塔
+- **英文名**：Oriental Pearl TV Tower (Oriental Pearl Radio & Television Tower)
+- **正文（英文）**：
+
+```
+The Oriental Pearl TV Tower, located at 1 Century Avenue, Pudong New Area, stands 467.9 meters tall and was opened in 1994, ranking as the 6th tallest tower in Asia and 9th in the world. Its structure consists of three 9-meter-diameter pillars and three spheres of varying sizes connected by space capsules, creating the iconic "large and small pearls falling on a jade plate" silhouette that has become a symbol of Shanghai's skyline. The tower features the Main Observation Deck (263m), the transparent Sky Walk (259m), the Space Capsule (351m), the outdoor Observation Deck (350m), a Revolving Restaurant (267m), and the Shanghai Museum of Urban Development History, making it one of the best vantage points for viewing Shanghai's day and night scenery on both sides of the Huangpu River. The plaza at its base hosts various city festivals, and the "Dynamic Shanghai" multimedia show inside provides an immersive experience of Shanghai's century-long urban transformation.
+```
+
+### 10. 上海海洋水族馆
+- 来源 md：`新上海子景点信息/陆家嘴金融区/03.上海海洋水族馆.md`
+- 配对图片：`03.上海海洋水族馆.jpg`
+- sub_area id：`lujiazui_financial_district_sa_03`
+- sort_order：2
+- **中文名**：上海海洋水族馆
+- **英文名**：Shanghai Ocean Aquarium
+- **正文（英文）**：
+
+```
+The Shanghai Ocean Aquarium, located at 1388 Lujiazui Ring Road, Pudong New Area, is adjacent to the Oriental Pearl TV Tower. With a building area of approximately 20,500 square meters, it opened in 2002 and is one of the largest and most diverse ocean aquariums in Asia. The facility features 9 themed exhibition zones including Asia, South America, Australia, Africa, Cold Water, Coastline, Deep Sea, and China zones, housing over 15,000 rare marine creatures from more than 450 species. Its most famous feature is the 155-meter-long underwater viewing tunnel—certified by Guinness World Records as one of the world's longest ocean tunnels—where visitors can watch sharks, rays, and sea turtles swim overhead through transparent acrylic panels. The aquarium also features the Jellyfish Kingdom, Coral Sea, and Antarctic Penguin exhibits, making it an ideal destination for families, couples, and marine life enthusiasts.
+```
+
+### 11. 金茂大厦
+- 来源 md：`新上海子景点信息/陆家嘴金融区/04.金茂大厦.md`
+- 配对图片：`04.金茂大厦.jpg`
+- sub_area id：`lujiazui_financial_district_sa_04`
+- sort_order：3
+- **中文名**：金茂大厦
+- **英文名**：Jin Mao Tower
+- **正文（英文）**：
+
+```
+Jin Mao Tower, located at 88 Century Avenue, Pudong New Area, stands 420.5 meters tall with 88 above-ground floors and 3 basement levels. Completed and opened in 1999, it was the first building in mainland China to exceed 400 meters. Designed by the American architectural firm SOM, the building draws inspiration from classical Chinese pagodas with its tiered, tapering form, creating a "fountain pen tip" silhouette. Its facade combines aluminum alloy and granite curtain walls, making it highly recognizable. The complex integrates offices, hotels, sightseeing, and commerce, featuring the Grand Hyatt Shanghai (floors 53-87), the 88th-floor Observation Deck, and the spectacular 152-meter-tall "Time Tunnel" light corridor. From the 88th-floor observation deck, visitors can enjoy a 360-degree panoramic view of Shanghai, with the historic Bund and Lujiazui skyscrapers all visible. At night, the building's illuminated peak becomes one of Shanghai's most iconic skyline features.
+```
+
+### 12. 上海环球金融中心
+- 来源 md：`新上海子景点信息/陆家嘴金融区/05.上海环球金融中心.md`
+- 配对图片：`05.上海环球金融中心.jpg`
+- sub_area id：`lujiazui_financial_district_sa_05`
+- sort_order：4
+- **中文名**：上海环球金融中心
+- **英文名**：Shanghai World Financial Center (SWFC)
+- **正文（英文）**：
+
+```
+Shanghai World Financial Center, located at 100 Century Avenue, Pudong New Area, stands 492 meters tall with 101 above-ground floors and 3 basement levels, fully opened in August 2008. Designed by Japan's Kohn Pedersen Fox (KPF), the building is nicknamed the "Bottle Opener" due to its distinctive trapezoidal aperture at the top. As one of the Lujiazui "Trio" skyscrapers, it integrates offices, hotels, sightseeing, and commerce, housing the Park Hyatt Shanghai (floors 79-93), observation decks on floors 94/97/100, and the "Sky Walk 100" experience at 492 meters. The 100th-floor observation sky lobby was certified by Guinness World Records as the world's highest observation deck, offering a 360-degree panoramic view at 474 meters. Its transparent glass-floor sky walk provides an exhilarating experience. Together with Jin Mao Tower and Shanghai Tower, SWFC forms the iconic "three-legged" Lujiazui skyline—a symbol of China's 30 years of reform and opening up.
+```
+
+### 13. 上海中心大厦
+- 来源 md：`新上海子景点信息/陆家嘴金融区/06.上海中心大厦.md`
+- 配对图片：`06.上海中心大厦.jpg`
+- sub_area id：`lujiazui_financial_district_sa_06`
+- sort_order：5
+- **中文名**：上海中心大厦
+- **英文名**：Shanghai Tower (Top of Shanghai Observation Hall)
+- **正文（英文）**：
+
+```
+Shanghai Tower, located at 501 Yincheng Middle Road, Pudong New Area, stands 632 meters tall with 127 above-ground floors and 5 basement levels. Fully completed and opened in 2015, it is the tallest building in China and the second tallest in the world, after the Burj Khalifa in Dubai. Designed by the American firm Gensler, the tower draws inspiration from DNA's double-helix structure, with its form resembling a slowly twisting "dragon-like" curved surface. Its facade consists of nearly 20,000 curved glass panels that change color with the light. The complex integrates offices, hotels, commerce, and sightseeing, housing the J Hotel (floors 84-110, one of the world's highest hotels), the 118F "Top of Shanghai" Observation Hall, the 126F "Damper Performance" installation, and the "Magic City Light" art exhibition. The "Top of Shanghai" observation hall on the 118th floor stands at 546 meters, making it the world's highest indoor observation platform, offering 360-degree views. The 126F "Shanghai Eye"—a 1,000-ton tuned mass damper—is one of the world's heaviest, blending technology and art seamlessly.
+```
+
+### 14. 吴昌硕纪念馆
+- 来源 md：`新上海子景点信息/陆家嘴金融区/07.吴昌硕纪念馆.md`
+- 配对图片：`07.吴昌硕纪念馆.jpg`
+- sub_area id：`lujiazui_financial_district_sa_07`
+- sort_order：6
+- **中文名**：吴昌硕纪念馆
+- **英文名**：Wu Changshuo Memorial Hall
+- **正文（英文）**：
+
+```
+The Wu Changshuo Memorial Hall, located at 15 Lujiazui East Road, Pudong New Area, is a dedicated memorial to Wu Changshuo (1844-1927), the master of Shanghai-style painting and calligraphy in late Qing and early Republican China, who excelled in poetry, painting, calligraphy, and seal carving. The memorial is housed in the "Yingchuan Xiaozhu" (Yingchuan Small Mansion)—a late Qing and early Republic era red-and-blue brick carved residence built in 1920, originally the home of Shanghai merchant Chen Guichun. Officially relocated to this site in May 2010, the building covers approximately 1,500 square meters and is recognized as a Shanghai Municipal Cultural Relic Protection Unit, renowned for its exquisite brick and wood carvings and nicknamed "Pudong Carved Building." The memorial features three main exhibition halls: "Wu Changshuo's Life and Career," "Artistic Achievements," and "Poetry, Painting, Calligraphy, and Seal Works," displaying over 200 precious artifacts including works by Wu Changshuo and his disciples Qi Baishi, Pan Tianshou, Sha Menghai, Wang Geyi, and others. The site also includes the "Fou Pavilion" café and a cultural creative shop, making it a rare refined cultural oasis in the Lujiazui financial district.
+```
+
+### 15. 世纪大道
+- 来源 md：`新上海子景点信息/陆家嘴金融区/08.世纪大道.md`
+- 配对图片：`08.世纪大道.jpg`
+- sub_area id：`lujiazui_financial_district_sa_08`
+- sort_order：7
+- **中文名**：世纪大道
+- **英文名**：Century Avenue
+- **正文（英文）**：
+
+```
+Century Avenue, located in Pudong New Area, is 5.5 kilometers long and 100 meters wide. Stretching east from Century Park to the Oriental Pearl TV Tower in Lujiazui and connecting directly with the Yan'an East Road Tunnel, it opened on April 18, 2000, and is one of the most important east-west arterial roads in Shanghai's Pudong New Area. Its most distinctive feature is being "China's first urban landscape avenue where greenery and sidewalks are wider than the vehicle lanes"—the north sidewalk alone is 44.5 meters wide, the south sidewalk 24.5 meters, with a total green landscape sidewalk area of 69 meters, more than three times that of an ordinary urban road. The avenue is lined with four rows of street trees, including evergreen camphor trees on the outer side and deciduous ginkgo and plane trees on the inner side, creating changing colors throughout the year and earning it the nickname "The Champs-Élysées of the East." Flanked by skyscrapers (Jin Mao Tower, SWFC, Shanghai Tower, Oriental Pearl) and low-rise financial street shops, the avenue is Shanghai's most international city image display. Along the way, Century Park is a weekend leisure destination, while Century Square features a large musical fountain.
+```
+
+### 16. 浦东滨江大道
+- 来源 md：`新上海子景点信息/陆家嘴金融区/09.浦东滨江大道.md`
+- 配对图片：`09.浦东滨江大道.jpg`
+- sub_area id：`lujiazui_financial_district_sa_09`
+- sort_order：8
+- **中文名**：浦东滨江大道
+- **英文名**：Pudong Riverside Promenade
+- **正文（英文）**：
+
+```
+The Pudong Riverside Promenade, located on the east bank of the Huangpu River in Pudong New Area, stretches approximately 2.5 kilometers from Dongchang Wharf in the west to Taitongzhan Wharf in the east, completed and opened in 1997. Comprising a water-friendly platform, sloped green landscape, semi-underground spaces, and landscape roads, it is hailed as the "Little Bund of Shanghai." Facing the historic Bund across the river, visitors can enjoy a panoramic view of the Puxi Bund's "Expo of World Architecture" and Lujiazui's modern skyscrapers (Oriental Pearl, Jin Mao, SWFC, Shanghai Tower), creating a magnificent dialogue between history and modernity. Lined with lush trees and blooming flowers, the promenade features over 20 themed sculptures, water-friendly viewing platforms, and cultural landmarks such as Chen Yi Square, the 1862 Shipyard Fashion Art Center, and the Shanghai Powerlong Art Museum. At night, the illuminated riverside becomes one of Shanghai's most iconic destinations for evening strolls, jogging, cycling, and photography. The "1862 Shipyard," a former century-old shipyard converted into a fashion art center, regularly hosts fashion, art, and commercial events, becoming Lujiazui's most artistic industrial-style new landmark.
+```
+
+## 南外滩轻纺面料市场（south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market）
+
+### 17. 市场入口大厅
+- 来源 md：`新上海子景点信息/南外滩轻纺面料市场/01.市场入口大厅.md`
+- 配对图片：`01.市场入口大厅.jpg`
+- sub_area id：`south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_01`
+- sort_order：0
+- **中文名**：市场入口大厅
+- **英文名**：Market Entrance Lobby
+- **正文（英文）**：
+
+```
+The main entrance lobby of Nanwaitan Light Textile & Fabric Market is the first stop on the journey into this "global bespoke center." Located at the front of the first floor of the main building at 399 Lujiabang Road, the high-ceilinged lobby reflects the "modern marketplace" identity that the market adopted after its 2005 upgrade. Multilingual signage in Chinese, English, Japanese, and Korean guides visitors to the different floors—ready-to-wear leather goods and the Kate & Kevin studio on the first floor, suit tailoring and imported fabric on the second, qipao and traditional textiles on the third, and cashmere and miscellaneous goods on the fourth. A consultation counter staffed by multilingual shop assistants (English, French, German, Italian, and Spanish) assists foreign visitors with measuring, shipping, and alteration questions, while a "Shanghai Bespoke" wall displays stories of NBA players, the US water-polo team, and French flight attendants. During peak hours the lobby doubles as a meeting and bargaining space, with the scent of the Huangpu River mingling with silk—often called Shanghai's most "alive" entry to international fashion.
+```
+
+### 18. 一楼-成衣与皮具区
+- 来源 md：`新上海子景点信息/南外滩轻纺面料市场/02.一楼-成衣与皮具区.md`
+- 配对图片：`02.一楼-成衣与皮具区.jpg`
+- sub_area id：`south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_02`
+- sort_order：1
+- **中文名**：一楼-成衣与皮具区
+- **英文名**：1F Ready-to-Wear & Leather Goods Section
+- **正文（英文）**：
+
+```
+The ready-to-wear and leather goods section occupies the west wing of the market's first floor. With around 40 shops focused on off-the-rack apparel and accessories, it is the fastest-moving part of the market, ideal for visitors who want to buy and wear immediately. Racks and shelves display men's and women's suits, trench coats, leather jackets, blazers, shirts, dresses, evening gowns, and leather goods including cowhide, sheepskin, and crocodile-embossed handbags, briefcases, and belts. Most vendors sell by browsing and bargaining, with on-the-spot fitting and minor alterations; prices range from a few hundred to tens of thousands of RMB. Located next to the Kate & Kevin studio and the lobby consultation counter, the section lets accompanying family or friends pick up a ready garment or a leather accessory while a tailor takes measurements. Many shop assistants can communicate in English about sizing and leather grades and help with packing and international shipping.
+```
+
+### 19. 一楼-Kate&Kevin定制工坊
+- 来源 md：`新上海子景点信息/南外滩轻纺面料市场/03.一楼-Kate&Kevin定制工坊.md`
+- 配对图片：`03.一楼-Kate&Kevin定制工坊.jpg`
+- sub_area id：`south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_03`
+- sort_order：2
+- **中文名**：一楼-Kate&Kevin定制工坊
+- **英文名**：1F Kate & Kevin Bespoke Studio
+- **正文（英文）**：
+
+```
+The Kate & Kevin bespoke studio sits in the east wing of the first floor, near the entrance lobby, and is one of the earliest studios in the market to operate fully in English with an end-to-end bespoke workflow. Sample gowns hang throughout the room—silk evening dresses, satin qipao, Xiangyunsha outerwear, lace bridal gowns, and cocktail dresses—while the walls display swatch cards of imported fabrics from Italy, the United Kingdom, and Japan. Founders Kate and Kevin follow a "one person, one pattern" draping method, beginning with British-style toile work on the form, then a basted fitting that respects the client's shoulder, neck, bust, waist, and hip proportions, and finishing with hand-stitched hems, pankou knots, and concealed zippers. The studio specializes in evening gowns, qipao, and bridal collections, as well as fusion pieces that combine Chinese standing collars with Western silhouettes. Lead time is usually 7–14 days, and appointments are recommended in peak seasons (March, May, and September–October). In partnership with the Huangpu Post Office counter on the fourth floor, finished garments can be shipped directly to more than 170 countries and regions.
+```
+
+### 20. 二楼-西装定制核心区
+- 来源 md：`新上海子景点信息/南外滩轻纺面料市场/04.二楼-西装定制核心区.md`
+- 配对图片：`04.二楼-西装定制核心区.jpg`
+- sub_area id：`south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_04`
+- sort_order：3
+- **中文名**：二楼-西装定制核心区
+- **英文名**：2F Suit Tailoring Core Zone
+- **正文（英文）**：
+
+```
+The second floor is the heart of Nanwaitan Light Textile & Fabric Market and the densest cluster of shops—more than 60 tailors dedicated to men's suits, shirts, trench coats, and overcoats line both sides of the atrium corridor. It is the area that drives most of the "Shanghai Bespoke" reputation on overseas social media. Most shops follow a "front shop, back factory" model: the front displays wool, cashmere, and blend fabric swatches and sample garments, while the back houses a team of cutters, machinists, and pressers who produce the basted, half-finished, and finished garments. The standard workflow runs from fabric selection to measurement, basted fitting, second fitting, and finished garment, with a 7–14-day lead time that can be compressed to 3–4 days for rush orders. Many shop assistants speak English—and often French, Spanish, or Japanese—and accept remote measurement by photo or video. Stories of international clients such as NBA star Dirk Nowitzki and the US water-polo team are often posted on the walls and on social media, helping first-time visitors identify the silhouette that best suits them.
+```
+
+### 21. 二楼-进口面料坊
+- 来源 md：`新上海子景点信息/南外滩轻纺面料市场/05.二楼-进口面料坊.md`
+- 配对图片：`05.二楼-进口面料坊.jpg`
+- sub_area id：`south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_05`
+- sort_order：4
+- **中文名**：二楼-进口面料坊
+- **英文名**：2F Imported Fabric Section
+- **正文（英文）**：
+
+```
+The imported fabric section sits on the inner side of the 2F east wing, with about 15–20 shops and counters dedicated to premium imported fabrics. It shares foot traffic with the core suit-tailoring area but occupies a higher-end niche. This is where fabric connoisseurs browse: brand-name books from Italy's Loro Piana, Vitale Barberis Canonico, Zegna, and Reda, the UK's Holland & Sherry and Fox Brothers, and Japan's Dormeuil line the shelves, alongside Chinese luxury textiles such as Xiangyunsha, Song brocade, and Zhang velvet. Shop owners typically speak English and Japanese, helping customers understand yarn counts (Super 130s/150s/180s), weave structures (plain, twill, herringbone), cloth weight, and seasonal use, then recommending combinations to match any budget. The section rarely produces garments itself, but it works hand-in-glove with the core tailoring shops and half-finished garment workshops on the same floor—a selection-to-basted-garment turnaround of 3–5 days is common.
+```
+
+### 22. 三楼-旗袍与中式服装区
+- 来源 md：`新上海子景点信息/南外滩轻纺面料市场/06.三楼-旗袍与中式服装区.md`
+- 配对图片：`06.三楼-旗袍与中式服装区.jpg`
+- sub_area id：`south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_06`
+- sort_order：5
+- **中文名**：三楼-旗袍与中式服装区
+- **英文名**：3F Qipao & Chinese Clothing Zone
+- **正文（英文）**：
+
+```
+The central atrium of the third floor is the most distinctively "Eastern" section of the market, gathering around 30 shops that specialize in qipao, changshan, magua, and traditional Chinese wedding attire. Its clientele is strikingly international—French, Singaporean, and Malaysian brides, Chinese-diaspora communities in the US and Canada ordering festival gowns, and Russian and Ukrainian customers ordering bridesmaid qipao all leave their mark here. Fabrics are dominated by silk crepe de Chine, brocade, Xiangyunsha, Song brocade, Zhang velvet, and embroidered cloths, with both fully hand-stitched and hybrid hand-and-machine options available. Mandarin collar height, pankou design, slit position, and sleeve length can all be tailored to the client's figure and taste. Lead time runs 7–14 days, with 3–5-day rush service available; during Chinese New Year and the seventh lunar month, shops often require 1–2 months of advance booking. Finished qipao can be shipped abroad directly from the Huangpu Post Office counter on the fourth floor.
+```
+
+### 23. 三楼-传统面料零售区
+- 来源 md：`新上海子景点信息/南外滩轻纺面料市场/07.三楼-传统面料零售区.md`
+- 配对图片：`07.三楼-传统面料零售区.jpg`
+- sub_area id：`south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_07`
+- sort_order：6
+- **中文名**：三楼-传统面料零售区
+- **英文名**：3F Traditional Fabric Retail Area
+- **正文（英文）**：
+
+```
+The traditional fabric retail area runs along the east and south wings of the third floor, with 30–40 counters selling fabric by the metre in a "cut and carry" model. Its main customers are local qipao enthusiasts, independent designers, theatrical costume studios, and DIY buyers. The selection covers everything from basics to niche pieces: silk satin crepe, crepe de chine, organza, chiffon, and habotai; cotton and linen such as washed cotton, ramie, and flax; wool ranging from coarse to worsted fancy tweeds; synthetics and blends suited to school projects or stage costumes; and distinctive textiles including blue calico, batik, tie-dye, ethnic brocade, and Peking opera costume cloth. Counters accept both small cut orders (from 0.5 m) and wholesale volumes, which is convenient for individual buyers. Many can recommend the right fabric width and cutting plan for a client's figure and can arrange shipping or hand-carry packaging. This is the most upstream "raw material window" of the Shanghai bespoke industry chain.
+```
+
+### 24. 四楼-羊绒与杂项区
+- 来源 md：`新上海子景点信息/南外滩轻纺面料市场/08.四楼-羊绒与杂项区.md`
+- 配对图片：`08.四楼-羊绒与杂项区.jpg`
+- sub_area id：`south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_08`
+- sort_order：7
+- **中文名**：四楼-羊绒与杂项区
+- **英文名**：4F Cashmere & Miscellaneous Zone
+- **正文（英文）**：
+
+```
+The fourth floor is the top level of the market, with 25–35 shops dedicated to cashmere and complementary accessories; it is at its liveliest during autumn and winter. Visitors can find Inner Mongolia-, Xinjiang-, and Qinghai-sourced pure cashmere yarn, cashmere scarves and shawls, and bespoke-knitted and custom-dyed cashmere sweaters, cardigans, and double-faced cashmere overcoats. The "miscellaneous" range covers sheepskin gloves, belts, silk scarves, buttons, pankou knots, zippers, lining cloth, brooches, tie clips, and cuff links, letting customers put together an entire outfit on the same floor. Many shops offer semi-bespoke service—adjusting collar, sleeve, and body length on ready patterns with a 2–3-day turnaround. The price ladder is clear: from RMB 300 plain cashmere sweaters to over RMB 10,000 premium overcoats. It is the floor that most clearly showcases the value-for-money side of "Shanghai Bespoke."
+```
+
+### 25. 黄浦邮政国际寄送服务台
+- 来源 md：`新上海子景点信息/南外滩轻纺面料市场/09.黄浦邮政国际寄送服务台.md`
+- 配对图片：`09.黄浦邮政国际寄送服务台.jpg`
+- sub_area id：`south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_09`
+- sort_order：8
+- **中文名**：黄浦邮政国际寄送服务台
+- **英文名**：Huangpu Postal International Shipping Service Desk
+- **正文（英文）**：
+
+```
+The Huangpu Post Office international shipping counter sits near the escalator on the fourth floor. Established in 2025 under the coordination of the Huangpu District Commerce Commission, it is the temporary service point that completes the "fit on arrival, ship to the world on departure" loop that has become a Nanwaitan signature. The counter offers international EMS, international small packets, registered mail, and air/sea-surface services covering more than 170 countries and regions. On-site workflow: customers present the finished garment, the bespoke order receipt, and valid ID; staff cushion the garment in shockproof paper, reinforce the four corners, weigh and price the parcel, and print the waybill—two bespoke shirts weighing 0.49 kg to Paris, for example, take 5–7 working days at around RMB 260. Beyond shipping, the counter plans a "Nanwaitan Bespoke" themed post office, cultural postcards, and limited-edition philatelic products, making it one of Shanghai's most representative "national-trend meets international courier" experience points.
+```
+
+## 上海博物馆（shanghai_museum）
+
+### 26. 中国古代青铜馆
+- 来源 md：`新上海子景点信息/上海博物馆/01.中国古代青铜馆.md`
+- 配对图片：`01.中国古代青铜馆.jpg`
+- sub_area id：`shanghai_museum_sa_01`
+- sort_order：0
+- **中文名**：中国古代青铜馆
+- **英文名**：Ancient Chinese Bronze Gallery
+- **正文（英文）**：
+
+```
+The Ancient Chinese Bronze Gallery, on the east wing of the first floor of the Shanghai Museum's People's Square building, is one of the most academically significant permanent exhibitions in the museum's "half-of-China" collection. Covering about 1,200 square meters, it is organized into seven sections—Emergence, Growth, Apex, Transition, and Renewal—together with two thematic units on bronzes from peripheral regions and on smelting and casting techniques. Highlights include Erlitou-culture bronze jue vessels, Shang-dynasty taotie-pattern square ding, Western Zhou masterpieces such as Da Yu Ding and Mao Gong Ding, the Spring and Autumn Lotus and Crane Square Hu, and a replica of the Marquis Yi of Zeng bell set alongside Chu-style rising ding. The route reveals ritual, political, and metallurgical dimensions of early Chinese bronze civilization through vessel typology, inscriptions, and craftsmanship.
+```
+
+### 27. 中国古代雕塑馆
+- 来源 md：`新上海子景点信息/上海博物馆/02.中国古代雕塑馆.md`
+- 配对图片：`02.中国古代雕塑馆.jpg`
+- sub_area id：`shanghai_museum_sa_02`
+- sort_order：1
+- **中文名**：中国古代雕塑馆
+- **英文名**：Ancient Chinese Sculpture Gallery
+- **正文（英文）**：
+
+```
+The Ancient Chinese Sculpture Gallery occupies the west wing of the first floor, mirroring the Bronze Gallery. It covers about 640 square meters and is divided into four periods—Warring States to Qin–Han, Wei–Jin through the Sui, Tang–Five Dynasties, and Song–Yuan—with roughly 120 works, of which about 80% are Buddhist statues. Early sections lead with Huo Qubing's tomb reliefs, replicas of the Qin terracotta warriors, and Han pottery figures. The middle period is anchored by Northern dynasties sculptures from Yungang, Longmen, Maijishan, and Dunhuang, alongside white-marble Buddhas from Quyang in Hebei and Liang-dynasty pieces from Wanfo Temple in Sichuan. The Tang–Five Dynasties unit gathers Chang'an-style pieces, Dunhuang painted sculptures, and the Amitabha from the Leifeng Pagoda crypt. The Song–Yuan section pivots to Jinci painted sculptures, Lingyan Temple luohans, and Tibetan-Buddhist statues. A parallel storyline—icons, donors, guardian figures, and tomb sculpture—traces the transformation of Chinese sculpture from ritual object to devotional image.
+```
+
+### 28. 中国古代陶瓷馆
+- 来源 md：`新上海子景点信息/上海博物馆/03.中国古代陶瓷馆.md`
+- 配对图片：`03.中国古代陶瓷馆.jpg`
+- sub_area id：`shanghai_museum_sa_03`
+- sort_order：2
+- **中文名**：中国古代陶瓷馆
+- **英文名**：Ancient Chinese Ceramics Gallery
+- **正文（英文）**：
+
+```
+The Ancient Chinese Ceramics Gallery occupies the central area of the second floor. Covering about 1,300 square meters with more than 500 pieces, it is one of the most complete and large-scale surveys of Chinese ceramic history in the museum's collection. Seven chronological sections—Neolithic painted pottery, Shang–Zhou proto-porcelain, Han–Jin and Northern–Southern dynasties, Tang sancai and early celadon, Song dynasty's six great kiln systems (Ru, Guan, Ge, Jun, Ding, and Yue, Longquan, Yaozhou, Cizhou), Yuan–Ming–Qing Jingdezhen blue-and-white and monochrome glazes, and Ming–Qing regional kilns (Yixing zisha, Dehua blanc de Chine, Shiwan)—trace the full arc. Key objects include Majiayao painted pottery basins, Shang proto-porcelain zun, a Northern Qi white-splash-on-green long-neck vase, Tang sancai camel with musicians, a Ru ware sky-blue narcissus basin, a Yuan blue-and-white peony jar, a Ming Yongle sweet-white carved prunus vase, and a Kangxi famille-rose bowl. Five-dimensional labels (period, type, kiln, technique, motif) make the room a complete index for the study of Chinese ceramics.
+```
+
+### 29. 中国历代书法馆
+- 来源 md：`新上海子景点信息/上海博物馆/04.中国历代书法馆.md`
+- 配对图片：`04.中国历代书法馆.jpg`
+- sub_area id：`shanghai_museum_sa_04`
+- sort_order：3
+- **中文名**：中国历代书法馆
+- **英文名**：Chinese Calligraphy Gallery
+- **正文（英文）**：
+
+```
+The Chinese Calligraphy Gallery is on the east wing of the third floor, covering about 600 square meters. About 60 masterworks are arranged in six chronological sections—seal and clerical scripts, Jin–Tang calligraphy, Song, Yuan, Ming, and Qing. Highlights include Shang oracle-bone and Western Zhou bronze rubbings, the best-preserved fragments of the Chunhuage Tie, a Tang copy of Wang Xizhi's Shangyu Tie, Huai Su's Bitter Bamboo Shoot Tie, Emperor Huizong's Slender-Gold Thousand-Character Classic, Su Shi's memorial draft for Huang Jidao, Huang Tingjian's cursive Lienpo and Lin Xiangru Biographies, Zhao Mengfu's Danba Stele, works by Zhu Yunming, Wen Zhengming, Dong Qichang, Wang Duo, and Fu Shan, and letters and hand scrolls from the "Two Wangs" lineage. Standing desks with high-resolution digital comparison panels allow visitors to study brushwork, composition, and ink tonality.
+```
+
+### 30. 中国历代绘画馆
+- 来源 md：`新上海子景点信息/上海博物馆/05.中国历代绘画馆.md`
+- 配对图片：`05.中国历代绘画馆.jpg`
+- sub_area id：`shanghai_museum_sa_05`
+- sort_order：4
+- **中文名**：中国历代绘画馆
+- **英文名**：Chinese Painting Gallery
+- **正文（英文）**：
+
+```
+The Chinese Painting Gallery occupies the west wing of the third floor, opposite the Calligraphy Gallery. Covering about 1,200 square meters and displaying more than 120 works from the Tang dynasty to modern times, it is one of the largest permanent ancient painting exhibitions on the Chinese mainland. Seven chronological sections—Tang–Song, Yuan, early-to-mid Ming, late Ming to early Qing, mid Qing, late Qing, plus the dedicated "Liangtu Xuan" gallery—trace the evolution of Chinese painting from blue-and-green landscape to literati xieyi. Treasures include Sun Wei's High Recluse scroll (the only surviving handscroll of its theme), Emperor Huizong's Willows, Crows, and Reed Geese, Liang Kai's Eight Eminent Monks, Wang Shen's Misty Rivers and Layered Peaks, Zhao Mengfu's Horses at the Autumn Outskirts, Ni Zan's Six Gentlemen, masterworks by the Four Masters of Wu (Shen Zhou, Wen Zhengming, Tang Yin, Qiu Ying), Dong Qichang's Eight Views of Yan and Wu album, the Four Wangs, Four Monks, Jinling and Yangzhou schools, and Ren Bonian and Xu Gu of the Shanghai school. Low-illumination cold lighting and UV-filtering vitrines protect silk and paper surfaces.
+```
+
+### 31. 中国历代玺印馆
+- 来源 md：`新上海子景点信息/上海博物馆/06.中国历代玺印馆.md`
+- 配对图片：`06.中国历代玺印馆.jpg`
+- sub_area id：`shanghai_museum_sa_06`
+- sort_order：5
+- **中文名**：中国历代玺印馆
+- **英文名**：Chinese Seals Gallery
+- **正文（英文）**：
+
+```
+The Chinese Seals Gallery is at the center of the third floor and is the first dedicated museum of Chinese seal engraving in China, covering 380 square meters with more than 500 pieces. Five sections follow the art historical line: early archaic seals (Shang–Zhou through Warring States bronze official and private seals, nose and altar knobs); the Qin–Han codification (Qin "field-grid" seals, Han seal script, jade seals and bird-worm script); Tang–Song–Jin–Yuan new styles (regular-script seals, hand-pressed marks, studio seals); the rise of literati seal carving in Ming–Qing (Wen Peng, He Zhen, the Wan and Zhe schools, Deng Shiru, Wu Rangzhi, Zhao Zhiqian, Wu Changshuo and their lineages); and Ming–Qing seal materials and finial carving (Qingtian, Shoushan, Changhua, Balin stones with full-round and relief knobs). A closing section on "seal catalogues and seal studies" displays the Shizhong Shanfang Yinju, Xueshantang Seal Catalogue, and Xiling Bajia catalogue, linking original seals with their bibliographic counterparts.
+```
+
+### 32. 中国古代玉器馆
+- 来源 md：`新上海子景点信息/上海博物馆/07.中国古代玉器馆.md`
+- 配对图片：`07.中国古代玉器馆.jpg`
+- sub_area id：`shanghai_museum_sa_07`
+- sort_order：6
+- **中文名**：中国古代玉器馆
+- **英文名**：Ancient Chinese Jades Gallery
+- **正文（英文）**：
+
+```
+The Ancient Chinese Jades Gallery is on the fourth floor, covering 500 square meters. About 300 jades from the Neolithic to the Qing dynasty are arranged in six units—prehistoric, Xia–Shang–Western Zhou, Spring and Autumn–Warring States, Han–Jin, Tang–Song–Liao–Jin, and Yuan–Ming–Qing. Highlights include a Hongshan-culture jade pig-dragon, Lingjiatan-culture jade eagle and jade plate, Liangzhu cong with a deity-and-beast mask (one of the museum's heaviest), Shang dynasty birds and blades, Fu Hao–style phoenix and figures, Western Zhou pendant sets, Spring and Autumn coiled-dragon bi, Warring States dragon pendants and multi-segment articulated chains, a complete Han dynasty gold-wire jade burial suit and jade dancers, Tang–Song flying apsaras, Liao–Jin "Spring Water" and "Autumn Mountain" jades, Ming–Qing Zigang plaques, Mughal-influenced "Hindustan" jades, and Qianlong-era inscribed jade mountain-sculptures. The storyline—ritual object, ornament, mortuary piece, scholar's implement, display piece—traces jade's cultural trajectory from divine to royal to literari aesthetic.
+```
+
+### 33. 中国历代钱币馆
+- 来源 md：`新上海子景点信息/上海博物馆/08.中国历代钱币馆.md`
+- 配对图片：`08.中国历代钱币馆.jpg`
+- sub_area id：`shanghai_museum_sa_08`
+- sort_order：7
+- **中文名**：中国历代钱币馆
+- **英文名**：Chinese Coins Gallery
+- **正文（英文）**：
+
+```
+The Chinese Coins Gallery is on the fourth floor and covers 740 square meters, displaying more than 3,300 objects—one of the largest permanent numismatic exhibitions in China. The chronological storyline runs from pre-Qin cowries, spade, knife, and round coins; Qin–Han half-tael and wuzhu; Tang Kaiyuan Tongbao and feiqian; Song money drafts, Jiaozi, silver ingots, and bronze–iron coinage in parallel; Yuan paper money and silver ingots; Ming–Qing baochao, sycee, and machine-struck copper coins; to modern machine-struck silver dollars, copper cents, and currency from red-base regions—tracing money from commodity to metal, from metal to paper, and from hand to machine striking. Two thematic rooms: the "Shi Jiagan Numismatic Room" displays rare Chinese antique and machine-struck coins donated by the modern collector Shi Jiagan; the "Du Weishan and Tan Duanyan Central Asian Coins Room" displays Sogdian, Kushan, Sasanian, and Arabo-Persian coins from the Silk Road donated by the Australian-based scholar Du Weishan and his wife, reflecting East–West monetary exchange along the Silk Road.
+```
+
+### 34. 中国明清家具馆
+- 来源 md：`新上海子景点信息/上海博物馆/09.中国明清家具馆.md`
+- 配对图片：`09.中国明清家具馆.jpg`
+- sub_area id：`shanghai_museum_sa_09`
+- sort_order：8
+- **中文名**：中国明清家具馆
+- **英文名**：Ming–Qing Chinese Furniture Gallery
+- **正文（英文）**：
+
+```
+The Ming–Qing Chinese Furniture Gallery is in the west wing of the fourth floor, covering 700 square meters with more than 100 masterpieces. The route divides into two stylistic threads: Ming furniture, in huanghuali, zitan, and tieli, prized for spare forms, rounded lines, and precise proportions—exemplified by a huanghuali four-flush official's cap armchair, a huanghuali flat-top table with insert shoulders, a zitan horseshoe-back armchair, and a zitan large painting table; and Qing furniture, in zitan and hongmu, marked by lavish carving, auspicious motifs, and grandeur—exemplars include a Qianlong-period zitan throne with Western lotus carving, a mid-Qing hongmu carved screen, and mother-of-pearl and marble-inlaid long tables and Eight Immortals tables. Two recreated interiors—an Ming reception hall (centered on long table, Eight Immortals table, armchairs, and flower stands) and a Qing scholar's studio (painting table, horseshoe-back chair, bookcase, and official leather box)—help visitors read furniture within the ritual and daily grammar of traditional Chinese homes. A wall of mortise-and-tenon detail diagrams shows swallowtail, hugging-shoulder, dumpling-angle, insert-shoulder, and through-shoulder joints.
+```
+
+### 35. 中国少数民族工艺馆
+- 来源 md：`新上海子景点信息/上海博物馆/10.中国少数民族工艺馆.md`
+- 配对图片：`10.中国少数民族工艺馆.jpg`
+- sub_area id：`shanghai_museum_sa_10`
+- sort_order：9
+- **中文名**：中国少数民族工艺馆
+- **英文名**：Chinese Ethnic Minorities Craft Gallery
+- **正文（英文）**：
+
+```
+The Chinese Ethnic Minorities Craft Gallery is on the fourth floor's east wing, adjacent to the Jades Gallery. With more than 700 square meters and nearly 600 objects, it is the most culturally diverse permanent gallery in the People's Square museum. Eight craft sections—ethnic costume (Mongolian robe, Tibetan chuba, Yi pleated skirt, Miao silver headdress, Uyghur doppa); dyeing, weaving, and embroidery (batik, tie-dye, embroidery, brocade—Miao embroidery, Dong brocade, Zhuang brocade, Dai brocade, Tujia "Xilankapu", Li brocade, Tibetan pulu); metalwork (Miao silver, Yi silver, Tibetan Buddhist ritual objects and butter lamps, Dai silver ewers, Mongolian gold and silver); carvings (Wa woodcarving, Tibetan carved doors and sutra blocks, Miao wooden masks, Tajik stone carving); ceramics (Dai slow-wheel pottery, Tibetan "ka" kiln ware, Kazakh glazed pottery); lacquerware (Yi lacquer, Tibetan gilt-and-painted, Miao lacquered leather armor); rattan and bamboo weaving (Li rattan, Dai bamboo, Miao baskets, Yi back-baskets); and mask art (Tibetan opera masks, Nuo masks, Yi bimo masks, Miao Lusheng festival masks)—represent the crafts of ethnic regions across all Chinese provinces, autonomous regions, and municipalities. The gallery emphasizes the context of craft, community, festival, and daily life, providing a visual model for understanding the "diversity in unity" of Chinese culture.
+```
+
+## 上海迪士尼度假区（shanghai_disney_resort）
+
+### 36. 米奇大街
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/01.米奇大街.md`
+- 配对图片：`01.米奇大街.jpg`
+- sub_area id：`shanghai_disney_resort_sa_01`
+- sort_order：0
+- **中文名**：米奇大街
+- **英文名**：Mickey Avenue
+- **正文（英文）**：
+
+```
+Mickey Avenue is the first themed street every visitor walks upon entering the park, located at the very front of the main entrance. Inspired by the stories of classic Disney characters—Mickey, Minnie, Donald, Goofy, and Pluto—the street is lined with retail and dining venues such as the Old Station Shop, Sweethearts Confectionery, and Mickey & Pals Market Cafe. The avenue replaces the nearly 60-year tradition of 'Main Street, U.S.A.' found at other Disney parks worldwide, incorporating Chinese elements—building colors and decorative motifs draw from Shanghai's Bund and Old City styles. It is the best viewing spot for the Mickey's Storybook Express parade and the central hub for photos with Duffy, ShellieMay, StellaLou, and Gelatoni.
+```
+
+### 37. 奇想花园
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/02.奇想花园.md`
+- 配对图片：`02.奇想花园.jpg`
+- sub_area id：`shanghai_disney_resort_sa_02`
+- sort_order：1
+- **中文名**：奇想花园
+- **英文名**：Gardens of Imagination
+- **正文（英文）**：
+
+```
+Gardens of Imagination is situated in the north-central part of the park, with the Enchanted Storybook Castle as its visual centerpiece, surrounding it with classic attractions. The land's signature ride, Fantasia Carousel, was handcrafted by Chinese artisans using 72 colors, making it one of the most elaborate carousels in any Disney park worldwide. Other attractions include Dumbo the Flying Elephant, the Garden of the Twelve Friends (where Disney characters interpret the Chinese zodiac in mural form), Marvel Heroes Headquarters (an indoor interactive experience including Iron Man transformations), and a classic photo spot with Mickey. The garden design extensively uses Chinese garden elements—pavilions, rockeries, willows, and lotus ponds—making it the park's most photogenic area for strolling.
+```
+
+### 38. 探险岛
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/03.探险岛.md`
+- 配对图片：`03.探险岛.jpg`
+- sub_area id：`shanghai_disney_resort_sa_03`
+- sort_order：2
+- **中文名**：探险岛
+- **英文名**：Adventure Isle
+- **正文（英文）**：
+
+```
+Adventure Isle is located in the southeast of the park, themed around ancient jungle-tribe expeditions. The land's core landmark is Roaring Mountain—an artificial rock formation threaded with a river rapids course and a flight-theater attraction. The signature ride, Soaring Over the Horizon, is one of the park's longest-queued attractions, where guests board suspended flying vehicles and soar over global landmarks on a giant dome screen (height requirement: 102cm+). Other adventures include Roaring Rapids (an outdoor white-water raft ride, 107cm+) and Camp Discovery (rope courses and outdoor exploration trails). The land's design draws from a blend of Pacific Island and South American jungle civilizations, enveloped in mist and water effects, making it one of the park's most immersive themed areas.
+```
+
+### 39. 宝藏湾
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/04.宝藏湾.md`
+- 配对图片：`04.宝藏湾.jpg`
+- sub_area id：`shanghai_disney_resort_sa_04`
+- sort_order：3
+- **中文名**：宝藏湾
+- **英文名**：Treasure Cove
+- **正文（英文）**：
+
+```
+Treasure Cove is located in the northeast of the park, the first pirate-themed land in any Disney park worldwide. Based on the Pirates of the Caribbean films, it recreates an 18th-century Caribbean port town—cobblestone streets, wooden docks, weathered taverns, and pirate ship masts. The signature attraction, Pirates of the Caribbean: Battle for the Sunken Treasure, is the park's most technologically advanced boat ride, taking guests through underwater shipwrecks, pirate battles, and volcanic eruptions with seamless projection-and-physical-set integration. Additional attractions include Siren's Revenge (a shipboarding experience) and Explorer Canoes (paddling through the waterways between Treasure Cove and Adventure Isle). The land's stage show, Eye of the Storm: Captain Jack's Stunt Spectacular, runs approximately 30 minutes and is one of the park's most popular live performances.
+```
+
+### 40. 梦幻世界
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/05.梦幻世界.md`
+- 配对图片：`05.梦幻世界.jpg`
+- sub_area id：`shanghai_disney_resort_sa_05`
+- sort_order：4
+- **中文名**：梦幻世界
+- **英文名**：Fantasyland
+- **正文（英文）**：
+
+```
+Fantasyland is located in the northern part of the park and features the most attractions of any themed land (9 total), with classic Disney animated fairy tales as its core narrative. The land's centerpiece, the Enchanted Storybook Castle, is the tallest and largest Disney castle in the world, crowned with Chinese auspicious clouds, peonies, and magnolia elements—the park's most popular photo spot. Signature attractions include Seven Dwarfs Mine Train (a family coaster, 97cm+), Peter Pan's Flight (an indoor suspended flight ride), The Many Adventures of Winnie the Pooh (an indoor boat ride), Voyage to the Crystal Grotto (an outdoor water attraction), and Alice in Wonderland Maze (an outdoor interactive maze). Inside the castle, guests can also enjoy 'Once Upon a Time' Storybook Adventure with Snow White and the 'Frozen Sing-Along Celebration' show (approximately 20 minutes).
+```
+
+### 41. 明日世界
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/06.明日世界.md`
+- 配对图片：`06.明日世界.jpg`
+- sub_area id：`shanghai_disney_resort_sa_06`
+- sort_order：5
+- **中文名**：明日世界
+- **英文名**：Tomorrowland
+- **正文（英文）**：
+
+```
+Tomorrowland is located in the northwest of the park, themed around futuristic technology and science-fiction exploration. The land's architectural style is filled with streamlined metallic forms and neon lighting effects, creating a cyberpunk futuristic-urban atmosphere. The signature attraction, TRON Lightcycle Power Run presented by Chevrolet, is an indoor high-speed motorcycle-style roller coaster (122cm+) where guests straddle glowing lightcycles and race through a tunnel of light and shadow—one of the most thrilling coasters in any Disney park worldwide. Other attractions include Buzz Lightyear Planet Rescue (an indoor interactive shooter), Jet Packs (an outdoor rotating flight ride, 122cm+), and TRON Digital Challenge presented by Chevrolet (an interactive future-driving experience). The land also regularly hosts 'Avengers Training Initiative' shows and 'Club E' electronic music parties.
+```
+
+### 42. 玩具总动员乐园
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/07.玩具总动员乐园.md`
+- 配对图片：`07.玩具总动员乐园.jpg`
+- sub_area id：`shanghai_disney_resort_sa_07`
+- sort_order：6
+- **中文名**：玩具总动员乐园
+- **英文名**：Toy Story Land
+- **正文（英文）**：
+
+```
+Toy Story Land is located in the northwest of the park, adjacent to Tomorrowland. Opened on April 26, 2018, it was the first expansion themed land at Shanghai Disneyland. The land's design is based on the Toy Story film universe—upon entering, guests 'shrink' to toy size and step into Andy's backyard, where everyday objects like building blocks, Slinky Dog, paper kites, and dominoes become oversized giant installations. Signature attractions include Rex's Racer (a U-shaped track ride, 120cm+), Slinky Dog Spin (an outdoor rotating chase ride), and Woody's Round-Up (a Western wagon ride, 81cm+). The land is vibrantly colored and leisurely paced, making it the most family- and young-child-friendly themed area in the park.
+```
+
+### 43. 疯狂动物城
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/08.疯狂动物城.md`
+- 配对图片：`08.疯狂动物城.jpg`
+- sub_area id：`shanghai_disney_resort_sa_08`
+- sort_order：7
+- **中文名**：疯狂动物城
+- **英文名**：Zootopia
+- **正文（英文）**：
+
+```
+Zootopia is located in the eastern part of the park, adjacent to Treasure Cove. Officially opened on December 20, 2023, it is the world's first Zootopia-themed land and the eighth major themed land at Shanghai Disneyland. The land faithfully recreates the city scenes from the film—districts for animals of different sizes, the train system, neon signage, and City Hall. The signature attraction, Zootopia: Hot Pursuit, is the park's newest high-tech immersive ride. Interactive installations and photo spots featuring Nick, Judy, Flash, and other film characters are found throughout the land. On March 10, 2023, the red panda 'Mei Mei' made its global debut here. In November 2024, the land received the Themed Entertainment Association (TEA) 2025 'Outstanding Achievement Award for a Theme Park Land.'
+```
+
+### 44. 迪士尼小镇
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/09.迪士尼小镇.md`
+- 配对图片：`09.迪士尼小镇.jpg`
+- sub_area id：`shanghai_disney_resort_sa_09`
+- sort_order：8
+- **中文名**：迪士尼小镇
+- **英文名**：Disneytown
+- **正文（英文）**：
+
+```
+Disneytown is located just south of the main entrance of Shanghai Disneyland, serving as the resort's standalone commercial and entertainment district—accessible without a park ticket. Covering approximately 46,000 square meters, it is divided into three areas: Marketplace, Broadway Plaza, and Broadway Avenue, gathering globally renowned dining brands (such as The Cheesecake Factory, The BOATHOUSE, and Element Table), Disney's official store (one of the world's largest Disney flagship stores), Dayin Bookstore, and the LEGO flagship store. The Walt Disney Grand Theatre within Disneytown stages the Broadway musical 'The Lion King' in Mandarin (separate ticket required). The district also hosts seasonal markets, outdoor performances, and light installations, making it a popular destination for visitors to spend half a day outside the park.
+```
+
+### 45. 星愿公园
+- 来源 md：`新上海子景点信息/上海迪士尼度假区/10.星愿公园.md`
+- 配对图片：`10.星愿公园.jpg`
+- sub_area id：`shanghai_disney_resort_sa_10`
+- sort_order：9
+- **中文名**：星愿公园
+- **英文名**：Wishing Star Park
+- **正文（英文）**：
+
+```
+Wishing Star Park is located on the western side of Shanghai Disney Resort, built around the 400,000-square-meter Wishing Star Lake. It is a free, open public park independent of the park's perimeter walls. The park features an approximately 2.5-kilometer lakeside trail lined with waterfront platforms, gardens, a children's playground, picnic lawns, and numerous photo spots. Its name draws inspiration from 'When You Wish Upon a Star' from Disney's animated film Mulan. At the lake's center stands a giant illuminated installation called 'Wishing Star,' which lights up at night and reflects on the water—one of the resort's signature night views. The park also offers bicycle rentals (two- and four-seater), kayaking experiences, and seasonal flower exhibitions, making it an ideal choice for families and runners to spend time outside the park.
+```
+
+## 上海外滩（the_bund_shanghai）
+
+### 46. 十六铺码头
+- 来源 md：`新上海子景点信息/上海外滩/01.十六铺码头.md`
+- 配对图片：`01.十六铺码头.jpg`
+- sub_area id：`the_bund_shanghai_sa_01`
+- sort_order：0
+- **中文名**：十六铺码头
+- **英文名**：Shiliupu Wharf
+- **正文（英文）**：
+
+```
+Shiliupu Wharf is located at the southern end of the Bund along the Huangpu River, with a history tracing back to the Xianfeng era of the Qing Dynasty, named after the old Shanghai Shiliupu commercial district. It was once Shanghai's water gateway to Jiangsu and Zhejiang, with peak daily passenger traffic exceeding 100,000. After 2000, the terminal's passenger functions gradually ceased, and a comprehensive renovation was completed before the 2010 World Expo, creating a large multi-level complex with three underground levels and a waterfront observation deck above. Today the wharf retains some sightseeing cruise routes, offering boat rides to enjoy both banks of the Huangpu River, while integrating commerce, dining, and waterfront promenades, becoming a 'waterfront living room' for citizens and tourists to experience Shanghai's 'wharf culture.'
+```
+
+### 47. 外滩十八号
+- 来源 md：`新上海子景点信息/上海外滩/02.外滩十八号.md`
+- 配对图片：`02.外滩十八号.jpg`
+- sub_area id：`the_bund_shanghai_sa_02`
+- sort_order：1
+- **中文名**：外滩十八号
+- **英文名**：Bund 18
+- **正文（英文）**：
+
+```
+Bund 18 is located at 18 Zhongshan East 1st Road, designed by the British firm Palmer & Turner Architects, completed in 1923, and formerly housed the Shanghai branch of Chartered Bank (now Standard Chartered Bank). The building is a seven-story reinforced concrete structure with a neoclassical facade—rusticated granite at the base, an Ionic colonnade spanning the second floor and above, and a entrance retaining exquisite bronze doors and marble staircases. In 2006, the building underwent a conservation-minded renovation and was transformed into a mixed-use space combining luxury brand flagships, art galleries, Michelin-starred restaurants, and boutique offices, becoming a classic model of the Bund's 'readable architecture' initiative.
+```
+
+### 48. 亚细亚大楼（外滩一号）
+- 来源 md：`新上海子景点信息/上海外滩/03.亚细亚大楼（外滩一号）.md`
+- 配对图片：`03.亚细亚大楼（外滩一号）.jpg`
+- sub_area id：`the_bund_shanghai_sa_03`
+- sort_order：2
+- **中文名**：亚细亚大楼（外滩一号）
+- **英文名**：Asia Building (Bund No. 1)
+- **正文（英文）**：
+
+```
+The Asia Building is located at 1 Zhongshan East 1st Road, earning the title 'Bund's First Building' as it sits at the southernmost starting point of the Bund's international architectural ensemble. The building was invested by the British McBain & Co., designed by Palmer & Turner Architects, and completed in 1913, originally named the McBain Building. Its main facade features a Baroque style with a three-story Ionic colonnade at the center, curved corners, and a semicircular pediment at the top, blending Classical and Neoclassical aesthetics. After the Asiatic Petroleum Company (a predecessor of Shell) purchased the building in 1917 and used it as headquarters, it became known as the 'Asia Building.' It now serves as the headquarters of China Pacific Insurance and is one of the best-preserved and most representative early high-rise buildings in the Bund complex.
+```
+
+### 49. 上海总会（华尔道夫酒店）
+- 来源 md：`新上海子景点信息/上海外滩/04.上海总会（华尔道夫酒店）.md`
+- 配对图片：`04.上海总会（华尔道夫酒店）.jpg`
+- sub_area id：`the_bund_shanghai_sa_04`
+- sort_order：3
+- **中文名**：上海总会（华尔道夫酒店）
+- **英文名**：Shanghai Club (Waldorf Astoria Shanghai on the Bund)
+- **正文（英文）**：
+
+```
+The Shanghai Club Building is located at 2 Zhongshan East 1st Road, built in 1910, designed by the British firm Atkinson & Dallas, with interior decoration by Japanese architect Kikutar Shimoda. The building features an English Renaissance style, with an Ionic colonnade spanning the second and third floors on its facade, a domed corner tower, and Baroque detailing. Because its interior decoration referenced Japanese imperial court style, it was once hailed as 'the London of the East.' The building housed a 34-meter marble bar—the 'longest bar in the Far East'—and was the core social venue for Shanghai's foreign community in the early 20th century. After renovation in 2010, the building was transformed into the Waldorf Astoria Shanghai on the Bund, preserving its historical character while providing luxury hotel service.
+```
+
+### 50. 原汇丰银行大楼
+- 来源 md：`新上海子景点信息/上海外滩/05.原汇丰银行大楼.md`
+- 配对图片：`05.原汇丰银行大楼.jpg`
+- sub_area id：`the_bund_shanghai_sa_05`
+- sort_order：4
+- **中文名**：原汇丰银行大楼
+- **英文名**：Former HSBC Building
+- **正文（英文）**：
+
+```
+The Former HSBC Building is located at 12 Zhongshan East 1st Road, completed in 1925, designed by Palmer & Turner Architects, and formerly housed the Shanghai branch of the Hongkong and Shanghai Banking Corporation. The building is a quintessential example of neoclassical architecture, with a seven-story main body, a six-column Ionic colonnade on the central facade, and a massive hemispherical dome whose interior is adorned with exquisite mosaic murals depicting eight global financial centers. The building was once praised as 'the most magnificent building between the Suez Canal and the Bering Strait.' From 1955 to 1995, it served as the Shanghai Municipal Government office building. In 1997, it was acquired and restored by Shanghai Pudong Development Bank, which now uses it as its headquarters, making it one of the Bund's most iconic historic buildings.
+```
+
+### 51. 海关大楼
+- 来源 md：`新上海子景点信息/上海外滩/06.海关大楼.md`
+- 配对图片：`06.海关大楼.jpg`
+- sub_area id：`the_bund_shanghai_sa_06`
+- sort_order：5
+- **中文名**：海关大楼
+- **英文名**：Customs House (Shanghai)
+- **正文（英文）**：
+
+```
+The Customs House is located at 13 Zhongshan East 1st Road, designed by Palmer & Turner Architects and rebuilt in 1927. It is one of the most recognizable buildings in the Bund's international architectural ensemble. The eight-story building features a Greek neoclassical facade supported by a Doric colonnade at the base, exuding grand solemnity. Its most striking feature is the clock tower—a tall square tower with four clock faces, manufactured in the style of Big Ben at the Palace of Westminster in London, cast by the British Joyce & Co. clock foundry. The clock chimes every fifteen minutes, and its resonant bell once echoed across both banks of the Huangpu River, earning it the title 'Asia's First Clock.' The building is still used by Shanghai Customs today and stands as the spiritual landmark of the Bund's 'Expo of World Architecture.'
+```
+
+### 52. 和平饭店
+- 来源 md：`新上海子景点信息/上海外滩/07.和平饭店.md`
+- 配对图片：`07.和平饭店.jpg`
+- sub_area id：`the_bund_shanghai_sa_07`
+- sort_order：6
+- **中文名**：和平饭店
+- **英文名**：Peace Hotel (Fairmont Peace Hotel)
+- **正文（英文）**：
+
+```
+The Peace Hotel is located at 20 Zhongshan East 1st Road, invested by the British Jewish businessman Sir Victor Sassoon, designed by Palmer & Turner Architects, and completed in 1929. Originally named Sassoon House, it was once 'the tallest building in the Far East.' The building features an Art Deco style, ten stories high, with a granite facade crowned by the iconic green copper pyramidal spire, striking in the sunlight. The building housed the Cathay Hotel, the premier hotel in the Far East during the first half of the 20th century, hosting celebrities such as Charlie Chaplin and George Bernard Shaw. Renamed the Peace Hotel in 1952, it underwent a major renovation from 2007 to 2010 and is now managed by the Fairmont hotel group, featuring the iconic Jasmine Lounge and nine nationality-themed suites.
+```
+
+### 53. 陈毅广场与陈毅铜像
+- 来源 md：`新上海子景点信息/上海外滩/08.陈毅广场与陈毅铜像.md`
+- 配对图片：`08.陈毅广场与陈毅铜像.jpg`
+- sub_area id：`the_bund_shanghai_sa_08`
+- sort_order：7
+- **中文名**：陈毅广场与陈毅铜像
+- **英文名**：Chen Yi Square and Bronze Statue of Chen Yi
+- **正文（英文）**：
+
+```
+Chen Yi Square is located on the waterfront observation platform between Nanjing East Road and Fuzhou Road on the Bund, the most densely trafficked core area of the Bund. At the center of the square stands the bronze statue of Chen Yi, sculpted by Zhang Yonghao and unveiled on the eve of National Day in 1993. The statue, approximately 9 meters tall, depicts Mayor Chen Yi wearing an overcoat with hands clasped behind his back and a serene smile, facing the Huangpu River and gazing at the Pudong Lujiazui skyline, symbolizing his hopes for the development of new Shanghai. Chen Yi (1901–1972) served as the first mayor of Shanghai under the People's Republic (1949–1958), during which he stabilized prices, restored production, and restored public order, earning deep affection from Shanghai citizens. The square serves both as a leisure and sightseeing spot and as the central venue for Shanghai's major festivals and celebrations.
+```
+
+### 54. 外滩牛
+- 来源 md：`新上海子景点信息/上海外滩/09.外滩牛.md`
+- 配对图片：`09.外滩牛.jpg`
+- sub_area id：`the_bund_shanghai_sa_09`
+- sort_order：8
+- **中文名**：外滩牛
+- **英文名**：Bund Bull (Shanghai Financial Bull)
+- **正文（英文）**：
+
+```
+The Bund Bull is located at the Bund Financial Square at the intersection of Zhongshan East 1st Road and Fuzhou Road. Created by Italian-American artist Arturo Di Modica, it was officially unveiled during the 2010 Shanghai World Expo. Di Modica is the same sculptor who created the Charging Bull on Wall Street in New York, making the Bund Bull its 'sister work.' The bronze sculpture, cast in a dark red-brown patina, weighs approximately 2.5 tons and is slightly larger than its Wall Street counterpart. The bull is depicted in a lowered-head, charging posture with taut muscles and forward-thrusting horns, brimming with kinetic energy, symbolizing a 'bull market' and the robust development of Shanghai's financial markets. Since its installation, it has quickly become a popular Bund landmark, with visitors commonly touching the bull's horns for good fortune.
+```
+
+### 55. 上海市人民英雄纪念塔
+- 来源 md：`新上海子景点信息/上海外滩/10.上海市人民英雄纪念塔.md`
+- 配对图片：`10.上海市人民英雄纪念塔.jpg`
+- sub_area id：`the_bund_shanghai_sa_10`
+- sort_order：9
+- **中文名**：上海市人民英雄纪念塔
+- **英文名**：Shanghai People's Heroes Memorial Tower
+- **正文（英文）**：
+
+```
+The Shanghai People's Heroes Memorial Tower is located in Huangpu Park at the northern end of the Bund, at the confluence of the Huangpu River and Suzhou Creek. Built in 1993 and officially opened on May 27, 1994 (the 45th anniversary of Shanghai's liberation), the memorial consists of three 60-meter-tall granite rifle-shaped towers leaning against each other and pointing skyward, symbolizing the people's heroes who sacrificed their lives in the Opium War, the May Fourth Movement, and the War of Liberation. At the base of the towers lies a sunken circular plaza surrounded by large granite reliefs depicting scenes of the Shanghai people's revolutionary struggles. With a total construction area of approximately 16,000 square meters, the memorial is an important patriotic education base and red-cultural landmark of Shanghai, as well as an excellent vantage point for viewing the Pudong Lujiazui skyline.
+```
+
+### 56. 外白渡桥
+- 来源 md：`新上海子景点信息/上海外滩/11.外白渡桥.md`
+- 配对图片：`11.外白渡桥.jpg`
+- sub_area id：`the_bund_shanghai_sa_11`
+- sort_order：10
+- **中文名**：外白渡桥
+- **英文名**：Waibaidu Bridge (Garden Bridge of Shanghai)
+- **正文（英文）**：
+
+```
+Waibaidu Bridge is located at the northern end of the Bund, spanning the mouth of Suzhou Creek where it flows into the Huangpu River. It connects Huangpu Park to the south and the North Bund in Hongkou District to the north, and is an important landmark of Shanghai's modern urban development. The bridge was originally built in 1856 (as a wooden bridge); the existing steel bridge was completed in 1907, designed and manufactured by the British Cleveland Bridge & Engineering Company. It was China's first all-steel riveted truss bridge, measuring 104 meters long and 18 meters wide, with two steel spans connected by rivets in an elegant, archaic form. The name 'Waibaidu' originates from the site's history as a creek crossing point, where 'baidu' meant a free ferry crossing (no longer charging a fee). In 2008, the bridge was entirely moved to a shipyard for major repairs and then reinstalled in its original position, restoring the century-old steel structure. Waibaidu Bridge has been a filming location for numerous films and television dramas and is an excellent spot for viewing the Pudong skyline and the Bund's architectural ensemble.
+```
+
+### 57. 外滩源
+- 来源 md：`新上海子景点信息/上海外滩/12.外滩源.md`
+- 配对图片：`12.外滩源.jpg`
+- sub_area id：`the_bund_shanghai_sa_12`
+- sort_order：11
+- **中文名**：外滩源
+- **英文名**：The Origin of the Bund (Waitanyuan)
+- **正文（英文）**：
+
+```
+Waitanyuan (The Origin of the Bund) is located on the southwest side of the confluence of the Huangpu River and Suzhou Creek, bounded by the Huangpu River to the east, Sichuan Middle Road to the west, Suzhou Creek to the north, and Dianchi Road to the south, covering approximately 16.4 hectares. It is called 'the source of the Bund' because the earliest buildings of the Bund's international architectural ensemble were born in this area. The core building, 'Bund Source No. 1' (33 Zhongshan East 1st Road), was the former British Consulate General in Shanghai, with its main building dating from 1872—the oldest surviving building on the Bund's first facade, in the English Renaissance style. The area also preserves multiple historic buildings including the China Federation Building, the North China Branch of the Royal Asiatic Society Building, and the Yuanying Road Apartments. After conservation-minded development, it has become a pedestrian district centered on Yuanying Road, integrating art exhibitions, fine dining, and boutique retail—a unique neighborhood for experiencing the cultural charm of 'old Shanghai, new Bund.'
+```
+
+## 苏州河十二国色（suzhou_creek_twelve_nations_colors）
+
+### 58. 高陵集市（鹅黄色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/01.高陵集市（鹅黄色）.md`
+- 配对图片：`01.高陵集市（鹅黄色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_01`
+- sort_order：0
+- **中文名**：高陵集市（鹅黄色）
+- **英文名**：Gaoling Market (Goose Yellow)
+- **正文（英文）**：
+
+```
+Gaoling Market is a renovated community food market along Suzhou Creek, named for its warm goose-yellow façade that has become a visual landmark of the Putuo District riverfront. Originally a traditional wet market, it was transformed in 2023 into a modern, multi-level food hall combining fresh produce, cooked-food stalls, and community dining spaces. The interior features clean industrial design with exposed ductwork and polished concrete floors, while the exterior's yellow cladding references both the historical grain warehouses of the area and the warm, approachable spirit of neighborhood market culture. The market serves as both a daily grocery destination for local residents and a foodie stop for visitors exploring the Suzhou Creek waterfront trail.
+```
+
+### 59. 曹杨新村（月白色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/02.曹杨新村（月白色）.md`
+- 配对图片：`02.曹杨新村（月白色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_02`
+- sort_order：1
+- **中文名**：曹杨新村（月白色）
+- **英文名**：Caoyang New Village (Moon White)
+- **正文（英文）**：
+
+```
+Caoyang New Village is China's first planned workers' residential community, built in 1951 as a model socialist housing project. Its moon-white façade color references the clean, optimistic aesthetic of 1950s modernist architecture. The neighborhood features a distinctive radial layout with curved lanes, low-rise apartment blocks, and generous green spaces designed around the concept of 'neighborhood units.' Designated as a national cultural relic in 2021, the village preserves original Soviet-influenced residential architecture, community centers, and the historic Caoyang Workers' Cultural Palace. A small museum inside the community documents the history of workers' housing in Shanghai, making it a key site for understanding the city's post-1949 urban development.
+```
+
+### 60. 玉佛寺（朱红色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/03.玉佛寺（朱红色）.md`
+- 配对图片：`03.玉佛寺（朱红色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_03`
+- sort_order：2
+- **中文名**：玉佛寺（朱红色）
+- **英文名**：Jade Buddha Temple (Vermilion)
+- **正文（英文）**：
+
+```
+The Jade Buddha Temple is a Chan Buddhist temple founded in 1882 to house two white jade Buddha statues brought from Myanmar by monk Huigen. The temple's vermillion-red walls and golden roof tiles follow traditional Chinese Buddhist temple architecture, with a layout comprising the Heavenly Kings Hall, the Great Treasure Hall, and the Jade Buddha Tower where the seated jade Buddha (1.92 meters tall) is enshrined. A second reclining jade Buddha lies in a side hall. The temple remains an active place of worship and is one of Shanghai's most important Buddhist sites, drawing both devotees and tourists. The complex was rebuilt in 1928 at its current Putuo District location after the original temple was destroyed by fire.
+```
+
+### 61. M50 创意园（翠绿色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/04.M50 创意园（翠绿色）.md`
+- 配对图片：`04.M50 创意园（翠绿色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_04`
+- sort_order：3
+- **中文名**：M50 创意园（翠绿色）
+- **英文名**：M50 Creative Park (Emerald Green)
+- **正文（英文）**：
+
+```
+M50 Creative Park is Shanghai's premier contemporary art district, housed in a former textile printing and dyeing factory complex dating to the 1930s. The emerald-green accents of its industrial façade reference the site's manufacturing heritage. Since 2000, when artist Xue Song established the first studio here, M50 has grown into a dense cluster of galleries, artist studios, design firms, and independent cultural spaces, hosting over 100 artists and 30+ galleries. The complex retains its raw industrial character—exposed brick walls, rusted steel frames, and factory windows—while serving as the epicenter of Shanghai's contemporary art scene, regularly hosting exhibitions, open studio events, and art fairs.
+```
+
+### 62. 雾苑堂茶室（天青色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/06.雾苑堂茶室（天青色）.md`
+- 配对图片：`06.雾苑堂茶室（天青色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_06`
+- sort_order：5
+- **中文名**：雾苑堂茶室（天青色）
+- **英文名**：Wuyuantang Teahouse (Sky Blue)
+- **正文（英文）**：
+
+```
+Wuyuantang Teahouse is a contemporary tea space perched along the Suzhou Creek waterfront, its sky-blue façade evoking the celadon glazes of Song dynasty ceramics. Designed as a quiet retreat from the urban riverfront, the teahouse features floor-to-ceiling glass walls framing views of the creek, a minimalist interior with raw concrete and warm wood, and a curated tea menu spanning Chinese white, green, and dark teas. The architecture blends traditional tea-culture aesthetics with modernist sensibility, creating a space where visitors can experience the ritual of tea preparation against the backdrop of Suzhou Creek's industrial heritage. The teahouse also hosts tea ceremony workshops and seasonal cultural events.
+```
+
+### 63. 竹丝编非遗体验馆（竹青色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/07.竹丝编非遗体验馆（竹青色）.md`
+- 配对图片：`07.竹丝编非遗体验馆（竹青色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_07`
+- sort_order：6
+- **中文名**：竹丝编非遗体验馆（竹青色）
+- **英文名**：Bamboo Weaving ICH Experience Hall (Bamboo Green)
+- **正文（英文）**：
+
+```
+The Bamboo Weaving Intangible Cultural Heritage Experience Hall is a craft workshop and exhibition space dedicated to the traditional art of bamboo splint weaving, a craft listed on China's intangible cultural heritage registry. The bamboo-green color of its entrance reflects the natural hue of its primary material. Inside, visitors can view intricate bamboo-woven artworks—from practical baskets and tea trays to large-scale installation pieces—and participate in hands-on workshops led by master craftsmen. The hall documents the history of bamboo weaving in the Jiangnan region, showcases tools and techniques passed down through generations, and sells finished pieces, making it both a cultural preservation site and an interactive craft destination along the Suzhou Creek cultural corridor.
+```
+
+### 64. 顾正红纪念馆（玄采色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/08.顾正红纪念馆（玄采色）.md`
+- 配对图片：`08.顾正红纪念馆（玄采色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_08`
+- sort_order：7
+- **中文名**：顾正红纪念馆（玄采色）
+- **英文名**：Gu Zhenghong Memorial Hall (Dark Purple)
+- **正文（英文）**：
+
+```
+The Gu Zhenghong Memorial Hall commemorates Gu Zhenghong, a workers' movement leader whose death in 1925 sparked the May 30th Movement, a pivotal event in modern Chinese history. The dark purple-gray exterior conveys solemnity and historical weight. The memorial hall, built on the site of the former Japanese-owned cotton mill where Gu worked and was killed, displays historical photographs, documents, and artifacts related to the workers' movement and the anti-imperialist struggle of 1920s Shanghai. The adjacent bronze statue of Gu Zhenghong and the memorial plaza serve as sites for commemorative events. The hall provides crucial historical context for understanding Shanghai's role as a birthplace of the Chinese labor movement.
+```
+
+### 65. 苏州河工业文明展示馆（丁香色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/09.苏州河工业文明展示馆（丁香色）.md`
+- 配对图片：`09.苏州河工业文明展示馆（丁香色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_09`
+- sort_order：8
+- **中文名**：苏州河工业文明展示馆（丁香色）
+- **英文名**：Suzhou Creek Industrial Civilization Exhibition Hall (Lilac)
+- **正文（英文）**：
+
+```
+The Suzhou Creek Industrial Civilization Exhibition Hall is housed in a converted factory building along the creek, its lilac-grey façade blending with the industrial brick textures of the surrounding Putuo District waterfront. The museum traces the industrial history of Suzhou Creek from the late 19th century through the present, displaying vintage machinery, factory models, historical photographs, and interactive exhibits that show how the creek's banks became China's most concentrated corridor of light industry, textiles, and flour mills. The exhibits also document the creek's environmental remediation and waterfront renewal, offering a comprehensive narrative of Shanghai's industrial rise, decline, and post-industrial transformation.
+```
+
+### 66. 半马苏河公园（钴蓝色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/10.半马苏河公园（钴蓝色）.md`
+- 配对图片：`10.半马苏河公园（钴蓝色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_10`
+- sort_order：9
+- **中文名**：半马苏河公园（钴蓝色）
+- **英文名**：Half-Marathon Suzhou Creek Park (Cobalt Blue)
+- **正文（英文）**：
+
+```
+Half-Marathon Suzhou Creek Park is a 21-kilometer linear waterfront park stretching along both banks of Suzhou Creek, named for its half-marathon-length continuous trail. The cobalt-blue accents of its wayfinding and recreational facilities echo the water itself. Opened progressively from 2021, the park connects dozens of previously inaccessible industrial waterfront parcels into a unified public space, featuring running and cycling paths, riverside seating, children's play areas, and ecological wetlands. The park passes through multiple districts, linking landmarks such as M50, the Dream Center, and Changfeng Park, and has become Shanghai's most popular urban linear park for jogging, cycling, and riverside leisure.
+```
+
+### 67. 百禧公园（紫棠色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/11.百禧公园（紫棠色）.md`
+- 配对图片：`11.百禧公园（紫棠色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_11`
+- sort_order：10
+- **中文名**：百禧公园（紫棠色）
+- **英文名**：Baixi Park (Purple Brown)
+- **正文（英文）**：
+
+```
+Baixi Park is an elevated linear park built on the former site of the Baixin Railway, Shanghai's longest abandoned railway corridor. Its purple-brown paving references the rust and earth tones of the decommissioned rail tracks. Opened in 2021, the park stretches approximately 800 meters at elevated levels, featuring three tiers of public space: a ground-level community garden, a mid-level walking promenade with fitness equipment, and an elevated skywalk with panoramic views of the surrounding Caoyang neighborhood. The design integrates the park's rail heritage—preserving sections of original track—while providing much-needed green space in one of Shanghai's densest residential areas. It is often compared to New York's High Line as a model of post-industrial urban reuse.
+```
+
+### 68. 鸿寿坊（琥珀色）
+- 来源 md：`新上海子景点信息/苏州河十二国色/12.鸿寿坊（琥珀色）.md`
+- 配对图片：`12.鸿寿坊（琥珀色）.jpg`
+- sub_area id：`suzhou_creek_twelve_nations_colors_sa_12`
+- sort_order：11
+- **中文名**：鸿寿坊（琥珀色）
+- **英文名**：Hongshoufang (Amber)
+- **正文（英文）**：
+
+```
+Hongshoufang is a historic shikumen neighborhood recently revitalized into a mixed-use commercial and cultural complex, its amber-toned brick façades preserving the warm hues of 1920s Shanghai residential architecture. The site retains the original lane-and-courtyard layout of traditional shikumen housing while introducing boutique retail, specialty food halls, co-working spaces, and cultural exhibition areas. The renovation carefully preserved historic elements—stone gateways, carved lintels, and internal staircases—while inserting modern amenities. Located near the Suzhou Creek waterfront in Putuo District, Hongshoufang has become a model for adaptive reuse of Shanghai's historic lilong architecture, blending neighborhood-scale retail with heritage preservation.
+```
+
+##  田子坊（tianzifang）
+
+- 文件夹名：`田子坊` → DB：` 田子坊`
+
+### 69. 泰康路主入口
+- 来源 md：`新上海子景点信息/田子坊/01.泰康路主入口.md`
+- 配对图片：`01.泰康路主入口.jpg`
+- sub_area id：`tianzifang_sa_01`
+- sort_order：0
+- **中文名**：泰康路主入口
+- **英文名**：Taikang Road Main Entrance
+- **正文（英文）**：
+
+```
+The Taikang Road Main Entrance sits at Lane 210, Taikang Road, the southern end of Tianzifang. The archway is built of bluestone, with the characters "Tianzifang" calligraphed by the renowned Chinese painter Huang Yongyu. Right by the entrance is a small cultural-creative gift shop and a popular photo wall where visitors queue year-round for pictures. Stepping through, you step into the shikumen lilong cluster and creative boutiques — the first movement of Tianzifang's "old Shanghai, new art" mood.
+```
+
+### 70. 石库门里弄建筑群
+- 来源 md：`新上海子景点信息/田子坊/02.石库门里弄建筑群.md`
+- 配对图片：`02.石库门里弄建筑群.jpg`
+- sub_area id：`tianzifang_sa_02`
+- sort_order：1
+- **中文名**：石库门里弄建筑群
+- **英文名**：Shikumen Lilong Architectural Cluster
+- **正文（英文）**：
+
+```
+The Shikumen lilong area is the historic heart of Tianzifang, covering about 7.2 hectares. Most shikumen houses were built in the 1920s—1930s: red-brick plaster walls, black-lacquered wooden doors, brass knockers, semi-circular or Baroque carved lintels, with sky-bridges and wing-rooms staggered along narrow lanes. The buildings have been converted into creative shops, galleries, cafés and designer studios, but the original façades remain largely intact. Walking along Lanes 210 / 248 / 274, you'll see laundry poles, cast-iron window grilles and old shikumen plaques — the best living slice of Shanghai's "alley-meets-modern" character.
+```
+
+### 71. 陈逸飞工作室旧址
+- 来源 md：`新上海子景点信息/田子坊/03.陈逸飞工作室旧址.md`
+- 配对图片：`03.陈逸飞工作室旧址.jpg`
+- sub_area id：`tianzifang_sa_03`
+- sort_order：2
+- **中文名**：陈逸飞工作室旧址
+- **英文名**：Chen Yifei Former Studio
+- **正文（英文）**：
+
+```
+The former studio sits at 2-A, Lane 210, Taikang Road, a two-storey shikumen building of about 170 square meters. From 1998 until his death in 2005, the celebrated oil painter Chen Yifei worked here, completing several major series including "Old Shanghai Dreams" and "Ladies." The studio's signature is its tangle of overhead wires and mismatched window shapes against the sky. Since October 2025, the Shanghai and Huangpu governments have jointly opened the space to the public for free, restoring it to its working-condition look. Visitors can see easels, oil paints, original catalogues, and letters — a must-visit for art lovers and Chen Yifei fans.
+```
+
+### 72. 守白艺术中心
+- 来源 md：`新上海子景点信息/田子坊/04.守白艺术中心.md`
+- 配对图片：`04.守白艺术中心.jpg`
+- sub_area id：`tianzifang_sa_04`
+- sort_order：3
+- **中文名**：守白艺术中心
+- **英文名**：Shoubai Art Center
+- **正文（英文）**：
+
+```
+Located inside Lane 210, Taikang Road, Shoubai Art Center was founded by Hai pai painter and paper-cutting artist Li Shoubai. The center regularly displays Li Shoubai's heavy-color paintings and paper-cut works themed on old Shanghai street scenes, qipao, opera, and everyday life — vivid colors and rich compositions. The first floor houses the exhibition and creative-retail zone; the second floor often hosts interactive workshops (paper-cutting, woodblock printing, fan painting, etc.) where visitors can try intangible cultural heritage hands-on. The center also regularly invites domestic and overseas artists for joint exhibitions and lectures — a day-into-night cultural parlor.
+```
+
+### 73. 画家楼
+- 来源 md：`新上海子景点信息/田子坊/05.画家楼.md`
+- 配对图片：`05.画家楼.jpg`
+- sub_area id：`tianzifang_sa_05`
+- sort_order：4
+- **中文名**：画家楼
+- **英文名**：Painter's Building Rooftop
+- **正文（英文）**：
+
+```
+The "Painter's Building" is a shikumen-converted artists' residence deep inside Lane 210, Taikang Road, with ground and first floors housing galleries, studios and creative shops. The rooftop is open to visitors and offers a wide panoramic view: to the east, the urban skyline toward Dapuqiao; to the south, an unbroken sea of red-tile shikumen roofs laced with black overhead wires — the classic "old Shanghai" sightline; to the west, occasional glimpses of distant high-rises. Many photographers come specifically for the "red tiles + skyscrapers" contrast, especially at sunset. Pair it with the retro phone booth, graffiti wall, and narrow lanes for the full Tianzifang photo trail.
+```
+
+### 74. 气味图书馆
+- 来源 md：`新上海子景点信息/田子坊/06.气味图书馆.md`
+- 配对图片：`06.气味图书馆.jpg`
+- sub_area id：`tianzifang_sa_06`
+- sort_order：5
+- **中文名**：气味图书馆
+- **英文名**：Demete / Odor Library
+- **正文（英文）**：
+
+```
+The Odor Library (the Chinese partner of the US Demeter Fragrance Library brand) sits inside Lane 248, Taikang Road, and is one of China's earliest homegrown brands to turn "city scents," "childhood memories," and "emotional scents" into bottled perfumes. The compact shop displays dozens of thematically named fragrances on its walls — "Garden After Rain," "Old Book Page," "Grandma's Kitchen," "Old Shanghai Lane" — each tied to a concrete scene or memory. Customers can freely sniff, commission a custom scent, or pick up 30ml travel-size gift boxes. For travelers who believe a city can be captured by smell, it is Tianzifang's most distinctive "olfactory souvenir" stop.
+```
+
+### 75. 金粉世家
+- 来源 md：`新上海子景点信息/田子坊/07.金粉世家.md`
+- 配对图片：`07.金粉世家.jpg`
+- sub_area id：`tianzifang_sa_07`
+- sort_order：6
+- **中文名**：金粉世家
+- **英文名**：Jin Fen Shi Jia (Golden Powder Family)
+- **正文（英文）**：
+
+```
+Tucked deep inside Lane 248, Taikang Road, Jin Fen Shi Jia is one of Tianzifang's longest-running and most reputable qipao + retro photo studios. The shop stocks dozens of old-Shanghai qipao (silk, velvet, linen-cotton), plus men's changshan, mandarin jackets, student uniforms, and vintage accessories. Customers can try them on, then be photographed by a pro in the studio or out in the lilong lanes — with retro phone booths, vintage bicycles and gramophones as classic props. The shop also rents costumes and props for self-shooters. Whether you want an "old Shanghai family portrait" or a "qipao shoot with the girls," Jin Fen Shi Jia is one of the most reliable choices in Tianzifang.
+```
+
+### 76. 248弄弄堂
+- 来源 md：`新上海子景点信息/田子坊/08.248弄弄堂.md`
+- 配对图片：`08.248弄弄堂.jpg`
+- sub_area id：`tianzifang_sa_08`
+- sort_order：7
+- **中文名**：248弄弄堂
+- **英文名**：Lane 248 (248 Nong)
+- **正文（英文）**：
+
+```
+Lane 248 is one of Tianzifang's three principal lanes (the others being Lanes 210 and 274), running north from Taikang Road for about 200 meters. Lined with dozens of original designer shops, hand-made leather ateliers, independent bookstores, vintage silverware stores, and small cafés/dessert spots, Lane 248 is narrower and quieter than the main 210 Lane, ideal for slow wandering. You can often watch designers hand-finishing leather goods, blending perfume, or throwing pottery inside the shops. Street performers — accordion, hand drum — regularly play at the lane mouth, lending the space a free, easy-going mood.
+```
+
+### 77. 274弄艺术长廊
+- 来源 md：`新上海子景点信息/田子坊/09.274弄艺术长廊.md`
+- 配对图片：`09.274弄艺术长廊.jpg`
+- sub_area id：`tianzifang_sa_09`
+- sort_order：8
+- **中文名**：274弄艺术长廊
+- **英文名**：Lane 274 Art Corridor (274 Nong)
+- **正文（英文）**：
+
+```
+Lane 274 is the northernmost of Tianzifang's three main lanes, connecting Taikang Road in the south to Jianguo Middle Road in the north. It is the most "art-saturated" of the three, lined with contemporary galleries (Base Art Center, Ren Weiyin Painting Museum, and others), emerging-artist studios, independent publishers, photography galleries, and small art-book cafés. It hosts numerous solo, group, video, and salon-style exhibitions each year; some galleries are free, others charge 20—50 RMB/visit or require a drink voucher. Many gallery façades are regularly repainted with new large-scale graffiti and installations, making Lane 274 a "see-shoot-wander" all-in-one core section of Tianzifang.
+```
+
+## 武康路（wukang_road）
+
+### 78. 武康大楼（诺曼底公寓）
+- 来源 md：`新上海子景点信息/武康路/01.武康大楼（诺曼底公寓）.md`
+- 配对图片：`01.武康大楼（诺曼底公寓）.jpg`
+- sub_area id：`wukang_road_sa_01`
+- sort_order：0
+- **中文名**：武康大楼（诺曼底公寓）
+- **英文名**：Wukang Mansion (Normandie Apartments, No. 1 Wukang Road)
+- **正文（英文）**：
+
+```
+Located at the five-way intersection of Huaihai Middle Road and Wukang Road, Wukang Mansion was designed by Hungarian-Slovak architect László Hudec in 1924. Originally called "Normandie Apartments" and renamed Wukang Mansion in 1953, it is one of Shanghai's earliest modern high-rise apartment buildings. The huge "ship-shaped" wedge-shaped volume inserts itself into the intersection; with one basement and eight above-ground floors, the continuous outer corridors and rounded corner stretch from Huaihai Middle Road into the depths of Wukang Road. It is Shanghai's only surviving 1920s "ship-shaped" apartment. The ground floor hosts arcades and shops — coffee shops, light dining, creative stores, and a small documentary exhibition. After repeated renovations, the contrast between granolithic and red-brick façades is striking, making it the best viewing point for the plane-tree-lined Huaihai Middle Road streetscape and the famed "First Turn in Shanghai."
+```
+
+### 79. 宋庆龄故居
+- 来源 md：`新上海子景点信息/武康路/02.宋庆龄故居.md`
+- 配对图片：`02.宋庆龄故居.jpg`
+- sub_area id：`wukang_road_sa_02`
+- sort_order：1
+- **中文名**：宋庆龄故居
+- **英文名**：Former Residence of Soong Ching-ling (No. 393 Wukang Road)
+- **正文（英文）**：
+
+```
+Located at No. 393 Wukang Road, the residence was moved into by Soong Ching-ling in 1948 and remained her home until her death in 1981 — her longest-tenured Shanghai residence and the place where she received the most Chinese and foreign guests. After Shanghai's liberation in 1949 it also served as a state guest parlor. Converted into a memorial museum after her death in 1981, the residence officially opened to the public in 1982. The collection holds over 15,000 items — photographs with Sun Yat-sen, Chongqing-era wartime clothing, post-1949 diplomatic gifts, late-life manuscripts, and personal effects. The main building is a 1920s Western garden residence; the front and rear gardens remain open and simple, with the dining room and parlor preserved as Soong Ching-ling kept them — one of Shanghai's most important "celebrity residence + state parlor" complexes.
+```
+
+### 80. 黄兴故居（老房子艺术中心）
+- 来源 md：`新上海子景点信息/武康路/03.黄兴故居（老房子艺术中心）.md`
+- 配对图片：`03.黄兴故居（老房子艺术中心）.jpg`
+- sub_area id：`wukang_road_sa_03`
+- sort_order：2
+- **中文名**：黄兴故居（老房子艺术中心）
+- **英文名**：Huang Xing's Former Residence / Old-House Art Center (Lane 393, Wukang Road)
+- **正文（英文）**：
+
+```
+Located in Lane 393 of Wukang Road, this was Shanghai residence of 1911 Revolution leader Huang Xing during 1913—1916, commonly known as "Chongde Lou." When Huang Xing passed away in Shanghai in 1916, Sun Yat-sen inscribed the characters "Xingjian" (Vigorous Action) in his memory. Listed as a Shanghai Municipal Cultural Relic in 1992, since 2010 the building has been operated as the "Old-House Art Center," co-curated by Shanghai Dramatic Arts Centre and Shanghai Jingju Theatre. It regularly hosts small art exhibitions, drama salons, Peking-Chinese opera chamber concerts, and creative markets. The building is a three-bay two-story brick-and-timber Western-style residence with gray-brick walls and simple cornices — a typical early-Republic Shanghai high-end residence forming a "dual-landmark" pairing with the Soong Ching-ling residence to its south.
+```
+
+### 81. 周璇旧居
+- 来源 md：`新上海子景点信息/武康路/04.周璇旧居.md`
+- 配对图片：`04.周璇旧居.jpg`
+- sub_area id：`wukang_road_sa_04`
+- sort_order：3
+- **中文名**：周璇旧居
+- **英文名**：Former Residence of Zhou Xuan (No. 1, Lane 391, Wukang Road)
+- **正文（英文）**：
+
+```
+Located at No. 1, Lane 391 of Wukang Road, this is one of 1930s—40s "Golden Voice" singer Zhou Xuan's several Shanghai residences. The building is a 1920s three-story brick-and-timber Western-style residence with cream-yellow walls, a corner balcony on the second floor, and dormer windows on the third — a simple and understated façade. The lane is a private "new-style lilong," used by Zhou Xuan's family and peers in the entertainment world. After Zhou Xuan passed away in 1957 the building reverted to private ownership and has never been publicly opened; it remains a private plot. Visitors can view the façade and take photos from the lane entrance, but the interior is not accessible. It is best combined with other celebrity residences along Wukang Road for a "Searching for Socialites Beneath the Plane Trees" themed walk.
+```
+
+### 82. 意大利总领事馆旧址
+- 来源 md：`新上海子景点信息/武康路/05.意大利总领事馆旧址.md`
+- 配对图片：`05.意大利总领事馆旧址.jpg`
+- sub_area id：`wukang_road_sa_05`
+- sort_order：4
+- **中文名**：意大利总领事馆旧址
+- **英文名**：Former Italian Consulate-General Residence (No. 390 Wukang Road)
+- **正文（英文）**：
+
+```
+Located at No. 390 Wukang Road, this building was designed and built by Credit Foncier d'Extreme-Orient in 1932 as the Italian consul-general's residence in Shanghai. The site covers about 2,630 m² with a floor area of 612 m², a half-basement + two above-ground-floor brick-and-stone mixed structure. The main façade faces south toward the garden; the east, south, and west sides of the ground floor are all open arcades, with red barrel-tile pitched roofs combined with semicircular and square window openings — one of Shanghai's rare surviving Mediterranean-style garden residences. After 1949 it served as offices for Shanghai's machinery and electrical systems; from 1995 it was assigned to SAIC Motor. After renovation, from 2024 it has operated as the "Mediterranean Lifestyle Hall" with reservation-based public access to the building, garden, and small art exhibitions.
+```
+
+### 83. 武康庭
+- 来源 md：`新上海子景点信息/武康路/06.武康庭.md`
+- 配对图片：`06.武康庭.jpg`
+- sub_area id：`wukang_road_sa_06`
+- sort_order：5
+- **中文名**：武康庭
+- **英文名**：Wukang Mansion Courtyard (No. 376—378 Wukang Road)
+- **正文（英文）**：
+
+```
+Wukang Mansion Courtyard sits at Nos. 376—378 Wukang Road, on the site of 1920s British firm Aquarius Co. (the famous "Zhèng Guǎng Hé" soda-water brand) Shanghai offices and surrounding new-style lilong. Renovated into an open commercial courtyard in 2007, it preserves historical elements such as the red-brick walls, dormer windows, and terrazzo stairs, and uses a central water feature, long wooden benches, and vine trellises to create an "European-style lilong atrium" atmosphere. The courtyard gathers specialty coffee shops (such as %Arabica, Peet's Coffee, Manner pop-ups), independent designer boutiques, contemporary art galleries, wedding-dress ateliers, and light dining. It is the longest-paused "small and beautiful" complex on Wukang Road, directly connected to the street, free to enter, and one of the most iconic shooting spots for an "afternoon in Wukang Road."
+```
+
+### 84. 罗密欧阳台（德利那齐宅）
+- 来源 md：`新上海子景点信息/武康路/07.罗密欧阳台（德利那齐宅）.md`
+- 配对图片：`07.罗密欧阳台（德利那齐宅）.jpg`
+- sub_area id：`wukang_road_sa_07`
+- sort_order：6
+- **中文名**：罗密欧阳台（德利那齐宅）
+- **英文名**：Romeo's Balcony (No. 210 Wukang Road / Former Del Nerce House)
+- **正文（英文）**：
+
+```
+Located at No. 210 Wukang Road and built in the 1930s, this was the private residence of Italian merchant Del Nerce. The building is a three-story brick-concrete Western-style house with cream-yellow walls, white window casings, and a small curved iron balcony projecting south from the second floor, facing the plane-tree-lined depths of Wukang Road. Seen from a distance, the balcony with its surrounding walls, vines, and garden forms a highly theatrical scene, hence its popular nickname "Romeo's Balcony" (literally "Juliet's Balcony") coined in the 2000s — the most romantic micro-landmark along Wukang Road. The building is privately owned and not open to the interior; visitors can view and photograph the façade from the Wukang Road sidewalk — an unmissable "view along the way" on a Wukang Road City Walk.
+```
+
+### 85. 巴金故居
+- 来源 md：`新上海子景点信息/武康路/08.巴金故居.md`
+- 配对图片：`08.巴金故居.jpg`
+- sub_area id：`wukang_road_sa_08`
+- sort_order：7
+- **中文名**：巴金故居
+- **英文名**：Former Residence of Ba Jin (No. 113 Wukang Road)
+- **正文（英文）**：
+
+```
+Located at No. 113 Wukang Road, this was Ba Jin's residence from 1955 — when he moved here from Huaihai Lane — until his death in 2005, a span of nearly half a century and his longest-tenured Shanghai home with the highest output. The building is a three-bay two-story detached garden villa built in the 1920s, with simple gray-brick façades, a modest gate, and a garden preserving the magnolia and cherry trees Ba Jin himself planted. From 1958—2003, here he completed Random Thoughts (five volumes, 150 essays), True Words, In Sickness, and other major works, and hosted many Chinese and overseas scholars of his writing. Officially opened to the public in 2011, the interior retains the original arrangement of Ba Jin's furniture, desk, bookcases, and phonograph. Exhibits include manuscripts, letters, photographs, books, and personal items of Ba Jin and his wife Xiao Shan.
+```
+
+### 86. 密丹公寓
+- 来源 md：`新上海子景点信息/武康路/09.密丹公寓.md`
+- 配对图片：`09.密丹公寓.jpg`
+- sub_area id：`wukang_road_sa_09`
+- sort_order：8
+- **中文名**：密丹公寓
+- **英文名**：Medan Apartments (No. 115 Wukang Road)
+- **正文（英文）**：
+
+```
+Located at No. 115 Wukang Road, Medan Apartments was funded by the French International Savings Society and designed by the architectural firm A. Léonard & P. Veysseyre in 1924. The building has six above-ground floors (originally four, later added), a brick-concrete structure, with yellow rough-cast cement walls and simple geometric window casings and balconies; the ground floor has a continuous arcade. Overall it shows the typical "Art Deco" early-modern style of the late 1920s. Located in the heart of the former French Concession next to the Ba Jin residence and Wukang Mansion Courtyard, it has long been rented by foreign doctors, engineers, and cultural celebrities. After 1949 it became ordinary residential housing for Shanghai citizens; the first and second floors are partly commercial, with residential units above. The exterior is open to view; the interior is not accessible — a must-stop on Wukang Road's "Architecture Can Be Read" walk.
+```
+
+## 徐家汇源景区（xujiahui_source_scenic_area）
+
+- 文件夹名：`徐家汇源` → DB：`徐家汇源景区`
+
+### 87. 徐家汇书院
+- 来源 md：`新上海子景点信息/徐家汇源/01.徐家汇书院.md`
+- 配对图片：`01.徐家汇书院.jpg`
+- sub_area id：`xujiahui_source_scenic_area_sa_01`
+- sort_order：0
+- **中文名**：徐家汇书院
+- **英文名**：Xujiahui Library
+- **正文（英文）**：
+
+```
+Xujiahui Library is a striking contemporary public library opened in 2023, designed as a 'book box in the garden' with a translucent glass façade that glows at night. Located at the heart of the Xujiahui cultural district, the three-story building houses over 200,000 volumes, a children's reading area, digital media labs, and exhibition spaces. The interior features open-plan reading rooms with floor-to-ceiling windows overlooking the adjacent church plaza and parkland. The library's design integrates sustainable elements—natural ventilation, solar shading, and rainwater harvesting—while its terraced reading areas create a serene, layered spatial experience. It has quickly become one of Shanghai's most beloved public cultural spaces.
+```
+
+### 88. 徐家汇天主堂
+- 来源 md：`新上海子景点信息/徐家汇源/02.徐家汇天主堂.md`
+- 配对图片：`02.徐家汇天主堂.jpg`
+- sub_area id：`xujiahui_source_scenic_area_sa_02`
+- sort_order：1
+- **中文名**：徐家汇天主堂
+- **英文名**：Xujiahui Catholic Church
+- **正文（英文）**：
+
+```
+The Xujiahui Catholic Church (St. Ignatius Cathedral) is Shanghai's largest Gothic Revival church, completed in 1910 by French Jesuit architects. Its twin spires rise 57 meters, dominating the Xujiahui skyline with red-brick walls and stone tracery windows. The interior features a soaring rib-vaulted nave, stained glass windows imported from France, and a capacity of 2,500 worshippers. The church was severely damaged during the Cultural Revolution—its spires were removed and stained glass destroyed—but underwent a major restoration completed in 2013, returning the twin spires and reinstalling stained glass. As the spiritual center of Shanghai's Catholic community and a key landmark of Xujiahui's Jesuit heritage, the church is both an active place of worship and a major architectural monument.
+```
+
+### 89. 上海气象博物馆（徐家汇观象台旧址）
+- 来源 md：`新上海子景点信息/徐家汇源/03.上海气象博物馆（徐家汇观象台旧址）.md`
+- 配对图片：`03.上海气象博物馆（徐家汇观象台旧址）.jpg`
+- sub_area id：`xujiahui_source_scenic_area_sa_03`
+- sort_order：2
+- **中文名**：上海气象博物馆（徐家汇观象台旧址）
+- **英文名**：Shanghai Meteorological Museum (Former Xujiahui Observatory)
+- **正文（英文）**：
+
+```
+The Shanghai Meteorological Museum occupies the former Xujiahui Observatory, established by Jesuit priests in 1872 as one of East Asia's first modern meteorological stations. The building's French Renaissance-style architecture features a central tower and weather-observation balcony. The museum displays historical instruments—barometers, anemometers, seismographs—and documents the observatory's 150-year continuous weather record, one of the longest in Asia. Exhibits also cover the history of typhoon tracking, earthquake monitoring, and time-keeping services that the observatory provided to Shanghai and the wider China coast. The restored building itself is a cultural relic, offering visitors a glimpse into the scientific contributions of the Jesuit mission to modern China.
+```
+
+### 90. 徐汇公学旧址（崇思楼）
+- 来源 md：`新上海子景点信息/徐家汇源/04.徐汇公学旧址（崇思楼）.md`
+- 配对图片：`04.徐汇公学旧址（崇思楼）.jpg`
+- sub_area id：`xujiahui_source_scenic_area_sa_04`
+- sort_order：3
+- **中文名**：徐汇公学旧址（崇思楼）
+- **英文名**：Former Xuhui Public School (Chongsi Building)
+- **正文（英文）**：
+
+```
+The Former Xuhui Public School (Chongsi Building) is a historic educational institution founded in 1850 by Jesuit priests, making it one of Shanghai's oldest Western-style schools. The Chongsi Building, constructed in 1917, is a three-story brick-and-stone structure combining French Renaissance and Chinese architectural elements, with arched colonnades, red-brick walls, and a central clock tower. The school educated many prominent Chinese intellectuals, scientists, and public figures throughout its history. Now preserved as a cultural heritage site, the building houses a small exhibition on the history of Western education in Shanghai and the Xujiahui cultural district's role as a center of learning and cultural exchange.
+```
+
+### 91. 百代小楼（《义勇军进行曲》灌制地纪念馆）
+- 来源 md：`新上海子景点信息/徐家汇源/05.百代小楼（《义勇军进行曲》灌制地纪念馆）.md`
+- 配对图片：`05.百代小楼（《义勇军进行曲》灌制地纪念馆）.jpg`
+- sub_area id：`xujiahui_source_scenic_area_sa_05`
+- sort_order：4
+- **中文名**：百代小楼（《义勇军进行曲》灌制地纪念馆）
+- **英文名**：Pathé Villa (March of the Volunteers Recording Memorial)
+- **正文（英文）**：
+
+```
+The Pathé Villa (Baidai Xiaolou) is a red-brick Western-style garden residence built in 1921 that became the Shanghai headquarters of Pathé Records (later EMI) in the 1930s. It was here, in 1935, that the 'March of the Volunteers'—now China's national anthem—was first recorded by singer Yuan Muzhi and composer Nie Er. The villa has been restored as a memorial museum, displaying original recording equipment, vintage gramophones, historical photographs, and interactive exhibits on the history of China's recording industry. The ground-floor recording studio where the anthem was laid down is preserved as a key exhibit. The building itself is a protected cultural relic, representing both Shanghai's musical heritage and the revolutionary history embedded in the national anthem.
+```
+
+### 92. 上海电影博物馆
+- 来源 md：`新上海子景点信息/徐家汇源/06.上海电影博物馆.md`
+- 配对图片：`06.上海电影博物馆.jpg`
+- sub_area id：`xujiahui_source_scenic_area_sa_06`
+- sort_order：5
+- **中文名**：上海电影博物馆
+- **英文名**：Shanghai Film Museum
+- **正文（英文）**：
+
+```
+The Shanghai Film Museum is a four-story, 15,000-square-meter museum dedicated to the history of Chinese cinema, located in the former Shanghai Film Studio complex in Xujiahui. Opened in 2013, the museum traces over a century of filmmaking from Shanghai's role as the birthplace of Chinese cinema in the 1890s through the golden age of 1930s Shanghai cinema and into the contemporary era. Exhibits include vintage cameras, projectors, costume collections, set recreations, and interactive displays where visitors can try dubbing, special effects, and animation. The museum also houses a 4D cinema, a classic film screening room, and a permanent exhibition on the Shanghai Animation Film Studio, celebrating China's rich tradition of animated filmmaking.
+```
+
+### 93. 光启公园与徐光启纪念馆
+- 来源 md：`新上海子景点信息/徐家汇源/07.光启公园与徐光启纪念馆.md`
+- 配对图片：`07.光启公园与徐光启纪念馆.jpg`
+- sub_area id：`xujiahui_source_scenic_area_sa_07`
+- sort_order：6
+- **中文名**：光启公园与徐光启纪念馆
+- **英文名**：Guangqi Park and Xu Guangqi Memorial Hall
+- **正文（英文）**：
+
+```
+Guangqi Park and the Xu Guangqi Memorial Hall honor Xu Guangqi (1562–1633), the Ming dynasty polymath who was one of the first Chinese scholars to systematically study Western science and Christianity. The park contains Xu Guangqi's tomb, a simple mound surrounded by greenery, while the memorial hall—housed in a traditional Chinese-style building—displays his manuscripts, translations of Euclid's geometry (co-translated with Jesuit Matteo Ricci), astronomical instruments, and correspondence. The exhibits document Xu's pioneering role in Sino-Western cultural exchange, his contributions to mathematics, agriculture, and astronomy, and his lasting influence on Chinese intellectual history. The park serves as both a historical site and a peaceful green space in the heart of the Xujiahui district, which itself is named after Xu's family estate.
+```
+
+### 94. 土山湾博物馆
+- 来源 md：`新上海子景点信息/徐家汇源/08.土山湾博物馆.md`
+- 配对图片：`08.土山湾博物馆.jpg`
+- sub_area id：`xujiahui_source_scenic_area_sa_08`
+- sort_order：7
+- **中文名**：土山湾博物馆
+- **英文名**：Tushanwan Museum
+- **正文（英文）**：
+
+```
+The Tushanwan Museum commemorates the Tushanwan Orphanage and Arts Workshop, established by Jesuit priests in 1864. The orphanage workshop became renowned for training orphaned boys in Western-style painting, sculpture, woodcarving, stained glass, and printing, effectively becoming the 'cradle of Western art in Shanghai.' The museum displays original Tushanwan artworks—including religious paintings, carved altarpieces, and the famous 'Tushanwan brand' color prints—alongside historical photographs and workshop tools. Exhibits document how Tushanwan graduates influenced modern Chinese art, design, and publishing, and how the workshop produced works for churches and institutions across China and Southeast Asia. The museum provides a unique window into the cultural exchange between East and West through craft education.
+```
+
+### 95. 圣母院旧址（上海老站）
+- 来源 md：`新上海子景点信息/徐家汇源/09.圣母院旧址（上海老站）.md`
+- 配对图片：`09.圣母院旧址（上海老站）.jpg`
+- sub_area id：`xujiahui_source_scenic_area_sa_09`
+- sort_order：8
+- **中文名**：圣母院旧址（上海老站）
+- **英文名**：Former Notre Dame Convent (Shanghai Old Station)
+- **正文（英文）**：
+
+```
+The Former Notre Dame Convent, now operating as the 'Shanghai Old Station' restaurant, is a historic religious compound built by the Sisters of the Presentation of Mary in the 1860s. The complex includes a Gothic-style chapel, a European-style convent building, and landscaped gardens. After the convent's closure, the buildings were adaptively reused as a restaurant specializing in Shanghainese cuisine, with dining rooms set in the former chapel and convent halls. The interior preserves many original architectural features—vaulted ceilings, stained glass, stone columns—while vintage train carriages placed in the garden reference the nearby former railway station. The site represents both the religious heritage of Xujiahui and the adaptive reuse of historic buildings in contemporary Shanghai.
+```
+
+## 豫园（yu_garden）
+
+### 96. 三穗堂
+- 来源 md：`新上海子景点信息/豫园/01.三穗堂.md`
+- 配对图片：`01.三穗堂.jpg`
+- sub_area id：`yu_garden_sa_01`
+- sort_order：0
+- **中文名**：三穗堂
+- **英文名**：Sansui Hall
+- **正文（英文）**：
+
+```
+A five-bay gable-roofed hall with a soaring ridge, it displays red-lacquered painted beams and a calligraphic plaque. Inside, a portrait of Pan Yuduan and an old panorama of the garden are exhibited. Today it welcomes visitors and frames the first impression of Yuyuan.
+```
+
+### 97. 仰山堂卷雨楼
+- 来源 md：`新上海子景点信息/豫园/02.仰山堂卷雨楼.md`
+- 配对图片：`02.仰山堂卷雨楼.jpg`
+- sub_area id：`yu_garden_sa_02`
+- sort_order：1
+- **中文名**：仰山堂卷雨楼
+- **英文名**：Yangshan Hall & Juanyu Lou
+- **正文（英文）**：
+
+```
+Yangshan Hall is a three-bay gable-roofed room framing views of the rockery; Juanyu Lou above offers tea seats and, on rainy days, eaves that drip like a curtain—hence the name. The complex is the prime vantage point for photographing the Great Rockery.
+```
+
+### 98. 大假山
+- 来源 md：`新上海子景点信息/豫园/03.大假山.md`
+- 配对图片：`03.大假山.jpg`
+- sub_area id：`yu_garden_sa_03`
+- sort_order：2
+- **中文名**：大假山
+- **英文名**：The Great Rockery
+- **正文（英文）**：
+
+```
+Built of yellow stones from Wukang, Zhejiang, the 12-metre-tall, 400-metre-perimeter rockery features crags, caves and winding paths. From the summit pavilion, visitors glimpse the Huangpu River and City God Temple roofs. A national key cultural relic, it embodies the Ming literati principle of "made by man, yet appearing natural."
+```
+
+### 99. 萃秀堂
+- 来源 md：`新上海子景点信息/豫园/04.萃秀堂.md`
+- 配对图片：`04.萃秀堂.jpg`
+- sub_area id：`yu_garden_sa_04`
+- sort_order：3
+- **中文名**：萃秀堂
+- **英文名**：Cuixiu Hall
+- **正文（英文）**：
+
+```
+Facing a winding pool and backed by rockwork, Cuixiu Hall is a three-bay hall on the eastern foot of the Great Rockery. Planted with osmanthus, magnolia, crabapple and crape myrtle, it served the Ming owners for poetry and music gatherings. Its pale Su-style painted beams and fine latticework reflect the classic Jiangnan literati aesthetic.
+```
+
+### 100. 万花楼
+- 来源 md：`新上海子景点信息/豫园/05.万花楼.md`
+- 配对图片：`05.万花楼.jpg`
+- sub_area id：`yu_garden_sa_05`
+- sort_order：4
+- **中文名**：万花楼
+- **英文名**：Wanhua Lou
+- **正文（英文）**：
+
+```
+A two-storey structure next to Cuixiu Hall, named for the peonies, roses, camellias, azaleas and herbaceous peonies surrounding it. The ground floor is a flower-viewing parlor; the upper floor overlooks the pool and rockery. It is Yuyuan's most beloved springtime destination.
+```
+
+### 101. 点春堂
+- 来源 md：`新上海子景点信息/豫园/06.点春堂.md`
+- 配对图片：`06.点春堂.jpg`
+- sub_area id：`yu_garden_sa_06`
+- sort_order：5
+- **中文名**：点春堂
+- **英文名**：Dianchun Hall
+- **正文（英文）**：
+
+```
+Originally a guild hall for Fujianese sugar and flower merchants, Dianchun Hall became the command post of the 1853 Small Swords Society Uprising led by Liu Lichuan. Today a five-bay gable-roofed building with a front stage, it preserves exhibits about the uprising, making it both a revolutionary heritage site and a traditional opera venue.
+```
+
+### 102. 玉玲珑
+- 来源 md：`新上海子景点信息/豫园/07.玉玲珑.md`
+- 配对图片：`07.玉玲珑.jpg`
+- sub_area id：`yu_garden_sa_07`
+- sort_order：6
+- **中文名**：玉玲珑
+- **英文名**：Yulinglong (Jade Camellia Stone)
+- **正文（英文）**：
+
+```
+A 3.3-metre-tall Lake Tai scholar's rock, Yulinglong is famed for its 72 perforations, said to let smoke from a single incense burner escape through every hole. Once owned by the Ming official Gu Mingshi, it is one of the "Three Great Rocks of Jiangnan" alongside Liu Garden's Guanyun Peak and West Lake's Zhouyun Peak.
+```
+
+### 103. 玉华堂
+- 来源 md：`新上海子景点信息/豫园/08.玉华堂.md`
+- 配对图片：`08.玉华堂.jpg`
+- sub_area id：`yu_garden_sa_08`
+- sort_order：7
+- **中文名**：玉华堂
+- **英文名**：Yuhua Hall
+- **正文（英文）**：
+
+```
+Yuhua Hall ("Jade-Splendor Hall") is a compact three-bay studio adjoining the Jade Camellia Stone. Its name means "the essence of jade." Fitted with Ming-style furniture and surrounded by bamboo, rocks and a small pool, it was the owner's retreat for reading and qin playing. Today it complements the Yulinglong stone display.
+```
+
+### 104. 会景楼
+- 来源 md：`新上海子景点信息/豫园/09.会景楼.md`
+- 配对图片：`09.会景楼.jpg`
+- sub_area id：`yu_garden_sa_09`
+- sort_order：8
+- **中文名**：会景楼
+- **英文名**：Huijing Lou
+- **正文（英文）**：
+
+```
+The three-storey Huijing Lou ("Gathering-Scenery Tower") is the tallest building in Yuyuan's west garden. Its top floor offers 360-degree views: the Nine-Turn Bridge and Mid-Lake Pavilion to the south, the Great Rockery and City God Temple to the east, and Lujiazui's skyline to the northwest. It also houses calligraphy exhibitions and a tea house.
+```
+
+### 105. 得月楼
+- 来源 md：`新上海子景点信息/豫园/10.得月楼.md`
+- 配对图片：`10.得月楼.jpg`
+- sub_area id：`yu_garden_sa_10`
+- sort_order：9
+- **中文名**：得月楼
+- **英文名**：Deyue Lou
+- **正文（英文）**：
+
+```
+Built by the lotus pond, Deyue Lou ("Moon-Winning Tower") is a two-storey teahouse facing the Mid-Lake Pavilion and the winding Nine-Turn Bridge. Its name quotes Su Lin of the Song dynasty: "The waterside tower wins the moon first." Tea and Shanghainese snacks are served upstairs with prime views—the quintessential Jiangnan teahouse experience.
+```
+
+### 106. 内园
+- 来源 md：`新上海子景点信息/豫园/11.内园.md`
+- 配对图片：`11.内园.jpg`
+- sub_area id：`yu_garden_sa_11`
+- sort_order：10
+- **中文名**：内园
+- **英文名**：Inner Garden
+- **正文（英文）**：
+
+```
+Built in 1709 as a private garden for the City God Temple complex, the Inner Garden is a master class in Jiangnan miniature landscaping. In just 2 mu it packs winding corridors, the Nine-Dragon Pool, the Yellow-Stone Rockery and the Jiyu Peak, connected by covered walkways inset with Ming–Qing stone tablets—a perfectly preserved late-imperial literati garden.
+```

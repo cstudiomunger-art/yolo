@@ -29,6 +29,7 @@ struct AudioGuideSection: View {
     @State private var isScrubbing = false
     @State private var voiceVariants: [AudioVoiceVariant] = []
     @State private var selectedVariantId: String?
+    @State private var showTranscript = false
 
     private var player: AudioQueuePlayer { appEnv.audioPlayer }
 
@@ -111,6 +112,19 @@ struct AudioGuideSection: View {
     }
     private var effectiveIndex: Int { queue.isEmpty ? 0 : trackIndex }
 
+    private var transcriptText: String? {
+        AudioTranscriptResolver.text(for: playbackGuide)
+    }
+
+    private func openTranscript() {
+        guard transcriptText != nil else { return }
+        if hasFullAccess {
+            showTranscript = true
+        } else {
+            showPurchase = true
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 8) {
@@ -180,6 +194,14 @@ struct AudioGuideSection: View {
                 showUnlockedToast = true
             }
             .environment(appEnv)
+        }
+        .sheet(isPresented: $showTranscript) {
+            if let transcript = transcriptText {
+                AudioTranscriptSheet(
+                    title: guide.titleEn,
+                    transcript: transcript
+                )
+            }
         }
         .onAppear {
             syncVoiceFromPlayer()
@@ -299,6 +321,9 @@ struct AudioGuideSection: View {
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
             Spacer()
+            if transcriptText != nil {
+                AudioTranscriptButton { openTranscript() }
+            }
         }
 
         if showsUnlockButton {
@@ -334,6 +359,9 @@ struct AudioGuideSection: View {
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(Theme.ColorToken.textMuted)
             Spacer()
+            if transcriptText != nil {
+                AudioTranscriptButton { openTranscript() }
+            }
             downloadRow
         }
     }

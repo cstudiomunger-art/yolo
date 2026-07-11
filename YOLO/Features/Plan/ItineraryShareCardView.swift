@@ -40,8 +40,8 @@ struct ItineraryShareCardView: View {
             Text("🇨🇳 \(itinerary.title)")
                 .font(Theme.FontToken.playfair(22, weight: .semibold))
                 .foregroundStyle(Theme.ColorToken.textPrimary)
-            if !itinerary.meta.isEmpty {
-                Text(itinerary.meta)
+            if !itinerary.displayMeta.isEmpty {
+                Text(itinerary.displayMeta)
                     .font(Theme.FontToken.inter(12))
                     .foregroundStyle(Theme.ColorToken.textSecondary)
             }
@@ -60,7 +60,7 @@ struct ItineraryShareCardView: View {
 
     private func daySection(_ day: ItineraryDay) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(day.dateLabel)
+            Text(itinerary.displayDateLabel(for: day))
                 .font(Theme.FontToken.inter(11, weight: .semibold))
                 .foregroundStyle(Theme.ColorToken.textMuted)
                 .textCase(.uppercase)

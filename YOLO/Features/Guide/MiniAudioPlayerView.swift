@@ -10,6 +10,8 @@ struct MiniAudioPlayerView: View {
     @State private var isScrubbing = false
     @State private var showPlaylist = false
     @State private var paywallTrack: AudioTrack?
+    @State private var showTranscript = false
+    @State private var accessRefresh = UUID()
 
     private let buttonSize: CGFloat = 52
 
@@ -56,6 +58,10 @@ struct MiniAudioPlayerView: View {
         }
         .onChange(of: player.currentTrackId) { _, _ in
             scrub = player.progress
+            accessRefresh = UUID()
+            if showTranscript, currentTranscript == nil {
+                showTranscript = false
+            }
         }
         .onChange(of: appEnv.preferences.purchasedAttractionIds) { _, _ in
             player.refreshCurrentTrackAccess()
@@ -65,6 +71,36 @@ struct MiniAudioPlayerView: View {
         }
         .onChange(of: appEnv.membershipRevision) { _, _ in
             player.refreshCurrentTrackAccess()
+            accessRefresh = UUID()
+        }
+        .sheet(isPresented: $showTranscript) {
+            if let track = player.currentTrack, let transcript = currentTranscript {
+                AudioTranscriptSheet(
+                    title: track.title,
+                    transcript: transcript
+                )
+            }
+        }
+    }
+
+    private var currentTranscript: String? {
+        guard let track = player.currentTrack else { return nil }
+        return AudioTranscriptResolver.text(for: track)
+    }
+
+    private var currentTranscriptAccess: Bool {
+        _ = accessRefresh
+        guard let track = player.currentTrack else { return true }
+        if track.isFree { return true }
+        return player.resolveAccess?(track).hasFullAccess ?? true
+    }
+
+    private func openTranscript() {
+        guard let track = player.currentTrack, currentTranscript != nil else { return }
+        if currentTranscriptAccess {
+            showTranscript = true
+        } else if track.attraction != nil {
+            paywallTrack = track
         }
     }
 
@@ -109,6 +145,10 @@ struct MiniAudioPlayerView: View {
                 AudioTrackVoiceSwitcher(track: track) { variant in
                     player.applyVoiceVariant(variant, at: player.currentIndex)
                 }
+            }
+
+            if currentTranscript != nil {
+                AudioTranscriptButton { openTranscript() }
             }
 
             if player.currentTrackIsPreview {

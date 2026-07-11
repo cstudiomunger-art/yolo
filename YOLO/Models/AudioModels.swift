@@ -8,6 +8,7 @@ struct AudioGuide: Identifiable, Codable {
     let durationSeconds: Int
     let audioUrl: String
     let quote: String?
+    let transcript: String?
     let segments: [AudioSegment]
     let isMainGuide: Bool
 
@@ -19,6 +20,7 @@ struct AudioGuide: Identifiable, Codable {
         durationSeconds: Int = 0,
         audioUrl: String,
         quote: String? = nil,
+        transcript: String? = nil,
         segments: [AudioSegment] = [],
         isMainGuide: Bool = false
     ) {
@@ -29,6 +31,7 @@ struct AudioGuide: Identifiable, Codable {
         self.durationSeconds = durationSeconds
         self.audioUrl = audioUrl
         self.quote = quote
+        self.transcript = transcript
         self.segments = segments
         self.isMainGuide = isMainGuide
     }
@@ -42,6 +45,7 @@ struct AudioGuide: Identifiable, Codable {
         durationSeconds = try c.decodeIfPresent(Int.self, forKey: .durationSeconds) ?? 0
         audioUrl = try c.decodeIfPresent(String.self, forKey: .audioUrl) ?? ""
         quote = try c.decodeIfPresent(String.self, forKey: .quote)
+        transcript = try c.decodeIfPresent(String.self, forKey: .transcript)
         segments = (try? c.decode([AudioSegment].self, forKey: .segments)) ?? []
         isMainGuide = try c.decodeIfPresent(Bool.self, forKey: .isMainGuide) ?? false
     }
@@ -55,12 +59,13 @@ struct AudioGuide: Identifiable, Codable {
         try c.encode(durationSeconds, forKey: .durationSeconds)
         try c.encode(audioUrl, forKey: .audioUrl)
         try c.encodeIfPresent(quote, forKey: .quote)
+        try c.encodeIfPresent(transcript, forKey: .transcript)
         try c.encode(segments, forKey: .segments)
         try c.encode(isMainGuide, forKey: .isMainGuide)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, attractionId, titleEn, description, durationSeconds, audioUrl, quote, segments, isMainGuide
+        case id, attractionId, titleEn, description, durationSeconds, audioUrl, quote, transcript, segments, isMainGuide
     }
 }
 

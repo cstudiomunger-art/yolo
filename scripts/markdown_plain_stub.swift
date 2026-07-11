@@ -22,3 +22,10 @@ enum MarkdownContentView {
         return s.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
+
+/// Minimal stub so `PlanItineraryHelpers` compiles in the golden harness.
+protocol ContentRepositoryProtocol: Sendable {
+    func fetchAttraction(id: String) async throws -> Attraction?
+    func fetchAttractions(cityId: String) async throws -> [Attraction]
+    func fetchCities() async throws -> [City]
+}

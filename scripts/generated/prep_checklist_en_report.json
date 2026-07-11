@@ -1,0 +1,84 @@
+{
+  "generatedAt": "2026-07-11T06:57:19.205Z",
+  "source": "/Users/vesperal/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_gc85d9n70ps122_37b7/msg/file/2026-07/EN_通用行前准备清单.md",
+  "mode": "apply",
+  "tasks": [
+    {
+      "id": "cl_prep_en_01",
+      "type": "entry",
+      "title_en": "Check your visa or visa-free eligibility",
+      "why_len": 251,
+      "how_len": 428,
+      "external_links": [
+        {
+          "label": "Open Visa Checker",
+          "url": "app://visa-checker"
+        }
+      ]
+    },
+    {
+      "id": "cl_prep_en_02",
+      "type": "entry",
+      "title_en": "Get your passport and entry documents ready",
+      "why_len": 137,
+      "how_len": 610,
+      "external_links": []
+    },
+    {
+      "id": "cl_prep_en_03",
+      "type": "universal",
+      "title_en": "Get your phone ready (payments, data, apps)",
+      "why_len": 184,
+      "how_len": 713,
+      "external_links": [
+        {
+          "label": "Payment setup guide",
+          "url": "app://payment-helper"
+        },
+        {
+          "label": "Connectivity options",
+          "url": "app://info-hub"
+        }
+      ]
+    },
+    {
+      "id": "cl_prep_en_04",
+      "type": "universal",
+      "title_en": "Book your hotels, high-speed rail, and popular attraction tickets",
+      "why_len": 173,
+      "how_len": 532,
+      "external_links": [
+        {
+          "label": "Book a hotel",
+          "url": "app://plan-hotels"
+        }
+      ]
+    },
+    {
+      "id": "cl_prep_en_05",
+      "type": "universal",
+      "title_en": "Pack smart (medications, power, clothing)",
+      "why_len": 185,
+      "how_len": 919,
+      "external_links": [
+        {
+          "label": "Medication guide",
+          "url": "app://emergency-medical"
+        }
+      ]
+    },
+    {
+      "id": "cl_prep_en_06",
+      "type": "universal",
+      "title_en": "Cover your safety and emergency basics",
+      "why_len": 189,
+      "how_len": 926,
+      "external_links": [
+        {
+          "label": "Embassy assistance",
+          "url": "app://emergency"
+        }
+      ]
+    }
+  ]
+}

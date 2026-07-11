@@ -512,11 +512,20 @@ enum PlanItineraryCityDays {
             pace: pace
         )
         if calendarNeed > tripDays {
-            let msg = "行程 \(tripDays) 天偏紧：按景点体量建议至少 \(Int(minDemandDaysTotal)) 个观光日，已压缩分配。"
+            let msg = String(
+                format: String(localized: "Tight %lld-day trip: recommend at least %lld sightseeing days; compressed allocation applied."),
+                locale: PlanTripDateMath.displayLocale,
+                tripDays,
+                Int(minDemandDaysTotal)
+            )
             hints.append(msg)
             adjustments.append(msg)
         } else if minDemandDaysTotal > Double(availableCityDays) + 0.5 {
-            let msg = "景点较多，\(availableCityDays) 个观光日可能装不下全部推荐景点，部分将自动取舍。"
+            let msg = String(
+                format: String(localized: "Many sights — %lld sightseeing days may not fit everything; some will be skipped."),
+                locale: PlanTripDateMath.displayLocale,
+                availableCityDays
+            )
             hints.append(msg)
             adjustments.append(msg)
         }

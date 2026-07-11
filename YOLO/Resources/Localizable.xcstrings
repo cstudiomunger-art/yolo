@@ -252,9 +252,6 @@
     "⏸ Pause preview" : {
 
     },
-    "▴" : {
-
-    },
     "▶ Listen" : {
 
     },
@@ -262,9 +259,6 @@
 
     },
     "▶ Preview (%lld min free)" : {
-
-    },
-    "▾" : {
 
     },
     "⚠" : {
@@ -333,16 +327,10 @@
     "💬" : {
 
     },
-    "💬 Common phrases" : {
-
-    },
     "📍" : {
 
     },
     "📚 Read Before You Go" : {
-
-    },
-    "📝 %@" : {
 
     },
     "🔒" : {
@@ -355,9 +343,6 @@
 
     },
     "🔗 Ticket links (external · not tracked)" : {
-
-    },
-    "🗣 Dialect gems · long-press a card for large text" : {
 
     },
     "🗺" : {
@@ -405,16 +390,16 @@
     "Active Membership" : {
 
     },
-    "Activity name" : {
+    "Activities on this day will be kept." : {
 
     },
-    "Add activity" : {
+    "Add" : {
 
     },
     "Add attraction" : {
 
     },
-    "Add day" : {
+    "Add intercity travel" : {
 
     },
     "Add to favorites" : {
@@ -432,6 +417,9 @@
     "Added" : {
 
     },
+    "Added by you" : {
+
+    },
     "Added to Day %lld" : {
 
     },
@@ -440,46 +428,6 @@
     },
     "Advance reminders" : {
 
-    },
-    "Afternoon arrival — light sightseeing window" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下午抵达 — 可安排轻度观光"
-          }
-        }
-      }
-    },
-    "Afternoon arrival in %@ — light sightseeing" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下午抵达 %@ — 轻松 1 站 + 可选晚间"
-          }
-        }
-      }
-    },
-    "Afternoon departure — morning sights still possible" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下午出发 — 上午仍可安排景点"
-          }
-        }
-      }
-    },
-    "Afternoon sightseeing in %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下午可在 %@ 游玩"
-          }
-        }
-      }
     },
     "Agree to terms and privacy policy" : {
 
@@ -499,19 +447,6 @@
     "All cities" : {
 
     },
-    "Allow extra time for airport or train station transfer" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "预留前往机场或火车站的额外时间"
-          }
-        }
-      }
-    },
-    "Almost ready…" : {
-
-    },
     "An account with this email already exists. Try signing in instead." : {
 
     },
@@ -527,17 +462,6 @@
     "Arrival time" : {
 
     },
-    "Arrive at %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "抵达时间 %@"
-          }
-        }
-      }
-    },
     "Attractions" : {
 
     },
@@ -548,9 +472,6 @@
 
     },
     "Audio not available yet." : {
-
-    },
-    "Audio transcript" : {
 
     },
     "Authenticity is our moat — we're not bots. We genuinely want to help." : {
@@ -569,9 +490,6 @@
 
     },
     "BEST VALUE" : {
-
-    },
-    "Booking trace" : {
 
     },
     "Built with on-device scheduling rules" : {
@@ -606,16 +524,6 @@
     },
     "Check for Content Updates" : {
 
-    },
-    "Check in and settle at your hotel" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "办理入住并在酒店安顿"
-          }
-        }
-      }
     },
     "Check the admin: city, enabled status, and foreign-guest acceptance must match this trip." : {
 
@@ -684,6 +592,9 @@
     "Coming soon — we're adding content for %@" : {
 
     },
+    "Common phrases" : {
+
+    },
     "complete" : {
 
     },
@@ -750,9 +661,6 @@
     "Copy Link" : {
 
     },
-    "Cost estimate" : {
-
-    },
     "Could not create share image. Please try again." : {
 
     },
@@ -769,6 +677,15 @@
 
     },
     "Could not place %@ during normalize" : {
+
+    },
+    "Could not redeem code. Please try again." : {
+
+    },
+    "Could not save share link. Please try again." : {
+
+    },
+    "Could not schedule: %1$@ (%2$@)" : {
 
     },
     "Create a trip poster you can send to friends." : {
@@ -790,15 +707,6 @@
 
     },
     "Custom" : {
-
-    },
-    "Daily schedule" : {
-
-    },
-    "Date label" : {
-
-    },
-    "Dates" : {
 
     },
     "Day · in progress" : {
@@ -838,27 +746,6 @@
     "Delete this trip?" : {
 
     },
-    "Depart at %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "出发时间 %@"
-          }
-        }
-      }
-    },
-    "Depart from %@ at %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@ 出发"
-          }
-        }
-      }
-    },
     "Departure" : {
 
     },
@@ -874,7 +761,7 @@
     "Detailed check (departure / port / onward ticket)" : {
 
     },
-    "Details" : {
+    "Dialect gems · tap to listen · long-press for large text" : {
 
     },
     "Display name" : {
@@ -886,9 +773,6 @@
     "Done" : {
 
     },
-    "Done reorder" : {
-
-    },
     "Double tap to change departure date" : {
 
     },
@@ -898,29 +782,13 @@
     "Downloaded" : {
 
     },
-    "Drag days" : {
-
-    },
     "Drag to reorder days and activities. Tap Done when finished." : {
 
-    },
-    "Early arrival — full day in %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "清晨抵达 — 全天可在 %@ 游玩"
-          }
-        }
-      }
     },
     "Edit" : {
 
     },
     "Edit Profile" : {
-
-    },
-    "Edit Trip" : {
 
     },
     "Email" : {
@@ -974,31 +842,11 @@
     "Enter your email and password. We'll create your account if you're new." : {
 
     },
+    "Enter your invite code to unlock complimentary membership access." : {
+
+    },
     "Entry date & time" : {
 
-    },
-    "Estimated budget" : {
-
-    },
-    "Evening arrival — check in and rest" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "晚间抵达 — 办理入住并休息"
-          }
-        }
-      }
-    },
-    "Evening arrival in %@ — check in and rest" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "晚间抵达 %@ — 入住休息"
-          }
-        }
-      }
     },
     "Evening plans" : {
 
@@ -1036,21 +884,14 @@
     "From $%lld/night" : {
 
     },
+    "From and To must be different cities." : {
+
+    },
+    "From city" : {
+
+    },
     "Full Guide locked — audio + full article" : {
 
-    },
-    "Full list →" : {
-
-    },
-    "Full travel day — check in and rest in %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "全天赶路 — 抵达 %@ 后入住休息"
-          }
-        }
-      }
     },
     "GDPR Compliance Framework" : {
 
@@ -1088,7 +929,7 @@
     "HAPPY" : {
 
     },
-    "Has audio guide" : {
+    "Have an invite code?" : {
 
     },
     "Hello, world!" : {
@@ -1130,63 +971,28 @@
     "Intense · packed" : {
 
     },
-    "Intercity route summary format" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@  ·  %@ 高铁/航班"
-          }
-        }
-      }
-    },
     "International arrival" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "国际入境"
-          }
-        }
-      }
-    },
-    "International arrival in %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "抵达 %@"
-          }
-        }
-      }
+
     },
     "International department" : {
 
     },
     "International departure" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "国际出境"
-          }
-        }
-      }
-    },
-    "International departure from %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从 %@ 出发"
-          }
-        }
-      }
+
     },
     "Internet Access" : {
 
     },
     "Introduction" : {
+
+    },
+    "Invite code" : {
+
+    },
+    "Invite code redeemed!" : {
+
+    },
+    "Invite code redemption is not available in this build." : {
 
     },
     "It moves to History. You can start a new chat anytime." : {
@@ -1198,51 +1004,16 @@
     "Keep your itinerary; apply for an L tourist visa (about 4–7 business days plus visa fee)." : {
 
     },
-    "Land at %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "落地时间 %@"
-          }
-        }
-      }
-    },
-    "Land in %@ at %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ %2$@ 落地"
-          }
-        }
-      }
-    },
     "Landing city" : {
 
     },
     "Landing time" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "落地时间"
-          }
-        }
-      }
-    },
-    "Last-day sights adjust after you confirm your flight" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "确认航班后，末日行程将自动调整"
-          }
-        }
-      }
+
     },
     "Lifetime access" : {
+
+    },
+    "Lifetime access granted!" : {
 
     },
     "Link" : {
@@ -1281,6 +1052,9 @@
     "Manage in App Store →" : {
 
     },
+    "Many sights — %lld sightseeing days may not fit everything; some will be skipped." : {
+
+    },
     "Maps →" : {
 
     },
@@ -1293,13 +1067,13 @@
     "Marked as Done" : {
 
     },
-    "Matching attractions…" : {
-
-    },
     "Max 10" : {
 
     },
     "Maybe Later" : {
+
+    },
+    "Member until " : {
 
     },
     "Membership" : {
@@ -1319,46 +1093,6 @@
     },
     "Mock mode is active. Configure SUPABASE_URL and SUPABASE_ANON_KEY in Secrets.xcconfig." : {
 
-    },
-    "Morning arrival — afternoon in %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上午抵达 — 下午在 %@ 游玩"
-          }
-        }
-      }
-    },
-    "Morning arrival — full sightseeing day" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上午抵达 — 全天观光"
-          }
-        }
-      }
-    },
-    "Morning commute — afternoon in %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上午赶路 — 下午在 %@ 游玩"
-          }
-        }
-      }
-    },
-    "Morning departure — lighter sightseeing before you leave" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上午出发 — 出发前轻度观光"
-          }
-        }
-      }
     },
     "Must exit by %@." : {
 
@@ -1437,26 +1171,6 @@
     },
     "Open checklist" : {
 
-    },
-    "Optional light evening stroll if you have energy" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如有精力可轻松晚间散步"
-          }
-        }
-      }
-    },
-    "Pack and hotel checkout" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "收拾行李并退房"
-          }
-        }
-      }
     },
     "Packed schedule" : {
 
@@ -1537,36 +1251,7 @@
 
     },
     "Planned sights" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当日行程"
-          }
-        }
-      }
-    },
-    "Planned sights shown under International arrival above" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当日行程已移至上方「国际入境」卡片"
-          }
-        }
-      }
-    },
-    "Planned sights shown under International departure below" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当日行程已移至下方「国际出境」卡片"
-          }
-        }
-      }
+
     },
     "Planning your days…" : {
 
@@ -1587,25 +1272,7 @@
 
     },
     "Post-arrival itinerary" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "抵达后行程"
-          }
-        }
-      }
-    },
-    "Post-arrival sights shown under International arrival above" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "抵达后行程已移至上方「国际入境」卡片"
-          }
-        }
-      }
+
     },
     "Practical Info" : {
 
@@ -1649,6 +1316,9 @@
     "Profile" : {
 
     },
+    "Promotional access" : {
+
+    },
     "Purchase" : {
 
     },
@@ -1670,13 +1340,16 @@
     "Read-only · shared with YOLO HAPPY" : {
 
     },
-    "Reading List" : {
-
-    },
     "Recommended" : {
 
     },
     "Recommended hospitals · %@" : {
+
+    },
+    "Redeem" : {
+
+    },
+    "Redeem Invite Code" : {
 
     },
     "Refund" : {
@@ -1694,13 +1367,13 @@
     "Remove" : {
 
     },
-    "Remove activity" : {
-
-    },
     "Remove from favorites" : {
 
     },
-    "Remove this day" : {
+    "Remove intercity travel" : {
+
+    },
+    "Remove intercity travel?" : {
 
     },
     "Renewal" : {
@@ -1731,9 +1404,6 @@
 
     },
     "Return from" : {
-
-    },
-    "Route summary" : {
 
     },
     "Rule details" : {
@@ -1788,6 +1458,9 @@
     "Select cities to test (local only, won't affect your real trip)" : {
 
     },
+    "Select city" : {
+
+    },
     "Select one or more cities for your trip." : {
 
     },
@@ -1807,56 +1480,13 @@
 
     },
     "Set departure time" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设置出发时间"
-          }
-        }
-      }
+
     },
     "Set landing time" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设置落地时间"
-          }
-        }
-      }
-    },
-    "Set your departure time below" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在下方设置出发时间"
-          }
-        }
-      }
-    },
-    "Set your landing time below" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在下方设置落地时间"
-          }
-        }
-      }
+
     },
     "Set your landing time to plan sights for the arrival window." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设置落地时间后将按抵达窗口规划"
-          }
-        }
-      }
+
     },
     "Set your nationality in Profile" : {
 
@@ -1879,16 +1509,6 @@
     "Shared trip" : {
 
     },
-    "Short hop — afternoon sightseeing in %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "短途 — 下午可在 %@ 游玩"
-          }
-        }
-      }
-    },
     "Show password" : {
 
     },
@@ -1897,16 +1517,6 @@
     },
     "Show translation" : {
 
-    },
-    "Sightseeing for this day updates after you confirm arrival" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "确认抵达后，当日行程将自动更新"
-          }
-        }
-      }
     },
     "Sign in / Register →" : {
 
@@ -1921,6 +1531,9 @@
 
     },
     "Sign in to plan your China trip" : {
+
+    },
+    "Sign in to redeem an invite code." : {
 
     },
     "Sign in to share a link" : {
@@ -2028,6 +1641,9 @@
     "Test cities" : {
 
     },
+    "The confirmation link expires after a limited time. If it expires, tap Resend confirmation email." : {
+
+    },
     "then %@ · cancel anytime" : {
 
     },
@@ -2038,6 +1654,27 @@
 
     },
     "This check only answers whether your route qualifies; it does not finalize paperwork. Card binding and pre-trip tasks belong in your Pre-Trip Checklist. Subject to final decision at border control." : {
+
+    },
+    "This code has already been used." : {
+
+    },
+    "This code is only for new members." : {
+
+    },
+    "This guide is no longer available." : {
+
+    },
+    "This invite code has expired." : {
+
+    },
+    "This invite code has reached its limit." : {
+
+    },
+    "This invite code isn't active yet." : {
+
+    },
+    "This invite code isn't valid." : {
 
     },
     "This link may have expired or sharing was turned off." : {
@@ -2062,7 +1699,20 @@
         }
       }
     },
-    "Title" : {
+    "Tight %lld-day trip: recommend at least %lld sightseeing days; compressed allocation applied." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Tight %1$lld-day trip: recommend at least %2$lld sightseeing days; compressed allocation applied."
+          }
+        }
+      }
+    },
+    "To city" : {
+
+    },
+    "Too many attempts. Please try again later." : {
 
     },
     "Too many password reset emails sent. Wait a few minutes, check your inbox and spam folder, then try again." : {
@@ -2096,9 +1746,6 @@
 
     },
     "Trip not found" : {
-
-    },
-    "Trip overview" : {
 
     },
     "Trip pace" : {
@@ -2203,6 +1850,16 @@
     "View Itinerary" : {
 
     },
+    "View narration script" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看解说词"
+          }
+        }
+      }
+    },
     "View official notice →" : {
 
     },
@@ -2251,7 +1908,22 @@
     "YOLO HAPPY" : {
 
     },
+    "You already have lifetime access." : {
+
+    },
+    "You've already claimed a code from this promotion." : {
+
+    },
+    "You've already used this code." : {
+
+    },
     "Your access has been suspended. Contact support if you believe this is a mistake." : {
+
+    },
+    "Your account can't redeem codes right now." : {
+
+    },
+    "Your account has already redeemed an invite code." : {
 
     },
     "Your benefits" : {
@@ -2291,6 +1963,12 @@
 
     },
     "Your trip starts tomorrow" : {
+
+    },
+    "常用语" : {
+
+    },
+    "趣味方言" : {
 
     }
   },

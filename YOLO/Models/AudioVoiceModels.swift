@@ -135,6 +135,7 @@ enum AudioPlaybackResolver {
             durationSeconds: variant.durationSeconds > 0 ? variant.durationSeconds : baseGuide.durationSeconds,
             audioUrl: variant.audioUrl,
             quote: baseGuide.quote,
+            transcript: baseGuide.transcript,
             segments: variant.segments.isEmpty ? baseGuide.segments : variant.segments,
             isMainGuide: baseGuide.isMainGuide
         )

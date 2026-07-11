@@ -8,7 +8,7 @@ struct CityGuideAudioSection: View {
 
     @State private var scrubProgress: Double = 0
     @State private var isScrubbing = false
-    @State private var transcriptExpanded = false
+    @State private var showTranscript = false
     @State private var voiceVariants: [AudioVoiceVariant] = []
     @State private var selectedVariantId: String?
 
@@ -52,6 +52,11 @@ struct CityGuideAudioSection: View {
             voiceOwner: voiceOwner,
             baseGuide: audioGuide
         )
+    }
+
+    private var transcriptText: String? {
+        AudioTranscriptResolver.normalized(guide.audioTranscript)
+            ?? AudioTranscriptResolver.text(for: playbackGuide)
     }
 
     var body: some View {
@@ -112,31 +117,22 @@ struct CityGuideAudioSection: View {
                 .font(Theme.FontToken.inter(10))
                 .foregroundStyle(Theme.ColorToken.textMuted)
 
-            if let transcript = guide.audioTranscript?.trimmingCharacters(in: .whitespacesAndNewlines),
-               !transcript.isEmpty {
-                Button {
-                    transcriptExpanded.toggle()
-                } label: {
-                    HStack {
-                        Text("📝 \(String(localized: "Audio transcript"))")
-                            .font(Theme.FontToken.inter(11, weight: .medium))
-                        Spacer()
-                        Text(transcriptExpanded ? "▴" : "▾")
-                            .font(Theme.FontToken.inter(10))
-                    }
-                    .foregroundStyle(Theme.ColorToken.accent)
-                }
-                .buttonStyle(.plain)
-
-                if transcriptExpanded {
-                    MarkdownContentView(content: transcript, fontSize: 11)
-                        .padding(12)
-                        .background(Theme.ColorToken.backgroundSubtle)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
+            if transcriptText != nil {
+                HStack {
+                    Spacer()
+                    AudioTranscriptButton { showTranscript = true }
                 }
             }
         }
         .guideContentCardStyle()
+        .sheet(isPresented: $showTranscript) {
+            if let transcript = transcriptText {
+                AudioTranscriptSheet(
+                    title: audioGuide.titleEn,
+                    transcript: transcript
+                )
+            }
+        }
         .task(id: guide.id) {
             await loadVoiceVariants()
         }

@@ -29,11 +29,14 @@ if [[ -z "${SUPABASE_URL}" || -z "${SUPABASE_ANON_KEY}" ]]; then
   exit 1
 fi
 
-if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]] && ! npx wrangler whoami >/dev/null 2>&1; then
-  echo "未检测到 Cloudflare 认证。请先执行其一："
-  echo "  npx wrangler login"
-  echo "或设置 CLOUDFLARE_API_TOKEN（见 https://developers.cloudflare.com/fundamentals/api/get-started/create-token/）"
-  exit 1
+if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
+  whoami_out="$(npx wrangler whoami 2>&1)" || true
+  if ! echo "$whoami_out" | grep -q "You are logged in"; then
+    echo "未检测到 Cloudflare 认证。请先执行其一："
+    echo "  npx wrangler login"
+    echo "或设置 CLOUDFLARE_API_TOKEN（见 https://developers.cloudflare.com/fundamentals/api/get-started/create-token/）"
+    exit 1
+  fi
 fi
 
 if scutil --proxy 2>/dev/null | grep -q "HTTPEnable : 1"; then

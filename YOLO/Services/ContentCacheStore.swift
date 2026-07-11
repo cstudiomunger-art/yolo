@@ -95,7 +95,7 @@ actor ContentCacheStore {
 }
 
 enum ContentCacheKey {
-    private static let prefix = "md_v1_"
+    private static let prefix = "md_v2_"
 
     static func cities() -> String { "\(prefix)cities" }
     static func cultureTips(cityIds: [String]) -> String { "\(prefix)culture_tips_\(filterHash(cityIds: cityIds))" }

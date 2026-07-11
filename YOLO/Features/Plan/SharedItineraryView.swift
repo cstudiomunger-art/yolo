@@ -35,6 +35,7 @@ struct SharedItineraryView: View {
                 await load()
             }
         }
+        .environment(\.locale, PlanTripDateMath.displayLocale)
         .sheetDragToDismiss()
     }
 
@@ -69,13 +70,13 @@ private struct SharedItineraryContent: View {
                     .font(Theme.FontToken.inter(10, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.textMuted)
 
-                Text(itinerary.meta)
+                Text(itinerary.displayMeta)
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textSecondary)
 
                 ForEach(itinerary.days) { day in
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(day.dateLabel)
+                        Text(itinerary.displayDateLabel(for: day))
                             .font(Theme.FontToken.inter(12, weight: .semibold))
                         ForEach(day.activities) { act in
                             Text("• \(act.name)")

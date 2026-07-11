@@ -39,6 +39,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
     var intercityManualActivities: [String: [ItineraryActivity]]?
     /// Algorithm-suggested activities per hop day when arrival time is first enabled. Keys are `dayIndex` strings.
     var intercityScheduleBaselineByDayIndex: [String: [ItineraryActivity]]?
+    /// Calendar day indexes where the user removed an intercity hop; annotator must not re-inject.
+    var suppressedIntercityDayIndexes: [Int]?
 
     init(
         id: String,
@@ -63,7 +65,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         internationalArrivalActivities: [ItineraryActivity]? = nil,
         internationalDepartureActivities: [ItineraryActivity]? = nil,
         intercityManualActivities: [String: [ItineraryActivity]]? = nil,
-        intercityScheduleBaselineByDayIndex: [String: [ItineraryActivity]]? = nil
+        intercityScheduleBaselineByDayIndex: [String: [ItineraryActivity]]? = nil,
+        suppressedIntercityDayIndexes: [Int]? = nil
     ) {
         self.id = id
         self.title = title
@@ -88,6 +91,7 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         self.internationalDepartureActivities = internationalDepartureActivities
         self.intercityManualActivities = intercityManualActivities
         self.intercityScheduleBaselineByDayIndex = intercityScheduleBaselineByDayIndex
+        self.suppressedIntercityDayIndexes = suppressedIntercityDayIndexes
     }
 
     init(from decoder: Decoder) throws {
@@ -115,6 +119,7 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         internationalDepartureActivities = try c.decodeIfPresent([ItineraryActivity].self, forKey: .internationalDepartureActivities)
         intercityManualActivities = try c.decodeIfPresent([String: [ItineraryActivity]].self, forKey: .intercityManualActivities)
         intercityScheduleBaselineByDayIndex = try c.decodeIfPresent([String: [ItineraryActivity]].self, forKey: .intercityScheduleBaselineByDayIndex)
+        suppressedIntercityDayIndexes = try c.decodeIfPresent([Int].self, forKey: .suppressedIntercityDayIndexes)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -142,6 +147,7 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         try c.encodeIfPresent(internationalDepartureActivities, forKey: .internationalDepartureActivities)
         try c.encodeIfPresent(intercityManualActivities, forKey: .intercityManualActivities)
         try c.encodeIfPresent(intercityScheduleBaselineByDayIndex, forKey: .intercityScheduleBaselineByDayIndex)
+        try c.encodeIfPresent(suppressedIntercityDayIndexes, forKey: .suppressedIntercityDayIndexes)
     }
 
     func intercityManual(forDayIndex dayIndex: Int) -> [ItineraryActivity] {
@@ -178,6 +184,7 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
         case internationalDepartureActivities = "international_departure_activities"
         case intercityManualActivities = "intercity_manual_activities"
         case intercityScheduleBaselineByDayIndex = "intercity_schedule_baseline_by_day_index"
+        case suppressedIntercityDayIndexes = "suppressed_intercity_day_indexes"
     }
 
     /// Copy with replaced days; preserves share state and trip dates.
@@ -205,7 +212,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             internationalArrivalActivities: internationalArrivalActivities,
             internationalDepartureActivities: internationalDepartureActivities,
             intercityManualActivities: intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: suppressedIntercityDayIndexes
         )
     }
 
@@ -235,7 +243,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             internationalArrivalActivities: internationalArrivalActivities,
             internationalDepartureActivities: internationalDepartureActivities,
             intercityManualActivities: intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: suppressedIntercityDayIndexes
         )
     }
 
@@ -263,7 +272,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             internationalArrivalActivities: internationalArrivalActivities,
             internationalDepartureActivities: internationalDepartureActivities,
             intercityManualActivities: intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: suppressedIntercityDayIndexes
         )
     }
 
@@ -291,7 +301,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             internationalArrivalActivities: activities,
             internationalDepartureActivities: internationalDepartureActivities,
             intercityManualActivities: intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: suppressedIntercityDayIndexes
         )
     }
 
@@ -319,7 +330,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             internationalArrivalActivities: internationalArrivalActivities,
             internationalDepartureActivities: activities,
             intercityManualActivities: intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: suppressedIntercityDayIndexes
         )
     }
 
@@ -347,7 +359,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             internationalArrivalActivities: internationalArrivalActivities,
             internationalDepartureActivities: internationalDepartureActivities,
             intercityManualActivities: intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: suppressedIntercityDayIndexes
         )
     }
 
@@ -375,7 +388,8 @@ struct SampleItinerary: Codable, Identifiable, Hashable {
             internationalArrivalActivities: internationalArrivalActivities,
             internationalDepartureActivities: internationalDepartureActivities,
             intercityManualActivities: intercityManualActivities,
-            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex
+            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex,
+            suppressedIntercityDayIndexes: suppressedIntercityDayIndexes
         )
     }
 }

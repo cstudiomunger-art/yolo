@@ -34,9 +34,16 @@
       const cta = document.getElementById("cta");
 
       function slugFromPath() {
+        const q = new URLSearchParams(location.search).get("slug");
+        if (q) return q;
         const parts = location.pathname.split("/").filter(Boolean);
-        const i = parts.indexOf("i");
-        if (i >= 0 && parts[i + 1]) return parts[i + 1];
+        for (const marker of ["i", "share"]) {
+          const idx = parts.indexOf(marker);
+          if (idx >= 0) {
+            const slug = parts[idx + 1];
+            if (slug && !slug.endsWith(".html")) return slug;
+          }
+        }
         return null;
       }
 

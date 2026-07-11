@@ -77,6 +77,7 @@ struct PlanView: View {
         NavigationStack(path: $path) {
             planRootContent
         }
+        .environment(\.locale, PlanTripDateMath.displayLocale)
         .alert(
             String(localized: "Delete this trip?"),
             isPresented: showDeleteAlert,
@@ -288,7 +289,7 @@ struct PlanView: View {
             }
             Text(trip.title)
                 .font(Theme.FontToken.playfair(16, weight: .semibold))
-            Text(trip.meta)
+            Text(trip.displayMeta)
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
             Text(trip.routeSummary)
