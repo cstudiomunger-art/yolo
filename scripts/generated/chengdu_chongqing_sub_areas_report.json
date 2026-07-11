@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-09T08:27:26.979Z",
-  "mode": "dry-run",
+  "generatedAt": "2026-07-09T09:12:15.656Z",
+  "mode": "apply",
   "sources": {
     "chengdu": "/Users/vesperal/Desktop/成都子景点",
     "chongqing": "/Users/vesperal/Desktop/重庆子景点"
@@ -14,14 +14,7 @@
     "emptyNameEn": 0,
     "toDeleteCount": 60
   },
-  "unmatchedFolders": [
-    {
-      "city": "chengdu",
-      "folderName": "成都熊猫基地",
-      "reason": "attraction_not_in_db_yet",
-      "note": "已纳入确认清单，attraction_id 暂用 chengdu_panda_research_base；写库前需在 attractions 表创建「成都大熊猫繁育研究基地」"
-    }
-  ],
+  "unmatchedFolders": [],
   "warnings": [
     {
       "type": "missing_image",
@@ -355,7 +348,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/正门与大厅.md",
       "localImageName": "1. 正门与大厅.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/1. 正门与大厅.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_02",
@@ -373,7 +366,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/一楼·四川汉代陶石艺术馆.md",
       "localImageName": "2. 一楼・四川汉代陶石艺术馆.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/2. 一楼・四川汉代陶石艺术馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_03",
@@ -391,7 +384,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/二楼·远古四川（史前时期）.md",
       "localImageName": "3. 二楼・远古四川（史前时期）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/3. 二楼・远古四川（史前时期）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_04",
@@ -409,7 +402,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/二楼·古代四川（先秦至秦汉三国）.md",
       "localImageName": "4. 二楼・古代四川（先秦至秦汉三国）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/4. 二楼・古代四川（先秦至秦汉三国）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_05",
@@ -427,7 +420,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/二楼·巴蜀青铜器馆.md",
       "localImageName": "5. 二楼・巴蜀青铜器馆.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/5. 二楼・巴蜀青铜器馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_06",
@@ -445,7 +438,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/二楼·陶瓷馆.md",
       "localImageName": "6. 二楼・陶瓷馆.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/6. 二楼・陶瓷馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_07",
@@ -463,7 +456,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/二楼·书画馆.md",
       "localImageName": "7. 二楼・张大千书画馆（大风堂）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/7. 二楼・张大千书画馆（大风堂）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_08",
@@ -481,7 +474,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/二楼·张大千书画馆（大风堂）.md",
       "localImageName": "7. 二楼・张大千书画馆（大风堂）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/7. 二楼・张大千书画馆（大风堂）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_09",
@@ -499,7 +492,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/三楼·藏传佛教文物馆.md",
       "localImageName": "9. 三楼・藏传佛教文物馆.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/9. 三楼・藏传佛教文物馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_10",
@@ -517,7 +510,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/三楼·万佛寺石刻馆.md",
       "localImageName": "10. 三楼・万佛寺石刻馆.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/10. 三楼・万佛寺石刻馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_11",
@@ -535,7 +528,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/三楼·四川民族文物馆.md",
       "localImageName": "11. 三楼・四川民族文物馆.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/11. 三楼・四川民族文物馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_12",
@@ -553,7 +546,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/三楼·工艺美术馆.md",
       "localImageName": "12. 三楼・工艺美术馆.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/12. 三楼・工艺美术馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "sichuan_museum_sa_13",
@@ -571,7 +564,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物院子景点信息/出口与周边.md",
       "localImageName": "13. 出口与周边.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/四川博物院/13. 出口与周边.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_01",
@@ -589,7 +582,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/二楼·九天开出一成都——先秦时期的成都.md",
       "localImageName": "二楼·九天开出一成都——先秦时期的成都.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/二楼·九天开出一成都——先秦时期的成都.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_02",
@@ -607,7 +600,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/二楼·西蜀称天府——两汉魏晋南北朝时期的成都.md",
       "localImageName": "二楼·西蜀称天府——两汉魏晋南北朝时期的成都.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/二楼·西蜀称天府——两汉魏晋南北朝时期的成都.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_03",
@@ -625,7 +618,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/负一楼·人与自然——贝林捐赠展.md",
       "localImageName": "负一楼·人与自然——贝林捐赠展.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/负一楼·人与自然——贝林捐赠展.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_04",
@@ -643,7 +636,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/三楼·丹楼生晚辉——明清时期的成都.md",
       "localImageName": "三楼·丹楼生晚辉——明清时期的成都.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/三楼·丹楼生晚辉——明清时期的成都.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_05",
@@ -661,7 +654,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/三楼·喧然名都会——隋唐五代宋元时期的成都.md",
       "localImageName": "三楼·喧然名都会——隋唐五代宋元时期的成都.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/三楼·喧然名都会——隋唐五代宋元时期的成都.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_06",
@@ -679,7 +672,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/四楼·花重锦官城——成都历史文化陈列（近世篇）.md",
       "localImageName": "四楼·花重锦官城——成都历史文化陈列（近世篇）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/四楼·花重锦官城——成都历史文化陈列（近世篇）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_07",
@@ -697,7 +690,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/四楼·花重锦官城——成都历史文化陈列（民俗篇）.md",
       "localImageName": "四楼·花重锦官城——成都历史文化陈列（近世篇）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/四楼·花重锦官城——成都历史文化陈列（近世篇）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_08",
@@ -715,7 +708,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/五楼·偶戏大千——中国木偶展.md",
       "localImageName": "五楼·偶戏大千——中国木偶展.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/五楼·偶戏大千——中国木偶展.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_09",
@@ -733,7 +726,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/五楼·影舞万象——中国皮影展.md",
       "localImageName": "五楼·影舞万象——中国皮影展.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/五楼·影舞万象——中国皮影展.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_museum_sa_10",
@@ -751,7 +744,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都博物馆子景点信息/正门大厅.md",
       "localImageName": "正门大厅.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都博物馆/正门大厅.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_01",
@@ -769,7 +762,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/草堂影壁.md",
       "localImageName": "草堂影壁.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/草堂影壁.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_02",
@@ -787,7 +780,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/柴门.md",
       "localImageName": "柴门.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/柴门.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_03",
@@ -805,7 +798,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/大廨.md",
       "localImageName": "大廨.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/大廨.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_04",
@@ -823,7 +816,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/大雅堂.md",
       "localImageName": "大雅堂.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/大雅堂.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_05",
@@ -841,7 +834,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/工部祠.md",
       "localImageName": "工部祠.JPG.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/工部祠.JPG.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_06",
@@ -859,7 +852,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/花径.md",
       "localImageName": "花径.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/花径.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_07",
@@ -877,7 +870,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/茅屋故居.md",
       "localImageName": "茅草故居.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/茅草故居.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_08",
@@ -895,7 +888,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/南门.md",
       "localImageName": "南门.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/南门.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_09",
@@ -913,7 +906,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/千诗碑廊.md",
       "localImageName": "千诗碑廊.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/千诗碑廊.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_10",
@@ -931,7 +924,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/少陵草堂碑亭.md",
       "localImageName": "少陵草堂碑亭.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/少陵草堂碑亭.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_11",
@@ -949,7 +942,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/诗史堂.md",
       "localImageName": "诗史堂.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/诗史堂.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_12",
@@ -967,7 +960,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/唐代遗址.md",
       "localImageName": "唐代遗址.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/唐代遗址.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "du_fu_thatched_cottage_sa_13",
@@ -985,7 +978,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都杜甫草堂景点信息/正门.md",
       "localImageName": "正门.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/杜甫草堂/正门.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_01",
@@ -1003,7 +996,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/南门与照壁.md",
       "localImageName": "1. 南门与照壁.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/1. 南门与照壁.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_02",
@@ -1021,7 +1014,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/大门（汉昭烈庙）.md",
       "localImageName": "2. 大门（汉昭烈庙）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/2. 大门（汉昭烈庙）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_03",
@@ -1039,7 +1032,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/二门与唐碑（三绝碑）.md",
       "localImageName": "3. 二门与唐碑（三绝碑.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/3. 二门与唐碑（三绝碑.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_04",
@@ -1057,7 +1050,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/刘备殿（汉昭烈庙正殿）.md",
       "localImageName": "4. 刘备殿（汉昭烈庙正殿）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/4. 刘备殿（汉昭烈庙正殿）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_05",
@@ -1075,7 +1068,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/过厅（出师表石刻）.md",
       "localImageName": "5. 过厅（出师表石刻.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/5. 过厅（出师表石刻.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_06",
@@ -1093,7 +1086,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/诸葛亮殿（静远堂）.md",
       "localImageName": "6. 诸葛亮殿（静远堂）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/6. 诸葛亮殿（静远堂）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_07",
@@ -1111,7 +1104,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/三义庙.md",
       "localImageName": "7. 三义庙.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/7. 三义庙.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_08",
@@ -1129,7 +1122,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/桂荷楼、琴亭与园林区.md",
       "localImageName": "8. 桂荷楼、琴亭与园林区.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/8. 桂荷楼、琴亭与园林区.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_09",
@@ -1147,7 +1140,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/惠陵（刘备墓）.md",
       "localImageName": "9. 惠陵（刘备墓）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/9. 惠陵（刘备墓）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chengdu_wuhou_shrine_sa_10",
@@ -1165,7 +1158,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都武侯祠子景点信息/锦里与水榭.md",
       "localImageName": "10. 锦里与水榭.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/武侯祠/10. 锦里与水榭.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_01",
@@ -1183,7 +1176,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/正门.md",
       "localImageName": "1.正门.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/1.正门.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_02",
@@ -1201,7 +1194,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/山门.md",
       "localImageName": "2. 山门.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/2. 山门.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_03",
@@ -1219,7 +1212,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/灵祖殿.md",
       "localImageName": "3. 灵祖殿.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/3. 灵祖殿.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_04",
@@ -1237,7 +1230,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/混元殿.md",
       "localImageName": "4. 混元殿.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/4. 混元殿.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_05",
@@ -1255,7 +1248,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/八卦亭.md",
       "localImageName": "5. 八卦亭.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/5. 八卦亭.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_06",
@@ -1273,7 +1266,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/三清殿.md",
       "localImageName": "6. 三清殿.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/6. 三清殿.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_07",
@@ -1291,7 +1284,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/斗姥殿.md",
       "localImageName": "7. 斗姥殿.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/7. 斗姥殿.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_08",
@@ -1309,7 +1302,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/玉皇殿（福禄寿照壁）.md",
       "localImageName": "8. 玉皇殿（福禄寿照壁）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/8. 玉皇殿（福禄寿照壁）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_09",
@@ -1327,7 +1320,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/降生台与说法台.md",
       "localImageName": "9. 降生台与说法台.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/9. 降生台与说法台.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_10",
@@ -1345,7 +1338,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/紫金台（唐王殿）.md",
       "localImageName": "10. 紫金台（唐王殿）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/10. 紫金台（唐王殿）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "qingyangg_sa_11",
@@ -1363,7 +1356,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都青羊宫子景点信息/茶园与老庄书院.md",
       "localImageName": "11. 茶园与老庄书院.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/青羊宫/11. 茶园与老庄书院.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "wenshuyuan_sa_01",
@@ -1381,7 +1374,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/文殊院/藏经楼（宸经楼）.md",
       "localImageName": "藏经楼（又名空林堂）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/文殊院/藏经楼（又名空林堂）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "wenshuyuan_sa_02",
@@ -1399,7 +1392,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/文殊院/茶园与香斋堂.md",
       "localImageName": "香斋堂.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/文殊院/香斋堂.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "wenshuyuan_sa_03",
@@ -1417,7 +1410,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/文殊院/大雄宝殿.md",
       "localImageName": "文殊院-大雄宝殿.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/文殊院/文殊院-大雄宝殿.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "wenshuyuan_sa_04",
@@ -1435,7 +1428,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/文殊院/千佛和平塔与碑廊.md",
       "localImageName": "碑廊.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/文殊院/碑廊.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "wenshuyuan_sa_05",
@@ -1453,7 +1446,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/文殊院/三大士殿（观音殿）.md",
       "localImageName": "文殊院-三大士殿.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/文殊院/文殊院-三大士殿.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "wenshuyuan_sa_06",
@@ -1471,7 +1464,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/文殊院/山门（天王殿）.md",
       "localImageName": "天王殿1.jpeg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/文殊院/天王殿1.jpeg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "wenshuyuan_sa_07",
@@ -1489,7 +1482,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/文殊院/说法堂（药师殿）.md",
       "localImageName": "说法堂.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/文殊院/说法堂.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "wenshuyuan_sa_08",
@@ -1507,7 +1500,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/文殊院/文殊阁.md",
       "localImageName": "文殊阁（空林讲堂:万佛塔）.png",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/文殊院/文殊阁（空林讲堂:万佛塔）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "wenshuyuan_sa_09",
@@ -1543,7 +1536,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/文殊院/正门（照壁）.md",
       "localImageName": "文殊院-照壁.JPG",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/文殊院/文殊院-照壁.JPG",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_shibati_sa_01",
@@ -1561,7 +1554,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/十八梯/1.十八梯大牌坊.md",
       "localImageName": "1.十八梯大牌坊.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/十八梯/1.十八梯大牌坊.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_shibati_sa_02",
@@ -1579,7 +1572,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/十八梯/2.善果巷与山城记忆馆.md",
       "localImageName": "2.善果巷与山城记忆馆.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/十八梯/2.善果巷与山城记忆馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_shibati_sa_03",
@@ -1597,7 +1590,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/十八梯/3.月台坝（山地院落）.md",
       "localImageName": "3.月台坝（山地院落）.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/十八梯/3.月台坝（山地院落）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_shibati_sa_04",
@@ -1615,7 +1608,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/十八梯/4.大隧道遗址.md",
       "localImageName": "4.大隧道遗址.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/十八梯/4.大隧道遗址.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_dazu_rock_carvings_sa_01",
@@ -1633,7 +1626,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/大足石刻/1.宝顶山.md",
       "localImageName": "01_宝顶山.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/大足石刻/01_宝顶山.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_dazu_rock_carvings_sa_02",
@@ -1651,7 +1644,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/大足石刻/2.北山景区.md",
       "localImageName": "02_北山景区.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/大足石刻/02_北山景区.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_dazu_rock_carvings_sa_03",
@@ -1669,7 +1662,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/大足石刻/3.大足石刻博物馆.md",
       "localImageName": "03_大足石刻博物馆.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/大足石刻/03_大足石刻博物馆.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_dazu_rock_carvings_sa_04",
@@ -1687,7 +1680,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/大足石刻/4.南山景区.md",
       "localImageName": "04_南山景区.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/大足石刻/04_南山景区.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_dazu_rock_carvings_sa_05",
@@ -1705,7 +1698,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/大足石刻/5.石门山景区.md",
       "localImageName": "05_石门山景区.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/大足石刻/05_石门山景区.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_dazu_rock_carvings_sa_06",
@@ -1723,7 +1716,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/大足石刻/6.石篆山.md",
       "localImageName": "06_石篆山.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/大足石刻/06_石篆山.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_mountain_trails_sa_01",
@@ -1741,7 +1734,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/山城步道/1.步道入口牌坊.md",
       "localImageName": "1.步道入口牌坊.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/山城步道/1.步道入口牌坊.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_mountain_trails_sa_02",
@@ -1759,7 +1752,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/山城步道/2.厚庐.md",
       "localImageName": "2.厚庐.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/山城步道/2.厚庐.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_mountain_trails_sa_03",
@@ -1777,7 +1770,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/山城步道/3.悬空栈道.md",
       "localImageName": "3.悬空栈道.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/山城步道/3.悬空栈道.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_mountain_trails_sa_04",
@@ -1795,7 +1788,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/山城步道/4.仁爱荒野剧场.md",
       "localImageName": "4.仁爱荒野剧场.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/山城步道/4.仁爱荒野剧场.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_liziba_monorail_sa_01",
@@ -1813,7 +1806,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/李子坝轻轨穿楼/1.轨道李子坝站1号出口.md",
       "localImageName": "1.轨道李子坝站1号出口.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/李子坝轻轨穿楼/1.轨道李子坝站1号出口.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_liziba_monorail_sa_02",
@@ -1831,7 +1824,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/李子坝轻轨穿楼/2.李子坝观景平台.md",
       "localImageName": "2.李子坝观景平台.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/李子坝轻轨穿楼/2.李子坝观景平台.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_liziba_monorail_sa_03",
@@ -1849,7 +1842,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/李子坝轻轨穿楼/3.岩之魂浮雕文化墙.md",
       "localImageName": "3.岩之魂浮雕文化墙.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/李子坝轻轨穿楼/3.岩之魂浮雕文化墙.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_liziba_monorail_sa_04",
@@ -1867,7 +1860,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/李子坝轻轨穿楼/4.文旅服务中心.md",
       "localImageName": "4.文旅服务中心.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/李子坝轻轨穿楼/4.文旅服务中心.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_liziba_monorail_sa_05",
@@ -1885,7 +1878,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/李子坝轻轨穿楼/5.巴渝旧闻馆.md",
       "localImageName": "5.巴渝旧闻馆.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/李子坝轻轨穿楼/5.巴渝旧闻馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_liziba_monorail_sa_06",
@@ -1903,7 +1896,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/李子坝轻轨穿楼/6.轨道穿楼主体建筑.md",
       "localImageName": "6.轨道穿楼主体建筑.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/李子坝轻轨穿楼/6.轨道穿楼主体建筑.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_raffles_city_sa_01",
@@ -1921,7 +1914,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/来福士/1.朝天门广场与两江交汇.md",
       "localImageName": "1.朝天门广场与两江交汇.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/来福士/1.朝天门广场与两江交汇.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_raffles_city_sa_02",
@@ -1939,7 +1932,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/来福士/2.购物中心中庭与山城花园.md",
       "localImageName": "2.购物中心中庭与山城花园.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/来福士/2.购物中心中庭与山城花园.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_raffles_city_sa_03",
@@ -1957,7 +1950,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/来福士/3.水晶连廊（探索舱·观景台）.md",
       "localImageName": "3.水晶连廊（探索舱·观景台）.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/来福士/3.水晶连廊（探索舱·观景台）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_raffles_city_sa_04",
@@ -1975,7 +1968,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/来福士/4.探索舱·云端乐园.md",
       "localImageName": "4.探索舱·云端乐园.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/来福士/4.探索舱·云端乐园.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_01",
@@ -1993,7 +1986,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/1.天龙桥.md",
       "localImageName": "1.天龙桥.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/1.天龙桥.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_02",
@@ -2029,7 +2022,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/2.天官赐福.md",
       "localImageName": "2.天官赐福.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/2.天官赐福.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_04",
@@ -2047,7 +2040,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/3.青龙桥.md",
       "localImageName": "3.青龙桥.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/3.青龙桥.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_05",
@@ -2065,7 +2058,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/4.神鹰天坑.md",
       "localImageName": "4.神鹰天坑.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/4.神鹰天坑.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_06",
@@ -2083,7 +2076,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/5.黑龙桥.md",
       "localImageName": "5.黑龙桥.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/5.黑龙桥.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_07",
@@ -2101,7 +2094,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/6.龙泉洞.md",
       "localImageName": "6.龙泉洞.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/6.龙泉洞.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_08",
@@ -2119,7 +2112,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/7.龙水峡地缝.md",
       "localImageName": "7.龙水峡地缝.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/7.龙水峡地缝.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_09",
@@ -2137,7 +2130,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/8.银河飞瀑.md",
       "localImageName": "8.银河飞瀑.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/8.银河飞瀑.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_10",
@@ -2155,7 +2148,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/9.蛟龙寒窟.md",
       "localImageName": "9.蛟龙寒窟.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/9.蛟龙寒窟.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_wulong_karst_sa_11",
@@ -2173,7 +2166,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/武隆喀斯特旅游区/10.仙女山国家公园-木梯子站.md",
       "localImageName": "10.仙女山国家公园-木梯子站.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/武隆喀斯特旅游区/10.仙女山国家公园-木梯子站.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_01",
@@ -2191,7 +2184,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/1.重庆洪崖洞民俗风貌区.md",
       "localImageName": "01_重庆洪崖洞民俗风貌区.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/01_重庆洪崖洞民俗风貌区.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_02",
@@ -2209,7 +2202,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/2.城市阳台.md",
       "localImageName": "02_城市阳台.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/02_城市阳台.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_03",
@@ -2227,7 +2220,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/3.辛亥丰碑.md",
       "localImageName": "03_辛亥丰碑.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/03_辛亥丰碑.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_04",
@@ -2245,7 +2238,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/4.记忆山城雕塑.md",
       "localImageName": "04_记忆山城雕塑.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/04_记忆山城雕塑.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_05",
@@ -2263,7 +2256,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/5.江隘炮台铜雕.md",
       "localImageName": "05_江隘炮台铜雕.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/05_江隘炮台铜雕.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_06",
@@ -2281,7 +2274,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/6.十楼：巴文化柱.md",
       "localImageName": "06_十楼巴文化柱.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/06_十楼巴文化柱.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_07",
@@ -2299,7 +2292,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/7.九楼：异域风情街.md",
       "localImageName": "07_九楼异域风情街.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/07_九楼异域风情街.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_08",
@@ -2317,7 +2310,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/8.八楼：78区潮玩世界.md",
       "localImageName": "08_八楼78区潮玩世界.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/08_八楼78区潮玩世界.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_09",
@@ -2335,7 +2328,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/9.七楼：78区潮玩世界.md",
       "localImageName": "09_七楼78区潮玩世界.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/09_七楼78区潮玩世界.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_10",
@@ -2353,7 +2346,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/10.六楼：光影互动艺术空间.md",
       "localImageName": "10_六楼光影互动艺术空间.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/10_六楼光影互动艺术空间.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_11",
@@ -2371,7 +2364,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/11.五楼：重逢1980·八十年代生活情境街区.md",
       "localImageName": "11_五楼重逢1980街区.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/11_五楼重逢1980街区.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_12",
@@ -2389,7 +2382,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/12.四楼：盛宴美食街.md",
       "localImageName": "12_四楼盛宴美食街.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/12_四楼盛宴美食街.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_13",
@@ -2407,7 +2400,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/13.三楼：天成巷巴渝风情街.md",
       "localImageName": "13_三楼天成巷巴渝风情街.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/13_三楼天成巷巴渝风情街.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_14",
@@ -2425,7 +2418,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/14.二楼：纸盐河动感酒吧街.md",
       "localImageName": "14_二楼纸盐河动感酒吧街.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/14_二楼纸盐河动感酒吧街.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_hongya_cave_sa_15",
@@ -2443,7 +2436,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/洪崖洞/15.一楼：滴翠广场.md",
       "localImageName": "15_一楼滴翠广场.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆洪崖洞民俗风貌区/15_一楼滴翠广场.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_baixiangju_sa_01",
@@ -2461,7 +2454,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/白象居/2.10层空中公共连廊.md",
       "localImageName": "10层空中公共连廊.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/白象居/10层空中公共连廊.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_baixiangju_sa_02",
@@ -2479,7 +2472,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/白象居/4.15层解放东路出口（终点）.md",
       "localImageName": "15层解放东路出口.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/白象居/15层解放东路出口.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_baixiangju_sa_03",
@@ -2497,7 +2490,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/白象居/1.1层临江入口（起点）.md",
       "localImageName": " 1层临江入口.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/白象居/ 1层临江入口.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_baixiangju_sa_04",
@@ -2515,7 +2508,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/白象居/3.长江索道同框观景窗.md",
       "localImageName": "长江索道同框观景窗.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/白象居/长江索道同框观景窗.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_01",
@@ -2533,7 +2526,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/1.黄桷坪牌坊.md",
       "localImageName": "01_黄桷坪牌坊.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/01_黄桷坪牌坊.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_02",
@@ -2551,7 +2544,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/2.钟家院.md",
       "localImageName": "02_钟家院.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/02_钟家院.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_03",
@@ -2569,7 +2562,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/3.宝善宫.md",
       "localImageName": "03_宝善宫.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/03_宝善宫.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_04",
@@ -2587,7 +2580,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/4.鑫记杂货铺.md",
       "localImageName": "04_鑫记杂货铺.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/04_鑫记杂货铺.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_05",
@@ -2605,7 +2598,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/5.聚森茂酱园旧址.md",
       "localImageName": "05_聚森茂酱园旧址.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/05_聚森茂酱园旧址.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_06",
@@ -2623,7 +2616,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/6.磁横街.md",
       "localImageName": "06_磁横街.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/06_磁横街.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_07",
@@ -2641,7 +2634,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/7.宝轮寺.md",
       "localImageName": "07_宝轮寺.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/07_宝轮寺.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_08",
@@ -2659,7 +2652,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/8.迎龙门码头.md",
       "localImageName": "08_迎龙门码头.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/08_迎龙门码头.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_09",
@@ -2677,7 +2670,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/9.九石缸河滩.md",
       "localImageName": "09_九石缸河滩.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/09_九石缸河滩.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_ciqikou_old_town_sa_10",
@@ -2695,7 +2688,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/磁器口古镇/10.磁器长歌体验馆.md",
       "localImageName": "10_磁器长歌体验馆.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/磁器口/10_磁器长歌体验馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_guanyinqiao_sa_01",
@@ -2713,7 +2706,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/观音桥/1.观音桥步行街广场.md",
       "localImageName": "01_观音桥步行街广场.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/观音桥/01_观音桥步行街广场.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_guanyinqiao_sa_02",
@@ -2731,7 +2724,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/观音桥/2.茂业天地“裸眼3D”大屏.md",
       "localImageName": "02_茂业天地裸眼3D大屏.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/观音桥/02_茂业天地裸眼3D大屏.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_guanyinqiao_sa_03",
@@ -2749,7 +2742,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/观音桥/3.观音桥雕塑（城市标志）.md",
       "localImageName": "03_观音桥雕塑.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/观音桥/03_观音桥雕塑.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_guanyinqiao_sa_04",
@@ -2767,7 +2760,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/观音桥/4.北城天街.md",
       "localImageName": "04_北城天街.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/观音桥/04_北城天街.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_guanyinqiao_sa_05",
@@ -2785,7 +2778,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/观音桥/5.观音桥九街（不夜九街 - 终点）.md",
       "localImageName": "05_观音桥九街.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/观音桥/05_观音桥九街.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jiefangbei_sa_01",
@@ -2803,7 +2796,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/解放碑/1.解放碑广场.md",
       "localImageName": "01_解放碑广场.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/解放碑广场/01_解放碑广场.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jiefangbei_sa_02",
@@ -2821,7 +2814,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/解放碑/2.解放碑纪念碑.md",
       "localImageName": "02_解放碑纪念碑.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/解放碑广场/02_解放碑纪念碑.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jiefangbei_sa_03",
@@ -2839,7 +2832,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/解放碑/3.解放碑步行街雕塑群.md",
       "localImageName": "03_解放碑步行街雕塑群.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/解放碑广场/03_解放碑步行街雕塑群.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jiefangbei_sa_04",
@@ -2857,7 +2850,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/解放碑/4.邹容路步行街.md",
       "localImageName": "04_邹容路步行街.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/解放碑广场/04_邹容路步行街.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jiefangbei_sa_05",
@@ -2875,7 +2868,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/解放碑/5.八一路好吃街.md",
       "localImageName": "05_八一路好吃街.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/解放碑广场/05_八一路好吃街.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jiefangbei_sa_06",
@@ -2893,7 +2886,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/解放碑/6.环球金融中心会仙楼观景台.md",
       "localImageName": "06_环球金融中心会仙楼观景台.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/解放碑广场/06_环球金融中心会仙楼观景台.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_zoo_sa_01",
@@ -2911,7 +2904,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/重庆动物园/1.大门广场（起点）.md",
       "localImageName": "01_大门广场.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆动物园/01_大门广场.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_zoo_sa_02",
@@ -2929,7 +2922,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/重庆动物园/2.熊猫馆.md",
       "localImageName": "02_熊猫馆.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆动物园/02_熊猫馆.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_zoo_sa_03",
@@ -2947,7 +2940,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/重庆动物园/3.金鱼馆.md",
       "localImageName": "03_金鱼馆.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆动物园/03_金鱼馆.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_zoo_sa_04",
@@ -2965,7 +2958,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/重庆动物园/4.两栖爬行动物馆.md",
       "localImageName": "04_两栖爬行动物馆.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆动物园/04_两栖爬行动物馆.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_zoo_sa_05",
@@ -2983,7 +2976,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/重庆动物园/5.鸟类区.md",
       "localImageName": "05_鸟类区.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/重庆动物园/05_鸟类区.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_01",
@@ -3001,7 +2994,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/1.大门.md",
       "localImageName": "01_大门.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/01_大门.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_02",
@@ -3019,7 +3012,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/2.碧潭幽谷.md",
       "localImageName": "02_碧潭幽谷.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/02_碧潭幽谷.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_03",
@@ -3037,7 +3030,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/14.西门索道下站.md",
       "localImageName": "03_索道下站.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/03_索道下站.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_04",
@@ -3055,7 +3048,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/3.索道下站.md",
       "localImageName": "03_索道下站.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/03_索道下站.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_05",
@@ -3073,7 +3066,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/4.牵牛坪天街.md",
       "localImageName": "04_牵牛坪天街.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/04_牵牛坪天街.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_06",
@@ -3091,7 +3084,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/5.箭竹林海.md",
       "localImageName": "05_箭竹林海.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/05_箭竹林海.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_07",
@@ -3109,7 +3102,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/6.金龟朝阳.md",
       "localImageName": "06_金龟朝阳.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/06_金龟朝阳.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_08",
@@ -3127,7 +3120,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/7.云端步道.md",
       "localImageName": "07_云端步道.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/07_云端步道.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_09",
@@ -3145,7 +3138,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/8.燕子洞和灵观洞.md",
       "localImageName": "08_燕子洞和灵观洞.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/08_燕子洞和灵观洞.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_10",
@@ -3163,7 +3156,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/9.杜鹃王子.md",
       "localImageName": "09_杜鹃王子.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/09_杜鹃王子.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_11",
@@ -3181,7 +3174,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/10.药池坝.md",
       "localImageName": "10_药池坝.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/10_药池坝.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_12",
@@ -3199,7 +3192,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/11.古佛洞.md",
       "localImageName": "11_古佛洞.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/11_古佛洞.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_13",
@@ -3217,7 +3210,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/12.金佛顶.md",
       "localImageName": "12_金佛顶.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/12_金佛顶.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_14",
@@ -3235,7 +3228,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/13.生态石林.md",
       "localImageName": "13_生态石林.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/13_生态石林.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_jinfo_mountain_sa_15",
@@ -3253,7 +3246,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/金佛山/15.西门游客中心.md",
       "localImageName": "15_西门游客中心.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/金佛山/15_西门游客中心.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_yangtze_cableway_sa_01",
@@ -3271,7 +3264,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/长江索道/1.北站（渝中区新华路站）.md",
       "localImageName": "1.北站（渝中区新华路站）.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/长江索道/1.北站（渝中区新华路站）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_yangtze_cableway_sa_02",
@@ -3289,7 +3282,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/长江索道/2.索道轿厢.md",
       "localImageName": "2.索道轿厢.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/长江索道/2.索道轿厢.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_yangtze_cableway_sa_03",
@@ -3307,7 +3300,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/长江索道/3.南站（南岸区龙门浩站）.md",
       "localImageName": "3.南站（南岸区龙门浩站）.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/长江索道/3.南站（南岸区龙门浩站）.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_01",
@@ -3325,7 +3318,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/1.大门.md",
       "localImageName": "01_大门.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/01_大门.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_02",
@@ -3343,7 +3336,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/2.二厂记忆博物馆.md",
       "localImageName": "02_二厂记忆博物馆.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/02_二厂记忆博物馆.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_03",
@@ -3361,7 +3354,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/3.民国中央银行印钞厂旧址（9号楼）.md",
       "localImageName": "03_民国中央银行印钞厂旧址.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/03_民国中央银行印钞厂旧址.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_04",
@@ -3379,7 +3372,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/4.Test Design街巷.md",
       "localImageName": "04_Test_Design街巷.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/04_Test_Design街巷.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_05",
@@ -3397,7 +3390,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/5.Test Joy街巷.md",
       "localImageName": "05_Test_Joy街巷.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/05_Test_Joy街巷.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_06",
@@ -3415,7 +3408,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/6.Test Spirit街巷.md",
       "localImageName": "06_Test_Sprit街巷.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/06_Test_Sprit街巷.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_07",
@@ -3433,7 +3426,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/7.T²国际当代艺术中心.md",
       "localImageName": "07_T2国际当代艺术中心.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/07_T2国际当代艺术中心.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_08",
@@ -3451,7 +3444,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/8.爱情天台（CITY-RADIO电台墙）.md",
       "localImageName": "08_爱情天台.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/08_爱情天台.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_09",
@@ -3469,7 +3462,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/9.云上天台.md",
       "localImageName": "09_云上天台.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/09_云上天台.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_10",
@@ -3487,7 +3480,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/10.螺旋楼梯和涂鸦巷.md",
       "localImageName": "10_螺旋楼梯和涂鸦巷.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/10_螺旋楼梯和涂鸦巷.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_11",
@@ -3505,7 +3498,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/11.巨型拉链雕塑.md",
       "localImageName": "11_巨型拉链雕塑.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/11_巨型拉链雕塑.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_12",
@@ -3523,7 +3516,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/12.下沉广场.md",
       "localImageName": "12_下沉广场.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/12_下沉广场.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_13",
@@ -3541,7 +3534,7 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/13.重庆书局.md",
       "localImageName": "13_重庆书局.jpg",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/13_重庆书局.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
       "id": "chongqing_eling_2nd_factory_sa_14",
@@ -3559,259 +3552,259 @@
       "sourceMdPath": "/Users/vesperal/Desktop/重庆子景点/重庆子景点-信息/鹅岭二厂文创公园/14.你好童年怀旧馆.md",
       "localImageName": "14_你好童年怀旧馆.png",
       "localImagePath": "/Users/vesperal/Desktop/重庆子景点/鹅岭二厂文创公园/14_你好童年怀旧馆.png",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_01",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_01",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 0,
       "nameZh": "成年亚成年幼年大熊猫别墅",
-      "nameEn": "Located",
+      "nameEn": "Adult, Sub-adult & Juvenile Panda Villa",
       "bodyPlainEn": "Located in the central core area of the base, this villa complex is composed of multiple independent courtyards linked together. Each courtyard includes an indoor enclosure, an outdoor activity field, perches, and a pool. The villas house pandas by age—adults over 2 years, sub-adults 1-2 years, and juveniles 6 months-1 year—with each panda having its own indoor room and shared outdoor area. Through glass walls, visitors can closely observe daily behaviors such as eating bamboo, climbing trees, sleeping, and playing in water. It is one of the areas where most visitors linger longest and take the most photos. In winter (November to next March), some pandas may be moved indoors—please refer to on-site announcements.",
       "mdFieldSources": {
-        "name": "h1: # 成年亚成年幼年大熊猫别墅 + body opening",
+        "name": "h1: # 成年亚成年幼年大熊猫别墅 + EN doc h1",
         "body": "Long Description @ line 30"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/成年亚成年幼年大熊猫别墅.md",
       "localImageName": "成年亚成年幼年大熊猫别墅.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/成年亚成年幼年大熊猫别墅.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_02",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_02",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 1,
       "nameZh": "大熊猫博物馆",
-      "nameEn": "Adjacent",
+      "nameEn": "Giant Panda Museum",
       "bodyPlainEn": "Adjacent to the South Gate entrance, the Giant Panda Museum is the first indoor stop after entering the park. The two-story museum covers about 4,000 square meters and features permanent exhibitions including \"Panda Origins,\" \"Panda Evolution,\" \"Panda Ecology,\" \"Panda Conservation,\" and \"World Panda Distribution.\" Through fossil specimens, skeletal models, taxidermy specimens, HD videos, and interactive installations, it systematically tells the 8-million-year evolutionary story of giant pandas. The museum houses a 4D cinema (looping \"Panda Mission,\" about 15 minutes per session)—the most popular stop for families with children and educational groups.",
       "mdFieldSources": {
-        "name": "h1: # 大熊猫博物馆 + body opening",
+        "name": "h1: # 大熊猫博物馆 + EN doc h1",
         "body": "Long Description @ line 32"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/大熊猫博物馆.md",
       "localImageName": "大熊猫博物馆.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/大熊猫博物馆.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_03",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_03",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 2,
       "nameZh": "大熊猫太阳产房",
-      "nameEn": "Located",
+      "nameEn": "Giant Panda Sun Nursery",
       "bodyPlainEn": "Located in the central area of the base, adjacent to the Moon Nursery, the Sun Nursery is one of the earliest cub-rearing facilities built at the base in the 1980s. The nursery is a closed, constant-temperature building divided into multiple independent cub-rearing rooms, each accommodating one mother panda and 1-2 newborn cubs. During the cub-rearing season (approximately June to November), mother pandas spend the first few months with their newborn cubs in the nursery. Through the glass observation windows, visitors can see the pink newborn cubs gradually grow their \"black eye patches.\" In the off-season, it is transformed into a giant panda science exhibition hall, introducing knowledge about cub-rearing, breeding research, and growth cycles.",
       "mdFieldSources": {
-        "name": "h1: # 大熊猫太阳产房 + body opening",
+        "name": "h1: # 大熊猫太阳产房 + EN doc h1",
         "body": "Long Description @ line 30"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/大熊猫太阳产房.md",
       "localImageName": "大熊猫太阳产房.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/大熊猫太阳产房.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_04",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_04",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 3,
       "nameZh": "大熊猫星星产房",
-      "nameEn": "Located",
+      "nameEn": "Giant Panda Star Nursery",
       "bodyPlainEn": "Located at the northernmost end of the base's new area, adjacent to the New Area Exhibition Hall and the Panda Tower, the Star Nursery is a high-end cub-rearing facility newly opened in 2024. The nursery's exterior features a \"starry sky\" theme design (deep blue facade + LED starry ceiling), with internal divisions by constellation: Big Dipper Zone, Aries Zone, Scorpio Zone, etc., each corresponding to a set of cub-rearing rooms + supporting observation windows. The nursery uses a fully enclosed constant temperature and humidity system + 24-hour AI behavior monitoring + real-time live broadcast (growth videos of newborn pandas can be watched via the base's official WeChat account during certain periods). This nursery mainly undertakes the dual tasks of \"high-end cub-rearing demonstration\" and \"scientific breeding\" at the base. Note: Due to cub-rearing needs, it may not be open to the public during certain periods—please refer to on-site announcements.",
       "mdFieldSources": {
-        "name": "h1: # 大熊猫星星产房 + body opening",
+        "name": "h1: # 大熊猫星星产房 + EN doc h1",
         "body": "Long Description @ line 30"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/大熊猫星星产房.md",
       "localImageName": "大熊猫星星产房.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/大熊猫星星产房.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_05",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_05",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 4,
       "nameZh": "大熊猫月亮产房",
-      "nameEn": "Located",
+      "nameEn": "Giant Panda Moon Nursery",
       "bodyPlainEn": "Located in the central core area of the base, facing the Sun Nursery across a path, the Moon Nursery is a modern cub-rearing facility expanded by the base in the 2010s. The building has a half-spherical exterior (mimicking the lunar phase) and is internally divided by \"lunar phases\": the Full Moon Hall serves cub-rearing families, the First Quarter Hall is a science exhibition hall, and the Last Quarter Hall is a research monitoring room. During the cub-rearing season (approximately June to November), mother pandas live here with their newborn cubs. Through the floor-to-ceiling glass, visitors can clearly see the heartwarming scenes of panda mothers holding, nursing, and grooming their cubs—making it one of the base's \"Internet celebrity check-in spots.\" In the off-season, the Moon Hall is transformed into a 4D cinema or themed temporary exhibition area.",
       "mdFieldSources": {
-        "name": "h1: # 大熊猫月亮产房 + body opening",
+        "name": "h1: # 大熊猫月亮产房 + EN doc h1",
         "body": "Long Description @ line 30"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/大熊猫月亮产房.md",
       "localImageName": "大熊猫月亮产房.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/大熊猫月亮产房.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_06",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_06",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 5,
       "nameZh": "南大门",
-      "nameEn": "Located",
+      "nameEn": "South Gate (Main Entrance)",
       "bodyPlainEn": "Located at the southernmost end of the base facing Xiongmao Avenue, the South Gate is the base's iconic gateway. It features a bionic design—columns mimicking the panda's \"black eye patches,\" a golden plaque reading \"Chengdu Research Base of Giant Panda Breeding\" on the lintel, and panda silhouettes with bamboo reliefs. The spacious plaza in front houses a visitor center, luggage storage, wheelchair/stroller rental, and audio guide rental. The right side has group lanes and accessible lanes. After security, visitors scan their reservation QR code or use face recognition to enter—making it the base's busiest and most photogenic gate.",
       "mdFieldSources": {
-        "name": "h1: # 南大门 + body opening",
+        "name": "h1: # 南大门 + EN doc h1",
         "body": "Long Description @ line 37"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/南大门.md",
       "localImageName": "南大门.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/南大门.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_07",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_07",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 6,
       "nameZh": "西门",
-      "nameEn": "Located",
+      "nameEn": "West Gate",
       "bodyPlainEn": "Located at the westernmost end of the base, adjacent to the entrance of the \"Moon\" Pavilion Group and the western slope of Moon Mountain, the West Gate is the base's secondary entrance (the South Gate is the main entrance). The West Gate uses a \"panda\" bionic design language consistent with the South Gate, but with a smaller scale and simpler style, mainly serving visitors arriving by car or bus from the west of Chenghua District/Xindu District. Inside the gate is a small visitor center (inquiries, wheelchair rental, guide map pickup), and outside the gate is a parking lot (about 200 spaces) and a bus stop (Bus 198, 655 to \"Panda Base West Gate\" stop). The West Gate is open year-round and is the designated entrance for the \"Moon\" Pavilion Group night session (\"Bright Moon\" light show 19:00-21:00).",
       "mdFieldSources": {
-        "name": "h1: # 西门 + body opening",
+        "name": "h1: # 西门 + EN doc h1",
         "body": "Long Description @ line 36"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/西门.md",
       "localImageName": "西门.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/西门.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_08",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_08",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 7,
       "nameZh": "西区\"月\"字展馆群",
-      "nameEn": "Located",
+      "nameEn": "West District \"Moon\" Pavilion Group",
       "bodyPlainEn": "Located in the base's west district (adjacent to the West Gate and Moon Mountain), the West District \"Moon\" Pavilion Group is a themed pavilion cluster newly opened in 2024-2025. The pavilions are uniformly named with the \"Moon\" (月) imagery. The opened pavilions include \"Moonlight Splendor\" (月华), \"Moonlight on Snow\" (月华映雪), \"Moon Court\" (月之庭), \"Moon Encounter\" (月见), \"Bright Moon\" (月明), and \"Moon Dance\" (月舞) (some names are commercial promotional names—please refer to the on-site nameplates). Each pavilion is not large (300-800 square meters) but has a distinct theme: \"Moonlight Splendor\" features giant panda photography exhibitions, \"Moonlight on Snow\" recreates winter snowy panda scenes, \"Moon Court\" is a panda-themed immersive light and shadow exhibition, \"Moon Encounter\" is a coffee + cultural creativity space, and \"Bright Moon\" is a night light show (19:00-21:00). This area is a landmark node in the base's upgrade from \"zoo\" to \"themed resort.\"",
       "mdFieldSources": {
-        "name": "h1: # 西区\"月\"字展馆群 + body opening",
+        "name": "h1: # 西区\"月\"字展馆群 + EN doc h1",
         "body": "Long Description @ line 31"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/西区“月”字展馆群.md",
       "localImageName": "西区月字展馆群.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/西区月字展馆群.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_09",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_09",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 8,
       "nameZh": "小熊猫1号2号活动场",
-      "nameEn": "Located",
+      "nameEn": "Red Panda Activity Field No.1 & No.2",
       "bodyPlainEn": "Located on the east and west sides of the Moon Mountain trail in the central base, Red Panda Activity Fields No.1 and No.2 are the base's earliest publicly opened outdoor red panda activity areas. Each field has independent fences and simulates the red panda's native high-mountain forest—dense forest, flowing water, perches, deadwood holes, and rain shelter cabins. The two fields are connected by a walking boardwalk, allowing visitors to observe natural behaviors such as napping on branches, leaping, and curling tails to shade the sun. The area is spacious with open views. Note the distinction from the \"Red Panda Moon Nursery\": the Moon Nursery tends toward breeding (semi-enclosed), while No.1/No.2 activity fields are open outdoor activity areas.",
       "mdFieldSources": {
-        "name": "h1: # 小熊猫1号2号活动场 + body opening",
+        "name": "h1: # 小熊猫1号2号活动场 + EN doc h1",
         "body": "Long Description @ line 29"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/小熊猫1号2号活动场.md",
       "localImageName": "小熊猫1号2号活动场.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/小熊猫1号2号活动场.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_10",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_10",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 9,
       "nameZh": "小熊猫月亮产房",
-      "nameEn": "Located",
+      "nameEn": "Red Panda Moon Nursery",
       "bodyPlainEn": "Located in the Moon Mountain area of the base, the Red Panda Moon Nursery is designed for breeding red pandas (scientific name: Ailurus fulgens, also known as \"lesser panda\" or \"red bear-cat\"). The \"Moon Nursery\" name comes from its proximity to the Moon Nursery area and the shared moon-phase-inspired architectural design—it does not house baby giant pandas. The area is divided into multiple semi-wild activity zones by lunar phase, each simulating the red panda's native high-mountain forest environment, equipped with perches, deadwood, flowing water, and small wooden houses. Through glass walls and wooden fences, visitors can observe behaviors such as tree-climbing, leaping, tail-curling, and feeding. This area is one of the favorite \"cute check-in spots\" for families with children.",
       "mdFieldSources": {
-        "name": "h1: # 小熊猫月亮产房 + body opening",
+        "name": "h1: # 小熊猫月亮产房 + EN doc h1",
         "body": "Long Description @ line 30"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/小熊猫月亮产房.md",
       "localImageName": "小熊猫月亮产房.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/小熊猫月亮产房.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_11",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_11",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 10,
       "nameZh": "新区展馆",
-      "nameEn": "Located",
+      "nameEn": "New Area Exhibition Hall",
       "bodyPlainEn": "Located at the core of the base's new area (northern expansion zone), adjacent to the New Area Panda Villa and the entrance to the Panda Tower, the New Area Exhibition Hall is a comprehensive hall newly built in the 2020s. The hall is divided into two floors: the first floor is the giant panda-themed science exhibition hall (fossils, skeletons, habitat panoramas, breeding research results), and the second floor houses the \"Panda VR Immersive Experience Hall,\" \"Panda Theme Post Office,\" and \"Panda Cultural & Creative Retail.\" The hall exit leads directly to the Panda Tower and the new area observation deck. Outside the hall is the New Area Central Plaza, which hosts panda-themed pop-ups and seasonal science activities year-round—making it a complex node for \"science + cultural creativity + experience\" at the base.",
       "mdFieldSources": {
-        "name": "h1: # 新区展馆 + body opening",
+        "name": "h1: # 新区展馆 + EN doc h1",
         "body": "Long Description @ line 31"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/新区展馆.md",
       "localImageName": "新区展馆.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/新区展馆.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_12",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_12",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 11,
       "nameZh": "熊猫美术馆",
-      "nameEn": "Located",
+      "nameEn": "Panda Art Museum",
       "bodyPlainEn": "Located on the east side of the New Area Central Plaza in the base, adjacent to the New Area Exhibition Hall, the Panda Art Museum is a small art museum newly built in the 2020s. The museum covers about 800 square meters, divided into two floors: the first floor is the permanent exhibition hall (displaying panda-themed paintings, sculptures, and photography works by domestic and foreign artists, about 80-120 pieces), and the second floor is the temporary exhibition hall (3-4 themed exhibitions per year, having hosted \"Pandas and Children's Paintings,\" \"Panda Image Chronicles,\" \"International Panda Art Biennale,\" etc.). The museum's design is simple and bright, with floor-to-ceiling glass walls that let natural light become the best exhibition filter. The museum houses a cultural creative shop selling limited edition art derivatives (postcards, prints, silk scarves, T-shirts, etc.).",
       "mdFieldSources": {
-        "name": "h1: # 熊猫美术馆 + body opening",
+        "name": "h1: # 熊猫美术馆 + EN doc h1",
         "body": "Long Description @ line 31"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/熊猫美术馆.md",
       "localImageName": "熊猫美术馆.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/熊猫美术馆.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_13",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_13",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 12,
       "nameZh": "熊猫塔",
-      "nameEn": "Located",
+      "nameEn": "Panda Tower",
       "bodyPlainEn": "Located on the north side of the New Area Central Plaza of the base, the Panda Tower is a new observation/science landmark built in the 2020s. The tower is about 30 meters tall (some sources say about 50 meters, please refer to the on-site nameplate), with an exterior shaped like a giant \"panda head + bamboo leaves\"—the facade features black, white, and green spliced into a \"panda\" outline. The tower has elevators and walking stairs; the top floor is a 360° observation deck that overlooks the entire base new area (northern expansion zone) with its villas, activity fields, nurseries, and Moon Mountain. The first floor of the tower is the \"Panda Tower · Themed Coffee Area,\" the second floor is the \"Panda Photography Gallery,\" and the third floor is the observation deck. There is an LED light show on the tower at night (19:00-21:00). Note: Information about the actual height of the Panda Tower varies between 30 meters and 50 meters—please refer to the on-site nameplate.",
       "mdFieldSources": {
-        "name": "h1: # 熊猫塔 + body opening",
+        "name": "h1: # 熊猫塔 + EN doc h1",
         "body": "Long Description @ line 31"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/熊猫塔.md",
       "localImageName": "熊猫塔.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/熊猫塔.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     },
     {
-      "id": "chengdu_panda_research_base_sa_14",
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_14",
       "city": "chengdu",
-      "attractionId": "chengdu_panda_research_base",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
       "attractionFolder": "成都熊猫基地",
       "sortOrder": 13,
       "nameZh": "熊猫邮局",
-      "nameEn": "Located",
+      "nameEn": "Panda Post Office",
       "bodyPlainEn": "Located on the north side of the first floor of the New Area Exhibition Hall at the base, the Panda Post Office is a \"Panda-themed Postal Cultural Creativity Experience Point\" cooperating with China Post—it is not a traditional post office. The store mainly sells panda-themed postcards, commemorative stamp albums, commemorative seals, local stationery stickers, commemorative envelopes, and other cultural creative products. Visitors can stamp the exclusive \"Panda Post Office\" commemorative seal on site and mail to any country in the world (additional postage required). This \"themed post office\" model is common in tourist attractions both in China and abroad, functioning more like a \"panda-themed cultural creativity store\" + \"commemorative seal experience point\"—for services such as registered mail, courier, or cash withdrawal, please visit the nearest post office on Xiongmao Avenue in Chenghua District outside the base (about 1.5 km).",
       "mdFieldSources": {
-        "name": "h1: # 熊猫邮局 + body opening",
+        "name": "h1: # 熊猫邮局 + EN doc h1",
         "body": "Long Description @ line 32"
       },
       "sourceMdPath": "/Users/vesperal/Desktop/成都子景点/成都子景点-信息/成都熊猫基地/熊猫邮局.md",
       "localImageName": "熊猫邮局.jpg",
       "localImagePath": "/Users/vesperal/Desktop/成都子景点/成都熊猫基地/熊猫邮局.jpg",
-      "coverSource": ""
+      "coverSource": "uploaded"
     }
   ]
 }

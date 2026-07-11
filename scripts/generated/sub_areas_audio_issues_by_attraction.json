@@ -1,0 +1,796 @@
+{
+  "generatedAt": "2026-07-09T11:13:55.688Z",
+  "count": 17,
+  "attractions": [
+    {
+      "city": "Beijing",
+      "attractionId": "beijing_prince_gong_mansion",
+      "attractionName": "恭王府",
+      "benedictFolder": "北京/恭王府",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [
+        {
+          "nameZh": "葆光室与锡晋斋",
+          "current": "beijing_prince_gong_mansion_003.mp3",
+          "expected": "beijing_prince_gong_mansion_009.mp3"
+        },
+        {
+          "nameZh": "蝠池与安善堂",
+          "current": "beijing_prince_gong_mansion_003.mp3",
+          "expected": "beijing_prince_gong_mansion_006.mp3"
+        },
+        {
+          "nameZh": "怡神所与蝠厅",
+          "current": "beijing_prince_gong_mansion_006.mp3",
+          "expected": "beijing_prince_gong_mansion_008.mp3"
+        },
+        {
+          "nameZh": "平步青云路、邀月台、滴翠岩与福字碑",
+          "current": "beijing_prince_gong_mansion_009.mp3",
+          "expected": "beijing_prince_gong_mansion_003.mp3"
+        }
+      ],
+      "unmatchedAudio": [],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Beijing",
+      "attractionId": "beijing_forbidden_city",
+      "attractionName": "故宫",
+      "benedictFolder": "北京/故宫",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [
+        {
+          "nameZh": "太和门与外朝东西路",
+          "current": "beijing_forbidden_city_004.mp3",
+          "expected": "beijing_forbidden_city_007.mp3"
+        },
+        {
+          "nameZh": "后三宫·乾清宫、交泰殿与坤宁宫",
+          "current": "beijing_forbidden_city_005.mp3",
+          "expected": "beijing_forbidden_city_004.mp3"
+        },
+        {
+          "nameZh": "东西六宫",
+          "current": "beijing_forbidden_city_007.mp3",
+          "expected": "beijing_forbidden_city_005.mp3"
+        }
+      ],
+      "unmatchedAudio": [],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Beijing",
+      "attractionId": "beijing_national_museum",
+      "attractionName": "国博",
+      "benedictFolder": "北京/国博",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [
+        {
+          "nameZh": "二层专题·科技的力量、风展红旗与德化白瓷",
+          "current": "beijing_national_museum_003.mp3",
+          "expected": "beijing_national_museum_008.mp3"
+        },
+        {
+          "nameZh": "古代钱币与铜镜",
+          "current": "beijing_national_museum_008.mp3",
+          "expected": "beijing_national_museum_006.mp3"
+        },
+        {
+          "nameZh": "古代服饰与饮食文化",
+          "current": "beijing_national_museum_006.mp3",
+          "expected": "beijing_national_museum_003.mp3"
+        }
+      ],
+      "unmatchedAudio": [],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Chengdu",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
+      "attractionName": "大熊猫基地",
+      "benedictFolder": "成都/熊猫基地",
+      "missingSubAreas": [
+        "小熊猫月亮产房"
+      ],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Chengdu",
+      "attractionId": "sichuan_museum",
+      "attractionName": "四川博物院",
+      "benedictFolder": "成都/四川博物院",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_3.二楼·远古四川（史前时期）.mp3",
+          "title": "二楼·远古四川（史前时期）",
+          "storageKey": "sichuan_museum_003.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_4.二楼·古代四川（先秦至秦汉三国）.mp3",
+          "title": "二楼·古代四川（先秦至秦汉三国）",
+          "storageKey": "sichuan_museum_004.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_8.二楼·书画馆.mp3",
+          "title": "二楼·书画馆",
+          "storageKey": "sichuan_museum_008.mp3"
+        }
+      ],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Chongqing",
+      "attractionId": "chongqing_ciqikou_old_town",
+      "attractionName": "磁器口古镇",
+      "benedictFolder": "重庆/磁器口古镇",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_8.Yinglong Gate Dock.mp3",
+          "title": "Yinglong Gate Dock",
+          "storageKey": "chongqing_ciqikou_old_town_008.mp3"
+        }
+      ],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Chongqing",
+      "attractionId": "chongqing_dazu_rock_carvings",
+      "attractionName": "大足石刻",
+      "benedictFolder": "重庆/大足石刻",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [
+        {
+          "type": "未匹配",
+          "file": "宝顶山/A_EN_Benedict_3.Museum.mp3",
+          "title": "Museum",
+          "storageKey": "chongqing_dazu_rock_carvings_003.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "宝顶山/A_EN_Benedict_4.Dafo Bay Entrance.mp3",
+          "title": "Dafo Bay Entrance",
+          "storageKey": "chongqing_dazu_rock_carvings_004.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "宝顶山/A_EN_Benedict_5.Acts of Liu Benzun.mp3",
+          "title": "Acts of Liu Benzun",
+          "storageKey": "chongqing_dazu_rock_carvings_005.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "宝顶山/A_EN_Benedict_6.Scenes of Hell.mp3",
+          "title": "Scenes of Hell",
+          "storageKey": "chongqing_dazu_rock_carvings_006.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "北山景区/A_EN_Benedict_2.Museum.mp3",
+          "title": "Museum",
+          "storageKey": "chongqing_dazu_rock_carvings_017.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "北山景区/A_EN_Benedict_3.Beishan Rock Carvings Entrance.mp3",
+          "title": "Beishan Rock Carvings Entrance",
+          "storageKey": "chongqing_dazu_rock_carvings_018.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "北山景区/A_EN_Benedict_5.Samantabhadra.mp3",
+          "title": "Samantabhadra",
+          "storageKey": "chongqing_dazu_rock_carvings_020.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "北山景区/A_EN_Benedict_6.Manjushri.mp3",
+          "title": "Manjushri",
+          "storageKey": "chongqing_dazu_rock_carvings_021.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "北山景区/A_EN_Benedict_7.Jade-Seal Guanyin.mp3",
+          "title": "Jade-Seal Guanyin",
+          "storageKey": "chongqing_dazu_rock_carvings_022.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "大足石刻博物馆/A_EN_Benedict_5.Conservation and Heritage of the Dazu Rock Carvings.mp3",
+          "title": "Conservation and Heritage of the Dazu Rock Carvings",
+          "storageKey": "chongqing_dazu_rock_carvings_030.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "大足石刻博物馆/A_EN_Benedict_7.Museum Exit.mp3",
+          "title": "Museum Exit",
+          "storageKey": "chongqing_dazu_rock_carvings_032.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "南山景区/A_EN_Benedict_2.Nanshan Rock Carvings Entrance.mp3",
+          "title": "Nanshan Rock Carvings Entrance",
+          "storageKey": "chongqing_dazu_rock_carvings_034.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "南山景区/A_EN_Benedict_6.Dragon Cave.mp3",
+          "title": "Dragon Cave",
+          "storageKey": "chongqing_dazu_rock_carvings_038.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "石门山景区/A_EN_Benedict_2.Shimenshan Rock Carvings Entrance.mp3",
+          "title": "Shimenshan Rock Carvings Entrance",
+          "storageKey": "chongqing_dazu_rock_carvings_042.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "石门山景区/A_EN_Benedict_4.Wutong Dadi.mp3",
+          "title": "Wutong Dadi",
+          "storageKey": "chongqing_dazu_rock_carvings_044.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "石篆山景区/A_EN_Benedict_2.Shizhuanshan Rock Carvings Entrance.mp3",
+          "title": "Shizhuanshan Rock Carvings Entrance",
+          "storageKey": "chongqing_dazu_rock_carvings_049.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "石篆山景区/A_EN_Benedict_4.Cave of Laojun.mp3",
+          "title": "Cave of Laojun",
+          "storageKey": "chongqing_dazu_rock_carvings_051.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "石篆山景区/A_EN_Benedict_5.Figure of Lu Ban.mp3",
+          "title": "Figure of Lu Ban",
+          "storageKey": "chongqing_dazu_rock_carvings_052.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "石篆山景区/A_EN_Benedict_6.Hariti.mp3",
+          "title": "Hariti",
+          "storageKey": "chongqing_dazu_rock_carvings_053.mp3"
+        }
+      ],
+      "ambiguousAudio": [
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_2.Digital Cinema.mp3",
+          "title": "Digital Cinema",
+          "storageKey": "chongqing_dazu_rock_carvings_002.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_7.Scripture on Parental Kindness.mp3",
+          "title": "Scripture on Parental Kindness",
+          "storageKey": "chongqing_dazu_rock_carvings_007.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_8.Thousand-Hand Guanyin.mp3",
+          "title": "Thousand-Hand Guanyin",
+          "storageKey": "chongqing_dazu_rock_carvings_008.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_9.The Three Sages of Huayan.mp3",
+          "title": "The Three Sages of Huayan",
+          "storageKey": "chongqing_dazu_rock_carvings_009.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_10.Nine Dragons Bathing the Prince.mp3",
+          "title": "Nine Dragons Bathing the Prince",
+          "storageKey": "chongqing_dazu_rock_carvings_010.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_11.The Reclining Buddha.mp3",
+          "title": "The Reclining Buddha",
+          "storageKey": "chongqing_dazu_rock_carvings_011.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_12.Shengshuo Temple.mp3",
+          "title": "Shengshuo Temple",
+          "storageKey": "chongqing_dazu_rock_carvings_012.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_13.Boyong Fangong Exit.mp3",
+          "title": "Boyong Fangong Exit",
+          "storageKey": "chongqing_dazu_rock_carvings_013.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_14.Baoding Old Street.mp3",
+          "title": "Baoding Old Street",
+          "storageKey": "chongqing_dazu_rock_carvings_014.mp3",
+          "candidates": [
+            "北山景区",
+            "大足石刻博物馆",
+            "南山景区"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "宝顶山/A_EN_Benedict_15.Visitor Center Exit.mp3",
+          "title": "Visitor Center Exit",
+          "storageKey": "chongqing_dazu_rock_carvings_015.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "北山景区/A_EN_Benedict_1.Visitor Center.mp3",
+          "title": "Visitor Center",
+          "storageKey": "chongqing_dazu_rock_carvings_016.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "北山景区/A_EN_Benedict_4.Revolving Sutra Repository Cave.mp3",
+          "title": "Revolving Sutra Repository Cave",
+          "storageKey": "chongqing_dazu_rock_carvings_019.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "北山景区/A_EN_Benedict_8.Rosary Guanyin.mp3",
+          "title": "Rosary Guanyin",
+          "storageKey": "chongqing_dazu_rock_carvings_023.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "北山景区/A_EN_Benedict_9.Stele of He Guangzhen.mp3",
+          "title": "Stele of He Guangzhen",
+          "storageKey": "chongqing_dazu_rock_carvings_024.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "大足石刻博物馆/A_EN_Benedict_1.Visitor Center.mp3",
+          "title": "Visitor Center",
+          "storageKey": "chongqing_dazu_rock_carvings_026.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "大足石刻博物馆/A_EN_Benedict_2.Museum Entrance.mp3",
+          "title": "Museum Entrance",
+          "storageKey": "chongqing_dazu_rock_carvings_027.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "南山景区"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "大足石刻博物馆/A_EN_Benedict_3.World Cave Art Overview.mp3",
+          "title": "World Cave Art Overview",
+          "storageKey": "chongqing_dazu_rock_carvings_028.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "大足石刻博物馆/A_EN_Benedict_6.Digital Cinema.mp3",
+          "title": "Digital Cinema",
+          "storageKey": "chongqing_dazu_rock_carvings_031.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "南山景区/A_EN_Benedict_1.Visitor Center.mp3",
+          "title": "Visitor Center",
+          "storageKey": "chongqing_dazu_rock_carvings_033.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "南山景区/A_EN_Benedict_3.Cave of the Three Purities.mp3",
+          "title": "Cave of the Three Purities",
+          "storageKey": "chongqing_dazu_rock_carvings_035.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "南山景区/A_EN_Benedict_4.Shrine of Zhenwu.mp3",
+          "title": "Shrine of Zhenwu",
+          "storageKey": "chongqing_dazu_rock_carvings_036.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "南山景区/A_EN_Benedict_5.Shrine of Houtu the Sacred Mother.mp3",
+          "title": "Shrine of Houtu the Sacred Mother",
+          "storageKey": "chongqing_dazu_rock_carvings_037.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "南山景区/A_EN_Benedict_7.Stele Gallery.mp3",
+          "title": "Stele Gallery",
+          "storageKey": "chongqing_dazu_rock_carvings_039.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "石门山景区/A_EN_Benedict_1.Visitor Center.mp3",
+          "title": "Visitor Center",
+          "storageKey": "chongqing_dazu_rock_carvings_041.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "石门山景区/A_EN_Benedict_3.Shrine of the Jade Emperor.mp3",
+          "title": "Shrine of the Jade Emperor",
+          "storageKey": "chongqing_dazu_rock_carvings_043.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "石门山景区/A_EN_Benedict_5.Dongyue Dadi Precious Penitential Tableau.mp3",
+          "title": "Dongyue Dadi Precious Penitential Tableau",
+          "storageKey": "chongqing_dazu_rock_carvings_045.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "石门山景区/A_EN_Benedict_6.Western Trinity and Ten-Saint Guanyin Cave.mp3",
+          "title": "Western Trinity and Ten-Saint Guanyin Cave",
+          "storageKey": "chongqing_dazu_rock_carvings_046.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "石篆山景区/A_EN_Benedict_1.Visitor Center.mp3",
+          "title": "Visitor Center",
+          "storageKey": "chongqing_dazu_rock_carvings_048.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        },
+        {
+          "type": "歧义",
+          "file": "石篆山景区/A_EN_Benedict_3.Shrine of Confucius and the Ten Wise Disciples.mp3",
+          "title": "Shrine of Confucius and the Ten Wise Disciples",
+          "storageKey": "chongqing_dazu_rock_carvings_050.mp3",
+          "candidates": [
+            "北山景区",
+            "宝顶山",
+            "大足石刻博物馆"
+          ]
+        }
+      ]
+    },
+    {
+      "city": "Chongqing",
+      "attractionId": "chongqing_jinfo_mountain",
+      "attractionName": "金佛山",
+      "benedictFolder": "重庆/金佛山",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_10.Yaochi Ba.mp3",
+          "title": "Yaochi Ba",
+          "storageKey": "chongqing_jinfo_mountain_010.mp3"
+        }
+      ],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Chongqing",
+      "attractionId": "chongqing_mountain_trails",
+      "attractionName": "山城步道",
+      "benedictFolder": "重庆/山城步道",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_2.Houlu.mp3",
+          "title": "Houlu",
+          "storageKey": "chongqing_mountain_trails_002.mp3"
+        }
+      ],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "benedictFolder": null,
+      "missingSubAreas": [
+        "六和塔景区入口",
+        "六和塔",
+        "塔基与地宫",
+        "塔身一至七层",
+        "塔顶层观景台",
+        "六和塔文化陈列馆",
+        "中华古塔博览苑",
+        "钱塘江观景平台",
+        "六合钟声",
+        "碑亭"
+      ],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "benedictFolder": null,
+      "missingSubAreas": [
+        "千岛湖中心湖区旅游码头",
+        "梅峰岛",
+        "渔乐岛",
+        "龙山岛",
+        "海瑞祠",
+        "月光岛",
+        "锁岛",
+        "状元桥",
+        "温馨岛",
+        "东南湖区黄山尖"
+      ],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "benedictFolder": null,
+      "missingSubAreas": [
+        "断桥残雪",
+        "白堤",
+        "平湖秋月",
+        "孤山与西泠印社",
+        "曲院风荷",
+        "苏堤春晓",
+        "花港观鱼",
+        "雷峰塔",
+        "南屏晚钟",
+        "柳浪闻莺",
+        "湖滨公园",
+        "三潭印月"
+      ],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake_cultural_plaza",
+      "attractionName": "西湖文化广场",
+      "benedictFolder": "杭州/西湖文化广场",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [
+        {
+          "nameZh": "西湖文化广场音乐喷泉",
+          "current": "hangzhou_west_lake_cultural_plaza_005.mp3",
+          "expected": "hangzhou_west_lake_cultural_plaza_002.mp3"
+        },
+        {
+          "nameZh": "运河魂雕塑与亲水平台",
+          "current": "hangzhou_west_lake_cultural_plaza_006.mp3",
+          "expected": "hangzhou_west_lake_cultural_plaza_008.mp3"
+        }
+      ],
+      "unmatchedAudio": [],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_zhejiang_museum",
+      "attractionName": "浙江省博物馆",
+      "benedictFolder": "杭州/浙江省博物馆（之江馆区）",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_2.浙江一万年·史前至隋唐.mp3",
+          "title": "浙江一万年·史前至隋唐",
+          "storageKey": "hangzhou_zhejiang_museum_002.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_3.江南秘色——浙江青瓷文化展.mp3",
+          "title": "江南秘色——浙江青瓷文化展",
+          "storageKey": "hangzhou_zhejiang_museum_003.mp3"
+        },
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_4.向东是大海——浙江海洋文化陈列.mp3",
+          "title": "向东是大海——浙江海洋文化陈列",
+          "storageKey": "hangzhou_zhejiang_museum_004.mp3"
+        }
+      ],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "benedictFolder": null,
+      "missingSubAreas": [
+        "中国丝绸博物馆入口",
+        "丝路馆：中国丝绸故事",
+        "蚕桑馆",
+        "织造馆",
+        "服饰馆：华美服饰",
+        "修复馆：纺织品文物修复",
+        "锦绣廊",
+        "时装馆",
+        "晓风书屋与文创空间",
+        "户外园林与茶园"
+      ],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Nanjing",
+      "attractionId": "nanjing_laomendong",
+      "attractionName": "老门东历史文化街区",
+      "benedictFolder": "南京/南京老门东",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_2.Gutong Lane.mp3",
+          "title": "Gutong Lane",
+          "storageKey": "nanjing_laomendong_002.mp3"
+        }
+      ],
+      "ambiguousAudio": []
+    },
+    {
+      "city": "Nanjing",
+      "attractionId": "nanjing_city_wall",
+      "attractionName": "南京明城墙",
+      "benedictFolder": "南京/明城墙",
+      "missingSubAreas": [],
+      "wrongBindingSubAreas": [],
+      "unmatchedAudio": [
+        {
+          "type": "未匹配",
+          "file": "A_EN_Benedict_5.The Ramps.mp3",
+          "title": "The Ramps",
+          "storageKey": "nanjing_city_wall_005.mp3"
+        }
+      ],
+      "ambiguousAudio": []
+    }
+  ]
+}

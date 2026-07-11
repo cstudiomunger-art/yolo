@@ -1,6 +1,6 @@
 # 成都/重庆子景点 md 内容确认清单
 
-生成时间：2026-07-09T08:27:26.973Z
+生成时间：2026-07-09T09:12:15.650Z
 总条数：193
 
 > 请核对每条的中文名、英文名、正文（英文长文）及解析来源。确认无误后回复「内容确认无误」。
@@ -2553,16 +2553,16 @@ A 1,200 sqm two-storey bookstore with 20,000+ titles, a Chongqing local-literatu
 An 800 sqm immersive nostalgia museum with thousands of 1970s–90s Chinese objects—enamel mugs, tin frogs, glass marbles, cassette games, and a recreated 1980s classroom with chalkboard desks.
 ```
 
-## 成都大熊猫繁育研究基地（chengdu_panda_research_base）
+## 大熊猫基地（https_yoloadmin_vue_cstudiomunger_workers_dev）
 
 ### 180. 成年亚成年幼年大熊猫别墅
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/成年亚成年幼年大熊猫别墅.md`
 - 配对图片：`成年亚成年幼年大熊猫别墅.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_01`
-- 解析来源（名称）：h1: # 成年亚成年幼年大熊猫别墅 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_01`
+- 解析来源（名称）：h1: # 成年亚成年幼年大熊猫别墅 + EN doc h1
 - 解析来源（正文）：Long Description @ line 30
 - **中文名**：成年亚成年幼年大熊猫别墅
-- **英文名**：Located
+- **英文名**：Adult, Sub-adult & Juvenile Panda Villa
 - **正文（英文）**：
 
 ```
@@ -2572,11 +2572,11 @@ Located in the central core area of the base, this villa complex is composed of 
 ### 181. 大熊猫博物馆
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/大熊猫博物馆.md`
 - 配对图片：`大熊猫博物馆.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_02`
-- 解析来源（名称）：h1: # 大熊猫博物馆 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_02`
+- 解析来源（名称）：h1: # 大熊猫博物馆 + EN doc h1
 - 解析来源（正文）：Long Description @ line 32
 - **中文名**：大熊猫博物馆
-- **英文名**：Adjacent
+- **英文名**：Giant Panda Museum
 - **正文（英文）**：
 
 ```
@@ -2586,11 +2586,11 @@ Adjacent to the South Gate entrance, the Giant Panda Museum is the first indoor 
 ### 182. 大熊猫太阳产房
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/大熊猫太阳产房.md`
 - 配对图片：`大熊猫太阳产房.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_03`
-- 解析来源（名称）：h1: # 大熊猫太阳产房 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_03`
+- 解析来源（名称）：h1: # 大熊猫太阳产房 + EN doc h1
 - 解析来源（正文）：Long Description @ line 30
 - **中文名**：大熊猫太阳产房
-- **英文名**：Located
+- **英文名**：Giant Panda Sun Nursery
 - **正文（英文）**：
 
 ```
@@ -2600,11 +2600,11 @@ Located in the central area of the base, adjacent to the Moon Nursery, the Sun N
 ### 183. 大熊猫星星产房
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/大熊猫星星产房.md`
 - 配对图片：`大熊猫星星产房.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_04`
-- 解析来源（名称）：h1: # 大熊猫星星产房 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_04`
+- 解析来源（名称）：h1: # 大熊猫星星产房 + EN doc h1
 - 解析来源（正文）：Long Description @ line 30
 - **中文名**：大熊猫星星产房
-- **英文名**：Located
+- **英文名**：Giant Panda Star Nursery
 - **正文（英文）**：
 
 ```
@@ -2614,11 +2614,11 @@ Located at the northernmost end of the base's new area, adjacent to the New Area
 ### 184. 大熊猫月亮产房
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/大熊猫月亮产房.md`
 - 配对图片：`大熊猫月亮产房.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_05`
-- 解析来源（名称）：h1: # 大熊猫月亮产房 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_05`
+- 解析来源（名称）：h1: # 大熊猫月亮产房 + EN doc h1
 - 解析来源（正文）：Long Description @ line 30
 - **中文名**：大熊猫月亮产房
-- **英文名**：Located
+- **英文名**：Giant Panda Moon Nursery
 - **正文（英文）**：
 
 ```
@@ -2628,11 +2628,11 @@ Located in the central core area of the base, facing the Sun Nursery across a pa
 ### 185. 南大门
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/南大门.md`
 - 配对图片：`南大门.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_06`
-- 解析来源（名称）：h1: # 南大门 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_06`
+- 解析来源（名称）：h1: # 南大门 + EN doc h1
 - 解析来源（正文）：Long Description @ line 37
 - **中文名**：南大门
-- **英文名**：Located
+- **英文名**：South Gate (Main Entrance)
 - **正文（英文）**：
 
 ```
@@ -2642,11 +2642,11 @@ Located at the southernmost end of the base facing Xiongmao Avenue, the South Ga
 ### 186. 西门
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/西门.md`
 - 配对图片：`西门.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_07`
-- 解析来源（名称）：h1: # 西门 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_07`
+- 解析来源（名称）：h1: # 西门 + EN doc h1
 - 解析来源（正文）：Long Description @ line 36
 - **中文名**：西门
-- **英文名**：Located
+- **英文名**：West Gate
 - **正文（英文）**：
 
 ```
@@ -2656,11 +2656,11 @@ Located at the westernmost end of the base, adjacent to the entrance of the "Moo
 ### 187. 西区"月"字展馆群
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/西区“月”字展馆群.md`
 - 配对图片：`西区月字展馆群.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_08`
-- 解析来源（名称）：h1: # 西区"月"字展馆群 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_08`
+- 解析来源（名称）：h1: # 西区"月"字展馆群 + EN doc h1
 - 解析来源（正文）：Long Description @ line 31
 - **中文名**：西区"月"字展馆群
-- **英文名**：Located
+- **英文名**：West District "Moon" Pavilion Group
 - **正文（英文）**：
 
 ```
@@ -2670,11 +2670,11 @@ Located in the base's west district (adjacent to the West Gate and Moon Mountain
 ### 188. 小熊猫1号2号活动场
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/小熊猫1号2号活动场.md`
 - 配对图片：`小熊猫1号2号活动场.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_09`
-- 解析来源（名称）：h1: # 小熊猫1号2号活动场 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_09`
+- 解析来源（名称）：h1: # 小熊猫1号2号活动场 + EN doc h1
 - 解析来源（正文）：Long Description @ line 29
 - **中文名**：小熊猫1号2号活动场
-- **英文名**：Located
+- **英文名**：Red Panda Activity Field No.1 & No.2
 - **正文（英文）**：
 
 ```
@@ -2684,11 +2684,11 @@ Located on the east and west sides of the Moon Mountain trail in the central bas
 ### 189. 小熊猫月亮产房
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/小熊猫月亮产房.md`
 - 配对图片：`小熊猫月亮产房.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_10`
-- 解析来源（名称）：h1: # 小熊猫月亮产房 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_10`
+- 解析来源（名称）：h1: # 小熊猫月亮产房 + EN doc h1
 - 解析来源（正文）：Long Description @ line 30
 - **中文名**：小熊猫月亮产房
-- **英文名**：Located
+- **英文名**：Red Panda Moon Nursery
 - **正文（英文）**：
 
 ```
@@ -2698,11 +2698,11 @@ Located in the Moon Mountain area of the base, the Red Panda Moon Nursery is des
 ### 190. 新区展馆
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/新区展馆.md`
 - 配对图片：`新区展馆.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_11`
-- 解析来源（名称）：h1: # 新区展馆 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_11`
+- 解析来源（名称）：h1: # 新区展馆 + EN doc h1
 - 解析来源（正文）：Long Description @ line 31
 - **中文名**：新区展馆
-- **英文名**：Located
+- **英文名**：New Area Exhibition Hall
 - **正文（英文）**：
 
 ```
@@ -2712,11 +2712,11 @@ Located at the core of the base's new area (northern expansion zone), adjacent t
 ### 191. 熊猫美术馆
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/熊猫美术馆.md`
 - 配对图片：`熊猫美术馆.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_12`
-- 解析来源（名称）：h1: # 熊猫美术馆 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_12`
+- 解析来源（名称）：h1: # 熊猫美术馆 + EN doc h1
 - 解析来源（正文）：Long Description @ line 31
 - **中文名**：熊猫美术馆
-- **英文名**：Located
+- **英文名**：Panda Art Museum
 - **正文（英文）**：
 
 ```
@@ -2726,11 +2726,11 @@ Located on the east side of the New Area Central Plaza in the base, adjacent to 
 ### 192. 熊猫塔
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/熊猫塔.md`
 - 配对图片：`熊猫塔.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_13`
-- 解析来源（名称）：h1: # 熊猫塔 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_13`
+- 解析来源（名称）：h1: # 熊猫塔 + EN doc h1
 - 解析来源（正文）：Long Description @ line 31
 - **中文名**：熊猫塔
-- **英文名**：Located
+- **英文名**：Panda Tower
 - **正文（英文）**：
 
 ```
@@ -2740,11 +2740,11 @@ Located on the north side of the New Area Central Plaza of the base, the Panda T
 ### 193. 熊猫邮局
 - 来源 md：`成都子景点/成都子景点-信息/成都熊猫基地/熊猫邮局.md`
 - 配对图片：`熊猫邮局.jpg`
-- sub_area id：`chengdu_panda_research_base_sa_14`
-- 解析来源（名称）：h1: # 熊猫邮局 + body opening
+- sub_area id：`https_yoloadmin_vue_cstudiomunger_workers_dev_sa_14`
+- 解析来源（名称）：h1: # 熊猫邮局 + EN doc h1
 - 解析来源（正文）：Long Description @ line 32
 - **中文名**：熊猫邮局
-- **英文名**：Located
+- **英文名**：Panda Post Office
 - **正文（英文）**：
 
 ```

@@ -1,0 +1,605 @@
+{
+  "updated": [
+    {
+      "attrId": "shanghai_disney_resort",
+      "seq": 2,
+      "nameZh": "奇想花园",
+      "part": "奇想花园",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/shanghai_disney_resort_002.mp3"
+    },
+    {
+      "attrId": "shanghai_disney_resort",
+      "seq": 3,
+      "nameZh": "探险岛",
+      "part": "探险岛",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/shanghai_disney_resort_003.mp3"
+    },
+    {
+      "attrId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "seq": 4,
+      "nameZh": "二楼-西装定制核心区",
+      "part": "西装定制",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_004.mp3"
+    },
+    {
+      "attrId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "seq": 5,
+      "nameZh": "二楼-进口面料坊",
+      "part": "进口面料",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_005.mp3"
+    },
+    {
+      "attrId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "seq": 6,
+      "nameZh": "三楼-旗袍与中式服装区",
+      "part": "旗袍",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_006.mp3"
+    },
+    {
+      "attrId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "seq": 7,
+      "nameZh": "三楼-传统面料零售区",
+      "part": "传统面料",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_007.mp3"
+    },
+    {
+      "attrId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "seq": 8,
+      "nameZh": "四楼-羊绒与杂项区",
+      "part": "羊绒",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_008.mp3"
+    },
+    {
+      "attrId": "tianzifang",
+      "seq": 2,
+      "nameZh": "田子坊 · 石库门里弄建筑群",
+      "part": "石库门里弄",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/tianzifang_002.mp3"
+    },
+    {
+      "attrId": "tianzifang",
+      "seq": 6,
+      "nameZh": "田子坊 · 气味图书馆",
+      "part": "气味图书馆",
+      "audioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/tianzifang_006.mp3"
+    }
+  ],
+  "errors": [],
+  "skipped": [
+    {
+      "attrId": "shanghai_disney_resort",
+      "nameZh": "米奇大街",
+      "seq": 1
+    },
+    {
+      "attrId": "shanghai_disney_resort",
+      "nameZh": "宝藏湾",
+      "seq": 4
+    },
+    {
+      "attrId": "shanghai_disney_resort",
+      "nameZh": "梦幻世界",
+      "seq": 5
+    },
+    {
+      "attrId": "shanghai_disney_resort",
+      "nameZh": "明日世界",
+      "seq": 6
+    },
+    {
+      "attrId": "shanghai_disney_resort",
+      "nameZh": "玩具总动员乐园",
+      "seq": 7
+    },
+    {
+      "attrId": "shanghai_disney_resort",
+      "nameZh": "疯狂动物城",
+      "seq": 8
+    },
+    {
+      "attrId": "shanghai_disney_resort",
+      "nameZh": "迪士尼小镇",
+      "seq": 9
+    },
+    {
+      "attrId": "shanghai_disney_resort",
+      "nameZh": "星愿公园",
+      "seq": 10
+    },
+    {
+      "attrId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "nameZh": "市场入口大厅",
+      "seq": 1
+    },
+    {
+      "attrId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "nameZh": "一楼-成衣与皮具区",
+      "seq": 2
+    },
+    {
+      "attrId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "nameZh": "一楼-Kate&Kevin定制工坊",
+      "seq": 3
+    },
+    {
+      "attrId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market",
+      "nameZh": "黄浦邮政国际寄送服务台",
+      "seq": 9
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "高陵集市（鹅黄色）",
+      "seq": 1
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "曹杨新村（月白色）",
+      "seq": 2
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "玉佛寺（朱红色）",
+      "seq": 3
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "M50创意园（翠绿色）",
+      "seq": 4
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "创享塔（木槿色）",
+      "seq": 5
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "雾苑堂茶室（天青色）",
+      "seq": 6
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "竹丝编非遗体验馆（竹青色）",
+      "seq": 7
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "顾正红纪念馆（玄采色）",
+      "seq": 8
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "苏州河工业文明展示馆（丁香色）",
+      "seq": 9
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "半马苏河公园（钴蓝色）",
+      "seq": 10
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "百禧公园（紫棠色）",
+      "seq": 11
+    },
+    {
+      "attrId": "suzhou_creek_twelve_nations_colors",
+      "nameZh": "鸿寿坊（琥珀色）",
+      "seq": 12
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "三穗堂",
+      "seq": 1
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "仰山堂·卷雨楼",
+      "seq": 2
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "大假山",
+      "seq": 3
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "萃秀堂",
+      "seq": 4
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "万花楼",
+      "seq": 5
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "点春堂",
+      "seq": 6
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "玉玲珑",
+      "seq": 7
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "玉华堂",
+      "seq": 8
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "会景楼",
+      "seq": 9
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "得月楼",
+      "seq": 10
+    },
+    {
+      "attrId": "yu_garden",
+      "nameZh": "内园",
+      "seq": 11
+    },
+    {
+      "attrId": "lujiazui_financial_district",
+      "nameZh": "陆家嘴中心绿地",
+      "seq": 1
+    },
+    {
+      "attrId": "lujiazui_financial_district",
+      "nameZh": "东方明珠广播电视塔",
+      "seq": 2
+    },
+    {
+      "attrId": "lujiazui_financial_district",
+      "nameZh": "上海海洋水族馆",
+      "seq": 3
+    },
+    {
+      "attrId": "lujiazui_financial_district",
+      "nameZh": "金茂大厦",
+      "seq": 4
+    },
+    {
+      "attrId": "lujiazui_financial_district",
+      "nameZh": "上海环球金融中心",
+      "seq": 5
+    },
+    {
+      "attrId": "lujiazui_financial_district",
+      "nameZh": "上海中心大厦（上海之巅）",
+      "seq": 6
+    },
+    {
+      "attrId": "lujiazui_financial_district",
+      "nameZh": "吴昌硕纪念馆",
+      "seq": 7
+    },
+    {
+      "attrId": "lujiazui_financial_district",
+      "nameZh": "世纪大道",
+      "seq": 8
+    },
+    {
+      "attrId": "lujiazui_financial_district",
+      "nameZh": "浦东滨江大道",
+      "seq": 9
+    },
+    {
+      "attrId": "tianzifang",
+      "nameZh": "田子坊 · 泰康路主入口",
+      "seq": 1
+    },
+    {
+      "attrId": "tianzifang",
+      "nameZh": "田子坊 · 陈逸飞工作室旧址",
+      "seq": 3
+    },
+    {
+      "attrId": "tianzifang",
+      "nameZh": "田子坊 · 守白艺术中心",
+      "seq": 4
+    },
+    {
+      "attrId": "tianzifang",
+      "nameZh": "田子坊 · 画家楼天台",
+      "seq": 5
+    },
+    {
+      "attrId": "tianzifang",
+      "nameZh": "田子坊 · 金粉世家",
+      "seq": 7
+    },
+    {
+      "attrId": "tianzifang",
+      "nameZh": "田子坊 · 248 弄弄堂",
+      "seq": 8
+    },
+    {
+      "attrId": "tianzifang",
+      "nameZh": "田子坊 · 274 弄艺术长廊",
+      "seq": 9
+    },
+    {
+      "attrId": "wukang_road",
+      "nameZh": "武康大楼（原诺曼底公寓",
+      "seq": 1
+    },
+    {
+      "attrId": "wukang_road",
+      "nameZh": "武康路 · 宋庆龄故居",
+      "seq": 2
+    },
+    {
+      "attrId": "wukang_road",
+      "nameZh": "黄兴故居",
+      "seq": 3
+    },
+    {
+      "attrId": "wukang_road",
+      "nameZh": "武康路 · 周璇旧居",
+      "seq": 4
+    },
+    {
+      "attrId": "wukang_road",
+      "nameZh": "武康路 · 意大利总领事馆旧址",
+      "seq": 5
+    },
+    {
+      "attrId": "wukang_road",
+      "nameZh": "武康路 · 武康庭",
+      "seq": 6
+    },
+    {
+      "attrId": "wukang_road",
+      "nameZh": "罗密欧阳台（武康路 210 号",
+      "seq": 7
+    },
+    {
+      "attrId": "wukang_road",
+      "nameZh": "武康路 · 巴金故居",
+      "seq": 8
+    },
+    {
+      "attrId": "wukang_road",
+      "nameZh": "密丹公寓（武康路 115 号",
+      "seq": 9
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "十六铺码头",
+      "seq": 1
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "外滩十八号",
+      "seq": 2
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "亚细亚大楼（外滩一号）",
+      "seq": 3
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "上海总会（华尔道夫酒店）",
+      "seq": 4
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "原汇丰银行大楼",
+      "seq": 5
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "海关大楼",
+      "seq": 6
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "和平饭店",
+      "seq": 7
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "陈毅广场与陈毅铜像",
+      "seq": 8
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "外滩牛",
+      "seq": 9
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "上海市人民英雄纪念塔",
+      "seq": 10
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "外白渡桥",
+      "seq": 11
+    },
+    {
+      "attrId": "the_bund_shanghai",
+      "nameZh": "外滩源",
+      "seq": 12
+    },
+    {
+      "attrId": "oriental_pearl_radio_television_tower",
+      "nameZh": "检票口",
+      "seq": 1
+    },
+    {
+      "attrId": "oriental_pearl_radio_television_tower",
+      "nameZh": "主观光层",
+      "seq": 2
+    },
+    {
+      "attrId": "oriental_pearl_radio_television_tower",
+      "nameZh": "米太空舱",
+      "seq": 3
+    },
+    {
+      "attrId": "oriental_pearl_radio_television_tower",
+      "nameZh": "全透明悬空观光廊",
+      "seq": 4
+    },
+    {
+      "attrId": "oriental_pearl_radio_television_tower",
+      "nameZh": "户外观光层",
+      "seq": 5
+    },
+    {
+      "attrId": "oriental_pearl_radio_television_tower",
+      "nameZh": "更上海环动多媒体秀",
+      "seq": 6
+    },
+    {
+      "attrId": "oriental_pearl_radio_television_tower",
+      "nameZh": "上海城市历史发展陈列馆",
+      "seq": 7
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "中国古代青铜馆",
+      "seq": 1
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "中国古代雕塑馆",
+      "seq": 2
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "中国古代陶瓷馆",
+      "seq": 3
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "中国历代书法馆",
+      "seq": 4
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "中国历代绘画馆",
+      "seq": 5
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "中国历代玺印馆",
+      "seq": 6
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "中国古代玉器馆",
+      "seq": 7
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "中国历代钱币馆",
+      "seq": 8
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "中国明清家具馆",
+      "seq": 9
+    },
+    {
+      "attrId": "shanghai_museum",
+      "nameZh": "解说词-中国少数民族工艺馆",
+      "seq": 10
+    },
+    {
+      "attrId": "xujiahui_source_scenic_area",
+      "nameZh": "徐家汇书院",
+      "seq": 1
+    },
+    {
+      "attrId": "xujiahui_source_scenic_area",
+      "nameZh": "徐家汇天主堂",
+      "seq": 2
+    },
+    {
+      "attrId": "xujiahui_source_scenic_area",
+      "nameZh": "上海气象博物馆（徐家汇观象台旧址）",
+      "seq": 3
+    },
+    {
+      "attrId": "xujiahui_source_scenic_area",
+      "nameZh": "徐汇公学旧址（崇思楼）",
+      "seq": 4
+    },
+    {
+      "attrId": "xujiahui_source_scenic_area",
+      "nameZh": "百代小楼（《义勇军进行曲》灌制地纪念馆）",
+      "seq": 5
+    },
+    {
+      "attrId": "xujiahui_source_scenic_area",
+      "nameZh": "上海电影博物馆",
+      "seq": 6
+    },
+    {
+      "attrId": "xujiahui_source_scenic_area",
+      "nameZh": "光启公园与徐光启纪念馆",
+      "seq": 7
+    },
+    {
+      "attrId": "xujiahui_source_scenic_area",
+      "nameZh": "土山湾博物馆",
+      "seq": 8
+    },
+    {
+      "attrId": "xujiahui_source_scenic_area",
+      "nameZh": "圣母院旧址（上海老站）",
+      "seq": 9
+    },
+    {
+      "attrId": "zhujiajiao_ancient_town",
+      "nameZh": "放生桥",
+      "seq": 1
+    },
+    {
+      "attrId": "zhujiajiao_ancient_town",
+      "nameZh": "北大街",
+      "seq": 2
+    },
+    {
+      "attrId": "zhujiajiao_ancient_town",
+      "nameZh": "涵大隆酱园",
+      "seq": 3
+    },
+    {
+      "attrId": "zhujiajiao_ancient_town",
+      "nameZh": "泰安桥",
+      "seq": 4
+    },
+    {
+      "attrId": "zhujiajiao_ancient_town",
+      "nameZh": "圆津禅院",
+      "seq": 5
+    },
+    {
+      "attrId": "zhujiajiao_ancient_town",
+      "nameZh": "廊桥",
+      "seq": 6
+    },
+    {
+      "attrId": "zhujiajiao_ancient_town",
+      "nameZh": "城隍庙",
+      "seq": 7
+    },
+    {
+      "attrId": "zhujiajiao_ancient_town",
+      "nameZh": "课植园",
+      "seq": 8
+    },
+    {
+      "attrId": "zhujiajiao_ancient_town",
+      "nameZh": "大清邮局",
+      "seq": 9
+    }
+  ]
+}

@@ -1,0 +1,1460 @@
+{
+  "generatedAt": "2026-07-09T10:18:33.451Z",
+  "mode": "apply",
+  "cityFilter": null,
+  "stats": {
+    "matched": 705,
+    "updated": 41,
+    "skippedLowScore": 0,
+    "unmatchedFiles": 28,
+    "ambiguous": 29
+  },
+  "items": [
+    {
+      "city": "上海",
+      "scenic": "南外滩轻纺面料市场",
+      "sourceFile": "A_EN_Benedict_5.2F Imported Fabric Boutique.mp3",
+      "hint": "2F Imported Fabric Boutique",
+      "fileKey": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_005.mp3",
+      "subAreaId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_04",
+      "nameZh": "二楼-西装定制核心区",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_004.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_005.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "南外滩轻纺面料市场",
+      "sourceFile": "A_EN_Benedict_6.3F Qipao and Chinese-Style Garment Zone.mp3",
+      "hint": "3F Qipao and Chinese-Style Garment Zone",
+      "fileKey": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_006.mp3",
+      "subAreaId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_05",
+      "nameZh": "二楼-进口面料坊",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_005.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_006.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "南外滩轻纺面料市场",
+      "sourceFile": "A_EN_Benedict_7.3F Traditional Fabric Retail Zone.mp3",
+      "hint": "3F Traditional Fabric Retail Zone",
+      "fileKey": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_007.mp3",
+      "subAreaId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_06",
+      "nameZh": "三楼-旗袍与中式服装区",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_006.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_007.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "南外滩轻纺面料市场",
+      "sourceFile": "A_EN_Benedict_8.4F Cashmere and Miscellaneous Zone.mp3",
+      "hint": "4F Cashmere and Miscellaneous Zone",
+      "fileKey": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_008.mp3",
+      "subAreaId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_07",
+      "nameZh": "三楼-传统面料零售区",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_007.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_008.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "南外滩轻纺面料市场",
+      "sourceFile": "A_EN_Benedict_9.Huangpu Post International Shipping Service Counter.mp3",
+      "hint": "Huangpu Post International Shipping Service Counter",
+      "fileKey": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_009.mp3",
+      "subAreaId": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_sa_08",
+      "nameZh": "四楼-羊绒与杂项区",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_008.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_009.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_1.Mickey Avenue.mp3",
+      "hint": "Mickey Avenue",
+      "fileKey": "shanghai_disney_resort_001.mp3",
+      "subAreaId": "shanghai_disney_resort_sa_02",
+      "nameZh": "奇想花园",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/shanghai_disney_resort_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/shanghai_disney_resort_001.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_2.Gardens of Imagination.mp3",
+      "hint": "Gardens of Imagination",
+      "fileKey": "shanghai_disney_resort_002.mp3",
+      "subAreaId": "shanghai_disney_resort_sa_03",
+      "nameZh": "探险岛",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/shanghai_disney_resort_003.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/shanghai_disney_resort_002.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "田子坊",
+      "sourceFile": "A_EN_Benedict_2.Shikumen Lane Architecture.mp3",
+      "hint": "Shikumen Lane Architecture",
+      "fileKey": "tianzifang_002.mp3",
+      "subAreaId": "tianzifang_sa_06",
+      "nameZh": "田子坊 · 气味图书馆",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/tianzifang_006.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/tianzifang_002.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "田子坊",
+      "sourceFile": "A_EN_Benedict_6.Scent Library.mp3",
+      "hint": "Scent Library",
+      "fileKey": "tianzifang_006.mp3",
+      "subAreaId": "tianzifang_sa_02",
+      "nameZh": "田子坊 · 石库门里弄建筑群",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/tianzifang_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/tianzifang_006.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "恭王府",
+      "sourceFile": "A_EN_Benedict_3.The Hall of Hidden Light and the Hall of Xi Jin.mp3",
+      "hint": "The Hall of Hidden Light and the Hall of Xi Jin",
+      "fileKey": "beijing_prince_gong_mansion_003.mp3",
+      "subAreaId": "beijing_prince_gong_mansion_bj_sa_06",
+      "nameZh": "蝠池与安善堂",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_006.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_003.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "恭王府",
+      "sourceFile": "A_EN_Benedict_6.Bat Pond and the Hall of Good Peace.mp3",
+      "hint": "Bat Pond and the Hall of Good Peace",
+      "fileKey": "beijing_prince_gong_mansion_006.mp3",
+      "subAreaId": "beijing_prince_gong_mansion_bj_sa_08",
+      "nameZh": "怡神所与蝠厅",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_008.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_006.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "恭王府",
+      "sourceFile": "A_EN_Benedict_8.The Hall of Spirit's Delight and Bat Hall.mp3",
+      "hint": "The Hall of Spirit's Delight and Bat Hall",
+      "fileKey": "beijing_prince_gong_mansion_008.mp3",
+      "subAreaId": "beijing_prince_gong_mansion_bj_sa_11",
+      "nameZh": "乐道堂与多福轩",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_011.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_prince_gong_mansion_008.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "故宫",
+      "sourceFile": "A_EN_Benedict_2.Gate of Supreme Harmony and the Eastern and Western Flanks of the Outer Court.mp3",
+      "hint": "Gate of Supreme Harmony and the Eastern and Western Flanks of the Outer Court",
+      "fileKey": "beijing_forbidden_city_002.mp3",
+      "subAreaId": "beijing_forbidden_city_bj_sa_11",
+      "nameZh": "神武门、角楼与东西华门",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_011.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_002.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "故宫",
+      "sourceFile": "A_EN_Benedict_4.Hall of Central Harmony and Hall of Preserving Harmony.mp3",
+      "hint": "Hall of Central Harmony and Hall of Preserving Harmony",
+      "fileKey": "beijing_forbidden_city_004.mp3",
+      "subAreaId": "beijing_forbidden_city_bj_sa_02",
+      "nameZh": "太和门与外朝东西路",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_004.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "故宫",
+      "sourceFile": "A_EN_Benedict_6.Hall of Mental Cultivation and the Grand Council Office.mp3",
+      "hint": "Hall of Mental Cultivation and the Grand Council Office",
+      "fileKey": "beijing_forbidden_city_006.mp3",
+      "subAreaId": "beijing_forbidden_city_bj_sa_04",
+      "nameZh": "中和殿与保和殿",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_004.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_006.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "故宫",
+      "sourceFile": "A_EN_Benedict_9.Hall of Ancestral Worship - Clock and Watch Gallery and Palace of Tranquil Longevity - Treasures Gallery.mp3",
+      "hint": "Hall of Ancestral Worship - Clock and Watch Gallery and Palace of Tranquil Longevity - Treasures Gallery",
+      "fileKey": "beijing_forbidden_city_009.mp3",
+      "subAreaId": "beijing_forbidden_city_bj_sa_06",
+      "nameZh": "养心殿与军机处",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_006.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_forbidden_city_009.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "国博",
+      "sourceFile": "A_EN_Benedict_6.Ancient Chinese Coins and Bronze Mirrors.mp3",
+      "hint": "Ancient Chinese Coins and Bronze Mirrors",
+      "fileKey": "beijing_national_museum_006.mp3",
+      "subAreaId": "beijing_national_museum_bj_sa_08",
+      "nameZh": "古代服饰与饮食文化",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_008.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_006.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "国博",
+      "sourceFile": "A_EN_Benedict_8.Ancient Chinese Costume and Food Culture.mp3",
+      "hint": "Ancient Chinese Costume and Food Culture",
+      "fileKey": "beijing_national_museum_008.mp3",
+      "subAreaId": "beijing_national_museum_bj_sa_06",
+      "nameZh": "古代钱币与铜镜",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_006.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_national_museum_008.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "慕田峪长城",
+      "sourceFile": "A_EN_Benedict_2.Zhengguan Terrace.mp3",
+      "hint": "Zhengguan Terrace",
+      "fileKey": "beijing_mutianyu_great_wall_002.mp3",
+      "subAreaId": "beijing_mutianyu_great_wall_bj_sa_06",
+      "nameZh": "好汉坡",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_mutianyu_great_wall_006.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/beijing_mutianyu_great_wall_002.mp3"
+    },
+    {
+      "city": "南京",
+      "scenic": "明城墙",
+      "sourceFile": "A_EN_Benedict_4.The Hidden Soldier Caves.mp3",
+      "hint": "The Hidden Soldier Caves",
+      "fileKey": "nanjing_city_wall_004.mp3",
+      "subAreaId": "nanjing_city_wall_sa_05",
+      "nameZh": "马道",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/nanjing_city_wall_005.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/nanjing_city_wall_004.mp3"
+    },
+    {
+      "city": "南京",
+      "scenic": "南京老门东",
+      "sourceFile": "A_EN_Benedict_1.Mendong Memorial Gateway.mp3",
+      "hint": "Mendong Memorial Gateway",
+      "fileKey": "nanjing_laomendong_001.mp3",
+      "subAreaId": "nanjing_laomendong_sa_02",
+      "nameZh": "箍桶巷",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/nanjing_laomendong_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/nanjing_laomendong_001.mp3"
+    },
+    {
+      "city": "杭州",
+      "scenic": "浙江省博物馆（之江馆区）",
+      "sourceFile": "A_EN_Benedict_6.浙江一万年·五代至明清.mp3",
+      "hint": "浙江一万年·五代至明清",
+      "fileKey": "hangzhou_zhejiang_museum_006.mp3",
+      "subAreaId": "hangzhou_zhejiang_museum_sa_06",
+      "nameZh": "浙江一万年·五代至明清",
+      "score": 100,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/hangzhou_zhejiang_museum_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/hangzhou_zhejiang_museum_006.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "白象居",
+      "sourceFile": "A_EN_Benedict_1.Floor 1 — Riverside Entrance (Starting Point).mp3",
+      "hint": "Floor 1 — Riverside Entrance (Starting Point)",
+      "fileKey": "chongqing_baixiangju_001.mp3",
+      "subAreaId": "chongqing_baixiangju_sa_03",
+      "nameZh": "层临江入口（起点）",
+      "score": 100,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_baixiangju_003.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_baixiangju_001.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "重庆动物园",
+      "sourceFile": "A_EN_Benedict_2.Giant Panda House.mp3",
+      "hint": "Giant Panda House",
+      "fileKey": "chongqing_zoo_002.mp3",
+      "subAreaId": "chongqing_zoo_sa_03",
+      "nameZh": "金鱼馆",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_zoo_003.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_zoo_002.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "重庆动物园",
+      "sourceFile": "A_EN_Benedict_3.Goldfish Pavilion.mp3",
+      "hint": "Goldfish Pavilion",
+      "fileKey": "chongqing_zoo_003.mp3",
+      "subAreaId": "chongqing_zoo_sa_02",
+      "nameZh": "熊猫馆",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_zoo_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_zoo_003.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "磁器口古镇",
+      "sourceFile": "A_EN_Benedict_4.Xinji General Store.mp3",
+      "hint": "Xinji General Store",
+      "fileKey": "chongqing_ciqikou_old_town_004.mp3",
+      "subAreaId": "chongqing_ciqikou_old_town_sa_08",
+      "nameZh": "迎龙门码头",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_ciqikou_old_town_008.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_ciqikou_old_town_004.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "北山景区/A_EN_Benedict_10.Beishan Scenic Area Exit.mp3",
+      "hint": "Beishan Scenic Area Exit",
+      "fileKey": "chongqing_dazu_rock_carvings_025.mp3",
+      "subAreaId": "chongqing_dazu_rock_carvings_sa_02",
+      "nameZh": "北山景区",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_025.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "大足石刻博物馆/A_EN_Benedict_4.History and Art of the Dazu Rock Carvings.mp3",
+      "hint": "History and Art of the Dazu Rock Carvings",
+      "fileKey": "chongqing_dazu_rock_carvings_029.mp3",
+      "subAreaId": "chongqing_dazu_rock_carvings_sa_03",
+      "nameZh": "大足石刻博物馆",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_003.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_029.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "南山景区/A_EN_Benedict_8.Nanshan Scenic Area Exit.mp3",
+      "hint": "Nanshan Scenic Area Exit",
+      "fileKey": "chongqing_dazu_rock_carvings_040.mp3",
+      "subAreaId": "chongqing_dazu_rock_carvings_sa_04",
+      "nameZh": "南山景区",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_004.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_040.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石门山景区/A_EN_Benedict_7.Shimenshan Scenic Area Exit.mp3",
+      "hint": "Shimenshan Scenic Area Exit",
+      "fileKey": "chongqing_dazu_rock_carvings_047.mp3",
+      "subAreaId": "chongqing_dazu_rock_carvings_sa_05",
+      "nameZh": "石门山景区",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_005.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_047.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石篆山景区/A_EN_Benedict_7.Shizhuanshan Scenic Area Exit.mp3",
+      "hint": "Shizhuanshan Scenic Area Exit",
+      "fileKey": "chongqing_dazu_rock_carvings_054.mp3",
+      "subAreaId": "chongqing_dazu_rock_carvings_sa_06",
+      "nameZh": "石篆山景区",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_022.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_054.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_1.Visitor Center.mp3",
+      "hint": "Visitor Center",
+      "fileKey": "chongqing_dazu_rock_carvings_001.mp3",
+      "subAreaId": "chongqing_dazu_rock_carvings_sa_01",
+      "nameZh": "宝顶山",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_014.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_dazu_rock_carvings_001.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "洪崖洞民俗风貌区",
+      "sourceFile": "A_EN_Benedict_2.Floor 11 — City Terrace.mp3",
+      "hint": "Floor 11 — City Terrace",
+      "fileKey": "chongqing_hongya_cave_002.mp3",
+      "subAreaId": "chongqing_hongya_cave_sa_01",
+      "nameZh": "重庆洪崖洞民俗风貌区",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_hongya_cave_001.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_hongya_cave_002.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "洪崖洞民俗风貌区",
+      "sourceFile": "A_EN_Benedict_7.Floor 9 — International Bazaar.mp3",
+      "hint": "Floor 9 — International Bazaar",
+      "fileKey": "chongqing_hongya_cave_007.mp3",
+      "subAreaId": "chongqing_hongya_cave_sa_02",
+      "nameZh": "城市阳台",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_hongya_cave_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_hongya_cave_007.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "金佛山",
+      "sourceFile": "A_EN_Benedict_8.Yanzi Cave and Lingguan Cave.mp3",
+      "hint": "Yanzi Cave and Lingguan Cave",
+      "fileKey": "chongqing_jinfo_mountain_008.mp3",
+      "subAreaId": "chongqing_jinfo_mountain_sa_09",
+      "nameZh": "燕子洞和灵观洞",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_jinfo_mountain_009.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_jinfo_mountain_008.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "金佛山",
+      "sourceFile": "A_EN_Benedict_14.West Gate Cable Car Lower Station (Descent).mp3",
+      "hint": "West Gate Cable Car Lower Station (Descent)",
+      "fileKey": "chongqing_jinfo_mountain_014.mp3",
+      "subAreaId": "chongqing_jinfo_mountain_sa_04",
+      "nameZh": "索道下站",
+      "score": 95,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_jinfo_mountain_004.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_jinfo_mountain_014.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "金佛山",
+      "sourceFile": "A_EN_Benedict_7.Skyline Trail.mp3",
+      "hint": "Skyline Trail",
+      "fileKey": "chongqing_jinfo_mountain_007.mp3",
+      "subAreaId": "chongqing_jinfo_mountain_sa_08",
+      "nameZh": "云端步道",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_jinfo_mountain_008.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_jinfo_mountain_007.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "金佛山",
+      "sourceFile": "A_EN_Benedict_9.Rhododendron Prince.mp3",
+      "hint": "Rhododendron Prince",
+      "fileKey": "chongqing_jinfo_mountain_009.mp3",
+      "subAreaId": "chongqing_jinfo_mountain_sa_11",
+      "nameZh": "药池坝",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_jinfo_mountain_010.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_jinfo_mountain_009.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "山城步道",
+      "sourceFile": "A_EN_Benedict_3.Suspended Boardwalk.mp3",
+      "hint": "Suspended Boardwalk",
+      "fileKey": "chongqing_mountain_trails_003.mp3",
+      "subAreaId": "chongqing_mountain_trails_sa_02",
+      "nameZh": "厚庐",
+      "score": 75,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_mountain_trails_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_mountain_trails_003.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "武隆喀斯特旅游区",
+      "sourceFile": "天生三桥/A_EN_Benedict_2.Tianfu Post Station.mp3",
+      "hint": "Tianfu Post Station",
+      "fileKey": "chongqing_wulong_karst_002.mp3",
+      "subAreaId": "chongqing_wulong_karst_sa_03",
+      "nameZh": "天官赐福",
+      "score": 100,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_wulong_karst_003.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_wulong_karst_002.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "武隆喀斯特旅游区",
+      "sourceFile": "仙女山国家森林公园/A_EN_Benedict_2.Grand Grassland Station.mp3",
+      "hint": "Grand Grassland Station",
+      "fileKey": "chongqing_wulong_karst_011.mp3",
+      "subAreaId": "chongqing_wulong_karst_sa_02",
+      "nameZh": "仙女山国家公园-大草原站",
+      "score": 100,
+      "previousUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_wulong_karst_002.mp3",
+      "newUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/sub-areas/chongqing_wulong_karst_011.mp3"
+    }
+  ],
+  "unmatched": [
+    {
+      "city": "上海",
+      "scenic": "南外滩轻纺面料市场",
+      "sourceFile": "A_EN_Benedict_4.2F Bespoke Suit Core Zone.mp3",
+      "hint": "2F Bespoke Suit Core Zone",
+      "fileKey": "south_bund_fabric_market_commonly_known_as_dongjiadu_fabric_market_004.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_3.Adventure Isle.mp3",
+      "hint": "Adventure Isle",
+      "fileKey": "shanghai_disney_resort_003.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_4.Treasure Cove.mp3",
+      "hint": "Treasure Cove",
+      "fileKey": "shanghai_disney_resort_004.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_5.Fantasyland.mp3",
+      "hint": "Fantasyland",
+      "fileKey": "shanghai_disney_resort_005.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_6.Tomorrowland.mp3",
+      "hint": "Tomorrowland",
+      "fileKey": "shanghai_disney_resort_006.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_7.Toy Story Land.mp3",
+      "hint": "Toy Story Land",
+      "fileKey": "shanghai_disney_resort_007.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_8.Zootopia.mp3",
+      "hint": "Zootopia",
+      "fileKey": "shanghai_disney_resort_008.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_9.Disneytown.mp3",
+      "hint": "Disneytown",
+      "fileKey": "shanghai_disney_resort_009.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "上海迪士尼度假区",
+      "sourceFile": "A_EN_Benedict_10.Wishing Star Park.mp3",
+      "hint": "Wishing Star Park",
+      "fileKey": "shanghai_disney_resort_010.mp3"
+    },
+    {
+      "city": "上海",
+      "scenic": "武康路",
+      "sourceFile": "A_EN_Benedict_9.密丹里.mp3",
+      "hint": "密丹里",
+      "fileKey": "wukang_road_009.mp3"
+    },
+    {
+      "city": "北京",
+      "scenic": "天坛",
+      "sourceFile": "A_EN_Benedict_3.Divine Path.mp3",
+      "hint": "Divine Path",
+      "fileKey": "beijing_temple_of_heaven_003.mp3"
+    },
+    {
+      "city": "南京",
+      "scenic": "中山陵",
+      "sourceFile": "A_EN_Benedict_8.墓室.mp3",
+      "hint": "墓室",
+      "fileKey": "nanjing_sun_yat_sen_mausoleum_008.mp3"
+    },
+    {
+      "city": "成都",
+      "scenic": "四川博物院",
+      "sourceFile": "A_EN_Benedict_3.二楼·远古四川（史前时期）.mp3",
+      "hint": "二楼·远古四川（史前时期）",
+      "fileKey": "sichuan_museum_003.mp3"
+    },
+    {
+      "city": "成都",
+      "scenic": "四川博物院",
+      "sourceFile": "A_EN_Benedict_4.二楼·古代四川（先秦至秦汉三国）.mp3",
+      "hint": "二楼·古代四川（先秦至秦汉三国）",
+      "fileKey": "sichuan_museum_004.mp3"
+    },
+    {
+      "city": "杭州",
+      "scenic": "西湖文化广场",
+      "sourceFile": "A_EN_Benedict_2.主广场与音乐喷泉.mp3",
+      "hint": "主广场与音乐喷泉",
+      "fileKey": "hangzhou_west_lake_cultural_plaza_002.mp3"
+    },
+    {
+      "city": "杭州",
+      "scenic": "西湖文化广场",
+      "sourceFile": "A_EN_Benedict_8.文化广场雕塑群.mp3",
+      "hint": "文化广场雕塑群",
+      "fileKey": "hangzhou_west_lake_cultural_plaza_008.mp3"
+    },
+    {
+      "city": "杭州",
+      "scenic": "浙江省博物馆（之江馆区）",
+      "sourceFile": "A_EN_Benedict_3.江南秘色——浙江青瓷文化展.mp3",
+      "hint": "江南秘色——浙江青瓷文化展",
+      "fileKey": "hangzhou_zhejiang_museum_003.mp3"
+    },
+    {
+      "city": "杭州",
+      "scenic": "浙江省博物馆（之江馆区）",
+      "sourceFile": "A_EN_Benedict_4.向东是大海——浙江海洋文化陈列.mp3",
+      "hint": "向东是大海——浙江海洋文化陈列",
+      "fileKey": "hangzhou_zhejiang_museum_004.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_4.Dafo Bay Entrance.mp3",
+      "hint": "Dafo Bay Entrance",
+      "fileKey": "chongqing_dazu_rock_carvings_004.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_5.Acts of Liu Benzun.mp3",
+      "hint": "Acts of Liu Benzun",
+      "fileKey": "chongqing_dazu_rock_carvings_005.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_6.Scenes of Hell.mp3",
+      "hint": "Scenes of Hell",
+      "fileKey": "chongqing_dazu_rock_carvings_006.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "北山景区/A_EN_Benedict_5.Samantabhadra.mp3",
+      "hint": "Samantabhadra",
+      "fileKey": "chongqing_dazu_rock_carvings_020.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "北山景区/A_EN_Benedict_6.Manjushri.mp3",
+      "hint": "Manjushri",
+      "fileKey": "chongqing_dazu_rock_carvings_021.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "南山景区/A_EN_Benedict_6.Dragon Cave.mp3",
+      "hint": "Dragon Cave",
+      "fileKey": "chongqing_dazu_rock_carvings_038.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石门山景区/A_EN_Benedict_4.Wutong Dadi.mp3",
+      "hint": "Wutong Dadi",
+      "fileKey": "chongqing_dazu_rock_carvings_044.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石篆山景区/A_EN_Benedict_4.Cave of Laojun.mp3",
+      "hint": "Cave of Laojun",
+      "fileKey": "chongqing_dazu_rock_carvings_051.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石篆山景区/A_EN_Benedict_5.Figure of Lu Ban.mp3",
+      "hint": "Figure of Lu Ban",
+      "fileKey": "chongqing_dazu_rock_carvings_052.mp3"
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石篆山景区/A_EN_Benedict_6.Hariti.mp3",
+      "hint": "Hariti",
+      "fileKey": "chongqing_dazu_rock_carvings_053.mp3"
+    }
+  ],
+  "ambiguous": [
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_2.Digital Cinema.mp3",
+      "hint": "Digital Cinema",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_7.Scripture on Parental Kindness.mp3",
+      "hint": "Scripture on Parental Kindness",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_8.Thousand-Hand Guanyin.mp3",
+      "hint": "Thousand-Hand Guanyin",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_9.The Three Sages of Huayan.mp3",
+      "hint": "The Three Sages of Huayan",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_10.Nine Dragons Bathing the Prince.mp3",
+      "hint": "Nine Dragons Bathing the Prince",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_11.The Reclining Buddha.mp3",
+      "hint": "The Reclining Buddha",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_12.Shengshuo Temple.mp3",
+      "hint": "Shengshuo Temple",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_13.Boyong Fangong Exit.mp3",
+      "hint": "Boyong Fangong Exit",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_14.Baoding Old Street.mp3",
+      "hint": "Baoding Old Street",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_04",
+          "nameZh": "南山景区",
+          "nameEn": "Nanshan (South Mountain) Scenic Area",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "宝顶山/A_EN_Benedict_15.Visitor Center Exit.mp3",
+      "hint": "Visitor Center Exit",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "北山景区/A_EN_Benedict_1.Visitor Center.mp3",
+      "hint": "Visitor Center",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "北山景区/A_EN_Benedict_4.Revolving Sutra Repository Cave.mp3",
+      "hint": "Revolving Sutra Repository Cave",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "北山景区/A_EN_Benedict_8.Rosary Guanyin.mp3",
+      "hint": "Rosary Guanyin",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "北山景区/A_EN_Benedict_9.Stele of He Guangzhen.mp3",
+      "hint": "Stele of He Guangzhen",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "大足石刻博物馆/A_EN_Benedict_1.Visitor Center.mp3",
+      "hint": "Visitor Center",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "大足石刻博物馆/A_EN_Benedict_2.Museum Entrance.mp3",
+      "hint": "Museum Entrance",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_04",
+          "nameZh": "南山景区",
+          "nameEn": "Nanshan (South Mountain) Scenic Area",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "大足石刻博物馆/A_EN_Benedict_3.World Cave Art Overview.mp3",
+      "hint": "World Cave Art Overview",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "大足石刻博物馆/A_EN_Benedict_6.Digital Cinema.mp3",
+      "hint": "Digital Cinema",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "南山景区/A_EN_Benedict_1.Visitor Center.mp3",
+      "hint": "Visitor Center",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "南山景区/A_EN_Benedict_3.Cave of the Three Purities.mp3",
+      "hint": "Cave of the Three Purities",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "南山景区/A_EN_Benedict_4.Shrine of Zhenwu.mp3",
+      "hint": "Shrine of Zhenwu",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "南山景区/A_EN_Benedict_5.Shrine of Houtu the Sacred Mother.mp3",
+      "hint": "Shrine of Houtu the Sacred Mother",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "南山景区/A_EN_Benedict_7.Stele Gallery.mp3",
+      "hint": "Stele Gallery",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石门山景区/A_EN_Benedict_1.Visitor Center.mp3",
+      "hint": "Visitor Center",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石门山景区/A_EN_Benedict_3.Shrine of the Jade Emperor.mp3",
+      "hint": "Shrine of the Jade Emperor",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石门山景区/A_EN_Benedict_5.Dongyue Dadi Precious Penitential Tableau.mp3",
+      "hint": "Dongyue Dadi Precious Penitential Tableau",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石门山景区/A_EN_Benedict_6.Western Trinity and Ten-Saint Guanyin Cave.mp3",
+      "hint": "Western Trinity and Ten-Saint Guanyin Cave",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石篆山景区/A_EN_Benedict_1.Visitor Center.mp3",
+      "hint": "Visitor Center",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    },
+    {
+      "city": "重庆",
+      "scenic": "大足石刻",
+      "sourceFile": "石篆山景区/A_EN_Benedict_3.Shrine of Confucius and the Ten Wise Disciples.mp3",
+      "hint": "Shrine of Confucius and the Ten Wise Disciples",
+      "candidates": [
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_01",
+          "nameZh": "宝顶山",
+          "nameEn": "Baoding Mountain",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_02",
+          "nameZh": "北山景区",
+          "nameEn": "Beishan (North Mountain) Scenic Area",
+          "score": 75
+        },
+        {
+          "id": "chongqing_dazu_rock_carvings_sa_03",
+          "nameZh": "大足石刻博物馆",
+          "nameEn": "Dazu Rock Carvings Museum",
+          "score": 75
+        }
+      ]
+    }
+  ]
+}

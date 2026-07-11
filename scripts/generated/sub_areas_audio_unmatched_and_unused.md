@@ -1,0 +1,256 @@
+# 解说音频：未匹配 / 未使用清单
+
+生成时间：2026-07-09T10:56:52.206Z
+
+## 统计
+
+- Benedict 源文件总数：801
+- 已绑定子景点：717
+- 跳过（Welcome/Closing/结束语）：23
+- 用户策略忽略：2
+- **未匹配**（无合适子景点）：30
+- **歧义未决**（多候选，未写入 SQL）：29
+- **未使用**（未绑定且非跳过）：59
+
+## 已跳过（不计入未使用）
+
+- **北京 / 北海公园**：`A_EN_Benedict_11.Closing · Five Dragon Pavilions.mp3` — Closing · Five Dragon Pavilions
+- **北京 / 恭王府**：`A_EN_Benedict_11.Closing Words — The Hall of Delighting in the Way and the Hall of Many Blessings.mp3` — Closing Words — The Hall of Delighting in the Way and the Hall of Many Blessings
+- **北京 / 故宫**：`A_EN_Benedict_11.Closing - Gate of Divine Prowess, Corner Towers and the East and West Prosperity Gates.mp3` — Closing - Gate of Divine Prowess, Corner Towers and the East and West Prosperity Gates
+- **北京 / 国博**：`A_EN_Benedict_10.Closing - Wax Figures of Heroes and Models.mp3` — Closing - Wax Figures of Heroes and Models
+- **北京 / 慕田峪长城**：`A_EN_Benedict_6.Closing.Hero Slope.mp3` — Closing.Hero Slope
+- **北京 / 十三陵**：`A_EN_Benedict_8.Closing - Siling.mp3` — Closing - Siling
+- **北京 / 天坛**：`A_EN_Benedict_5.Closing Remarks · North Gate.mp3` — Closing Remarks · North Gate
+- **北京 / 颐和园**：`A_EN_Benedict_10.Closing Remarks · New Palace Gate.mp3` — Closing Remarks · New Palace Gate
+- **北京 / 雍和宫**：`A_EN_Benedict_9.Closing — Guanyin Cave and Hall of Achievement and Peace.mp3` — Closing — Guanyin Cave and Hall of Achievement and Peace
+- **南京 / 晨光1865科技创意产业园**：`A_EN_Benedict_10.结束语.mp3` — 结束语
+- **南京 / 夫子庙**：`A_EN_Benedict_13.结束语.mp3` — 结束语
+- **南京 / 明城墙**：`A_EN_Benedict_9.Closing Words (Summary).mp3` — Closing Words (Summary)
+- **南京 / 明孝陵**：`A_EN_Benedict_12.Closing.mp3` — Closing
+- **南京 / 南京博物院**：`A_EN_Benedict_12.结束语.mp3` — 结束语
+- **南京 / 南京大屠杀纪念馆**：`A_EN_Benedict_10.结束语.mp3` — 结束语
+- **南京 / 南京老门东**：`A_EN_Benedict_11.Closing.mp3` — Closing
+- **南京 / 牛首山**：`A_EN_Benedict_11.结束语.mp3` — 结束语
+- **南京 / 石臼湖（溧水境内）**：`A_EN_Benedict_7.结束语.mp3` — 结束语
+- **南京 / 中山陵**：`A_EN_Benedict_10.结束语.mp3` — 结束语
+- **南京 / 总统府**：`A_EN_Benedict_14.结束语.mp3` — 结束语
+- **成都 / 文殊院**：`A_EN_Benedict_11.结束语.mp3` — 结束语
+- **成都 / 武侯祠**：`A_EN_Benedict_10.结束语：锦里与水榭.mp3` — 结束语：锦里与水榭
+- **重庆 / 洪崖洞民俗风貌区**：`A_EN_Benedict_1.Welcome.mp3` — Welcome
+
+## 策略忽略
+
+- **北京 / 天坛**：`A_EN_Benedict_3.Divine Path.mp3` — Divine Path
+- **南京 / 中山陵**：`A_EN_Benedict_8.墓室.mp3` — 墓室
+
+## 未匹配（无候选子景点或低置信度）
+
+- **南京 / 明城墙**：`A_EN_Benedict_5.The Ramps.mp3` — The Ramps [best=55]
+  - storage: `nanjing_city_wall_005.mp3`
+- **南京 / 南京老门东**：`A_EN_Benedict_2.Gutong Lane.mp3` — Gutong Lane [best=55]
+  - storage: `nanjing_laomendong_002.mp3`
+- **成都 / 四川博物院**：`A_EN_Benedict_3.二楼·远古四川（史前时期）.mp3` — 二楼·远古四川（史前时期）
+  - storage: `sichuan_museum_003.mp3`
+- **成都 / 四川博物院**：`A_EN_Benedict_4.二楼·古代四川（先秦至秦汉三国）.mp3` — 二楼·古代四川（先秦至秦汉三国）
+  - storage: `sichuan_museum_004.mp3`
+- **成都 / 四川博物院**：`A_EN_Benedict_8.二楼·书画馆.mp3` — 二楼·书画馆 [best=85]
+  - storage: `sichuan_museum_008.mp3`
+- **杭州 / 浙江省博物馆（之江馆区）**：`A_EN_Benedict_2.浙江一万年·史前至隋唐.mp3` — 浙江一万年·史前至隋唐 [best=65]
+  - storage: `hangzhou_zhejiang_museum_002.mp3`
+- **杭州 / 浙江省博物馆（之江馆区）**：`A_EN_Benedict_3.江南秘色——浙江青瓷文化展.mp3` — 江南秘色——浙江青瓷文化展
+  - storage: `hangzhou_zhejiang_museum_003.mp3`
+- **杭州 / 浙江省博物馆（之江馆区）**：`A_EN_Benedict_4.向东是大海——浙江海洋文化陈列.mp3` — 向东是大海——浙江海洋文化陈列
+  - storage: `hangzhou_zhejiang_museum_004.mp3`
+- **重庆 / 磁器口古镇**：`A_EN_Benedict_8.Yinglong Gate Dock.mp3` — Yinglong Gate Dock [best=55]
+  - storage: `chongqing_ciqikou_old_town_008.mp3`
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_3.Museum.mp3` — Museum [best=55]
+  - storage: `chongqing_dazu_rock_carvings_003.mp3`
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_4.Dafo Bay Entrance.mp3` — Dafo Bay Entrance
+  - storage: `chongqing_dazu_rock_carvings_004.mp3`
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_5.Acts of Liu Benzun.mp3` — Acts of Liu Benzun
+  - storage: `chongqing_dazu_rock_carvings_005.mp3`
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_6.Scenes of Hell.mp3` — Scenes of Hell
+  - storage: `chongqing_dazu_rock_carvings_006.mp3`
+- **重庆 / 大足石刻**：`北山景区/A_EN_Benedict_2.Museum.mp3` — Museum [best=55]
+  - storage: `chongqing_dazu_rock_carvings_017.mp3`
+- **重庆 / 大足石刻**：`北山景区/A_EN_Benedict_3.Beishan Rock Carvings Entrance.mp3` — Beishan Rock Carvings Entrance [best=85]
+  - storage: `chongqing_dazu_rock_carvings_018.mp3`
+- **重庆 / 大足石刻**：`北山景区/A_EN_Benedict_5.Samantabhadra.mp3` — Samantabhadra
+  - storage: `chongqing_dazu_rock_carvings_020.mp3`
+- **重庆 / 大足石刻**：`北山景区/A_EN_Benedict_6.Manjushri.mp3` — Manjushri
+  - storage: `chongqing_dazu_rock_carvings_021.mp3`
+- **重庆 / 大足石刻**：`北山景区/A_EN_Benedict_7.Jade-Seal Guanyin.mp3` — Jade-Seal Guanyin [best=55]
+  - storage: `chongqing_dazu_rock_carvings_022.mp3`
+- **重庆 / 大足石刻**：`大足石刻博物馆/A_EN_Benedict_5.Conservation and Heritage of the Dazu Rock Carvings.mp3` — Conservation and Heritage of the Dazu Rock Carvings [best=95]
+  - storage: `chongqing_dazu_rock_carvings_030.mp3`
+- **重庆 / 大足石刻**：`大足石刻博物馆/A_EN_Benedict_7.Museum Exit.mp3` — Museum Exit [best=55]
+  - storage: `chongqing_dazu_rock_carvings_032.mp3`
+- **重庆 / 大足石刻**：`南山景区/A_EN_Benedict_2.Nanshan Rock Carvings Entrance.mp3` — Nanshan Rock Carvings Entrance [best=85]
+  - storage: `chongqing_dazu_rock_carvings_034.mp3`
+- **重庆 / 大足石刻**：`南山景区/A_EN_Benedict_6.Dragon Cave.mp3` — Dragon Cave
+  - storage: `chongqing_dazu_rock_carvings_038.mp3`
+- **重庆 / 大足石刻**：`石门山景区/A_EN_Benedict_2.Shimenshan Rock Carvings Entrance.mp3` — Shimenshan Rock Carvings Entrance [best=85]
+  - storage: `chongqing_dazu_rock_carvings_042.mp3`
+- **重庆 / 大足石刻**：`石门山景区/A_EN_Benedict_4.Wutong Dadi.mp3` — Wutong Dadi
+  - storage: `chongqing_dazu_rock_carvings_044.mp3`
+- **重庆 / 大足石刻**：`石篆山景区/A_EN_Benedict_2.Shizhuanshan Rock Carvings Entrance.mp3` — Shizhuanshan Rock Carvings Entrance [best=85]
+  - storage: `chongqing_dazu_rock_carvings_049.mp3`
+- **重庆 / 大足石刻**：`石篆山景区/A_EN_Benedict_4.Cave of Laojun.mp3` — Cave of Laojun
+  - storage: `chongqing_dazu_rock_carvings_051.mp3`
+- **重庆 / 大足石刻**：`石篆山景区/A_EN_Benedict_5.Figure of Lu Ban.mp3` — Figure of Lu Ban
+  - storage: `chongqing_dazu_rock_carvings_052.mp3`
+- **重庆 / 大足石刻**：`石篆山景区/A_EN_Benedict_6.Hariti.mp3` — Hariti
+  - storage: `chongqing_dazu_rock_carvings_053.mp3`
+- **重庆 / 金佛山**：`A_EN_Benedict_10.Yaochi Ba.mp3` — Yaochi Ba [best=55]
+  - storage: `chongqing_jinfo_mountain_010.mp3`
+- **重庆 / 山城步道**：`A_EN_Benedict_2.Houlu.mp3` — Houlu [best=55]
+  - storage: `chongqing_mountain_trails_002.mp3`
+
+## 歧义（有候选但未自动绑定，需人工确认）
+
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_2.Digital Cinema.mp3` — Digital Cinema
+  - storage: `chongqing_dazu_rock_carvings_002.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_7.Scripture on Parental Kindness.mp3` — Scripture on Parental Kindness
+  - storage: `chongqing_dazu_rock_carvings_007.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_8.Thousand-Hand Guanyin.mp3` — Thousand-Hand Guanyin
+  - storage: `chongqing_dazu_rock_carvings_008.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_9.The Three Sages of Huayan.mp3` — The Three Sages of Huayan
+  - storage: `chongqing_dazu_rock_carvings_009.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_10.Nine Dragons Bathing the Prince.mp3` — Nine Dragons Bathing the Prince
+  - storage: `chongqing_dazu_rock_carvings_010.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_11.The Reclining Buddha.mp3` — The Reclining Buddha
+  - storage: `chongqing_dazu_rock_carvings_011.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_12.Shengshuo Temple.mp3` — Shengshuo Temple
+  - storage: `chongqing_dazu_rock_carvings_012.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_13.Boyong Fangong Exit.mp3` — Boyong Fangong Exit
+  - storage: `chongqing_dazu_rock_carvings_013.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_14.Baoding Old Street.mp3` — Baoding Old Street
+  - storage: `chongqing_dazu_rock_carvings_014.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 大足石刻博物馆 [score 75]
+  - 候选 3: 南山景区 [score 75]
+- **重庆 / 大足石刻**：`宝顶山/A_EN_Benedict_15.Visitor Center Exit.mp3` — Visitor Center Exit
+  - storage: `chongqing_dazu_rock_carvings_015.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`北山景区/A_EN_Benedict_1.Visitor Center.mp3` — Visitor Center
+  - storage: `chongqing_dazu_rock_carvings_016.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`北山景区/A_EN_Benedict_4.Revolving Sutra Repository Cave.mp3` — Revolving Sutra Repository Cave
+  - storage: `chongqing_dazu_rock_carvings_019.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`北山景区/A_EN_Benedict_8.Rosary Guanyin.mp3` — Rosary Guanyin
+  - storage: `chongqing_dazu_rock_carvings_023.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`北山景区/A_EN_Benedict_9.Stele of He Guangzhen.mp3` — Stele of He Guangzhen
+  - storage: `chongqing_dazu_rock_carvings_024.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`大足石刻博物馆/A_EN_Benedict_1.Visitor Center.mp3` — Visitor Center
+  - storage: `chongqing_dazu_rock_carvings_026.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`大足石刻博物馆/A_EN_Benedict_2.Museum Entrance.mp3` — Museum Entrance
+  - storage: `chongqing_dazu_rock_carvings_027.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 南山景区 [score 75]
+- **重庆 / 大足石刻**：`大足石刻博物馆/A_EN_Benedict_3.World Cave Art Overview.mp3` — World Cave Art Overview
+  - storage: `chongqing_dazu_rock_carvings_028.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`大足石刻博物馆/A_EN_Benedict_6.Digital Cinema.mp3` — Digital Cinema
+  - storage: `chongqing_dazu_rock_carvings_031.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`南山景区/A_EN_Benedict_1.Visitor Center.mp3` — Visitor Center
+  - storage: `chongqing_dazu_rock_carvings_033.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`南山景区/A_EN_Benedict_3.Cave of the Three Purities.mp3` — Cave of the Three Purities
+  - storage: `chongqing_dazu_rock_carvings_035.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`南山景区/A_EN_Benedict_4.Shrine of Zhenwu.mp3` — Shrine of Zhenwu
+  - storage: `chongqing_dazu_rock_carvings_036.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`南山景区/A_EN_Benedict_5.Shrine of Houtu the Sacred Mother.mp3` — Shrine of Houtu the Sacred Mother
+  - storage: `chongqing_dazu_rock_carvings_037.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`南山景区/A_EN_Benedict_7.Stele Gallery.mp3` — Stele Gallery
+  - storage: `chongqing_dazu_rock_carvings_039.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`石门山景区/A_EN_Benedict_1.Visitor Center.mp3` — Visitor Center
+  - storage: `chongqing_dazu_rock_carvings_041.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`石门山景区/A_EN_Benedict_3.Shrine of the Jade Emperor.mp3` — Shrine of the Jade Emperor
+  - storage: `chongqing_dazu_rock_carvings_043.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`石门山景区/A_EN_Benedict_5.Dongyue Dadi Precious Penitential Tableau.mp3` — Dongyue Dadi Precious Penitential Tableau
+  - storage: `chongqing_dazu_rock_carvings_045.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`石门山景区/A_EN_Benedict_6.Western Trinity and Ten-Saint Guanyin Cave.mp3` — Western Trinity and Ten-Saint Guanyin Cave
+  - storage: `chongqing_dazu_rock_carvings_046.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`石篆山景区/A_EN_Benedict_1.Visitor Center.mp3` — Visitor Center
+  - storage: `chongqing_dazu_rock_carvings_048.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+- **重庆 / 大足石刻**：`石篆山景区/A_EN_Benedict_3.Shrine of Confucius and the Ten Wise Disciples.mp3` — Shrine of Confucius and the Ten Wise Disciples
+  - storage: `chongqing_dazu_rock_carvings_050.mp3`
+  - 候选 1: 北山景区 [score 75]
+  - 候选 2: 宝顶山 [score 75]
+  - 候选 3: 大足石刻博物馆 [score 75]
+

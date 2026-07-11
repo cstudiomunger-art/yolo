@@ -1,0 +1,394 @@
+{
+  "generatedAt": "2026-07-09T11:10:57.168Z",
+  "totalMissing": 43,
+  "attractionCount": 5,
+  "items": [
+    {
+      "city": "Chengdu",
+      "attractionId": "https_yoloadmin_vue_cstudiomunger_workers_dev",
+      "attractionName": "大熊猫基地",
+      "subAreaId": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_10",
+      "nameZh": "小熊猫月亮产房",
+      "nameEn": "Red Panda Moon Nursery",
+      "sortOrder": 9
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_01",
+      "nameZh": "六和塔景区入口",
+      "nameEn": "Liuhe Pagoda Scenic Area Entrance (Liuhe Ta Jingqu Rukou)",
+      "sortOrder": 0
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_02",
+      "nameZh": "六和塔",
+      "nameEn": "Liuhe Pagoda (Liuhe Ta)",
+      "sortOrder": 1
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_03",
+      "nameZh": "塔基与地宫",
+      "nameEn": "Pagoda Foundation and Underground Palace (Taji yu Diogong)",
+      "sortOrder": 2
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_04",
+      "nameZh": "塔身一至七层",
+      "nameEn": "Pagoda Body Floors 1-7 (Tashen Diyizhi Qiceng)",
+      "sortOrder": 3
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_05",
+      "nameZh": "塔顶层观景台",
+      "nameEn": "Pagoda Top-Level Viewing Terrace (Tadingceng Guanjing Tai)",
+      "sortOrder": 4
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_06",
+      "nameZh": "六和塔文化陈列馆",
+      "nameEn": "Liuhe Pagoda Cultural Exhibition Hall (Liuh e Ta Wenhua Chenlieguan)",
+      "sortOrder": 5
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_07",
+      "nameZh": "中华古塔博览苑",
+      "nameEn": "Chinese Ancient Pagoda Exhibition Garden (Zhonghua Guta Bolanyuan)",
+      "sortOrder": 6
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_08",
+      "nameZh": "钱塘江观景平台",
+      "nameEn": "Qiantang River Viewing Platform (Qiantang Jiang Guanjing Pingtai)",
+      "sortOrder": 7
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_09",
+      "nameZh": "六合钟声",
+      "nameEn": "Liuhe Bell Sound (Liuhe Zhongsheng)",
+      "sortOrder": 8
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_liuhe_pagoda",
+      "attractionName": "六和塔",
+      "subAreaId": "hangzhou_liuhe_pagoda_sa_10",
+      "nameZh": "碑亭",
+      "nameEn": "Stele Pavilion (Beiting)",
+      "sortOrder": 9
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_01",
+      "nameZh": "千岛湖中心湖区旅游码头",
+      "nameEn": "Qiandaohu Central Lake Area Tourist Dock (Qiandaohu Zhongxin Huqu Lüyou Matou)",
+      "sortOrder": 0
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_02",
+      "nameZh": "梅峰岛",
+      "nameEn": "Meifeng Island (Meifeng Dao)",
+      "sortOrder": 1
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_03",
+      "nameZh": "渔乐岛",
+      "nameEn": "Yule Island (Yule Dao)",
+      "sortOrder": 2
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_04",
+      "nameZh": "龙山岛",
+      "nameEn": "Longshan Island (Longshan Dao)",
+      "sortOrder": 3
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_05",
+      "nameZh": "海瑞祠",
+      "nameEn": "Hairui Shrine (Hairui Ci)",
+      "sortOrder": 4
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_06",
+      "nameZh": "月光岛",
+      "nameEn": "Moonlight Island (Yueguang Dao)",
+      "sortOrder": 5
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_07",
+      "nameZh": "锁岛",
+      "nameEn": "Lock Island (Suo Dao)",
+      "sortOrder": 6
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_08",
+      "nameZh": "状元桥",
+      "nameEn": "Zhuangyuan Bridge (Zhuangyuan Qiao)",
+      "sortOrder": 7
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_09",
+      "nameZh": "温馨岛",
+      "nameEn": "Wenxin Island (Wenxin Dao)",
+      "sortOrder": 8
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_qiandao_lake",
+      "attractionName": "千岛湖景区",
+      "subAreaId": "hangzhou_qiandao_lake_sa_10",
+      "nameZh": "东南湖区黄山尖",
+      "nameEn": "Huangshanjian in Southeast Lake Area (Dongnan Hujqu Huangshanjian)",
+      "sortOrder": 9
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_01",
+      "nameZh": "断桥残雪",
+      "nameEn": "Duanqiao Canxue (Broken Bridge with Remnant Snow)",
+      "sortOrder": 0
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_02",
+      "nameZh": "白堤",
+      "nameEn": "Baiti (White Causeway)",
+      "sortOrder": 1
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_03",
+      "nameZh": "平湖秋月",
+      "nameEn": "Pinghu Qiuyue (Autumn Moon over Calm Lake)",
+      "sortOrder": 2
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_04",
+      "nameZh": "孤山与西泠印社",
+      "nameEn": "Gushan and Xiling Seal Society (Gushan yu Xiling Yinshe)",
+      "sortOrder": 3
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_05",
+      "nameZh": "曲院风荷",
+      "nameEn": "Quyuan Fenghe (Breeze-ruffled Lotus in Winy Courtyard)",
+      "sortOrder": 4
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_06",
+      "nameZh": "苏堤春晓",
+      "nameEn": "Sudi Chunxiao (Spring Dawn on Su Causeway)",
+      "sortOrder": 5
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_07",
+      "nameZh": "花港观鱼",
+      "nameEn": "Huagang Guanyu (Flower Harbor Viewing Fish)",
+      "sortOrder": 6
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_08",
+      "nameZh": "雷峰塔",
+      "nameEn": "Leifeng Pagoda (Leifeng Ta)",
+      "sortOrder": 7
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_09",
+      "nameZh": "南屏晚钟",
+      "nameEn": "Nanping WanZhong (Evening Bell from Nanping)",
+      "sortOrder": 8
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_10",
+      "nameZh": "柳浪闻莺",
+      "nameEn": "Liulang Wenying (Oriole Singing in Willow Waves)",
+      "sortOrder": 9
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_11",
+      "nameZh": "湖滨公园",
+      "nameEn": "Hubin Park (Lakefront Park)",
+      "sortOrder": 10
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_west_lake",
+      "attractionName": "西湖",
+      "subAreaId": "hangzhou_west_lake_sa_12",
+      "nameZh": "三潭印月",
+      "nameEn": "Santan Yinyue (Three Pools Mirroring the Moon)",
+      "sortOrder": 11
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_01",
+      "nameZh": "中国丝绸博物馆入口",
+      "nameEn": "China National Silk Museum Entrance (Zhongguo Sichou Bowuguan Rukou)",
+      "sortOrder": 0
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_02",
+      "nameZh": "丝路馆：中国丝绸故事",
+      "nameEn": "Silk Road Gallery: The Story of Chinese Silk",
+      "sortOrder": 1
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_03",
+      "nameZh": "蚕桑馆",
+      "nameEn": "Silkworm and Mulberry Gallery (Cansang Guan)",
+      "sortOrder": 2
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_04",
+      "nameZh": "织造馆",
+      "nameEn": "Weaving and Dyeing Gallery (Zhizao Guan)",
+      "sortOrder": 3
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_05",
+      "nameZh": "服饰馆：华美服饰",
+      "nameEn": "Costume Gallery: Magnificent Attire (Fushi Guan: Huamei Fushi)",
+      "sortOrder": 4
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_06",
+      "nameZh": "修复馆：纺织品文物修复",
+      "nameEn": "Conservation Gallery: Textile Cultural Relic Restoration (Xiufu Guan: Fangzhipin Wenwu Xiufu)",
+      "sortOrder": 5
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_07",
+      "nameZh": "锦绣廊",
+      "nameEn": "Brocade and Embroidery Gallery (Jinxiu Lang)",
+      "sortOrder": 6
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_08",
+      "nameZh": "时装馆",
+      "nameEn": "Fashion Gallery (Shizhuang Guan)",
+      "sortOrder": 7
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_09",
+      "nameZh": "晓风书屋与文创空间",
+      "nameEn": "Xiaofeng Book House and Cultural Creative Space (Xiaofeng Shuwu yu Wenchiuang Kongjian)",
+      "sortOrder": 8
+    },
+    {
+      "city": "Hangzhou",
+      "attractionId": "hangzhou_silk_museum",
+      "attractionName": "中国丝绸博物馆",
+      "subAreaId": "hangzhou_silk_museum_sa_10",
+      "nameZh": "户外园林与茶园",
+      "nameEn": "Outdoor Garden and Tea Plantation (Huwai Yuanlin yu Chayuan)",
+      "sortOrder": 9
+    }
+  ]
+}
