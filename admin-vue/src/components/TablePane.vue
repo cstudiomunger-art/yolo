@@ -74,7 +74,8 @@ async function load() {
     await refCache.load();
     if (isSingle.value) {
       const row = await fetchSingle(props.tableKey);
-      editing.value = row || {};
+      const pk = schema.value.pk || "id";
+      editing.value = row || { [pk]: "global" };
       rows.value = row ? [row] : [];
     } else {
       rows.value = await fetchList(props.tableKey, schema.value);

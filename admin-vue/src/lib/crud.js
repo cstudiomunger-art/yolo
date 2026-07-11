@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { TABLES } from "@/schema/tables";
 
 /** Schema table key == DB table name for all content tables. */
 export async function fetchList(tableKey, schema) {
@@ -24,6 +25,30 @@ export async function fetchSingle(tableKey) {
 }
 
 export async function upsertRow(tableKey, payload) {
+  const schema = TABLES[tableKey];
+  const pk = schema?.pk || "id";
+  const id = payload?.[pk];
+
+  // Single-row CMS tables: update existing row when possible (avoids INSERT RLS edge cases).
+  if (schema?.single && id != null && id !== "") {
+    const { data: existing, error: readErr } = await supabase
+      .from(tableKey)
+      .select(pk)
+      .eq(pk, id)
+      .maybeSingle();
+    if (readErr) throw readErr;
+    if (existing) {
+      const { data, error } = await supabase
+        .from(tableKey)
+        .update(payload)
+        .eq(pk, id)
+        .select()
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    }
+  }
+
   const { data, error } = await supabase.from(tableKey).upsert(payload).select().maybeSingle();
   if (error) throw error;
   return data;
