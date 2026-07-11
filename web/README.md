@@ -81,4 +81,25 @@ Auth → **URL Configuration**：
 | Redirect URLs | `https://yolo.cstudiomunger.workers.dev/auth/confirm` |
 | | `https://yolo.cstudiomunger.workers.dev/auth/reset-password` |
 
-重置密码邮件链接会在网页完成验证与改密；App 通过非 PKCE 的 `/auth/v1/recover` 发起，回调后浏览器 URL 带 `#access_token`（implicit flow）。若使用自定义邮件模板，也可改为 `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery`。
+Auth → **Providers → Email**：
+
+| 项 | 建议值 |
+|----|--------|
+| OTP expiry | `86400`（24 小时，降低用户晚点开邮件失败率） |
+
+Auth → **Email Templates → Confirm signup**（注册确认，**必改**）：
+
+将默认 `{{ .ConfirmationURL }}`（点开即被邮件安全扫描消耗）改为直达确认页、由用户点击按钮后再 `verifyOtp`：
+
+```html
+<h2>Confirm your signup</h2>
+<p>Follow this link to confirm your YOLO HAPPY account:</p>
+<p><a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=signup">Confirm your email</a></p>
+```
+
+确认页行为（`/auth/confirm`）：
+
+- 英文 UI；`otp_expired` 显示 **Confirmation link expired**（非 Confirmation failed）
+- 用户点击 **Confirm email** 后才调用 Supabase 验证（与重置密码页一致）
+
+重置密码邮件链接会在网页完成验证与改密；App 通过非 PKCE 的 `/auth/v1/recover` 发起，回调后浏览器 URL 带 `#access_token`（implicit flow）。重置邮件模板可使用 `{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=recovery`。

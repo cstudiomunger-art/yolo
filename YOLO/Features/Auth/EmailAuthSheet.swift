@@ -99,6 +99,9 @@ struct EmailAuthSheet: View {
             Text(String(localized: "Check your email to confirm your account before signing in."))
                 .font(Theme.FontToken.inter(12))
                 .foregroundStyle(Theme.ColorToken.textMuted)
+            Text("The confirmation link expires after a limited time. If it expires, tap Resend confirmation email.")
+                .font(Theme.FontToken.inter(11))
+                .foregroundStyle(Theme.ColorToken.textMuted)
             Text(trimmedEmail)
                 .font(Theme.FontToken.inter(13, weight: .medium))
         }

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-Hans">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>邮箱确认 · YOLO HAPPY</title>
+  <title>Email confirmation · YOLO HAPPY</title>
   <style>
     :root {
       --bg: #faf9f7;
@@ -13,6 +13,8 @@
       --card: #fff;
       --success: #1b7f4a;
       --error: #b00020;
+      --warn: #c77700;
+      --border: #e4e0da;
     }
     * { box-sizing: border-box; }
     body {
@@ -56,11 +58,14 @@
     }
     .icon.success { background: #e8f6ee; color: var(--success); }
     .icon.error { background: #fdecea; color: var(--error); }
+    .icon.warn { background: #fff4e5; color: var(--warn); }
+    .icon.pending { background: #f5f0e8; color: var(--accent); }
     h1 { font-size: 1.35rem; font-weight: 600; margin: 0 0 10px; }
     p { margin: 0 0 12px; color: var(--muted); font-size: 0.95rem; }
     .email { color: var(--text); font-weight: 600; word-break: break-all; }
     .cta {
       display: block;
+      width: 100%;
       margin-top: 22px;
       background: var(--accent);
       color: #fff;
@@ -69,11 +74,15 @@
       border-radius: 10px;
       font-weight: 600;
       font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
     }
+    .cta:disabled { opacity: 0.55; cursor: not-allowed; }
     .cta.secondary {
       background: transparent;
       color: var(--muted);
-      border: 1px solid #e4e0da;
+      border: 1px solid var(--border);
       margin-top: 10px;
       font-weight: 500;
     }
@@ -84,6 +93,15 @@
 <body>
   <div class="card">
     <p class="badge">YOLO HAPPY</p>
+
+    <div id="state-confirm" class="hidden">
+      <div class="icon pending">✉</div>
+      <h1 id="title-confirm"></h1>
+      <p id="msg-confirm"></p>
+      <button id="btn-confirm" type="button" class="cta"></button>
+      <p id="hint-confirm" class="hint"></p>
+    </div>
+
     <div id="state-success" class="hidden">
       <div class="icon success">✓</div>
       <h1 id="title-success"></h1>
@@ -93,105 +111,242 @@
       <a id="app-store" class="cta secondary hidden" href="#" target="_blank" rel="noopener"></a>
       <p id="hint-success" class="hint"></p>
     </div>
+
     <div id="state-error" class="hidden">
-      <div class="icon error">!</div>
+      <div id="icon-error" class="icon error">!</div>
       <h1 id="title-error"></h1>
       <p id="msg-error"></p>
       <a id="retry-signin" class="cta secondary" href="/"></a>
     </div>
+
+    <div id="state-loading" class="hidden">
+      <div class="icon pending">…</div>
+      <h1 id="title-loading"></h1>
+      <p id="msg-loading"></p>
+    </div>
   </div>
+
   <script src="/config.js"></script>
   <script src="/auth/auth-callback.js"></script>
-  <script>
-    (function () {
-      const cfg = window.YOLO_WEB_CONFIG || {};
-      const auth = window.YOLOAuthCallback;
-      const lang = (navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en";
-      const appScheme = "yoloapp://auth/confirm";
-      const copy = {
-        zh: {
-          successTitle: "邮箱确认成功",
-          successMsg: "您的账号已验证完成，可以登录 YOLO HAPPY 开始规划行程。",
-          openApp: "打开 YOLO App",
-          getApp: "下载 App",
-          autoOpen: "正在尝试打开 App…",
-          hint: "若未自动跳转，请点击上方按钮。",
-          errorTitle: "确认失败",
-          errorDefault: "链接无效或已过期，请返回 App 重新发送确认邮件。",
-          retry: "返回首页",
-          invalidTitle: "无效的确认链接",
-          invalidMsg: "请从注册确认邮件中打开链接，不要直接访问此页面。",
-        },
-        en: {
-          successTitle: "Email confirmed",
-          successMsg: "Your account is verified. Sign in to YOLO HAPPY and start planning your trip.",
-          openApp: "Open YOLO App",
-          getApp: "Get the app",
-          autoOpen: "Opening the app…",
-          hint: "If nothing happens, tap the button above.",
-          errorTitle: "Confirmation failed",
-          errorDefault: "This link is invalid or expired. Resend a confirmation email from the app.",
-          retry: "Back to home",
-          invalidTitle: "Invalid confirmation link",
-          invalidMsg: "Open the link from your sign-up email instead of visiting this page directly.",
-        },
-      };
-      const t = copy[lang];
-      const params = auth.parseAuthParams();
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-      function showSuccess() {
-        document.getElementById("state-success").classList.remove("hidden");
-        document.getElementById("title-success").textContent = t.successTitle;
-        document.getElementById("msg-success").textContent = t.successMsg;
-        document.getElementById("hint-success").textContent = t.hint;
+    const cfg = window.YOLO_WEB_CONFIG || {};
+    const auth = window.YOLOAuthCallback;
+    const appScheme = "yoloapp://auth/confirm";
 
-        const email = auth.decodeJwtEmail(params.access_token || "");
-        if (email) {
-          const el = document.getElementById("email-success");
-          el.textContent = email;
-          el.classList.remove("hidden");
-        }
+    const copy = {
+      confirmTitle: "Confirm your email",
+      confirmMsg: "Tap below to verify your sign-up link. This link works once — complete within the time limit shown in your email.",
+      confirmBtn: "Confirm email",
+      confirmHint: "Do not forward this link. Email security scanners can invalidate it.",
+      verifyingTitle: "Verifying…",
+      verifyingMsg: "Please wait.",
+      successTitle: "Email confirmed",
+      successMsg: "Your account is verified. Sign in to YOLO HAPPY and start planning your trip.",
+      openApp: "Open YOLO App",
+      getApp: "Get the app",
+      autoOpen: "Opening the app…",
+      hint: "If nothing happens, tap the button above.",
+      expiredTitle: "Confirmation link expired",
+      expiredMsg: "This confirmation link has timed out. Open YOLO HAPPY and tap Resend confirmation email to get a new one.",
+      failedTitle: "Confirmation failed",
+      failedMsg: "We couldn't confirm your email. Please request a new confirmation email from the app.",
+      invalidTitle: "Invalid confirmation link",
+      invalidMsg: "Open the link from your sign-up email instead of visiting this page directly.",
+      configError: "Missing page configuration. Please try again later.",
+      retry: "Back to home",
+    };
 
-        const deepLink = auth.appDeepLinkFromLocation(appScheme);
-        const openApp = document.getElementById("open-app");
-        openApp.textContent = t.openApp;
-        openApp.href = deepLink;
+    const params = auth.parseAuthParams();
 
-        if (cfg.appStoreUrl && !String(cfg.appStoreUrl).includes("0000000000")) {
-          const store = document.getElementById("app-store");
-          store.href = cfg.appStoreUrl;
-          store.textContent = t.getApp;
-          store.classList.remove("hidden");
-        }
+    const states = {
+      confirm: document.getElementById("state-confirm"),
+      success: document.getElementById("state-success"),
+      error: document.getElementById("state-error"),
+      loading: document.getElementById("state-loading"),
+    };
 
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-          document.getElementById("hint-success").textContent = t.autoOpen;
-          setTimeout(function () {
-            window.location.href = deepLink;
-          }, 600);
-        }
+    function showState(name) {
+      Object.keys(states).forEach(function (key) {
+        states[key].classList.toggle("hidden", key !== name);
+      });
+    }
+
+    function isExpiredSignal(errorCode, description, message) {
+      const code = (errorCode || "").toLowerCase();
+      const text = [description, message].filter(Boolean).join(" ").toLowerCase();
+      return code === "otp_expired"
+        || text.includes("expired")
+        || text.includes("otp has expired");
+    }
+
+    function resolveErrorFromParams(params) {
+      if (isExpiredSignal(params.error_code, params.error_description, params.error)) {
+        return { title: copy.expiredTitle, message: copy.expiredMsg, expired: true };
       }
-
-      function showError(title, message) {
-        document.getElementById("state-error").classList.remove("hidden");
-        document.getElementById("title-error").textContent = title;
-        document.getElementById("msg-error").textContent = message;
-        document.getElementById("retry-signin").textContent = t.retry;
-        document.getElementById("retry-signin").href = "/";
-      }
-
       if (auth.hasAuthError(params)) {
-        showError(t.errorTitle, params.error_description || params.error || t.errorDefault);
+        return { title: copy.failedTitle, message: copy.failedMsg, expired: false };
+      }
+      return { title: copy.invalidTitle, message: copy.invalidMsg, expired: false };
+    }
+
+    function resolveErrorFromVerifyError(err) {
+      const code = (err && err.code ? String(err.code) : "").toLowerCase();
+      const message = (err && err.message ? String(err.message) : "");
+      if (isExpiredSignal(code, message, message)) {
+        return { title: copy.expiredTitle, message: copy.expiredMsg, expired: true };
+      }
+      return { title: copy.failedTitle, message: copy.failedMsg, expired: false };
+    }
+
+    function showError(resolved) {
+      showState("error");
+      const icon = document.getElementById("icon-error");
+      icon.className = resolved.expired ? "icon warn" : "icon error";
+      icon.textContent = resolved.expired ? "⏱" : "!";
+      document.getElementById("title-error").textContent = resolved.title;
+      document.getElementById("msg-error").textContent = resolved.message;
+      document.getElementById("retry-signin").textContent = copy.retry;
+      document.getElementById("retry-signin").href = "/";
+    }
+
+    function showLoading() {
+      showState("loading");
+      document.getElementById("title-loading").textContent = copy.verifyingTitle;
+      document.getElementById("msg-loading").textContent = copy.verifyingMsg;
+    }
+
+    if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+      showError({ title: copy.failedTitle, message: copy.configError, expired: false });
+      throw new Error("missing config");
+    }
+
+    if (auth.hasAuthError(params)) {
+      showError(resolveErrorFromParams(params));
+      throw new Error("auth error in url");
+    }
+
+    if (!auth.hasAuthPayload(params)) {
+      showError(resolveErrorFromParams(params));
+      throw new Error("invalid link");
+    }
+
+    const supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+      auth: {
+        detectSessionInUrl: false,
+        persistSession: true,
+        autoRefreshToken: false,
+      },
+    });
+
+    let verifiedEmail = null;
+    let sessionTokens = null;
+
+    async function establishSignupSession() {
+      if (params.token_hash && params.type) {
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: params.token_hash,
+          type: params.type,
+        });
+        if (error) throw error;
+        verifiedEmail = data.user?.email || null;
+        sessionTokens = data.session
+          ? { access_token: data.session.access_token, refresh_token: data.session.refresh_token }
+          : null;
         return;
       }
 
-      if (!auth.hasAuthPayload(params)) {
-        showError(t.invalidTitle, t.invalidMsg);
+      if (params.access_token && params.refresh_token) {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: params.access_token,
+          refresh_token: params.refresh_token,
+        });
+        if (error) throw error;
+        verifiedEmail = data.user?.email || auth.decodeJwtEmail(params.access_token);
+        sessionTokens = {
+          access_token: params.access_token,
+          refresh_token: params.refresh_token,
+        };
         return;
       }
 
-      showSuccess();
-    })();
+      if (params.code) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(params.code);
+        if (error) throw error;
+        verifiedEmail = data.user?.email || null;
+        sessionTokens = data.session
+          ? { access_token: data.session.access_token, refresh_token: data.session.refresh_token }
+          : null;
+        return;
+      }
+
+      throw new Error(copy.failedMsg);
+    }
+
+    function buildDeepLink() {
+      if (sessionTokens) {
+        return auth.appDeepLink(appScheme, {
+          access_token: sessionTokens.access_token,
+          refresh_token: sessionTokens.refresh_token,
+          type: params.type || "signup",
+        });
+      }
+      return auth.appDeepLinkFromLocation(appScheme);
+    }
+
+    function showSuccess() {
+      showState("success");
+      document.getElementById("title-success").textContent = copy.successTitle;
+      document.getElementById("msg-success").textContent = copy.successMsg;
+      document.getElementById("hint-success").textContent = copy.hint;
+
+      if (verifiedEmail) {
+        const el = document.getElementById("email-success");
+        el.textContent = verifiedEmail;
+        el.classList.remove("hidden");
+      }
+
+      const deepLink = buildDeepLink();
+      const openApp = document.getElementById("open-app");
+      openApp.textContent = copy.openApp;
+      openApp.href = deepLink;
+
+      if (cfg.appStoreUrl && !String(cfg.appStoreUrl).includes("0000000000")) {
+        const store = document.getElementById("app-store");
+        store.href = cfg.appStoreUrl;
+        store.textContent = copy.getApp;
+        store.classList.remove("hidden");
+      }
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        document.getElementById("hint-success").textContent = copy.autoOpen;
+        setTimeout(function () {
+          window.location.href = deepLink;
+        }, 600);
+      }
+    }
+
+    showState("confirm");
+    document.getElementById("title-confirm").textContent = copy.confirmTitle;
+    document.getElementById("msg-confirm").textContent = copy.confirmMsg;
+    document.getElementById("btn-confirm").textContent = copy.confirmBtn;
+    document.getElementById("hint-confirm").textContent = copy.confirmHint;
+
+    document.getElementById("btn-confirm").addEventListener("click", async function () {
+      const btn = document.getElementById("btn-confirm");
+      btn.disabled = true;
+      showLoading();
+
+      try {
+        await establishSignupSession();
+        showSuccess();
+      } catch (err) {
+        showError(resolveErrorFromVerifyError(err));
+      } finally {
+        btn.disabled = false;
+      }
+    });
   </script>
 </body>
 </html>
