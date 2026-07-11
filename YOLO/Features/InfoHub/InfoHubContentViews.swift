@@ -87,6 +87,7 @@ struct PhrasesView: View {
     @State private var dialect: String = ""
     @State private var bigScreen: DialectPhrase?
     @State private var audio = PhraseAudioPlayer()
+    @State private var lastPlayedPhraseId: String?
 
     private var content: InfoHubContent {
         let c = appEnv.infoHub.content
@@ -102,15 +103,22 @@ struct PhrasesView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("💬 Common phrases").font(Theme.FontToken.inter(14, weight: .semibold))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Common phrases").font(Theme.FontToken.inter(14, weight: .semibold))
+                    Text("常用语").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                }
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], spacing: 8) {
                     ForEach(content.common) { p in
-                        Button { audio.play(text: p.cn, url: p.audioUrl) } label: {
+                        let display = phraseDisplay(en: p.en, cn: p.cn, pinyin: p.pinyin)
+                        Button { playPhrase(id: p.id, text: p.cn, url: p.audioUrl) } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 1) {
-                                    Text(p.cn).font(Theme.FontToken.inter(13, weight: .medium))
-                                    Text([p.pinyin, p.en].compactMap { $0 }.joined(separator: " · "))
-                                        .font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
+                                    Text(display.primary).font(Theme.FontToken.inter(13, weight: .medium))
+                                    if !display.secondary.isEmpty {
+                                        Text(display.secondary)
+                                            .font(Theme.FontToken.inter(10))
+                                            .foregroundStyle(Theme.ColorToken.textMuted)
+                                    }
                                 }
                                 Spacer()
                                 Image(systemName: "speaker.wave.2").font(.system(size: 12)).foregroundStyle(Theme.ColorToken.accent)
@@ -120,13 +128,17 @@ struct PhrasesView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .contentShape(RoundedRectangle(cornerRadius: 10))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PhraseCardButtonStyle())
                     }
                 }
 
                 if !dialects.isEmpty {
-                    Text("🗣 Dialect gems · tap to listen · long-press for large text")
-                        .font(Theme.FontToken.inter(14, weight: .semibold)).padding(.top, 6)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Dialect gems · tap to listen · long-press for large text")
+                            .font(Theme.FontToken.inter(14, weight: .semibold))
+                        Text("趣味方言").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.textMuted)
+                    }
+                    .padding(.top, 6)
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 14) {
                             ForEach(dialects, id: \.self) { d in
@@ -149,27 +161,60 @@ struct PhrasesView: View {
         }
         .navigationTitle("Phrases / Dialect")
         .navigationBarTitleDisplayMode(.inline)
+        .sensoryFeedback(.selection, trigger: lastPlayedPhraseId)
         .task { await appEnv.infoHub.load() }
         .fullScreenCover(item: $bigScreen) { d in
             DialectBigScreen(phrase: d)
         }
     }
 
-    private func dialectCard(_ d: DialectPhrase) -> some View {
-        VStack(spacing: 6) {
-            Text(d.emoji ?? "💬").font(.system(size: 34))
-            Text(d.cn).font(Theme.FontToken.playfair(15, weight: .semibold))
-            Text([d.pinyin, d.en].compactMap { $0 }.joined(separator: " · "))
-                .font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
-                .multilineTextAlignment(.center)
-            Text("▶ Listen").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.accent)
+    private func playPhrase(id: String, text: String, url: String?) {
+        lastPlayedPhraseId = id
+        audio.play(text: text, url: url)
+    }
+
+    private func phraseDisplay(en: String?, cn: String, pinyin: String?) -> (primary: String, secondary: String) {
+        let trimmedEn = en?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let primary = (trimmedEn?.isEmpty == false ? trimmedEn : nil) ?? cn
+        let secondaryParts: [String]
+        if primary == cn {
+            secondaryParts = [pinyin].compactMap { $0 }.filter { !$0.isEmpty }
+        } else {
+            secondaryParts = [cn, pinyin].compactMap { $0 }.filter { !$0.isEmpty }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ColorToken.border, lineWidth: 1))
-        .contentShape(RoundedRectangle(cornerRadius: 14))
-        .onTapGesture { audio.play(text: d.cn, url: d.audioUrl) }
+        return (primary, secondaryParts.joined(separator: " · "))
+    }
+
+    private func dialectCard(_ d: DialectPhrase) -> some View {
+        let display = phraseDisplay(en: d.en, cn: d.cn, pinyin: d.pinyin)
+        return Button { playPhrase(id: d.id, text: d.cn, url: d.audioUrl) } label: {
+            VStack(spacing: 6) {
+                Text(d.emoji ?? "💬").font(.system(size: 34))
+                Text(display.primary).font(Theme.FontToken.playfair(15, weight: .semibold))
+                if !display.secondary.isEmpty {
+                    Text(display.secondary)
+                        .font(Theme.FontToken.inter(10))
+                        .foregroundStyle(Theme.ColorToken.textMuted)
+                        .multilineTextAlignment(.center)
+                }
+                Text("▶ Listen").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.accent)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ColorToken.border, lineWidth: 1))
+            .contentShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(PhraseCardButtonStyle())
         .onLongPressGesture { bigScreen = d }
+    }
+}
+
+private struct PhraseCardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .opacity(configuration.isPressed ? 0.88 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
