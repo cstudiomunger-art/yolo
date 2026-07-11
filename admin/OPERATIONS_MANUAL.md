@@ -252,6 +252,8 @@ flowchart LR
 | **Search foreigner-friendly hotels** | `hotels`（按 `city_id`） |
 | 机票外链按钮 | `app_settings.flight_platforms` |
 | **Share Itinerary** | 用户行程 `share_slug`（后台可查看/编辑用户行程） |
+| **Have an invite code?** | 侧栏 **邀请码** 生成；用户详情可查看兑换记录 |
+| 付费墙划线价 | **会员计划** + 应用配置 `paywall_compare_price_enabled` |
 | 景点 **Paywall**（与 Guide 共用） | 应用配置 Paywall 文案 + 景点 `iap_product_id` |
 
 ---
@@ -378,6 +380,8 @@ flowchart LR
 | Pro / 单购展示文案 | 应用配置 **内购展示文案** |
 | **Change nationality** | 签证与文化 → 护照国家 |
 | 已购景点解锁 | **用户与购买** → `purchased_attraction_ids` |
+| **Have an invite code?** | 侧栏 **邀请码** 生成兑换码；兑换后写入 `profiles.membership_override = grant` |
+| 付费墙划线价 | **会员计划** `compare_price_label` + 应用配置 `paywall_compare_price_enabled` |
 | Content Mode 标签 | `use_remote_content` / `use_remote_ai` |
 
 ---
@@ -393,8 +397,24 @@ flowchart LR
 | 改 `country_code` | Home/Profile 签证规则匹配 |
 | 改 `departure_date` | Home 倒计时、Prepare 提醒 |
 | **在「用户行程」表中筛选** | 对应 Plan **Saved trips**（跳转后带筛选） |
+| 查看 **邀请码兑换** 记录 | 用户详情 → 邀请码兑换表（`invite_code_redemptions`） |
 
 > 购买记录为 App **本地模拟同步** 的 `profiles` 字段，不是 App Store 账单。
+
+### 4.1.1 邀请码（侧栏 🎟 邀请码）
+
+| 操作 | 说明 |
+|------|------|
+| **新建 / 批量生成** | 设置权益时长（1 月 / 2 月 / 半年 / 终身 / 自定义天数）、关联 `membership_plans`、兑换模式（一次性 / 限量 / 不限量） |
+| **批次** | 同一 `batch_id` 下每账号仅可兑一次（防刷同一活动） |
+| **账号限制** | `one_per_account`：该用户终身只能成功兑换任意一个邀请码 |
+| **新用户专享** | `new_users_only`：无有效会员、无历史兑换记录才可兑 |
+| **停用** | 手动关闭或达到 `max_redemptions` 后自动停用（`auto_deactivate_on_exhaust`） |
+| **兑换记录** | 全站列表或 **用户与购买 → 用户详情** 查看该用户的 `invite_code_redemptions` |
+
+App 入口：Profile / 付费墙页脚 **Have an invite code?**；深链 `yoloapp://redeem?code=XXXX`。
+
+叠加规则：在 `max(当前时间, grant 到期, 订阅到期)` 基础上 **累加** 邀请码时长；终身码 `expires_at = NULL`。
 
 ---
 
@@ -413,6 +433,7 @@ flowchart LR
 | 助手问候 | `assistant_greeting_general` | Assistant 首条 |
 | Plan 警告 | `plan_alert_*` | **待 App 接入** |
 | Paywall | `paywall_*` | 解锁弹窗全部按钮与模板 |
+| 划线价总开关 | `paywall_compare_price_enabled` | 关闭后 App 不显示任何计划划线价 |
 | 机票平台 | `flight_platforms` | Plan → Book Your Trip |
 | AI 行程限制 | `ai_max_trip_days` 等 | 生成行程上限 |
 | Home 轮播卡 | `home_dashboard_cards` | **待 App 接入** |

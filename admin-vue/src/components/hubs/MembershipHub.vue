@@ -21,7 +21,8 @@ async function loadPlans() {
 }
 
 const BLANK = {
-  id: "", name_zh: "", name_en: "", price_label: "", plan_type: "subscription",
+  id: "", name_zh: "", name_en: "", price_label: "", compare_price_label: "", show_compare_price: false,
+  plan_type: "subscription",
   duration_days: null, free_trial_days: null, apple_product_id: "", rc_package_id: "",
   display_order: 0, is_best_value: false, is_active: true, feature_lines: [], access_flags: [],
 };
@@ -137,6 +138,7 @@ onMounted(loadPlans);
           <label class="f">中文名<input v-model="editing.name_zh" /></label>
           <label class="f">英文名<input v-model="editing.name_en" /></label>
           <label class="f">价格文案<input v-model="editing.price_label" /></label>
+          <label class="f">划线价文案<input v-model="editing.compare_price_label" placeholder="如 $19.99/year" /></label>
           <label class="f">时长（天）<input type="number" v-model.number="editing.duration_days" /></label>
           <label class="f">免费试用（天）<input type="number" v-model.number="editing.free_trial_days" /></label>
           <label class="f">Apple 产品 ID<input v-model="editing.apple_product_id" /></label>
@@ -145,6 +147,7 @@ onMounted(loadPlans);
           <label class="f full">权益文案（每行一条）<textarea rows="4" :value="linesGet(editing.feature_lines)" @input="linesSet('feature_lines', $event.target.value)"></textarea></label>
           <label class="f full">access_flags（每行一条）<textarea rows="2" :value="linesGet(editing.access_flags)" @input="linesSet('access_flags', $event.target.value)"></textarea></label>
           <label class="cond"><input type="checkbox" v-model="editing.is_best_value" /> 最佳价值</label>
+          <label class="cond"><input type="checkbox" v-model="editing.show_compare_price" /> 显示划线价</label>
           <label class="cond"><input type="checkbox" v-model="editing.is_active" /> 启用</label>
         </div>
       </template>
@@ -152,12 +155,13 @@ onMounted(loadPlans);
       <template v-else>
         <div class="bar"><button class="btn" @click="newPlan">+ 新建计划</button></div>
         <table class="data-table">
-          <thead><tr><th>名称</th><th>类型</th><th>价格</th><th>启用</th><th></th></tr></thead>
+          <thead><tr><th>名称</th><th>类型</th><th>价格</th><th>划线价</th><th>启用</th><th></th></tr></thead>
           <tbody>
             <tr v-for="p in plans" :key="p.id" @click="editPlan(p)" class="click">
               <td><strong>{{ p.name_zh || p.name_en }}</strong> <span class="muted">{{ p.id }}</span></td>
               <td>{{ p.plan_type }}</td>
               <td>{{ p.price_label }}</td>
+              <td>{{ p.show_compare_price ? (p.compare_price_label || "—") : "—" }}</td>
               <td>{{ p.is_active ? "✓" : "—" }}</td>
               <td @click.stop><button class="btn btn-secondary btn-sm" @click="removePlan(p)">删</button></td>
             </tr>

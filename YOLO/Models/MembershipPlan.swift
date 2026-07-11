@@ -7,6 +7,8 @@ struct MembershipPlan: Identifiable, Codable, Sendable {
     let nameEn: String
     let nameZh: String?
     let priceLabel: String
+    let comparePriceLabel: String?
+    let showComparePrice: Bool
     let durationDays: Int?
     let freeTrialDays: Int
     let planType: PlanType
@@ -59,6 +61,8 @@ struct MembershipPlan: Identifiable, Codable, Sendable {
         case nameEn
         case nameZh
         case priceLabel
+        case comparePriceLabel
+        case showComparePrice
         case durationDays
         case freeTrialDays
         case planType
@@ -73,6 +77,7 @@ struct MembershipPlan: Identifiable, Codable, Sendable {
     init(
         id: String, rcPackageId: String?, appleProductId: String,
         nameEn: String, nameZh: String?, priceLabel: String,
+        comparePriceLabel: String? = nil, showComparePrice: Bool = false,
         durationDays: Int?, freeTrialDays: Int, planType: PlanType,
         accessFlags: AccessFlags, featureLines: [String],
         isBestValue: Bool, displayOrder: Int, isActive: Bool
@@ -83,6 +88,8 @@ struct MembershipPlan: Identifiable, Codable, Sendable {
         self.nameEn = nameEn
         self.nameZh = nameZh
         self.priceLabel = priceLabel
+        self.comparePriceLabel = comparePriceLabel
+        self.showComparePrice = showComparePrice
         self.durationDays = durationDays
         self.freeTrialDays = freeTrialDays
         self.planType = planType
@@ -101,6 +108,8 @@ struct MembershipPlan: Identifiable, Codable, Sendable {
         nameEn = try c.decode(String.self, forKey: .nameEn)
         nameZh = try c.decodeIfPresent(String.self, forKey: .nameZh)
         priceLabel = try c.decodeIfPresent(String.self, forKey: .priceLabel) ?? ""
+        comparePriceLabel = try c.decodeIfPresent(String.self, forKey: .comparePriceLabel)
+        showComparePrice = try c.decodeIfPresent(Bool.self, forKey: .showComparePrice) ?? false
         durationDays = try c.decodeIfPresent(Int.self, forKey: .durationDays)
         freeTrialDays = try c.decodeIfPresent(Int.self, forKey: .freeTrialDays) ?? 0
         planType = try c.decodeIfPresent(PlanType.self, forKey: .planType) ?? .subscription

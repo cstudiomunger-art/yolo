@@ -209,6 +209,8 @@ final class AppEnvironment {
             } catch {
                 TelemetryService.shared.recordError(error, context: "email_confirmation_link")
             }
+        case .redeemInviteCode(let code):
+            navigation.presentInviteRedeem(code: code)
         }
     }
 

@@ -18,6 +18,7 @@ struct MembershipPlansView: View {
 
     @State private var selectedId: String?
     @State private var showLogin = false
+    @State private var showInviteRedeem = false
     @State private var errorMessage: String?
 
     // MARK: - Derived plan lists
@@ -48,6 +49,11 @@ struct MembershipPlansView: View {
     }
 
     private var branding: AppBranding { appEnv.contentMode.branding }
+
+    private var canRedeemInviteCode: Bool {
+        !appEnv.purchase.isMembershipBanned
+            && !(appEnv.preferences.isOverrideGrantActive && appEnv.preferences.membershipOverrideExpiresAt == nil)
+    }
 
     // MARK: - Body
 
@@ -95,6 +101,13 @@ struct MembershipPlansView: View {
                 ensureSelection()
             }
             .onChange(of: appEnv.purchase.availablePlans.count) { _, _ in ensureSelection() }
+            .onChange(of: appEnv.membershipRevision) { _, _ in
+                if appEnv.purchase.isProActive { dismiss() }
+            }
+            .sheet(isPresented: $showInviteRedeem) {
+                InviteCodeRedeemSheet()
+                    .environment(appEnv)
+            }
         }
         .presentationDetents([.large])
         .sheetDragToDismiss()
@@ -199,6 +212,18 @@ struct MembershipPlansView: View {
             }
             .font(Theme.FontToken.inter(11))
             .foregroundStyle(Theme.ColorToken.textMuted)
+
+            if canRedeemInviteCode {
+                Button(String(localized: "Have an invite code?")) {
+                    if appEnv.mustSignInForAccountAction {
+                        showLogin = true
+                        return
+                    }
+                    showInviteRedeem = true
+                }
+                .font(Theme.FontToken.inter(11, weight: .medium))
+                .foregroundStyle(Theme.ColorToken.accent)
+            }
 
             Text(branding.paywall.footnote)
                 .font(Theme.FontToken.inter(9))
@@ -308,6 +333,7 @@ struct MembershipPlansView: View {
 // MARK: - Plan Option Card (selectable radio)
 
 private struct PlanOptionCard: View {
+    @Environment(AppEnvironment.self) private var appEnv
     let plan: MembershipPlan
     let isSelected: Bool
     let isSingle: Bool
@@ -328,10 +354,11 @@ private struct PlanOptionCard: View {
                                 .font(Theme.FontToken.playfair(16, weight: .semibold))
                                 .foregroundStyle(Theme.ColorToken.textPrimary)
                             Spacer()
-                            Text(plan.priceLabel)
-                                .font(Theme.FontToken.playfair(17, weight: .semibold))
-                                .foregroundStyle(Theme.ColorToken.textPrimary)
-                                .layoutPriority(1)
+                            MembershipPriceLabel(
+                                plan: plan,
+                                comparePriceEnabled: appEnv.contentMode.branding.paywallComparePriceEnabled
+                            )
+                            .layoutPriority(1)
                         }
                         if let desc = subtitle {
                             Text(desc)

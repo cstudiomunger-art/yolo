@@ -97,6 +97,7 @@ const GROUPS = [
   { id: "users", label: "用户", leaves: [{ label: "用户管理", hubId: "users" }] },
   { id: "membership", label: "会员与购买", leaves: [
     { label: "👑 会员计划", hubId: "membership" },
+    { label: "🎟 邀请码", hubId: "invite_codes" },
     { label: "🏷️ 景点定价", hubId: "pricing" },
     { label: "💳 购买记录", hubId: "transactions" },
   ] },

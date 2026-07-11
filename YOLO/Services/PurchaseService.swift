@@ -104,10 +104,13 @@ final class PurchaseService {
         return availablePlans.first(where: { $0.id == planId })?.accessFlags ?? .none
     }
 
-    /// Flags granted by an admin "grant" override — use the first active subscription plan's
-    /// flags (the annual plan), falling back to full access if plans aren't loaded yet.
+    /// Flags granted by an admin "grant" override — use the plan tied to subscription_plan_id when set.
     private func grantAccessFlags() -> MembershipPlan.AccessFlags {
-        availablePlans.first(where: { $0.planType == .subscription })?.accessFlags ?? .full
+        if let planId = preferences?.subscriptionPlanId,
+           let plan = availablePlans.first(where: { $0.id == planId }) {
+            return plan.accessFlags
+        }
+        return availablePlans.first(where: { $0.planType == .subscription })?.accessFlags ?? .full
     }
 
     /// Whether the user has an active entitlement (admin override beats RevenueCat).

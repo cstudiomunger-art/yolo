@@ -7,6 +7,7 @@ struct MembershipCenterView: View {
     @State private var showHistory = false
     @State private var showUpgrade = false
     @State private var showLogin = false
+    @State private var showInviteRedeem = false
     @State private var pendingHistory = false
 
     private var canViewMembership: Bool {
@@ -31,6 +32,15 @@ struct MembershipCenterView: View {
     /// RevenueCat subscription expiry.
     private var effectiveMembershipExpiry: Date? {
         prefs.effectiveMembershipExpiry
+    }
+
+    private var canRedeemInviteCode: Bool {
+        !purchase.isMembershipBanned
+            && !(prefs.isOverrideGrantActive && prefs.membershipOverrideExpiresAt == nil)
+    }
+
+    private var isPromotionalGrant: Bool {
+        prefs.membershipOverrideKind == .grant
     }
 
     var body: some View {
@@ -87,6 +97,10 @@ struct MembershipCenterView: View {
             }
             .sheetDragToDismiss()
         }
+        .sheet(isPresented: $showInviteRedeem) {
+            InviteCodeRedeemSheet()
+                .environment(appEnv)
+        }
     }
 
     private var membershipContent: some View {
@@ -127,6 +141,11 @@ struct MembershipCenterView: View {
                     Text(String(localized: "Valid until: ") + expires.formatted(date: .long, time: .omitted))
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textMuted)
+                    if isPromotionalGrant {
+                        Text(String(localized: "Promotional access"))
+                            .font(Theme.FontToken.inter(11))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    }
                     if let days = Calendar.current.dateComponents([.day], from: .now, to: expires).day, days <= 7 {
                         Text(String(format: String(localized: "Renews in %lld days"), days))
                             .font(Theme.FontToken.inter(11, weight: .medium))
@@ -198,6 +217,18 @@ struct MembershipCenterView: View {
 
     private var actionsSection: some View {
         VStack(spacing: 0) {
+            if canRedeemInviteCode {
+                Button {
+                    if appEnv.mustSignInForAccountAction {
+                        showLogin = true
+                        return
+                    }
+                    showInviteRedeem = true
+                } label: {
+                    settingsRow(String(localized: "Redeem Invite Code"))
+                }
+                .buttonStyle(.plain)
+            }
             Button {
                 requestPurchaseHistory()
             } label: {
@@ -247,9 +278,12 @@ private struct PlanSummaryRow: View {
                 Text(plan.displayName)
                     .font(Theme.FontToken.inter(14, weight: .medium))
                 Spacer()
-                Text(plan.priceLabel)
-                    .font(Theme.FontToken.inter(12))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
+                MembershipPriceLabel(
+                    plan: plan,
+                    comparePriceEnabled: appEnv.contentMode.branding.paywallComparePriceEnabled,
+                    priceFont: Theme.FontToken.inter(12),
+                    compareFont: Theme.FontToken.inter(10)
+                )
             }
             Button {
                 if !appEnv.auth.isAuthenticated, !AppConfig.useMock {

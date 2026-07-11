@@ -5,6 +5,7 @@ enum DeepLinkHandler {
         case openSharedItinerary(slug: String)
         case passwordRecovery
         case emailConfirmation
+        case redeemInviteCode(code: String)
     }
 
     static func action(for url: URL) -> Action? {
@@ -17,6 +18,14 @@ enum DeepLinkHandler {
             }
             if let slug = ItineraryShareService.parseShareSlug(from: url) {
                 return .openSharedItinerary(slug: slug)
+            }
+            if url.host == "redeem" {
+                let code = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                    .queryItems?
+                    .first(where: { $0.name == "code" })?
+                    .value?
+                    .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                if !code.isEmpty { return .redeemInviteCode(code: code) }
             }
         }
         if let slug = ItineraryShareService.parseShareSlug(from: url) {

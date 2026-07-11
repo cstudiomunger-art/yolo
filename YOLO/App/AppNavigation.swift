@@ -48,6 +48,9 @@ final class AppNavigation {
     /// Universal link / custom URL share slug pending presentation.
     var pendingShareSlug: String?
 
+    /// Deep link invite code pending redeem sheet.
+    var pendingInviteRedeemCode: String?
+
     /// Set when opening attraction from Plan itinerary editor preview.
     var guideAddToItineraryHandler: ((Attraction) -> Void)?
 
@@ -89,6 +92,16 @@ final class AppNavigation {
         let slug = pendingShareSlug
         pendingShareSlug = nil
         return slug
+    }
+
+    func presentInviteRedeem(code: String) {
+        pendingInviteRedeemCode = InviteCodeService.normalize(code)
+    }
+
+    func consumePendingInviteRedeemCode() -> String? {
+        let code = pendingInviteRedeemCode
+        pendingInviteRedeemCode = nil
+        return code
     }
 
     func presentPrepare() {

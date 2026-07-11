@@ -62,6 +62,7 @@ struct AppBranding: Codable, Equatable {
     let freeAudioPreviewSeconds: Int
     let freeTextPreviewChars: Int
     let freeVisitorTipsCount: Int
+    let paywallComparePriceEnabled: Bool
     let paywall: PaywallCopy
     let flightPlatforms: [FlightPlatform]
     let privacyPolicyBody: String
@@ -84,6 +85,7 @@ struct AppBranding: Codable, Equatable {
         freeAudioPreviewSeconds: Int,
         freeTextPreviewChars: Int = 80,
         freeVisitorTipsCount: Int = 1,
+        paywallComparePriceEnabled: Bool = false,
         paywall: PaywallCopy = .fallback,
         flightPlatforms: [FlightPlatform] = AppBranding.fallback.flightPlatforms,
         privacyPolicyBody: String = "",
@@ -105,6 +107,7 @@ struct AppBranding: Codable, Equatable {
         self.freeAudioPreviewSeconds = freeAudioPreviewSeconds
         self.freeTextPreviewChars = freeTextPreviewChars
         self.freeVisitorTipsCount = freeVisitorTipsCount
+        self.paywallComparePriceEnabled = paywallComparePriceEnabled
         self.paywall = paywall
         self.flightPlatforms = flightPlatforms
         self.privacyPolicyBody = privacyPolicyBody
@@ -129,6 +132,7 @@ struct AppBranding: Codable, Equatable {
         freeAudioPreviewSeconds = try c.decodeIfPresent(Int.self, forKey: .freeAudioPreviewSeconds) ?? 180
         freeTextPreviewChars = try c.decodeIfPresent(Int.self, forKey: .freeTextPreviewChars) ?? 80
         freeVisitorTipsCount = try c.decodeIfPresent(Int.self, forKey: .freeVisitorTipsCount) ?? 1
+        paywallComparePriceEnabled = try c.decodeIfPresent(Bool.self, forKey: .paywallComparePriceEnabled) ?? false
         paywall = (try? c.decode(PaywallCopy.self, forKey: .paywall)) ?? .fallback
         flightPlatforms = (try? c.decode([FlightPlatform].self, forKey: .flightPlatforms)) ?? Self.fallback.flightPlatforms
         privacyPolicyBody = try c.decodeIfPresent(String.self, forKey: .privacyPolicyBody) ?? ""
@@ -142,7 +146,7 @@ struct AppBranding: Codable, Equatable {
         case supportEmail, aboutTitle, aboutVersion, aboutBody
         case assistantGreetingGeneral, assistantGreetingPlanning
         case planAlertMessage, planAlertLinkAttractionId, planAlertLinkCityId, planAlertLinkLabel
-        case freeAudioPreviewSeconds, freeTextPreviewChars, freeVisitorTipsCount, paywall, flightPlatforms
+        case freeAudioPreviewSeconds, freeTextPreviewChars, freeVisitorTipsCount, paywallComparePriceEnabled, paywall, flightPlatforms
         case privacyPolicyBody, termsOfServiceBody, gdprComplianceBody, aiContentDisclosureBody, shareWebBaseURL
     }
 
@@ -222,6 +226,7 @@ struct AppSettingsRow: Decodable {
     let paywallPreviewLineTemplate: String?
     let paywallRestore: String?
     let paywallFootnote: String?
+    let paywallComparePriceEnabled: Bool?
     let flightPlatforms: [FlightPlatform]?
     let privacyPolicyBody: String?
     let termsOfServiceBody: String?
@@ -262,6 +267,7 @@ struct AppSettingsRow: Decodable {
         case paywallPreviewLineTemplate
         case paywallRestore
         case paywallFootnote
+        case paywallComparePriceEnabled
         case flightPlatforms
         case privacyPolicyBody
         case termsOfServiceBody
@@ -300,6 +306,7 @@ struct AppSettingsRow: Decodable {
         paywallPreviewLineTemplate = try container.decodeIfPresent(String.self, forKey: .paywallPreviewLineTemplate)
         paywallRestore = try container.decodeIfPresent(String.self, forKey: .paywallRestore)
         paywallFootnote = try container.decodeIfPresent(String.self, forKey: .paywallFootnote)
+        paywallComparePriceEnabled = try container.decodeIfPresent(Bool.self, forKey: .paywallComparePriceEnabled)
         flightPlatforms = try container.decodeIfPresent([FlightPlatform].self, forKey: .flightPlatforms)
         privacyPolicyBody = try container.decodeIfPresent(String.self, forKey: .privacyPolicyBody)
         termsOfServiceBody = try container.decodeIfPresent(String.self, forKey: .termsOfServiceBody)
@@ -353,6 +360,7 @@ struct AppSettingsRow: Decodable {
             freeAudioPreviewSeconds: freeAudioPreviewSeconds ?? defaults.freeAudioPreviewSeconds,
             freeTextPreviewChars: freeTextPreviewChars ?? defaults.freeTextPreviewChars,
             freeVisitorTipsCount: freeVisitorTipsCount ?? defaults.freeVisitorTipsCount,
+            paywallComparePriceEnabled: paywallComparePriceEnabled ?? defaults.paywallComparePriceEnabled,
             paywall: paywall,
             flightPlatforms: flightPlatforms ?? defaults.flightPlatforms,
             privacyPolicyBody: privacyPolicyBody ?? defaults.privacyPolicyBody,
