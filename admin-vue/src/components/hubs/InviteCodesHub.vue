@@ -18,9 +18,23 @@ const DURATION_PRESETS = [
 ];
 
 const MODE_LABELS = {
-  single_use: "一次性（全平台 1 次）",
+  single_use: "一次性",
   multi_use: "限量",
-  unlimited: "不限量（每人每码 1 次）",
+  unlimited: "不限量",
+};
+
+const MODE_HINTS = {
+  single_use: "全平台仅可兑换 1 次，用尽后自动停用",
+  multi_use: "可设置总兑换次数上限",
+  unlimited: "不限总次数，但每位用户每码仅可兑 1 次",
+};
+
+const STATUS_META = {
+  active: { text: "生效中", cls: "green" },
+  scheduled: { text: "未开始", cls: "yellow" },
+  expired: { text: "已过期", cls: "red" },
+  exhausted: { text: "已用尽", cls: "gray" },
+  disabled: { text: "已停用", cls: "gray" },
 };
 
 function randomCode(len = 8) {
@@ -32,7 +46,13 @@ function randomCode(len = 8) {
 function benefitLabel(row) {
   const p = DURATION_PRESETS.find((x) => x.id === row.duration_preset);
   if (row.duration_preset === "custom") return `${row.duration_days || "?"} 天`;
-  return p?.label || row.duration_preset;
+  return p?.label || row.duration_preset || "—";
+}
+
+function planName(id) {
+  if (!id) return "—";
+  const p = plans.value.find((x) => x.id === id);
+  return p ? (p.name_zh || p.name_en || id) : id;
 }
 
 function codeStatus(row) {
@@ -43,6 +63,39 @@ function codeStatus(row) {
   return "active";
 }
 
+function fmtDateTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("zh-CN", {
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
+function toLocalInput(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function fromLocalInput(local) {
+  if (!local) return null;
+  const d = new Date(local);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("已复制");
+  } catch {
+    showToast("复制失败");
+  }
+}
+
 // ── data ──
 const codes = ref([]);
 const batches = ref([]);
@@ -50,21 +103,40 @@ const redemptions = ref([]);
 const plans = ref([]);
 const search = ref("");
 const filterBatch = ref("");
+const filterStatus = ref("");
 
 async function loadPlans() {
-  const { data } = await supabase.from("membership_plans").select("id,name_zh,name_en").eq("is_active", true).order("display_order");
+  const { data } = await supabase
+    .from("membership_plans")
+    .select("id,name_zh,name_en")
+    .eq("is_active", true)
+    .order("display_order");
   plans.value = data || [];
+  const first = plans.value[0]?.id;
+  if (first) {
+    if (!plans.value.some((p) => p.id === batchForm.value.plan_id)) {
+      batchForm.value.plan_id = first;
+    }
+  }
 }
 
 async function loadCodes() {
   error.value = "";
-  const { data, error: e } = await supabase.from("invite_codes").select("*").order("created_at", { ascending: false }).limit(500);
+  const { data, error: e } = await supabase
+    .from("invite_codes")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(500);
   if (e) error.value = e.message;
   codes.value = data || [];
 }
 
 async function loadBatches() {
-  const { data } = await supabase.from("invite_code_batches").select("*").order("created_at", { ascending: false }).limit(100);
+  const { data } = await supabase
+    .from("invite_code_batches")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(100);
   batches.value = data || [];
 }
 
@@ -81,12 +153,42 @@ async function loadRedemptions() {
   }));
 }
 
+const stats = computed(() => {
+  const rows = codes.value;
+  const active = rows.filter((c) => codeStatus(c) === "active").length;
+  const redeemed = rows.reduce((n, c) => n + (c.redeemed_count || 0), 0);
+  return {
+    total: rows.length,
+    active,
+    redeemed,
+    batches: batches.value.length,
+  };
+});
+
 const filteredCodes = computed(() => {
   let rows = codes.value;
   if (filterBatch.value) rows = rows.filter((c) => c.batch_id === filterBatch.value);
+  if (filterStatus.value) rows = rows.filter((c) => codeStatus(c) === filterStatus.value);
   const q = search.value.trim().toUpperCase();
-  if (q) rows = rows.filter((c) => (c.code || "").includes(q) || (c.label || "").includes(q));
+  if (q) {
+    rows = rows.filter((c) =>
+      (c.code || "").includes(q)
+      || (c.label || "").toUpperCase().includes(q)
+      || (c.batch_id || "").toUpperCase().includes(q)
+    );
+  }
   return rows;
+});
+
+const redemptionSearch = ref("");
+const filteredRedemptions = computed(() => {
+  const q = redemptionSearch.value.trim().toLowerCase();
+  if (!q) return redemptions.value;
+  return redemptions.value.filter((r) =>
+    (r.email || "").toLowerCase().includes(q)
+    || (r.code_snapshot || "").toLowerCase().includes(q)
+    || (r.batch_id || "").toLowerCase().includes(q)
+  );
 });
 
 // ── single edit ──
@@ -108,14 +210,40 @@ const BLANK = {
   valid_from: null,
   valid_until: null,
   is_active: true,
+  note_internal: "",
 };
 
+const editingPreview = computed(() => {
+  if (!editing.value) return "";
+  const e = editing.value;
+  const parts = [
+    benefitLabel(e),
+    planName(e.plan_id),
+    MODE_LABELS[e.redemption_mode] || e.redemption_mode,
+  ];
+  if (e.one_per_account) parts.push("账号终身 1 次");
+  if (e.new_users_only) parts.push("仅新用户");
+  return parts.join(" · ");
+});
+
 function newCode() {
-  editing.value = { ...BLANK, _new: true, code: randomCode() };
+  const defaultPlan = plans.value[0]?.id || "annual";
+  editing.value = {
+    ...BLANK,
+    plan_id: defaultPlan,
+    _new: true,
+    code: randomCode(),
+    _valid_from_local: "",
+    _valid_until_local: "",
+  };
 }
 
 function editCode(row) {
-  editing.value = { ...row };
+  editing.value = {
+    ...row,
+    _valid_from_local: toLocalInput(row.valid_from),
+    _valid_until_local: toLocalInput(row.valid_until),
+  };
 }
 
 function onModeChange() {
@@ -133,10 +261,26 @@ function onModeChange() {
 async function saveCode() {
   const p = editing.value;
   if (!p.code?.trim()) return showToast("请填写邀请码");
+  if (p.duration_preset === "custom" && !(p.duration_days > 0)) {
+    return showToast("请填写自定义天数");
+  }
   if (!p.id) p.id = `ic_${Date.now().toString(36)}`;
   p.code = p.code.trim().toUpperCase();
-  const payload = { ...p };
+
+  const dup = codes.value.find((c) => c.code === p.code && c.id !== p.id);
+  if (dup) return showToast("邀请码已存在");
+
+  const payload = {
+    ...p,
+    valid_from: fromLocalInput(p._valid_from_local),
+    valid_until: fromLocalInput(p._valid_until_local),
+    duration_days: p.duration_preset === "custom" ? p.duration_days : null,
+    updated_at: new Date().toISOString(),
+  };
   delete payload._new;
+  delete payload._valid_from_local;
+  delete payload._valid_until_local;
+
   const { error: e } = await supabase.from("invite_codes").upsert(payload);
   if (e) return showToast("失败：" + e.message);
   editing.value = null;
@@ -144,12 +288,35 @@ async function saveCode() {
   showToast("已保存");
 }
 
-async function deactivateCode(row) {
-  if (!confirm(`停用邀请码 ${row.code}？`)) return;
-  const { error: e } = await supabase.from("invite_codes").update({ is_active: false, updated_at: new Date().toISOString() }).eq("id", row.id);
+async function setCodeActive(row, active) {
+  const label = active ? "重新启用" : "停用";
+  if (!confirm(`${label}邀请码 ${row.code}？`)) return;
+  const { error: e } = await supabase
+    .from("invite_codes")
+    .update({ is_active: active, updated_at: new Date().toISOString() })
+    .eq("id", row.id);
   if (e) return showToast("失败：" + e.message);
   await loadCodes();
-  showToast("已停用");
+  showToast(active ? "已启用" : "已停用");
+}
+
+function exportCodesCsv(rows, filename) {
+  const header = "code,batch_id,label,benefit,plan,status,redeemed,max";
+  const lines = rows.map((r) => [
+    r.code,
+    r.batch_id || "",
+    (r.label || "").replace(/,/g, " "),
+    benefitLabel(r),
+    r.plan_id,
+    codeStatus(r),
+    r.redeemed_count,
+    r.max_redemptions ?? "",
+  ].join(","));
+  const blob = new Blob([[header, ...lines].join("\n")], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
 }
 
 // ── batch generate ──
@@ -165,13 +332,28 @@ const batchForm = ref({
   new_users_only: false,
 });
 
+const batchPreview = computed(() => {
+  const f = batchForm.value;
+  return `${f.count} 个码 · ${benefitLabel(f)} · ${planName(f.plan_id)} · ${MODE_LABELS[f.redemption_mode]}`;
+});
+
+function onBatchModeChange() {
+  if (batchForm.value.redemption_mode === "single_use") {
+    batchForm.value.max_redemptions = 1;
+  } else if (batchForm.value.redemption_mode === "unlimited") {
+    batchForm.value.max_redemptions = null;
+  } else if (!batchForm.value.max_redemptions) {
+    batchForm.value.max_redemptions = 10;
+  }
+}
+
 async function generateBatch() {
   const f = batchForm.value;
   const n = Math.min(Math.max(Number(f.count) || 1, 1), 500);
   if (f.duration_preset === "custom" && !(f.duration_days > 0)) {
     return showToast("请填写自定义天数");
   }
-  if (!confirm(`生成 ${n} 个一次性邀请码？`)) return;
+  if (!confirm(`生成 ${n} 个邀请码？\n${batchPreview.value}`)) return;
 
   const batchId = `camp_${Date.now().toString(36)}`;
   const { error: be } = await supabase.from("invite_code_batches").insert({
@@ -186,11 +368,18 @@ async function generateBatch() {
   });
   if (be) return showToast("批次创建失败：" + be.message);
 
+  const mode = f.redemption_mode;
+  const maxRed = mode === "single_use" ? 1 : mode === "unlimited" ? null : f.max_redemptions;
   const rows = [];
-  const seen = new Set();
+  const seen = new Set(codes.value.map((c) => c.code));
   for (let i = 0; i < n; i++) {
     let code;
-    do { code = randomCode(8); } while (seen.has(code));
+    let tries = 0;
+    do {
+      code = randomCode(8);
+      tries += 1;
+    } while (seen.has(code) && tries < 50);
+    if (seen.has(code)) return showToast("生成唯一码失败，请重试");
     seen.add(code);
     rows.push({
       id: `ic_${batchId}_${i}`,
@@ -200,9 +389,9 @@ async function generateBatch() {
       plan_id: f.plan_id,
       duration_preset: f.duration_preset,
       duration_days: f.duration_preset === "custom" ? f.duration_days : null,
-      redemption_mode: "single_use",
-      max_redemptions: 1,
-      auto_deactivate_on_exhaust: true,
+      redemption_mode: mode,
+      max_redemptions: maxRed,
+      auto_deactivate_on_exhaust: mode !== "unlimited",
       one_per_account: f.one_per_account,
       new_users_only: f.new_users_only,
       is_active: true,
@@ -212,16 +401,27 @@ async function generateBatch() {
   const { error: ce } = await supabase.from("invite_codes").insert(rows);
   if (ce) return showToast("写入码失败：" + ce.message);
 
-  const csv = ["code,batch_id,benefit", ...rows.map((r) => `${r.code},${batchId},${benefitLabel(r)}`)].join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `invite_codes_${batchId}.csv`;
-  a.click();
+  exportCodesCsv(rows, `invite_codes_${batchId}.csv`);
 
   await loadCodes();
   await loadBatches();
   showToast(`已生成 ${n} 个码`);
+}
+
+function openBatchCodes(batchId) {
+  filterBatch.value = batchId;
+  filterStatus.value = "";
+  tab.value = "codes";
+}
+
+async function exportBatchCsv(batch) {
+  const { data } = await supabase
+    .from("invite_codes")
+    .select("*")
+    .eq("batch_id", batch.id)
+    .order("code");
+  if (!data?.length) return showToast("该批次暂无码");
+  exportCodesCsv(data, `batch_${batch.id}.csv`);
 }
 
 function switchTab(t) {
@@ -240,8 +440,23 @@ onMounted(async () => {
 
 <template>
   <div class="ih">
-    <h1>🎟 邀请码</h1>
-    <p class="hint">兑换后写入用户 <code>membership_override=grant</code>，与后台手动赠送会员相同。</p>
+    <header class="page-head">
+      <div>
+        <h1>🎟 邀请码</h1>
+        <p class="hint">
+          兑换后写入用户 <code>membership_override=grant</code>，与后台手动赠送会员相同。
+          App 入口：Profile / 付费墙页脚 · 深链 <code>yoloapp://redeem?code=</code>
+        </p>
+      </div>
+    </header>
+
+    <div class="stats">
+      <div class="stat"><div class="num">{{ stats.total }}</div><div class="lab">邀请码总数</div></div>
+      <div class="stat green"><div class="num">{{ stats.active }}</div><div class="lab">生效中</div></div>
+      <div class="stat blue"><div class="num">{{ stats.redeemed }}</div><div class="lab">累计兑换</div></div>
+      <div class="stat"><div class="num">{{ stats.batches }}</div><div class="lab">批次</div></div>
+    </div>
+
     <div v-if="error" class="status-bar error">{{ error }}</div>
 
     <div class="tabs">
@@ -251,155 +466,615 @@ onMounted(async () => {
       <button :class="{ on: tab === 'redemptions' }" @click="switchTab('redemptions')">兑换记录</button>
     </div>
 
-  <!-- codes tab -->
-  <section v-if="tab === 'codes'">
-    <template v-if="editing">
-      <div class="form-head">
-        <h2>{{ editing._new ? "新建邀请码" : "编辑" }}</h2>
-        <div>
-          <button class="btn btn-secondary btn-sm" @click="editing = null">取消</button>
-          <button class="btn btn-sm" @click="saveCode">保存</button>
+    <!-- codes tab -->
+    <section v-if="tab === 'codes'" class="panel">
+      <template v-if="editing">
+        <div class="card form-card">
+          <div class="form-head">
+            <div>
+              <h2>{{ editing._new ? "新建邀请码" : "编辑邀请码" }}</h2>
+              <p v-if="editingPreview" class="preview-line">{{ editingPreview }}</p>
+            </div>
+            <div class="form-head-actions">
+              <button class="btn btn-secondary btn-sm" @click="editing = null">取消</button>
+              <button class="btn btn-sm" @click="saveCode">保存</button>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>基本信息</h3>
+            <div class="fgrid">
+              <label class="f">
+                <span>邀请码</span>
+                <div class="input-row">
+                  <input v-model="editing.code" class="mono" placeholder="8 位字母数字" />
+                  <button type="button" class="btn btn-secondary btn-sm" title="重新生成" @click="editing.code = randomCode()">↻</button>
+                  <button type="button" class="btn btn-secondary btn-sm" title="复制" @click="copyText(editing.code)">复制</button>
+                </div>
+              </label>
+              <label class="f">
+                <span>备注 / 活动名</span>
+                <input v-model="editing.label" placeholder="如：七月小红书福利" />
+              </label>
+              <label class="f full">
+                <span>内部备注 <span class="muted">（仅后台可见）</span></span>
+                <input v-model="editing.note_internal" placeholder="运营备注、渠道来源等" />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>权益设置</h3>
+            <div class="fgrid">
+              <label class="f">
+                <span>权益时长</span>
+                <select v-model="editing.duration_preset">
+                  <option v-for="p in DURATION_PRESETS" :key="p.id" :value="p.id">{{ p.label }}</option>
+                </select>
+              </label>
+              <label v-if="editing.duration_preset === 'custom'" class="f">
+                <span>自定义天数</span>
+                <input type="number" v-model.number="editing.duration_days" min="1" />
+              </label>
+              <label class="f" :class="{ full: editing.duration_preset !== 'custom' }">
+                <span>会员计划</span>
+                <select v-model="editing.plan_id">
+                  <option v-for="p in plans" :key="p.id" :value="p.id">
+                    {{ p.name_zh || p.name_en }} ({{ p.id }})
+                  </option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>兑换规则</h3>
+            <div class="fgrid">
+              <label class="f">
+                <span>兑换模式</span>
+                <select v-model="editing.redemption_mode" @change="onModeChange">
+                  <option value="single_use">一次性（全平台 1 次）</option>
+                  <option value="multi_use">限量（可设总次数）</option>
+                  <option value="unlimited">不限量（每人每码 1 次）</option>
+                </select>
+                <span class="field-hint">{{ MODE_HINTS[editing.redemption_mode] }}</span>
+              </label>
+              <label v-if="editing.redemption_mode === 'multi_use'" class="f">
+                <span>总兑换次数上限</span>
+                <input type="number" v-model.number="editing.max_redemptions" min="1" />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>有效期 <span class="muted small">留空表示不限制</span></h3>
+            <div class="fgrid">
+              <label class="f">
+                <span>生效自</span>
+                <input type="datetime-local" v-model="editing._valid_from_local" />
+              </label>
+              <label class="f">
+                <span>失效于</span>
+                <input type="datetime-local" v-model="editing._valid_until_local" />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>限制与状态</h3>
+            <div class="opts-grid">
+              <label class="opt">
+                <input type="checkbox" v-model="editing.one_per_account" />
+                <span class="opt-text">
+                  <strong>每账号终身仅可兑 1 次</strong>
+                  <small>该用户成功兑换任意邀请码后，不可再兑其他码</small>
+                </span>
+              </label>
+              <label class="opt">
+                <input type="checkbox" v-model="editing.new_users_only" />
+                <span class="opt-text">
+                  <strong>仅新用户</strong>
+                  <small>无有效会员且无历史兑换记录才可兑</small>
+                </span>
+              </label>
+              <label class="opt">
+                <input
+                  type="checkbox"
+                  v-model="editing.auto_deactivate_on_exhaust"
+                  :disabled="editing.redemption_mode === 'single_use'"
+                />
+                <span class="opt-text">
+                  <strong>用尽后自动停用</strong>
+                  <small>达到兑换上限后关闭该码</small>
+                </span>
+              </label>
+              <label class="opt">
+                <input type="checkbox" v-model="editing.is_active" />
+                <span class="opt-text">
+                  <strong>启用</strong>
+                  <small>关闭后用户无法兑换</small>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-foot">
+            <button class="btn btn-secondary" @click="editing = null">取消</button>
+            <button class="btn" @click="saveCode">保存邀请码</button>
+          </div>
         </div>
-      </div>
-      <div class="fgrid">
-        <label class="f">邀请码<input v-model="editing.code" /></label>
-        <label class="f">备注<input v-model="editing.label" /></label>
-        <label class="f">兑换模式
-          <select v-model="editing.redemption_mode" @change="onModeChange">
-            <option value="single_use">一次性（全平台 1 次）</option>
-            <option value="multi_use">限量</option>
-            <option value="unlimited">不限量</option>
-          </select>
-        </label>
-        <label v-if="editing.redemption_mode === 'multi_use'" class="f">总次数上限<input type="number" v-model.number="editing.max_redemptions" min="1" /></label>
-        <label class="f">权益时长
-          <select v-model="editing.duration_preset">
-            <option v-for="p in DURATION_PRESETS" :key="p.id" :value="p.id">{{ p.label }}</option>
-          </select>
-        </label>
-        <label v-if="editing.duration_preset === 'custom'" class="f">自定义天数<input type="number" v-model.number="editing.duration_days" min="1" /></label>
-        <label class="f">会员计划
-          <select v-model="editing.plan_id">
-            <option v-for="p in plans" :key="p.id" :value="p.id">{{ p.name_zh || p.name_en }} ({{ p.id }})</option>
-          </select>
-        </label>
-        <label class="f">生效自<input type="datetime-local" v-model="editing.valid_from" /></label>
-        <label class="f">失效于<input type="datetime-local" v-model="editing.valid_until" /></label>
-        <label class="cond"><input type="checkbox" v-model="editing.one_per_account" /> 每账号终身仅可兑 1 次</label>
-        <label class="cond"><input type="checkbox" v-model="editing.new_users_only" /> 仅新用户</label>
-        <label class="cond"><input type="checkbox" v-model="editing.auto_deactivate_on_exhaust" :disabled="editing.redemption_mode === 'single_use'" /> 用尽后自动停用</label>
-        <label class="cond"><input type="checkbox" v-model="editing.is_active" /> 启用</label>
-      </div>
-    </template>
-    <template v-else>
-      <div class="bar">
-        <button class="btn" @click="newCode">+ 新建</button>
-        <input v-model="search" class="search" placeholder="搜索码…" />
-        <select v-model="filterBatch">
-          <option value="">全部批次</option>
-          <option v-for="b in batches" :key="b.id" :value="b.id">{{ b.label || b.id }}</option>
-        </select>
-      </div>
-      <table class="data-table">
-        <thead><tr><th>码</th><th>权益</th><th>模式</th><th>已兑/上限</th><th>状态</th><th></th></tr></thead>
-        <tbody>
-          <tr v-for="c in filteredCodes" :key="c.id">
-            <td><code>{{ c.code }}</code> <span class="muted">{{ c.label }}</span></td>
-            <td>{{ benefitLabel(c) }}</td>
-            <td>{{ MODE_LABELS[c.redemption_mode] || c.redemption_mode }}</td>
-            <td>{{ c.redeemed_count }}/{{ c.max_redemptions ?? "∞" }}</td>
-            <td>{{ codeStatus(c) }}</td>
-            <td>
-              <button class="btn btn-secondary btn-sm" @click="editCode(c)">编辑</button>
-              <button v-if="c.is_active" class="btn btn-secondary btn-sm" @click="deactivateCode(c)">停用</button>
-            </td>
-          </tr>
-          <tr v-if="!filteredCodes.length"><td colspan="6" class="center muted">暂无</td></tr>
-        </tbody>
-      </table>
-    </template>
-  </section>
+      </template>
 
-  <!-- batch generate -->
-  <section v-else-if="tab === 'batch'">
-    <h2>批量生成一次性卡密</h2>
-    <div class="fgrid">
-      <label class="f full">活动名称<input v-model="batchForm.label" placeholder="如：七月小红书福利" /></label>
-      <label class="f">数量<input type="number" v-model.number="batchForm.count" min="1" max="500" /></label>
-      <label class="f">权益
-        <select v-model="batchForm.duration_preset">
-          <option v-for="p in DURATION_PRESETS" :key="p.id" :value="p.id">{{ p.label }}</option>
-        </select>
-      </label>
-      <label v-if="batchForm.duration_preset === 'custom'" class="f">天数<input type="number" v-model.number="batchForm.duration_days" min="1" /></label>
-      <label class="f">会员计划
-        <select v-model="batchForm.plan_id">
-          <option v-for="p in plans" :key="p.id" :value="p.id">{{ p.name_zh || p.name_en }}</option>
-        </select>
-      </label>
-      <label class="cond"><input type="checkbox" v-model="batchForm.one_per_account" /> 每账号终身仅 1 次</label>
-      <label class="cond"><input type="checkbox" v-model="batchForm.new_users_only" /> 仅新用户</label>
-    </div>
-    <button class="btn" style="margin-top:14px" @click="generateBatch">生成并导出 CSV</button>
-    <p class="hint">同一批次内每用户只能兑换 1 张码（batch 唯一约束）。</p>
-  </section>
+      <template v-else>
+        <div class="toolbar">
+          <button class="btn" @click="newCode">+ 新建邀请码</button>
+          <input v-model="search" class="search" type="search" placeholder="搜索码 / 备注 / 批次…" />
+          <select v-model="filterBatch">
+            <option value="">全部批次</option>
+            <option v-for="b in batches" :key="b.id" :value="b.id">{{ b.label || b.id }}</option>
+          </select>
+          <select v-model="filterStatus">
+            <option value="">全部状态</option>
+            <option v-for="(meta, key) in STATUS_META" :key="key" :value="key">{{ meta.text }}</option>
+          </select>
+          <span class="muted count">{{ filteredCodes.length }} 条</span>
+          <button
+            v-if="filterBatch || filterStatus || search"
+            class="btn btn-secondary btn-sm"
+            @click="filterBatch = ''; filterStatus = ''; search = ''"
+          >清除筛选</button>
+        </div>
 
-  <!-- batches list -->
-  <section v-else-if="tab === 'batches'">
-    <table class="data-table">
-      <thead><tr><th>批次</th><th>权益</th><th>生成/兑换</th><th>时间</th></tr></thead>
-      <tbody>
-        <tr v-for="b in batches" :key="b.id">
-          <td><strong>{{ b.label || b.id }}</strong><br /><code class="muted">{{ b.id }}</code></td>
-          <td>{{ benefitLabel(b) }}</td>
-          <td>{{ b.codes_redeemed || 0 }} / {{ b.codes_generated || 0 }}</td>
-          <td class="muted">{{ (b.created_at || "").slice(0, 10) }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>邀请码</th>
+                <th>权益</th>
+                <th>计划</th>
+                <th>模式</th>
+                <th>已兑 / 上限</th>
+                <th>状态</th>
+                <th class="col-actions">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="c in filteredCodes" :key="c.id">
+                <td>
+                  <div class="code-cell">
+                    <code>{{ c.code }}</code>
+                    <button class="icon-btn" title="复制" @click="copyText(c.code)">⎘</button>
+                  </div>
+                  <div v-if="c.label" class="muted row-sub">{{ c.label }}</div>
+                  <div v-if="c.batch_id" class="muted row-sub">
+                    <button class="link-btn" @click="filterBatch = c.batch_id">{{ c.batch_id }}</button>
+                  </div>
+                </td>
+                <td>{{ benefitLabel(c) }}</td>
+                <td>{{ planName(c.plan_id) }}</td>
+                <td>
+                  <span class="badge gray">{{ MODE_LABELS[c.redemption_mode] || c.redemption_mode }}</span>
+                </td>
+                <td>{{ c.redeemed_count }} / {{ c.max_redemptions ?? "∞" }}</td>
+                <td>
+                  <span class="badge" :class="STATUS_META[codeStatus(c)]?.cls">
+                    {{ STATUS_META[codeStatus(c)]?.text || codeStatus(c) }}
+                  </span>
+                </td>
+                <td class="col-actions">
+                  <button class="btn btn-secondary btn-sm" @click="editCode(c)">编辑</button>
+                  <button
+                    v-if="c.is_active"
+                    class="btn btn-danger btn-sm"
+                    @click="setCodeActive(c, false)"
+                  >停用</button>
+                  <button
+                    v-else
+                    class="btn btn-secondary btn-sm"
+                    @click="setCodeActive(c, true)"
+                  >启用</button>
+                </td>
+              </tr>
+              <tr v-if="!filteredCodes.length">
+                <td colspan="7" class="center muted">暂无邀请码</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
+    </section>
 
-  <!-- redemptions -->
-  <section v-else>
-    <table class="data-table">
-      <thead><tr><th>时间</th><th>用户</th><th>码</th><th>批次</th><th>到期</th></tr></thead>
-      <tbody>
-        <tr v-for="r in redemptions" :key="r.id">
-          <td>{{ (r.redeemed_at || "").slice(0, 19).replace("T", " ") }}</td>
-          <td class="muted">{{ r.email }}</td>
-          <td><code>{{ r.code_snapshot }}</code></td>
-          <td class="muted">{{ r.batch_id || "—" }}</td>
-          <td>{{ r.granted_expires_at ? r.granted_expires_at.slice(0, 10) : "终身" }}</td>
-        </tr>
-        <tr v-if="!redemptions.length"><td colspan="5" class="center muted">暂无兑换</td></tr>
-      </tbody>
-    </table>
-  </section>
+    <!-- batch generate -->
+    <section v-else-if="tab === 'batch'" class="panel">
+      <div class="card form-card">
+        <h2>批量生成邀请码</h2>
+        <p class="hint block-hint">适合活动发码：一次生成多张一次性或限量码，自动创建批次并导出 CSV。</p>
+
+        <div class="form-section">
+          <div class="fgrid">
+            <label class="f full">
+              <span>活动名称</span>
+              <input v-model="batchForm.label" placeholder="如：七月小红书福利" />
+            </label>
+            <label class="f">
+              <span>生成数量</span>
+              <input type="number" v-model.number="batchForm.count" min="1" max="500" />
+            </label>
+            <label class="f">
+              <span>兑换模式</span>
+              <select v-model="batchForm.redemption_mode" @change="onBatchModeChange">
+                <option value="single_use">一次性</option>
+                <option value="multi_use">限量</option>
+                <option value="unlimited">不限量</option>
+              </select>
+            </label>
+            <label v-if="batchForm.redemption_mode === 'multi_use'" class="f">
+              <span>每码总次数</span>
+              <input type="number" v-model.number="batchForm.max_redemptions" min="1" />
+            </label>
+            <label class="f">
+              <span>权益时长</span>
+              <select v-model="batchForm.duration_preset">
+                <option v-for="p in DURATION_PRESETS" :key="p.id" :value="p.id">{{ p.label }}</option>
+              </select>
+            </label>
+            <label v-if="batchForm.duration_preset === 'custom'" class="f">
+              <span>自定义天数</span>
+              <input type="number" v-model.number="batchForm.duration_days" min="1" />
+            </label>
+            <label class="f" :class="{ full: batchForm.duration_preset === 'custom' && batchForm.redemption_mode !== 'multi_use' }">
+              <span>会员计划</span>
+              <select v-model="batchForm.plan_id">
+                <option v-for="p in plans" :key="p.id" :value="p.id">{{ p.name_zh || p.name_en }}</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>限制选项</h3>
+          <div class="opts-grid">
+            <label class="opt">
+              <input type="checkbox" v-model="batchForm.one_per_account" />
+              <span class="opt-text">
+                <strong>每账号终身仅可兑 1 次</strong>
+                <small>跨所有邀请码生效</small>
+              </span>
+            </label>
+            <label class="opt">
+              <input type="checkbox" v-model="batchForm.new_users_only" />
+              <span class="opt-text">
+                <strong>仅新用户</strong>
+                <small>无会员且无兑换记录</small>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="batch-preview">
+          <span class="muted">预览：</span>{{ batchPreview }}
+        </div>
+
+        <div class="form-foot">
+          <button class="btn" @click="generateBatch">生成并导出 CSV</button>
+        </div>
+        <p class="hint foot-hint">同一批次内每用户只能兑换 1 张码（batch 唯一约束）。</p>
+      </div>
+    </section>
+
+    <!-- batches list -->
+    <section v-else-if="tab === 'batches'" class="panel">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>批次</th>
+              <th>权益</th>
+              <th>计划</th>
+              <th>已兑 / 生成</th>
+              <th>创建时间</th>
+              <th class="col-actions">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="b in batches" :key="b.id">
+              <td>
+                <strong>{{ b.label || b.id }}</strong>
+                <div class="muted row-sub"><code>{{ b.id }}</code></div>
+              </td>
+              <td>{{ benefitLabel(b) }}</td>
+              <td>{{ planName(b.plan_id) }}</td>
+              <td>{{ b.codes_redeemed || 0 }} / {{ b.codes_generated || 0 }}</td>
+              <td class="muted">{{ fmtDateTime(b.created_at) }}</td>
+              <td class="col-actions">
+                <button class="btn btn-secondary btn-sm" @click="openBatchCodes(b.id)">查看码</button>
+                <button class="btn btn-secondary btn-sm" @click="exportBatchCsv(b)">导出</button>
+              </td>
+            </tr>
+            <tr v-if="!batches.length">
+              <td colspan="6" class="center muted">暂无批次</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- redemptions -->
+    <section v-else class="panel">
+      <div class="toolbar">
+        <input v-model="redemptionSearch" class="search" type="search" placeholder="搜索用户邮箱 / 邀请码 / 批次…" />
+        <span class="muted count">{{ filteredRedemptions.length }} 条</span>
+        <button class="btn btn-secondary btn-sm" @click="loadRedemptions">刷新</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>兑换时间</th>
+              <th>用户</th>
+              <th>邀请码</th>
+              <th>批次</th>
+              <th>计划</th>
+              <th>权益到期</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="r in filteredRedemptions" :key="r.id">
+              <td>{{ fmtDateTime(r.redeemed_at) }}</td>
+              <td class="muted">{{ r.email }}</td>
+              <td><code>{{ r.code_snapshot }}</code></td>
+              <td>
+                <button v-if="r.batch_id" class="link-btn muted" @click="openBatchCodes(r.batch_id)">{{ r.batch_id }}</button>
+                <span v-else class="muted">—</span>
+              </td>
+              <td>{{ planName(r.granted_plan_id) }}</td>
+              <td>{{ r.granted_expires_at ? fmtDateTime(r.granted_expires_at) : "终身" }}</td>
+            </tr>
+            <tr v-if="!filteredRedemptions.length">
+              <td colspan="6" class="center muted">暂无兑换记录</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
     <div class="toast" :class="{ on: toast }">{{ toast }}</div>
   </div>
 </template>
 
 <style scoped>
-.ih h1 { margin: 0 0 6px; font-size: 20px; }
-.hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 14px; flex-wrap: wrap; }
-.tabs button { background: transparent; border: none; padding: 9px 14px; cursor: pointer; color: var(--muted); font-weight: 600; border-bottom: 2px solid transparent; }
+.ih { max-width: 1080px; }
+.page-head h1 { margin: 0 0 6px; font-size: 20px; }
+.hint { color: var(--muted); font-size: 13px; margin: 0; line-height: 1.5; }
+.hint code { font-size: 12px; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  text-align: center;
+}
+.stat .num { font-size: 22px; font-weight: 700; line-height: 1.2; }
+.stat .lab { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.stat.green .num { color: #5cb85c; }
+.stat.blue .num { color: #5bc0de; }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.tabs button {
+  background: transparent;
+  border: none;
+  padding: 9px 14px;
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
 .tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
-.bar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-.bar .search { width: 180px; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.data-table th, .data-table td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-.data-table th { color: var(--muted); font-size: 13px; }
-.muted { color: var(--muted); font-size: 12px; }
-.center { text-align: center; padding: 24px; }
-.form-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+
+.panel { margin-bottom: 24px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.form-card h2 { margin: 0 0 8px; font-size: 18px; }
+.block-hint { margin-bottom: 16px; }
+.foot-hint { margin-top: 12px; }
+
+.form-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
 .form-head h2 { margin: 0; font-size: 18px; }
-.fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 760px; }
-.f { display: block; font-size: 12px; color: var(--muted); }
+.preview-line { margin: 6px 0 0; font-size: 13px; color: var(--accent); }
+.form-head-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.form-section {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.form-section:last-of-type { border-bottom: none; padding-bottom: 0; }
+.form-section h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.small { font-size: 12px; font-weight: 400; }
+
+.fgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+.f { display: flex; flex-direction: column; gap: 6px; }
+.f span { font-size: 12px; color: var(--muted); font-weight: 600; }
 .f.full { grid-column: 1 / -1; }
-.f input, .f select { margin-top: 4px; width: 100%; }
-.cond { display: flex; align-items: center; gap: 6px; font-size: 14px; }
-.toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 8px; font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 1100; }
+.f input, .f select { margin: 0; }
+.field-hint { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+.input-row { display: flex; gap: 6px; align-items: center; }
+.input-row input { flex: 1; }
+.input-row .btn { flex-shrink: 0; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.06em; }
+
+.opts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  margin: 0;
+}
+.opt input { width: auto; margin-top: 2px; flex-shrink: 0; }
+.opt-text { display: flex; flex-direction: column; gap: 2px; }
+.opt-text strong { font-size: 14px; font-weight: 600; color: var(--text); }
+.opt-text small { font-size: 12px; color: var(--muted); line-height: 1.35; }
+
+.form-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.toolbar .search { width: 220px; min-width: 160px; }
+.toolbar select { width: auto; min-width: 130px; }
+.count { font-size: 13px; margin-left: auto; }
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.data-table th, .data-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.data-table th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--surface2);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.col-actions { white-space: nowrap; width: 1%; }
+.data-table .btn { margin-right: 4px; margin-bottom: 2px; }
+
+.code-cell { display: flex; align-items: center; gap: 6px; }
+.code-cell code { font-size: 13px; font-weight: 600; }
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+.icon-btn:hover { color: var(--accent); background: var(--surface2); }
+.link-btn {
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  text-decoration: underline;
+}
+.row-sub { margin-top: 4px; font-size: 12px; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--surface2);
+  color: var(--muted);
+}
+.badge.green { background: rgba(92, 184, 92, 0.15); color: #5cb85c; }
+.badge.yellow { background: rgba(240, 173, 78, 0.15); color: #f0ad4e; }
+.badge.red { background: rgba(217, 83, 79, 0.15); color: #d9534f; }
+.badge.blue { background: rgba(91, 192, 222, 0.15); color: #5bc0de; }
+.badge.gray { background: var(--surface2); color: var(--muted); }
+
+.batch-preview {
+  padding: 12px 14px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.muted { color: var(--muted); }
+.center { text-align: center; padding: 28px; }
+
+.toast {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--bg);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 1100;
+}
 .toast.on { opacity: 1; }
+
+@media (max-width: 720px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .fgrid, .opts-grid { grid-template-columns: 1fr; }
+  .form-head { flex-direction: column; }
+  .count { margin-left: 0; }
+}
 </style>
