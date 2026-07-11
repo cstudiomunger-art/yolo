@@ -34,7 +34,7 @@ final class PurchaseService {
 
     // MARK: - Plan Loading
 
-    private static let plansCacheKey = "yolohappy.cachedMembershipPlans.v1"
+    private static let plansCacheKey = "yolohappy.cachedMembershipPlans.v2"
 
     /// Loads membership plans from Supabase (the source of truth for names / prices /
     /// features / access flags / trial). On success the result is cached locally so that

@@ -97,7 +97,8 @@ struct MembershipPlansView: View {
                 showLogin = false
             }
             .task {
-                if options.isEmpty { await appEnv.purchase.loadPlans() }
+                await appEnv.contentMode.refreshFromRemote()
+                await appEnv.purchase.loadPlans()
                 ensureSelection()
             }
             .onChange(of: appEnv.purchase.availablePlans.count) { _, _ in ensureSelection() }
@@ -190,7 +191,11 @@ struct MembershipPlansView: View {
                 .foregroundStyle(Theme.ColorToken.textMuted)
                 .multilineTextAlignment(.center)
             Button(String(localized: "Retry")) {
-                Task { await appEnv.purchase.loadPlans(); ensureSelection() }
+                Task {
+                    await appEnv.contentMode.refreshFromRemote()
+                    await appEnv.purchase.loadPlans()
+                    ensureSelection()
+                }
             }
             .font(Theme.FontToken.inter(12, weight: .medium))
             .foregroundStyle(Theme.ColorToken.accent)
