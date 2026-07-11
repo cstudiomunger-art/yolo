@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import { uploadStorageFile, COVER_BUCKET } from "@/lib/storage";
 import { renderMarkdownHtml, containsHtmlTags } from "@/lib/markdown";
+import "../../../../scripts/lib/markdown-prose.css";
 
 const props = defineProps({
   modelValue: { type: String, default: "" },
@@ -86,8 +87,14 @@ const previewHtml = computed(() => renderMarkdownHtml(props.modelValue));
       <button type="button" class="md-btn" @click="insertAtCursor('\n## ')">##</button>
       <button type="button" class="md-btn" @click="insertAtCursor('\n### ')">###</button>
       <button type="button" class="md-btn" @click="wrapSelection('**')">**B**</button>
+      <button type="button" class="md-btn" @click="wrapSelection('*')">*I*</button>
       <button type="button" class="md-btn" @click="insertAtCursor('\n- ')">- 列表</button>
+      <button type="button" class="md-btn" @click="insertAtCursor('\n1. ')">1. 列表</button>
       <button type="button" class="md-btn" @click="insertAtCursor('\n> ')">引用</button>
+      <button type="button" class="md-btn" @click="wrapSelection('`')">`code`</button>
+      <button type="button" class="md-btn" @click="insertAtCursor('\n```\n\n```\n')">```</button>
+      <button type="button" class="md-btn" @click="wrapSelection('~~')">~~</button>
+      <button type="button" class="md-btn" @click="insertAtCursor('\n\n---\n\n')">---</button>
       <button type="button" class="md-btn" @click="insertAtCursor('[链接文字](https://)')">链接</button>
       <button type="button" class="md-btn" @click="insertTable">表格</button>
       <label class="md-btn">
@@ -115,10 +122,7 @@ const previewHtml = computed(() => renderMarkdownHtml(props.modelValue));
 .md-body.split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 900px) { .md-body.split { grid-template-columns: 1fr; } }
 .md-area { width: 100%; font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.5; min-height: 200px; }
-.md-render { border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.6; min-height: 200px; overflow: auto; }
-.prose-preview :deep(img) { max-width: 100%; border-radius: 8px; }
-.prose-preview :deep(table) { width: 100%; border-collapse: collapse; font-size: 0.92em; }
-.prose-preview :deep(th), .prose-preview :deep(td) { border: 1px solid var(--border); padding: 6px 8px; }
+.md-render { border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.6; min-height: 200px; overflow: auto; color: var(--text); }
 .muted { color: var(--muted); font-size: 13px; }
 .warn { color: #b8860b; font-size: 13px; margin: 0 0 6px; }
 .err { color: var(--danger, #c0392b); font-size: 13px; }

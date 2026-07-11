@@ -1,16 +1,20 @@
 import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
 import { resolveCoverImageUrl } from "@/lib/storage";
+import { MARKED_OPTIONS as SHARED_MARKED_OPTIONS } from "../../../scripts/lib/marked-config.mjs";
+import { MARKDOWN_SANITIZE_OPTIONS } from "../../../scripts/lib/markdown-sanitize.mjs";
 
-/** GFM: tables, strikethrough, task lists, autolinks. Keep in sync with scripts/lib/marked-config.mjs */
-export const MARKED_OPTIONS = { gfm: true, breaks: false };
+/** GFM: tables, strikethrough, autolinks. Keep in sync with scripts/lib/marked-config.mjs */
+export const MARKED_OPTIONS = SHARED_MARKED_OPTIONS;
 
 marked.setOptions(MARKED_OPTIONS);
 
-/** Rewrite relative `![](path)` before preview/render (matches site + App). */
+/** Rewrite relative `![](path)` before preview/render; normalize lone `#` → `##` per CMS spec. */
 export function markdownForDisplay(md) {
   const raw = String(md ?? "").trim();
   if (!raw) return "";
-  return raw.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_match, alt, src) => {
+  const normalized = raw.replace(/^# (?!#)/gm, "## ");
+  return normalized.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_match, alt, src) => {
     const trimmed = String(src ?? "").trim();
     if (/^https?:\/\//i.test(trimmed)) return `![${alt}](${trimmed})`;
     const resolved = resolveCoverImageUrl(trimmed);
@@ -21,7 +25,8 @@ export function markdownForDisplay(md) {
 export function renderMarkdownHtml(md) {
   const prepared = markdownForDisplay(md);
   if (!prepared) return "";
-  return marked.parse(prepared);
+  const html = marked.parse(prepared);
+  return sanitizeHtml(html, MARKDOWN_SANITIZE_OPTIONS);
 }
 
 /** @param {string} raw */

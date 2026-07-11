@@ -32,6 +32,9 @@ struct MarkdownContentView: View {
                     colorScheme: colorScheme
                 ))
                 .markdownImageProvider(TapImageProvider(onTap: onImageTap))
+                .environment(\.openURL, OpenURLAction { url in
+                    allowsInteraction ? .systemAction(url) : .handled
+                })
                 .allowsHitTesting(allowsInteraction)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -40,14 +43,21 @@ struct MarkdownContentView: View {
     // MARK: - Preprocessing
 
     static func markdownForDisplay(_ markdown: String) -> String {
+        var result = markdown
+
+        if let h1 = try? NSRegularExpression(pattern: #"(?m)^# (?!#)"#, options: []) {
+            let range = NSRange(result.startIndex..., in: result)
+            result = h1.stringByReplacingMatches(in: result, range: range, withTemplate: "## ")
+        }
+
         guard let regex = try? NSRegularExpression(
             pattern: #"!\[([^\]]*)\]\(([^)]+)\)"#,
             options: []
-        ) else { return markdown }
+        ) else { return result }
 
-        let ns = markdown as NSString
-        let mutable = NSMutableString(string: markdown)
-        let matches = regex.matches(in: markdown, range: NSRange(location: 0, length: ns.length))
+        let ns = result as NSString
+        let mutable = NSMutableString(string: result)
+        let matches = regex.matches(in: result, range: NSRange(location: 0, length: ns.length))
         for match in matches.reversed() {
             let urlPart = ns.substring(with: match.range(at: 2)).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !urlPart.lowercased().hasPrefix("http"),
@@ -106,8 +116,26 @@ struct MarkdownContentView: View {
             .emphasis {
                 FontStyle(.italic)
             }
+            .strikethrough {
+                StrikethroughStyle(.single)
+                ForegroundColor(Theme.ColorToken.textMuted)
+            }
+            .code {
+                FontFamilyVariant(.monospaced)
+                FontSize(fontSize * 0.9)
+                BackgroundColor(subtle)
+            }
             .link {
                 ForegroundColor(accent)
+            }
+            .heading1 { configuration in
+                configuration.label
+                    .markdownTextStyle {
+                        FontSize(fontSize * 1.15)
+                        FontWeight(.semibold)
+                        ForegroundColor(Theme.ColorToken.textPrimary)
+                    }
+                    .padding(.top, 8)
             }
             .heading2 { configuration in
                 configuration.label
@@ -127,6 +155,15 @@ struct MarkdownContentView: View {
                     }
                     .padding(.top, 6)
             }
+            .heading4 { configuration in
+                configuration.label
+                    .markdownTextStyle {
+                        FontSize(fontSize * 1.04)
+                        FontWeight(.semibold)
+                        ForegroundColor(Theme.ColorToken.textPrimary)
+                    }
+                    .padding(.top, 4)
+            }
             .paragraph { configuration in
                 configuration.label
                     .padding(.bottom, 4)
@@ -140,6 +177,28 @@ struct MarkdownContentView: View {
                         Rectangle().fill(accent).frame(width: 2)
                     }
                     .background(subtle)
+            }
+            .listItem { configuration in
+                configuration.label
+                    .markdownMargin(top: .em(0.12), bottom: .em(0.12))
+            }
+            .codeBlock { configuration in
+                configuration.label
+                    .relativeLineSpacing(.em(0.2))
+                    .markdownTextStyle {
+                        FontFamilyVariant(.monospaced)
+                        FontSize(fontSize * 0.88)
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(subtle)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.medium))
+                    .padding(.vertical, 4)
+            }
+            .thematicBreak {
+                Divider()
+                    .overlay(border)
+                    .padding(.vertical, 8)
             }
             .table { configuration in
                 configuration.label

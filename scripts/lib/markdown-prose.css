@@ -1,0 +1,62 @@
+/**
+ * Shared CMS Markdown prose styles (import in site global.css; mirror in admin-vue MarkdownField).
+ * Targets rendered HTML from marked (gfm: true).
+ */
+
+/* Headings — prefer ## / ###; lone # is normalized to ## at render time */
+.prose h1, .prose-preview h1,
+.prose h2, .prose-preview h2 { margin: 1.2em 0 0.5em; font-size: 1.25rem; font-weight: 600; line-height: 1.25; }
+.prose h3, .prose-preview h3 { margin: 1em 0 0.4em; font-size: 1.1rem; font-weight: 600; line-height: 1.3; }
+.prose h4, .prose-preview h4 { margin: 0.9em 0 0.35em; font-size: 1.05rem; font-weight: 600; }
+.prose h5, .prose-preview h5 { margin: 0.85em 0 0.3em; font-size: 1rem; font-weight: 600; }
+.prose h6, .prose-preview h6 { margin: 0.8em 0 0.25em; font-size: 0.95rem; font-weight: 600; color: var(--muted, #666); }
+
+/* Paragraphs & lists */
+.prose p, .prose-preview p { margin: 0 0 0.85em; }
+.prose ul, .prose ol, .prose-preview ul, .prose-preview ol { margin: 0.75em 0; padding-left: 1.45em; }
+.prose li, .prose-preview li { margin: 0.35em 0; }
+.prose li > ul, .prose li > ol, .prose-preview li > ul, .prose-preview li > ol { margin: 0.25em 0; }
+
+/* Inline */
+.prose a, .prose-preview a { color: var(--coral-dark, #c45c4a); text-decoration: underline; }
+.prose a:hover, .prose-preview a:hover { text-decoration: none; }
+.prose strong, .prose b, .prose-preview strong, .prose-preview b { font-weight: 600; }
+.prose em, .prose i, .prose-preview em, .prose-preview i { font-style: italic; }
+.prose del, .prose s, .prose-preview del, .prose-preview s { text-decoration: line-through; color: var(--muted, #666); }
+.prose code, .prose-preview code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--surface-warm, #f6f4f0);
+  padding: 0.12em 0.35em;
+  border-radius: 4px;
+}
+.prose pre, .prose-preview pre {
+  background: var(--surface-warm, #f6f4f0);
+  padding: 12px 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0.85em 0;
+}
+.prose pre code, .prose-preview pre code { background: none; padding: 0; }
+
+/* Blockquote & rule */
+.prose blockquote, .prose-preview blockquote {
+  margin: 1em 0;
+  padding: 0.5em 0 0.5em 1em;
+  border-left: 3px solid var(--border-strong, #ccc);
+  color: var(--muted, #666);
+}
+.prose hr, .prose-preview hr { border: none; border-top: 1px solid var(--border, #ddd); margin: 1.5em 0; }
+
+/* Tables & images */
+.prose img, .prose-preview img { max-width: 100%; height: auto; border-radius: 8px; margin: 0.5em 0; }
+.prose table, .prose-preview table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.92rem; }
+.prose th, .prose td, .prose-preview th, .prose-preview td {
+  border: 1px solid var(--border, #ddd);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.prose th, .prose-preview th { background: var(--surface-warm, #f6f4f0); font-weight: 600; }
