@@ -14,7 +14,6 @@ struct PrepareView: View {
     @State private var reading: [ReadingItem] = []
     @State private var cultureTips: [CultureTip] = []
     @State private var collapsedSections: Set<String> = []
-    @State private var showReadingList = false
     @State private var selectedDetailItem: ChecklistItem?
     @State private var selectedCultureTip: CultureTip?
     @State private var restoreConfirmItem: ChecklistItem?
@@ -56,9 +55,6 @@ struct PrepareView: View {
         .onChange(of: appEnv.contentRevision) { _, _ in Task { await reloadContent(invalidateCache: true) } }
         .onChange(of: appEnv.preferences.activeItineraryId) { _, _ in Task { await reloadContent(invalidateCache: true) } }
         .onChange(of: appEnv.preferences.savedItineraries.count) { _, _ in Task { await reloadContent() } }
-        .sheet(isPresented: $showReadingList) {
-            ReadingListView(items: reading)
-        }
         .alert("Restore this item?", isPresented: showRestoreAlert, presenting: restoreConfirmItem) { item in
             Button("Restore") {
                 appEnv.preferences.restoreChecklistItem(item.id, type: item.type)
@@ -377,15 +373,8 @@ struct PrepareView: View {
 
     private var embeddedReading: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("📚 Read Before You Go")
-                    .sectionTitleStyle()
-                Spacer()
-                Button("Full list →") { showReadingList = true }
-                    .font(Theme.FontToken.inter(10, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.accent)
-                    .textCase(.uppercase)
-            }
+            Text("📚 Read Before You Go")
+                .sectionTitleStyle()
             ForEach(reading.prefix(2)) { item in
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.title)
@@ -529,32 +518,5 @@ struct ChecklistRowView: View {
     private var rowTextColor: Color {
         if isSkipped { return Theme.ColorToken.textDisabled }
         return isDone ? Theme.ColorToken.textMuted : Theme.ColorToken.textPrimary
-    }
-}
-
-struct ReadingListView: View {
-    let items: [ReadingItem]
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            List(items) { item in
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(item.title).font(Theme.FontToken.playfair(16, weight: .semibold))
-                    Text("\(item.author) · \(item.genre)")
-                        .font(Theme.FontToken.inter(11))
-                        .foregroundStyle(Theme.ColorToken.textMuted)
-                    MarkdownContentView(content: item.synopsisEn, fontSize: 12, lineSpacing: 3)
-                }
-                .padding(.vertical, 4)
-            }
-            .navigationTitle("Reading List")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
-        .sheetDragToDismiss()
     }
 }
