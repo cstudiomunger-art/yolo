@@ -26,6 +26,16 @@
 - 任意 HTML 标签（`<p>`、`<h2>`、`<img` 等）— admin 保存时会拦截
 - Quill 特有 class/style
 
+## 三端渲染库（表格 + 图片）
+
+| 端 | 库 | 表格 | 图片 |
+|----|-----|------|------|
+| admin-vue 预览 | `marked`（`gfm: true`） | GFM `\| col \|` 语法 | `![](url)`，相对路径预览前改写 |
+| iOS App | `MarkdownUI` 2.x（GFM / cmark-gfm） | `.table` / `.tableCell` 主题 | `AsyncImage` + 相对路径改写 |
+| site 官网 | `marked` → `sanitize-html` | 白名单保留 `table/th/td` | 白名单保留 `img[src]` |
+
+验证脚本：`node scripts/verify-markdown-gfm.mjs`
+
 ## 图片路径
 
 上传后写入 Storage，正文插入：

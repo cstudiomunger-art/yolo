@@ -51,6 +51,10 @@ function wrapSelection(before, after = before) {
   emit("update:modelValue", cur.slice(0, start) + before + selected + after + cur.slice(end));
 }
 
+function insertTable() {
+  insertAtCursor("\n| 列1 | 列2 |\n| --- | --- |\n| 内容 | 内容 |\n");
+}
+
 async function onImage(e) {
   const file = e.target.files?.[0];
   e.target.value = "";
@@ -85,6 +89,7 @@ const previewHtml = computed(() => renderMarkdownHtml(props.modelValue));
       <button type="button" class="md-btn" @click="insertAtCursor('\n- ')">- 列表</button>
       <button type="button" class="md-btn" @click="insertAtCursor('\n> ')">引用</button>
       <button type="button" class="md-btn" @click="insertAtCursor('[链接文字](https://)')">链接</button>
+      <button type="button" class="md-btn" @click="insertTable">表格</button>
       <label class="md-btn">
         🖼 图片
         <input type="file" accept="image/jpeg,image/png,image/webp" @change="onImage" :disabled="uploading" hidden />

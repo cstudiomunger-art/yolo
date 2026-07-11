@@ -1,13 +1,27 @@
 import { marked } from "marked";
+import { resolveCoverImageUrl } from "@/lib/storage";
 
+/** GFM: tables, strikethrough, task lists, autolinks. Keep in sync with scripts/lib/marked-config.mjs */
 export const MARKED_OPTIONS = { gfm: true, breaks: false };
 
 marked.setOptions(MARKED_OPTIONS);
 
+/** Rewrite relative `![](path)` before preview/render (matches site + App). */
+export function markdownForDisplay(md) {
+  const raw = String(md ?? "").trim();
+  if (!raw) return "";
+  return raw.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_match, alt, src) => {
+    const trimmed = String(src ?? "").trim();
+    if (/^https?:\/\//i.test(trimmed)) return `![${alt}](${trimmed})`;
+    const resolved = resolveCoverImageUrl(trimmed);
+    return resolved ? `![${alt}](${resolved})` : `![${alt}](${trimmed})`;
+  });
+}
+
 export function renderMarkdownHtml(md) {
-  const text = String(md ?? "").trim();
-  if (!text) return "";
-  return marked.parse(text);
+  const prepared = markdownForDisplay(md);
+  if (!prepared) return "";
+  return marked.parse(prepared);
 }
 
 /** @param {string} raw */

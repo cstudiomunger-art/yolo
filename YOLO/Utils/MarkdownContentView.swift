@@ -143,12 +143,24 @@ struct MarkdownContentView: View {
             }
             .table { configuration in
                 configuration.label
+                    .fixedSize(horizontal: false, vertical: true)
                     .markdownTableBorderStyle(.init(color: border))
+                    .markdownTableBackgroundStyle(
+                        .alternatingRows(
+                            Theme.ColorToken.background,
+                            subtle
+                        )
+                    )
+                    .padding(.vertical, 4)
             }
             .tableCell { configuration in
                 configuration.label
                     .markdownTextStyle {
                         FontSize(fontSize * 0.92)
+                        if configuration.row == 0 {
+                            FontWeight(.semibold)
+                            ForegroundColor(Theme.ColorToken.textPrimary)
+                        }
                     }
                     .padding(.vertical, 4)
                     .padding(.horizontal, 6)
