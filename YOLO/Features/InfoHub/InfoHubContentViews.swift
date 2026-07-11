@@ -117,13 +117,15 @@ struct PhrasesView: View {
                             }
                             .padding(10)
                             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.ColorToken.border, lineWidth: 1))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(RoundedRectangle(cornerRadius: 10))
                         }
                         .buttonStyle(.plain)
                     }
                 }
 
                 if !dialects.isEmpty {
-                    Text("🗣 Dialect gems · long-press a card for large text")
+                    Text("🗣 Dialect gems · tap to listen · long-press for large text")
                         .font(Theme.FontToken.inter(14, weight: .semibold)).padding(.top, 6)
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 14) {
@@ -160,14 +162,13 @@ struct PhrasesView: View {
             Text([d.pinyin, d.en].compactMap { $0 }.joined(separator: " · "))
                 .font(Theme.FontToken.inter(10)).foregroundStyle(Theme.ColorToken.textMuted)
                 .multilineTextAlignment(.center)
-            Button { audio.play(text: d.cn, url: d.audioUrl) } label: {
-                Text("▶ Listen").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.accent)
-            }
-            .buttonStyle(.plain)
+            Text("▶ Listen").font(Theme.FontToken.inter(11)).foregroundStyle(Theme.ColorToken.accent)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ColorToken.border, lineWidth: 1))
+        .contentShape(RoundedRectangle(cornerRadius: 14))
+        .onTapGesture { audio.play(text: d.cn, url: d.audioUrl) }
         .onLongPressGesture { bigScreen = d }
     }
 }
