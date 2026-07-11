@@ -91,7 +91,7 @@ struct CityGuideAudioSection: View {
                 )
 
             if let quote = audioGuide.quote, !quote.isEmpty {
-                HTMLContentView(content: quote, fontSize: 12)
+                MarkdownContentView(content: quote, fontSize: 12)
             }
 
             HStack(spacing: 12) {
@@ -129,7 +129,7 @@ struct CityGuideAudioSection: View {
                 .buttonStyle(.plain)
 
                 if transcriptExpanded {
-                    HTMLContentView(content: transcript, fontSize: 11)
+                    MarkdownContentView(content: transcript, fontSize: 11)
                         .padding(12)
                         .background(Theme.ColorToken.backgroundSubtle)
                         .clipShape(RoundedRectangle(cornerRadius: 4))

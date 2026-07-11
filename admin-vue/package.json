@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
+    "marked": "^15.0.12",
     "pinia": "^2.2.6",
-    "quill": "^2.0.3",
     "vue": "^3.5.13",
     "vue-router": "^4.4.5"
   },

@@ -172,9 +172,8 @@ function deriveAttractionNameFromPath(mdPath) {
   return "";
 }
 
-function toHtml(text) {
-  const safe = cleanMdMarks(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  return safe ? `<p>${safe}</p>` : "";
+function toMarkdown(text) {
+  return cleanMdMarks(text).trim();
 }
 
 function generatedEnglishName(attractionId, order) {
@@ -228,7 +227,7 @@ async function main() {
           attractionId: parent.id,
           nameZh,
           nameEn,
-          body: toHtml(parsed.bodyEn),
+          body: toMarkdown(parsed.bodyEn),
         });
       }
     } else {
@@ -237,7 +236,7 @@ async function main() {
         attractionId: parent.id,
         nameZh: stripLeadingOrder(parsed.nameZh || basename(path, ".md")),
         nameEn: stripLeadingOrder(parsed.nameEn || ""),
-        body: toHtml(parsed.bodyEn),
+        body: toMarkdown(parsed.bodyEn),
       });
     }
     byAttractionId.set(parent.id, targetList);

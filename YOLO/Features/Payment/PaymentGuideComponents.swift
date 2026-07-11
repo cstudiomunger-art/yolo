@@ -701,14 +701,11 @@ struct PaymentGuideRichText: View {
     }
 
     var body: some View {
-        Text(attributed)
-            .font(serif ? Theme.FontToken.playfair(size, weight: weight) : Theme.FontToken.inter(size, weight: weight))
-            .foregroundStyle(color)
-            .lineSpacing(3)
-            .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private var attributed: AttributedString {
-        (try? AttributedString(markdown: markdown)) ?? AttributedString(markdown)
+        MarkdownContentView(
+            content: markdown,
+            fontSize: size,
+            foregroundColor: color,
+            lineSpacing: 3
+        )
     }
 }

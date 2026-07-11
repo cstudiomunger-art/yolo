@@ -42,9 +42,8 @@ function stripLeadingOrder(s) {
 function cleanNameEn(s) {
   return stripLeadingOrder(clean(s).replace(/^(?:English|Name|英文名)\s*[:：]\s*/i, ""));
 }
-function toHtml(s) {
-  const t = clean(s).replace(/\s+/g, " ").trim();
-  return t ? `<p>${t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>` : "";
+function toMarkdown(s) {
+  return clean(s).trim();
 }
 function extractEnglishFromMixedLine(line) {
   const m = String(line || "").match(/[A-Za-z][\s\S]*$/);
@@ -157,7 +156,7 @@ function parseMd(content, fallbackStem) {
     const sm = content.match(/\*\*Summary\*\*\s*[:：]\s*(.+)/i);
     if (sm) bodyEn = clean(sm[1]);
   }
-  return { nameZh, nameEn, body: toHtml(bodyEn) };
+  return { nameZh, nameEn, body: toMarkdown(bodyEn) };
 }
 
 function parseImageMeta(filename) {

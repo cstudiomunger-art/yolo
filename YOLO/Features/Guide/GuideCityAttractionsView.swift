@@ -46,7 +46,7 @@ struct GuideCityAttractionsView: View {
                     CoverImageView(path: cover, height: 160)
                 }
                 if let desc = city.description, !desc.isEmpty {
-                    HTMLContentView(content: desc, fontSize: 13, lineSpacing: 4, allowsInteraction: false)
+                    MarkdownContentView(content: desc, fontSize: 13, lineSpacing: 4, allowsInteraction: false)
                         .padding(.top, 12)
                         .padding(.bottom, cityGuides.isEmpty ? 0 : 4)
                 }
@@ -177,12 +177,12 @@ struct AttractionRowView: View {
                     FavoriteAttractionButton(attraction: attraction)
                 }
                 if let short = attraction.shortDescription, !short.isEmpty {
-                    Text(HTMLContentView.plainText(from: short))
+                    Text(MarkdownContentView.plainText(from: short))
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                         .lineLimit(2)
                 } else if let summary = attraction.summary, !summary.isEmpty {
-                    Text(HTMLContentView.plainText(from: summary))
+                    Text(MarkdownContentView.plainText(from: summary))
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                         .lineLimit(2)

@@ -936,7 +936,7 @@ enum PlanItineraryScheduler {
             detailParts.append(duration)
         }
         if let summary = row.summary, !summary.isEmpty {
-            detailParts.append(HTMLContentView.plainText(from: summary))
+            detailParts.append(MarkdownContentView.plainText(from: summary))
         }
         let detail = detailParts.isEmpty ? "Explore at your own pace" : detailParts.joined(separator: " · ")
 

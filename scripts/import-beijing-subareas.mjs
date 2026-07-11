@@ -44,17 +44,8 @@ function sqlStr(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
-function toHtml(content) {
-  const safe = content
-    .trim()
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  if (!safe) return "";
-  return safe
-    .split(/\n{2,}/)
-    .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
-    .join("");
+function toMarkdown(content) {
+  return String(content || "").trim();
 }
 
 function normalizeSeq(raw) {
@@ -91,7 +82,7 @@ function parseSections(mdText) {
     ...s,
     order: index,
     bodyMarkdown: s.bodyLines.join("\n").trim(),
-    bodyHtml: toHtml(s.bodyLines.join("\n")),
+    bodyHtml: toMarkdown(s.bodyLines.join("\n")),
   }));
 }
 

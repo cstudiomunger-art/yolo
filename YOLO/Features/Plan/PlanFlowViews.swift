@@ -902,7 +902,7 @@ struct ItineraryDetailView: View {
                 Text(activity.name)
                     .font(Theme.FontToken.inter(13, weight: .medium))
                     .foregroundStyle(Theme.ColorToken.textPrimary)
-                Text(HTMLContentView.plainText(from: activity.detail))
+                Text(MarkdownContentView.plainText(from: activity.detail))
                     .font(Theme.FontToken.inter(11))
                     .foregroundStyle(Theme.ColorToken.textMuted)
                     .lineLimit(isEditing ? 2 : 3)
@@ -1385,7 +1385,7 @@ struct HotelCardView: View {
                 HStack(alignment: .top, spacing: 4) {
                     Text("✅")
                         .font(Theme.FontToken.inter(11))
-                    Text(HTMLContentView.plainText(from: note))
+                    Text(MarkdownContentView.plainText(from: note))
                         .font(Theme.FontToken.inter(11))
                 }
             } else if !hotel.hasEnglishStaff {
@@ -1433,7 +1433,7 @@ struct HotelCardView: View {
                     Text("📍")
                         .font(Theme.FontToken.inter(11))
                         .foregroundStyle(Theme.ColorToken.textMuted)
-                    Text(HTMLContentView.plainText(from: loc))
+                    Text(MarkdownContentView.plainText(from: loc))
                         .font(Theme.FontToken.inter(11))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                 }
@@ -1454,7 +1454,7 @@ struct HotelCardView: View {
                 }
             }
             if let tip = hotel.languageTip, !tip.isEmpty {
-                Text(HTMLContentView.plainText(from: tip))
+                Text(MarkdownContentView.plainText(from: tip))
                     .font(Theme.FontToken.inter(10))
                     .foregroundStyle(Theme.ColorToken.textMuted)
                     .padding(.top, 4)

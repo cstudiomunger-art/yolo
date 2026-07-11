@@ -3,13 +3,9 @@ import { computed, ref } from "vue";
 import { supabase } from "@/lib/supabase";
 import { useRefCache } from "@/stores/refCache";
 import { PRACTICAL_INFO_PRESETS } from "@/schema/tables";
-import RichText from "@/components/fields/RichText.vue";
+import MarkdownField from "@/components/fields/MarkdownField.vue";
 import ObjectListEditor from "@/components/fields/ObjectListEditor.vue";
 import MultiCheck from "@/components/fields/MultiCheck.vue";
-import ImageUrlList from "@/components/fields/ImageUrlList.vue";
-import PaymentMatch from "@/components/fields/PaymentMatch.vue";
-import ItineraryBuilder from "@/components/fields/ItineraryBuilder.vue";
-import MarkdownField from "@/components/fields/MarkdownField.vue";
 import VoiceVariantsEditor from "@/components/fields/VoiceVariantsEditor.vue";
 import StringListEditor from "@/components/fields/StringListEditor.vue";
 import {
@@ -263,9 +259,9 @@ async function onAudioFile(e) {
       <option v-for="o in enumOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
     </select>
 
-    <RichText v-else-if="isType('richtext')" v-model="val" :entity-id="entityId" />
+    <MarkdownField v-else-if="isType('markdown')" v-model="val"
+      :entity-id="entityId" :folder="f.uploadFolder || 'misc'" />
 
-    <input v-else-if="isType('tags')" v-model="csv" type="text" placeholder="逗号分隔" />
 
     <StringListEditor
       v-else-if="isType('string_list')"
@@ -309,10 +305,7 @@ async function onAudioFile(e) {
     <!-- payment match object -->
     <PaymentMatch v-else-if="isType('payment_match')" v-model="val" />
 
-    <!-- markdown editor with inline image upload -->
-    <MarkdownField v-else-if="isType('markdown')" v-model="val"
-      :entity-id="entityId" :folder="f.uploadFolder || 'payment-articles'" />
-
+    <input v-else-if="isType('tags')" v-model="csv" type="text" placeholder="逗号分隔" />
     <!-- itinerary builder -->
     <ItineraryBuilder v-else-if="isType('itinerary_builder')" v-model="val" />
 

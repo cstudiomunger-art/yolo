@@ -7,10 +7,8 @@ import {
   cityById,
   subAreasForAttraction,
   audioTeaseCount,
-  blockKind,
-  blockImage,
-  clean,
 } from "../../../lib/guides";
+import { renderMarkdown, plainTextFromMarkdown } from "../../../lib/markdown";
 
 export async function getStaticPaths() {
   const { attractions } = await import("../../../lib/guides");
@@ -26,7 +24,7 @@ const audio = audioTeaseCount(a);
 const gallery = (a.cover_images && a.cover_images.length ? a.cover_images : a.cover_image_path ? [a.cover_image_path] : []);
 const address = a.address_en || a.address_zh;
 
-const plainSummary = (a.short_description || a.summary || "").replace(/<[^>]+>/g, "").trim();
+const plainSummary = plainTextFromMarkdown(a.short_description || a.summary || "");
 const title = `${a.name}${city ? `, ${city.name}` : ""} — visitor guide`;
 const description =
   (plainSummary || `${a.name}: ticket price, opening hours, how to get there and tips for foreign visitors.`).slice(0, 155);
@@ -76,7 +74,7 @@ const description =
       )}
 
       {(a.introduction || a.summary) && (
-        <div class="prose" set:html={clean(a.introduction || a.summary)} />
+        <div class="prose" set:html={renderMarkdown(a.introduction || a.summary)} />
       )}
 
       <!-- Tips for foreign visitors -->
@@ -98,13 +96,7 @@ const description =
                 {s.has_audio && <span class="audio-tag ui">🎧 In app</span>}
               </div>
               {s.cover_image_path && <img class="sub-img" src={s.cover_image_path} alt={s.name_en} loading="lazy" />}
-              {s.body && <div class="prose" set:html={clean(s.body)} />}
-              {s.content_blocks?.map((b) => {
-                const kind = blockKind(b);
-                if (kind === "image") { const src = blockImage(b); return src ? <img class="sub-img" src={src} alt={b.title || s.name_en} loading="lazy" /> : null; }
-                if (kind === "heading") return <h4 class="block-h">{b.title}</h4>;
-                return b.body ? <div class="prose" set:html={clean(b.body)} /> : null;
-              })}
+              {s.body && <div class="prose" set:html={renderMarkdown(s.body)} />}
             </article>
           ))}
         </section>
@@ -151,6 +143,10 @@ const description =
   .prose { max-width: 70ch; color: var(--ink-soft); }
   .prose :global(p) { margin: 0 0 1em; }
   .prose :global(img) { max-width: 100%; border-radius: var(--radius-sm); }
+  .prose :global(table) { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.92rem; }
+  .prose :global(th), .prose :global(td) { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  .prose :global(th) { background: var(--surface-warm); font-weight: 600; }
+  .prose :global(blockquote) { margin: 1em 0; padding-left: 1em; border-left: 3px solid var(--border-strong); color: var(--muted); }
 
   .tips { padding: 20px 24px; margin: 24px 0; background: var(--coral-tint); border-color: var(--coral-tint-strong); }
   .tips-h { font-size: 1.15rem; margin-bottom: 8px; }

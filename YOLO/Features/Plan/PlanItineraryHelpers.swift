@@ -101,7 +101,7 @@ enum PlanItineraryHelpers {
             id: UUID().uuidString,
             timeSlot: PlanItineraryVisitHours.visitTimeSlotLabel(slot),
             name: attraction.name,
-            detail: HTMLContentView.plainText(from: attraction.summary ?? attraction.shortDescription ?? ""),
+            detail: MarkdownContentView.plainText(from: attraction.summary ?? attraction.shortDescription ?? ""),
             attractionId: attraction.id,
             cityId: attraction.cityId,
             hasAudio: attraction.audioGuideCount > 0

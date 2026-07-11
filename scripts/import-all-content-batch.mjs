@@ -86,22 +86,8 @@ function extractEnglishLongDescriptionMixed(line) {
   return (match ? match[0] : "").trim();
 }
 
-function toHtmlParagraphs(text) {
-  const normalized = String(text || "")
-    .replace(/\*\*/g, "")
-    .replace(/\*/g, "")
-    .replace(/`/g, "")
-    .replace(/\s+/g, " ");
-  const safe = normalized
-    .trim()
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  if (!safe) return "";
-  return safe
-    .split(/\n{2,}/)
-    .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
-    .join("");
+function toMarkdownBody(text) {
+  return String(text || "").trim();
 }
 
 function parseBeijingSections(mdText) {
@@ -221,7 +207,7 @@ async function main() {
   id, attraction_id, name_en, name_zh, cover_image_path, body, sort_order, is_active, requires_purchase
 ) VALUES (
   ${sqlStr(id)}, ${sqlStr(parent.id)}, ${sqlStr(nameEn)}, ${sqlStr(nameZh)},
-  ${sqlStr(coverUrl)}, ${sqlStr(toHtmlParagraphs(sec.englishLong))}, ${sec.order}, TRUE, FALSE
+  ${sqlStr(coverUrl)}, ${sqlStr(toMarkdownBody(sec.englishLong))}, ${sec.order}, TRUE, FALSE
 ) ON CONFLICT (id) DO UPDATE SET
   name_en=EXCLUDED.name_en,
   name_zh=EXCLUDED.name_zh,
@@ -284,7 +270,7 @@ async function main() {
   id, attraction_id, name_en, name_zh, cover_image_path, body, sort_order, is_active, requires_purchase
 ) VALUES (
   ${sqlStr(id)}, ${sqlStr(parent.id)}, ${sqlStr(nameEn)}, ${sqlStr(nameZh)},
-  ${sqlStr(coverUrl)}, ${sqlStr(toHtmlParagraphs(parsed.englishLong))}, ${i}, TRUE, FALSE
+  ${sqlStr(coverUrl)}, ${sqlStr(toMarkdownBody(parsed.englishLong))}, ${i}, TRUE, FALSE
 ) ON CONFLICT (id) DO UPDATE SET
   name_en=EXCLUDED.name_en,
   name_zh=EXCLUDED.name_zh,

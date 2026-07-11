@@ -2,7 +2,6 @@
 // Audio fields are already stripped by the fetch script; here we just shape and nest.
 
 import raw from "../data/guides.json";
-import sanitizeHtml from "sanitize-html";
 
 const DEFAULT_SUPABASE_URL = "https://edwvrriuwzaaqznklrgi.supabase.co";
 const SUPABASE_URL = (import.meta.env.PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/+$/, "");
@@ -25,31 +24,6 @@ export function resolveCoverImageUrl(raw: string | null | undefined, bucket = CO
   if (path.startsWith(prefix)) path = path.slice(prefix.length);
   if (!path) return null;
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
-}
-
-// CMS body fields (introduction / description / sub-area body / content blocks) are
-// rendered with set:html, so they must be sanitized. This runs at BUILD only (SSG) —
-// sanitize-html never reaches the client bundle. Defense-in-depth against stored XSS
-// even though CMS writes are admin-only (RLS is_admin()).
-export function clean(html: string | null | undefined): string {
-  if (!html) return "";
-  return sanitizeHtml(html, {
-    allowedTags: [
-      "p", "br", "hr", "strong", "b", "em", "i", "u", "s", "blockquote",
-      "ul", "ol", "li", "h2", "h3", "h4", "h5", "span", "a", "img", "figure", "figcaption",
-    ],
-    allowedAttributes: {
-      a: ["href", "title", "target", "rel"],
-      img: ["src", "alt", "title", "loading"],
-      span: [],
-    },
-    allowedSchemes: ["https", "http", "mailto"],
-    // Force safe link behavior; strip on* handlers / style / class via allowlist above.
-    transformTags: {
-      a: sanitizeHtml.simpleTransform("a", { rel: "noopener nofollow ugc", target: "_blank" }),
-    },
-    disallowedTagsMode: "discard",
-  });
 }
 
 export interface City {
@@ -101,14 +75,6 @@ export interface Attraction {
   display_order: number;
 }
 
-export interface ContentBlock {
-  type?: string | null;
-  title?: string | null;
-  body?: string | null;
-  image_path?: string | null;
-  imagePath?: string | null;
-}
-
 export interface SubArea {
   id: string;
   attraction_id: string;
@@ -116,7 +82,6 @@ export interface SubArea {
   name_zh: string | null;
   cover_image_path: string | null;
   body: string | null;
-  content_blocks: ContentBlock[];
   sort_order: number;
   has_audio: boolean;
 }
@@ -136,11 +101,6 @@ export const attractions = data.attractions.map((a) => ({
 export const subAreas = data.sub_areas.map((s) => ({
   ...s,
   cover_image_path: resolveCoverImageUrl(s.cover_image_path),
-  content_blocks: (s.content_blocks || []).map((b) => ({
-    ...b,
-    image_path: resolveCoverImageUrl(b.image_path),
-    imagePath: resolveCoverImageUrl(b.imagePath),
-  })),
 }));
 
 export const cityCover = (c: City) => c.cover_image_path || c.cover_image_url || null;
@@ -183,14 +143,3 @@ export function audioTeaseCount(a: Attraction): number {
   const sub = subAreasForAttraction(a.id).filter((s) => s.has_audio).length;
   return Math.max(a.audio_guide_count, sub);
 }
-
-/** Resolve a content block to a normalized {kind, ...} for rendering. */
-export function blockKind(b: ContentBlock): "heading" | "image" | "paragraph" {
-  const raw = (b.type ?? "").toLowerCase();
-  const img = b.image_path ?? b.imagePath ?? null;
-  if (raw === "heading" || raw === "image" || raw === "paragraph") return raw as any;
-  if (img || (!raw && !b.title && b.body?.startsWith("http"))) return "image";
-  if (b.title && !b.body) return "heading";
-  return "paragraph";
-}
-export const blockImage = (b: ContentBlock) => b.image_path ?? b.imagePath ?? (blockKind(b) === "image" ? b.body ?? null : null);

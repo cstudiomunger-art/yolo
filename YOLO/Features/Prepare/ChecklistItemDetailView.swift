@@ -14,12 +14,12 @@ struct ChecklistItemDetailView: View {
 
                 if let why = item.whyImportant, !why.isEmpty {
                     sectionTitle("Why this matters")
-                    HTMLContentView(content: why, fontSize: 14, lineSpacing: 4)
+                    MarkdownContentView(content: why, fontSize: 14, lineSpacing: 4)
                 }
 
                 if let how = item.howToComplete, !how.isEmpty {
                     sectionTitle("How to complete")
-                    HTMLContentView(content: how, fontSize: 14, foregroundColor: Theme.ColorToken.textSecondary, lineSpacing: 4)
+                    MarkdownContentView(content: how, fontSize: 14, foregroundColor: Theme.ColorToken.textSecondary, lineSpacing: 4)
                 }
 
                 ForEach(item.externalLinks, id: \.url) { link in
@@ -37,7 +37,7 @@ struct ChecklistItemDetailView: View {
                 }
 
                 if let tip = item.culturalTip, !tip.isEmpty {
-                    HTMLContentView(content: tip, fontSize: 12, foregroundColor: Theme.ColorToken.textSecondary)
+                    MarkdownContentView(content: tip, fontSize: 12, foregroundColor: Theme.ColorToken.textSecondary)
                         .padding(12)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Theme.ColorToken.backgroundSubtle)

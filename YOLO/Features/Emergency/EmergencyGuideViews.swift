@@ -8,8 +8,8 @@ struct EmergencyContentDetailView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(item.displayTitle)
                     .font(Theme.FontToken.playfair(22, weight: .semibold))
-                if !item.displayBodyHTML.isEmpty {
-                    HTMLContentView(content: item.displayBodyHTML, fontSize: 14, lineSpacing: 5)
+                if !item.displayBody.isEmpty {
+                    MarkdownContentView(content: item.displayBody, fontSize: 14, lineSpacing: 5)
                 } else {
                     Text("Content is not available offline. Refresh from CMS when online.")
                         .font(Theme.FontToken.inter(13))

@@ -19,7 +19,7 @@ struct InternetAccessGuideView: View {
         return en.isEmpty ? "Internet Access" : en
     }
 
-    private var bodyHTML: String {
+    private var bodyMarkdown: String {
         let zh = guide.bodyZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let en = guide.bodyEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !zh.isEmpty { return zh }
@@ -31,7 +31,7 @@ struct InternetAccessGuideView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(title)
                     .font(Theme.FontToken.playfair(22, weight: .semibold))
-                HTMLContentView(content: bodyHTML, fontSize: 14, lineSpacing: 5)
+                MarkdownContentView(content: bodyMarkdown, fontSize: 14, lineSpacing: 5)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(Theme.screenPadding)
@@ -60,8 +60,7 @@ struct TransportView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("\(categoryEmoji(tip.category)) \(tip.titleZh ?? tip.titleEn ?? "")")
                             .font(Theme.FontToken.inter(15, weight: .semibold))
-                        Text(tip.bodyZh ?? tip.bodyEn ?? "")
-                            .font(Theme.FontToken.inter(13)).foregroundStyle(Theme.ColorToken.textSecondary)
+                        MarkdownContentView(content: tip.bodyZh ?? tip.bodyEn ?? "", fontSize: 13)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(15)

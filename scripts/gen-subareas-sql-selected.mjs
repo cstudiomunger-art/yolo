@@ -161,9 +161,8 @@ function splitByH3(content) {
   if (cur) chunks.push(cur);
   return chunks;
 }
-function toHtml(text) {
-  const safe = cleanMdMarks(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  return safe ? `<p>${safe}</p>` : "";
+function toMarkdown(text) {
+  return cleanMdMarks(text).trim();
 }
 function collectMdFromPath(path, out) {
   const st = statSync(path, { throwIfNoEntry: false });
@@ -234,7 +233,7 @@ async function main() {
           attractionId: parent.id,
           nameZh: stripLeadingOrder(parsed.nameZh || cleanMdMarks(titleParts[0] || ch.title)),
           nameEn: stripLeadingOrder(parsed.nameEn || cleanMdMarks(titleParts[1] || "")), // keep empty if missing
-          body: toHtml(parsed.bodyEn),
+          body: toMarkdown(parsed.bodyEn),
         });
       }
     } else {
@@ -243,7 +242,7 @@ async function main() {
         attractionId: parent.id,
         nameZh: stripLeadingOrder(parsed.nameZh || basename(path, ".md")),
         nameEn: stripLeadingOrder(parsed.nameEn || ""), // keep empty if missing
-        body: toHtml(parsed.bodyEn),
+        body: toMarkdown(parsed.bodyEn),
       });
     }
     byAttractionId.set(parent.id, list);

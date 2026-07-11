@@ -25,7 +25,7 @@ import Foundation
 //     YOLO/Features/Plan/PlanItinerarySlotBudget.swift \
 //     YOLO/Features/Plan/PlanItineraryNormalizer.swift \
 //     YOLO/Features/Plan/PlanItineraryAssembler.swift \
-//     scripts/html_plain_stub.swift \
+//     scripts/markdown_plain_stub.swift \
 //     scripts/plan_itinerary_golden_test.swift \
 //     -o /tmp/plan_itinerary_golden_test
 //

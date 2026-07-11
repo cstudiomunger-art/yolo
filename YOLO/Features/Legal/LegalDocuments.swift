@@ -17,7 +17,7 @@ enum LegalDocumentKind: String, Identifiable {
         }
     }
 
-    func resolvedHTML(branding: AppBranding) -> String {
+    func resolvedMarkdown(branding: AppBranding) -> String {
         let cms = switch self {
         case .privacy: branding.privacyPolicyBody
         case .terms: branding.termsOfServiceBody
@@ -27,45 +27,59 @@ enum LegalDocumentKind: String, Identifiable {
         if !cms.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return cms
         }
-        return bundledHTML
+        return bundledMarkdown
     }
 
-    private var bundledHTML: String {
+    private var bundledMarkdown: String {
         switch self {
-        case .privacy: Self.privacyHTML
-        case .terms: Self.termsHTML
-        case .gdpr: Self.gdprHTML
-        case .aiDisclosure: Self.aiDisclosureHTML
+        case .privacy: Self.privacyMarkdown
+        case .terms: Self.termsMarkdown
+        case .gdpr: Self.gdprMarkdown
+        case .aiDisclosure: Self.aiDisclosureMarkdown
         }
     }
 
-    private static let privacyHTML = """
-    <h2>Privacy Policy</h2>
-    <p><strong>Last updated:</strong> June 2026</p>
-    <p>YOLO HAPPY explains how we handle your information when you use our iOS app and related services.</p>
-    <h3>Contact</h3>
-    <p>Privacy: chengduyuliutech@163.com · Support: support@yolohappy.app</p>
+    private static let privacyMarkdown = """
+    ## Privacy Policy
+
+    **Last updated:** June 2026
+
+    YOLO HAPPY explains how we handle your information when you use our iOS app and related services.
+
+    ### Contact
+
+    Privacy: chengduyuliutech@163.com · Support: support@yolohappy.app
     """
 
-    private static let termsHTML = """
-    <h2>Terms of Service</h2>
-    <p><strong>Last updated:</strong> June 2026</p>
-    <p>By using YOLO HAPPY you agree to these terms. Content is for general information only and not professional travel or legal advice.</p>
-    <h3>Contact</h3>
-    <p>support@yolohappy.app</p>
+    private static let termsMarkdown = """
+    ## Terms of Service
+
+    **Last updated:** June 2026
+
+    By using YOLO HAPPY you agree to these terms. Content is for general information only and not professional travel or legal advice.
+
+    ### Contact
+
+    support@yolohappy.app
     """
 
-    private static let gdprHTML = """
-    <h2>GDPR Compliance Framework</h2>
-    <p><strong>Effective:</strong> June 2026</p>
-    <p>This framework describes how Chengdu Yuliu Technology Co., Ltd. processes personal data for YOLO HAPPY users in the EU/EEA, including legal bases, data subject rights, and breach response.</p>
-    <h3>Contact</h3>
-    <p>Data protection: chengduyuliutech@163.com</p>
+    private static let gdprMarkdown = """
+    ## GDPR Compliance Framework
+
+    **Effective:** June 2026
+
+    This framework describes how Chengdu Yuliu Technology Co., Ltd. processes personal data for YOLO HAPPY users in the EU/EEA, including legal bases, data subject rights, and breach response.
+
+    ### Contact
+
+    Data protection: chengduyuliutech@163.com
     """
 
-    private static let aiDisclosureHTML = """
-    <h2>AI Content Disclosure</h2>
-    <p><strong>Version:</strong> v2.0 · June 2026</p>
-    <p>YOLO HAPPY uses AI (Volcengine Ark) to assist with itinerary planning and travel dialogue. AI output is for travel reference only — verify critical details independently. Non-AI paths are available.</p>
+    private static let aiDisclosureMarkdown = """
+    ## AI Content Disclosure
+
+    **Version:** v2.0 · June 2026
+
+    YOLO HAPPY uses AI (Volcengine Ark) to assist with itinerary planning and travel dialogue. AI output is for travel reference only — verify critical details independently. Non-AI paths are available.
     """
 }

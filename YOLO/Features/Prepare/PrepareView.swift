@@ -357,7 +357,7 @@ struct PrepareView: View {
                         .foregroundStyle(Theme.ColorToken.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .multilineTextAlignment(.leading)
-                    Text(HTMLContentView.plainText(from: tip.preview))
+                    Text(MarkdownContentView.plainText(from: tip.preview))
                         .font(Theme.FontToken.inter(11))
                         .foregroundStyle(Theme.ColorToken.textMuted)
                         .lineLimit(2)
@@ -393,7 +393,7 @@ struct PrepareView: View {
                     Text("\(item.author) · \(item.genre)")
                         .font(Theme.FontToken.inter(11))
                         .foregroundStyle(Theme.ColorToken.textMuted)
-                    HTMLContentView(content: item.synopsisEn, fontSize: 12, lineSpacing: 3)
+                    MarkdownContentView(content: item.synopsisEn, fontSize: 12, lineSpacing: 3)
                 }
                 .padding(.vertical, 8)
             }
@@ -544,9 +544,7 @@ struct ReadingListView: View {
                     Text("\(item.author) · \(item.genre)")
                         .font(Theme.FontToken.inter(11))
                         .foregroundStyle(Theme.ColorToken.textMuted)
-                    Text(item.synopsisEn)
-                        .font(Theme.FontToken.inter(12))
-                        .foregroundStyle(Theme.ColorToken.textSecondary)
+                    MarkdownContentView(content: item.synopsisEn, fontSize: 12, lineSpacing: 3)
                 }
                 .padding(.vertical, 4)
             }

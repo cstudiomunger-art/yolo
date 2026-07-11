@@ -1,11 +1,10 @@
 import SwiftUI
 
-/// Shows a truncated preview of HTML content followed by a paywall CTA.
-/// When the user has access, the full content is shown normally.
+/// Shows a truncated preview of Markdown content followed by a paywall CTA.
 struct ContentPaywallOverlay: View {
     @Environment(AppEnvironment.self) private var appEnv
 
-    let htmlContent: String
+    let markdownContent: String
     let freeChars: Int
     let hasAccess: Bool
     var attraction: Attraction?
@@ -22,7 +21,7 @@ struct ContentPaywallOverlay: View {
 
     var body: some View {
         if hasAccess {
-            HTMLContentView(content: htmlContent)
+            MarkdownContentView(content: markdownContent)
         } else {
             VStack(alignment: .leading, spacing: 0) {
                 // Locked preview: text clipped with a fade-to-background mask at the bottom
@@ -82,7 +81,7 @@ struct ContentPaywallOverlay: View {
     }
 
     private var previewText: String {
-        let plain = HTMLContentView.plainText(from: htmlContent)
+        let plain = MarkdownContentView.plainText(from: markdownContent)
             .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !plain.isEmpty else { return "" }
         let limit = max(freeChars, 80)  // 最少展示 80 字符，避免过短

@@ -6,8 +6,8 @@ struct LegalDocumentView: View {
 
     var body: some View {
         ScrollView {
-            HTMLContentView(
-                content: kind.resolvedHTML(branding: appEnv.contentMode.branding),
+            MarkdownContentView(
+                content: kind.resolvedMarkdown(branding: appEnv.contentMode.branding),
                 fontSize: 14,
                 lineSpacing: 5
             )

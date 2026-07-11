@@ -160,7 +160,7 @@ struct SubAreaDetailView: View {
 
                 if let body = area.body?.trimmingCharacters(in: .whitespacesAndNewlines), !body.isEmpty {
                     ContentPaywallOverlay(
-                        htmlContent: body,
+                        markdownContent: body,
                         freeChars: appEnv.contentMode.branding.freeTextPreviewChars,
                         hasAccess: subAreaTextAccess(area),
                         attraction: attraction,
@@ -169,15 +169,6 @@ struct SubAreaDetailView: View {
                         displayTitle: area.nameEn,
                         showsUnlockButton: false
                     )
-                    .guideContentCardStyle()
-                } else if !area.contentBlocks.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(area.contentBlocks, id: \.self) { block in
-                            SubAreaContentBlockView(block: block) { path in
-                                fullScreenImagePath = path
-                            }
-                        }
-                    }
                     .guideContentCardStyle()
                 }
             }

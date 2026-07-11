@@ -63,7 +63,7 @@ struct GuideCultureTipsView: View {
                                 Text(tip.title)
                                     .font(Theme.FontToken.inter(13))
                                     .foregroundStyle(Theme.ColorToken.textPrimary)
-                                Text(HTMLContentView.plainText(from: tip.preview))
+                                Text(MarkdownContentView.plainText(from: tip.preview))
                                     .font(Theme.FontToken.inter(11))
                                     .foregroundStyle(Theme.ColorToken.textMuted)
                                     .lineLimit(2)
@@ -90,7 +90,7 @@ struct CultureTipDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                HTMLContentView(content: tip.body, lineSpacing: 6)
+                MarkdownContentView(content: tip.body, lineSpacing: 6)
 
                 if let doText = tip.doText, !doText.isEmpty {
                     comparisonRow(label: "Do this", text: doText, positive: true)
@@ -111,7 +111,7 @@ struct CultureTipDetailView: View {
             Text(label)
                 .font(Theme.FontToken.inter(11, weight: .medium))
                 .foregroundStyle(positive ? Theme.ColorToken.accent : Theme.ColorToken.urgent)
-            HTMLContentView(content: text, fontSize: 13)
+            MarkdownContentView(content: text, fontSize: 13)
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)

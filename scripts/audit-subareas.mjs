@@ -163,14 +163,8 @@ function fieldValueFromLine(line, label) {
     .trim();
 }
 
-function toHtml(text) {
-  const safe = cleanMdMarks(text)
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  return safe ? `<p>${safe}</p>` : "";
+function toMarkdown(text) {
+  return cleanMdMarks(text).trim();
 }
 
 function stripHtml(html) {
@@ -576,8 +570,8 @@ function parseMdContent(content, { fallbackStem = "", headingTitle = "" } = {}) 
 
   if (!nameEn && bodyPlainEn) {
     let m = bodyPlainEn.match(/^((?:The|A|An)\s[^,]{4,80})/);
-    if (!m) m = bodyPlainEn.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+){0,4})/);
-    if (m) {
+    if (!m) m = bodyPlainEn.match(/^([A-Z][a-z]+(?:\s[A-Z][a-z]+){1,4})/);
+    if (m && !/^(Located|Built|Standing|Adjacent|Situated|Covering|Opened|Stretching|Named|During|Inside|Outside|Crossing|Welcome|Originally|Adjacent)/i.test(m[1])) {
       nameEn = stripLeadingOrder(m[1]);
       if (!mdFieldSources.name?.includes("body")) {
         mdFieldSources.name = `${mdFieldSources.name || "fallbackStem"} + body opening`;
@@ -585,7 +579,18 @@ function parseMdContent(content, { fallbackStem = "", headingTitle = "" } = {}) 
     }
   }
 
-  const bodyHtml = toHtml(bodyPlainEn);
+  if (!nameEn) {
+    const { enPart } = splitBilingualParts(content);
+    if (enPart && enPart !== content) {
+      const enH1 = enPart.split(/\r?\n/).find((l) => /^#\s+/.test(l.trim()) && !/^##/.test(l.trim()));
+      if (enH1) {
+        nameEn = stripLeadingOrder(cleanMdMarks(enH1.replace(/^#\s+/, "")));
+        mdFieldSources.name = `${mdFieldSources.name || "fallbackStem"} + EN doc h1`;
+      }
+    }
+  }
+
+  const bodyHtml = toMarkdown(bodyPlainEn);
 
   return { nameZh, nameEn, bodyPlainEn, bodyHtml, mdFieldSources };
 }

@@ -95,34 +95,36 @@ actor ContentCacheStore {
 }
 
 enum ContentCacheKey {
-    static func cities() -> String { "cities" }
-    static func cultureTips(cityIds: [String]) -> String { "culture_tips_\(filterHash(cityIds: cityIds))" }
-    static func attractions(cityId: String) -> String { "attractions_\(cityId.lowercased())" }
-    static func cityGuides(cityId: String) -> String { "city_guides_\(cityId.lowercased())" }
-    static func cityGuide(id: String) -> String { "city_guide_\(id.lowercased())" }
-    static func attraction(id: String) -> String { "attraction_\(id.lowercased())" }
-    static func audioGuides(attractionId: String) -> String { "audio_guides_\(attractionId.lowercased())" }
-    static func audioGuide(id: String) -> String { "audio_guide_\(id.lowercased())" }
+    private static let prefix = "md_v1_"
+
+    static func cities() -> String { "\(prefix)cities" }
+    static func cultureTips(cityIds: [String]) -> String { "\(prefix)culture_tips_\(filterHash(cityIds: cityIds))" }
+    static func attractions(cityId: String) -> String { "\(prefix)attractions_\(cityId.lowercased())" }
+    static func cityGuides(cityId: String) -> String { "\(prefix)city_guides_\(cityId.lowercased())" }
+    static func cityGuide(id: String) -> String { "\(prefix)city_guide_\(id.lowercased())" }
+    static func attraction(id: String) -> String { "\(prefix)attraction_\(id.lowercased())" }
+    static func audioGuides(attractionId: String) -> String { "\(prefix)audio_guides_\(attractionId.lowercased())" }
+    static func audioGuide(id: String) -> String { "\(prefix)audio_guide_\(id.lowercased())" }
     static func voiceVariants(ownerType: AudioVoiceOwnerType, ownerId: String) -> String {
-        "voice_variants_\(ownerType.rawValue)_\(ownerId.lowercased())"
+        "\(prefix)voice_variants_\(ownerType.rawValue)_\(ownerId.lowercased())"
     }
-    static func subAreas(attractionId: String) -> String { "sub_areas_\(attractionId.lowercased())" }
+    static func subAreas(attractionId: String) -> String { "\(prefix)sub_areas_\(attractionId.lowercased())" }
     static func checklist(cityIds: [String], countryCode: String) -> String {
-        "checklist_\(filterHash(cityIds: cityIds, countryCode: countryCode))"
+        "\(prefix)checklist_\(filterHash(cityIds: cityIds, countryCode: countryCode))"
     }
-    static func shopping(cityIds: [String]) -> String { "shopping_\(filterHash(cityIds: cityIds))" }
-    static func reading(cityIds: [String]) -> String { "reading_\(filterHash(cityIds: cityIds))" }
-    static func hotels(cityId: String) -> String { "hotels_\(cityId.lowercased())" }
-    static func cityHospitals(cityId: String) -> String { "city_hospitals_\(cityId.lowercased())" }
-    static func cityEmbassies(cityId: String) -> String { "city_embassies_\(cityId.lowercased())" }
-    static func homeTips(cityIds: [String]) -> String { "home_tips_\(filterHash(cityIds: cityIds))" }
-    static func passportCountries() -> String { "passport_countries" }
-    static func emergencyData() -> String { "emergency_data" }
-    static func emergencyHelpItems() -> String { "emergency_help_items" }
-    static func emergencyMedicalItems() -> String { "emergency_medical_items" }
-    static func sampleItinerary() -> String { "sample_itinerary" }
-    static func planningItinerary() -> String { "planning_itinerary" }
-    static func appBranding() -> String { "app_branding" }
+    static func shopping(cityIds: [String]) -> String { "\(prefix)shopping_\(filterHash(cityIds: cityIds))" }
+    static func reading(cityIds: [String]) -> String { "\(prefix)reading_\(filterHash(cityIds: cityIds))" }
+    static func hotels(cityId: String) -> String { "\(prefix)hotels_\(cityId.lowercased())" }
+    static func cityHospitals(cityId: String) -> String { "\(prefix)city_hospitals_\(cityId.lowercased())" }
+    static func cityEmbassies(cityId: String) -> String { "\(prefix)city_embassies_\(cityId.lowercased())" }
+    static func homeTips(cityIds: [String]) -> String { "\(prefix)home_tips_\(filterHash(cityIds: cityIds))" }
+    static func passportCountries() -> String { "\(prefix)passport_countries" }
+    static func emergencyData() -> String { "\(prefix)emergency_data" }
+    static func emergencyHelpItems() -> String { "\(prefix)emergency_help_items" }
+    static func emergencyMedicalItems() -> String { "\(prefix)emergency_medical_items" }
+    static func sampleItinerary() -> String { "\(prefix)sample_itinerary" }
+    static func planningItinerary() -> String { "\(prefix)planning_itinerary" }
+    static func appBranding() -> String { "\(prefix)app_branding" }
 
     private static func filterHash(cityIds: [String], countryCode: String = "") -> String {
         let cities = cityIds.map { $0.lowercased().trimmingCharacters(in: .whitespaces) }.sorted().joined(separator: ",")

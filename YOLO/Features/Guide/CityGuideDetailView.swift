@@ -171,7 +171,7 @@ struct CityGuideDetailView: View {
     @ViewBuilder
     private var bodySection: some View {
         if let body = display.body?.trimmingCharacters(in: .whitespacesAndNewlines), !body.isEmpty {
-            HTMLContentView(content: body, lineSpacing: 5)
+            MarkdownContentView(content: body, lineSpacing: 5)
                 .guideContentCardStyle()
         }
     }

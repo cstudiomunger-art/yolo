@@ -341,8 +341,8 @@ struct AttractionDetailView: View {
                 .sectionTitleStyle()
             VStack(alignment: .leading, spacing: 8) {
                 if hasAccess {
-                    HTMLContentView(content: body, lineSpacing: 5, lineLimit: introExpanded ? nil : 3)
-                    if HTMLContentView.plainText(from: body).count > 120 {
+                    MarkdownContentView(content: body, lineSpacing: 5, lineLimit: introExpanded ? nil : 3)
+                    if MarkdownContentView.plainText(from: body).count > 120 {
                         Button(introExpanded ? "Read less ▲" : "Read more ▼") {
                             introExpanded.toggle()
                         }
@@ -351,7 +351,7 @@ struct AttractionDetailView: View {
                     }
                 } else {
                     ContentPaywallOverlay(
-                        htmlContent: body,
+                        markdownContent: body,
                         freeChars: freeChars,
                         hasAccess: false,
                         attraction: display,

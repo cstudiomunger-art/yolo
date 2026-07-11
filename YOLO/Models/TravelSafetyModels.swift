@@ -117,7 +117,7 @@ struct EmergencyContentItem: Identifiable, Codable, Hashable {
         return zh
     }
 
-    var displayBodyHTML: String {
+    var displayBody: String {
         let zh = bodyZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let en = bodyEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !en.isEmpty { return en }

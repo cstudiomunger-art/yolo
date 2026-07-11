@@ -5,6 +5,7 @@
  *   node import-chengdu-chongqing-subareas.mjs --dry-run
  *   node import-chengdu-chongqing-subareas.mjs --apply
  */
+import { createClient } from "@supabase/supabase-js";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { basename, extname, join } from "path";
 import {
@@ -37,18 +38,48 @@ function readXcconfigValue(path, key) {
   const text = readFileSync(path, "utf8");
   const line = text.split(/\r?\n/).find((it) => it.trim().startsWith(`${key} =`));
   if (!line) return "";
-  return line.split("=").slice(1).join("=").replace(/\$\(\)/g, "").trim();
+  return line
+    .split("=")
+    .slice(1)
+    .join("=")
+    .replace(/\$\(\)/g, "")
+    .trim();
 }
 
 function getSupabaseConfig() {
   const xcPath = join(ROOT, "Secrets.xcconfig");
-  const url = process.env.SUPABASE_URL || readXcconfigValue(xcPath, "SUPABASE_URL");
+  const url = (process.env.SUPABASE_URL || readXcconfigValue(xcPath, "SUPABASE_URL")).replace(/\$\(\)/g, "");
   const key =
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     readXcconfigValue(xcPath, "SUPABASE_ANON_KEY");
   if (!url || !key) throw new Error("缺少 SUPABASE_URL 或 key");
-  return { url, key };
+  return { url, key, usesServiceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY) };
+}
+
+function createSupabase() {
+  const { url, key } = getSupabaseConfig();
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+async function uploadCover(supabase, storagePath, localPath) {
+  const ext = extname(localPath).toLowerCase();
+  const contentType = ext === ".png" ? "image/png" : ext === ".webp" ? "image/webp" : "image/jpeg";
+  const body = readFileSync(localPath);
+  let lastErr;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const { error } = await supabase.storage.from("cover-images").upload(storagePath, body, {
+      upsert: true,
+      contentType,
+    });
+    if (!error) {
+      const { data } = supabase.storage.from("cover-images").getPublicUrl(storagePath);
+      return data.publicUrl;
+    }
+    lastErr = error;
+    if (attempt < 3) await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+  }
+  throw new Error(`${storagePath}: ${lastErr.message}`);
 }
 
 function sqlStr(v) {
@@ -57,32 +88,32 @@ function sqlStr(v) {
 
 async function rest(path, init = {}) {
   const { url, key } = getSupabaseConfig();
-  const res = await fetch(`${url}${path}`, {
-    ...init,
-    headers: { apikey: key, Authorization: `Bearer ${key}`, ...(init.headers || {}) },
-  });
-  if (!res.ok) throw new Error(`${path} -> ${res.status} ${await res.text()}`);
-  return res;
+  let lastErr;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const res = await fetch(`${url}${path}`, {
+        ...init,
+        headers: { apikey: key, Authorization: `Bearer ${key}`, ...(init.headers || {}) },
+      });
+      if (!res.ok) throw new Error(`${path} -> ${res.status} ${await res.text()}`);
+      return res;
+    } catch (err) {
+      lastErr = err;
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    }
+  }
+  throw lastErr;
 }
 
-async function upload(storagePath, localPath) {
-  const ext = extname(localPath).toLowerCase();
-  const ct = ext === ".png" ? "image/png" : ext === ".webp" ? "image/webp" : "image/jpeg";
-  const { url } = getSupabaseConfig();
-  await rest(`/storage/v1/object/cover-images/${storagePath}`, {
-    method: "POST",
-    headers: { "x-upsert": "true", "content-type": ct },
-    body: readFileSync(localPath),
-  });
-  return `${url}/storage/v1/object/public/cover-images/${storagePath}`;
-}
+const PANDA_ATTRACTION_NAME_ZH = "大熊猫基地";
 
-const PANDA_ATTRACTION_ID = "chengdu_panda_research_base";
-const PANDA_ATTRACTION_NAME = "成都大熊猫繁育研究基地";
-
-function collectPandaFallback(expected, unmatchedFolders) {
+function collectPandaFallback(expected, unmatchedFolders, allAttractions) {
   const idx = unmatchedFolders.findIndex((u) => u.folderName === "成都熊猫基地");
   if (idx < 0) return;
+
+  const panda = allAttractions.find((a) => String(a.chinese_name || "").trim() === PANDA_ATTRACTION_NAME_ZH);
+  if (!panda) return;
+
   unmatchedFolders.splice(idx, 1);
 
   const mdDir = join(CHENGDU_ROOT, "成都子景点-信息", "成都熊猫基地");
@@ -109,7 +140,7 @@ function collectPandaFallback(expected, unmatchedFolders) {
       buildExpectedItem({
         city: "chengdu",
         attractionFolder: "成都熊猫基地",
-        attractionId: PANDA_ATTRACTION_ID,
+        attractionId: panda.id,
         sortIndex,
         sourceMdPath: mdPath,
         parsed,
@@ -118,21 +149,15 @@ function collectPandaFallback(expected, unmatchedFolders) {
       })
     );
   });
-
-  unmatchedFolders.push({
-    city: "chengdu",
-    folderName: "成都熊猫基地",
-    reason: "attraction_not_in_db_yet",
-    note: `已纳入确认清单，attraction_id 暂用 ${PANDA_ATTRACTION_ID}；写库前需在 attractions 表创建「${PANDA_ATTRACTION_NAME}」`,
-  });
 }
 
-function collectExpected(attractions) {
+function collectExpected(allAttractions) {
+  const validAttractions = allAttractions.filter(isValidAttractionRecord);
   const expected = [];
   const unmatchedFolders = [];
-  collectChengdu("chengdu", CHENGDU_ROOT, attractions, expected, unmatchedFolders);
-  collectChongqing("chongqing", CHONGQING_ROOT, attractions, expected, unmatchedFolders);
-  collectPandaFallback(expected, unmatchedFolders);
+  collectChengdu("chengdu", CHENGDU_ROOT, validAttractions, expected, unmatchedFolders);
+  collectChongqing("chongqing", CHONGQING_ROOT, validAttractions, expected, unmatchedFolders);
+  collectPandaFallback(expected, unmatchedFolders, allAttractions);
   return {
     expected: expected.filter((e) => !SKIP_ATTRACTION_IDS.has(e.attractionId)),
     unmatchedFolders,
@@ -154,9 +179,7 @@ function buildConfirmListMarkdown(items, attractionsById) {
   let lastAttraction = "";
   for (const item of items) {
     const attr = attractionsById.get(item.attractionId);
-    const attrName =
-      attr?.chinese_name ||
-      (item.attractionId === PANDA_ATTRACTION_ID ? PANDA_ATTRACTION_NAME : item.attractionId);
+    const attrName = attr?.chinese_name || item.attractionId;
     if (attrName !== lastAttraction) {
       lastAttraction = attrName;
       lines.push(`## ${attrName}（${item.attractionId}）`, "");
@@ -238,7 +261,7 @@ async function main() {
   const attractions = await (await rest("/rest/v1/attractions?select=id,chinese_name,city_id")).json();
   const validAttractions = attractions.filter(isValidAttractionRecord);
 
-  const { expected, unmatchedFolders } = collectExpected(validAttractions);
+  const { expected, unmatchedFolders } = collectExpected(attractions);
 
   const scopeAttractionIds = new Set(expected.map((e) => e.attractionId));
   const keepIds = new Set(expected.map((e) => e.id));
@@ -259,6 +282,12 @@ async function main() {
   const rows = [];
   const reportItems = [];
 
+  const supabase = createSupabase();
+  const { usesServiceRole } = getSupabaseConfig();
+  if (!dryRun && !usesServiceRole) {
+    console.warn("警告: 未设置 SUPABASE_SERVICE_ROLE_KEY，上传/写库可能因 RLS 失败");
+  }
+
   for (const exp of expected) {
     if (!exp.nameZh) warnings.push({ type: "empty_name_zh", id: exp.id, md: exp.sourceMdPath });
     if (!exp.nameEn) warnings.push({ type: "empty_name_en", id: exp.id, md: exp.sourceMdPath, nameZh: exp.nameZh });
@@ -269,7 +298,7 @@ async function main() {
     let coverSource = "";
     if (!dryRun && exp.localImagePath) {
       const storagePath = `sub-areas/all/${exp.id}${extname(exp.localImagePath).toLowerCase()}`;
-      cover = await upload(storagePath, exp.localImagePath);
+      cover = await uploadCover(supabase, storagePath, exp.localImagePath);
       coverSource = "uploaded";
     }
 
@@ -299,7 +328,7 @@ async function main() {
     });
   }
 
-  const attractionsById = new Map(validAttractions.map((a) => [a.id, a]));
+  const attractionsById = new Map(attractions.map((a) => [a.id, a]));
   const confirmMd = buildConfirmListMarkdown(expected, attractionsById);
 
   const report = {
@@ -335,7 +364,41 @@ async function main() {
   if (dryRun) {
     console.log("\n[dry-run] 未上传图片、未写库。请核对 confirm_list 后运行 --apply");
   } else {
-    console.log("\n[apply] 图片已上传。请在 Supabase SQL Editor 执行 upsert + delete SQL。");
+    console.log("\n[apply] 图片已上传，开始写库…");
+    await applyDatabase(rows, toDelete);
+    console.log("[apply] 完成：UPSERT + DELETE 已执行");
+  }
+}
+
+async function applyDatabase(rows, toDelete) {
+  const supabase = createSupabase();
+  const payload = rows.map((r) => ({
+    id: `${r.attractionId}_sa_${String(r.sortOrder + 1).padStart(2, "0")}`,
+    attraction_id: r.attractionId,
+    name_en: r.nameEn || "",
+    name_zh: r.nameZh,
+    body: r.bodyHtml || "",
+    cover_image_path: r.cover || null,
+    sort_order: r.sortOrder,
+    is_active: true,
+  }));
+
+  const batchSize = 50;
+  for (let i = 0; i < payload.length; i += batchSize) {
+    const batch = payload.slice(i, i + batchSize);
+    const { error } = await supabase.from("sub_areas").upsert(batch, { onConflict: "id" });
+    if (error) throw new Error(`upsert batch ${i}: ${error.message}`);
+    console.log(`  upserted ${Math.min(i + batchSize, payload.length)}/${payload.length}`);
+  }
+
+  if (toDelete.length) {
+    const deleteIds = toDelete.map((r) => r.id);
+    for (let i = 0; i < deleteIds.length; i += batchSize) {
+      const batch = deleteIds.slice(i, i + batchSize);
+      const { error } = await supabase.from("sub_areas").delete().in("id", batch);
+      if (error) throw new Error(`delete batch ${i}: ${error.message}`);
+      console.log(`  deleted ${Math.min(i + batchSize, deleteIds.length)}/${deleteIds.length}`);
+    }
   }
 }
 

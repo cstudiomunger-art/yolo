@@ -1,13 +1,12 @@
 <script setup>
-// Markdown editor with inline image upload (满足运营说明书:文章正文「🖼 插入图片」直插光标处)
-// 输出纯 Markdown(非 Quill HTML),与 App 的 PaymentMarkdownView 渲染同构。
 import { ref, computed } from "vue";
 import { uploadStorageFile, COVER_BUCKET } from "@/lib/storage";
+import { renderMarkdownHtml, containsHtmlTags } from "@/lib/markdown";
 
 const props = defineProps({
   modelValue: { type: String, default: "" },
   entityId: { type: String, default: "" },
-  folder: { type: String, default: "payment-articles" },
+  folder: { type: String, default: "misc" },
 });
 const emit = defineEmits(["update:modelValue"]);
 
@@ -19,15 +18,37 @@ const text = computed({
 const taRef = ref(null);
 const uploading = ref(false);
 const err = ref("");
-const showPreview = ref(false);
+const splitPreview = ref(true);
+
+const htmlWarning = computed(() =>
+  containsHtmlTags(props.modelValue) ? "检测到 HTML 标签，请改为 Markdown 语法（##、**、-、![](url)）" : ""
+);
 
 function insertAtCursor(snippet) {
   const ta = taRef.value;
   const cur = props.modelValue || "";
-  if (!ta) { emit("update:modelValue", cur + snippet); return; }
+  if (!ta) {
+    emit("update:modelValue", cur + snippet);
+    return;
+  }
   const start = ta.selectionStart ?? cur.length;
   const end = ta.selectionEnd ?? cur.length;
   emit("update:modelValue", cur.slice(0, start) + snippet + cur.slice(end));
+  requestAnimationFrame(() => {
+    const pos = start + snippet.length;
+    ta.focus();
+    ta.setSelectionRange(pos, pos);
+  });
+}
+
+function wrapSelection(before, after = before) {
+  const ta = taRef.value;
+  const cur = props.modelValue || "";
+  if (!ta) return;
+  const start = ta.selectionStart ?? 0;
+  const end = ta.selectionEnd ?? 0;
+  const selected = cur.slice(start, end) || "text";
+  emit("update:modelValue", cur.slice(0, start) + before + selected + after + cur.slice(end));
 }
 
 async function onImage(e) {
@@ -35,7 +56,10 @@ async function onImage(e) {
   e.target.value = "";
   if (!file) return;
   err.value = "";
-  if (!props.entityId) { err.value = "请先填写标题/英文名以生成 ID,再插图"; return; }
+  if (!props.entityId) {
+    err.value = "请先填写名称/英文名以生成 ID，再插图";
+    return;
+  }
   uploading.value = true;
   try {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
@@ -49,54 +73,48 @@ async function onImage(e) {
   }
 }
 
-// 轻量 Markdown→HTML 预览(与 App 渲染对齐:标题/列表/引用/加粗/图片/段落)
-const previewHtml = computed(() => {
-  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const inline = (s) =>
-    esc(s)
-      .replace(/!\[[^\]]*\]\(([^)]+)\)/g, '<img src="$1" />')
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  return (props.modelValue || "")
-    .split("\n")
-    .map((raw) => {
-      const line = raw.trim();
-      if (!line) return "";
-      if (line.startsWith("### ")) return `<h4>${inline(line.slice(4))}</h4>`;
-      if (line.startsWith("## ")) return `<h3>${inline(line.slice(3))}</h3>`;
-      if (line.startsWith("# ")) return `<h2>${inline(line.slice(2))}</h2>`;
-      if (line.startsWith("> ")) return `<blockquote>${inline(line.slice(2))}</blockquote>`;
-      if (line.startsWith("- ") || line.startsWith("* ")) return `<li>${inline(line.slice(2))}</li>`;
-      if (/^!\[[^\]]*\]\([^)]+\)$/.test(line)) return inline(line);
-      return `<p>${inline(line)}</p>`;
-    })
-    .join("");
-});
+const previewHtml = computed(() => renderMarkdownHtml(props.modelValue));
 </script>
 
 <template>
   <div class="md">
     <div class="md-toolbar">
+      <button type="button" class="md-btn" @click="insertAtCursor('\n## ')">##</button>
+      <button type="button" class="md-btn" @click="insertAtCursor('\n### ')">###</button>
+      <button type="button" class="md-btn" @click="wrapSelection('**')">**B**</button>
+      <button type="button" class="md-btn" @click="insertAtCursor('\n- ')">- 列表</button>
+      <button type="button" class="md-btn" @click="insertAtCursor('\n> ')">引用</button>
+      <button type="button" class="md-btn" @click="insertAtCursor('[链接文字](https://)')">链接</button>
       <label class="md-btn">
-        🖼 插入图片
+        🖼 图片
         <input type="file" accept="image/jpeg,image/png,image/webp" @change="onImage" :disabled="uploading" hidden />
       </label>
       <span v-if="uploading" class="muted">上传中…</span>
-      <button type="button" class="md-btn" @click="showPreview = !showPreview">
-        {{ showPreview ? "✏️ 编辑" : "👁 预览" }}
+      <button type="button" class="md-btn" @click="splitPreview = !splitPreview">
+        {{ splitPreview ? "单栏编辑" : "分屏预览" }}
       </button>
     </div>
-    <textarea v-if="!showPreview" ref="taRef" v-model="text" rows="10" class="md-area" spellcheck="false"></textarea>
-    <div v-else class="md-render" v-html="previewHtml"></div>
+    <p v-if="htmlWarning" class="warn">{{ htmlWarning }}</p>
+    <div class="md-body" :class="{ split: splitPreview }">
+      <textarea ref="taRef" v-model="text" rows="12" class="md-area" spellcheck="false" />
+      <div v-if="splitPreview" class="md-render prose-preview" v-html="previewHtml" />
+    </div>
     <p v-if="err" class="err">{{ err }}</p>
   </div>
 </template>
 
 <style scoped>
-.md-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.md-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px; }
 .md-btn { cursor: pointer; font-size: 13px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); }
-.md-area { width: 100%; font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.5; }
-.md-render { border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.6; }
-.md-render :deep(img) { max-width: 100%; border-radius: 8px; }
+.md-body { display: block; }
+.md-body.split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 900px) { .md-body.split { grid-template-columns: 1fr; } }
+.md-area { width: 100%; font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.5; min-height: 200px; }
+.md-render { border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.6; min-height: 200px; overflow: auto; }
+.prose-preview :deep(img) { max-width: 100%; border-radius: 8px; }
+.prose-preview :deep(table) { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+.prose-preview :deep(th), .prose-preview :deep(td) { border: 1px solid var(--border); padding: 6px 8px; }
 .muted { color: var(--muted); font-size: 13px; }
+.warn { color: #b8860b; font-size: 13px; margin: 0 0 6px; }
 .err { color: var(--danger, #c0392b); font-size: 13px; }
 </style>

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		603FB6122FB848A0008F13B4 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 603FB6112FB848A0008F13B4 /* Supabase */; };
 		603FB6222FB84920008F13B4 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 603FB6212FB84920008F13B4 /* RevenueCat */; };
+		603FB6322FB84930008F13B4 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 603FB6312FB84930008F13B4 /* MarkdownUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 			files = (
 				603FB6122FB848A0008F13B4 /* Supabase in Frameworks */,
 				603FB6222FB84920008F13B4 /* RevenueCat in Frameworks */,
+				603FB6322FB84930008F13B4 /* MarkdownUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,6 +78,7 @@
 			packageProductDependencies = (
 				603FB6112FB848A0008F13B4 /* Supabase */,
 				603FB6212FB84920008F13B4 /* RevenueCat */,
+				603FB6312FB84930008F13B4 /* MarkdownUI */,
 			);
 			productName = YOLO;
 			productReference = 602065AB2F9E523D0041D9E3 /* YOLO.app */;
@@ -109,6 +112,7 @@
 			packageReferences = (
 				603FB60F2FB847C6008F13B4 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				603FB6202FB84920008F13B4 /* XCRemoteSwiftPackageReference "purchases-ios" */,
+				603FB6302FB84930008F13B4 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 602065AC2F9E523D0041D9E3 /* Products */;
@@ -388,6 +392,14 @@
 				minimumVersion = 5.0.0;
 			};
 		};
+		603FB6302FB84930008F13B4 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -400,6 +412,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 603FB6202FB84920008F13B4 /* XCRemoteSwiftPackageReference "purchases-ios" */;
 			productName = RevenueCat;
+		};
+		603FB6312FB84930008F13B4 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 603FB6302FB84930008F13B4 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

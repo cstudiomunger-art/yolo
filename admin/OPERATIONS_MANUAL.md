@@ -70,7 +70,22 @@ flowchart TB
 - 上传封面/音频后需 **保存** 对应记录，App 才会拉到新 URL。
 - 修改内容后，App 端可在 Profile → **Refresh from CMS** 拉最新远程配置（内容表由 `use_remote_content` 控制）。
 
-### 1.4 城市树节点一览
+### 1.4 正文格式（Markdown）
+
+所有景点简介、城市说明、紧急指南、法律文档等**长正文**统一使用 **Markdown** 录入（admin-vue 后台）。请勿粘贴 HTML 或 Word 富文本；保存时若检测到 `<p>`、`<table>` 等标签会被拦截。
+
+| 语法 | 写法 |
+|------|------|
+| 小标题 | `##` / `###`（不用一级 `#`） |
+| 加粗 | `**文字**` |
+| 列表 | `- 条目` 或 `1. 条目` |
+| 链接 | `[文字](https://...)` |
+| 图片 | `![](cover-images/子目录/文件名.jpg)` 或用编辑器 **插入图片** |
+| 表格 | GFM 表格（紧急指南等需要） |
+
+完整约定见仓库 [`docs/content-markdown-spec.md`](../docs/content-markdown-spec.md)。预览区应与 App 展示一致。
+
+### 1.5 城市树节点一览
 
 | 侧栏节点 | 主区做什么 |
 |----------|------------|
@@ -265,7 +280,7 @@ flowchart LR
 
 ```
 ┌──────────────────────────────────────┐
-│ [封面] 城市简介 HTML                   │
+│ [封面] 城市简介 Markdown               │
 │ City Guides                           │
 │  - 指南条目 → 详情页                   │
 │ Attractions                           │
@@ -276,7 +291,7 @@ flowchart LR
 
 | App 位置 | 后台 |
 |----------|------|
-| 顶部封面与简介 | `cities.cover_image_path`, `description`（富文本） |
+| 顶部封面与简介 | `cities.cover_image_path`, `description`（Markdown） |
 | **City Guides** 列表 | 城市树 → **城市指南** `city_guides` |
 | 指南详情标题、正文、meta、音频 | 单条 `city_guides`（含 `CityGuideAudioSection`） |
 | **Attractions** 列表行 | 景点 **解说与详情**：`name`, `summary`, `short_description` |
@@ -289,7 +304,7 @@ flowchart LR
 │ ← 返回                                │
 │ [封面轮播] 英文名 / 中文名 / 地址      │
 │ 🎧 Audio Guide  [播放器 / Paywall]    │
-│ Introduction  (HTML 正文)             │
+│ Introduction  (Markdown 正文)         │
 │ Explore by Area → 子区域列表          │
 │ Practical Info  (门票/时长等条目)      │
 │ Visitor Tips  (bullet 列表)           │
@@ -301,7 +316,7 @@ flowchart LR
 |--------------|------------------------------|
 | 封面轮播 | `cover_images`, `cover_image_path`, 上传封面 |
 | 名称/地址 | `name`, `chinese_name`, `address_en`, `address_zh` |
-| **Introduction** | `introduction`（富文本，可插图） |
+| **Introduction** | `introduction`（Markdown，可插图） |
 | **Practical Info** | `practical_info`（结构化条目列表） |
 | **Visitor Tips** | `western_visitor_tips` |
 | 周边（若展示） | `nearby_places` |
@@ -352,7 +367,7 @@ flowchart LR
 | 医疗与药品列表 | **医疗与药品** → `emergency_medical_items` |
 | 推荐城市医院 | **推荐医院（按城市）** → `city_hospitals` |
 
-列表项点击进入富文本详情；`sort_order` 控制顺序，`is_active` 控制上下线。
+列表项点击进入 Markdown 详情；`sort_order` 控制顺序，`is_active` 控制上下线。
 
 ---
 
@@ -393,7 +408,7 @@ flowchart LR
 | 大模型（火山 Ark） | `ai_model_id`, Prompt, token 等 | Assistant 对话、Plan AI 行程 |
 | 内购与试听 | `use_remote_iap`, `free_audio_preview_seconds` | 音频试听时长、是否锁内容 |
 | 关于 | `about_title`, `about_version`, `about_body` | Profile → About YOLO HAPPY |
-| 法律与反馈 | `support_email`, privacy/terms HTML | Profile 法律页、邮件反馈 |
+| 法律与反馈 | `support_email`, privacy/terms Markdown | Profile 法律页、邮件反馈 |
 | 内购展示文案 | `iap_pro_*`, `iap_single_price_label` | Profile 订阅区文案 |
 | 助手问候 | `assistant_greeting_general` | Assistant 首条 |
 | Plan 警告 | `plan_alert_*` | **待 App 接入** |

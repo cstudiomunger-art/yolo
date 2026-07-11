@@ -116,12 +116,8 @@ function extractEnglishDescription(sectionLines) {
   return englishParts.join(" ").replace(/\s+/g, " ").trim();
 }
 
-function toHtml(text) {
-  const safe = cleanMdMarks(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  return safe ? `<p>${safe}</p>` : "";
+function toMarkdown(text) {
+  return cleanMdMarks(text).trim();
 }
 
 function splitByH3(content) {
@@ -171,7 +167,7 @@ function parseSection(chunk, order, attractionId) {
     attraction_id: attractionId,
     name_zh: nameZh,
     name_en: nameEn,
-    body: toHtml(bodyEn),
+    body: toMarkdown(bodyEn),
     body_length: bodyEn.length,
     sort_order: order,
     seq: chunk.seq,

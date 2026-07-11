@@ -148,7 +148,7 @@ struct AudioGuideSection: View {
             }
 
             if let quote = guide.quote {
-                HTMLContentView(content: quote, fontSize: 12)
+                MarkdownContentView(content: quote, fontSize: 12)
             }
 
             statusLine

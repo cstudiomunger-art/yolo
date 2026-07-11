@@ -3,6 +3,7 @@ import { reactive, computed, ref, watch } from "vue";
 import FieldInput from "@/components/fields/FieldInput.vue";
 import { upsertRow, deleteRow } from "@/lib/crud";
 import { slugify } from "@/lib/storage";
+import { containsHtmlTags } from "@/lib/markdown";
 
 const props = defineProps({
   tableKey: { type: String, required: true },
@@ -191,6 +192,12 @@ function validate(payload) {
   for (const f of props.schema.fields) {
     if (f.required && (payload[f.key] == null || payload[f.key] === "")) {
       return `「${f.label || f.key}」为必填`;
+    }
+    if (f.type === "markdown") {
+      const v = payload[f.key];
+      if (v != null && v !== "" && containsHtmlTags(v)) {
+        return `「${f.label || f.key}」含 HTML 标签，请改为 Markdown`;
+      }
     }
   }
   return "";
