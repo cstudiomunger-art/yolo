@@ -4,6 +4,7 @@ import Foundation
 
 enum PaymentGuideDestination: Hashable {
     case mobile, cash, prepay, failed, before, phrases, setup, limits
+    case article(id: String)
 }
 
 // MARK: - Content models
@@ -86,6 +87,14 @@ struct PaymentGuideSegmentOption: Identifiable {
     let title: String
     let prefLabel: String?
     let steps: [String]
+}
+
+enum PaymentGuideCMSArticles {
+    static let cashGuides = ["physical_cards", "cash_guide"]
+    static let mobileGuides = ["scene_guide"]
+    static let prepayGuide = "prepay_online"
+    static let limitsGuide = "limits_fees"
+    static let hubFAQ = "faq"
 }
 
 // MARK: - Static content (English, from prototype HTML)
@@ -394,6 +403,7 @@ enum PaymentGuideContent {
         case .phrases: return "Show the Cashier"
         case .setup: return "Full Setup"
         case .limits: return "Limits & Fees"
+        case .article: return "Guide"
         }
     }
 }

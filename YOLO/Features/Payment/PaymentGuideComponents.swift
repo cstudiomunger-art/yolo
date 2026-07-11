@@ -11,6 +11,10 @@ enum PaymentGuideLayout {
 // MARK: - Hero
 
 struct PaymentGuideHero: View {
+    var fullIntro: String?
+    var introBold: String = PaymentGuideContent.hubIntroBold
+    var introRest: String = PaymentGuideContent.hubIntroRest
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(PaymentGuideContent.hubEyebrow)
@@ -26,10 +30,17 @@ struct PaymentGuideHero: View {
                 .lineSpacing(2)
                 .padding(.bottom, 12)
 
-            (Text(PaymentGuideContent.hubIntroBold).fontWeight(.medium).foregroundStyle(Theme.ColorToken.textPrimary)
-             + Text(PaymentGuideContent.hubIntroRest).fontWeight(.light).foregroundStyle(Theme.ColorToken.textSecondary))
-                .font(Theme.FontToken.inter(13))
-                .lineSpacing(4)
+            if let fullIntro, !fullIntro.isEmpty {
+                Text(fullIntro)
+                    .font(Theme.FontToken.inter(13))
+                    .foregroundStyle(Theme.ColorToken.textSecondary)
+                    .lineSpacing(4)
+            } else {
+                (Text(introBold).fontWeight(.medium).foregroundStyle(Theme.ColorToken.textPrimary)
+                 + Text(introRest).fontWeight(.light).foregroundStyle(Theme.ColorToken.textSecondary))
+                    .font(Theme.FontToken.inter(13))
+                    .lineSpacing(4)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, PaymentGuideLayout.horizontalPadding)
@@ -281,6 +292,41 @@ struct PaymentGuidePagePad<Content: View>: View {
 
 // MARK: - Content blocks
 
+struct PaymentGuideArticlesSection: View {
+    let articles: [PaymentArticle]
+
+    var body: some View {
+        if !articles.isEmpty {
+            PaymentGuideSection(title: "In-Depth Guides") {
+                ForEach(articles) { article in
+                    NavigationLink(value: PaymentGuideDestination.article(id: article.id)) {
+                        PaymentGuideDeepLink(title: "\(PaymentGuideCMSMapper.articleTitle(article)) →")
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+}
+
+struct PaymentGuideLinksSection: View {
+    let links: [PaymentHelperLink]
+
+    var body: some View {
+        if !links.isEmpty {
+            PaymentGuideSection(title: "Useful Links") {
+                ForEach(links) { link in
+                    if let url = URL(string: link.url) {
+                        Link(destination: url) {
+                            PaymentGuideDeepLink(title: "\(PaymentGuideCMSMapper.linkLabel(link)) ↗")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 struct PaymentGuideSection<Content: View>: View {
     let title: String
     @ViewBuilder let content: () -> Content
@@ -311,10 +357,7 @@ struct PaymentGuideStepView: View {
                 PaymentGuideRichText(step.title, size: 13, weight: .light, color: Theme.ColorToken.textPrimary)
 
                 if let note = step.note, !note.isEmpty {
-                    Text(note)
-                        .font(Theme.FontToken.inter(11))
-                        .foregroundStyle(Theme.ColorToken.textMuted)
-                        .lineSpacing(3)
+                    PaymentGuideRichText(note, size: 11, weight: .light, color: Theme.ColorToken.textMuted)
                         .padding(.top, 2)
                 }
 
@@ -429,10 +472,7 @@ struct PaymentGuideRowView: View {
             if let badge = row.badge {
                 PaymentGuideBadge(level: badge)
             } else if let amount = row.amount {
-                Text(amount)
-                    .font(Theme.FontToken.inter(13, weight: .medium))
-                    .foregroundStyle(Theme.ColorToken.textPrimary)
-                    .monospacedDigit()
+                PaymentGuideRichText(amount, size: 13, weight: .medium, color: Theme.ColorToken.textPrimary)
             }
         }
         .padding(.vertical, 11)

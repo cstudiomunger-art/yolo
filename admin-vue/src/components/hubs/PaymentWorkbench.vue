@@ -9,7 +9,7 @@ const position = ref("questions");
 
 const POSITIONS = [
   { id: "questions", label: "入口与三问", nodes: [], tables: ["payment_countries", "payment_card_networks", "payment_cash_rules"] },
-  { id: "plan", label: "方案页", nodes: ["plan"] },
+  { id: "plan", label: "方案页", nodes: ["plan"], tables: ["payment_checklist_items", "payment_helper_links"] },
   { id: "install", label: "安装", nodes: ["install"] },
   { id: "register", label: "注册", nodes: ["register"] },
   { id: "bind", label: "绑卡", nodes: ["bind"] },
@@ -26,6 +26,8 @@ const TABLE_ORDER = {
   payment_articles: "display_order",
   payment_rescue_rungs: "rung_order",
   payment_merchant_phrases: "sort_order",
+  payment_checklist_items: "item_order",
+  payment_helper_links: "sort_order",
   payment_countries: "opt_order",
   payment_cash_rules: "opt_order",
   payment_card_networks: "sort_order",
@@ -99,8 +101,10 @@ async function loadPreview() {
       supabase.from("payment_merchant_phrases").select("*").eq("is_active", true).order("sort_order"),
       supabase.from("payment_node_texts").select("*").eq("is_active", true).order("ord"),
       supabase.from("payment_articles").select("*").eq("is_active", true).eq("is_published", true).order("display_order"),
+      supabase.from("payment_checklist_items").select("*").eq("is_active", true).order("item_order"),
+      supabase.from("payment_helper_links").select("*").eq("is_active", true).order("sort_order"),
     ]);
-    const [countries, cashRules, cardNetworks, flowSteps, rescueRungs, merchantPhrases, nodeTexts, articles] = queries.map((q) => q.data || []);
+    const [countries, cashRules, cardNetworks, flowSteps, rescueRungs, merchantPhrases, nodeTexts, articles, checklistItems, helperLinks] = queries.map((q) => q.data || []);
     const stepsByNode = {};
     flowSteps.forEach((s) => { (stepsByNode[s.node_key] = stepsByNode[s.node_key] || []).push(s); });
     const nodeTextsMap = {};
@@ -110,7 +114,7 @@ async function loadPreview() {
     preview.value = {
       articles,
       articles_by_node: articlesByNode,
-      flow: { steps_by_node: stepsByNode, countries, card_networks: cardNetworks, cash_rules: cashRules, rescue_rungs: rescueRungs, merchant_phrases: merchantPhrases, node_texts: nodeTextsMap },
+      flow: { steps_by_node: stepsByNode, countries, card_networks: cardNetworks, cash_rules: cashRules, rescue_rungs: rescueRungs, merchant_phrases: merchantPhrases, node_texts: nodeTextsMap, checklist_items: checklistItems, helper_links: helperLinks },
     };
   } catch (e) {
     error.value = e.message || String(e);
@@ -173,7 +177,7 @@ onMounted(loadAll);
     <header class="pw-head">
       <div>
         <h1>💳 支付助手工作台</h1>
-        <p class="muted">按用户旅程位置管理内容。保存即生效，App 下次刷新即更新。</p>
+        <p class="muted">按用户旅程位置管理内容。保存后 App 下次打开支付助手时会拉取最新 CMS 数据。</p>
       </div>
     </header>
 

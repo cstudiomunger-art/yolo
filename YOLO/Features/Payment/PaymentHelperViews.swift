@@ -7,11 +7,18 @@ struct PaymentHelperHomeView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
 
+    private var service: PaymentHelperService { appEnv.paymentHelper }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    PaymentGuideHero()
+                    PaymentGuideHero(
+                        fullIntro: {
+                            let cms = service.nodeText(nodeKey: "home", slot: "intro", fallback: "")
+                            return cms == PaymentGuideContent.hubIntroBold ? nil : (cms.isEmpty ? nil : cms)
+                        }()
+                    )
                     PaymentGuideRule()
 
                     PaymentGuideSectionHeader(title: PaymentGuideContent.threeWaysHeader)
@@ -41,6 +48,14 @@ struct PaymentHelperHomeView: View {
                     }
                     .padding(.horizontal, PaymentGuideLayout.horizontalPadding)
                     .padding(.top, 18)
+
+                    if service.article(id: PaymentGuideCMSArticles.hubFAQ) != nil {
+                        PaymentGuideArticlesSection(
+                            articles: service.articles(ids: [PaymentGuideCMSArticles.hubFAQ])
+                        )
+                        .padding(.horizontal, PaymentGuideLayout.horizontalPadding)
+                        .padding(.top, 8)
+                    }
                 }
                 .padding(.bottom, PaymentGuideLayout.bottomPadding)
             }
@@ -76,6 +91,7 @@ private struct PaymentGuideScreenView: View {
             case .phrases: PaymentGuidePhrasesView()
             case .setup: PaymentGuideSetupView()
             case .limits: PaymentGuideLimitsView()
+            case .article(let id): PaymentGuideArticleView(articleId: id)
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -88,11 +104,12 @@ private struct PaymentGuideScreenView: View {
 
 private struct PaymentGuideSubPage<Content: View>: View {
     let destination: PaymentGuideDestination
+    var titleOverride: String?
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         VStack(spacing: 0) {
-            PaymentGuideSubNav(title: PaymentGuideContent.screenTitle(for: destination))
+            PaymentGuideSubNav(title: titleOverride ?? PaymentGuideContent.screenTitle(for: destination))
             ScrollView {
                 PaymentGuidePagePad { content() }
             }
@@ -102,19 +119,58 @@ private struct PaymentGuideSubPage<Content: View>: View {
     }
 }
 
+// MARK: - Article detail
+
+private struct PaymentGuideArticleView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    let articleId: String
+
+    private var article: PaymentArticle? {
+        appEnv.paymentHelper.article(id: articleId)
+    }
+
+    var body: some View {
+        PaymentGuideSubPage(
+            destination: .article(id: articleId),
+            titleOverride: article.map { PaymentGuideCMSMapper.articleTitle($0) }
+        ) {
+            if let article {
+                MarkdownContentView(
+                    content: PaymentGuideCMSMapper.articleBody(article),
+                    lineSpacing: 5
+                )
+            } else {
+                Text("This guide is no longer available.")
+                    .font(Theme.FontToken.inter(13))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+            }
+        }
+        .navigationDestination(for: PaymentGuideDestination.self) { destination in
+            PaymentGuideScreenView(destination: destination)
+        }
+    }
+}
+
 // MARK: - Mobile Pay
 
 private struct PaymentGuideMobilePayView: View {
+    @Environment(AppEnvironment.self) private var appEnv
     @State private var howSegment = 1
+
+    private var service: PaymentHelperService { appEnv.paymentHelper }
 
     var body: some View {
         PaymentGuideSubPage(destination: .mobile) {
-            PaymentGuideLead(text: PaymentGuideContent.mobileLead)
-            PaymentGuideSub(text: PaymentGuideContent.mobileSub)
+            PaymentGuideLead(text: service.nodeText(nodeKey: "use", slot: "h1", fallback: PaymentGuideContent.mobileLead))
+            PaymentGuideSub(text: service.nodeText(nodeKey: "use", slot: "intro", fallback: PaymentGuideContent.mobileSub))
             PaymentGuideBrandChips(chips: PaymentGuideContent.mobileBrandChips)
 
+            ForEach(Array(service.nodeCallouts(nodeKey: "install").enumerated()), id: \.offset) { _, callout in
+                PaymentGuideCallout(text: callout)
+            }
+
             PaymentGuideSection(title: "Before You Fly") {
-                ForEach(PaymentGuideContent.mobileBeforeFlySteps) { step in
+                ForEach(service.mobileBeforeFlySteps) { step in
                     PaymentGuideStepView(step: step)
                 }
                 NavigationLink(value: PaymentGuideDestination.setup) {
@@ -125,16 +181,23 @@ private struct PaymentGuideMobilePayView: View {
 
             PaymentGuideSection(title: "How to Pay In-Store") {
                 PaymentGuideSegment(
-                    options: PaymentGuideContent.mobileHowSegments,
+                    options: service.mobileHowSegments,
                     selectedID: $howSegment
                 )
             }
 
             PaymentGuideSection(title: "Where It Works") {
-                ForEach(PaymentGuideContent.mobileCoverageRows) { row in
-                    PaymentGuideRowView(row: row)
+                if let body = service.articleBody(id: PaymentGuideCMSArticles.mobileGuides[0]) {
+                    MarkdownContentView(content: body, fontSize: 13, lineSpacing: 4)
+                } else {
+                    ForEach(PaymentGuideContent.mobileCoverageRows) { row in
+                        PaymentGuideRowView(row: row)
+                    }
                 }
             }
+
+            PaymentGuideArticlesSection(articles: service.articles(nodeKey: "use"))
+            PaymentGuideLinksSection(links: service.helperLinks(lane: "prep"))
         }
         .navigationDestination(for: PaymentGuideDestination.self) { destination in
             PaymentGuideScreenView(destination: destination)
@@ -145,27 +208,37 @@ private struct PaymentGuideMobilePayView: View {
 // MARK: - Cash + Cards
 
 private struct PaymentGuideCashCardsView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+
+    private var service: PaymentHelperService { appEnv.paymentHelper }
+
     var body: some View {
         PaymentGuideSubPage(destination: .cash) {
-            PaymentGuideLead(text: PaymentGuideContent.cashLead)
+            PaymentGuideLead(text: service.nodeText(nodeKey: "card", slot: "h1", fallback: PaymentGuideContent.cashLead))
             PaymentGuideSub(text: PaymentGuideContent.cashSub)
 
             PaymentGuideSection(title: "How Much Cash to Carry") {
-                ForEach(PaymentGuideContent.cashAmountRows) { row in
+                ForEach(service.cashAmountRows) { row in
                     PaymentGuideRowView(row: row)
                 }
             }
 
             PaymentGuideCallout(text: PaymentGuideContent.cashBreakNote)
 
-            PaymentGuideSection(title: "Where to Get Cash") {
-                ForEach(PaymentGuideContent.cashSourceRows) { row in
-                    PaymentGuideRowView(row: row)
+            if let body = service.articleBody(id: "cash_guide") {
+                PaymentGuideSection(title: "Where to Get Cash") {
+                    MarkdownContentView(content: body, fontSize: 13, lineSpacing: 4)
+                }
+            } else {
+                PaymentGuideSection(title: "Where to Get Cash") {
+                    ForEach(PaymentGuideContent.cashSourceRows) { row in
+                        PaymentGuideRowView(row: row)
+                    }
                 }
             }
 
             PaymentGuideSection(title: "Where Physical Cards Work") {
-                ForEach(PaymentGuideContent.cashCardRows) { row in
+                ForEach(service.cashCardRows) { row in
                     PaymentGuideRowView(row: row)
                 }
             }
@@ -176,6 +249,9 @@ private struct PaymentGuideCashCardsView: View {
                 PaymentGuideDeepLink(title: PaymentGuideContent.cashLimitsLink)
             }
             .buttonStyle(.plain)
+
+            PaymentGuideArticlesSection(articles: service.articles(ids: PaymentGuideCMSArticles.cashGuides))
+            PaymentGuideLinksSection(links: service.helperLinks(lane: "prep"))
         }
         .navigationDestination(for: PaymentGuideDestination.self) { destination in
             PaymentGuideScreenView(destination: destination)
@@ -186,18 +262,27 @@ private struct PaymentGuideCashCardsView: View {
 // MARK: - Prepay
 
 private struct PaymentGuidePrepayView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+
+    private var service: PaymentHelperService { appEnv.paymentHelper }
+
     var body: some View {
         PaymentGuideSubPage(destination: .prepay) {
             PaymentGuideLead(text: PaymentGuideContent.prepayLead)
             PaymentGuideSub(text: PaymentGuideContent.prepaySub)
 
-            PaymentGuideSection(title: "Best Paid in Advance") {
-                ForEach(PaymentGuideContent.prepayRows) { row in
-                    PaymentGuideRowView(row: row)
+            if let body = service.articleBody(id: PaymentGuideCMSArticles.prepayGuide) {
+                MarkdownContentView(content: body, lineSpacing: 5)
+            } else {
+                PaymentGuideSection(title: "Best Paid in Advance") {
+                    ForEach(PaymentGuideContent.prepayRows) { row in
+                        PaymentGuideRowView(row: row)
+                    }
                 }
+                PaymentGuideCallout(text: PaymentGuideContent.prepayCallout)
             }
 
-            PaymentGuideCallout(text: PaymentGuideContent.prepayCallout)
+            PaymentGuideLinksSection(links: service.helperLinks(lane: "prep"))
         }
     }
 }
@@ -205,16 +290,22 @@ private struct PaymentGuidePrepayView: View {
 // MARK: - Payment Failed
 
 private struct PaymentGuideFailedView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+
+    private var service: PaymentHelperService { appEnv.paymentHelper }
+
     var body: some View {
         PaymentGuideSubPage(destination: .failed) {
-            PaymentGuideLead(text: PaymentGuideContent.failedLead)
+            PaymentGuideLead(text: service.nodeText(nodeKey: "rescue", slot: "h1", fallback: PaymentGuideContent.failedLead))
             PaymentGuideSub(text: PaymentGuideContent.failedSub)
 
-            ForEach(PaymentGuideContent.failedSteps) { step in
+            ForEach(service.failedSteps) { step in
                 PaymentGuideStepView(step: step)
             }
 
             PaymentGuideCallout(text: PaymentGuideContent.failedWarning, warn: true)
+
+            PaymentGuideLinksSection(links: service.helperLinks(lane: "rescue"))
         }
     }
 }
@@ -225,20 +316,23 @@ private struct PaymentGuideBeforeYouFlyView: View {
     @Environment(AppEnvironment.self) private var appEnv
 
     private var service: PaymentHelperService { appEnv.paymentHelper }
-    private var total: Int { PaymentGuideContent.checklistItems.count }
+    private var total: Int { service.checklistEntries.count }
 
     var body: some View {
         PaymentGuideSubPage(destination: .before) {
-            PaymentGuideLead(text: PaymentGuideContent.beforeLead)
+            PaymentGuideLead(text: service.nodeText(nodeKey: "plan", slot: "h1", fallback: PaymentGuideContent.beforeLead))
             PaymentGuideSub(text: PaymentGuideContent.beforeSub)
 
             PaymentGuideProgressHeader(done: service.checklistDoneCount, total: total)
 
             PaymentGuideChecklist(
-                items: PaymentGuideContent.checklistItems,
+                items: service.checklistEntries,
                 isDone: { service.isChecklistDone($0) },
                 onToggle: { service.toggleChecklist($0) }
             )
+
+            PaymentGuideArticlesSection(articles: service.articles(ids: ["pre_trip_checklist"]))
+            PaymentGuideLinksSection(links: service.helperLinks(lane: "prep"))
         }
     }
 }
@@ -254,7 +348,7 @@ private struct PaymentGuidePhrasesView: View {
 
     var body: some View {
         PaymentGuideSubPage(destination: .phrases) {
-            PaymentGuideLead(text: PaymentGuideContent.phrasesLead)
+            PaymentGuideLead(text: service.nodeText(nodeKey: "merchant", slot: "h1", fallback: PaymentGuideContent.phrasesLead))
             PaymentGuideSub(text: PaymentGuideContent.phrasesSub)
 
             ForEach(service.displayPhrases) { phrase in
@@ -294,22 +388,45 @@ private struct PaymentGuidePhrasesView: View {
 // MARK: - Full Setup
 
 private struct PaymentGuideSetupView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+
+    private var service: PaymentHelperService { appEnv.paymentHelper }
+
     var body: some View {
         PaymentGuideSubPage(destination: .setup) {
-            PaymentGuideLead(text: PaymentGuideContent.setupLead)
-            PaymentGuideSub(text: PaymentGuideContent.setupSub)
+            PaymentGuideLead(text: service.nodeText(nodeKey: "bind", slot: "h1", fallback: PaymentGuideContent.setupLead))
+            PaymentGuideSub(text: service.nodeText(nodeKey: "bind", slot: "intro", fallback: PaymentGuideContent.setupSub))
+
+            ForEach(Array(service.nodeCallouts(nodeKey: "verify").enumerated()), id: \.offset) { _, callout in
+                PaymentGuideCallout(text: callout)
+            }
 
             PaymentGuideSection(title: "支付宝 Alipay") {
-                ForEach(PaymentGuideContent.alipaySetupSteps) { step in
+                ForEach(service.alipaySetupSteps) { step in
                     PaymentGuideStepView(step: step)
                 }
             }
 
             PaymentGuideSection(title: "微信支付 WeChat Pay") {
-                ForEach(PaymentGuideContent.wechatSetupSteps) { step in
+                ForEach(service.wechatSetupSteps) { step in
                     PaymentGuideStepView(step: step)
                 }
             }
+
+            PaymentGuideArticlesSection(articles: service.articles(nodeKey: "bind"))
+
+            if !service.chinaSteps.isEmpty {
+                PaymentGuideSection(title: "Already in China?") {
+                    ForEach(service.chinaSteps) { step in
+                        PaymentGuideStepView(step: step)
+                    }
+                }
+            }
+
+            PaymentGuideLinksSection(links: service.helperLinks(lane: "china"))
+        }
+        .navigationDestination(for: PaymentGuideDestination.self) { destination in
+            PaymentGuideScreenView(destination: destination)
         }
     }
 }
@@ -317,14 +434,22 @@ private struct PaymentGuideSetupView: View {
 // MARK: - Limits & Fees
 
 private struct PaymentGuideLimitsView: View {
+    @Environment(AppEnvironment.self) private var appEnv
+
+    private var service: PaymentHelperService { appEnv.paymentHelper }
+
     var body: some View {
         PaymentGuideSubPage(destination: .limits) {
             PaymentGuideLead(text: PaymentGuideContent.limitsLead)
             PaymentGuideSub(text: PaymentGuideContent.limitsSub)
 
-            PaymentGuideSection(title: "Payment Limits") {
-                ForEach(PaymentGuideContent.limitRows) { row in
-                    PaymentGuideRowView(row: row)
+            if let body = service.articleBody(id: PaymentGuideCMSArticles.limitsGuide) {
+                MarkdownContentView(content: body, lineSpacing: 5)
+            } else {
+                PaymentGuideSection(title: "Payment Limits") {
+                    ForEach(PaymentGuideContent.limitRows) { row in
+                        PaymentGuideRowView(row: row)
+                    }
                 }
             }
 

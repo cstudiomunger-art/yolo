@@ -86,6 +86,23 @@ const filtered = computed(() => {
   });
 });
 
+const selectableFiltered = computed(() => filtered.value.filter((e) => e.inStorage));
+
+const selectedEntries = computed(() =>
+  entries.value.filter((e) => selected.value.has(e.id) && e.inStorage)
+);
+
+const allSelected = computed(() =>
+  selectableFiltered.value.length > 0 &&
+  selectableFiltered.value.every((e) => selected.value.has(e.id))
+);
+
+const someSelected = computed(() => selected.value.size > 0);
+
+const hasUnusedSelectable = computed(() =>
+  selectableFiltered.value.some((e) => e.status === "unused")
+);
+
 function statusLabel(s) {
   return { used: "已使用", unused: "未使用", orphan: "孤立引用" }[s] || s;
 }
@@ -95,6 +112,41 @@ function toggleSelect(id) {
   if (next.has(id)) next.delete(id);
   else next.add(id);
   selected.value = next;
+}
+
+function selectAllFiltered() {
+  selected.value = new Set(selectableFiltered.value.map((e) => e.id));
+}
+
+function invertSelection() {
+  const next = new Set(selected.value);
+  for (const e of selectableFiltered.value) {
+    if (next.has(e.id)) next.delete(e.id);
+    else next.add(e.id);
+  }
+  selected.value = next;
+}
+
+function selectUnusedOnly() {
+  selected.value = new Set(
+    selectableFiltered.value.filter((e) => e.status === "unused").map((e) => e.id)
+  );
+}
+
+function clearSelection() {
+  selected.value = new Set();
+}
+
+function pruneSelection() {
+  const visible = new Set(filtered.value.map((e) => e.id));
+  const next = new Set([...selected.value].filter((id) => visible.has(id)));
+  if (next.size !== selected.value.size) selected.value = next;
+}
+
+async function resolveUrl(entry) {
+  const url = previewSrc(entry) || entry.publicUrl;
+  if (url) return url;
+  return getStoragePreviewUrl(entry.bucket, entry.path);
 }
 
 function toggleExpand(id) {
@@ -125,20 +177,25 @@ function pickEdit(entry) {
 }
 
 async function copyUrl(entry) {
-  const url = previewSrc(entry) || entry.publicUrl;
-  if (!url) {
-    try {
-      const signed = await getStoragePreviewUrl(entry.bucket, entry.path);
-      await navigator.clipboard.writeText(signed);
-      showToast("已复制签名 URL");
-      return;
-    } catch {
-      showToast("无法复制 URL");
-      return;
-    }
+  try {
+    const url = await resolveUrl(entry);
+    await navigator.clipboard.writeText(url);
+    showToast("已复制 URL");
+  } catch {
+    showToast("无法复制 URL");
   }
-  await navigator.clipboard.writeText(url);
-  showToast("已复制 URL");
+}
+
+async function copySelectedUrls() {
+  const list = selectedEntries.value;
+  if (!list.length) return;
+  try {
+    const urls = await Promise.all(list.map((e) => resolveUrl(e)));
+    await navigator.clipboard.writeText(urls.join("\n"));
+    showToast(`已复制 ${urls.length} 条 URL`);
+  } catch {
+    showToast("无法复制 URL");
+  }
 }
 
 async function deleteEntry(entry, force = false) {
@@ -161,12 +218,15 @@ async function deleteEntry(entry, force = false) {
 }
 
 async function deleteSelected() {
-  const ids = [...selected.value];
-  const toDelete = filtered.value.filter((e) => ids.includes(e.id) && e.inStorage);
+  const toDelete = selectedEntries.value;
   if (!toDelete.length) return;
-  const hasUsed = toDelete.some((e) => e.status === "used");
-  if (hasUsed && !confirm("选中项包含已使用图片，确定删除 Storage 文件？")) return;
-  if (!hasUsed && !confirm(`删除 ${toDelete.length} 个未使用文件？`)) return;
+
+  const usedCount = toDelete.filter((e) => e.status === "used").length;
+  const orphanCount = toDelete.filter((e) => e.status === "orphan").length;
+  let msg = `删除 ${toDelete.length} 个 Storage 文件？`;
+  if (usedCount) msg += `\n其中 ${usedCount} 张仍被数据库引用（不会自动改字段）。`;
+  if (orphanCount) msg += `\n其中 ${orphanCount} 张为孤立引用。`;
+  if (!confirm(msg)) return;
 
   try {
     for (const bucket of IMAGE_BUCKETS) {
@@ -181,6 +241,8 @@ async function deleteSelected() {
 }
 
 watch(filterBucket, () => { filterFolder.value = "all"; });
+
+watch([filterBucket, filterFolder, filterStatus, search, filtered], pruneSelection);
 
 watch(() => nav.reloadTick, () => {
   if (!loading.value) load();
@@ -205,11 +267,19 @@ onMounted(load);
         </button>
         <button
           type="button"
+          class="btn btn-secondary btn-sm"
+          :disabled="!someSelected || loading"
+          @click="copySelectedUrls"
+        >
+          复制选中 URL ({{ selected.size }})
+        </button>
+        <button
+          type="button"
           class="btn btn-danger btn-sm"
-          :disabled="!selected.size || loading"
+          :disabled="!someSelected || loading"
           @click="deleteSelected"
         >
-          删除选中未使用 ({{ selected.size }})
+          删除选中 ({{ selected.size }})
         </button>
       </div>
     </header>
@@ -248,6 +318,44 @@ onMounted(load);
       </label>
     </div>
 
+    <div v-if="!loading && entries.length" class="batch-bar">
+      <span class="batch-count">已选 {{ selected.size }} / 当前 {{ selectableFiltered.length }} 张可选</span>
+      <div class="batch-actions">
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          :disabled="!selectableFiltered.length"
+          @click="allSelected ? clearSelection() : selectAllFiltered()"
+        >
+          {{ allSelected ? "取消全选" : "全选当前结果" }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          :disabled="!selectableFiltered.length"
+          @click="invertSelection"
+        >
+          反选
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          :disabled="!hasUnusedSelectable"
+          @click="selectUnusedOnly"
+        >
+          仅选未使用
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          :disabled="!someSelected"
+          @click="clearSelection"
+        >
+          清空选择
+        </button>
+      </div>
+    </div>
+
     <div v-if="loading && !entries.length" class="muted pad">正在构建图片索引…</div>
 
     <div v-else class="grid">
@@ -255,15 +363,24 @@ onMounted(load);
         v-for="entry in filtered"
         :key="entry.id"
         class="card"
-        :class="entry.status"
+        :class="[entry.status, { selected: selected.has(entry.id) }]"
       >
         <div class="card-top">
-          <label v-if="entry.status === 'unused'" class="chk">
-            <input type="checkbox" :checked="selected.has(entry.id)" @change="toggleSelect(entry.id)" />
+          <label v-if="entry.inStorage" class="chk" @click.stop>
+            <input
+              type="checkbox"
+              :checked="selected.has(entry.id)"
+              @change="toggleSelect(entry.id)"
+            />
           </label>
+          <span v-else class="chk-spacer" />
           <span class="badge" :class="entry.status">{{ statusLabel(entry.status) }}</span>
         </div>
-        <div class="thumb">
+        <div
+          class="thumb"
+          :class="{ selectable: entry.inStorage }"
+          @click="entry.inStorage && toggleSelect(entry.id)"
+        >
           <img v-if="previewSrc(entry)" :src="previewSrc(entry)" :alt="entry.path" loading="lazy" />
           <span v-else class="no-thumb">无预览</span>
         </div>
@@ -321,6 +438,20 @@ onMounted(load);
   background: var(--surface); color: var(--text); min-width: 120px;
 }
 .filters .search input { min-width: 200px; }
+.batch-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.batch-count { font-size: 13px; color: var(--muted); }
+.batch-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .pad { padding: 24px 0; }
 .grid {
   display: grid;
@@ -337,7 +468,14 @@ onMounted(load);
   gap: 8px;
 }
 .card.orphan { border-color: #c0392b; }
-.card-top { display: flex; justify-content: space-between; align-items: center; min-height: 22px; }
+.card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.card-top { display: flex; justify-content: space-between; align-items: center; min-height: 22px; gap: 8px; }
+.chk { display: flex; align-items: center; cursor: pointer; flex-shrink: 0; }
+.chk input { width: 16px; height: 16px; cursor: pointer; }
+.chk-spacer { width: 16px; flex-shrink: 0; }
 .badge {
   font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500;
 }
@@ -353,6 +491,8 @@ onMounted(load);
   align-items: center;
   justify-content: center;
 }
+.thumb.selectable { cursor: pointer; }
+.thumb.selectable:hover { opacity: 0.92; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; }
 .no-thumb { font-size: 12px; color: var(--muted); }
 .path {
