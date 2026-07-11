@@ -52,6 +52,12 @@ export function formatListCell(col, row, refCache) {
     const s = sec % 60;
     return { kind: "text", text: `${m}:${String(s).padStart(2, "0")}` };
   }
+  if (typeof col === "object" && col.format === "duration_slot") {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return { kind: "text", text: "—", muted: true };
+    const labels = { 0.5: "0.5 半日", 1: "1 标准", 2: "2 全日", 3: "3+ 远郊" };
+    return { kind: "tag", text: labels[n] || String(n), on: n >= 1 };
+  }
   if (typeof col === "object" && col.ref === "attraction") {
     return { kind: "text", text: refCache.attractionLabel(v) };
   }

@@ -16,7 +16,8 @@ watch(
     await refCache.load(true); // cities list + ref lookups
     if (openCity.value) {
       const { data } = await supabase
-        .from("attractions").select("id,city_id,name,chinese_name,display_order")
+        .from("attractions")
+        .select("id,city_id,name,chinese_name,display_order,is_day_trip,duration_slots_min,latitude,longitude")
         .eq("city_id", openCity.value).order("display_order");
       attractionsByCity[openCity.value] = data || [];
     }
@@ -49,6 +50,24 @@ const attractionsByCity = reactive({});
 const subAreasByAttraction = reactive({});
 const audioGuidesByAttraction = reactive({});
 const loading = reactive({});
+const attrSearch = ref("");
+
+function filteredAttractions(cityId) {
+  const list = attractionsByCity[cityId] || [];
+  const q = attrSearch.value.trim().toLowerCase();
+  if (!q) return list;
+  return list.filter(
+    (a) =>
+      (a.chinese_name || "").toLowerCase().includes(q) ||
+      (a.name || "").toLowerCase().includes(q)
+  );
+}
+
+function attractionBadge(a) {
+  if (a.is_day_trip) return "🚌";
+  if (a.latitude == null || a.longitude == null || a.duration_slots_min == null) return "⚠";
+  return "";
+}
 
 const APP_SETTINGS_SECTIONS = computed(() => {
   const fields = TABLES.app_settings?.fields || [];
@@ -136,6 +155,7 @@ const GROUPS = [
     { label: "🎟️ 门票（外宾购票页）", table: "ticket_attractions" },
   ] },
   { id: "tools", label: "工具 · 跨城", leaves: [
+    { label: "🗺️ 行程调度", hubId: "scheduling" },
     { label: "行程模板", table: "content_itineraries" },
     { label: "全表：城市", table: "cities" },
     { label: "全表：景点", table: "attractions" },
@@ -163,10 +183,12 @@ async function toggleAttractions(cityId) {
   attractionsOpen.value = !attractionsOpen.value;
   openAttraction.value = null;
   attrPanel.value = null;
+  if (!attractionsOpen.value) attrSearch.value = "";
   if (attractionsOpen.value && !attractionsByCity[cityId]) {
     loading[`c:${cityId}`] = true;
     const { data } = await supabase
-      .from("attractions").select("id,city_id,name,chinese_name,display_order")
+      .from("attractions")
+      .select("id,city_id,name,chinese_name,display_order,is_day_trip,duration_slots_min,latitude,longitude")
       .eq("city_id", cityId).order("display_order");
     attractionsByCity[cityId] = data || [];
     loading[`c:${cityId}`] = false;
@@ -309,12 +331,19 @@ function isActive(sel) {
               景点 <span class="muted">({{ (attractionsByCity[c.id] || []).length }})</span>
             </button>
             <div v-show="attractionsOpen" class="children">
+              <input
+                v-model="attrSearch"
+                class="attr-search lvl3"
+                placeholder="搜景点…"
+                @click.stop
+              />
               <button class="leaf new lvl3" @click="newAttraction(c.id)">＋ 新建景点</button>
               <div v-if="loading[`c:${c.id}`]" class="muted lvl3">加载中…</div>
-              <div v-for="a in attractionsByCity[c.id] || []" :key="a.id" class="node">
+              <div v-for="a in filteredAttractions(c.id)" :key="a.id" class="node">
                 <button class="row lvl3" @click="toggleAttraction(a)">
                   <span class="caret" :class="{ open: openAttraction === a.id }">▶</span>
                   {{ a.chinese_name || a.name }}
+                  <span v-if="attractionBadge(a)" class="attr-badge" :title="a.is_day_trip ? '远郊' : '调度字段不完整'">{{ attractionBadge(a) }}</span>
                 </button>
                 <div v-show="openAttraction === a.id" class="children">
                   <button
@@ -478,4 +507,15 @@ function isActive(sel) {
 .lvl4 { padding-left: 60px; }
 .lvl5 { padding-left: 76px; }
 .children { display: block; }
+.attr-search {
+  display: block;
+  width: calc(100% - 56px);
+  margin: 4px 0 4px 44px;
+  padding: 5px 8px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+.attr-badge { margin-left: auto; font-size: 11px; }
 </style>
