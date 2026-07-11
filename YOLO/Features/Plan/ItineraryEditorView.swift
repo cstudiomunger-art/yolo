@@ -303,7 +303,9 @@ struct ItineraryEditorView: View {
             internationalDepartureTime: itinerary.internationalDepartureTime,
             endpointScheduleBaselineDays: itinerary.endpointScheduleBaselineDays,
             internationalArrivalActivities: itinerary.internationalArrivalActivities,
-            internationalDepartureActivities: itinerary.internationalDepartureActivities
+            internationalDepartureActivities: itinerary.internationalDepartureActivities,
+            intercityManualActivities: itinerary.intercityManualActivities,
+            intercityScheduleBaselineByDayIndex: itinerary.intercityScheduleBaselineByDayIndex
         )
         appEnv.preferences.saveItinerary(updated)
         let cityIds = Set(

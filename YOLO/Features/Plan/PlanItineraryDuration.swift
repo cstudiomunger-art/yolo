@@ -7,6 +7,11 @@ enum DayScheduleProfile {
 }
 
 enum PlanItineraryDuration {
+    static func durationSlots(for attraction: Attraction) -> Double {
+        if let min = attraction.durationSlotsMin { return min }
+        return parseDurationSlots(attraction.recommendedDurationText)
+    }
+
     static func parseDurationSlots(_ recommendedDuration: String?) -> Double {
         let raw = (recommendedDuration ?? "").trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if raw.isEmpty { return 1 }

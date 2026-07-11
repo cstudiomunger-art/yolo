@@ -137,6 +137,14 @@ enum PlanItineraryFlightTimes {
             daytimeCap = max(1, daytimeCap)
         }
 
+        let userSetArrival = resolved?.isEmpty == false
+        if !userSetArrival,
+           hopKind == "hop",
+           pace == .intense,
+           !isTravelDay {
+            allowsMorningOrigin = true
+        }
+
         return DestinationWindows(
             daytimeCap: daytimeCap,
             eveningCap: eveningCap,

@@ -1,5 +1,15 @@
 export type DayScheduleProfile = "full_day" | "arrival_day" | "departure_day";
 
+export function durationSlotsForRow(row: {
+  recommended_duration?: string | null;
+  duration_slots_min?: number | null;
+}): number {
+  if (row.duration_slots_min != null && Number.isFinite(Number(row.duration_slots_min))) {
+    return Number(row.duration_slots_min);
+  }
+  return parseDurationSlots(row.recommended_duration);
+}
+
 export function parseDurationSlots(
   recommendedDuration: string | null | undefined,
 ): number {

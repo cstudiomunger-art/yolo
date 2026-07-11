@@ -101,7 +101,9 @@ enum PlanItineraryGoldenTest {
         fails += testSixCityFourteenDayCityDayBalance()
         fails += testChengduShortHopHasPureSightseeingDay()
         fails += testIntercityManualActivitiesSurviveArrivalReplan()
+        fails += testItineraryEditorPreservesIntercityManualMetadata()
         fails += testGeoRepairSplitsDayTripFromUrban()
+        fails += testDayTripFlagSplitsFromUrbanWithoutHardcodedId()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -2278,6 +2280,87 @@ enum PlanItineraryGoldenTest {
         print(ok
             ? "✓ intercity manual sights stay in metadata when arrival time replans algorithm area"
             : "✗ manual intercity add should survive replan (manual=\(manualIds) algorithm=\(algorithmIds))")
+        return ok ? 0 : 1
+    }
+
+    /// Mirrors ItineraryEditorView.save() metadata passthrough (no UI).
+    private static func testItineraryEditorPreservesIntercityManualMetadata() -> Int {
+        let manual = [mockActivity(id: "dufu", cityId: "chengdu", name: "Du Fu Cottage")]
+        let baseline = [mockActivity(id: "wenshu", cityId: "chengdu", name: "Wenshu")]
+        let original = SampleItinerary(
+            id: "t1",
+            title: "Trip",
+            meta: "meta",
+            routeSummary: "route",
+            estimatedBudget: "1000",
+            days: [],
+            endpointScheduleBaselineDays: [],
+            internationalArrivalActivities: [mockActivity(id: "arr", cityId: "shanghai", name: "Arrival")],
+            internationalDepartureActivities: [mockActivity(id: "dep", cityId: "beijing", name: "Departure")],
+            intercityManualActivities: ["10": manual],
+            intercityScheduleBaselineByDayIndex: ["10": baseline]
+        )
+        let saved = SampleItinerary(
+            id: original.id,
+            title: "Edited Trip",
+            meta: original.meta,
+            routeSummary: original.routeSummary,
+            estimatedBudget: original.estimatedBudget,
+            days: original.days,
+            shareSlug: original.shareSlug,
+            isShared: original.isShared,
+            startDate: original.startDate,
+            endDate: original.endDate,
+            visitOrder: original.visitOrder,
+            userEdited: true,
+            droppedAttractionIds: original.droppedAttractionIds,
+            schedulingAdjustments: original.schedulingAdjustments,
+            seasonHints: original.seasonHints,
+            pace: original.pace,
+            internationalArrivalTime: original.internationalArrivalTime,
+            internationalDepartureTime: original.internationalDepartureTime,
+            endpointScheduleBaselineDays: original.endpointScheduleBaselineDays,
+            internationalArrivalActivities: original.internationalArrivalActivities,
+            internationalDepartureActivities: original.internationalDepartureActivities,
+            intercityManualActivities: original.intercityManualActivities,
+            intercityScheduleBaselineByDayIndex: original.intercityScheduleBaselineByDayIndex
+        )
+        let manualId = saved.intercityManualActivities?["10"]?.first?.attractionId
+        let baselineId = saved.intercityScheduleBaselineByDayIndex?["10"]?.first?.attractionId
+        let arrivalId = saved.internationalArrivalActivities?.first?.attractionId
+        let departureId = saved.internationalDepartureActivities?.first?.attractionId
+        let ok = manualId == "dufu"
+            && baselineId == "wenshu"
+            && arrivalId == "arr"
+            && departureId == "dep"
+        print(ok
+            ? "✓ editor save round-trip preserves intercity and bookend metadata"
+            : "✗ editor save dropped intercity/bookend metadata")
+        return ok ? 0 : 1
+    }
+
+    private static func testDayTripFlagSplitsFromUrbanWithoutHardcodedId() -> Int {
+        let urban = mockAttraction(id: "test_urban_spot", cityId: "beijing", name: "Urban", displayOrder: 0)
+        let flaggedJson = """
+        {"id":"test_flagged_daytrip","cityId":"beijing","name":"Far suburb","displayOrder":1,"is_day_trip":true}
+        """
+        let flaggedRow = try! JSONDecoder().decode(Attraction.self, from: Data(flaggedJson.utf8))
+        let catalog = [urban.id: urban, flaggedRow.id: flaggedRow]
+        var assignments: [Int: [String]] = [1: [urban.id, flaggedRow.id]]
+        var adjustments: [String] = []
+        let geo = PlanItineraryGeoRepair.apply(
+            assignments: assignments,
+            catalogById: catalog,
+            allowedCitiesByDay: [1: ["beijing"]],
+            adjustments: &adjustments
+        )
+        let day1 = geo.assignments[1] ?? []
+        let ok = day1 == [urban.id]
+            && geo.dropped.contains(flaggedRow.id)
+            && PlanItineraryDayTrip.isDayTrip(attractionId: flaggedRow.id, catalogById: catalog)
+        print(ok
+            ? "✓ is_day_trip flag splits flagged sight from urban without hardcoded id"
+            : "✗ is_day_trip row should force day-trip split (day1=\(day1))")
         return ok ? 0 : 1
     }
 

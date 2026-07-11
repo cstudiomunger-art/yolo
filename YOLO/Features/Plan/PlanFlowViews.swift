@@ -158,6 +158,11 @@ struct ItineraryDetailView: View {
         .sheet(isPresented: $showEdit) {
             ItineraryEditorView(itinerary: currentItinerary) { updated in
                 editableDays = updated.days
+                intercityManualActivities = updated.intercityManualActivities
+                intercityScheduleBaselineByDayIndex = updated.intercityScheduleBaselineByDayIndex
+                internationalArrivalActivities = updated.internationalArrivalActivities
+                internationalDepartureActivities = updated.internationalDepartureActivities
+                endpointScheduleBaselineDays = updated.endpointScheduleBaselineDays
             }
         }
         .onAppear {

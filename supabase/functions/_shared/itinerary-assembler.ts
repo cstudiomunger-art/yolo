@@ -9,7 +9,7 @@ import {
 } from "./city-travel-hints.ts";
 import {
   maxAttractionsPerDayByCatalog,
-  parseDurationSlots,
+  durationSlotsForRow,
 } from "./itinerary-duration.ts";
 import { pickVisitTimeSlot, visitTimeSlotLabel } from "./itinerary-visit-hours.ts";
 import { runItinerarySchedulerPipeline, type IntercityHopDay } from "./itinerary-scheduler.ts";
@@ -18,6 +18,9 @@ import { seasonHintsForTrip } from "./itinerary-season-hints.ts";
 import { fillEmptyItineraryDays } from "./itinerary-day-fill.ts";
 import { annotateIntercityHops } from "./annotate-intercity-hops.ts";
 import { regionMap } from "./itinerary-city-days.ts";
+
+const CATALOG_TTL_MS = 10 * 60 * 1000;
+const catalogCache = new Map<string, { rows: AttractionRow[]; cachedAt: number }>();
 
 export type AttractionRow = {
   id: string;
@@ -39,6 +42,12 @@ export type AttractionRow = {
   last_entry_time?: string | null;
   opening_hours?: string | null;
   closed_days?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  is_day_trip?: boolean | null;
+  distance_from_center_km?: number | null;
+  duration_slots_min?: number | null;
+  duration_slots_max?: number | null;
 };
 
 export type ItineraryActivity = {
@@ -183,9 +192,15 @@ export async function fetchAttractionsForCities(
   const creds = supabaseHeaders();
   if (!creds || cityIds.length === 0) return [];
 
+  const cacheKey = [...cityIds].map((c) => c.toLowerCase()).sort().join(",");
+  const cached = catalogCache.get(cacheKey);
+  if (cached && Date.now() - cached.cachedAt < CATALOG_TTL_MS) {
+    return cached.rows;
+  }
+
   const ids = cityIds.map((c) => encodeURIComponent(c)).join(",");
   const select =
-    "id,city_id,name,summary,cover_image_path,recommended_duration,ticket_price,audio_guide_count,display_order,priority,planning_zone,recommended_visit_period,attraction_kind,closed_weekdays,open_time,close_time,last_entry_time,opening_hours,closed_days";
+    "id,city_id,name,summary,cover_image_path,recommended_duration,ticket_price,audio_guide_count,display_order,priority,planning_zone,recommended_visit_period,attraction_kind,closed_weekdays,open_time,close_time,last_entry_time,opening_hours,closed_days,latitude,longitude,is_day_trip,distance_from_center_km,duration_slots_min,duration_slots_max";
   const res = await fetch(
     `${creds.url}/rest/v1/attractions?city_id=in.(${ids})&is_published=eq.true&select=${select}&order=display_order.asc`,
     {
@@ -201,7 +216,7 @@ export async function fetchAttractionsForCities(
   }
   const rows = await res.json();
   if (!Array.isArray(rows)) return [];
-  return rows.map((r: Record<string, unknown>) => ({
+  const mapped = rows.map((r: Record<string, unknown>) => ({
     id: String(r.id),
     city_id: String(r.city_id),
     name: String(r.name),
@@ -229,7 +244,17 @@ export async function fetchAttractionsForCities(
     last_entry_time: r.last_entry_time != null ? String(r.last_entry_time) : null,
     opening_hours: r.opening_hours != null ? String(r.opening_hours) : null,
     closed_days: r.closed_days != null ? String(r.closed_days) : null,
+    latitude: r.latitude != null ? Number(r.latitude) : null,
+    longitude: r.longitude != null ? Number(r.longitude) : null,
+    is_day_trip: r.is_day_trip != null ? Boolean(r.is_day_trip) : null,
+    distance_from_center_km: r.distance_from_center_km != null
+      ? Number(r.distance_from_center_km)
+      : null,
+    duration_slots_min: r.duration_slots_min != null ? Number(r.duration_slots_min) : null,
+    duration_slots_max: r.duration_slots_max != null ? Number(r.duration_slots_max) : null,
   }));
+  catalogCache.set(cacheKey, { rows: mapped, cachedAt: Date.now() });
+  return mapped;
 }
 
 /** Every trip day is a slot; experience vs attraction decided by scheduler / AI. */
@@ -237,7 +262,7 @@ export function buildDayPlan(tripDays: number, catalog: AttractionRow[]): DayPla
   const days = Math.max(1, Math.min(tripDays, 21));
   const attractionDayIndices = Array.from({ length: days }, (_, i) => i + 1);
   const maxPerDay = maxAttractionsPerDayByCatalog(
-    catalog.map((a) => parseDurationSlots(a.recommended_duration)),
+    catalog.map((a) => durationSlotsForRow(a)),
     days,
     3,
   );

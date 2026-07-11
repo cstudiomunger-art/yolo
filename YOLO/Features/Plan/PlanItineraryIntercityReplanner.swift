@@ -334,7 +334,11 @@ enum PlanItineraryIntercityReplanner {
             var placed: [ItineraryActivity] = []
             var remaining: [ItineraryActivity] = []
             for act in queue {
-                if let aid = act.attractionId, existingIds.contains(aid) { continue }
+                if let aid = act.attractionId {
+                    let key = aid.lowercased()
+                    if options.protectedAttractionIds.contains(key) { continue }
+                    if existingIds.contains(aid) { continue }
+                }
                 let dur = activityDuration(act, catalogById: options.catalogById)
                 if used + dur <= cap {
                     used += dur

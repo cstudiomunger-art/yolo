@@ -37,6 +37,12 @@ struct Attraction: Identifiable, Hashable, Codable {
     let planningZone: String?
     let recommendedVisitPeriod: String?
     let attractionKind: String?
+    let latitude: Double?
+    let longitude: Double?
+    let isDayTrip: Bool
+    let distanceFromCenterKm: Double?
+    let durationSlotsMin: Double?
+    let durationSlotsMax: Double?
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -88,6 +94,12 @@ struct Attraction: Identifiable, Hashable, Codable {
         planningZone = try c.decodeIfPresent(String.self, forKey: .planningZone)
         recommendedVisitPeriod = try c.decodeIfPresent(String.self, forKey: .recommendedVisitPeriod) ?? "flexible"
         attractionKind = try c.decodeIfPresent(String.self, forKey: .attractionKind)
+        latitude = try c.decodeIfPresent(Double.self, forKey: .latitude)
+        longitude = try c.decodeIfPresent(Double.self, forKey: .longitude)
+        isDayTrip = try c.decodeIfPresent(Bool.self, forKey: .isDayTrip) ?? false
+        distanceFromCenterKm = try c.decodeIfPresent(Double.self, forKey: .distanceFromCenterKm)
+        durationSlotsMin = try c.decodeIfPresent(Double.self, forKey: .durationSlotsMin)
+        durationSlotsMax = try c.decodeIfPresent(Double.self, forKey: .durationSlotsMax)
 
         let decodedPractical = (try? c.decode([PracticalInfoItem].self, forKey: .practicalInfo)) ?? []
         if !decodedPractical.isEmpty {
@@ -161,6 +173,12 @@ struct Attraction: Identifiable, Hashable, Codable {
             try c.encodeIfPresent(recommendedVisitPeriod, forKey: .recommendedVisitPeriod)
         }
         try c.encodeIfPresent(attractionKind, forKey: .attractionKind)
+        try c.encodeIfPresent(latitude, forKey: .latitude)
+        try c.encodeIfPresent(longitude, forKey: .longitude)
+        if isDayTrip { try c.encode(isDayTrip, forKey: .isDayTrip) }
+        try c.encodeIfPresent(distanceFromCenterKm, forKey: .distanceFromCenterKm)
+        try c.encodeIfPresent(durationSlotsMin, forKey: .durationSlotsMin)
+        try c.encodeIfPresent(durationSlotsMax, forKey: .durationSlotsMax)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -172,6 +190,11 @@ struct Attraction: Identifiable, Hashable, Codable {
         case shortDescription, coverImages, addressEn, addressZh, paywallSubtitleOverride, planningZone
         case recommendedVisitPeriod = "recommended_visit_period"
         case attractionKind = "attraction_kind"
+        case latitude, longitude
+        case isDayTrip = "is_day_trip"
+        case distanceFromCenterKm = "distance_from_center_km"
+        case durationSlotsMin = "duration_slots_min"
+        case durationSlotsMax = "duration_slots_max"
     }
 
     var isEveningOnly: Bool {
@@ -303,6 +326,7 @@ struct SubArea: Identifiable, Hashable, Codable {
     let contentBlocks: [SubAreaContentBlock]
     let audioUrl: String?
     let audioGuideId: String?
+    let audioTranscript: String?
     let sortOrder: Int
     let requiresPurchase: Bool
     let priceTierId: String?
@@ -318,6 +342,7 @@ struct SubArea: Identifiable, Hashable, Codable {
         contentBlocks = try c.decodeIfPresent([SubAreaContentBlock].self, forKey: .contentBlocks) ?? []
         audioUrl = try c.decodeIfPresent(String.self, forKey: .audioUrl)
         audioGuideId = try c.decodeIfPresent(String.self, forKey: .audioGuideId)
+        audioTranscript = try c.decodeIfPresent(String.self, forKey: .audioTranscript)
         sortOrder = try c.decodeIfPresent(Int.self, forKey: .sortOrder) ?? 0
         requiresPurchase = try c.decodeIfPresent(Bool.self, forKey: .requiresPurchase) ?? false
         priceTierId = try c.decodeIfPresent(String.self, forKey: .priceTierId)
@@ -334,13 +359,14 @@ struct SubArea: Identifiable, Hashable, Codable {
         try c.encode(contentBlocks, forKey: .contentBlocks)
         try c.encodeIfPresent(audioUrl, forKey: .audioUrl)
         try c.encodeIfPresent(audioGuideId, forKey: .audioGuideId)
+        try c.encodeIfPresent(audioTranscript, forKey: .audioTranscript)
         try c.encode(sortOrder, forKey: .sortOrder)
         try c.encode(requiresPurchase, forKey: .requiresPurchase)
         try c.encodeIfPresent(priceTierId, forKey: .priceTierId)
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, attractionId, nameEn, nameZh, coverImagePath, body, contentBlocks, audioUrl, audioGuideId, sortOrder
+        case id, attractionId, nameEn, nameZh, coverImagePath, body, contentBlocks, audioUrl, audioGuideId, audioTranscript, sortOrder
         case requiresPurchase, priceTierId
     }
 
@@ -351,7 +377,8 @@ struct SubArea: Identifiable, Hashable, Codable {
                 id: "subarea_\(id)",
                 attractionId: attractionId,
                 titleEn: nameEn,
-                audioUrl: direct
+                audioUrl: direct,
+                transcript: audioTranscript
             )
         }
         return nil

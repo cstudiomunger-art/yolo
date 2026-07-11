@@ -425,7 +425,7 @@ async function handleItinerary(
 
   const adjCount = itinerary.scheduling_adjustments?.length ?? 0;
   const dropCount = itinerary.dropped_attraction_ids?.length ?? 0;
-  if (hasAI && aiPlan && (adjCount >= 8 || dropCount >= 5)) {
+  if (hasAI && aiPlan && !ai.disableSecondLlmPass && (adjCount >= 8 || dropCount >= 5)) {
     const retryUser = (
       `Your day_plans needed heavy schedule repairs (${adjCount} adjustments, ${dropCount} dropped).\n` +
       `Violations:\n${(itinerary.scheduling_adjustments ?? []).slice(0, 12).join("\n")}\n` +

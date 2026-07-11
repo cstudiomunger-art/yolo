@@ -7,6 +7,7 @@ export type AISettings = {
   timeoutMs: number;
   systemPromptAssistant: string | null;
   systemPromptItinerary: string | null;
+  disableSecondLlmPass: boolean;
 };
 
 const DEFAULT_API_URL = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
@@ -32,6 +33,7 @@ function envDefaults(): AISettings {
     timeoutMs: envNumber("VOLCENGINE_SUGGESTION_TIMEOUT_MS", 20000),
     systemPromptAssistant: null,
     systemPromptItinerary: null,
+    disableSecondLlmPass: false,
   };
 }
 
@@ -62,6 +64,7 @@ export function mergeAISettings(row: Record<string, unknown> | null): AISettings
     timeoutMs: pickNumber(row, "ai_timeout_ms", base.timeoutMs),
     systemPromptAssistant: pickString(row, "ai_system_prompt_assistant"),
     systemPromptItinerary: pickString(row, "ai_system_prompt_itinerary"),
+    disableSecondLlmPass: row.ai_disable_second_llm_pass === true,
   };
 }
 
@@ -86,7 +89,7 @@ export async function loadAISettingsFromCMS(): Promise<AISettings> {
 
   try {
     const res = await fetch(
-      `${url}/rest/v1/app_settings?id=eq.global&select=ai_model_id,ai_chat_api_url,ai_chat_max_tokens,ai_itinerary_max_tokens,ai_temperature,ai_timeout_ms,ai_system_prompt_assistant,ai_system_prompt_itinerary`,
+      `${url}/rest/v1/app_settings?id=eq.global&select=ai_model_id,ai_chat_api_url,ai_chat_max_tokens,ai_itinerary_max_tokens,ai_temperature,ai_timeout_ms,ai_system_prompt_assistant,ai_system_prompt_itinerary,ai_disable_second_llm_pass`,
       {
         headers: {
           apikey: key,

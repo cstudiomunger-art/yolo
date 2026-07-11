@@ -107,6 +107,20 @@ export function destinationWindows(params: {
   ) {
     daytimeCap = Math.max(1, daytimeCap);
   }
+  const userSetArrival = trimmed.length > 0;
+  if (
+    !userSetArrival
+    && hopKind === "hop"
+    && pace === "intense"
+    && !isTravelDay
+  ) {
+    return {
+      daytimeCap,
+      eveningCap: 1,
+      allowsMorningOrigin: true,
+      resolvedArrival: arrival,
+    };
+  }
   return { daytimeCap, eveningCap: 1, allowsMorningOrigin: true, resolvedArrival: arrival };
 }
 

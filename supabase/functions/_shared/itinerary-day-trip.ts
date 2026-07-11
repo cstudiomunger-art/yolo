@@ -1,17 +1,18 @@
 /** Full-day / far-suburb attractions that must not share a day with urban sights. */
 
-import { parseDurationSlots } from "./itinerary-duration.ts";
+import { durationSlotsForRow } from "./itinerary-duration.ts";
 
 export type DayTripAttractionRow = {
   id: string;
   recommended_duration?: string | null;
   planning_zone?: string | null;
+  is_day_trip?: boolean | null;
+  duration_slots_min?: number | null;
 };
 
 const KNOWN_DAY_TRIP_IDS = new Set([
   "chongqing_wulong_karst",
   "beijing_mutianyu_great_wall",
-  "beijing_jinshanling_great_wall",
   "chongqing_dazu_rock_carvings",
 ]);
 
@@ -23,9 +24,10 @@ export function isDayTripAttraction(
   if (KNOWN_DAY_TRIP_IDS.has(sid)) return true;
   const row = catalogById.get(id) ?? catalogById.get(sid);
   if (!row) return false;
+  if (row.is_day_trip) return true;
   const zone = row.planning_zone?.trim().toLowerCase() ?? "";
   if (zone.startsWith("daytrip")) return true;
-  return parseDurationSlots(row.recommended_duration) >= 3;
+  return durationSlotsForRow(row) >= 3;
 }
 
 export function splitDayTripFromUrban(

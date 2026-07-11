@@ -41,7 +41,7 @@ enum PlanItinerarySlotBudget {
 
     static func durationSlots(for activity: ItineraryActivity, catalogById: [String: Attraction]) -> Double {
         guard let aid = activity.attractionId, let row = catalogById[aid] else { return 1 }
-        return PlanItineraryDuration.parseDurationSlots(row.recommendedDurationText)
+        return PlanItineraryDuration.durationSlots(for: row)
     }
 
     static func usedDaytimeSlots(

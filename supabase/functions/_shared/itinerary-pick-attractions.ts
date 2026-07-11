@@ -1,4 +1,4 @@
-import { parseDurationSlots, daySlotCapacity } from "./itinerary-duration.ts";
+import { parseDurationSlots, durationSlotsForRow } from "./itinerary-duration.ts";
 import { daySlotCapacityForPace, hopDaySlotBudget } from "./itinerary-pace.ts";
 import { isEveningOnlyAttraction } from "./itinerary-visit-hours.ts";
 import { isIntercityHopKind } from "./city-travel-hints.ts";
@@ -127,7 +127,7 @@ export function pickAttractionsBySlotBudget(params: {
     const minDaytime = fullDays + hopDays;
 
     const tryPick = (row: AttractionRow, force = false): boolean => {
-      const slots = parseDurationSlots(row.recommended_duration);
+      const slots = durationSlotsForRow(row);
       if (!force && usedSlots + slots > slotBudget && picked.length > 0) return false;
       picked.push(row.id);
       pickedSet.add(row.id);
@@ -139,7 +139,7 @@ export function pickAttractionsBySlotBudget(params: {
     for (const row of dayPool) {
       if (pickedSet.has(row.id)) continue;
       if (daytimeCount >= minDaytime) break;
-      const slots = parseDurationSlots(row.recommended_duration);
+      const slots = durationSlotsForRow(row);
       if (slots > 1) continue;
       if (usedSlots + slots <= slotBudget || daytimeCount === 0) {
         tryPick(row, daytimeCount === 0);
@@ -148,7 +148,7 @@ export function pickAttractionsBySlotBudget(params: {
 
     for (const row of dayPool) {
       if (!mustIds.has(row.id) || pickedSet.has(row.id)) continue;
-      const slots = parseDurationSlots(row.recommended_duration);
+      const slots = durationSlotsForRow(row);
       if (usedSlots + slots > slotBudget && picked.length > 0) {
         preDropped.push(row.id);
         continue;
@@ -158,7 +158,7 @@ export function pickAttractionsBySlotBudget(params: {
 
     for (const row of dayPool) {
       if (pickedSet.has(row.id)) continue;
-      const slots = parseDurationSlots(row.recommended_duration);
+      const slots = durationSlotsForRow(row);
       if (usedSlots + slots > slotBudget) {
         preDropped.push(row.id);
         continue;
@@ -170,7 +170,7 @@ export function pickAttractionsBySlotBudget(params: {
       const extra = dayPool.find((row) =>
         !pickedSet.has(row.id)
         && priorityRank(row.priority) <= 1
-        && parseDurationSlots(row.recommended_duration) <= 1
+        && durationSlotsForRow(row) <= 1
       );
       if (extra) tryPick(extra, true);
     }
