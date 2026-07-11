@@ -201,16 +201,17 @@ struct MarkdownContentView: View {
                     .padding(.vertical, 8)
             }
             .table { configuration in
-                configuration.label
-                    .fixedSize(horizontal: false, vertical: true)
-                    .markdownTableBorderStyle(.init(color: border))
-                    .markdownTableBackgroundStyle(
-                        .alternatingRows(
-                            Theme.ColorToken.background,
-                            subtle
-                        )
-                    )
-                    .padding(.vertical, 4)
+                let columnCount = Self.tableColumnCount(in: configuration.content)
+                Group {
+                    if columnCount >= 4 {
+                        ScrollView(.horizontal, showsIndicators: true) {
+                            Self.styledTable(label: configuration.label, border: border, backgroundSubtle: subtle)
+                        }
+                    } else {
+                        Self.styledTable(label: configuration.label, border: border, backgroundSubtle: subtle)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .tableCell { configuration in
                 configuration.label
@@ -220,10 +221,44 @@ struct MarkdownContentView: View {
                             FontWeight(.semibold)
                             ForegroundColor(Theme.ColorToken.textPrimary)
                         }
+                        BackgroundColor(nil)
                     }
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 6)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .relativeLineSpacing(.em(0.2))
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
             }
+    }
+
+    /// Count GFM table columns from block content (for horizontal scroll threshold).
+    static func tableColumnCount(in content: MarkdownContent) -> Int {
+        let md = content.renderMarkdown()
+        guard let headerLine = md
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .first(where: { $0.contains("|") })
+        else { return 0 }
+        return headerLine
+            .split(separator: "|", omittingEmptySubsequences: true)
+            .count
+    }
+
+    @ViewBuilder
+    private static func styledTable(
+        label: BlockConfiguration.Label,
+        border: Color,
+        backgroundSubtle: Color
+    ) -> some View {
+        label
+            .fixedSize(horizontal: false, vertical: true)
+            .markdownTableBorderStyle(.init(color: border))
+            .markdownTableBackgroundStyle(
+                .alternatingRows(
+                    Theme.ColorToken.background,
+                    backgroundSubtle
+                )
+            )
+            .padding(.vertical, 4)
     }
 }
 

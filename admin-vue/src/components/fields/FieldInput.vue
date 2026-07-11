@@ -260,7 +260,8 @@ async function onAudioFile(e) {
     </select>
 
     <MarkdownField v-else-if="isType('markdown')" v-model="val"
-      :entity-id="entityId" :folder="f.uploadFolder || 'misc'" />
+      :entity-id="entityId" :folder="f.uploadFolder || 'misc'"
+      :label="f.label || f.key" />
 
 
     <StringListEditor
