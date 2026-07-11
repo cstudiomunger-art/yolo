@@ -284,6 +284,8 @@ const hasAdvanced = props.schema.fields.some((f) => f.advanced);
       :record="form"
       :table-key="tableKey"
       :entity-id="entityId"
+      :record-pk="pk"
+      :record-id="isNew ? null : form[pk]"
     />
 
     <button v-if="hasAdvanced" class="btn btn-secondary btn-sm adv" @click="showAdvanced = !showAdvanced">

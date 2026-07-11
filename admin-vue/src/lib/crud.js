@@ -34,6 +34,12 @@ export async function deleteRow(tableKey, pk, id) {
   if (error) throw error;
 }
 
+/** Patch specific columns on an existing row (e.g. immediate image field clear). */
+export async function patchRowFields(tableKey, pk, id, fields) {
+  const { error } = await supabase.from(tableKey).update(fields).eq(pk, id);
+  if (error) throw error;
+}
+
 /**
  * City filtering for flat list tables — mirror of core.js TABLE_CITY_FILTERS.
  * `attractionCity` maps an attraction_id → city_id (from refCache).

@@ -4,6 +4,8 @@ import { supabase } from "@/lib/supabase";
 import { useRefCache } from "@/stores/refCache";
 import { PRACTICAL_INFO_PRESETS } from "@/schema/tables";
 import MarkdownField from "@/components/fields/MarkdownField.vue";
+import { patchRowFields } from "@/lib/crud";
+import { deleteCoverImageFile } from "@/lib/storage";
 import ObjectListEditor from "@/components/fields/ObjectListEditor.vue";
 import MultiCheck from "@/components/fields/MultiCheck.vue";
 import VoiceVariantsEditor from "@/components/fields/VoiceVariantsEditor.vue";
@@ -22,6 +24,8 @@ const props = defineProps({
   record: { type: Object, required: true },
   tableKey: { type: String, required: true },
   entityId: { type: String, default: "" },
+  recordPk: { type: String, default: "id" },
+  recordId: { type: [String, Number], default: null },
 });
 
 const refCache = useRefCache();
@@ -167,20 +171,22 @@ const enumOptions = computed(() =>
 
 const JSON_TYPES = new Set(["json"]);
 
+async function persistField(key, value) {
+  if (props.recordId == null || props.recordId === "") return;
+  await patchRowFields(props.tableKey, props.recordPk, props.recordId, { [key]: value });
+}
+
 async function clearImage() {
-  if (!confirm("确定移除该图片？保存后 App 将不再显示。")) return;
+  if (!confirm("确定移除该图片？将立即从数据库清除并删除 Storage 文件。")) return;
   const url = props.record[f.key];
-  // best-effort: remove the underlying file from the cover-images bucket
+  uploadErr.value = "";
   try {
-    const marker = "/cover-images/";
-    if (typeof url === "string" && url.includes(marker)) {
-      const path = decodeURIComponent(url.split(marker)[1].split("?")[0]);
-      await supabase.storage.from("cover-images").remove([path]);
-    }
+    await deleteCoverImageFile(url);
+    props.record[f.key] = null;
+    await persistField(f.key, null);
   } catch (e) {
-    /* ignore — clearing the field reference is what matters */
+    uploadErr.value = e.message || String(e);
   }
-  props.record[f.key] = null;
 }
 
 async function onImageFile(e) {
@@ -301,7 +307,8 @@ async function onAudioFile(e) {
 
     <!-- image url list (with gallery upload) -->
     <ImageUrlList v-else-if="isType('image_url_list')" v-model="val"
-      :folder="f.uploadFolder || 'misc'" :entity-id="entityId" />
+      :folder="f.uploadFolder || 'misc'" :entity-id="entityId"
+      @persist="(v) => persistField(f.key, v)" />
 
     <!-- payment match object -->
     <PaymentMatch v-else-if="isType('payment_match')" v-model="val" />

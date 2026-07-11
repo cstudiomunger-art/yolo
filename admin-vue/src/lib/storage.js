@@ -3,6 +3,127 @@ import { supabase } from "@/lib/supabase";
 export const COVER_BUCKET = "cover-images";
 export const AUDIO_BUCKET = "audio-guides";
 export const AVATARS_BUCKET = "avatars";
+export const CHAT_IMAGES_BUCKET = "chat-images";
+
+/** All image Storage buckets (excludes audio-guides). */
+export const IMAGE_BUCKETS = [COVER_BUCKET, AVATARS_BUCKET, CHAT_IMAGES_BUCKET];
+
+const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "svg", "avif", "heic"]);
+
+/**
+ * Parse a DB value or URL into { bucket, path } or null.
+ * Handles public Storage URLs, bucket-prefixed paths, and cover-images relative paths.
+ */
+export function normalizeStorageRef(raw, defaultBucket = COVER_BUCKET) {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed) return null;
+
+  const publicMatch = trimmed.match(
+    /\/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+?)(?:\?.*)?$/i
+  );
+  if (publicMatch) {
+    return {
+      bucket: publicMatch[1],
+      path: decodeURIComponent(publicMatch[2].replace(/\/+$/, "")),
+    };
+  }
+
+  for (const bucket of IMAGE_BUCKETS) {
+    const marker = `/${bucket}/`;
+    const idx = trimmed.indexOf(marker);
+    if (idx !== -1) {
+      return {
+        bucket,
+        path: decodeURIComponent(trimmed.slice(idx + marker.length).split("?")[0]),
+      };
+    }
+    if (trimmed.startsWith(`${bucket}/`)) {
+      return { bucket, path: trimmed.slice(bucket.length + 1) };
+    }
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) return null;
+
+  let path = trimmed.replace(/^\/+/, "");
+  if (!path) return null;
+  return { bucket: defaultBucket, path };
+}
+
+/** Storage object key for cover-images (relative path or URL). */
+export function coverImageStoragePath(raw) {
+  const ref = normalizeStorageRef(raw, COVER_BUCKET);
+  return ref?.bucket === COVER_BUCKET ? ref.path : ref?.path ?? null;
+}
+
+export function storageRefKey(bucket, path) {
+  return `${bucket}:${path}`;
+}
+
+export function getPublicStorageUrl(bucket, path) {
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+export async function getStoragePreviewUrl(bucket, path) {
+  if (bucket === CHAT_IMAGES_BUCKET) {
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 3600);
+    if (error) throw error;
+    return data.signedUrl;
+  }
+  return getPublicStorageUrl(bucket, path);
+}
+
+export async function deleteStorageFile(bucket, pathOrPaths) {
+  const paths = Array.isArray(pathOrPaths) ? pathOrPaths : [pathOrPaths];
+  if (!paths.length) return;
+  const { error } = await supabase.storage.from(bucket).remove(paths);
+  if (error) throw error;
+}
+
+/** Best-effort delete for cover-images refs (URL or relative path). */
+export async function deleteCoverImageFile(raw) {
+  const ref = normalizeStorageRef(raw, COVER_BUCKET);
+  if (!ref) return;
+  try {
+    await deleteStorageFile(ref.bucket, ref.path);
+  } catch (e) {
+    console.warn("deleteCoverImageFile:", e);
+  }
+}
+
+/** Recursively list image files in a bucket. */
+export async function listBucketImages(bucket) {
+  const out = [];
+
+  async function walk(prefix = "") {
+    let offset = 0;
+    for (;;) {
+      const { data, error } = await supabase.storage.from(bucket).list(prefix, {
+        limit: 100,
+        offset,
+        sortBy: { column: "name", order: "asc" },
+      });
+      if (error) throw error;
+      if (!data?.length) break;
+
+      for (const item of data) {
+        const path = prefix ? `${prefix}/${item.name}` : item.name;
+        if (item.id == null) {
+          await walk(path);
+          continue;
+        }
+        const ext = (item.name.split(".").pop() || "").toLowerCase();
+        if (IMAGE_EXT.has(ext)) out.push({ bucket, path });
+      }
+
+      if (data.length < 100) break;
+      offset += data.length;
+    }
+  }
+
+  await walk();
+  return out;
+}
 
 /** Slugify identical to legacy core.js App.slugify. */
 export function slugify(text, prefix) {

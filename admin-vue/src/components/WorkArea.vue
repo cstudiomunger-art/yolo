@@ -14,6 +14,7 @@ import UsersHub from "@/components/hubs/UsersHub.vue";
 import SupportWorkbench from "@/components/hubs/SupportWorkbench.vue";
 import ChecklistWorkbench from "@/components/hubs/ChecklistWorkbench.vue";
 import PaymentWorkbench from "@/components/hubs/PaymentWorkbench.vue";
+import ImageManagerHub from "@/components/hubs/ImageManagerHub.vue";
 
 const HUBS = {
   visa: VisaWorkbench,
@@ -24,6 +25,7 @@ const HUBS = {
   support: SupportWorkbench,
   checklist: ChecklistWorkbench,
   payment: PaymentWorkbench,
+  images: ImageManagerHub,
 };
 
 const nav = useNav();

@@ -413,6 +413,11 @@ function isActive(sel) {
         </div>
         <button
           class="row lvl1 leaf"
+          :class="{ active: isActive({ kind: 'hub', hubId: 'images' }) }"
+          @click="nav.select({ kind: 'hub', hubId: 'images' })"
+        >🖼 图片管理</button>
+        <button
+          class="row lvl1 leaf"
           :class="{ active: isActive({ kind: 'table', tableKey: 'emergency_config' }) }"
           @click="nav.select({ kind: 'table', tableKey: 'emergency_config' })"
         >紧急联系</button>

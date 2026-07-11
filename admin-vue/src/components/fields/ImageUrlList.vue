@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from "vue";
-import { uploadGalleryImage } from "@/lib/storage";
+import { uploadGalleryImage, deleteCoverImageFile } from "@/lib/storage";
 
 /** Array-of-strings (image URLs) with local gallery upload. */
 const props = defineProps({
@@ -8,7 +8,7 @@ const props = defineProps({
   folder: { type: String, default: "misc" },
   entityId: { type: String, default: "" },
 });
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "persist"]);
 
 const urls = computed(() => (Array.isArray(props.modelValue) ? props.modelValue : []));
 const uploading = ref(false);
@@ -19,12 +19,25 @@ function setUrl(i, v) {
   next[i] = v;
   emit("update:modelValue", next);
 }
-function remove(i) {
-  emit("update:modelValue", urls.value.filter((_, idx) => idx !== i));
+
+async function remove(i) {
+  const url = urls.value[i];
+  if (!confirm("确定删除该图片？将立即从数据库移除并删除 Storage 文件。")) return;
+  err.value = "";
+  try {
+    if (url) await deleteCoverImageFile(url);
+    const next = urls.value.filter((_, idx) => idx !== i);
+    emit("update:modelValue", next);
+    emit("persist", next);
+  } catch (e2) {
+    err.value = e2.message || String(e2);
+  }
 }
+
 function addBlank() {
   emit("update:modelValue", [...urls.value, ""]);
 }
+
 async function onFiles(e) {
   const files = Array.from(e.target.files || []);
   if (!files.length) return;
@@ -41,7 +54,9 @@ async function onFiles(e) {
       const url = await uploadGalleryImage(files[i], props.folder, props.entityId, `img_${Date.now()}_${i}`);
       added.push(url);
     }
-    emit("update:modelValue", [...urls.value, ...added]);
+    const next = [...urls.value, ...added];
+    emit("update:modelValue", next);
+    emit("persist", next);
   } catch (e2) {
     err.value = e2.message || String(e2);
   } finally {
