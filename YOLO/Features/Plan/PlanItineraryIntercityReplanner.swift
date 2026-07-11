@@ -6,6 +6,8 @@ enum PlanItineraryIntercityReplanner {
         let pace: TripPace
         let catalogById: [String: Attraction]
         var droppedAttractionIds: [String] = []
+        /// Attraction ids the user manually pinned on intercity days — never auto-backfilled or relocated.
+        var protectedAttractionIds: Set<String> = []
     }
 
     static func replan(
@@ -104,7 +106,8 @@ enum PlanItineraryIntercityReplanner {
         PlanItineraryEventDayPlanner.Options(
             pace: options.pace,
             catalogById: options.catalogById,
-            droppedAttractionIds: options.droppedAttractionIds
+            droppedAttractionIds: options.droppedAttractionIds,
+            protectedAttractionIds: options.protectedAttractionIds
         )
     }
 
@@ -270,6 +273,7 @@ enum PlanItineraryIntercityReplanner {
             for act in queue {
                 if let aid = act.attractionId {
                     let key = aid.lowercased()
+                    if options.protectedAttractionIds.contains(key) { continue }
                     if existingIds.contains(where: { $0.lowercased() == key }) { continue }
                     result = PlanItineraryAttractionLedger.remove(attractionId: aid, from: result)
                 }

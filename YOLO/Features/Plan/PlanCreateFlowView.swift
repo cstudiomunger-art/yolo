@@ -41,8 +41,6 @@ struct PlanCreateFlowView: View {
     @State private var isRuleBasedTrip = false
     @State private var usedLocalFallback = false
     @State private var reviewEditMode: EditMode = .inactive
-    @State private var intercityTripSnapshot: [ItineraryDay]?
-    @State private var intercityAdjustmentsSnapshot: [String]?
     @State private var endpointTripSnapshot: [ItineraryDay]?
     @State private var endpointAdjustmentsSnapshot: [String]?
     @State private var endpointArrivalReplanTask: Task<Void, Never>?
@@ -198,6 +196,8 @@ struct PlanCreateFlowView: View {
             PlanAttractionPickerSheet(cityIds: ctx.cityIds, dayIndex: ctx.dayIndex) { attraction in
                 if let bookend = ctx.bookend {
                     appendBookendAttraction(attraction, bookend: bookend)
+                } else if ctx.intercityManual {
+                    appendIntercityManualAttraction(attraction, dayIndex: ctx.dayIndex)
                 } else {
                     appendAttraction(attraction, dayIndex: ctx.dayIndex)
                 }
@@ -1092,7 +1092,7 @@ struct PlanCreateFlowView: View {
                     cityDisplayName: visited.isEmpty
                         ? CityTravelHints.displayName(for: displayDay.experienceCityId ?? hop.toCityId)
                         : visited,
-                    showsActivities: !day.activities.isEmpty,
+                    showsActivities: !day.activities.isEmpty || !draftIntercityManualRows(dayIndex: dayIndex).isEmpty,
                     onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: dayIndex, arrivalTime: $0) }
                 )
                 .listRowInsets(EdgeInsets(top: 8, leading: Theme.screenPadding, bottom: 8, trailing: Theme.screenPadding))
@@ -1109,13 +1109,24 @@ struct PlanCreateFlowView: View {
                     moveReviewActivities(dayIndex: dayIndex, from: source, to: destination)
                 }
 
+                ForEach(draftIntercityManualRows(dayIndex: dayIndex)) { activity in
+                    reviewActivityRow(activity, dayIndex: dayIndex)
+                        .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 4, trailing: Theme.screenPadding))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+
                 if reviewEditMode == .inactive {
                     Button {
                         let cityIds: [String] = {
                             if let cid = displayDay.experienceCityId, !cid.isEmpty { return [cid] }
                             return reviewTripCityIds()
                         }()
-                        addAttractionContext = PlanAddAttractionContext(dayIndex: dayIndex, cityIds: cityIds)
+                        addAttractionContext = PlanAddAttractionContext(
+                            dayIndex: dayIndex,
+                            cityIds: cityIds,
+                            intercityManual: true
+                        )
                     } label: {
                         Label(String(localized: "Add attraction"), systemImage: "plus")
                             .font(Theme.FontToken.inter(12, weight: .medium))
@@ -1160,10 +1171,21 @@ struct PlanCreateFlowView: View {
                     )
                 }
 
+                ForEach(draftIntercityManualRows(dayIndex: dayIndex)) { activity in
+                    reviewActivityRow(activity, dayIndex: dayIndex)
+                        .listRowInsets(EdgeInsets(top: 4, leading: Theme.screenPadding, bottom: 4, trailing: Theme.screenPadding))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+
                 if reviewEditMode == .inactive {
                     Button {
                         let ids = reviewTripCityIds()
-                        addAttractionContext = PlanAddAttractionContext(dayIndex: dayIndex, cityIds: ids)
+                        addAttractionContext = PlanAddAttractionContext(
+                            dayIndex: dayIndex,
+                            cityIds: ids,
+                            intercityManual: true
+                        )
                     } label: {
                         Label(String(localized: "Add attraction"), systemImage: "plus")
                             .font(Theme.FontToken.inter(12, weight: .medium))
@@ -1657,16 +1679,6 @@ struct PlanCreateFlowView: View {
         failureMessage = nil
         generationMessage = String(localized: "Planning your days…")
         generationTask = Task {
-            let messages = [
-                String(localized: "Planning your days…"),
-                String(localized: "Matching attractions…"),
-                String(localized: "Almost ready…"),
-            ]
-            for (i, msg) in messages.enumerated() {
-                guard !Task.isCancelled, activeEpoch == generationEpoch else { return }
-                generationMessage = msg
-                try? await Task.sleep(for: .milliseconds(i == 0 ? 400 : 700))
-            }
             do {
                 let generated = try await AIService.generateItinerary(
                     content: appEnv.content,
@@ -1950,8 +1962,25 @@ struct PlanCreateFlowView: View {
         return mid?.lowercased() ?? visitOrder.first?.lowercased() ?? "beijing"
     }
 
+    private func draftIntercityManualRows(dayIndex: Int) -> [ItineraryActivity] {
+        guard let trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return [] }
+        return trip.intercityManual(forDayIndex: trip.days[dayIndex].dayIndex)
+    }
+
     private func loadAttractionCache(for trip: SampleItinerary) async {
-        attractionCache = await PlanItineraryHelpers.attractionCache(for: trip, content: appEnv.content)
+        var ids = Set(trip.days.flatMap(\.activities).compactMap(\.attractionId))
+        ids.formUnion((trip.internationalArrivalActivities ?? []).compactMap(\.attractionId))
+        ids.formUnion((trip.internationalDepartureActivities ?? []).compactMap(\.attractionId))
+        if let manualMap = trip.intercityManualActivities {
+            for manual in manualMap.values {
+                ids.formUnion(manual.compactMap(\.attractionId))
+            }
+        }
+        attractionCache = await PlanItineraryHelpers.supplementAttractionCache(
+            existing: attractionCache,
+            attractionIds: Array(ids),
+            content: appEnv.content
+        )
     }
 
     private func reviewTripCityIds() -> [String] {
@@ -1971,33 +2000,85 @@ struct PlanCreateFlowView: View {
         arrivalReplanTask = Task { @MainActor in
             try? await Task.sleep(nanoseconds: 350_000_000)
             guard !Task.isCancelled else { return }
-            guard let trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return }
-            let day = trip.days[dayIndex]
+            guard var trip = draftItinerary else { return }
+            guard let dayIdx = trip.days.firstIndex(where: { $0.dayIndex == dayIndex }) else { return }
+            let day = trip.days[dayIdx]
             guard day.intercityHop != nil else { return }
+            let key = String(dayIndex)
 
-            if intercityTripSnapshot == nil {
-                intercityTripSnapshot = trip.days
-                intercityAdjustmentsSnapshot = trip.schedulingAdjustments
-            }
-
-            if arrivalTime == nil, let snapshot = intercityTripSnapshot {
-                replaceReviewDays(
-                    snapshot,
-                    schedulingAdjustments: intercityAdjustmentsSnapshot
+            if arrivalTime == nil {
+                if let baseline = trip.intercityScheduleBaselineByDayIndex?[key] {
+                    var days = trip.days
+                    days[dayIdx] = days[dayIdx].withActivities(baseline)
+                    trip = trip.withDays(days)
+                }
+                var manual = trip.intercityManualActivities
+                manual?.removeValue(forKey: key)
+                trip = SampleItinerary(
+                    id: trip.id, title: trip.title, meta: trip.meta, routeSummary: trip.routeSummary,
+                    estimatedBudget: trip.estimatedBudget, days: trip.days, shareSlug: trip.shareSlug,
+                    isShared: trip.isShared, startDate: trip.startDate, endDate: trip.endDate,
+                    visitOrder: trip.visitOrder, userEdited: true,
+                    droppedAttractionIds: trip.droppedAttractionIds,
+                    schedulingAdjustments: trip.schedulingAdjustments, seasonHints: trip.seasonHints,
+                    pace: trip.pace, internationalArrivalTime: trip.internationalArrivalTime,
+                    internationalDepartureTime: trip.internationalDepartureTime,
+                    endpointScheduleBaselineDays: trip.endpointScheduleBaselineDays,
+                    internationalArrivalActivities: trip.internationalArrivalActivities,
+                    internationalDepartureActivities: trip.internationalDepartureActivities,
+                    intercityManualActivities: manual?.isEmpty == true ? nil : manual,
+                    intercityScheduleBaselineByDayIndex: {
+                        var baselines = trip.intercityScheduleBaselineByDayIndex
+                        baselines?.removeValue(forKey: key)
+                        return baselines?.isEmpty == true ? nil : baselines
+                    }()
                 )
-                intercityTripSnapshot = nil
-                intercityAdjustmentsSnapshot = nil
+                draftItinerary = trip
+                let (cleared, _) = PlanItineraryIntercityReplanner.replan(
+                    days: trip.days,
+                    dayIndex: dayIndex,
+                    arrivalTime: nil,
+                    options: PlanItineraryIntercityReplanner.Options(
+                        pace: tripPace,
+                        catalogById: attractionCache,
+                        droppedAttractionIds: trip.droppedAttractionIds ?? []
+                    )
+                )
+                replaceReviewDays(cleared)
                 return
             }
 
+            var baselines = trip.intercityScheduleBaselineByDayIndex ?? [:]
+            if baselines[key] == nil {
+                baselines[key] = trip.days[dayIdx].activities
+                trip = SampleItinerary(
+                    id: trip.id, title: trip.title, meta: trip.meta, routeSummary: trip.routeSummary,
+                    estimatedBudget: trip.estimatedBudget, days: trip.days, shareSlug: trip.shareSlug,
+                    isShared: trip.isShared, startDate: trip.startDate, endDate: trip.endDate,
+                    visitOrder: trip.visitOrder, userEdited: trip.userEdited,
+                    droppedAttractionIds: trip.droppedAttractionIds,
+                    schedulingAdjustments: trip.schedulingAdjustments, seasonHints: trip.seasonHints,
+                    pace: trip.pace, internationalArrivalTime: trip.internationalArrivalTime,
+                    internationalDepartureTime: trip.internationalDepartureTime,
+                    endpointScheduleBaselineDays: trip.endpointScheduleBaselineDays,
+                    internationalArrivalActivities: trip.internationalArrivalActivities,
+                    internationalDepartureActivities: trip.internationalDepartureActivities,
+                    intercityManualActivities: trip.intercityManualActivities,
+                    intercityScheduleBaselineByDayIndex: baselines
+                )
+                draftItinerary = trip
+            }
+
+            let protected = PlanItineraryHelpers.protectedIntercityManualIds(from: trip)
             let (newDays, adjustments) = PlanItineraryIntercityReplanner.replan(
                 days: trip.days,
-                dayIndex: day.dayIndex,
+                dayIndex: dayIndex,
                 arrivalTime: arrivalTime,
                 options: PlanItineraryIntercityReplanner.Options(
                     pace: tripPace,
                     catalogById: attractionCache,
-                    droppedAttractionIds: trip.droppedAttractionIds ?? []
+                    droppedAttractionIds: trip.droppedAttractionIds ?? [],
+                    protectedAttractionIds: protected
                 )
             )
             replaceReviewDays(newDays, extraAdjustments: adjustments)
@@ -2058,7 +2139,9 @@ struct PlanCreateFlowView: View {
             internationalDepartureTime: resolvedDeparture,
             endpointScheduleBaselineDays: resolvedBaseline,
             internationalArrivalActivities: resolvedArrivalActivities,
-            internationalDepartureActivities: resolvedDepartureActivities
+            internationalDepartureActivities: resolvedDepartureActivities,
+            intercityManualActivities: trip.intercityManualActivities,
+            intercityScheduleBaselineByDayIndex: trip.intercityScheduleBaselineByDayIndex
         )
     }
 
@@ -2241,6 +2324,23 @@ struct PlanCreateFlowView: View {
         var days = trip.days
         days[dayIndex] = trip.days[dayIndex].withActivities(activities)
         draftItinerary = trip.withDays(days).markingUserEdited()
+    }
+
+    private func appendIntercityManualAttraction(_ attraction: Attraction, dayIndex: Int) {
+        guard let trip = draftItinerary, trip.days.indices.contains(dayIndex) else { return }
+        let activity = PlanItineraryHelpers.activity(from: attraction)
+        var updated = PlanItineraryHelpers.appendIntercityManual(
+            activity,
+            dayIndex: trip.days[dayIndex].dayIndex,
+            to: trip
+        )
+        if let aid = activity.attractionId {
+            updated = updated.withDays(
+                PlanItineraryAttractionLedger.remove(attractionId: aid, from: updated.days)
+            )
+        }
+        draftItinerary = updated
+        attractionCache[attraction.id] = attraction
     }
 
     private func appendAttraction(_ attraction: Attraction, dayIndex: Int) {

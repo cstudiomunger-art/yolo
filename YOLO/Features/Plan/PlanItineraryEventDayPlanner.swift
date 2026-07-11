@@ -6,6 +6,7 @@ enum PlanItineraryEventDayPlanner {
         let pace: TripPace
         let catalogById: [String: Attraction]
         var droppedAttractionIds: [String] = []
+        var protectedAttractionIds: Set<String> = []
     }
 
     struct Caps {
@@ -100,7 +101,7 @@ enum PlanItineraryEventDayPlanner {
             eveningCap: caps.eveningCap,
             usedDaytime: usedDaytime(kept, catalogById: options.catalogById),
             eveningCount: eveningCount(kept, catalogById: options.catalogById),
-            excludeIds: scheduled,
+            excludeIds: scheduled.union(Set(options.protectedAttractionIds.map { $0.lowercased() })),
             dayIndex: day.dayIndex,
             startActIndex: kept.count,
             options: options
@@ -168,7 +169,7 @@ enum PlanItineraryEventDayPlanner {
             eveningCap: caps.eveningCap,
             usedDaytime: usedDaytime(kept, catalogById: options.catalogById),
             eveningCount: eveningCount(kept, catalogById: options.catalogById),
-            excludeIds: othersScheduled,
+            excludeIds: othersScheduled.union(Set(options.protectedAttractionIds.map { $0.lowercased() })),
             dayIndex: eventDayIndex,
             startActIndex: kept.count,
             options: options

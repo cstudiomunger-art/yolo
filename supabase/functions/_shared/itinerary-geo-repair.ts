@@ -1,14 +1,18 @@
 /** Geographic sanity for assignment lists (dedupe + same-day city compatibility). */
 
 import { canVisitSameDay } from "./city-travel-hints.ts";
+import {
+  isDayTripAttraction,
+  splitDayTripFromUrban,
+  type DayTripAttractionRow,
+} from "./itinerary-day-trip.ts";
 
 export type GeoAssignment = {
   day_index: number;
   attraction_ids: string[];
 };
 
-export type GeoAttractionRow = {
-  id: string;
+export type GeoAttractionRow = DayTripAttractionRow & {
   city_id: string;
 };
 
@@ -74,6 +78,20 @@ function citiesOnAssignment(
   return out;
 }
 
+function canPlaceWithoutMixing(
+  id: string,
+  existing: string[],
+  catalogById: Map<string, GeoAttractionRow>,
+): boolean {
+  if (existing.length === 0) return true;
+  const incomingTrip = isDayTripAttraction(id, catalogById);
+  const dayHasUrban = existing.some((eid) => !isDayTripAttraction(eid, catalogById));
+  const dayHasTrip = existing.some((eid) => isDayTripAttraction(eid, catalogById));
+  if (incomingTrip && dayHasUrban) return false;
+  if (!incomingTrip && dayHasTrip) return false;
+  return true;
+}
+
 /** Dedupe globally, enforce per-day allowed cities, and split incompatible same-day mixes. */
 export function applyGeographicRepairs<T extends GeoAssignment>(params: {
   assignments: T[];
@@ -121,6 +139,19 @@ export function applyGeographicRepairs<T extends GeoAssignment>(params: {
     overflow.push(...split.overflow);
   }
 
+  for (const assignment of assignments) {
+    const allowed = allowedCitiesByDay.get(assignment.day_index) ?? new Set<string>();
+    if (allowed.size === 2) continue;
+    const dayTripSplit = splitDayTripFromUrban(assignment.attraction_ids, catalogById);
+    if (dayTripSplit.overflow.length) {
+      adjustments.push(
+        `Split day-trip sights from urban mix on day ${assignment.day_index}: ${dayTripSplit.overflow.join(", ")}`,
+      );
+    }
+    assignment.attraction_ids = dayTripSplit.keep;
+    overflow.push(...dayTripSplit.overflow);
+  }
+
   for (const id of overflow) {
     const city = catalogById.get(id)?.city_id?.toLowerCase();
     if (!city) continue;
@@ -128,6 +159,7 @@ export function applyGeographicRepairs<T extends GeoAssignment>(params: {
     for (const assignment of assignments) {
       const allowed = allowedCitiesByDay.get(assignment.day_index);
       if (!allowed?.has(city)) continue;
+      if (!canPlaceWithoutMixing(id, assignment.attraction_ids, catalogById)) continue;
       const existing = citiesOnAssignment(assignment.attraction_ids, catalogById);
       if (existing.length === 0 || existing.every((c) => canVisitSameDay(c, city, regionByCity))) {
         assignment.attraction_ids.push(id);

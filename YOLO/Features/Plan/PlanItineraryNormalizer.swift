@@ -127,7 +127,9 @@ enum PlanItineraryNormalizer {
             internationalDepartureTime: trip.internationalDepartureTime,
             endpointScheduleBaselineDays: trip.endpointScheduleBaselineDays,
             internationalArrivalActivities: trip.internationalArrivalActivities,
-            internationalDepartureActivities: trip.internationalDepartureActivities
+            internationalDepartureActivities: trip.internationalDepartureActivities,
+            intercityManualActivities: trip.intercityManualActivities,
+            intercityScheduleBaselineByDayIndex: trip.intercityScheduleBaselineByDayIndex
         )
     }
 
@@ -278,7 +280,9 @@ enum PlanItineraryNormalizer {
             internationalDepartureTime: trip.internationalDepartureTime,
             endpointScheduleBaselineDays: trip.endpointScheduleBaselineDays,
             internationalArrivalActivities: trip.internationalArrivalActivities,
-            internationalDepartureActivities: trip.internationalDepartureActivities
+            internationalDepartureActivities: trip.internationalDepartureActivities,
+            intercityManualActivities: trip.intercityManualActivities,
+            intercityScheduleBaselineByDayIndex: trip.intercityScheduleBaselineByDayIndex
         )
     }
 

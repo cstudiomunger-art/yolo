@@ -57,12 +57,30 @@ enum PlanItineraryGeoRepair {
             overflow.append(contentsOf: split.overflow)
         }
 
+        for day in result.keys.sorted() {
+            let allowed = allowedCitiesByDay[day] ?? []
+            if allowed.count == 2 { continue }
+            let dayTripSplit = PlanItineraryDayTrip.splitDayTripFromUrban(
+                result[day] ?? [],
+                catalogById: catalogById
+            )
+            if !dayTripSplit.overflow.isEmpty {
+                adjustments.append(
+                    "Split day-trip sights from urban mix on day \(day): \(dayTripSplit.overflow.joined(separator: ", "))"
+                )
+            }
+            result[day] = dayTripSplit.keep
+            overflow.append(contentsOf: dayTripSplit.overflow)
+        }
+
         for id in overflow {
             guard let city = catalogById[id]?.cityId.lowercased() else { continue }
             var placed = false
             for day in result.keys.sorted() {
                 guard allowedCitiesByDay[day]?.contains(city) == true else { continue }
-                let existing = citiesOnAssignment(result[day] ?? [], catalogById: catalogById)
+                let existingIds = result[day] ?? []
+                if !canPlaceWithoutMixing(id, onDay: existingIds, catalogById: catalogById) { continue }
+                let existing = citiesOnAssignment(existingIds, catalogById: catalogById)
                 if existing.isEmpty || existing.allSatisfy({ CityTravelHints.canVisitSameDay($0, city) }) {
                     result[day, default: []].append(id)
                     placed = true
@@ -77,6 +95,24 @@ enum PlanItineraryGeoRepair {
         }
 
         return (result, dropped)
+    }
+
+    private static func canPlaceWithoutMixing(
+        _ id: String,
+        onDay existing: [String],
+        catalogById: [String: Attraction]
+    ) -> Bool {
+        if existing.isEmpty { return true }
+        let incomingTrip = PlanItineraryDayTrip.isDayTrip(attractionId: id, catalogById: catalogById)
+        let dayHasUrban = existing.contains {
+            !PlanItineraryDayTrip.isDayTrip(attractionId: $0, catalogById: catalogById)
+        }
+        let dayHasTrip = existing.contains {
+            PlanItineraryDayTrip.isDayTrip(attractionId: $0, catalogById: catalogById)
+        }
+        if incomingTrip && dayHasUrban { return false }
+        if !incomingTrip && dayHasTrip { return false }
+        return true
     }
 
     private static func splitIncompatibleSameDay(

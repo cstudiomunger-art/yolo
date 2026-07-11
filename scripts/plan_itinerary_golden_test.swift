@@ -19,6 +19,7 @@ import Foundation
 //     YOLO/Features/Plan/PlanItineraryCityDays.swift \
 //     YOLO/Features/Plan/PlanItineraryPickAttractions.swift \
 //     YOLO/Features/Plan/PlanItineraryGeoRepair.swift \
+//     YOLO/Features/Plan/PlanItineraryDayTrip.swift \
 //     YOLO/Features/Plan/PlanItineraryDayFill.swift \
 //     YOLO/Features/Plan/PlanItineraryIntercityAnnotator.swift \
 //     YOLO/Features/Plan/PlanItineraryScheduler.swift \
@@ -99,6 +100,8 @@ enum PlanItineraryGoldenTest {
         fails += testRuleBasedEnrichAnnotatesHopAfterNormalize()
         fails += testSixCityFourteenDayCityDayBalance()
         fails += testChengduShortHopHasPureSightseeingDay()
+        fails += testIntercityManualActivitiesSurviveArrivalReplan()
+        fails += testGeoRepairSplitsDayTripFromUrban()
 
         if fails == 0 {
             print("\n✅ Itinerary golden tests passed")
@@ -2230,6 +2233,73 @@ enum PlanItineraryGoldenTest {
         print(ok
             ? "✓ chengdu has a dedicated sightseeing day beyond short-hop transfer"
             : "✗ chengdu only has hop/travel days, no pure sightseeing day")
+        return ok ? 0 : 1
+    }
+
+    private static func testIntercityManualActivitiesSurviveArrivalReplan() -> Int {
+        let wenshu = mockAttraction(id: "wenshu", cityId: "chengdu", name: "Wenshu", displayOrder: 0)
+        let dufu = mockAttraction(id: "dufu", cityId: "chengdu", name: "Du Fu Cottage", displayOrder: 1)
+        let catalog = [wenshu.id: wenshu, dufu.id: dufu]
+        let hop = ItineraryIntercityHop(
+            fromCityId: "chongqing",
+            toCityId: "chengdu",
+            travelHours: 1.5,
+            items: ["Travel"]
+        )
+        let hopDay = ItineraryDay(
+            id: "day_10", dayIndex: 10, dateLabel: "Day 10", cityName: "Chongqing → Chengdu", costEstimate: nil,
+            activities: [mockActivity(id: "wenshu", cityId: "chengdu", name: "Wenshu")],
+            intercityHop: hop
+        )
+        let manual = [mockActivity(id: "dufu", cityId: "chengdu", name: "Du Fu Cottage")]
+        var trip = SampleItinerary(
+            id: "t1", title: "Test", meta: "", routeSummary: "cq-cd", estimatedBudget: "", days: [hopDay],
+            intercityManualActivities: ["10": manual]
+        )
+        let protected = trip.protectedIntercityManualAttractionIds
+        let (replanned, _) = PlanItineraryIntercityReplanner.replan(
+            days: trip.days,
+            dayIndex: 10,
+            arrivalTime: "15:00",
+            options: .init(
+                pace: .standard,
+                catalogById: catalog,
+                protectedAttractionIds: protected
+            )
+        )
+        trip = SampleItinerary(
+            id: trip.id, title: trip.title, meta: trip.meta, routeSummary: trip.routeSummary,
+            estimatedBudget: trip.estimatedBudget, days: replanned,
+            intercityManualActivities: trip.intercityManualActivities
+        )
+        let manualIds = trip.intercityManual(forDayIndex: 10).compactMap(\.attractionId)
+        let algorithmIds = replanned[0].activities.compactMap(\.attractionId)
+        let ok = manualIds == ["dufu"] && !algorithmIds.contains("dufu")
+        print(ok
+            ? "✓ intercity manual sights stay in metadata when arrival time replans algorithm area"
+            : "✗ manual intercity add should survive replan (manual=\(manualIds) algorithm=\(algorithmIds))")
+        return ok ? 0 : 1
+    }
+
+    private static func testGeoRepairSplitsDayTripFromUrban() -> Int {
+        let liziba = mockAttraction(id: "chongqing_liziba_monorail", cityId: "chongqing", name: "Liziba", displayOrder: 0)
+        let wulong = mockAttraction(id: "chongqing_wulong_karst", cityId: "chongqing", name: "Wulong", displayOrder: 1)
+        let catalog = [liziba.id: liziba, wulong.id: wulong]
+        var assignments: [Int: [String]] = [1: [liziba.id, wulong.id]]
+        var adjustments: [String] = []
+        let geo = PlanItineraryGeoRepair.apply(
+            assignments: assignments,
+            catalogById: catalog,
+            allowedCitiesByDay: [1: ["chongqing"]],
+            adjustments: &adjustments
+        )
+        let day1 = geo.assignments[1] ?? []
+        let ok = day1 == [liziba.id]
+            && !day1.contains(wulong.id)
+            && geo.dropped.contains(wulong.id)
+        print(ok
+            ? "✓ geo repair splits day-trip wulong from urban liziba on same day"
+            : "✗ wulong and liziba should not share a day (day1=\(day1))")
         return ok ? 0 : 1
     }
 

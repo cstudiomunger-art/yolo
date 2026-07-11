@@ -10,11 +10,14 @@ struct PlanAddAttractionContext: Identifiable {
     let dayIndex: Int
     let cityIds: [String]
     let bookend: InternationalBookend?
+    /// When true, append to `intercityManualActivities` instead of `days[].activities`.
+    let intercityManual: Bool
 
-    init(dayIndex: Int, cityIds: [String], bookend: InternationalBookend? = nil) {
+    init(dayIndex: Int, cityIds: [String], bookend: InternationalBookend? = nil, intercityManual: Bool = false) {
         self.dayIndex = dayIndex
         self.cityIds = cityIds
         self.bookend = bookend
+        self.intercityManual = intercityManual
     }
 }
 
@@ -73,6 +76,11 @@ enum PlanItineraryHelpers {
         var ids = Set(trip.days.flatMap(\.activities).compactMap(\.attractionId))
         ids.formUnion((trip.internationalArrivalActivities ?? []).compactMap(\.attractionId))
         ids.formUnion((trip.internationalDepartureActivities ?? []).compactMap(\.attractionId))
+        if let manualMap = trip.intercityManualActivities {
+            for manual in manualMap.values {
+                ids.formUnion(manual.compactMap(\.attractionId))
+            }
+        }
         for id in ids {
             if let a = try? await content.fetchAttraction(id: id) {
                 cache[id] = a
@@ -85,14 +93,89 @@ enum PlanItineraryHelpers {
         forCityIds cityIds: [String],
         content: any ContentRepositoryProtocol
     ) async -> [String: Attraction] {
-        var catalog: [String: Attraction] = [:]
-        for cityId in cityIds {
-            let list = (try? await content.fetchAttractions(cityId: cityId)) ?? []
-            for attraction in list {
-                catalog[attraction.id] = attraction
+        await withTaskGroup(of: [String: Attraction].self) { group in
+            for cityId in cityIds {
+                group.addTask {
+                    var chunk: [String: Attraction] = [:]
+                    let list = (try? await content.fetchAttractions(cityId: cityId)) ?? []
+                    for attraction in list {
+                        chunk[attraction.id] = attraction
+                    }
+                    return chunk
+                }
+            }
+            var catalog: [String: Attraction] = [:]
+            for await chunk in group {
+                catalog.merge(chunk) { _, new in new }
+            }
+            return catalog
+        }
+    }
+
+    /// Merge catalog rows; only fetch ids missing from `existing`.
+    static func supplementAttractionCache(
+        existing: [String: Attraction],
+        attractionIds: [String],
+        content: any ContentRepositoryProtocol
+    ) async -> [String: Attraction] {
+        var cache = existing
+        let missing = attractionIds.filter { cache[$0] == nil }
+        guard !missing.isEmpty else { return cache }
+        await withTaskGroup(of: (String, Attraction?).self) { group in
+            for id in missing {
+                group.addTask {
+                    let row = try? await content.fetchAttraction(id: id)
+                    return (id, row)
+                }
+            }
+            for await (id, row) in group {
+                if let row { cache[id] = row }
             }
         }
-        return catalog
+        return cache
+    }
+
+    static func isIntercityDay(_ day: ItineraryDay) -> Bool {
+        day.intercityHop != nil
+    }
+
+    static func appendIntercityManual(
+        _ activity: ItineraryActivity,
+        dayIndex: Int,
+        to trip: SampleItinerary
+    ) -> SampleItinerary {
+        var manual = trip.intercityManualActivities ?? [:]
+        let key = String(dayIndex)
+        manual[key] = (manual[key] ?? []) + [activity]
+        return SampleItinerary(
+            id: trip.id,
+            title: trip.title,
+            meta: trip.meta,
+            routeSummary: trip.routeSummary,
+            estimatedBudget: trip.estimatedBudget,
+            days: trip.days,
+            shareSlug: trip.shareSlug,
+            isShared: trip.isShared,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            visitOrder: trip.visitOrder,
+            userEdited: true,
+            droppedAttractionIds: trip.droppedAttractionIds,
+            schedulingAdjustments: trip.schedulingAdjustments,
+            seasonHints: trip.seasonHints,
+            pace: trip.pace,
+            internationalArrivalTime: trip.internationalArrivalTime,
+            internationalDepartureTime: trip.internationalDepartureTime,
+            endpointScheduleBaselineDays: trip.endpointScheduleBaselineDays,
+            internationalArrivalActivities: trip.internationalArrivalActivities,
+            internationalDepartureActivities: trip.internationalDepartureActivities,
+            intercityManualActivities: manual,
+            intercityScheduleBaselineByDayIndex: trip.intercityScheduleBaselineByDayIndex
+        )
+    }
+
+    static func protectedIntercityManualIds(from trip: SampleItinerary) -> Set<String> {
+        trip.protectedIntercityManualAttractionIds
     }
 
     static func activity(from attraction: Attraction) -> ItineraryActivity {

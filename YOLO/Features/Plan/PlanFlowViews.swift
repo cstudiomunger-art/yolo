@@ -79,8 +79,8 @@ struct ItineraryDetailView: View {
     @State private var attractionCache: [String: Attraction] = [:]
     @State private var cities: [City] = []
     @State private var addAttractionContext: PlanAddAttractionContext?
-    @State private var intercityTripSnapshot: [ItineraryDay]?
-    @State private var intercityAdjustmentsSnapshot: [String] = []
+    @State private var intercityManualActivities: [String: [ItineraryActivity]]?
+    @State private var intercityScheduleBaselineByDayIndex: [String: [ItineraryActivity]]?
     @State private var endpointTripSnapshot: [ItineraryDay]?
     @State private var endpointAdjustmentsSnapshot: [String] = []
     @State private var endpointScheduleBaselineDays: [ItineraryDay]?
@@ -167,6 +167,8 @@ struct ItineraryDetailView: View {
             internationalDepartureTime = itinerary.internationalDepartureTime
             internationalArrivalActivities = itinerary.internationalArrivalActivities
             internationalDepartureActivities = itinerary.internationalDepartureActivities
+            intercityManualActivities = itinerary.intercityManualActivities
+            intercityScheduleBaselineByDayIndex = itinerary.intercityScheduleBaselineByDayIndex
             endpointScheduleBaselineDays = itinerary.endpointScheduleBaselineDays
             droppedAttractionIds = itinerary.droppedAttractionIds
             if endpointScheduleBaselineDays == nil,
@@ -202,6 +204,8 @@ struct ItineraryDetailView: View {
                 internationalDepartureTime = saved.internationalDepartureTime
                 internationalArrivalActivities = saved.internationalArrivalActivities
                 internationalDepartureActivities = saved.internationalDepartureActivities
+                intercityManualActivities = saved.intercityManualActivities
+                intercityScheduleBaselineByDayIndex = saved.intercityScheduleBaselineByDayIndex
                 endpointScheduleBaselineDays = saved.endpointScheduleBaselineDays ?? endpointScheduleBaselineDays
                 droppedAttractionIds = saved.droppedAttractionIds
                 schedulingAdjustments = saved.schedulingAdjustments ?? []
@@ -211,6 +215,8 @@ struct ItineraryDetailView: View {
             PlanAttractionPickerSheet(cityIds: ctx.cityIds, dayIndex: ctx.dayIndex) { attraction in
                 if let bookend = ctx.bookend {
                     appendBookendAttraction(attraction, bookend: bookend)
+                } else if ctx.intercityManual {
+                    appendIntercityManualAttraction(attraction, dayIndex: ctx.dayIndex)
                 } else {
                     appendAttraction(attraction, dayIndex: ctx.dayIndex)
                 }
@@ -260,6 +266,19 @@ struct ItineraryDetailView: View {
         persistItineraryOrder()
     }
 
+    private func appendIntercityManualAttraction(_ attraction: Attraction, dayIndex: Int) {
+        let activity = PlanItineraryHelpers.activity(from: attraction)
+        var manual = intercityManualActivities ?? [:]
+        let key = String(editableDays[dayIndex].dayIndex)
+        manual[key] = (manual[key] ?? []) + [activity]
+        intercityManualActivities = manual
+        if let aid = activity.attractionId {
+            editableDays = PlanItineraryAttractionLedger.remove(attractionId: aid, from: editableDays)
+        }
+        attractionCache[attraction.id] = attraction
+        persistItineraryOrder()
+    }
+
     private func applyIntercityArrivalTime(dayIndex: Int, arrivalTime: String?) {
         arrivalReplanTask?.cancel()
         arrivalReplanTask = Task { @MainActor in
@@ -268,21 +287,40 @@ struct ItineraryDetailView: View {
             guard let dayIdx = editableDays.firstIndex(where: { $0.dayIndex == dayIndex }) else { return }
             let day = editableDays[dayIdx]
             guard day.intercityHop != nil else { return }
+            let key = String(dayIndex)
 
-            if intercityTripSnapshot == nil {
-                intercityTripSnapshot = editableDays
-                intercityAdjustmentsSnapshot = schedulingAdjustments
-            }
-
-            if arrivalTime == nil, let snapshot = intercityTripSnapshot {
-                editableDays = snapshot
-                schedulingAdjustments = intercityAdjustmentsSnapshot
-                intercityTripSnapshot = nil
-                intercityAdjustmentsSnapshot = []
+            if arrivalTime == nil {
+                if let baseline = intercityScheduleBaselineByDayIndex?[key] {
+                    editableDays[dayIdx] = editableDays[dayIdx].withActivities(baseline)
+                }
+                var manual = intercityManualActivities
+                manual?.removeValue(forKey: key)
+                intercityManualActivities = manual?.isEmpty == true ? nil : manual
+                var baselines = intercityScheduleBaselineByDayIndex
+                baselines?.removeValue(forKey: key)
+                intercityScheduleBaselineByDayIndex = baselines?.isEmpty == true ? nil : baselines
+                let (cleared, _) = PlanItineraryIntercityReplanner.replan(
+                    days: editableDays,
+                    dayIndex: dayIndex,
+                    arrivalTime: nil,
+                    options: PlanItineraryIntercityReplanner.Options(
+                        pace: resolvedTripPace,
+                        catalogById: attractionCache,
+                        droppedAttractionIds: currentItinerary.droppedAttractionIds ?? []
+                    )
+                )
+                editableDays = cleared
                 persistItineraryOrder()
                 return
             }
 
+            var baselines = intercityScheduleBaselineByDayIndex ?? [:]
+            if baselines[key] == nil {
+                baselines[key] = editableDays[dayIdx].activities
+                intercityScheduleBaselineByDayIndex = baselines
+            }
+
+            let protected = PlanItineraryHelpers.protectedIntercityManualIds(from: currentItinerary)
             let (newDays, adjustments) = PlanItineraryIntercityReplanner.replan(
                 days: editableDays,
                 dayIndex: dayIndex,
@@ -290,7 +328,8 @@ struct ItineraryDetailView: View {
                 options: PlanItineraryIntercityReplanner.Options(
                     pace: resolvedTripPace,
                     catalogById: attractionCache,
-                    droppedAttractionIds: currentItinerary.droppedAttractionIds ?? []
+                    droppedAttractionIds: currentItinerary.droppedAttractionIds ?? [],
+                    protectedAttractionIds: protected
                 )
             )
             editableDays = fillDaysAfterReplan(newDays)
@@ -521,7 +560,9 @@ struct ItineraryDetailView: View {
             internationalDepartureTime: internationalDepartureTime ?? saved?.internationalDepartureTime ?? itinerary.internationalDepartureTime,
             endpointScheduleBaselineDays: endpointScheduleBaselineDays ?? saved?.endpointScheduleBaselineDays ?? itinerary.endpointScheduleBaselineDays,
             internationalArrivalActivities: internationalArrivalActivities ?? saved?.internationalArrivalActivities ?? itinerary.internationalArrivalActivities,
-            internationalDepartureActivities: internationalDepartureActivities ?? saved?.internationalDepartureActivities ?? itinerary.internationalDepartureActivities
+            internationalDepartureActivities: internationalDepartureActivities ?? saved?.internationalDepartureActivities ?? itinerary.internationalDepartureActivities,
+            intercityManualActivities: intercityManualActivities ?? saved?.intercityManualActivities ?? itinerary.intercityManualActivities,
+            intercityScheduleBaselineByDayIndex: intercityScheduleBaselineByDayIndex ?? saved?.intercityScheduleBaselineByDayIndex ?? itinerary.intercityScheduleBaselineByDayIndex
         )
     }
 
@@ -585,7 +626,7 @@ struct ItineraryDetailView: View {
                             ExperienceSuggestionsDayCard(
                                 day: day,
                                 cityDisplayName: experienceCityDisplayName(day),
-                                showsActivities: !day.activities.isEmpty,
+                                showsActivities: !day.activities.isEmpty || !intercityManualRows(for: day).isEmpty,
                                 onArrivalTimeChange: { applyIntercityArrivalTime(dayIndex: day.dayIndex, arrivalTime: $0) }
                             )
                             .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16))
@@ -603,6 +644,13 @@ struct ItineraryDetailView: View {
                                 deleteActivities(dayId: day.id, at: offsets)
                             }
 
+                            ForEach(intercityManualRows(for: day)) { activity in
+                                activityRow(activity, dayId: "\(day.id)-manual")
+                            }
+                            .onDelete { offsets in
+                                deleteIntercityManual(dayIndex: day.dayIndex, at: offsets)
+                            }
+
                             Button {
                                 guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
                                 let cityIds: [String] = {
@@ -611,7 +659,8 @@ struct ItineraryDetailView: View {
                                 }()
                                 addAttractionContext = PlanAddAttractionContext(
                                     dayIndex: dayIndex,
-                                    cityIds: cityIds
+                                    cityIds: cityIds,
+                                    intercityManual: true
                                 )
                             } label: {
                                 addAttractionButtonLabel
@@ -653,7 +702,8 @@ struct ItineraryDetailView: View {
                                 }()
                                 addAttractionContext = PlanAddAttractionContext(
                                     dayIndex: dayIndex,
-                                    cityIds: cityIds
+                                    cityIds: cityIds,
+                                    intercityManual: displayDay.intercityHop != nil
                                 )
                             } label: {
                                 addAttractionButtonLabel
@@ -718,11 +768,19 @@ struct ItineraryDetailView: View {
                                 )
                             }
 
+                            ForEach(intercityManualRows(for: day)) { activity in
+                                activityRow(activity, dayId: "\(day.id)-manual")
+                            }
+                            .onDelete { offsets in
+                                deleteIntercityManual(dayIndex: day.dayIndex, at: offsets)
+                            }
+
                             Button {
                                 guard let dayIndex = editableDays.firstIndex(where: { $0.id == day.id }) else { return }
                                 addAttractionContext = PlanAddAttractionContext(
                                     dayIndex: dayIndex,
-                                    cityIds: tripCityIds
+                                    cityIds: tripCityIds,
+                                    intercityManual: true
                                 )
                             } label: {
                                 addAttractionButtonLabel
@@ -949,6 +1007,24 @@ struct ItineraryDetailView: View {
         return CoverImageView(path: path, height: 56, cornerRadius: 4)
             .frame(width: 56, height: 56)
             .fixedSize()
+    }
+
+    private func intercityManualRows(for day: ItineraryDay) -> [ItineraryActivity] {
+        intercityManualActivities?[String(day.dayIndex)] ?? []
+    }
+
+    private func deleteIntercityManual(dayIndex: Int, at offsets: IndexSet) {
+        let key = String(dayIndex)
+        guard var list = intercityManualActivities?[key] else { return }
+        list.remove(atOffsets: offsets)
+        var manual = intercityManualActivities ?? [:]
+        if list.isEmpty {
+            manual.removeValue(forKey: key)
+        } else {
+            manual[key] = list
+        }
+        intercityManualActivities = manual.isEmpty ? nil : manual
+        persistItineraryOrder()
     }
 
     private func deleteActivities(dayId: String, at offsets: IndexSet) {

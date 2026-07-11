@@ -196,9 +196,10 @@ async function buildItineraryFromAI(
   pace: string | null,
   arrivalTime: string | null,
   departureTime: string | null,
+  prefetchedCatalog?: Awaited<ReturnType<typeof fetchAttractionsForCities>>,
 ): Promise<SampleItinerary> {
   const cityIds = cities.length ? cities : ["beijing"];
-  const catalog = await fetchAttractionsForCities(cityIds);
+  const catalog = prefetchedCatalog ?? await fetchAttractionsForCities(cityIds);
 
   let aiPlan = null;
   if (aiPlanRaw) {
@@ -358,8 +359,10 @@ async function handleItinerary(
 
   const cityIds = cities.length ? cities : ["beijing"];
   const creds = supabaseHeaders();
-  const catalog = await fetchAttractionsForCities(cityIds);
-  const citiesMeta = await fetchCitiesMeta(cityIds, creds);
+  const [catalog, citiesMeta] = await Promise.all([
+    fetchAttractionsForCities(cityIds),
+    fetchCitiesMeta(cityIds, creds),
+  ]);
   const plan = buildDayPlan(days, catalog);
 
   const cmsPrompt = ai.systemPromptItinerary?.trim();
@@ -417,6 +420,7 @@ async function handleItinerary(
     pace,
     arrivalTime,
     departureTime,
+    catalog,
   );
 
   const adjCount = itinerary.scheduling_adjustments?.length ?? 0;
