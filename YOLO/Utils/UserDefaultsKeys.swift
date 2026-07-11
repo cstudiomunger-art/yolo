@@ -25,6 +25,7 @@ enum UserDefaultsKeys {
     static let subscriptionExpiresAt = prefix + "subscriptionExpiresAt"
     static let membershipOverride = prefix + "membershipOverride"
     static let membershipOverrideExpiresAt = prefix + "membershipOverrideExpiresAt"
+    static let membershipOverrideNote = prefix + "membershipOverrideNote"
     static let displayName = prefix + "displayName"
     static let avatarUrl = prefix + "avatarUrl"
     static let avatarStatus = prefix + "avatarStatus"

@@ -39,8 +39,9 @@ struct MembershipCenterView: View {
             && !(prefs.isOverrideGrantActive && prefs.membershipOverrideExpiresAt == nil)
     }
 
-    private var isPromotionalGrant: Bool {
+    private var isInvitePromotionalGrant: Bool {
         prefs.membershipOverrideKind == .grant
+            && (prefs.membershipOverrideNote?.localizedCaseInsensitiveContains("invite:") == true)
     }
 
     var body: some View {
@@ -141,7 +142,7 @@ struct MembershipCenterView: View {
                     Text(String(localized: "Valid until: ") + expires.formatted(date: .long, time: .omitted))
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textMuted)
-                    if isPromotionalGrant {
+                    if isInvitePromotionalGrant {
                         Text(String(localized: "Promotional access"))
                             .font(Theme.FontToken.inter(11))
                             .foregroundStyle(Theme.ColorToken.textMuted)
@@ -155,6 +156,11 @@ struct MembershipCenterView: View {
                     Text(String(localized: "Lifetime access"))
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.accent)
+                    if isInvitePromotionalGrant {
+                        Text(String(localized: "Promotional access"))
+                            .font(Theme.FontToken.inter(11))
+                            .foregroundStyle(Theme.ColorToken.textMuted)
+                    }
                 }
 
                 if prefs.membershipOverrideKind != .grant {

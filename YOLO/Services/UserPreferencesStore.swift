@@ -167,6 +167,13 @@ final class UserPreferencesStore {
         }
     }
 
+    /// Admin-only note synced from server; `invite:` prefix marks invite-code grants.
+    var membershipOverrideNote: String? {
+        didSet {
+            UserDefaults.standard.set(membershipOverrideNote, forKey: Keys.membershipOverrideNote)
+        }
+    }
+
     /// Incremented when admin override is applied from the server — use to refresh paywalled UI.
     private(set) var membershipStateVersion = 0
 
@@ -249,6 +256,7 @@ final class UserPreferencesStore {
         } else {
             membershipOverrideExpiresAt = nil
         }
+        membershipOverrideNote = UserDefaults.standard.string(forKey: Keys.membershipOverrideNote)
         displayName = UserDefaults.standard.string(forKey: Keys.displayName)
         avatarUrl = UserDefaults.standard.string(forKey: Keys.avatarUrl)
         avatarStatus = UserDefaults.standard.string(forKey: Keys.avatarStatus) ?? "none"
@@ -286,6 +294,7 @@ final class UserPreferencesStore {
             Keys.subscriptionExpiresAt,
             Keys.membershipOverride,
             Keys.membershipOverrideExpiresAt,
+            Keys.membershipOverrideNote,
             Keys.displayName,
             Keys.avatarUrl,
             Keys.avatarStatus,
@@ -310,6 +319,7 @@ final class UserPreferencesStore {
         subscriptionExpiresAt = nil
         membershipOverride = nil
         membershipOverrideExpiresAt = nil
+        membershipOverrideNote = nil
         displayName = nil
         avatarUrl = nil
         avatarStatus = "none"
@@ -688,15 +698,18 @@ final class UserPreferencesStore {
 
         let prevOverride = membershipOverride
         let prevExp = membershipOverrideExpiresAt
+        let prevNote = membershipOverrideNote
         let wasActive = isMembershipActive
 
         let (override, overrideExpires) = Self.resolveRemoteMembershipOverride(row)
         membershipOverride = override
         membershipOverrideExpiresAt = overrideExpires
+        membershipOverrideNote = row.membershipOverrideNote
         purchasedAttractionIds = Set(row.purchasedAttractionIds)
 
         let changed = membershipOverride != prevOverride
             || membershipOverrideExpiresAt != prevExp
+            || membershipOverrideNote != prevNote
             || isMembershipActive != wasActive
         if changed {
             membershipStateVersion += 1
@@ -743,6 +756,7 @@ final class UserPreferencesStore {
             // values so the App never blanks them, but the trigger ignores client writes anyway.
             membershipOverride: membershipOverride,
             membershipOverrideExpiresAt: membershipOverrideExpiresAt.map { Self.formatISO8601($0) },
+            membershipOverrideNote: membershipOverrideNote,
             savedItineraries: [],
             activeItineraryId: activeItineraryId
         )

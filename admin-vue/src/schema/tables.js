@@ -125,7 +125,7 @@ const App = {};
           key: "paywall_compare_price_enabled",
           type: "bool",
           label: "显示划线价（全局）",
-          hint: "开启后，在会员计划中勾选「显示划线价」且填写参考价的计划会在 App 付费墙展示划线价。",
+          hint: "关闭后，App 付费墙不显示任何计划的划线价；各计划仍需单独勾选「显示划线价」。",
         },
         { key: "flight_section", type: "section", label: "机票平台链接" },
         { key: "flight_platforms", type: "flight_platform_list", label: "机票预订平台" },

@@ -37,6 +37,9 @@ function linesSet(key, v) { editing.value[key] = v.split("\n").map((s) => s.trim
 async function savePlan() {
   const p = editing.value;
   if (!p.id) { showToast("请填写计划 ID"); return; }
+  if (p.show_compare_price && p.compare_price_label && p.compare_price_label === p.price_label) {
+    if (!confirm("划线价与现价相同，确定仍要显示？")) return;
+  }
   const payload = { ...p };
   delete payload._new;
   const { error: e } = await supabase.from("membership_plans").upsert(payload);

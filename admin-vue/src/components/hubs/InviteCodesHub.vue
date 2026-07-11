@@ -37,6 +37,71 @@ const STATUS_META = {
   disabled: { text: "已停用", cls: "gray" },
 };
 
+const STRATEGY_TEMPLATES = [
+  {
+    id: "single_card",
+    label: "单次卡密",
+    hint: "印卡、私信发码，全平台仅可兑 1 次",
+    redemption_mode: "single_use",
+    max_redemptions: 1,
+    one_per_account: false,
+    new_users_only: false,
+    auto_deactivate_on_exhaust: true,
+  },
+  {
+    id: "batch_one_per_user",
+    label: "批次一人一码",
+    hint: "同活动每用户只能领 1 张（batch 约束）",
+    redemption_mode: "single_use",
+    max_redemptions: 1,
+    one_per_account: false,
+    new_users_only: false,
+    auto_deactivate_on_exhaust: true,
+  },
+  {
+    id: "account_once",
+    label: "账号终身一次",
+    hint: "该用户成功兑换任意码后不可再兑",
+    redemption_mode: "single_use",
+    max_redemptions: 1,
+    one_per_account: true,
+    new_users_only: false,
+    auto_deactivate_on_exhaust: true,
+  },
+  {
+    id: "channel_unlimited",
+    label: "渠道通码",
+    hint: "如 WELCOME2026，不限总次数",
+    redemption_mode: "unlimited",
+    max_redemptions: null,
+    one_per_account: false,
+    new_users_only: false,
+    auto_deactivate_on_exhaust: false,
+  },
+  {
+    id: "limited_stock",
+    label: "限量抢购",
+    hint: "前 N 名可兑，用尽自动停用",
+    redemption_mode: "multi_use",
+    max_redemptions: 100,
+    one_per_account: false,
+    new_users_only: false,
+    auto_deactivate_on_exhaust: true,
+  },
+];
+
+function applyStrategyTemplate(target, templateId) {
+  const t = STRATEGY_TEMPLATES.find((x) => x.id === templateId);
+  if (!t || !target) return;
+  target.redemption_mode = t.redemption_mode;
+  target.max_redemptions = t.max_redemptions;
+  target.one_per_account = t.one_per_account;
+  target.new_users_only = t.new_users_only;
+  if ("auto_deactivate_on_exhaust" in target) {
+    target.auto_deactivate_on_exhaust = t.auto_deactivate_on_exhaust;
+  }
+}
+
 function randomCode(len = 8) {
   const arr = new Uint32Array(len);
   crypto.getRandomValues(arr);
@@ -193,6 +258,8 @@ const filteredRedemptions = computed(() => {
 
 // ── single edit ──
 const editing = ref(null);
+const editTemplate = ref("single_card");
+const batchTemplate = ref("batch_one_per_user");
 
 const BLANK = {
   id: "",
@@ -228,6 +295,7 @@ const editingPreview = computed(() => {
 
 function newCode() {
   const defaultPlan = plans.value[0]?.id || "annual";
+  editTemplate.value = "single_card";
   editing.value = {
     ...BLANK,
     plan_id: defaultPlan,
@@ -236,7 +304,10 @@ function newCode() {
     _valid_from_local: "",
     _valid_until_local: "",
   };
+  applyStrategyTemplate(editing.value, editTemplate.value);
 }
+
+const editingLocked = computed(() => editing.value && (editing.value.redeemed_count || 0) > 0);
 
 function editCode(row) {
   editing.value = {
@@ -270,6 +341,9 @@ async function saveCode() {
   const dup = codes.value.find((c) => c.code === p.code && c.id !== p.id);
   if (dup) return showToast("邀请码已存在");
 
+  if (p.duration_preset === "lifetime" && p._new && !confirm("确认为终身会员邀请码？兑换后用户将永久解锁。")) {
+    return;
+  }
   const payload = {
     ...p,
     valid_from: fromLocalInput(p._valid_from_local),
@@ -408,6 +482,28 @@ async function generateBatch() {
   showToast(`已生成 ${n} 个码`);
 }
 
+async function deactivateBatch(batch) {
+  if (!confirm(`停用批次「${batch.label || batch.id}」下所有仍生效的邀请码？`)) return;
+  const { error: e } = await supabase
+    .from("invite_codes")
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .eq("batch_id", batch.id)
+    .eq("is_active", true);
+  if (e) return showToast("失败：" + e.message);
+  await loadCodes();
+  showToast("批次已停用");
+}
+
+function onEditTemplateChange() {
+  if (editing.value && !editingLocked.value) {
+    applyStrategyTemplate(editing.value, editTemplate.value);
+  }
+}
+
+function onBatchTemplateChange() {
+  applyStrategyTemplate(batchForm.value, batchTemplate.value);
+}
+
 function openBatchCodes(batchId) {
   filterBatch.value = batchId;
   filterStatus.value = "";
@@ -481,14 +577,30 @@ onMounted(async () => {
             </div>
           </div>
 
+          <div v-if="editingLocked" class="warn-banner">
+            该码已有兑换记录，权益与兑换规则不可修改；可调整备注、有效期与启用状态。
+          </div>
+
+          <div class="form-section">
+            <h3>策略模板</h3>
+            <div class="fgrid">
+              <label class="f full">
+                <span>快速套用</span>
+                <select v-model="editTemplate" :disabled="editingLocked" @change="onEditTemplateChange">
+                  <option v-for="t in STRATEGY_TEMPLATES" :key="t.id" :value="t.id">{{ t.label }} — {{ t.hint }}</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
           <div class="form-section">
             <h3>基本信息</h3>
             <div class="fgrid">
               <label class="f">
                 <span>邀请码</span>
                 <div class="input-row">
-                  <input v-model="editing.code" class="mono" placeholder="8 位字母数字" />
-                  <button type="button" class="btn btn-secondary btn-sm" title="重新生成" @click="editing.code = randomCode()">↻</button>
+                  <input v-model="editing.code" class="mono" placeholder="8 位字母数字" :disabled="editingLocked" />
+                  <button type="button" class="btn btn-secondary btn-sm" title="重新生成" :disabled="editingLocked" @click="editing.code = randomCode()">↻</button>
                   <button type="button" class="btn btn-secondary btn-sm" title="复制" @click="copyText(editing.code)">复制</button>
                 </div>
               </label>
@@ -508,17 +620,17 @@ onMounted(async () => {
             <div class="fgrid">
               <label class="f">
                 <span>权益时长</span>
-                <select v-model="editing.duration_preset">
+                <select v-model="editing.duration_preset" :disabled="editingLocked">
                   <option v-for="p in DURATION_PRESETS" :key="p.id" :value="p.id">{{ p.label }}</option>
                 </select>
               </label>
               <label v-if="editing.duration_preset === 'custom'" class="f">
                 <span>自定义天数</span>
-                <input type="number" v-model.number="editing.duration_days" min="1" />
+                <input type="number" v-model.number="editing.duration_days" min="1" :disabled="editingLocked" />
               </label>
               <label class="f" :class="{ full: editing.duration_preset !== 'custom' }">
                 <span>会员计划</span>
-                <select v-model="editing.plan_id">
+                <select v-model="editing.plan_id" :disabled="editingLocked">
                   <option v-for="p in plans" :key="p.id" :value="p.id">
                     {{ p.name_zh || p.name_en }} ({{ p.id }})
                   </option>
@@ -532,7 +644,7 @@ onMounted(async () => {
             <div class="fgrid">
               <label class="f">
                 <span>兑换模式</span>
-                <select v-model="editing.redemption_mode" @change="onModeChange">
+                <select v-model="editing.redemption_mode" :disabled="editingLocked" @change="onModeChange">
                   <option value="single_use">一次性（全平台 1 次）</option>
                   <option value="multi_use">限量（可设总次数）</option>
                   <option value="unlimited">不限量（每人每码 1 次）</option>
@@ -541,7 +653,7 @@ onMounted(async () => {
               </label>
               <label v-if="editing.redemption_mode === 'multi_use'" class="f">
                 <span>总兑换次数上限</span>
-                <input type="number" v-model.number="editing.max_redemptions" min="1" />
+                <input type="number" v-model.number="editing.max_redemptions" min="1" :disabled="editingLocked" />
               </label>
             </div>
           </div>
@@ -634,6 +746,7 @@ onMounted(async () => {
                 <th>计划</th>
                 <th>模式</th>
                 <th>已兑 / 上限</th>
+                <th>首次兑换</th>
                 <th>状态</th>
                 <th class="col-actions">操作</th>
               </tr>
@@ -656,6 +769,7 @@ onMounted(async () => {
                   <span class="badge gray">{{ MODE_LABELS[c.redemption_mode] || c.redemption_mode }}</span>
                 </td>
                 <td>{{ c.redeemed_count }} / {{ c.max_redemptions ?? "∞" }}</td>
+                <td class="muted">{{ c.first_redeemed_at ? fmtDateTime(c.first_redeemed_at) : "—" }}</td>
                 <td>
                   <span class="badge" :class="STATUS_META[codeStatus(c)]?.cls">
                     {{ STATUS_META[codeStatus(c)]?.text || codeStatus(c) }}
@@ -676,7 +790,7 @@ onMounted(async () => {
                 </td>
               </tr>
               <tr v-if="!filteredCodes.length">
-                <td colspan="7" class="center muted">暂无邀请码</td>
+                <td colspan="8" class="center muted">暂无邀请码</td>
               </tr>
             </tbody>
           </table>
@@ -689,6 +803,16 @@ onMounted(async () => {
       <div class="card form-card">
         <h2>批量生成邀请码</h2>
         <p class="hint block-hint">适合活动发码：一次生成多张一次性或限量码，自动创建批次并导出 CSV。</p>
+
+        <div class="form-section">
+          <h3>策略模板</h3>
+          <label class="f full">
+            <span>快速套用</span>
+            <select v-model="batchTemplate" @change="onBatchTemplateChange">
+              <option v-for="t in STRATEGY_TEMPLATES" :key="t.id" :value="t.id">{{ t.label }} — {{ t.hint }}</option>
+            </select>
+          </label>
+        </div>
 
         <div class="form-section">
           <div class="fgrid">
@@ -789,6 +913,7 @@ onMounted(async () => {
               <td class="col-actions">
                 <button class="btn btn-secondary btn-sm" @click="openBatchCodes(b.id)">查看码</button>
                 <button class="btn btn-secondary btn-sm" @click="exportBatchCsv(b)">导出</button>
+                <button class="btn btn-danger btn-sm" @click="deactivateBatch(b)">停用批次</button>
               </td>
             </tr>
             <tr v-if="!batches.length">
@@ -908,6 +1033,16 @@ onMounted(async () => {
 .form-head h2 { margin: 0; font-size: 18px; }
 .preview-line { margin: 6px 0 0; font-size: 13px; color: var(--accent); }
 .form-head-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.warn-banner {
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  border-radius: var(--radius);
+  background: rgba(240, 173, 78, 0.12);
+  border: 1px solid rgba(240, 173, 78, 0.35);
+  font-size: 13px;
+  color: #f0ad4e;
+}
 
 .form-section {
   margin-bottom: 20px;

@@ -103,12 +103,24 @@ enum InviteCodeService {
     }
 
     static func redeem(code raw: String) async throws -> InviteCodeRedeemResult {
-        guard AppConfig.isSupabaseConfigured, !AppConfig.useMock else {
-            throw InviteCodeError.notConfigured
-        }
-
         let code = normalize(raw)
         guard code.count >= 6 else { throw InviteCodeError.invalidCode }
+
+        if AppConfig.useMock {
+            return InviteCodeRedeemResult(
+                ok: true,
+                error: nil,
+                expiresAtRaw: nil,
+                isLifetime: true,
+                alreadyLifetime: false,
+                planId: "annual",
+                benefitLabel: "lifetime"
+            )
+        }
+
+        guard AppConfig.isSupabaseConfigured else {
+            throw InviteCodeError.notConfigured
+        }
 
         let result: InviteCodeRedeemResult = try await SupabaseManager.shared
             .rpc("redeem_invite_code", params: ["p_code": code])
