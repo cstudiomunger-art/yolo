@@ -4,6 +4,10 @@
 --
 -- NOTE: Columns with NOT NULL use '' (empty Markdown), not NULL.
 -- Nullable columns are set to NULL.
+-- NOT NULL columns cleared to '': app_settings legal/about bodies, home_tips.body,
+-- reading_list.synopsis_en, culture_tips.preview/body, emergency_config.embassy_note,
+-- payment_advice_rules.body_zh/body_en, transport_tips, internet_access_guides,
+-- emergency_help_items, emergency_medical_items.
 
 BEGIN;
 
@@ -83,11 +87,11 @@ WHERE preview IS NOT NULL AND preview <> ''
 UPDATE emergency_config SET embassy_note = '', updated_at = NOW()
 WHERE embassy_note IS NOT NULL AND embassy_note <> '';
 
+-- payment_advice_rules.body_* NOT NULL DEFAULT ''
 UPDATE payment_advice_rules SET
-  body_zh = NULL,
-  body_en = NULL,
-  updated_at = NOW()
-WHERE body_zh IS NOT NULL OR body_en IS NOT NULL;
+  body_zh = '',
+  body_en = '',
+  updated_at = NOW();
 
 -- transport_tips.body_* NOT NULL DEFAULT ''
 UPDATE transport_tips SET
