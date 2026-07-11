@@ -57,9 +57,9 @@ struct FlowLayoutTags: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(Theme.ColorToken.backgroundSubtle)
+        .background(Theme.ColorToken.accent.opacity(0.14))
         .clipShape(Capsule())
-        .overlay(Capsule().stroke(Theme.ColorToken.accent.opacity(0.35), lineWidth: 1))
+        .overlay(Capsule().stroke(Theme.ColorToken.accent, lineWidth: 1.5))
         .fixedSize(horizontal: true, vertical: false)
     }
 }

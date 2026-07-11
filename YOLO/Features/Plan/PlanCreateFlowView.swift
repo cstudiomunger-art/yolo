@@ -11,6 +11,7 @@ struct PlanCreateFlowView: View {
     @State private var search = ""
     @State private var cities: [City] = []
     @State private var selectedCityIds: Set<String> = []
+    @State private var citySelectionTick = 0
     @State private var entryCityId: String?
     @State private var exitCityId: String?
     @State private var endpointMode: EndpointSelectionMode = .suggested
@@ -319,6 +320,7 @@ struct PlanCreateFlowView: View {
             }
             .padding(Theme.screenPadding)
         }
+        .sensoryFeedback(.selection, trigger: citySelectionTick)
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: 0) {
                 Divider()
@@ -476,41 +478,58 @@ struct PlanCreateFlowView: View {
     private func cityGrid(_ items: [City]) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
             ForEach(items) { city in
+                let isSelected = selectedCityIds.contains(city.id)
                 Button {
                     toggleCity(city.id)
                 } label: {
-                    VStack(alignment: .leading, spacing: 0) {
-                        cityCover(city)
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(city.name)
-                                .font(Theme.FontToken.inter(13, weight: .medium))
-                                .foregroundStyle(Theme.ColorToken.textPrimary)
-                                .lineLimit(1)
-                            Text(city.chineseName)
-                                .font(Theme.FontToken.inter(10))
-                                .foregroundStyle(Theme.ColorToken.textMuted)
+                    ZStack(alignment: .topTrailing) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            cityCover(city)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(city.name)
+                                    .font(Theme.FontToken.inter(13, weight: isSelected ? .semibold : .medium))
+                                    .foregroundStyle(Theme.ColorToken.textPrimary)
+                                    .lineLimit(1)
+                                Text(city.chineseName)
+                                    .font(Theme.FontToken.inter(10))
+                                    .foregroundStyle(
+                                        isSelected ? Theme.ColorToken.textSecondary : Theme.ColorToken.textMuted
+                                    )
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(12)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(12)
+
+                        if isSelected {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 22, weight: .semibold))
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(Theme.ColorToken.background, Theme.ColorToken.accent)
+                                .padding(8)
+                        }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(
-                        selectedCityIds.contains(city.id)
-                            ? Theme.ColorToken.backgroundSubtle
+                        isSelected
+                            ? Theme.ColorToken.accent.opacity(0.14)
                             : Theme.ColorToken.background
                     )
                     .clipShape(RoundedRectangle(cornerRadius: Theme.CornerRadius.medium, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: Theme.CornerRadius.medium, style: .continuous)
                             .stroke(
-                                selectedCityIds.contains(city.id)
-                                    ? Theme.ColorToken.accent
-                                    : Theme.ColorToken.border,
-                                lineWidth: 1
+                                isSelected ? Theme.ColorToken.accent : Theme.ColorToken.border,
+                                lineWidth: isSelected ? 2 : 1
                             )
                     )
+                    .shadow(
+                        color: isSelected ? Theme.ColorToken.accent.opacity(0.22) : .clear,
+                        radius: isSelected ? 6 : 0,
+                        y: isSelected ? 2 : 0
+                    )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(CityCardButtonStyle())
+                .animation(.easeOut(duration: 0.15), value: isSelected)
             }
         }
     }
@@ -1594,6 +1613,7 @@ struct PlanCreateFlowView: View {
         } else {
             selectedCityIds.insert(id)
         }
+        citySelectionTick += 1
         syncEntryExitCities()
     }
 
@@ -2587,6 +2607,14 @@ struct PlanCreateFlowView: View {
         }
         .presentationDetents([.medium])
         .sheetDragToDismiss()
+    }
+}
+
+private struct CityCardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
