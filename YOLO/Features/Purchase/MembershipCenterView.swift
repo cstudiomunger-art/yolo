@@ -287,7 +287,8 @@ private struct PlanSummaryRow: View {
                 MembershipPriceLabel(
                     plan: plan,
                     comparePriceEnabled: appEnv.contentMode.branding.paywallComparePriceEnabled,
-                    priceFont: Theme.FontToken.inter(12),
+                    style: .inline,
+                    priceFont: Theme.FontToken.inter(13, weight: .semibold),
                     compareFont: Theme.FontToken.inter(10)
                 )
             }

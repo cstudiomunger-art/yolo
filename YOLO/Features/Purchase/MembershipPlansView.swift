@@ -354,16 +354,17 @@ private struct PlanOptionCard: View {
                 HStack(alignment: .top, spacing: 11) {
                     radio
                     VStack(alignment: .leading, spacing: 3) {
-                        HStack(alignment: .firstTextBaseline) {
+                        HStack(alignment: .top, spacing: 10) {
                             Text(plan.displayName)
                                 .font(Theme.FontToken.playfair(16, weight: .semibold))
                                 .foregroundStyle(Theme.ColorToken.textPrimary)
-                            Spacer()
+                                .multilineTextAlignment(.leading)
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             MembershipPriceLabel(
                                 plan: plan,
-                                comparePriceEnabled: appEnv.contentMode.branding.paywallComparePriceEnabled
+                                comparePriceEnabled: appEnv.contentMode.branding.paywallComparePriceEnabled,
+                                style: .stacked
                             )
-                            .layoutPriority(1)
                         }
                         if let desc = subtitle {
                             Text(desc)
