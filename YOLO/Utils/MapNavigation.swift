@@ -19,7 +19,6 @@ struct MapDestination: Equatable {
     }
 
     var canOpenInMaps: Bool {
-        if coordinate != nil { return true }
         let zh = addressZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let en = addressEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return !zh.isEmpty || !en.isEmpty
@@ -46,25 +45,25 @@ struct MapDestination: Equatable {
         return t.isEmpty ? nil : t
     }
 
-    /// English-only navigation target (keeps coordinates when present).
+    /// English-only navigation target (address text only, no coordinates).
     func focusingEnglish(_ english: String) -> MapDestination {
         MapDestination(
             name: name,
             addressZh: nil,
             addressEn: english,
-            latitude: latitude,
-            longitude: longitude
+            latitude: nil,
+            longitude: nil
         )
     }
 
-    /// Chinese-only navigation target (keeps coordinates when present).
+    /// Chinese-only navigation target (address text only, no coordinates).
     func focusingChinese(_ chinese: String) -> MapDestination {
         MapDestination(
             name: name,
             addressZh: chinese,
             addressEn: nil,
-            latitude: latitude,
-            longitude: longitude
+            latitude: nil,
+            longitude: nil
         )
     }
 
@@ -76,9 +75,6 @@ struct MapDestination: Equatable {
         }
         if let zh = trimmed(addressZh), !lines.contains(where: { $0.0 == zh }) {
             lines.append((zh, focusingChinese(zh)))
-        }
-        if lines.isEmpty, coordinate != nil {
-            lines.append((title, self))
         }
         return lines
     }
