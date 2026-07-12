@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Tappable address row that opens an installed map app (with picker when several are available).
+/// Tappable address row that lets the user pick an installed map app for navigation.
 struct AddressNavigationRow: View {
     let destination: MapDestination
     var fontSize: CGFloat = 11
@@ -45,7 +45,7 @@ struct AddressNavigationRow: View {
                 }
             }
             .confirmationDialog(
-                String(localized: "Open in Maps"),
+                String(localized: "Choose navigation app"),
                 isPresented: $showNavPicker,
                 titleVisibility: .visible
             ) {
@@ -65,9 +65,7 @@ struct AddressNavigationRow: View {
     }
 
     private func requestNavigation() {
-        switch MapNavigation.openBestAvailable(destination: destination) {
-        case .opened:
-            break
+        switch MapNavigation.navigationChoice(for: destination) {
         case .chooseFrom(let providers):
             navProviders = providers
             showNavPicker = true

@@ -75,7 +75,6 @@ enum MapNavigationProvider: String, CaseIterable, Identifiable {
 }
 
 enum MapNavigationOutcome: Equatable {
-    case opened(MapNavigationProvider)
     case chooseFrom([MapNavigationProvider])
     case unavailable
 }
@@ -85,30 +84,21 @@ enum MapNavigationOutcome: Equatable {
 enum MapNavigation {
     private static let sourceApplication = "YOLO"
 
-    static func availableProviders() -> [MapNavigationProvider] {
+    /// Map apps detected on this device (Apple Maps + any installed third-party apps).
+    static func installedProviders() -> [MapNavigationProvider] {
         MapNavigationProvider.allCases.filter(isInstalled)
     }
 
     static func isInstalled(_ provider: MapNavigationProvider) -> Bool {
-        switch provider {
-        case .appleMaps:
-            return true
-        case .amap, .baiduMaps, .googleMaps:
-            guard let url = provider.probeURL else { return false }
-            return UIApplication.shared.canOpenURL(url)
-        }
+        guard let url = provider.probeURL else { return false }
+        return UIApplication.shared.canOpenURL(url)
     }
 
-    /// If one app is available, opens immediately. If several, returns `.chooseFrom`. If none, `.unavailable`.
-    @discardableResult
-    static func openBestAvailable(destination: MapDestination) -> MapNavigationOutcome {
+    /// Always returns installed providers for the user to choose — never opens automatically.
+    static func navigationChoice(for destination: MapDestination) -> MapNavigationOutcome {
         guard destination.canOpenInMaps else { return .unavailable }
-        let providers = availableProviders()
-        guard let only = providers.only else {
-            return providers.isEmpty ? .unavailable : .chooseFrom(providers)
-        }
-        open(destination: destination, provider: only)
-        return .opened(only)
+        let providers = installedProviders()
+        return providers.isEmpty ? .unavailable : .chooseFrom(providers)
     }
 
     static func open(destination: MapDestination, provider: MapNavigationProvider) {
@@ -125,7 +115,7 @@ enum MapNavigation {
         }
     }
 
-    /// Legacy entry point — opens the best available map app.
+    /// Legacy entry point — opens Apple Maps when available.
     static func open(
         name: String?,
         addressZh: String?,
@@ -140,7 +130,8 @@ enum MapNavigation {
             latitude: latitude,
             longitude: longitude
         )
-        _ = openBestAvailable(destination: destination)
+        guard isInstalled(.appleMaps) else { return }
+        open(destination: destination, provider: .appleMaps)
     }
 
     // MARK: - Apple Maps
@@ -239,11 +230,5 @@ enum MapNavigation {
 
     private static func format(_ value: Double) -> String {
         String(format: "%.6f", value)
-    }
-}
-
-private extension Array where Element == MapNavigationProvider {
-    var only: MapNavigationProvider? {
-        count == 1 ? first : nil
     }
 }

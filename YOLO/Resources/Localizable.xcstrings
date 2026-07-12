@@ -402,15 +402,6 @@
     "Add intercity travel" : {
 
     },
-    "Amap" : {
-
-    },
-    "Apple Maps" : {
-
-    },
-    "Baidu Maps" : {
-
-    },
     "Add to favorites" : {
 
     },
@@ -456,10 +447,16 @@
     "All cities" : {
 
     },
+    "Amap" : {
+
+    },
     "An account with this email already exists. Try signing in instead." : {
 
     },
     "Anyone with the link can view this trip read-only in a browser or the app." : {
+
+    },
+    "Apple Maps" : {
 
     },
     "Apple sign-in failed. Please try again." : {
@@ -490,6 +487,9 @@
 
     },
     "Back to dates" : {
+
+    },
+    "Baidu Maps" : {
 
     },
     "Based on common defaults (round-trip same country, major airports, onward ticket issued). Final decision rests with border control." : {
@@ -565,6 +565,9 @@
 
     },
     "Choose cities" : {
+
+    },
+    "Choose navigation app" : {
 
     },
     "Choose cities and dates — AI builds a day-by-day itinerary you can edit." : {
@@ -761,13 +764,13 @@
     "Departure date" : {
 
     },
-    "Destination" : {
-
-    },
     "Departure day" : {
 
     },
     "Departure time" : {
+
+    },
+    "Destination" : {
 
     },
     "Detailed check (departure / port / onward ticket)" : {
@@ -932,10 +935,10 @@
     "Good morning," : {
 
     },
-    "Guest" : {
+    "Google Maps" : {
 
     },
-    "Google Maps" : {
+    "Guest" : {
 
     },
     "Guide" : {
@@ -1800,6 +1803,9 @@
 
     },
     "Unable to load content. Pull to refresh." : {
+
+    },
+    "Unable to load this guide. Pull to refresh or try again when online." : {
 
     },
     "Unable to send password reset email. Please try again." : {
