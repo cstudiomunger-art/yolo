@@ -45,6 +45,43 @@ struct MapDestination: Equatable {
         let t = value.trimmingCharacters(in: .whitespacesAndNewlines)
         return t.isEmpty ? nil : t
     }
+
+    /// English-only navigation target (keeps coordinates when present).
+    func focusingEnglish(_ english: String) -> MapDestination {
+        MapDestination(
+            name: name,
+            addressZh: nil,
+            addressEn: english,
+            latitude: latitude,
+            longitude: longitude
+        )
+    }
+
+    /// Chinese-only navigation target (keeps coordinates when present).
+    func focusingChinese(_ chinese: String) -> MapDestination {
+        MapDestination(
+            name: name,
+            addressZh: chinese,
+            addressEn: nil,
+            latitude: latitude,
+            longitude: longitude
+        )
+    }
+
+    /// Separate clickable lines when both languages are present.
+    var navigationLines: [(text: String, destination: MapDestination)] {
+        var lines: [(String, MapDestination)] = []
+        if let en = trimmed(addressEn) {
+            lines.append((en, focusingEnglish(en)))
+        }
+        if let zh = trimmed(addressZh), !lines.contains(where: { $0.0 == zh }) {
+            lines.append((zh, focusingChinese(zh)))
+        }
+        if lines.isEmpty, coordinate != nil {
+            lines.append((title, self))
+        }
+        return lines
+    }
 }
 
 enum MapNavigationProvider: String, CaseIterable, Identifiable {
