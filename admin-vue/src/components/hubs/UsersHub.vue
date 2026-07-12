@@ -394,16 +394,12 @@ async function createNewAdminUser() {
   }
   creatingAdmin.value = true;
   try {
-    const result = await createAdminUser(email, password);
-    if (result.ok) {
-      showToast(`管理员「${email}」创建成功`);
-      newAdminEmail.value = "";
-      newAdminPassword.value = "";
-      showCreateAdminDialog.value = false;
-      await loadList();
-    } else {
-      showToast("创建失败：" + (result.error || "未知错误"));
-    }
+    await createAdminUser(email, password);
+    showToast(`管理员「${email}」创建成功`);
+    newAdminEmail.value = "";
+    newAdminPassword.value = "";
+    showCreateAdminDialog.value = false;
+    await loadList();
   } catch (e) {
     showToast("失败：" + (e.message || e));
   } finally {

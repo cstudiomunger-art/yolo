@@ -32,6 +32,29 @@ export async function checkIsAdmin(userId) {
 // Admin Management Functions
 // ═══════════════════════════════════════════════════════════════
 
+async function parseFunctionError(error) {
+  let message = error?.message || "操作失败";
+  const response = error?.context;
+  if (response && typeof response.json === "function") {
+    try {
+      const payload = await response.json();
+      if (payload?.error) message = payload.error;
+    } catch {
+      /* ignore malformed body */
+    }
+  }
+  return new Error(message);
+}
+
+/** Invoke manage-admin Edge Function with readable errors */
+async function invokeManageAdmin(body) {
+  const { data, error } = await supabase.functions.invoke("manage-admin", { body });
+  if (error) throw await parseFunctionError(error);
+  if (data?.error) throw new Error(data.error);
+  if (data?.ok === false) throw new Error(data.error || "操作失败");
+  return data;
+}
+
 /** Add an existing user as admin */
 export async function addAdmin(userId, email) {
   const { data, error } = await supabase
@@ -45,31 +68,21 @@ export async function addAdmin(userId, email) {
 
 /** Remove admin privileges from a user */
 export async function removeAdmin(userId) {
-  const { data, error } = await supabase
-    .from("admin_users")
-    .delete()
-    .eq("user_id", userId)
-    .select();
-  if (error) throw error;
-  return data;
+  return invokeManageAdmin({ action: "remove_admin", targetUserId: userId });
 }
 
 /** Create a new admin user (requires Edge Function) */
 export async function createAdminUser(email, password) {
-  const { data, error } = await supabase.functions.invoke("manage-admin", {
-    body: { action: "create_user", email, password },
-  });
-  if (error) throw error;
-  return data;
+  return invokeManageAdmin({ action: "create_user", email, password });
 }
 
 /** Add an existing user as admin (via Edge Function) */
 export async function addExistingUserAsAdmin(userId, email) {
-  const { data, error } = await supabase.functions.invoke("manage-admin", {
-    body: { action: "add_existing_user", targetUserId: userId, targetEmail: email },
+  return invokeManageAdmin({
+    action: "add_existing_user",
+    targetUserId: userId,
+    targetEmail: email,
   });
-  if (error) throw error;
-  return data;
 }
 
 /** Check if a user is an admin */
