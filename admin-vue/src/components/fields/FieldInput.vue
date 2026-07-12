@@ -12,11 +12,14 @@ import VoiceVariantsEditor from "@/components/fields/VoiceVariantsEditor.vue";
 import StringListEditor from "@/components/fields/StringListEditor.vue";
 import {
   uploadCoverImage,
+  uploadAgentAvatar,
   uploadSubAreaAudioFile,
   uploadAudioGuideFile,
   uploadCityGuideAudioFile,
   uploadPhraseAudioFile,
   resolveCoverImageUrl,
+  COVER_BUCKET,
+  AVATARS_BUCKET,
 } from "@/lib/storage";
 
 const props = defineProps({
@@ -109,7 +112,8 @@ const isObjectList = computed(() => Boolean(LIST_COLUMNS[f.type]));
 
 const imagePreviewSrc = computed(() => {
   if (!isType("image_preview", "image_thumb", "image_url")) return "";
-  return resolveCoverImageUrl(val.value);
+  const bucket = f.imageBucket === "avatars" ? AVATARS_BUCKET : COVER_BUCKET;
+  return resolveCoverImageUrl(val.value, bucket);
 });
 
 // ---- multi-check options ----
@@ -194,14 +198,22 @@ async function onImageFile(e) {
   if (!file) return;
   uploadErr.value = "";
   if (!props.entityId) {
-    uploadErr.value = "请先填写名称/英文名以生成 ID，再上传";
+    uploadErr.value = "请先保存记录以生成 ID，再上传头像";
     e.target.value = "";
     return;
   }
   uploading.value = true;
   try {
-    const url = await uploadCoverImage(file, f.uploadFolder || "misc", props.entityId);
-    if (f.uploadTarget) props.record[f.uploadTarget] = url;
+    let url;
+    if (f.uploadKind === "agent_avatar") {
+      url = await uploadAgentAvatar(file, props.entityId);
+    } else {
+      url = await uploadCoverImage(file, f.uploadFolder || "misc", props.entityId);
+    }
+    const target = f.uploadTarget || f.key;
+    props.record[target] = url;
+    if (target !== f.key) val.value = url;
+    await persistField(target, url);
   } catch (err) {
     uploadErr.value = err.message || String(err);
   } finally {
@@ -319,9 +331,15 @@ async function onAudioFile(e) {
 
     <!-- image preview / url -->
     <div v-else-if="isType('image_preview', 'image_thumb', 'image_url')" class="preview">
-      <img v-if="imagePreviewSrc" :src="imagePreviewSrc" alt="" class="img" />
+      <img
+        v-if="imagePreviewSrc"
+        :src="imagePreviewSrc"
+        alt=""
+        class="img"
+        :class="{ round: f.imageStyle === 'avatar' }"
+      />
       <span v-else-if="!val" class="muted">（无图）</span>
-      <span v-else class="muted">（无法预览，请检查 cover_image_path）</span>
+      <span v-else class="muted">（无法预览，请检查图片路径）</span>
       <input v-if="isType('image_url')" v-model="val" type="text" placeholder="图片 URL" />
       <button v-if="val" type="button" class="btn btn-danger btn-sm" @click="clearImage">移除图片</button>
     </div>
@@ -394,6 +412,7 @@ async function onAudioFile(e) {
 .hint { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
 .err { font-size: 12px; color: var(--accent); margin: 6px 0 0; }
 .preview .img { max-width: 200px; max-height: 140px; border-radius: var(--radius); border: 1px solid var(--border); display: block; }
+.preview .img.round { width: 96px; height: 96px; max-width: 96px; max-height: 96px; border-radius: 50%; object-fit: cover; }
 .preview .audio { width: 100%; }
 .muted { color: var(--muted); font-size: 13px; }
 .mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }

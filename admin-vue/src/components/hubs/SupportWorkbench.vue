@@ -268,7 +268,7 @@ async function saveAgent() {
   try {
     // Upload avatar if new file selected
     let avatarUrl = a.avatar_url;
-    if (compressedAgentAvatarFile.value && a.id) {
+    if ((compressedAgentAvatarFile.value || agentAvatarFile.value) && a.id) {
       const uploaded = await uploadAgentAvatarToServer();
       if (uploaded) avatarUrl = uploaded;
     }
