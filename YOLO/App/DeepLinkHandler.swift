@@ -5,11 +5,15 @@ enum DeepLinkHandler {
         case openSharedItinerary(slug: String)
         case passwordRecovery
         case emailConfirmation
+        case oauthCallback
         case redeemInviteCode(code: String)
     }
 
     static func action(for url: URL) -> Action? {
         if url.scheme?.lowercased() == "yoloapp" {
+            if url.host == "auth-callback" {
+                return .oauthCallback
+            }
             if url.host == "auth", url.path.contains("confirm") || containsEmailConfirmationType(in: url) {
                 return .emailConfirmation
             }

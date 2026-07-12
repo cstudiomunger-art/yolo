@@ -20,11 +20,7 @@ struct RootView: View {
         .task {
             await appEnv.refreshContentMode(clearSettingsCache: true)
             await appEnv.purchase.loadPlans()
-            if appEnv.auth.isAuthenticated {
-                await appEnv.syncAfterSignIn()
-            } else {
-                appEnv.reconcileAccountProfileWithAuth()
-            }
+            await appEnv.reconcileAuthState(isAuthenticated: appEnv.auth.isAuthenticated)
         }
         .onChange(of: appEnv.preferences.countryCode) { _, _ in
             Task { await appEnv.refreshVisaRule() }
@@ -56,11 +52,7 @@ struct RootView: View {
                 .environment(appEnv)
         }
         .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
-            if isAuthenticated {
-                Task { await appEnv.syncAfterSignIn() }
-            } else {
-                appEnv.reconcileAccountProfileWithAuth()
-            }
+            Task { await appEnv.reconcileAuthState(isAuthenticated: isAuthenticated) }
         }
     }
 

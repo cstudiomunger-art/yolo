@@ -9,14 +9,7 @@ struct PlanView: View {
     @State private var showLogin = false
     @State private var pendingCreateAfterLogin = false
 
-    private var savedTrips: [SampleItinerary] {
-        let all = appEnv.preferences.savedItineraries
-        guard let activeId = appEnv.preferences.activeItineraryId,
-              let active = all.first(where: { $0.id == activeId }) else {
-            return all
-        }
-        return [active] + all.filter { $0.id != activeId }
-    }
+    private var savedTrips: [SampleItinerary] { appEnv.orderedVisibleTrips }
 
     var body: some View {
         navigationStack
@@ -343,7 +336,7 @@ struct PlanView: View {
     private func reloadPrepProgress() async {
         let ctx = PrepChecklistContext(
             countryCode: appEnv.preferences.countryCode,
-            activeItinerary: appEnv.preferences.activeItinerary
+            activeItinerary: appEnv.visibleActiveItinerary
         )
         let cityIds = ctx.hasSavedItinerary ? ctx.itineraryCityIds : []
         let all = (try? await appEnv.content.fetchChecklistItems(

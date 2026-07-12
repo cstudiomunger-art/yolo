@@ -35,16 +35,12 @@ enum GuideRoute: Hashable {
 }
 
 enum GuideTripHelpers {
-    static func activeItinerary(from preferences: UserPreferencesStore) -> SampleItinerary? {
-        let all = preferences.savedItineraries
-        guard let activeId = preferences.activeItineraryId else {
-            return all.first
-        }
-        return all.first { $0.id == activeId } ?? all.first
+    static func activeItinerary(from appEnv: AppEnvironment) -> SampleItinerary? {
+        appEnv.visibleActiveItinerary
     }
 
-    static func tripCityIds(from preferences: UserPreferencesStore) -> [String] {
-        guard let itinerary = activeItinerary(from: preferences) else { return [] }
+    static func tripCityIds(from appEnv: AppEnvironment) -> [String] {
+        guard let itinerary = activeItinerary(from: appEnv) else { return [] }
         return SampleItinerary.orderedCityIds(from: itinerary)
     }
 

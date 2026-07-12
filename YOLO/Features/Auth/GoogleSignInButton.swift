@@ -4,9 +4,9 @@ import SwiftUI
 
 /// Google sign-in via Supabase's OAuth web flow (ASWebAuthenticationSession).
 /// Requires the Google provider to be enabled in Supabase Dashboard and
-/// `yolohappy://auth-callback` to be whitelisted under Auth → URL Configuration → Redirect URLs.
+/// `yoloapp://auth-callback` to be whitelisted under Auth → URL Configuration → Redirect URLs.
 struct GoogleSignInButton: View {
-    static let redirectURL = URL(string: "yolohappy://auth-callback")
+    static let redirectURL = URL(string: "yoloapp://auth-callback")
 
     var onStart: () -> Void = {}
     var onSuccess: () -> Void = {}

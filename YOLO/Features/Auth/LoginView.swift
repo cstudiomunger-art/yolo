@@ -31,6 +31,14 @@ struct LoginView: View {
                                 .onTapGesture { triggerConsentShake() }
                         }
                     }
+                    .overlay {
+                        if isLoading {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color.black.opacity(0.12))
+                            ProgressView()
+                        }
+                    }
+                    .allowsHitTesting(!isLoading)
 
                 legalConsentRow
                     .modifier(ShakeEffect(animatableData: consentShake))
@@ -38,7 +46,11 @@ struct LoginView: View {
 
                 if showGuestOption {
                     Button {
-                        appEnv.preferences.isGuestMode = true
+                        guard acceptedLegal else {
+                            triggerConsentShake()
+                            return
+                        }
+                        appEnv.enterGuestMode()
                     } label: {
                         Text(String(localized: "Explore as guest"))
                             .font(Theme.FontToken.inter(13, weight: .medium))

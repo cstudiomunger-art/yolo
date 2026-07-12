@@ -7,17 +7,10 @@ struct HomeView: View {
     @State private var cities: [City] = []
     @State private var showProfile = false
     @State private var showDatePicker = false
+    @State private var showLogin = false
+    @State private var pendingPlanAfterLogin = false
 
-    private var trips: [SampleItinerary] { orderedTrips }
-
-    private var orderedTrips: [SampleItinerary] {
-        let all = appEnv.preferences.savedItineraries
-        guard let activeId = appEnv.preferences.activeItineraryId,
-              let active = all.first(where: { $0.id == activeId }) else {
-            return all
-        }
-        return [active] + all.filter { $0.id != activeId }
-    }
+    private var trips: [SampleItinerary] { appEnv.orderedVisibleTrips }
 
     private func prepItemStatus(_ item: ChecklistItem) -> ChecklistItemStatus {
         appEnv.preferences.checklistStatus(for: item.id, type: item.type)
@@ -75,7 +68,7 @@ struct HomeView: View {
                     departureDate: appEnv.preferences.departureDate,
                     visa: appEnv.preferences.visaRule(),
                     onSetDeparture: { showDatePicker = true },
-                    onPlanTrip: { appEnv.navigation.openPlanGenerator() },
+                    onPlanTrip: { requestPlanTrip() },
                     onViewItinerary: { _ in appEnv.navigation.openTab(.plan) },
                     onOpenPrepare: { appEnv.navigation.presentPrepare() }
                 )
@@ -94,6 +87,15 @@ struct HomeView: View {
         .background(Theme.ColorToken.background)
         .sheet(isPresented: $showProfile) {
             ProfileSheetView()
+        }
+        .loginSheet(isPresented: $showLogin, appEnv: appEnv)
+        .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+            guard isAuthenticated else { return }
+            showLogin = false
+            if pendingPlanAfterLogin {
+                pendingPlanAfterLogin = false
+                appEnv.navigation.openPlanGenerator()
+            }
         }
         .sheet(isPresented: $showDatePicker) {
             NavigationStack {
@@ -154,7 +156,7 @@ struct HomeView: View {
             let repo = appEnv.content
             let ctx = PrepChecklistContext(
                 countryCode: appEnv.preferences.countryCode,
-                activeItinerary: appEnv.preferences.activeItinerary
+                activeItinerary: appEnv.visibleActiveItinerary
             )
             let cityIds = ctx.hasSavedItinerary ? ctx.itineraryCityIds : []
             async let checklistTask = repo.fetchChecklistItems(
@@ -181,5 +183,14 @@ struct HomeView: View {
             )
             prepItems = result.allItems
         }
+    }
+
+    private func requestPlanTrip() {
+        if appEnv.requiresSignInForTripActions {
+            pendingPlanAfterLogin = true
+            showLogin = true
+            return
+        }
+        appEnv.navigation.openPlanGenerator()
     }
 }

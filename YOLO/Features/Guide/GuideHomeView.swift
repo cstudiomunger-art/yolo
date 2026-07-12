@@ -10,11 +10,11 @@ struct GuideHomeView: View {
     @State private var activeTripCardIndex = 0
 
     private var activeItinerary: SampleItinerary? {
-        GuideTripHelpers.activeItinerary(from: appEnv.preferences)
+        GuideTripHelpers.activeItinerary(from: appEnv)
     }
 
     private var tripCityIds: [String] {
-        GuideTripHelpers.tripCityIds(from: appEnv.preferences)
+        GuideTripHelpers.tripCityIds(from: appEnv)
     }
 
     private var tripCities: [City] {

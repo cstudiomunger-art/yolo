@@ -49,12 +49,29 @@ struct VisaDetectorView: View {
     /// Only a Plan preset or a saved itinerary counts as a real trip. Without one we must
     /// NOT pass off the leftover global `selectedCityIds` as "我的行程" — show the empty state.
     private var hasRealTrip: Bool {
-        presetCitySlugs != nil || !appEnv.preferences.savedItineraries.isEmpty
+        presetCitySlugs != nil || !appEnv.visibleSavedItineraries.isEmpty
+    }
+
+    /// Cities from the active saved itinerary (visit order → day timeline → route summary).
+    private var itineraryCitySlugs: [String] {
+        guard let trip = appEnv.visibleActiveItinerary else { return [] }
+        if let visitOrder = trip.visitOrder, !visitOrder.isEmpty {
+            return visitOrder.map { $0.lowercased() }
+        }
+        let ordered = SampleItinerary.orderedCityIds(from: trip)
+        if !ordered.isEmpty { return ordered }
+        return PlanTripCities.cityIds(
+            itinerary: trip,
+            selectedCityIds: appEnv.preferences.selectedCityIds
+        )
     }
 
     private var tripSlugs: [String] {
         if let preset = presetCitySlugs { return preset }
-        return hasRealTrip ? appEnv.preferences.selectedCityIds : []
+        guard hasRealTrip else { return [] }
+        let fromItinerary = itineraryCitySlugs
+        if !fromItinerary.isEmpty { return fromItinerary }
+        return appEnv.preferences.selectedCityIds
     }
 
     private var tripSourceTitle: String {
@@ -94,10 +111,11 @@ struct VisaDetectorView: View {
                 guard !presetsApplied else { return }
                 presetsApplied = true
                 if departure.isEmpty { departure = country }   // default from passport
-                if let s = presetStart {
+                let trip = appEnv.visibleActiveItinerary
+                if let s = presetStart ?? trip?.startDate {
                     entryAt = Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: s) ?? s
                 }
-                if let e = presetEnd { plannedExitAt = e }
+                if let e = presetEnd ?? trip?.endDate { plannedExitAt = e }
             }
             .sheet(item: $verdict) { wrapped in
                 VisaVerdictView(recommendation: wrapped.rec, cityCodes: evaluatedCodes,

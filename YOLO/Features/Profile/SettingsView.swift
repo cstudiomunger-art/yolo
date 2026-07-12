@@ -240,7 +240,7 @@ struct SettingsView: View {
                     sectionHeader(String(localized: "Account"))
                     card {
                         Button {
-                            Task { await appEnv.signOutAndReset() }
+                            Task { await appEnv.signOut() }
                         } label: {
                             destructiveRowLabel(String(localized: "Sign Out"))
                         }

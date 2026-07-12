@@ -22,7 +22,7 @@ struct PrepareView: View {
     private var context: PrepChecklistContext {
         PrepChecklistContext(
             countryCode: appEnv.preferences.countryCode,
-            activeItinerary: appEnv.preferences.activeItinerary
+            activeItinerary: appEnv.visibleActiveItinerary
         )
     }
 
@@ -54,7 +54,7 @@ struct PrepareView: View {
         .task { await bootstrap() }
         .onChange(of: appEnv.contentRevision) { _, _ in Task { await reloadContent(invalidateCache: true) } }
         .onChange(of: appEnv.preferences.activeItineraryId) { _, _ in Task { await reloadContent(invalidateCache: true) } }
-        .onChange(of: appEnv.preferences.savedItineraries.count) { _, _ in Task { await reloadContent() } }
+        .onChange(of: appEnv.visibleSavedItineraries.count) { _, _ in Task { await reloadContent() } }
         .alert("Restore this item?", isPresented: showRestoreAlert, presenting: restoreConfirmItem) { item in
             Button("Restore") {
                 appEnv.preferences.restoreChecklistItem(item.id, type: item.type)
@@ -79,7 +79,7 @@ struct PrepareView: View {
                     completionBanner
                 }
                 progressSummary
-                if appEnv.preferences.savedItineraries.count > 1 {
+                if appEnv.visibleSavedItineraries.count > 1 {
                     itineraryPicker
                 }
                 checklistSections
@@ -199,7 +199,7 @@ struct PrepareView: View {
 
     private var itineraryPicker: some View {
         Menu {
-            ForEach(appEnv.preferences.savedItineraries) { trip in
+            ForEach(appEnv.visibleSavedItineraries) { trip in
                 Button(trip.title) {
                     appEnv.preferences.activeItineraryId = trip.id
                     let cityIds = SampleItinerary.orderedCityIds(from: trip)

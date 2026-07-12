@@ -29,6 +29,7 @@ final class AppEnvironment {
     private(set) var membershipRevision = 0
 
     @ObservationIgnored private var contentRefreshTask: Task<Void, Never>?
+    @ObservationIgnored private var wasAuthenticatedThisSession = false
 
     init(
         contentMode: ContentModeService? = nil,
@@ -82,6 +83,7 @@ final class AppEnvironment {
         resolvedPreferences.onMembershipStateChanged = { [weak self] in
             self?.membershipRevision += 1
         }
+        updateItineraryWriteAccess()
     }
 
     /// Wire the shared audio player so it can re-resolve per-track access (member / single /
@@ -145,8 +147,77 @@ final class AppEnvironment {
         preferences.avatarStatus = "none"
     }
 
+    // MARK: - Auth ↔ itinerary coordination
+
+    var canPersistItineraries: Bool {
+        auth.isAuthenticated || AppConfig.useMock
+    }
+
+    /// Trips shown in Home / Plan / Prepare / Guide — empty when logged out (guests cannot save trips).
+    var visibleSavedItineraries: [SampleItinerary] {
+        guard canPersistItineraries else { return [] }
+        return preferences.savedItineraries
+    }
+
+    var visibleActiveItinerary: SampleItinerary? {
+        guard canPersistItineraries else { return nil }
+        return preferences.activeItinerary
+    }
+
+    var orderedVisibleTrips: [SampleItinerary] {
+        let all = visibleSavedItineraries
+        guard let activeId = preferences.activeItineraryId,
+              let active = all.first(where: { $0.id == activeId }) else {
+            return all
+        }
+        return [active] + all.filter { $0.id != activeId }
+    }
+
+    var requiresSignInForTripActions: Bool {
+        !auth.isAuthenticated && !AppConfig.useMock
+    }
+
+    func updateItineraryWriteAccess() {
+        preferences.allowsItineraryPersistence = canPersistItineraries
+    }
+
+    /// Central hook for session appearing or disappearing (login, logout, token expiry).
+    func reconcileAuthState(isAuthenticated: Bool) async {
+        updateItineraryWriteAccess()
+        if isAuthenticated {
+            wasAuthenticatedThisSession = true
+            preferences.isGuestMode = false
+            updateItineraryWriteAccess()
+            await syncAfterSignIn()
+        } else {
+            profileSync.cancelPendingSync()
+            preferences.clearItinerarySession()
+            if wasAuthenticatedThisSession {
+                preferences.isGuestMode = false
+                wasAuthenticatedThisSession = false
+            }
+            reconcileAccountProfileWithAuth()
+            updateItineraryWriteAccess()
+            await purchase.logout()
+        }
+    }
+
+    /// Browse-only entry from the login gate; clears any stale account trip memory.
+    func enterGuestMode() {
+        preferences.clearItinerarySession()
+        preferences.isGuestMode = true
+        updateItineraryWriteAccess()
+    }
+
+    /// Light sign-out: keeps nationality / onboarding; clears account-bound data.
+    func signOut() async {
+        audioPlayer.close()
+        await profileSync.syncItineraries()
+        try? await auth.signOut()
+    }
+
     func rescheduleTripReminders() async {
-        let active = preferences.activeItinerary
+        let active = visibleActiveItinerary
         await TripReminderService.reschedule(
             itinerary: active,
             departureDate: preferences.departureDate,
@@ -205,9 +276,17 @@ final class AppEnvironment {
             do {
                 _ = try await SupabaseManager.shared.auth.session(from: url)
                 TelemetryService.shared.logEvent("email_confirmed")
-                await profileSync.syncAfterSignIn()
+                await reconcileAuthState(isAuthenticated: true)
             } catch {
                 TelemetryService.shared.recordError(error, context: "email_confirmation_link")
+            }
+        case .oauthCallback:
+            do {
+                _ = try await SupabaseManager.shared.auth.session(from: url)
+                TelemetryService.shared.logEvent("sign_in_google")
+                await reconcileAuthState(isAuthenticated: true)
+            } catch {
+                TelemetryService.shared.recordError(error, context: "oauth_callback")
             }
         case .redeemInviteCode(let code):
             navigation.presentInviteRedeem(code: code)

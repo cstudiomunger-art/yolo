@@ -14,7 +14,7 @@ struct EmergencyView: View {
     @State private var selectedCityId = ""
 
     private var tripCityIds: [String] {
-        if let trip = appEnv.preferences.activeItinerary {
+        if let trip = appEnv.visibleActiveItinerary {
             let ordered = SampleItinerary.orderedCityIds(from: trip)
             if !ordered.isEmpty { return ordered }
         }

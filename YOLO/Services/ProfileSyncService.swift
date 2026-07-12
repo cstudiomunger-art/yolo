@@ -25,6 +25,14 @@ final class ProfileSyncService {
         self.auth = auth
     }
 
+    func cancelPendingSync() {
+        scheduledPushTask?.cancel()
+        scheduledPushTask = nil
+        itinerarySyncTask?.cancel()
+        itinerarySyncTask = nil
+        isSyncing = false
+    }
+
     /// Debounced upload after local profile fields change.
     func schedulePush() {
         scheduledPushTask?.cancel()

@@ -107,6 +107,9 @@ final class UserPreferencesStore {
     /// When set, itineraries are read/written under per-account UserDefaults keys.
     private(set) var storageUserId: String?
 
+    /// When false, public itinerary mutations are ignored (guest / logged-out).
+    var allowsItineraryPersistence = false
+
     var activeItineraryId: String? {
         didSet {
             if !skipItineraryPersistence {
@@ -495,6 +498,7 @@ final class UserPreferencesStore {
     static let maxSavedItineraries = 10
 
     func saveItinerary(_ itinerary: SampleItinerary) {
+        guard allowsItineraryPersistence else { return }
         var list = savedItineraries.filter { $0.id != itinerary.id }
         list.insert(itinerary, at: 0)
         if list.count > Self.maxSavedItineraries {
@@ -507,6 +511,7 @@ final class UserPreferencesStore {
     }
 
     func updateItineraryShareState(_ itinerary: SampleItinerary) {
+        guard allowsItineraryPersistence else { return }
         guard let index = savedItineraries.firstIndex(where: { $0.id == itinerary.id }) else { return }
         var list = savedItineraries
         list[index] = itinerary
@@ -523,6 +528,7 @@ final class UserPreferencesStore {
     var showPrepareGuideAfterSave = false
 
     func deleteItinerary(id: String) {
+        guard allowsItineraryPersistence else { return }
         var list = savedItineraries
         list.removeAll { $0.id == id }
         savedItineraries = list
