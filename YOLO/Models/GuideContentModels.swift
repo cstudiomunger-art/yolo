@@ -53,11 +53,16 @@ struct Hotel: Identifiable, Codable {
         return nil
     }
 
-    var canOpenInMaps: Bool {
-        if latitude != nil, longitude != nil { return true }
-        let zh = addressZh?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let en = addressEn?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        return !zh.isEmpty || !en.isEmpty
+    var canOpenInMaps: Bool { mapDestination.canOpenInMaps }
+
+    var mapDestination: MapDestination {
+        MapDestination(
+            name: name,
+            addressZh: addressZh,
+            addressEn: addressEn,
+            latitude: latitude,
+            longitude: longitude
+        )
     }
 
     init(from decoder: Decoder) throws {

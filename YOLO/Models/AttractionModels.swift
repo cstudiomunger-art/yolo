@@ -258,6 +258,20 @@ struct Attraction: Identifiable, Hashable, Codable {
         }
         return days
     }
+
+    var displayAddressLine: String? { mapDestination.displayAddressLine }
+
+    var canOpenInMaps: Bool { mapDestination.canOpenInMaps }
+
+    var mapDestination: MapDestination {
+        MapDestination(
+            name: name,
+            addressZh: addressZh,
+            addressEn: addressEn,
+            latitude: latitude,
+            longitude: longitude
+        )
+    }
 }
 
 struct NearbyPlace: Codable, Hashable {

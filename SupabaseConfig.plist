@@ -18,5 +18,11 @@
 	<array>
 		<string>audio</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>iosamap</string>
+		<string>baidumap</string>
+		<string>comgooglemaps</string>
+	</array>
 </dict>
 </plist>

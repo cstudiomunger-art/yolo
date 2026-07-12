@@ -402,6 +402,15 @@
     "Add intercity travel" : {
 
     },
+    "Amap" : {
+
+    },
+    "Apple Maps" : {
+
+    },
+    "Baidu Maps" : {
+
+    },
     "Add to favorites" : {
 
     },
@@ -752,6 +761,9 @@
     "Departure date" : {
 
     },
+    "Destination" : {
+
+    },
     "Departure day" : {
 
     },
@@ -921,6 +933,9 @@
 
     },
     "Guest" : {
+
+    },
+    "Google Maps" : {
 
     },
     "Guide" : {
@@ -1173,6 +1188,9 @@
 
     },
     "Open checklist" : {
+
+    },
+    "Open in Maps" : {
 
     },
     "Packed schedule" : {

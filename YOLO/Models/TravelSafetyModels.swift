@@ -77,6 +77,18 @@ struct CityHospital: Identifiable, Codable, Hashable {
         if !zh.isEmpty { return zh }
         return nil
     }
+
+    var canOpenInMaps: Bool { mapDestination.canOpenInMaps }
+
+    var mapDestination: MapDestination {
+        MapDestination(
+            name: displayName,
+            addressZh: addressZh,
+            addressEn: addressEn,
+            latitude: nil,
+            longitude: nil
+        )
+    }
 }
 
 struct CityEmbassy: Identifiable, Codable, Hashable {

@@ -252,31 +252,18 @@ struct AttractionDetailView: View {
                     copyButton(text: display.chineseName, field: .name)
                 }
             }
-            if let en = display.addressEn, !en.isEmpty {
-                Text(en)
-                    .font(Theme.FontToken.inter(12))
-                    .foregroundStyle(Theme.ColorToken.textMuted)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            if let zh = display.addressZh, !zh.isEmpty {
-                Button {
-                    UIPasteboard.general.string = zh
-                    withAnimation(.easeInOut(duration: 0.15)) { copiedField = .address }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            if copiedField == .address { copiedField = nil }
-                        }
-                    }
-                } label: {
-                    addressLabel(zh)
-                }
-                .buttonStyle(.plain)
+            if display.canOpenInMaps {
+                AddressNavigationRow(
+                    destination: display.mapDestination,
+                    fontSize: 12,
+                    showsPin: false,
+                    showsCopyButton: true
+                )
             }
         }
     }
 
-    private enum CopyField { case name, address }
+    private enum CopyField { case name }
 
     @ViewBuilder
     private func copyButton(text: String, field: CopyField) -> some View {
@@ -294,23 +281,6 @@ struct AttractionDetailView: View {
                 .foregroundStyle(copiedField == field ? Color.green : Theme.ColorToken.accent)
         }
         .buttonStyle(.plain)
-    }
-
-    /// Address text with the copy icon flowing inline at the end, so a long
-    /// address wraps to multiple lines and the icon follows the last character.
-    private func addressLabel(_ text: String) -> some View {
-        let copied = copiedField == .address
-        return HStack(alignment: .firstTextBaseline, spacing: 4) {
-            Text(text)
-                .foregroundColor(Theme.ColorToken.textMuted)
-            Image(systemName: copied ? "checkmark" : "doc.on.doc")
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(copied ? Color.green : Theme.ColorToken.accent)
-        }
-        .font(Theme.FontToken.inter(12))
-        .multilineTextAlignment(.leading)
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
@@ -394,19 +364,13 @@ struct AttractionDetailView: View {
         let items = display.practicalInfo.filter {
             !$0.value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }
-        let hasAddress = display.addressZh?.isEmpty == false
-        if !items.isEmpty || hasAddress {
+        if !items.isEmpty {
             Text("Practical Info")
                 .sectionTitleStyle()
             ForEach(items, id: \.self) { item in
                 let icon = (item.icon?.isEmpty == false) ? (item.icon ?? "•") : "•"
                 let line = item.label.isEmpty ? item.value : "\(item.label): \(item.value)"
                 infoRow(icon, line)
-            }
-            if let zh = display.addressZh, !zh.isEmpty {
-                Text(zh)
-                    .font(Theme.FontToken.inter(12))
-                    .foregroundStyle(Theme.ColorToken.textSecondary)
             }
         }
     }

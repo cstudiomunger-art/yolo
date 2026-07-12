@@ -218,7 +218,13 @@ struct EmergencyView: View {
                             .font(Theme.FontToken.inter(10))
                             .foregroundStyle(Theme.ColorToken.accent)
                     }
-                    if let address = hospital.displayAddress {
+                    if hospital.canOpenInMaps {
+                        AddressNavigationRow(
+                            destination: hospital.mapDestination,
+                            fontSize: 10,
+                            showsTrailingArrow: true
+                        )
+                    } else if let address = hospital.displayAddress {
                         Text(address)
                             .font(Theme.FontToken.inter(10))
                             .foregroundStyle(Theme.ColorToken.textMuted)

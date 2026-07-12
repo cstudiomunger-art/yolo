@@ -1645,30 +1645,8 @@ struct HotelCardView: View {
             }
             Text("✅ Registered for foreign guests")
                 .font(Theme.FontToken.inter(11))
-            if let address = hotel.displayAddressLine, hotel.canOpenInMaps {
-                Button {
-                    MapNavigation.open(
-                        name: hotel.name,
-                        addressZh: hotel.addressZh,
-                        addressEn: hotel.addressEn,
-                        latitude: hotel.latitude,
-                        longitude: hotel.longitude
-                    )
-                } label: {
-                    HStack(alignment: .top, spacing: 4) {
-                        Text("📍")
-                            .font(Theme.FontToken.inter(11))
-                        Text(address)
-                            .font(Theme.FontToken.inter(11))
-                            .foregroundStyle(Theme.ColorToken.accent)
-                            .multilineTextAlignment(.leading)
-                        Spacer(minLength: 0)
-                        Text("Maps →")
-                            .font(Theme.FontToken.inter(10, weight: .medium))
-                            .foregroundStyle(Theme.ColorToken.accent)
-                    }
-                }
-                .buttonStyle(.plain)
+            if hotel.canOpenInMaps {
+                AddressNavigationRow(destination: hotel.mapDestination)
             } else if let address = hotel.displayAddressLine {
                 HStack(alignment: .top, spacing: 4) {
                     Text("📍")
