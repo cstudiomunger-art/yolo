@@ -85,6 +85,22 @@ export async function addExistingUserAsAdmin(userId, email) {
   });
 }
 
+/** Create a regular app user (auth + profile) */
+export async function createAppUser(email, password, { displayName, countryCode } = {}) {
+  return invokeManageAdmin({
+    action: "create_app_user",
+    email,
+    password,
+    display_name: displayName,
+    country_code: countryCode,
+  });
+}
+
+/** Permanently delete an app user and related data */
+export async function deleteAppUser(userId) {
+  return invokeManageAdmin({ action: "delete_app_user", targetUserId: userId });
+}
+
 /** Check if a user is an admin */
 export async function isAdmin(userId) {
   const { data, error } = await supabase

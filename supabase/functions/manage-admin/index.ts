@@ -13,6 +13,22 @@ function json(body: unknown, status = 200) {
   });
 }
 
+async function cleanupUserAvatars(
+  adminClient: ReturnType<typeof createClient>,
+  targetUserId: string,
+) {
+  try {
+    const { data: files } = await adminClient.storage.from("avatars").list(targetUserId);
+    if (files?.length) {
+      await adminClient.storage
+        .from("avatars")
+        .remove(files.map((f) => `${targetUserId}/${f.name}`));
+    }
+  } catch {
+    // Avatar cleanup failure should not block account deletion.
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -180,6 +196,74 @@ serve(async (req) => {
         }
 
         return json({ ok: true, admins: admins || [] });
+      }
+
+      case "create_app_user": {
+        const { email, password, display_name, country_code } = body;
+        if (!email || !password) {
+          return json({ error: "Email and password required" }, 400);
+        }
+
+        const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
+
+        if (createError || !newUser.user) {
+          return json({ error: createError?.message || "Failed to create user" }, 500);
+        }
+
+        const profilePatch: Record<string, string | null> = {};
+        if (typeof display_name === "string" && display_name.trim()) {
+          profilePatch.display_name = display_name.trim();
+        }
+        if (typeof country_code === "string" && country_code.trim()) {
+          profilePatch.country_code = country_code.trim().toUpperCase();
+        }
+        if (Object.keys(profilePatch).length) {
+          const { error: profileError } = await adminClient
+            .from("profiles")
+            .update(profilePatch)
+            .eq("id", newUser.user.id);
+          if (profileError) {
+            return json({ error: profileError.message }, 500);
+          }
+        }
+
+        return json({
+          ok: true,
+          user: {
+            id: newUser.user.id,
+            email: newUser.user.email,
+          },
+        });
+      }
+
+      case "delete_app_user": {
+        const { targetUserId } = body;
+        if (!targetUserId) {
+          return json({ error: "User ID required" }, 400);
+        }
+        if (targetUserId === userId) {
+          return json({ error: "Cannot delete your own account" }, 400);
+        }
+
+        const { data: targetUser, error: targetError } = await adminClient.auth.admin.getUserById(
+          targetUserId,
+        );
+        if (targetError || !targetUser.user) {
+          return json({ error: "User not found" }, 404);
+        }
+
+        await cleanupUserAvatars(adminClient, targetUserId);
+
+        const { error: deleteError } = await adminClient.auth.admin.deleteUser(targetUserId);
+        if (deleteError) {
+          return json({ error: deleteError.message }, 500);
+        }
+
+        return json({ ok: true });
       }
 
       default:

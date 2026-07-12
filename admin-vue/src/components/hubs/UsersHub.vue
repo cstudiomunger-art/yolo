@@ -1,13 +1,15 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { supabase, isAdmin, addExistingUserAsAdmin, removeAdmin, createAdminUser } from "@/lib/supabase";
+import { supabase, isAdmin, addExistingUserAsAdmin, removeAdmin, createAdminUser, createAppUser, deleteAppUser } from "@/lib/supabase";
 import { uploadUserAvatar } from "@/lib/storage";
 import { compressImage } from "@/lib/imageUtils";
 import { useRefCache } from "@/stores/refCache";
+import { useAuthStore } from "@/stores/auth";
 import MultiCheck from "@/components/fields/MultiCheck.vue";
 import DateTimePicker from "@/components/fields/DateTimePicker.vue";
 
 const refCache = useRefCache();
+const auth = useAuthStore();
 
 const profiles = ref([]);
 const plans = ref([]); // active plans for selectors
@@ -26,6 +28,16 @@ const showCreateAdminDialog = ref(false);
 const newAdminEmail = ref("");
 const newAdminPassword = ref("");
 const creatingAdmin = ref(false);
+
+// ═══════════════════════════════════════════════════════════════
+// App User Management State
+// ═══════════════════════════════════════════════════════════════
+const showCreateUserDialog = ref(false);
+const newUserEmail = ref("");
+const newUserPassword = ref("");
+const newUserDisplayName = ref("");
+const newUserCountryCode = ref("GB");
+const creatingUser = ref(false);
 
 // ═══════════════════════════════════════════════════════════════
 // Support Agent Management State
@@ -408,6 +420,58 @@ async function createNewAdminUser() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// App User Management Functions
+// ═══════════════════════════════════════════════════════════════
+async function createNewAppUser() {
+  const email = newUserEmail.value.trim();
+  const password = newUserPassword.value;
+  if (!email || !password) {
+    showToast("请填写邮箱和密码");
+    return;
+  }
+  creatingUser.value = true;
+  try {
+    await createAppUser(email, password, {
+      displayName: newUserDisplayName.value.trim() || undefined,
+      countryCode: newUserCountryCode.value.trim() || undefined,
+    });
+    showToast(`用户「${email}」创建成功`);
+    newUserEmail.value = "";
+    newUserPassword.value = "";
+    newUserDisplayName.value = "";
+    newUserCountryCode.value = "GB";
+    showCreateUserDialog.value = false;
+    await loadList();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  } finally {
+    creatingUser.value = false;
+  }
+}
+
+async function deleteUserAccount(user, fromDetail = false) {
+  if (!user?.id) return;
+  if (user.id === auth.session?.user?.id) {
+    showToast("不能删除当前登录账号");
+    return;
+  }
+  const warnings = [];
+  if (adminUserIds.value.has(user.id)) warnings.push("该用户是 CMS 管理员");
+  if (supportAgents.value.some((a) => a.user_id === user.id)) warnings.push("该用户是客服坐席");
+  const extra = warnings.length ? `\n\n注意：${warnings.join("；")}` : "";
+  const label = user.email || user.display_name || user.id;
+  if (!confirm(`永久删除用户「${label}」？\n将删除账号、资料及相关数据，不可恢复。${extra}`)) return;
+  try {
+    await deleteAppUser(user.id);
+    showToast("用户已删除");
+    if (fromDetail) closeDetail();
+    await loadList();
+  } catch (e) {
+    showToast("失败：" + (e.message || e));
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Support Agent Management Functions
 // ═══════════════════════════════════════════════════════════════
 async function addAsSupportAgent() {
@@ -618,6 +682,11 @@ onMounted(async () => { await refCache.load(); await loadList(); });
       <div class="bar">
         <button class="btn btn-secondary btn-sm" @click="closeDetail">← 用户列表</button>
         <button class="btn btn-sm" :disabled="savingDetail" @click="saveDetail">{{ savingDetail ? "保存中…" : "保存用户资料" }}</button>
+        <button
+          class="btn btn-danger btn-sm"
+          :disabled="detail.id === auth.session?.user?.id"
+          @click="deleteUserAccount(detail, true)"
+        >删除用户</button>
       </div>
 
       <section class="card">
@@ -837,6 +906,7 @@ onMounted(async () => { await refCache.load(); await loadList(); });
       </div>
 
       <div class="bar">
+        <button class="btn btn-sm" @click="showCreateUserDialog = true">+ 创建用户</button>
         <input v-model="search" class="search" type="search" placeholder="搜索邮箱、昵称、UUID…" />
         <select v-model="statusFilter">
           <option value="">全部用户</option>
@@ -850,7 +920,7 @@ onMounted(async () => { await refCache.load(); await loadList(); });
       </div>
 
       <table class="data-table">
-        <thead><tr><th>头像</th><th>邮箱 / 昵称</th><th>国籍</th><th>会员</th><th>到期</th><th>已购</th><th>头像审核</th><th>更新</th></tr></thead>
+        <thead><tr><th>头像</th><th>邮箱 / 昵称</th><th>国籍</th><th>会员</th><th>到期</th><th>已购</th><th>头像审核</th><th>更新</th><th>操作</th></tr></thead>
         <tbody>
           <tr v-for="p in filtered" :key="p.id" class="click" @click="openDetail(p)">
             <td class="center">
@@ -882,8 +952,15 @@ onMounted(async () => { await refCache.load(); await loadList(); });
             <td><span v-if="(p.purchased_attraction_ids || []).length" class="badge blue">{{ p.purchased_attraction_ids.length }} 个</span><span v-else class="muted">0</span></td>
             <td><span v-if="AVATAR_STATUS[p.avatar_status]" class="badge" :class="AVATAR_STATUS[p.avatar_status].cls">{{ AVATAR_STATUS[p.avatar_status].label }}</span><span v-else class="muted">—</span></td>
             <td class="muted small">{{ fmtDateTime(p.updated_at) }}</td>
+            <td>
+              <button
+                class="btn btn-danger btn-sm"
+                :disabled="p.id === auth.session?.user?.id"
+                @click.stop="deleteUserAccount(p)"
+              >删除</button>
+            </td>
           </tr>
-          <tr v-if="!filtered.length"><td colspan="8" class="center muted">暂无用户</td></tr>
+          <tr v-if="!filtered.length"><td colspan="9" class="center muted">暂无用户</td></tr>
         </tbody>
       </table>
 
@@ -949,6 +1026,37 @@ onMounted(async () => { await refCache.load(); await loadList(); });
           </tbody>
         </table>
       </section>
+
+      <!-- Create User Dialog -->
+      <div v-if="showCreateUserDialog" class="modal-overlay" @click.self="showCreateUserDialog = false">
+        <div class="modal-card">
+          <h3>创建用户</h3>
+          <div class="modal-body">
+            <label class="f">
+              <span>邮箱</span>
+              <input v-model="newUserEmail" type="email" placeholder="user@example.com" />
+            </label>
+            <label class="f">
+              <span>密码</span>
+              <input v-model="newUserPassword" type="password" placeholder="至少 6 位" />
+            </label>
+            <label class="f">
+              <span>显示名（可选）</span>
+              <input v-model="newUserDisplayName" type="text" placeholder="用户昵称" />
+            </label>
+            <label class="f">
+              <span>国籍代码</span>
+              <input v-model="newUserCountryCode" type="text" placeholder="如 GB、US" />
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" @click="showCreateUserDialog = false">取消</button>
+            <button class="btn" :disabled="creatingUser" @click="createNewAppUser">
+              {{ creatingUser ? "创建中..." : "创建" }}
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Create Admin Dialog -->
       <div v-if="showCreateAdminDialog" class="modal-overlay" @click.self="showCreateAdminDialog = false">
