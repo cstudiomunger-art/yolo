@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.1"
+    "@supabase/supabase-js": "^2.49.1",
+    "ali-oss": "^6.21.0"
+  },
+  "scripts": {
+    "sync:oss": "node sync-storage-to-oss.mjs"
   }
 }

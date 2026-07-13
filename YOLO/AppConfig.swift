@@ -22,6 +22,22 @@ enum AppConfig {
         return url
     }
 
+    /// Public media CDN base (e.g. https://media.yolohappy.app). Falls back to MEDIA_CDN_BASE_URL then ALI_CDN_BASE_URL.
+    nonisolated static var mediaCDNBaseURL: URL? {
+        for key in ["MEDIA_CDN_BASE_URL", "ALI_CDN_BASE_URL"] {
+            guard let raw = plistString(forKey: key)?
+                .trimmingCharacters(in: CharacterSet(charactersIn: "/")),
+                  !raw.isEmpty,
+                  !raw.hasPrefix("你的"),
+                  let url = URL(string: raw.hasSuffix("/") ? raw : raw + "/")
+            else { continue }
+            return url
+        }
+        return nil
+    }
+
+    nonisolated static var isMediaCDNConfigured: Bool { mediaCDNBaseURL != nil }
+
     static var supabaseAnonKey: String {
         guard let key = plistString(forKey: "SUPABASE_ANON_KEY"), !key.isEmpty else {
             fatalError("在 Secrets.xcconfig 中配置 SUPABASE_ANON_KEY")

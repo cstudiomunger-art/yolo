@@ -19,20 +19,26 @@ actor ImageCacheService {
     /// returns disk image immediately when available, refreshes in background when stale.
     func image(remoteURLString: String) async -> UIImage? {
         let normalized = normalize(remoteURLString)
-        guard !normalized.isEmpty, let url = URL(string: normalized) else { return nil }
+        guard !normalized.isEmpty else { return nil }
 
-        let key = cacheKey(for: normalized)
+        let stableKey = CDNRouter.cacheKey(for: normalized, defaultBucket: "cover-images")
+        let key = cacheKey(for: stableKey)
         let imageURL = imageFileURL(key: key)
         let metaURL = metaFileURL(key: key)
 
         if let disk = loadImage(from: imageURL) {
-            if isStale(metaURL: metaURL) {
-                Task { _ = await self.fetchAndStore(url: url, key: key, coverPath: normalized) }
+            if isStale(metaURL: metaURL),
+               let resolved = CDNRouter.publicMediaURLs(from: normalized, bucket: "cover-images") {
+                Task { await self.fetchAndStore(resolved: resolved, key: key, coverPath: stableKey) }
             }
             return disk
         }
 
-        return await fetchAndStore(url: url, key: key, coverPath: normalized)
+        guard let resolved = CDNRouter.publicMediaURLs(from: normalized, bucket: "cover-images") else {
+            return nil
+        }
+
+        return await fetchAndStore(resolved: resolved, key: key, coverPath: stableKey)
     }
 
     /// Loads an image cached under an arbitrary stable `key` (e.g. a private
@@ -45,29 +51,32 @@ actor ImageCacheService {
         let key = cacheKey(for: normalized)
         if let disk = loadImage(from: imageFileURL(key: key)) { return disk }
         guard let url = await fetch() else { return nil }
-        return await fetchAndStore(url: url, key: key, coverPath: normalized)
+        if let resolved = CDNRouter.publicMediaURLs(from: url.absoluteString, bucket: "cover-images") {
+            return await fetchAndStore(resolved: resolved, key: key, coverPath: normalized)
+        }
+        return await fetchAndStoreDirect(url: url, key: key, coverPath: normalized)
     }
 
     /// Loads cover by CMS path; returns disk image immediately when available, refreshes in background when stale.
     func image(coverPath: String) async -> UIImage? {
         let normalized = normalize(coverPath)
         guard !normalized.isEmpty,
-              let url = MediaURLResolver.coverImageURL(from: normalized) else {
+              let resolved = MediaURLResolver.resolvedCoverImageURLs(from: normalized) else {
             return nil
         }
 
-        let key = cacheKey(for: normalized)
+        let key = cacheKey(for: CDNRouter.cacheKey(for: normalized, defaultBucket: "cover-images"))
         let imageURL = imageFileURL(key: key)
         let metaURL = metaFileURL(key: key)
 
         if let disk = loadImage(from: imageURL) {
             if isStale(metaURL: metaURL) {
-                Task { await self.fetchAndStore(url: url, key: key, coverPath: normalized) }
+                Task { await self.fetchAndStore(resolved: resolved, key: key, coverPath: normalized) }
             }
             return disk
         }
 
-        return await fetchAndStore(url: url, key: key, coverPath: normalized)
+        return await fetchAndStore(resolved: resolved, key: key, coverPath: normalized)
     }
 
     /// Prime the cache with bytes already in hand (e.g. an image we just uploaded),
@@ -146,7 +155,24 @@ actor ImageCacheService {
         return UIImage(data: data)
     }
 
-    private func fetchAndStore(url: URL, key: String, coverPath: String) async -> UIImage? {
+    private func fetchAndStore(resolved: CDNRouter.ResolvedMediaURLs, key: String, coverPath: String) async -> UIImage? {
+        do {
+            let data = try await MediaNetworkFetch.data(from: resolved)
+            guard let image = UIImage(data: data) else { return nil }
+            let imageURL = imageFileURL(key: key)
+            let metaURL = metaFileURL(key: key)
+            try? data.write(to: imageURL, options: .atomic)
+            let meta = Meta(savedAt: Date(), coverPath: coverPath)
+            if let metaData = try? JSONCoding.makeEncoder().encode(meta) {
+                try? metaData.write(to: metaURL, options: .atomic)
+            }
+            return image
+        } catch {
+            return loadImage(from: imageFileURL(key: key))
+        }
+    }
+
+    private func fetchAndStoreDirect(url: URL, key: String, coverPath: String) async -> UIImage? {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             guard let image = UIImage(data: data) else { return nil }

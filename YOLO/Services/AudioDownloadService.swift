@@ -33,19 +33,22 @@ final class AudioDownloadService {
 
     func download(guide: AudioGuide) async throws {
         guard !activeDownloads.contains(guide.id) else { return }
-        guard let remote = MediaURLResolver.audioURL(from: guide.audioUrl) else {
+        guard let resolved = MediaURLResolver.resolvedAudioURLs(from: guide.audioUrl) else {
             throw AudioDownloadError.noRemoteURL
         }
         activeDownloads.insert(guide.id)
         defer { activeDownloads.remove(guide.id) }
-        let (tempURL, _) = try await URLSession.shared.download(from: remote)
-        let ext = Self.fileExtension(for: remote)
-        let dest = storageDirectory.appendingPathComponent("\(guide.id).\(ext)")
+        let ext = Self.fileExtension(for: resolved.primary)
+        let filename = "\(guide.id).\(ext)"
+        let dest = try await MediaNetworkFetch.download(
+            to: storageDirectory,
+            resolved: resolved,
+            filename: filename
+        )
         for existing in try FileManager.default.contentsOfDirectory(at: storageDirectory, includingPropertiesForKeys: nil)
-            where existing.deletingPathExtension().lastPathComponent == guide.id {
+            where existing.deletingPathExtension().lastPathComponent == guide.id && existing != dest {
             try? FileManager.default.removeItem(at: existing)
         }
-        try FileManager.default.moveItem(at: tempURL, to: dest)
         downloadedGuideIds.insert(guide.id)
         persist()
     }

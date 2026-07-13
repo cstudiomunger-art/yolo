@@ -94,6 +94,8 @@ final class AudioQueuePlayer {
     @ObservationIgnored private var freeTrialSeconds: Double = 180
     @ObservationIgnored private var configuredGuide: AudioGuide?
     @ObservationIgnored private var preferLocalPlayback = true
+    @ObservationIgnored private var pendingStreamResolved: CDNRouter.ResolvedMediaURLs?
+    @ObservationIgnored private var usedStreamFallbackURL = false
     @ObservationIgnored private var shouldAutoPlay = false
     @ObservationIgnored private var pendingSeek: Double?
     @ObservationIgnored private var nowPlayingTitle = ""
@@ -269,6 +271,9 @@ final class AudioQueuePlayer {
             markUnavailable()
             return
         }
+
+        pendingStreamResolved = MediaURLResolver.playbackResolvedURLs(for: guide, preferLocal: preferLocalPlayback)
+        usedStreamFallbackURL = false
 
         _ = AudioSessionService.activateForPlayback()
         startStreaming(url: url)
@@ -510,6 +515,17 @@ final class AudioQueuePlayer {
     }
 
     private func fallbackAfterStreamFailure() {
+        if !usedStreamFallbackURL,
+           let fallback = pendingStreamResolved?.fallback {
+            usedStreamFallbackURL = true
+            let savedProgress = progress
+            let wasPlaying = wantsPlayback || isPlaying
+            shouldAutoPlay = wasPlaying
+            pendingSeek = savedProgress
+            startStreaming(url: fallback)
+            return
+        }
+
         if preferLocalPlayback,
            let guide = configuredGuide,
            MediaURLResolver.audioURL(from: guide.audioUrl) != nil {

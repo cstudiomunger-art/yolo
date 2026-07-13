@@ -243,7 +243,7 @@ final class PaymentHelperService {
         guard let phrase = merchantPhrases.first(where: { $0.id == phraseID }),
               let urlStr = phrase.audioUrl,
               !urlStr.isEmpty else { return nil }
-        return URL(string: urlStr)
+        return MediaURLResolver.audioURL(from: urlStr) ?? URL(string: urlStr)
     }
 
     // MARK: - Cache
