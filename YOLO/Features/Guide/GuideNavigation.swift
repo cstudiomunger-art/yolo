@@ -101,3 +101,34 @@ struct CityTripDates {
     let dayCount: Int
     let tagText: String
 }
+
+enum GuideContentHelpers {
+    static func dedupedAttractions(_ attractions: [Attraction]) -> [Attraction] {
+        var seen = Set<String>()
+        return attractions.filter { seen.insert($0.id).inserted }
+    }
+
+    static func displayAttractionCount(for city: City, counts: [String: Int]) -> Int {
+        counts[city.id.lowercased()] ?? city.attractionCount
+    }
+
+    static func publishedAttractionCounts(
+        for cities: [City],
+        content: ContentRepositoryProtocol
+    ) async -> [String: Int] {
+        await withTaskGroup(of: (String, Int).self) { group in
+            for city in cities {
+                let cityId = city.id
+                group.addTask {
+                    let list = (try? await content.fetchAttractions(cityId: cityId)) ?? []
+                    return (cityId.lowercased(), dedupedAttractions(list).count)
+                }
+            }
+            var counts: [String: Int] = [:]
+            for await (cityId, count) in group {
+                counts[cityId] = count
+            }
+            return counts
+        }
+    }
+}

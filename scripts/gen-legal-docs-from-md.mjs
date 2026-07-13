@@ -10,22 +10,22 @@ const OUT_REPORT = join(OUT_DIR, "legal_docs_report.json");
 
 const SOURCES = [
   {
-    path: "/Users/vesperal/Desktop/01-Privacy-Policy.md",
+    path: "/Users/vesperal/Desktop/01-Privacy-Policy(1).md",
     column: "privacy_policy_body",
     id: "privacy",
   },
   {
-    path: "/Users/vesperal/Desktop/02-Terms-of-Service.md",
+    path: "/Users/vesperal/Desktop/02-Terms-of-Service(1).md",
     column: "terms_of_service_body",
     id: "terms",
   },
   {
-    path: "/Users/vesperal/Desktop/03-GDPR-Compliance-Framework.md",
+    path: "/Users/vesperal/Desktop/03-GDPR-Compliance-Framework(1).md",
     column: "gdpr_compliance_body",
     id: "gdpr",
   },
   {
-    path: "/Users/vesperal/Desktop/04-AI-Content-Disclosure.md",
+    path: "/Users/vesperal/Desktop/04-AI-Content-Disclosure(1).md",
     column: "ai_content_disclosure_body",
     id: "ai_disclosure",
   },
@@ -112,4 +112,8 @@ function main() {
   }
 }
 
-main();
+import { fileURLToPath } from "url";
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main();
+}

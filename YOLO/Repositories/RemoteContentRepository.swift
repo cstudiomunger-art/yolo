@@ -278,13 +278,15 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
 
     func fetchEmergencyHelpItems() async throws -> [EmergencyContentItem] {
         do {
-            return try await client
+            let remote: [EmergencyContentItem] = try await client
                 .from("emergency_help_items")
                 .select()
                 .eq("is_active", value: true)
                 .order("sort_order", ascending: true)
                 .execute()
                 .value
+            let bundled = try await bundledFallback.fetchEmergencyHelpItems()
+            return mergeEmergencyBodies(remote: remote, bundled: bundled)
         } catch {
             let fallback = try await bundledFallback.fetchEmergencyHelpItems()
             if !fallback.isEmpty { return fallback }
@@ -294,13 +296,15 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
 
     func fetchEmergencyMedicalItems() async throws -> [EmergencyContentItem] {
         do {
-            return try await client
+            let remote: [EmergencyContentItem] = try await client
                 .from("emergency_medical_items")
                 .select()
                 .eq("is_active", value: true)
                 .order("sort_order", ascending: true)
                 .execute()
                 .value
+            let bundled = try await bundledFallback.fetchEmergencyMedicalItems()
+            return mergeEmergencyBodies(remote: remote, bundled: bundled)
         } catch {
             let fallback = try await bundledFallback.fetchEmergencyMedicalItems()
             if !fallback.isEmpty { return fallback }
@@ -383,5 +387,29 @@ struct RemoteContentRepository: ContentRepositoryProtocol {
             throw URLError(.resourceUnavailable)
         }
         return row.asSampleItinerary()
+    }
+
+    /// When CMS rows exist but `body_en` was cleared (e.g. migration) or cache is stale, keep bundled bodies as fallback.
+    private func mergeEmergencyBodies(
+        remote: [EmergencyContentItem],
+        bundled: [EmergencyContentItem]
+    ) -> [EmergencyContentItem] {
+        let bundledById = Dictionary(uniqueKeysWithValues: bundled.map { ($0.id, $0) })
+        return remote.map { item in
+            guard item.displayBody.isEmpty, let fallback = bundledById[item.id], !fallback.displayBody.isEmpty else {
+                return item
+            }
+            return EmergencyContentItem(
+                id: item.id,
+                titleEn: item.titleEn ?? fallback.titleEn,
+                titleZh: item.titleZh ?? fallback.titleZh,
+                subtitleEn: item.subtitleEn ?? fallback.subtitleEn,
+                subtitleZh: item.subtitleZh ?? fallback.subtitleZh,
+                bodyEn: fallback.bodyEn,
+                bodyZh: item.bodyZh ?? fallback.bodyZh,
+                icon: item.icon ?? fallback.icon,
+                sortOrder: item.sortOrder ?? fallback.sortOrder
+            )
+        }
     }
 }

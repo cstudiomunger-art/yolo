@@ -387,14 +387,22 @@ struct SubArea: Identifiable, Hashable, Codable {
     func playbackGuide(attractionId: String) -> AudioGuide? {
         let direct = audioUrl?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !direct.isEmpty {
+            let transcript = Self.resolvedTranscript(audioTranscript: audioTranscript, body: body)
             return AudioGuide(
                 id: "subarea_\(id)",
                 attractionId: attractionId,
                 titleEn: nameEn,
                 audioUrl: direct,
-                transcript: audioTranscript
+                transcript: transcript
             )
         }
         return nil
+    }
+
+    private static func resolvedTranscript(audioTranscript: String?, body: String?) -> String? {
+        let fromTranscript = audioTranscript?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !fromTranscript.isEmpty { return fromTranscript }
+        let fromBody = body?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return fromBody.isEmpty ? nil : fromBody
     }
 }

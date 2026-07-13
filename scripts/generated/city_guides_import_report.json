@@ -1,0 +1,223 @@
+{
+  "generatedAt": "2026-07-12T04:22:28.036Z",
+  "mode": "apply",
+  "total": 34,
+  "byCity": {
+    "beijing": [
+      {
+        "id": "beijing_city_charm",
+        "title_en": "Beijing: Where a Thousand Years of History Beats with Modern Energy",
+        "body_length": 29691,
+        "warnings": []
+      },
+      {
+        "id": "beijing_food_drink",
+        "title_en": "A Foodie's Beijing — for International Visitors",
+        "body_length": 23904,
+        "warnings": []
+      },
+      {
+        "id": "beijing_coffee",
+        "title_en": "Beijing Independent Coffee Guide · Top 10 Must-Visit Cafes",
+        "body_length": 9220,
+        "warnings": []
+      },
+      {
+        "id": "beijing_hutong_citywalk",
+        "title_en": "Beijing Hutong Citywalk Guide",
+        "body_length": 24431,
+        "warnings": []
+      },
+      {
+        "id": "beijing_kunqu_culture",
+        "title_en": "Beijing Opera Experience Guide: Jingju and Kunqu",
+        "body_length": 5788,
+        "warnings": []
+      },
+      {
+        "id": "beijing_michelin",
+        "title_en": "Beijing Michelin Guide 2026",
+        "body_length": 46595,
+        "warnings": []
+      },
+      {
+        "id": "beijing_celebrity_residences",
+        "title_en": "Beijing Celebrity Former Residences · Attraction Listings",
+        "body_length": 9899,
+        "warnings": []
+      },
+      {
+        "id": "beijing_best_season",
+        "title_en": "Best Season to Visit Beijing",
+        "body_length": 18393,
+        "warnings": []
+      }
+    ],
+    "chengdu": [
+      {
+        "id": "chengdu_museum_routes",
+        "title_en": "Chengdu Museum: Official Visitor Routes and Attraction Guide",
+        "body_length": 8523,
+        "warnings": []
+      },
+      {
+        "id": "chengdu_coffee",
+        "title_en": "☕ Chengdu Independent Coffee Guide · Top 10 Picks for Foreign Visitors",
+        "body_length": 9726,
+        "warnings": []
+      },
+      {
+        "id": "chengdu_sichuan_museum",
+        "title_en": "Sichuan Museum: Visitor Routes and Attraction Guide",
+        "body_length": 13157,
+        "warnings": []
+      }
+    ],
+    "hangzhou": [
+      {
+        "id": "hangzhou_coffee",
+        "title_en": "Hangzhou Independent Specialty Coffee Guide · Top 10 for International Visitors",
+        "body_length": 10728,
+        "warnings": []
+      },
+      {
+        "id": "hangzhou_ancient_legends",
+        "title_en": "Hangzhou's Classic Ancient Legends: A Story Collection for International Visitors",
+        "body_length": 12926,
+        "warnings": []
+      },
+      {
+        "id": "hangzhou_butterfly_lovers",
+        "title_en": "The Butterfly Lovers: China's Timeless Tale of Loyal Love",
+        "body_length": 7746,
+        "warnings": []
+      },
+      {
+        "id": "hangzhou_food_suipo",
+        "title_en": "Hangzhou Food Guide",
+        "body_length": 3402,
+        "warnings": []
+      },
+      {
+        "id": "hangzhou_michelin_2026",
+        "title_en": "Hangzhou Michelin Guide 2026",
+        "body_length": 13596,
+        "warnings": []
+      },
+      {
+        "id": "hangzhou_zhejiang_museum",
+        "title_en": "Zhejiang Provincial Museum",
+        "body_length": 21159,
+        "warnings": []
+      }
+    ],
+    "nanjing": [
+      {
+        "id": "nanjing_coffee",
+        "title_en": "Nanjing Independent Coffee Guide: Top 10 Cafes for Foreign Visitors",
+        "body_length": 10427,
+        "warnings": []
+      },
+      {
+        "id": "nanjing_michelin",
+        "title_en": "Nanjing Michelin Restaurant Guide — App Venue Listing Copy",
+        "body_length": 11454,
+        "warnings": []
+      },
+      {
+        "id": "nanjing_local_culture",
+        "title_en": "Nanjing: A Complete Guide to Local Cultural Activities for Foreign Visitors",
+        "body_length": 24870,
+        "warnings": []
+      },
+      {
+        "id": "nanjing_districts_citywalk",
+        "title_en": "Nanjing Cultural Districts: A Citywalk Guide",
+        "body_length": 8076,
+        "warnings": []
+      }
+    ],
+    "shanghai": [
+      {
+        "id": "shanghai_museum_furniture",
+        "title_en": "Chapter Five: The Soul of Wood — Ming and Qing Furniture Gallery, Shanghai Museum",
+        "body_length": 26014,
+        "warnings": []
+      },
+      {
+        "id": "shanghai_museum_painting",
+        "title_en": "Ink and Color: Shanghai Museum's Calligraphy and Painting Galleries",
+        "body_length": 48568,
+        "warnings": []
+      },
+      {
+        "id": "shanghai_museum_overview",
+        "title_en": "Shanghai Museum: A Dialogue Across Civilizations",
+        "body_length": 50226,
+        "warnings": []
+      },
+      {
+        "id": "shanghai_museum_jade",
+        "title_en": "Chapter Five: The Beautiful Stone — Soul of a Nation",
+        "body_length": 40053,
+        "warnings": []
+      },
+      {
+        "id": "shanghai_coffee",
+        "title_en": "Top Ten Must-Visit Independent Coffee Shops in Shanghai (Detailed Guide)",
+        "body_length": 25963,
+        "warnings": []
+      },
+      {
+        "id": "shanghai_food_suipo",
+        "title_en": "Shanghai Restaurant Guide — Chef Sui Po's Personal Picks",
+        "body_length": 6858,
+        "warnings": []
+      },
+      {
+        "id": "shanghai_michelin",
+        "title_en": "Shanghai Michelin Guide — Restaurant Listings for the App",
+        "body_length": 37553,
+        "warnings": []
+      },
+      {
+        "id": "shanghai_bund_architecture",
+        "title_en": "Shanghai Bund: A Deep-Dive Travel Guide to a Century of Architecture",
+        "body_length": 29267,
+        "warnings": []
+      },
+      {
+        "id": "shanghai_wukang_road",
+        "title_en": "Wukang Road Neighborhood: A Guide to the Sites",
+        "body_length": 11655,
+        "warnings": []
+      }
+    ],
+    "suzhou": [
+      {
+        "id": "suzhou_coffee_top10",
+        "title_en": "Suzhou Independent Coffee Guide · TOP 10",
+        "body_length": 8248,
+        "warnings": []
+      },
+      {
+        "id": "suzhou_hanfu",
+        "title_en": "Suzhou Hanfu Rental Guide",
+        "body_length": 6857,
+        "warnings": []
+      },
+      {
+        "id": "suzhou_michelin",
+        "title_en": "Suzhou Michelin Guide Restaurants",
+        "body_length": 32651,
+        "warnings": []
+      },
+      {
+        "id": "suzhou_cultural_experiences",
+        "title_en": "Suzhou Cultural Experience Guide",
+        "body_length": 10445,
+        "warnings": []
+      }
+    ]
+  }
+}

@@ -7,12 +7,19 @@ const OUT_SQL = join(ROOT, "scripts/generated/city_guides_upsert.sql");
 const OUT_REPORT = join(ROOT, "scripts/generated/city_guides_report.json");
 
 const DEFAULT_ROOTS = [
-  "/Users/vesperal/Desktop/北京城市总览",
-  "/Users/vesperal/Desktop/上海城市总览",
-  "/Users/vesperal/Desktop/南京城市总览(2)",
-  "/Users/vesperal/Desktop/杭州城市总览(1)",
-  "/Users/vesperal/Desktop/成都城市总览",
-  "/Users/vesperal/Desktop/苏州城市总览(4)",
+  "/Users/vesperal/Desktop/00_城市总览",
+  "/Users/vesperal/Desktop/00_城市总览(1)",
+  "/Users/vesperal/Desktop/00_城市总览(2)",
+  "/Users/vesperal/Desktop/00_城市总览(3)",
+  "/Users/vesperal/Desktop/00_城市总览(4)",
+  "/Users/vesperal/Desktop/北京京昆文化体验推荐指南",
+  "/Users/vesperal/Desktop/北京吃喝指南",
+  "/Users/vesperal/Desktop/北京独立咖啡体验指南",
+  "/Users/vesperal/Desktop/北京胡同Citywalk指南",
+  "/Users/vesperal/Desktop/北京米其林餐厅指南",
+  "/Users/vesperal/Desktop/北京名人故居景点介绍",
+  "/Users/vesperal/Desktop/北京最佳旅行季节指南",
+  "/Users/vesperal/Desktop/北京城市魅力推介",
 ];
 
 const CITY_PREFIX_TO_ID = {
@@ -323,7 +330,12 @@ function inferIconAndBadge(folderName) {
   return { icon: "✦", badge: null };
 }
 
+const FOLDER_CITY_OVERRIDES = {
+  浙江省博物馆: "hangzhou",
+};
+
 function detectCityId(folderName, rootPath) {
+  if (FOLDER_CITY_OVERRIDES[folderName]) return FOLDER_CITY_OVERRIDES[folderName];
   for (const [prefix, cityId] of Object.entries(CITY_PREFIX_TO_ID)) {
     if (folderName.startsWith(prefix)) return cityId;
   }
@@ -343,18 +355,30 @@ function makeGuideId(folderName, cityId) {
 function collectGuides(roots) {
   const guides = [];
   for (const root of roots) {
-    for (const entry of readdirSync(root)) {
+    const files = readdirSync(root);
+    const enFile = files.find((f) => f.startsWith("EN_") && f.endsWith(".md"));
+    if (enFile) {
+      const zhFile = files.find((f) => f.startsWith("ZH_") && f.endsWith(".md")) || null;
+      guides.push({
+        folderName: basename(root),
+        rootPath: root,
+        enPath: join(root, enFile),
+        zhPath: zhFile ? join(root, zhFile) : null,
+      });
+      continue;
+    }
+    for (const entry of files) {
       const dir = join(root, entry);
       if (!statSync(dir).isDirectory()) continue;
-      const files = readdirSync(dir);
-      const enFile = files.find((f) => f.startsWith("EN_") && f.endsWith(".md"));
-      if (!enFile) continue;
-      const zhFile = files.find((f) => f.startsWith("ZH_") && f.endsWith(".md")) || null;
+      const subFiles = readdirSync(dir);
+      const subEn = subFiles.find((f) => f.startsWith("EN_") && f.endsWith(".md"));
+      if (!subEn) continue;
+      const subZh = subFiles.find((f) => f.startsWith("ZH_") && f.endsWith(".md")) || null;
       guides.push({
         folderName: entry,
         rootPath: root,
-        enPath: join(dir, enFile),
-        zhPath: zhFile ? join(dir, zhFile) : null,
+        enPath: join(dir, subEn),
+        zhPath: subZh ? join(dir, subZh) : null,
       });
     }
   }
@@ -412,7 +436,7 @@ function parseGuide(entry, displayOrder) {
 
   const subtitle = extractSubtitle(enText);
   const bodySource = stripBodySource(enText, titleEn);
-  const body = mdToHtml(bodySource, { titleEn });
+  const body = bodySource;
   if (!body) warnings.push("empty_body");
 
   const metaItems = extractMetaItems(enText, entry.folderName);
@@ -438,10 +462,7 @@ function parseGuide(entry, displayOrder) {
   };
 }
 
-function main() {
-  const roots = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_ROOTS;
-  mkdirSync(join(ROOT, "scripts/generated"), { recursive: true });
-
+export function buildCityGuideRows(roots = DEFAULT_ROOTS) {
   const entries = collectGuides(roots);
   const byCity = new Map();
   for (const entry of entries) {
@@ -451,14 +472,28 @@ function main() {
   }
 
   const rows = [];
-  for (const [, cityEntries] of [...byCity.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+  for (const [, cityEntries] of [...byCity.entries()].sort(([a], [b]) => String(a).localeCompare(String(b)))) {
     cityEntries.sort((a, b) => a.folderName.localeCompare(b.folderName, "zh"));
     cityEntries.forEach((entry, index) => {
       rows.push(parseGuide(entry, index));
     });
   }
 
-  rows.sort((a, b) => (a.city_id === b.city_id ? a.display_order - b.display_order : a.city_id.localeCompare(b.city_id)));
+  return rows.sort((a, b) =>
+    a.city_id === b.city_id ? a.display_order - b.display_order : String(a.city_id).localeCompare(String(b.city_id))
+  );
+}
+
+function main() {
+  const roots = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_ROOTS;
+  mkdirSync(join(ROOT, "scripts/generated"), { recursive: true });
+
+  const rows = buildCityGuideRows(roots);
+  const byCity = new Map();
+  for (const row of rows) {
+    if (!byCity.has(row.city_id)) byCity.set(row.city_id, []);
+    byCity.get(row.city_id).push(row);
+  }
 
   const beijingIds = rows.filter((r) => r.city_id === "beijing").map((r) => r.id);
   const deleteBeijingSql = `-- Beijing: remove all legacy guides before inserting new content
@@ -512,4 +547,8 @@ ${deleteBeijingSql}${rows.map(buildInsert).join("\n\n")}
   }
 }
 
-main();
+import { fileURLToPath } from "url";
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main();
+}

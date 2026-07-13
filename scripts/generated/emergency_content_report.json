@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-07-12T05:08:40.715Z",
+  "mode": "apply",
+  "helpItem": {
+    "id": "consular_emergency_help",
+    "chars": 12227
+  },
+  "medicalItems": [
+    {
+      "id": "health_prep",
+      "chars": 8839
+    },
+    {
+      "id": "hospital_visit",
+      "chars": 7303
+    },
+    {
+      "id": "buy_medicine",
+      "chars": 4519
+    },
+    {
+      "id": "help_card",
+      "chars": 3187
+    }
+  ],
+  "helpPhrases": 7,
+  "hospitals": [
+    {
+      "cityId": "beijing",
+      "count": 5
+    },
+    {
+      "cityId": "shanghai",
+      "count": 5
+    },
+    {
+      "cityId": "nanjing",
+      "count": 4
+    },
+    {
+      "cityId": "chengdu",
+      "count": 3
+    },
+    {
+      "cityId": "hangzhou",
+      "count": 4
+    },
+    {
+      "cityId": "suzhou",
+      "count": 4
+    },
+    {
+      "cityId": "chongqing",
+      "count": 4
+    }
+  ]
+}

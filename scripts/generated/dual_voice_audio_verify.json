@@ -1,0 +1,75 @@
+{
+  "verifiedAt": "2026-07-12T03:12:05.408Z",
+  "checks": [
+    {
+      "id": "beijing_forbidden_city_sa_01",
+      "nameZh": "午门与金水桥",
+      "hasAudioUrl": true,
+      "audioUsesVoicesPath": true,
+      "variantLabels": [
+        "Benedict",
+        "Blanchett"
+      ],
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "benedictIsDefault": true,
+      "allVariantsUseVoicesPath": true
+    },
+    {
+      "id": "the_bund_shanghai_sa_01",
+      "nameZh": "十六铺码头",
+      "hasAudioUrl": true,
+      "audioUsesVoicesPath": true,
+      "variantLabels": [
+        "Benedict",
+        "Blanchett"
+      ],
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "benedictIsDefault": true,
+      "allVariantsUseVoicesPath": true
+    },
+    {
+      "id": "suzhou_creek_twelve_nations_colors_sa_12",
+      "nameZh": "鸿寿坊（琥珀色）",
+      "hasAudioUrl": true,
+      "audioUsesVoicesPath": true,
+      "variantLabels": [
+        "Benedict",
+        "Blanchett"
+      ],
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "benedictIsDefault": true,
+      "allVariantsUseVoicesPath": true
+    },
+    {
+      "id": "https_yoloadmin_vue_cstudiomunger_workers_dev_sa_01",
+      "nameZh": "成年亚成年幼年大熊猫别墅",
+      "hasAudioUrl": true,
+      "audioUsesVoicesPath": true,
+      "variantLabels": [
+        "Benedict",
+        "Blanchett"
+      ],
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "benedictIsDefault": true,
+      "allVariantsUseVoicesPath": true
+    },
+    {
+      "id": "chongqing_dazu_rock_carvings_sa_01",
+      "nameZh": "宝顶山",
+      "hasAudioUrl": true,
+      "audioUsesVoicesPath": true,
+      "variantLabels": [
+        "Benedict",
+        "Blanchett"
+      ],
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "benedictIsDefault": true,
+      "allVariantsUseVoicesPath": true
+    }
+  ]
+}

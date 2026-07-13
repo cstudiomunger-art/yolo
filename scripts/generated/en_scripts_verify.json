@@ -1,0 +1,111 @@
+{
+  "verifiedAt": "2026-07-12T14:12:28.872Z",
+  "sourceRoot": "/Users/vesperal/Desktop/英文解说词原文",
+  "sourceScriptFolders": 748,
+  "previousImportReport": {
+    "scriptFolders": 596,
+    "matched": 596,
+    "unmatchedFolders": 0,
+    "unmatchedAttractions": 0,
+    "emptyBody": 0,
+    "updated": 0
+  },
+  "db": {
+    "activeSubAreas": 789,
+    "withAudioUrl": 744,
+    "bodyOver200Chars": 784,
+    "audioTranscriptOver200Chars": 784,
+    "bodyShortOrStub": 3,
+    "withAudioButNoLongBody": 5,
+    "withAudioButNoLongTranscript": 5
+  },
+  "issue": null,
+  "samples": [
+    {
+      "id": "beijing_forbidden_city_sa_01",
+      "nameZh": "午门与金水桥",
+      "bodyLen": 919,
+      "audioTranscriptLen": 919,
+      "hasAudio": true,
+      "bodySha": "5fff75ba39cc9e4b",
+      "audioTranscriptSha": "5fff75ba39cc9e4b"
+    },
+    {
+      "id": "beijing_beihai_park_sa_01",
+      "nameZh": "南门与团城",
+      "bodyLen": 6657,
+      "audioTranscriptLen": 6657,
+      "hasAudio": true,
+      "bodySha": "49b701601ef4fc8f",
+      "audioTranscriptSha": "49b701601ef4fc8f"
+    },
+    {
+      "id": "the_bund_shanghai_sa_01",
+      "nameZh": "十六铺码头",
+      "bodyLen": 3530,
+      "audioTranscriptLen": 3530,
+      "hasAudio": true,
+      "bodySha": "55d77c1e18a0ac43",
+      "audioTranscriptSha": "55d77c1e18a0ac43"
+    },
+    {
+      "id": "chengdu_panda_base_sa_01",
+      "nameZh": "成年亚成年幼年大熊猫别墅",
+      "bodyLen": 722,
+      "audioTranscriptLen": 722,
+      "hasAudio": true,
+      "bodySha": "8e9b40c7d7aeb560",
+      "audioTranscriptSha": "8e9b40c7d7aeb560"
+    },
+    {
+      "id": "chongqing_dazu_rock_carvings_sa_01",
+      "nameZh": "宝顶山",
+      "bodyLen": 624,
+      "audioTranscriptLen": 624,
+      "hasAudio": true,
+      "bodySha": "68c03dc5375a5195",
+      "audioTranscriptSha": "68c03dc5375a5195"
+    },
+    {
+      "id": "suzhou_creek_twelve_nations_colors_sa_12",
+      "nameZh": "鸿寿坊（琥珀色）",
+      "bodyLen": 774,
+      "audioTranscriptLen": 774,
+      "hasAudio": true,
+      "bodySha": "d1da0304df373f79",
+      "audioTranscriptSha": "d1da0304df373f79"
+    }
+  ],
+  "audioNoBodyExamples": [
+    {
+      "id": "chengdu_museum_sa_03",
+      "nameZh": "负一楼·人与自然——贝林捐赠展",
+      "bodyLen": 176,
+      "audioTranscriptLen": 0
+    },
+    {
+      "id": "chengdu_museum_sa_04",
+      "nameZh": "三楼·丹楼生晚辉——明清时期的成都",
+      "bodyLen": 165,
+      "audioTranscriptLen": 0
+    },
+    {
+      "id": "chengdu_museum_sa_08",
+      "nameZh": "五楼·偶戏大千——中国木偶展",
+      "bodyLen": 199,
+      "audioTranscriptLen": 0
+    },
+    {
+      "id": "chongqing_wulong_karst_sa_11",
+      "nameZh": "仙女山国家公园-木梯子站",
+      "bodyLen": 0,
+      "audioTranscriptLen": 0
+    },
+    {
+      "id": "zhujiajiao_ancient_town_sa_01",
+      "nameZh": "放生桥",
+      "bodyLen": 0,
+      "audioTranscriptLen": 0
+    }
+  ]
+}

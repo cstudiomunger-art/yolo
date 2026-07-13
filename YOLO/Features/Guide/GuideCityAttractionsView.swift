@@ -142,10 +142,12 @@ struct GuideCityAttractionsView: View {
             async let guidesTask = appEnv.content.fetchCityGuides(cityId: city.id)
             async let attractionsTask = appEnv.content.fetchAttractions(cityId: city.id)
             cityGuides = try await guidesTask
-            attractions = try await attractionsTask
+            attractions = GuideContentHelpers.dedupedAttractions(try await attractionsTask)
         } catch {
             cityGuides = (try? await appEnv.content.fetchCityGuides(cityId: city.id)) ?? []
-            attractions = (try? await appEnv.content.fetchAttractions(cityId: city.id)) ?? []
+            attractions = GuideContentHelpers.dedupedAttractions(
+                (try? await appEnv.content.fetchAttractions(cityId: city.id)) ?? []
+            )
             if cityGuides.isEmpty, attractions.isEmpty {
                 loadError = JSONCoding.describe(error)
             }

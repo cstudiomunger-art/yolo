@@ -5,40 +5,40 @@ import { join } from "path";
 const ROOT = "/Users/vesperal/Desktop/YOLO";
 const OUT_DIR = join(ROOT, "scripts/generated");
 
-const CITY_SOURCES = [
+export const CITY_SOURCES = [
   {
     cityId: "beijing",
-    path: "/Users/vesperal/Desktop/EN_Beijing_Hotel_Recommendations.md",
+    path: "/Users/vesperal/Desktop/ZH_北京酒店推荐报告_外国游客版.md",
     inactiveTierCodes: [],
   },
   {
     cityId: "shanghai",
-    path: "/Users/vesperal/Desktop/EN_Shanghai_Hotel_Recommendations.md",
+    path: "/Users/vesperal/Desktop/EN_Shanghai_Hotel_Recommendations(1).md",
     inactiveTierCodes: [],
   },
   {
     cityId: "chongqing",
-    path: "/Users/vesperal/Desktop/EN_Chongqing_Hotel_Recommendations.md",
+    path: "/Users/vesperal/Desktop/EN_Chongqing_Hotel_Recommendations(1).md",
     inactiveTierCodes: [],
   },
   {
     cityId: "nanjing",
-    path: "/Users/vesperal/Desktop/EN_Nanjing_Hotel_Recommendations.md",
+    path: "/Users/vesperal/Desktop/EN_Nanjing_Hotel_Recommendations(1).md",
     inactiveTierCodes: [],
   },
   {
     cityId: "hangzhou",
-    path: "/Users/vesperal/Desktop/EN_Hangzhou_Hotel_Recommendations.md",
+    path: "/Users/vesperal/Desktop/EN_Hangzhou_Hotel_Recommendations(1).md",
     inactiveTierCodes: ["H3-2"],
   },
   {
     cityId: "suzhou",
-    path: "/Users/vesperal/Desktop/EN_Suzhou_Hotel_Recommendations.md",
+    path: "/Users/vesperal/Desktop/EN_Suzhou_Hotel_Recommendations(1).md",
     inactiveTierCodes: [],
   },
   {
     cityId: "chengdu",
-    path: "/Users/vesperal/Desktop/ZH_Chengdu_Hotel_Recommendations_EN.md",
+    path: "/Users/vesperal/Desktop/ZH_Chengdu_Hotel_Recommendations_EN(1).md",
     inactiveTierCodes: [],
   },
 ];
@@ -230,12 +230,31 @@ function toSlug(name) {
     .slice(0, 40);
 }
 
+const FIELD_ALIASES = {
+  中文名: "Chinese Name",
+  英文名: "English Name",
+  "星级 / 类型": "Star Rating / Type",
+  价格区间: "Price Range",
+  中文地址: "Chinese Address",
+  英文地址: "English Address",
+  距核心区域: "Distance to Key Areas",
+  官方网站: "Official Website",
+  主要OTA: "Main OTA",
+  接受外国护照: "Accepts Foreign Passport",
+  英语服务: "English Service",
+};
+
+function normalizeFieldKey(key) {
+  const stripped = stripMd(key);
+  return FIELD_ALIASES[stripped] || stripped;
+}
+
 function parseFieldTable(block) {
   const fields = {};
   for (const line of block.split(/\r?\n/)) {
     const m = line.match(/^\|\s*\*\*(.+?)\*\*\s*\|\s*(.*?)\s*\|?\s*$/);
     if (!m) continue;
-    fields[stripMd(m[1])] = m[2].trim();
+    fields[normalizeFieldKey(m[1])] = m[2].trim();
   }
   return fields;
 }
@@ -447,7 +466,7 @@ async function fetchExistingHotelIds(cityId) {
   return (await res.json()).map((row) => row.id);
 }
 
-function processCity(source) {
+export function processCity(source) {
   const text = readFileSync(source.path, "utf8");
   const overviewCodes = parseOverviewTierCodes(text);
   const overviewNames = parseOverviewEnglishNames(text);
@@ -567,7 +586,11 @@ async function main() {
   console.log("Totals:", report.stats);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+import { fileURLToPath } from "url";
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

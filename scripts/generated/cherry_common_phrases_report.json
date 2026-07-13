@@ -1,0 +1,141 @@
+{
+  "generatedAt": "2026-07-12T03:24:04.631Z",
+  "mode": "apply",
+  "sourceRoot": "/Users/vesperal/Desktop/通用普通话音频_Cherry",
+  "stats": {
+    "phrases": 10,
+    "deletedIds": 18
+  },
+  "phrases": [
+    {
+      "id": "phrase_common_001",
+      "cn": "我不会说中文",
+      "pinyin": "我不会说中文",
+      "en": "I don't speak Chinese",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_001.mp3",
+      "sort_order": 0,
+      "is_active": true,
+      "file": "01_我不会说中文.mp3",
+      "uploaded": true
+    },
+    {
+      "id": "phrase_common_002",
+      "cn": "你会说英语吗？",
+      "pinyin": "你会说英语吗？",
+      "en": "Do you speak English?",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_002.mp3",
+      "sort_order": 1,
+      "is_active": true,
+      "file": "02_你会说英语吗.mp3",
+      "uploaded": true
+    },
+    {
+      "id": "phrase_common_003",
+      "cn": "我要去这个地址",
+      "pinyin": "我要去这个地址",
+      "en": "I want to go to this address",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_003.mp3",
+      "sort_order": 2,
+      "is_active": true,
+      "file": "03_我要去这个地址.mp3",
+      "uploaded": true
+    },
+    {
+      "id": "phrase_common_004",
+      "cn": "最近的洗手间在哪？",
+      "pinyin": "最近的洗手间在哪？",
+      "en": "Where is the nearest restroom?",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_004.mp3",
+      "sort_order": 3,
+      "is_active": true,
+      "file": "04_最近的洗手间在哪.mp3",
+      "uploaded": true
+    },
+    {
+      "id": "phrase_common_005",
+      "cn": "不要辣",
+      "pinyin": "不要辣",
+      "en": "Not spicy, please",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_005.mp3",
+      "sort_order": 4,
+      "is_active": true,
+      "file": "05_不要辣.mp3",
+      "uploaded": true
+    },
+    {
+      "id": "phrase_common_006",
+      "cn": "买单",
+      "pinyin": "买单",
+      "en": "The bill, please",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_006.mp3",
+      "sort_order": 5,
+      "is_active": true,
+      "file": "06_买单.mp3",
+      "uploaded": true
+    },
+    {
+      "id": "phrase_common_007",
+      "cn": "能用支付宝或者微信吗？",
+      "pinyin": "能用支付宝或者微信吗？",
+      "en": "Can I pay with Alipay or WeChat?",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_007.mp3",
+      "sort_order": 6,
+      "is_active": true,
+      "file": "07_能用支付宝或者微信吗.mp3",
+      "uploaded": true
+    },
+    {
+      "id": "phrase_common_008",
+      "cn": "请帮帮我",
+      "pinyin": "请帮帮我",
+      "en": "Please help me",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_008.mp3",
+      "sort_order": 7,
+      "is_active": true,
+      "file": "08_请帮帮我.mp3",
+      "uploaded": true
+    },
+    {
+      "id": "phrase_common_009",
+      "cn": "我的护照丢了",
+      "pinyin": "我的护照丢了",
+      "en": "I lost my passport",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_009.mp3",
+      "sort_order": 8,
+      "is_active": true,
+      "file": "09_我的护照丢了.mp3",
+      "uploaded": true
+    },
+    {
+      "id": "phrase_common_010",
+      "cn": "你这瓜保熟吗？",
+      "pinyin": "你这瓜保熟吗？",
+      "en": "Is this melon ripe (sweet)?",
+      "audio_url": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/phrases/phrase_common_010.mp3",
+      "sort_order": 9,
+      "is_active": true,
+      "file": "10_你这瓜保熟吗.mp3",
+      "uploaded": true
+    }
+  ],
+  "deleteIds": [
+    "hello",
+    "thanks",
+    "howmuch",
+    "nospicy",
+    "toilet",
+    "phrase_common_011",
+    "phrase_common_012",
+    "phrase_common_013",
+    "phrase_common_014",
+    "phrase_common_015",
+    "phrase_common_016",
+    "phrase_common_017",
+    "phrase_common_018",
+    "phrase_common_019",
+    "phrase_common_020",
+    "phrase_common_021",
+    "phrase_common_022",
+    "phrase_common_023"
+  ]
+}

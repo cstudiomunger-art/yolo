@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-07-12T03:51:59.471Z",
+  "mode": "apply",
+  "cityResults": [
+    {
+      "cityId": "beijing",
+      "imported": 19,
+      "skipped": 5
+    },
+    {
+      "cityId": "shanghai",
+      "imported": 21,
+      "skipped": 0
+    },
+    {
+      "cityId": "chongqing",
+      "imported": 17,
+      "skipped": 0
+    },
+    {
+      "cityId": "nanjing",
+      "imported": 18,
+      "skipped": 0
+    },
+    {
+      "cityId": "hangzhou",
+      "imported": 19,
+      "skipped": 5
+    },
+    {
+      "cityId": "suzhou",
+      "imported": 22,
+      "skipped": 2
+    },
+    {
+      "cityId": "chengdu",
+      "imported": 24,
+      "skipped": 0
+    }
+  ],
+  "total": 140
+}

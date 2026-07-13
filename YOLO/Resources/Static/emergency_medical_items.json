@@ -1,35 +1,46 @@
 [
   {
-    "id": "health_prep_before_travel",
-    "icon": "💊",
+    "id": "health_prep",
+    "icon": "📋",
     "title_zh": "",
     "title_en": "Health Prep Before You Travel",
     "subtitle_zh": "",
-    "subtitle_en": "Health card & prescription medicines",
+    "subtitle_en": "Your Health Card & Prescription Medicines",
     "body_zh": "",
-    "body_en": "## Before departure\n\nPrepare **two things** yourself (we do not store health data):\n\n1. A **health card** to carry (conditions, allergies, medications)\n2. A **doctor's letter** for prescription medicines you bring\n\n> This is travel reference only — not medical advice. Follow your doctor.\n\n*Full guide loads from CMS when online.*",
+    "body_en": "## Before departure\n\nPrepare **two things** yourself (we do not store health data):\n\n1. A **health card** to carry (conditions, allergies, medications)\n2. A **doctor's letter** for prescription medicines you bring\n\n> This is travel reference only — not medical advice. Follow your doctor.",
     "sort_order": 0
   },
   {
-    "id": "how_to_get_medical_care",
+    "id": "hospital_visit",
     "icon": "🏥",
     "title_zh": "",
     "title_en": "How to Get Medical Care in China",
     "subtitle_zh": "",
-    "subtitle_en": "Hospitals, registration, insurance",
+    "subtitle_en": "A Guide for Foreign Visitors",
     "body_zh": "",
-    "body_en": "## Key difference\n\nChina has **no GP referral system**. You usually go **directly to a hospital** and register.\n\n## In an emergency\n\n- Call **120** or go to **急诊 (emergency department)**\n- Major city **三甲医院** hospitals often have an **international department** with English service\n- Call your **travel insurance 24h line** if you have one\n\n*Full guide loads from CMS when online.*",
+    "body_en": "## Key difference\n\nChina has **no GP referral system**. You usually go **directly to a hospital** and register.\n\n## In an emergency\n\n- Call **120** or go to **急诊 (emergency department)**\n- Major city **三甲医院** hospitals often have an **international department** with English service\n- Call your **travel insurance 24h line** if you have one",
     "sort_order": 1
   },
   {
-    "id": "how_to_buy_medicine",
+    "id": "buy_medicine",
     "icon": "💊",
     "title_zh": "",
     "title_en": "How to Buy Medicine in China",
     "subtitle_zh": "",
-    "subtitle_en": "Pharmacies & communication",
+    "subtitle_en": "A Guide for Foreign Visitors",
     "body_zh": "",
-    "body_en": "## Where to buy\n\nLook for **药房 / 药店 / 大药房** signs. Convenience stores do **not** sell medicine.\n\n## Tips\n\n- Show pharmacy staff your needs in Chinese or via translation app\n- Follow the **package insert** and pharmacist/doctor advice\n\n*Full guide loads from CMS when online.*",
+    "body_en": "## Where to buy\n\nLook for **药房 / 药店 / 大药房** signs. Convenience stores do **not** sell medicine.\n\n## Tips\n\n- Show pharmacy staff your needs in Chinese or via translation app\n- Follow the **package insert** and pharmacist/doctor advice",
     "sort_order": 2
+  },
+  {
+    "id": "help_card",
+    "icon": "🗣️",
+    "title_zh": "",
+    "title_en": "Help Card — Point to These",
+    "subtitle_zh": "",
+    "subtitle_en": "Ask a Stranger for Help",
+    "body_zh": "",
+    "body_en": "## Please Help Me\n\n**救命！这是紧急情况，请帮我打 120。**\n*Help! This is an emergency — please call 120 (ambulance).*\n\n**我是外国人，中文不好，请帮我。**\n*I am a foreigner and I do not speak Chinese well. Please help me.*\n\n**请带我去最近的医院。**\n*Please take me to the nearest hospital.*",
+    "sort_order": 3
   }
 ]

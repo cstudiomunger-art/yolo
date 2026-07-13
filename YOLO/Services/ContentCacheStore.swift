@@ -106,7 +106,7 @@ enum ContentCacheKey {
     static func audioGuides(attractionId: String) -> String { "\(prefix)audio_guides_\(attractionId.lowercased())" }
     static func audioGuide(id: String) -> String { "\(prefix)audio_guide_\(id.lowercased())" }
     static func voiceVariants(ownerType: AudioVoiceOwnerType, ownerId: String) -> String {
-        "\(prefix)voice_variants_\(ownerType.rawValue)_\(ownerId.lowercased())"
+        "\(prefix)voice_variants_v3_\(ownerType.rawValue)_\(ownerId.lowercased())"
     }
     static func subAreas(attractionId: String) -> String { "\(prefix)sub_areas_\(attractionId.lowercased())" }
     static func checklist(cityIds: [String], countryCode: String) -> String {
@@ -119,9 +119,9 @@ enum ContentCacheKey {
     static func cityEmbassies(cityId: String) -> String { "\(prefix)city_embassies_\(cityId.lowercased())" }
     static func homeTips(cityIds: [String]) -> String { "\(prefix)home_tips_\(filterHash(cityIds: cityIds))" }
     static func passportCountries() -> String { "\(prefix)passport_countries" }
-    static func emergencyData() -> String { "\(prefix)emergency_data" }
-    static func emergencyHelpItems() -> String { "\(prefix)emergency_help_items" }
-    static func emergencyMedicalItems() -> String { "\(prefix)emergency_medical_items" }
+    static func emergencyData() -> String { "\(prefix)emergency_data_v3" }
+    static func emergencyHelpItems() -> String { "\(prefix)emergency_help_items_v3" }
+    static func emergencyMedicalItems() -> String { "\(prefix)emergency_medical_items_v3" }
     static func sampleItinerary() -> String { "\(prefix)sample_itinerary" }
     static func planningItinerary() -> String { "\(prefix)planning_itinerary" }
     static func appBranding() -> String { "\(prefix)app_branding" }

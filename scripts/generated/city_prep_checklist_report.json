@@ -1,0 +1,137 @@
+{
+  "generatedAt": "2026-07-12T03:51:54.123Z",
+  "mode": "apply",
+  "cities": [
+    {
+      "cityId": "shanghai",
+      "source": "/Users/vesperal/Desktop/EN_上海行前准备清单（特色版）.md",
+      "count": 6,
+      "ids": [
+        "cl_sh_01",
+        "cl_sh_02",
+        "cl_sh_03",
+        "cl_sh_04",
+        "cl_sh_05",
+        "cl_sh_06"
+      ],
+      "titles": [
+        "Climate and Clothing (Shanghai Is Easy to Misjudge)",
+        "Getting into the City: Two Airports in Opposite Directions (Be Sure to Confirm Which One You Land At)",
+        "Metro and Transport Cards",
+        "Popular Attractions Where You May Not Get In Without a Reservation",
+        "Typhoon Season Special Note (Essential for July-September)",
+        "Bund Night Views and Night Safety"
+      ]
+    },
+    {
+      "cityId": "beijing",
+      "source": "/Users/vesperal/Desktop/EN_北京行前准备清单（特色版）.md",
+      "count": 4,
+      "ids": [
+        "cl_bj_01",
+        "cl_bj_02",
+        "cl_bj_03",
+        "cl_bj_04"
+      ],
+      "titles": [
+        "Climate and Clothing",
+        "Airports and Getting into the City",
+        "Attraction Reservations (Important)",
+        "Beijing-Specific Tips"
+      ]
+    },
+    {
+      "cityId": "nanjing",
+      "source": "/Users/vesperal/Desktop/EN_南京行前准备清单（特色版）.md",
+      "count": 4,
+      "ids": [
+        "cl_nj_01",
+        "cl_nj_02",
+        "cl_nj_03",
+        "cl_nj_04"
+      ],
+      "titles": [
+        "Climate and Clothing",
+        "Airport and Getting into the City",
+        "Attraction Reservations and Etiquette",
+        "Nanjing-Specific Tips"
+      ]
+    },
+    {
+      "cityId": "chengdu",
+      "source": "/Users/vesperal/Desktop/EN_成都行前准备清单（特色版）.md",
+      "count": 6,
+      "ids": [
+        "cl_cd_01",
+        "cl_cd_02",
+        "cl_cd_03",
+        "cl_cd_04",
+        "cl_cd_05",
+        "cl_cd_06"
+      ],
+      "titles": [
+        "Climate and Clothing",
+        "Airports and Getting into the City (Important)",
+        "Attraction Reservations",
+        "Spice Level and Food",
+        "Teahouses and Temple Etiquette",
+        "Extended Plateau Trips (If You Go)"
+      ]
+    },
+    {
+      "cityId": "hangzhou",
+      "source": "/Users/vesperal/Desktop/EN_杭州行前准备清单（特色版）.md",
+      "count": 5,
+      "ids": [
+        "cl_hz_01",
+        "cl_hz_02",
+        "cl_hz_03",
+        "cl_hz_04",
+        "cl_hz_05"
+      ],
+      "titles": [
+        "Climate and Clothing",
+        "Good Walking Shoes (The Most Underrated Essential)",
+        "Airport and Getting into the City",
+        "Attractions Require Reservations (Do Not Make a Wasted Trip)",
+        "Cycling and Boat Trips (The Right Way to Experience Hangzhou)"
+      ]
+    },
+    {
+      "cityId": "suzhou",
+      "source": "/Users/vesperal/Desktop/EN_苏州行前准备清单（特色版）.md",
+      "count": 5,
+      "ids": [
+        "cl_sz_01",
+        "cl_sz_02",
+        "cl_sz_03",
+        "cl_sz_04",
+        "cl_sz_05"
+      ],
+      "titles": [
+        "Climate and Clothing",
+        "Arrival and Getting into the City",
+        "Getting Around the City",
+        "Garden Reservations and Tickets",
+        "Suzhou-Specific Tips"
+      ]
+    },
+    {
+      "cityId": "chongqing",
+      "source": "/Users/vesperal/Desktop/EN_重庆行前准备清单（特色版）.md",
+      "count": 4,
+      "ids": [
+        "cl_cq_01",
+        "cl_cq_02",
+        "cl_cq_03",
+        "cl_cq_04"
+      ],
+      "titles": [
+        "Climate and Clothing",
+        "Terrain Tips (3D City, Essential Reading)",
+        "Airport and Getting into the City",
+        "Attractions and Food"
+      ]
+    }
+  ]
+}

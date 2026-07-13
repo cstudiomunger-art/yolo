@@ -127,6 +127,12 @@ struct CachingContentRepository: ContentRepositoryProtocol {
         await store.removeByPrefix("culture_tips_")
     }
 
+    func invalidateEmergencyContent() async {
+        await store.remove(key: ContentCacheKey.emergencyData())
+        await store.remove(key: ContentCacheKey.emergencyHelpItems())
+        await store.remove(key: ContentCacheKey.emergencyMedicalItems())
+    }
+
     func fetchSampleItinerary() async throws -> SampleItinerary {
         try await cached(key: ContentCacheKey.sampleItinerary()) {
             try await upstream.fetchSampleItinerary()

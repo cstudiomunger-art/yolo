@@ -1,0 +1,192 @@
+{
+  "generatedAt": "2026-07-12T03:19:43.928Z",
+  "mode": "apply",
+  "sourceRoot": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点",
+  "cityFilter": null,
+  "stats": {
+    "subAreaFolders": 722,
+    "matched": 721,
+    "unmatchedFolders": 1,
+    "unmatchedAttractions": 0,
+    "missingBenedict": 0,
+    "missingBlanchett": 0,
+    "uploaded": 536,
+    "storageDeleted": 1340,
+    "variantsUpserted": 536,
+    "variantsDeleted": 268,
+    "subAreasUpdated": 268
+  },
+  "matchedCount": 721,
+  "applyQueueCount": 721,
+  "unmatched": [
+    {
+      "cityFolder": "上海",
+      "attractionFolder": "苏州河十二国色",
+      "subFolder": "05_创享塔（木槿色）",
+      "reason": "子景点未匹配"
+    }
+  ],
+  "warnings": [],
+  "sampleMatched": [
+    {
+      "cityFolder": "北京",
+      "cityId": "beijing",
+      "attractionFolder": "北海公园",
+      "attractionId": "beijing_beihai_park",
+      "subFolder": "01_南门与团城",
+      "subAreaId": "beijing_beihai_park_sa_01",
+      "nameZh": "南门与团城",
+      "previousAudioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/voices/sub_area/beijing_beihai_park_sa_01/avv_sa_beijing_beihai_park_sa_01_benedict.mp3",
+      "matchMethod": "id_suffix",
+      "matchScore": 100,
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "voices": {
+        "Benedict": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_01_benedict",
+          "voiceLabel": "Benedict",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/01_南门与团城/A_EN_Benedict_1.South Gate and Round City.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_01/avv_sa_beijing_beihai_park_sa_01_benedict.mp3",
+          "sortOrder": 0,
+          "isDefault": true
+        },
+        "Blanchett": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_01_blanchett",
+          "voiceLabel": "Blanchett",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/01_南门与团城/A_EN_Blanchett_1.South Gate and Round City.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_01/avv_sa_beijing_beihai_park_sa_01_blanchett.mp3",
+          "sortOrder": 1,
+          "isDefault": false
+        }
+      }
+    },
+    {
+      "cityFolder": "北京",
+      "cityId": "beijing",
+      "attractionFolder": "北海公园",
+      "attractionId": "beijing_beihai_park",
+      "subFolder": "02_永安桥",
+      "subAreaId": "beijing_beihai_park_sa_02",
+      "nameZh": "永安桥",
+      "previousAudioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/voices/sub_area/beijing_beihai_park_sa_02/avv_sa_beijing_beihai_park_sa_02_benedict.mp3",
+      "matchMethod": "id_suffix",
+      "matchScore": 100,
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "voices": {
+        "Benedict": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_02_benedict",
+          "voiceLabel": "Benedict",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/02_永安桥/A_EN_Benedict_2.Yong'an Bridge.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_02/avv_sa_beijing_beihai_park_sa_02_benedict.mp3",
+          "sortOrder": 0,
+          "isDefault": true
+        },
+        "Blanchett": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_02_blanchett",
+          "voiceLabel": "Blanchett",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/02_永安桥/A_EN_Blanchett_2.Yong'an Bridge.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_02/avv_sa_beijing_beihai_park_sa_02_blanchett.mp3",
+          "sortOrder": 1,
+          "isDefault": false
+        }
+      }
+    },
+    {
+      "cityFolder": "北京",
+      "cityId": "beijing",
+      "attractionFolder": "北海公园",
+      "attractionId": "beijing_beihai_park",
+      "subFolder": "03_琼华岛·永安寺与白塔",
+      "subAreaId": "beijing_beihai_park_sa_03",
+      "nameZh": "琼华岛·永安寺与白塔",
+      "previousAudioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/voices/sub_area/beijing_beihai_park_sa_03/avv_sa_beijing_beihai_park_sa_03_benedict.mp3",
+      "matchMethod": "id_suffix",
+      "matchScore": 100,
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "voices": {
+        "Benedict": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_03_benedict",
+          "voiceLabel": "Benedict",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/03_琼华岛·永安寺与白塔/A_EN_Benedict_3.Qionghua Island · Yong'an Temple and the White Pagoda.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_03/avv_sa_beijing_beihai_park_sa_03_benedict.mp3",
+          "sortOrder": 0,
+          "isDefault": true
+        },
+        "Blanchett": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_03_blanchett",
+          "voiceLabel": "Blanchett",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/03_琼华岛·永安寺与白塔/A_EN_Blanchett_3.Qionghua Island · Yong'an Temple and the White Pagoda.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_03/avv_sa_beijing_beihai_park_sa_03_blanchett.mp3",
+          "sortOrder": 1,
+          "isDefault": false
+        }
+      }
+    },
+    {
+      "cityFolder": "北京",
+      "cityId": "beijing",
+      "attractionFolder": "北海公园",
+      "attractionId": "beijing_beihai_park",
+      "subFolder": "04_琼华岛·琼岛春阴碑与阅古楼",
+      "subAreaId": "beijing_beihai_park_sa_04",
+      "nameZh": "琼华岛·琼岛春阴碑与阅古楼",
+      "previousAudioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/voices/sub_area/beijing_beihai_park_sa_04/avv_sa_beijing_beihai_park_sa_04_benedict.mp3",
+      "matchMethod": "id_suffix",
+      "matchScore": 100,
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "voices": {
+        "Benedict": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_04_benedict",
+          "voiceLabel": "Benedict",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/04_琼华岛·琼岛春阴碑与阅古楼/A_EN_Benedict_4.Qionghua Island · Qiongdao Chunyin Stele and Yuegu Tower.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_04/avv_sa_beijing_beihai_park_sa_04_benedict.mp3",
+          "sortOrder": 0,
+          "isDefault": true
+        },
+        "Blanchett": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_04_blanchett",
+          "voiceLabel": "Blanchett",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/04_琼华岛·琼岛春阴碑与阅古楼/A_EN_Blanchett_4.Qionghua Island · Qiongdao Chunyin Stele and Yuegu Tower.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_04/avv_sa_beijing_beihai_park_sa_04_blanchett.mp3",
+          "sortOrder": 1,
+          "isDefault": false
+        }
+      }
+    },
+    {
+      "cityFolder": "北京",
+      "cityId": "beijing",
+      "attractionFolder": "北海公园",
+      "attractionId": "beijing_beihai_park",
+      "subFolder": "05_琼华岛·漪澜堂、道宁斋与铜仙承露盘",
+      "subAreaId": "beijing_beihai_park_sa_05",
+      "nameZh": "琼华岛·漪澜堂、道宁斋与铜仙承露盘",
+      "previousAudioUrl": "https://edwvrriuwzaaqznklrgi.supabase.co/storage/v1/object/public/audio-guides/voices/sub_area/beijing_beihai_park_sa_05/avv_sa_beijing_beihai_park_sa_05_benedict.mp3",
+      "matchMethod": "id_suffix",
+      "matchScore": 100,
+      "hasBenedict": true,
+      "hasBlanchett": true,
+      "voices": {
+        "Benedict": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_05_benedict",
+          "voiceLabel": "Benedict",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/05_琼华岛·漪澜堂、道宁斋与铜仙承露盘/A_EN_Benedict_5.Qionghua Island · Yilan Hall, Daoning Studio, and the Bronze Immortal's Vessel.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_05/avv_sa_beijing_beihai_park_sa_05_benedict.mp3",
+          "sortOrder": 0,
+          "isDefault": true
+        },
+        "Blanchett": {
+          "variantId": "avv_sa_beijing_beihai_park_sa_05_blanchett",
+          "voiceLabel": "Blanchett",
+          "localPath": "/Users/vesperal/Desktop/全量英文解说音频_男女声_按城市-景点-子景点/北京/北海公园/05_琼华岛·漪澜堂、道宁斋与铜仙承露盘/A_EN_Blanchett_5.Qionghua Island · Yilan Hall, Daoning Studio, and the Bronze Immortal's Vessel.mp3",
+          "storagePath": "voices/sub_area/beijing_beihai_park_sa_05/avv_sa_beijing_beihai_park_sa_05_blanchett.mp3",
+          "sortOrder": 1,
+          "isDefault": false
+        }
+      }
+    }
+  ]
+}

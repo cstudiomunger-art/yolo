@@ -4,6 +4,7 @@ struct GuideHomeView: View {
     @Environment(AppEnvironment.self) private var appEnv
 
     let cities: [City]
+    let publishedAttractionCounts: [String: Int]
     let onSelectCity: (City) -> Void
     let onOpenFavorites: () -> Void
 
@@ -46,6 +47,10 @@ struct GuideHomeView: View {
     }
 
     // MARK: - Header & sections
+
+    private func attractionCount(for city: City) -> Int {
+        GuideContentHelpers.displayAttractionCount(for: city, counts: publishedAttractionCounts)
+    }
 
     private var favoritesCount: Int {
         appEnv.preferences.favoriteAttractions.count
@@ -169,7 +174,7 @@ struct GuideHomeView: View {
                 HStack {
                     tripDateLine(for: city)
                     Spacer(minLength: 8)
-                    Text("\(city.attractionCount) attractions →")
+                    Text("\(attractionCount(for: city)) attractions →")
                         .font(Theme.FontToken.inter(11, weight: .medium))
                         .foregroundStyle(Theme.ColorToken.accent)
                 }
@@ -221,7 +226,7 @@ struct GuideHomeView: View {
                         .foregroundStyle(Theme.ColorToken.textPrimary)
                     tripDateSubtitle(for: city)
                     HStack(spacing: 0) {
-                        Text("\(city.attractionCount) attractions ")
+                        Text("\(attractionCount(for: city)) attractions ")
                             .font(Theme.FontToken.inter(11))
                             .foregroundStyle(Theme.ColorToken.textMuted)
                         Text("→")
@@ -266,7 +271,7 @@ struct GuideHomeView: View {
                         .padding(.bottom, 4)
 
                     HStack(spacing: 0) {
-                        Text("\(city.attractionCount) attractions ")
+                        Text("\(attractionCount(for: city)) attractions ")
                             .font(Theme.FontToken.inter(10))
                             .foregroundStyle(Theme.ColorToken.textMuted)
                         Text("→")
@@ -330,7 +335,7 @@ struct GuideHomeView: View {
                     .foregroundStyle(Theme.ColorToken.textSecondary)
             }
         } else {
-            Text("\(city.attractionCount) attractions")
+            Text("\(attractionCount(for: city)) attractions")
                 .font(Theme.FontToken.inter(12))
                 .foregroundStyle(Theme.ColorToken.textSecondary)
         }

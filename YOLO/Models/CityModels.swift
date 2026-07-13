@@ -13,6 +13,48 @@ struct City: Identifiable, Hashable, Codable {
     let avgDaysRecommended: Int?
     let attractionCount: Int
 
+    init(
+        id: String,
+        name: String,
+        chineseName: String,
+        emoji: String?,
+        coverImagePath: String?,
+        description: String?,
+        bestFor: [String],
+        seasonNote: String?,
+        bestTimeToVisit: String?,
+        avgDaysRecommended: Int?,
+        attractionCount: Int
+    ) {
+        self.id = id
+        self.name = name
+        self.chineseName = chineseName
+        self.emoji = emoji
+        self.coverImagePath = coverImagePath
+        self.description = description
+        self.bestFor = bestFor
+        self.seasonNote = seasonNote
+        self.bestTimeToVisit = bestTimeToVisit
+        self.avgDaysRecommended = avgDaysRecommended
+        self.attractionCount = attractionCount
+    }
+
+    func replacingAttractionCount(_ count: Int) -> City {
+        City(
+            id: id,
+            name: name,
+            chineseName: chineseName,
+            emoji: emoji,
+            coverImagePath: coverImagePath,
+            description: description,
+            bestFor: bestFor,
+            seasonNote: seasonNote,
+            bestTimeToVisit: bestTimeToVisit,
+            avgDaysRecommended: avgDaysRecommended,
+            attractionCount: count
+        )
+    }
+
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(String.self, forKey: .id)

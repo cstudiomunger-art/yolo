@@ -6,11 +6,13 @@ struct GuideView: View {
     @State private var path = NavigationPath()
     @State private var cities: [City] = []
     @State private var cultureTips: [CultureTip] = []
+    @State private var publishedAttractionCounts: [String: Int] = [:]
 
     var body: some View {
         NavigationStack(path: $path) {
             GuideHomeView(
                 cities: cities,
+                publishedAttractionCounts: publishedAttractionCounts,
                 onSelectCity: { city in
                     path.append(GuideRoute.city(city.id))
                 },
@@ -94,6 +96,10 @@ struct GuideView: View {
             cities = (try? await BundledContentRepository().fetchCities()) ?? []
             cultureTips = (try? await BundledContentRepository().fetchCultureTips(cityIds: [])) ?? []
         }
+        publishedAttractionCounts = await GuideContentHelpers.publishedAttractionCounts(
+            for: cities,
+            content: appEnv.content
+        )
         await applyDeepLink()
     }
 

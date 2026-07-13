@@ -52,10 +52,15 @@ struct BundledContentRepository: ContentRepositoryProtocol {
     private let appBranding: AppBranding
 
     init() {
-        cities = BundledJSONLoader.load([City].self, resource: "cities")
+        let loadedCities = BundledJSONLoader.load([City].self, resource: "cities")
         routes = BundledJSONLoader.load([CityRoute].self, resource: "city_routes")
         cityGuides = BundledJSONLoader.load([CityGuide].self, resource: "city_guides")
         attractions = BundledJSONLoader.load([Attraction].self, resource: "attractions")
+        let countByCity = Dictionary(grouping: attractions, by: { $0.cityId.lowercased() })
+            .mapValues(\.count)
+        cities = loadedCities.map { city in
+            city.replacingAttractionCount(countByCity[city.id.lowercased()] ?? 0)
+        }
         audioGuides = BundledJSONLoader.load([AudioGuide].self, resource: "audio_guides")
         checklist = BundledJSONLoader.load([ChecklistItem].self, resource: "checklist_items")
         shopping = BundledJSONLoader.load([ShoppingItem].self, resource: "shopping_items")

@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-07-12T03:33:38.815Z",
+  "mode": "dry-run",
+  "plan": {
+    "createAttraction": false,
+    "updateAttractionCoords": true,
+    "subAreaMigrations": [],
+    "variantMigrations": [],
+    "deleteOldSubAreaIds": [],
+    "deleteOldVariantIds": [],
+    "deleteOldAttractionId": null
+  }
+}

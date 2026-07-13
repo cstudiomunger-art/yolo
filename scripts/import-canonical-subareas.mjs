@@ -11,13 +11,14 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { basename, extname, join } from "path";
 import {
   buildExpectedItem,
+  isValidAttractionRecord,
   parseMdContent,
 } from "./audit-subareas.mjs";
 
 const ROOT = "/Users/vesperal/Desktop/YOLO";
 const OUT_DIR = join(ROOT, "scripts/generated");
 
-const FILE_RE = /^(\d{2})\.(.+)\.md$/i;
+const FILE_RE = /^(\d{1,2})\.(.+)\.md$/i;
 
 /** Folder name on disk → attractions.chinese_name (per city) */
 const FOLDER_ALIASES_BY_CITY = {
@@ -35,6 +36,20 @@ const FOLDER_ALIASES_BY_CITY = {
     成都大熊猫繁育研究基地: "大熊猫基地",
     熊猫基地: "大熊猫基地",
   },
+  hangzhou: {
+    千岛湖: "千岛湖景区",
+    杭州大运河拱宸桥景区: "大运河拱宸桥",
+    浙江省博物馆之江馆区: "浙江省博物馆",
+    丝绸博物馆: "中国丝绸博物馆",
+    良渚古城: "良渚古城遗址公园",
+    河坊街: "河坊街（清河坊历史街区）",
+  },
+  chongqing: {
+    洪崖洞: "重庆洪崖洞民俗风貌区",
+    磁器口古镇: "磁器口",
+    解放碑: "解放碑广场",
+    武隆喀斯特旅游区: "武隆喀斯特",
+  },
 };
 
 function folderAliasesFor(cityKey) {
@@ -51,15 +66,24 @@ function argValue(flag) {
 
 const sourceRoot = argValue("--root");
 const cityId = argValue("--city");
+const outTag = argValue("--out-tag") || cityId;
+const onlyFolders = argValue("--only")
+  ? argValue("--only")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  : [];
 
 if (!sourceRoot || !cityId) {
-  console.error("Usage: node scripts/import-canonical-subareas.mjs --root <path> --city <city_id> [--dry-run|--apply]");
+  console.error(
+    "Usage: node scripts/import-canonical-subareas.mjs --root <path> --city <city_id> [--only 文件夹名] [--out-tag tag] [--dry-run|--apply]"
+  );
   process.exit(1);
 }
 
-const OUT_CONFIRM = join(OUT_DIR, `${cityId}_canonical_subareas_confirm.md`);
-const OUT_REPORT = join(OUT_DIR, `${cityId}_canonical_subareas_report.json`);
-const OUT_SQL = join(OUT_DIR, `${cityId}_canonical_subareas.sql`);
+const OUT_CONFIRM = join(OUT_DIR, `${outTag}_canonical_subareas_confirm.md`);
+const OUT_REPORT = join(OUT_DIR, `${outTag}_canonical_subareas_report.json`);
+const OUT_SQL = join(OUT_DIR, `${outTag}_canonical_subareas.sql`);
 
 function readXcconfigValue(path, key) {
   const text = readFileSync(path, "utf8");
@@ -231,11 +255,12 @@ function listAttractionDirs(root) {
         return false;
       }
     })
+    .filter((n) => !onlyFolders.length || onlyFolders.includes(n))
     .sort((a, b) => a.localeCompare(b, "zh-Hans-CN"));
 }
 
 function resolveAttractionForImport(folderName, attractions, cityKey) {
-  const pool = attractions.filter((a) => !cityKey || a.city_id === cityKey);
+  const pool = attractions.filter(isValidAttractionRecord).filter((a) => !cityKey || a.city_id === cityKey);
   const candidates = [
     folderName,
     folderName.replace(/子景点信息/g, "").replace(/景点信息/g, ""),
@@ -256,6 +281,23 @@ function resolveAttractionForImport(folderName, attractions, cityKey) {
     if (fuzzy.length) return fuzzy[0];
   }
   return null;
+}
+
+function resolveLocalImage(dirPath, seq, stem) {
+  for (const ext of [".jpg", ".jpeg", ".png", ".webp"]) {
+    const candidate = join(dirPath, `${stem}${ext}`);
+    if (existsSync(candidate)) {
+      return { localImagePath: candidate, localImageName: `${stem}${ext}` };
+    }
+  }
+  const prefixes = [`${String(seq).padStart(2, "0")}.`, `${seq}.`];
+  for (const name of readdirSync(dirPath)) {
+    if (!/\.(jpg|jpeg|png|webp)$/i.test(name)) continue;
+    if (prefixes.some((p) => name.startsWith(p))) {
+      return { localImagePath: join(dirPath, name), localImageName: name };
+    }
+  }
+  return { localImagePath: null, localImageName: null };
 }
 
 function collectCanonical(root, cityKey, attractions) {
@@ -282,16 +324,14 @@ function collectCanonical(root, cityKey, attractions) {
 
     for (const { name: mdName, seq, stem } of mdFiles) {
       const mdPath = join(dirPath, mdName);
-      const jpgPath = join(dirPath, `${stem}.jpg`);
-      const hasJpg = existsSync(jpgPath);
-      const localImagePath = hasJpg ? jpgPath : null;
+      const { localImagePath, localImageName } = resolveLocalImage(dirPath, seq, stem);
 
       const mdRaw = readFileSync(mdPath, "utf8");
       const parsed = normalizeParsedNames(parseMdContent(mdRaw, { fallbackStem: stem }), stem);
       const bodyMd = toBodyMarkdown(parsed.bodyPlainEn, mdRaw);
       const sortIndex = seq - 1;
 
-      if (!hasJpg) {
+      if (!localImagePath) {
         warnings.push({ type: "missing_image", folderName, md: mdPath, nameZh: parsed.nameZh });
       }
       if (!parsed.bodyPlainEn && !extractEnglishBodyMarkdown(mdRaw)) {
@@ -307,7 +347,7 @@ function collectCanonical(root, cityKey, attractions) {
           sourceMdPath: mdPath,
           parsed: { ...parsed, bodyHtml: bodyMd },
           localImagePath,
-          localImageName: hasJpg ? `${stem}.jpg` : null,
+          localImageName,
         })
       );
     }

@@ -1,0 +1,67 @@
+{
+  "generatedAt": "2026-07-12T14:12:19.315Z",
+  "mode": "apply",
+  "synced": 784,
+  "examples": [
+    {
+      "id": "nanjing_presidential_palace_sa_08",
+      "nameZh": "太平天国天朝宫殿陈列",
+      "bodyLen": 2191,
+      "hasAudio": true
+    },
+    {
+      "id": "lujiazui_financial_district_sa_02",
+      "nameZh": "东方明珠广播电视塔",
+      "bodyLen": 2759,
+      "hasAudio": true
+    },
+    {
+      "id": "shanghai_disney_resort_sa_03",
+      "nameZh": "探险岛",
+      "bodyLen": 2845,
+      "hasAudio": true
+    },
+    {
+      "id": "beijing_beihai_park_sa_01",
+      "nameZh": "南门与团城",
+      "bodyLen": 6657,
+      "hasAudio": true
+    },
+    {
+      "id": "sichuan_museum_sa_03",
+      "nameZh": "远古四川·史前时期展厅（成都博物院二楼）",
+      "bodyLen": 2336,
+      "hasAudio": true
+    },
+    {
+      "id": "suzhou_master_of_nets_garden_sa_05",
+      "nameZh": "梯云室",
+      "bodyLen": 2474,
+      "hasAudio": true
+    },
+    {
+      "id": "shanghai_disney_resort_sa_04",
+      "nameZh": "宝藏湾",
+      "bodyLen": 3330,
+      "hasAudio": true
+    },
+    {
+      "id": "hangzhou_west_lake_sa_04",
+      "nameZh": "孤山与西泠印社",
+      "bodyLen": 731,
+      "hasAudio": false
+    },
+    {
+      "id": "shanghai_museum_sa_10",
+      "nameZh": "中国少数民族工艺馆",
+      "bodyLen": 5137,
+      "hasAudio": true
+    },
+    {
+      "id": "the_bund_shanghai_sa_01",
+      "nameZh": "十六铺码头",
+      "bodyLen": 3530,
+      "hasAudio": true
+    }
+  ]
+}

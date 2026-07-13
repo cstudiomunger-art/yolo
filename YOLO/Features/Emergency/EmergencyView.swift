@@ -63,8 +63,12 @@ struct EmergencyView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
             .task { await loadContent() }
+            .refreshable { await loadContent(invalidateCache: true) }
             .onChange(of: selectedCityId) { _, _ in
                 Task { await loadCityResources() }
+            }
+            .onChange(of: appEnv.contentRevision) { _, _ in
+                Task { await loadContent(invalidateCache: true) }
             }
         }
     }
@@ -275,7 +279,10 @@ struct EmergencyView: View {
     }
 
     @MainActor
-    private func loadContent() async {
+    private func loadContent(invalidateCache: Bool = false) async {
+        if invalidateCache, let cache = appEnv.content as? CachingContentRepository {
+            await cache.invalidateEmergencyContent()
+        }
         data = try? await appEnv.content.fetchEmergencyData()
         helpItems = (try? await appEnv.content.fetchEmergencyHelpItems()) ?? []
         medicalItems = (try? await appEnv.content.fetchEmergencyMedicalItems()) ?? []
