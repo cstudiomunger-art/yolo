@@ -16,6 +16,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import ws from "ws";
 import { createWriteStream, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -127,7 +128,10 @@ async function main() {
     console.warn("警告: 未设置 SUPABASE_SERVICE_ROLE_KEY，大目录 list 可能受限");
   }
   const { url, key } = getSupabaseConfig();
-  const supabase = createClient(url, key);
+  const supabase = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    realtime: { transport: ws },
+  });
   const { client: oss, bucket: ossBucket } = await loadOSSClient();
 
   const report = {
