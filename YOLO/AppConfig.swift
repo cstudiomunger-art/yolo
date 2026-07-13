@@ -22,7 +22,7 @@ enum AppConfig {
         return url
     }
 
-    /// Public media CDN base (e.g. https://media.yolohappy.app). Falls back to MEDIA_CDN_BASE_URL then ALI_CDN_BASE_URL.
+    /// Public media CDN base (e.g. https://media.yolohappy.com). Falls back to MEDIA_CDN_BASE_URL then ALI_CDN_BASE_URL.
     nonisolated static var mediaCDNBaseURL: URL? {
         for key in ["MEDIA_CDN_BASE_URL", "ALI_CDN_BASE_URL"] {
             guard let raw = plistString(forKey: key)?
