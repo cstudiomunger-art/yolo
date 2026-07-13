@@ -2,7 +2,7 @@
 // Powers the filterable foreigner-friendly hotel directory.
 
 import raw from "../data/hotels.json";
-import { cities as guideCities } from "./guides";
+import { cities as guideCities, resolveCoverImageUrl } from "./guides";
 
 export interface BookingLink {
   url: string;
@@ -31,7 +31,10 @@ export interface Hotel {
   sort_order: number;
 }
 
-export const hotels = raw as unknown as Hotel[];
+export const hotels = (raw as unknown as Hotel[]).map((h) => ({
+  ...h,
+  cover_image_path: resolveCoverImageUrl(h.cover_image_path),
+}));
 
 /** Notes are richtext in the CMS — render as plain text (strip tags) on cards. */
 export const text = (s: string | null | undefined): string =>

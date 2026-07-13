@@ -14,6 +14,7 @@
 4. [按后台侧栏查找（我在后台改什么）](#4-按后台侧栏查找)
 5. [待 App 接入（后台可改，用户暂看不到）](#5-待-app-接入)
 6. [附录](#6-附录)
+7. [媒体上传与国内 App CDN 同步](#7-媒体上传与国内-app-cdn-同步)
 
 ---
 
@@ -594,6 +595,28 @@ Prepare 底部 **Read Before You Go**（`city_ids` 包含该城或为空）。
 | 用户能不能听完全部音频 | 用户与购买 + 应用配置远程内购 | [3.7](#37-profilehome-右上角头像) |
 | 签证提示不对 | 签证规则 + 用户国籍 | [3.1](#31-home-tab) |
 | 行前待办少一项 | 城市 → 行前清单 | [3.2](#32-prepare从-home-进入) |
+
+---
+
+## 7. 媒体上传与国内 App CDN 同步
+
+Admin 上传封面/音频后写入 **Supabase Storage**，DB 存 Supabase public URL。**后台预览始终走 Supabase**，不要求国内 CDN。
+
+国内 iOS 用户通过 `media.yolohappy.com` 加速，需将文件同步到阿里云 OSS：
+
+| 步骤 | 操作 |
+|------|------|
+| 1 | 上传并保存（与平时相同） |
+| 2 | 等待 GitHub Actions 同步（约 30 分钟）或运维手动执行 `cd scripts && npm run sync:oss` |
+| 3 | **替换**已有文件时加 `--force` |
+| 4 | 大版本更新后可在 CDN 控制台刷新 `/audio-guides/`、`/cover-images/` |
+| 5 | App 测试：Profile → Refresh from CMS |
+
+**仅换 Storage 文件、不改 DB 字段**：官网不会自动重建；iOS 仍可通过 CDN 访问（sync 后）。
+
+**不同步 OSS 的桶**：`avatars`、`chat-images`（头像与客服图仍走 Supabase）。
+
+详细规则见 [docs/media-url-spec.md](../docs/media-url-spec.md)。
 
 ---
 

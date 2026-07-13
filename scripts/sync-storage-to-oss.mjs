@@ -11,6 +11,7 @@
  *
  * Options:
  *   --dry-run     List actions without uploading
+ *   --force       Re-upload even when object already exists in OSS
  *   --bucket=X    Sync only one bucket (audio-guides | cover-images)
  */
 
@@ -28,9 +29,28 @@ const REPORT_PATH = join(OUT_DIR, "storage_oss_sync_report.json");
 
 const BUCKETS = ["audio-guides", "cover-images"];
 const CACHE_CONTROL = "public, max-age=2592000";
+const RETRYABLE = new Set(["ENOTFOUND", "ETIMEDOUT", "ECONNRESET", "EAI_AGAIN", "RequestError"]);
+
+async function withRetry(label, fn, { attempts = 4, baseMs = 800 } = {}) {
+  let last;
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      last = e;
+      const code = e?.code ?? e?.name;
+      if (!RETRYABLE.has(code) || i === attempts) throw e;
+      const wait = baseMs * 2 ** (i - 1);
+      console.warn(`retry ${i}/${attempts - 1} ${label} (${code}), wait ${wait}ms`);
+      await new Promise((r) => setTimeout(r, wait));
+    }
+  }
+  throw last;
+}
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
+const force = args.includes("--force");
 const bucketArg = args.find((a) => a.startsWith("--bucket="))?.split("=")[1];
 const buckets = bucketArg ? [bucketArg] : BUCKETS;
 
@@ -83,7 +103,7 @@ async function downloadObject(supabase, bucket, objectPath, dest) {
 
 async function ossObjectExists(client, key) {
   try {
-    await client.head(key);
+    await withRetry(`head ${key}`, () => client.head(key));
     return true;
   } catch (e) {
     if (e?.status === 404 || e?.code === "NoSuchKey") return false;
@@ -102,6 +122,7 @@ async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     dryRun,
+    force,
     ossBucket,
     buckets: {},
   };
@@ -115,7 +136,7 @@ async function main() {
     for (const { path } of objects) {
       const ossKey = `${bucket}/${path}`;
       try {
-        const exists = await ossObjectExists(oss, ossKey);
+        const exists = !force && (await ossObjectExists(oss, ossKey));
         if (exists) {
           bucketReport.skipped++;
           continue;
@@ -127,9 +148,11 @@ async function main() {
         }
         const tmp = join(OUT_DIR, ".tmp-sync", ossKey);
         await downloadObject(supabase, bucket, path, tmp);
-        await oss.put(ossKey, readFileSync(tmp), {
-          headers: { "Cache-Control": CACHE_CONTROL },
-        });
+        await withRetry(`put ${ossKey}`, () =>
+          oss.put(ossKey, readFileSync(tmp), {
+            headers: { "Cache-Control": CACHE_CONTROL },
+          })
+        );
         bucketReport.uploaded++;
         console.log(`uploaded ${ossKey}`);
       } catch (e) {

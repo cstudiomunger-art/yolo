@@ -341,7 +341,7 @@ private struct PaymentGuideBeforeYouFlyView: View {
 
 private struct PaymentGuidePhrasesView: View {
     @Environment(AppEnvironment.self) private var appEnv
-    @State private var player: AVPlayer?
+    @State private var playback = MediaAVPlayback()
     @State private var synthesizer = AVSpeechSynthesizer()
 
     private var service: PaymentHelperService { appEnv.paymentHelper }
@@ -356,8 +356,8 @@ private struct PaymentGuidePhrasesView: View {
                     speak(phrase.chinese)
                 }
                 .overlay(alignment: .bottomTrailing) {
-                    if let url = service.audioURL(for: phrase.id) {
-                        Button { playAudio(url) } label: {
+                    if service.resolvedAudioURLs(for: phrase.id) != nil {
+                        Button { playAudio(phraseID: phrase.id) } label: {
                             Image(systemName: "play.circle.fill")
                                 .font(.system(size: 18))
                                 .foregroundStyle(Theme.ColorToken.accent)
@@ -378,10 +378,9 @@ private struct PaymentGuidePhrasesView: View {
         synthesizer.speak(utterance)
     }
 
-    private func playAudio(_ url: URL) {
-        player?.pause()
-        player = AVPlayer(url: url)
-        player?.play()
+    private func playAudio(phraseID: String) {
+        guard let resolved = service.resolvedAudioURLs(for: phraseID) else { return }
+        playback.play(resolved: resolved)
     }
 }
 

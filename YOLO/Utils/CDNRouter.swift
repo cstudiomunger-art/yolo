@@ -16,6 +16,8 @@ enum CDNRouter {
     }
 
     private static let supabasePublicPathMarker = "/storage/v1/object/public/"
+    /// Buckets mirrored to OSS / media CDN (see docs/media-url-spec.md).
+    private static let cdnEligibleBuckets: Set<String> = ["audio-guides", "cover-images"]
 
     // MARK: - Parsing
 
@@ -27,9 +29,9 @@ enum CDNRouter {
            let scheme = url.scheme?.lowercased(),
            scheme == "http" || scheme == "https",
            let host = url.host?.lowercased(),
-           host.contains("supabase.co"),
-           let path = url.path.removingPercentEncoding ?? url.path,
-           let markerRange = path.range(of: supabasePublicPathMarker) {
+           host.contains("supabase.co") {
+            let path = url.path.removingPercentEncoding ?? url.path
+            guard let markerRange = path.range(of: supabasePublicPathMarker) else { return nil }
             let tail = String(path[markerRange.upperBound...]).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
             guard let slash = tail.firstIndex(of: "/") else { return nil }
             let bucket = String(tail[..<slash])
@@ -72,7 +74,8 @@ enum CDNRouter {
         let supabase = supabasePublicURL(bucket: reference.bucket, objectPath: reference.objectPath)
         guard let supabase else { return nil }
 
-        if let cdn = cdnPublicURL(bucket: reference.bucket, objectPath: reference.objectPath) {
+        if cdnEligibleBuckets.contains(reference.bucket),
+           let cdn = cdnPublicURL(bucket: reference.bucket, objectPath: reference.objectPath) {
             return ResolvedMediaURLs(primary: cdn, fallback: supabase)
         }
         return ResolvedMediaURLs(primary: supabase, fallback: nil)

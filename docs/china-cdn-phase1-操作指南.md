@@ -269,6 +269,22 @@ scripts/generated/storage_oss_sync_report.json
 
 CMS 上传新文件后，目前依赖定时同步（CMS 双写 OSS 尚未实现）。
 
+**后台预览**始终走 Supabase，不要求国内 CDN 加速。国内 App 用户走 `media.yolohappy.com`，需等 OSS 同步完成。
+
+替换已存在文件时使用 `--force`：
+
+```bash
+npm run sync:oss -- --force
+```
+
+或仅同步单个 bucket：
+
+```bash
+npm run sync:oss -- --bucket=cover-images --force
+```
+
+详见 [media-url-spec.md](media-url-spec.md)。
+
 ### 6.1 本地 cron 示例（每 15 分钟）
 
 ```bash
@@ -283,7 +299,16 @@ crontab -e
 
 ### 6.2 GitHub Actions（可选）
 
-在 `.github/workflows/` 新增定时 workflow，密钥存 Repository Secrets。
+仓库已包含 [`.github/workflows/sync-oss-media.yml`](../.github/workflows/sync-oss-media.yml)（每 30 分钟 + 手动触发）。在 GitHub Repository Secrets 配置：
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `OSS_ACCESS_KEY_ID`
+- `OSS_ACCESS_KEY_SECRET`
+- `OSS_BUCKET`（如 `yolo-media-prod`）
+- `OSS_REGION`（如 `oss-cn-shanghai`）
+
+也可在 `.github/workflows/` 自行调整 cron。
 
 ---
 

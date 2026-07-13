@@ -240,10 +240,15 @@ final class PaymentHelperService {
     }
 
     func audioURL(for phraseID: String) -> URL? {
+        resolvedAudioURLs(for: phraseID)?.primary
+    }
+
+    func resolvedAudioURLs(for phraseID: String) -> CDNRouter.ResolvedMediaURLs? {
         guard let phrase = merchantPhrases.first(where: { $0.id == phraseID }),
               let urlStr = phrase.audioUrl,
               !urlStr.isEmpty else { return nil }
-        return MediaURLResolver.audioURL(from: urlStr) ?? URL(string: urlStr)
+        return MediaURLResolver.resolvedAudioURLs(from: urlStr)
+            ?? URL(string: urlStr).map { CDNRouter.ResolvedMediaURLs(primary: $0, fallback: nil) }
     }
 
     // MARK: - Cache

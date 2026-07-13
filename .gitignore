@@ -3,6 +3,8 @@ DerivedData/
 build/
 *.xcuserstate
 node_modules/
+scripts/generated/.tmp-sync/
+scripts/generated/storage_oss_sync_report.json
 Secrets.xcconfig
 admin/js/config.js
 supabase/.temp/

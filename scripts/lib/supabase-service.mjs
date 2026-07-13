@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import { readFileSync } from "fs";
-import { join } from "path";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
-const ROOT = "/Users/vesperal/Desktop/YOLO";
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
 export function readXcconfigValue(path, key) {
   const text = readFileSync(path, "utf8");

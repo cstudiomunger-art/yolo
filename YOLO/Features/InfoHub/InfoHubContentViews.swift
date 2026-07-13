@@ -245,15 +245,18 @@ private struct DialectBigScreen: View {
 }
 
 /// Plays uploaded phrase audio when present; falls back to system TTS otherwise.
+@MainActor
 final class PhraseAudioPlayer {
-    private var player: AVPlayer?
+    private let playback = MediaAVPlayback()
     private let synth = AVSpeechSynthesizer()
 
     func play(text: String, url: String?) {
-        if let url, !url.isEmpty, let u = URL(string: url) {
-            player = AVPlayer(url: u)
-            player?.play()
+        if let url, !url.isEmpty,
+           let resolved = MediaURLResolver.resolvedAudioURLs(from: url)
+            ?? URL(string: url).map({ CDNRouter.ResolvedMediaURLs(primary: $0, fallback: nil) }) {
+            playback.play(resolved: resolved)
         } else {
+            playback.stop()
             synth.stopSpeaking(at: .immediate)
             let utt = AVSpeechUtterance(string: text)
             utt.voice = AVSpeechSynthesisVoice(language: "zh-CN")
