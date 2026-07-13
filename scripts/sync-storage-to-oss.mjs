@@ -112,6 +112,17 @@ async function ossObjectExists(client, key) {
 }
 
 async function main() {
+  const missing = [];
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
+    missing.push("SUPABASE_SERVICE_ROLE_KEY");
+  }
+  for (const k of ["OSS_ACCESS_KEY_ID", "OSS_ACCESS_KEY_SECRET", "OSS_BUCKET", "OSS_REGION"]) {
+    if (!process.env[k]?.trim()) missing.push(k);
+  }
+  if (missing.length) {
+    throw new Error(`缺少环境变量：${missing.join(", ")}`);
+  }
+
   if (!loadServiceKey()) {
     console.warn("警告: 未设置 SUPABASE_SERVICE_ROLE_KEY，大目录 list 可能受限");
   }
@@ -165,6 +176,12 @@ async function main() {
   mkdirSync(OUT_DIR, { recursive: true });
   writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2));
   console.log(`\nReport: ${REPORT_PATH}`);
+
+  const failedCount = Object.values(report.buckets).reduce((n, b) => n + (b.failed?.length ?? 0), 0);
+  if (failedCount > 0) {
+    console.error(`\n${failedCount} file(s) failed — see report`);
+    process.exit(1);
+  }
 }
 
 main().catch((e) => {

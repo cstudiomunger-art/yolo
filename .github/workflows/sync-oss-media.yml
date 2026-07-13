@@ -21,6 +21,15 @@ jobs:
           cache: npm
           cache-dependency-path: scripts/package-lock.json
 
+      - name: Validate required secrets
+        run: |
+          test -n "${{ secrets.SUPABASE_URL }}" || echo "::warning::SUPABASE_URL secret is empty"
+          test -n "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" || { echo "::error::SUPABASE_SERVICE_ROLE_KEY secret is empty"; exit 1; }
+          test -n "${{ secrets.OSS_ACCESS_KEY_ID }}" || { echo "::error::OSS_ACCESS_KEY_ID secret is empty"; exit 1; }
+          test -n "${{ secrets.OSS_ACCESS_KEY_SECRET }}" || { echo "::error::OSS_ACCESS_KEY_SECRET secret is empty"; exit 1; }
+          test -n "${{ secrets.OSS_BUCKET }}" || { echo "::error::OSS_BUCKET secret is empty"; exit 1; }
+          test -n "${{ secrets.OSS_REGION }}" || { echo "::error::OSS_REGION secret is empty"; exit 1; }
+
       - name: Install dependencies
         working-directory: scripts
         run: npm ci
