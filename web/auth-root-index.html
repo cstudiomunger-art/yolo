@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redirecting…</title>
+  <script>
+    (function () {
+      var q = window.location.search || "";
+      var p = new URLSearchParams(q);
+      var t = (p.get("type") || "").toLowerCase();
+      if (t === "recovery") {
+        window.location.replace("/auth/reset-password/" + q);
+      } else if (t === "signup" || t === "email" || t === "invite") {
+        window.location.replace("/auth/confirm/" + q);
+      } else {
+        document.body.textContent = "Open the link from your YOLO HAPPY email.";
+      }
+    })();
+  </script>
+</head>
+<body>Redirecting…</body>
+</html>

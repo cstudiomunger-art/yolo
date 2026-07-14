@@ -111,21 +111,42 @@ enum AppConfig {
     /// Web base used for auth email links (must match Supabase Auth redirect allow list).
     static var authWebBaseURL: String {
         let configured = plistString(forKey: "AUTH_WEB_BASE_URL")?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
             .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         if let configured, !configured.isEmpty { return configured }
         return "https://yolo.cstudiomunger.workers.dev"
     }
 
-    /// Password reset redirect (must match Supabase Auth redirect allow list).
+    /// Password reset landing page (full path — never Site URL root).
     static var authRedirectURL: URL {
-        URL(string: "\(authWebBaseURL)/auth/reset-password")
-            ?? URL(string: "https://yolo.cstudiomunger.workers.dev/auth/reset-password")!
+        authEmailLandingURL(path: "/auth/reset-password")
     }
 
-    /// Email signup confirmation redirect (must match Supabase Auth redirect allow list).
+    /// Email signup confirmation landing page (full path — never Site URL root).
     static var emailConfirmationRedirectURL: URL {
-        URL(string: "\(authWebBaseURL)/auth/confirm")
-            ?? URL(string: "https://yolo.cstudiomunger.workers.dev/auth/confirm")!
+        authEmailLandingURL(path: "/auth/confirm")
+    }
+
+    /// GoTrue base for endpoints that *send* emails (`/recover`, etc.).
+    /// When App API uses gateway, prefer direct Supabase so `redirect_to` is applied server-side.
+    static var authEmailAPIBaseURL: URL {
+        if isGatewayConfigured, let fallback = supabaseFallbackURL {
+            return fallback
+        }
+        return supabaseURL
+    }
+
+    nonisolated private static func authEmailLandingURL(path: String) -> URL {
+        let normalizedPath = path.hasPrefix("/") ? path : "/" + path
+        let host = authWebBaseURL.lowercased()
+        // Pin China auth host to an absolute URL so Supabase cannot fall back to Site URL `/`.
+        if host.contains("auth.yolohappy.com") {
+            return URL(string: "https://auth.yolohappy.com\(normalizedPath)")!
+        }
+        if let url = URL(string: authWebBaseURL + normalizedPath) {
+            return url
+        }
+        return URL(string: "https://yolo.cstudiomunger.workers.dev\(normalizedPath)")!
     }
 
     nonisolated private static func plistBool(forKey key: String) -> Bool? {

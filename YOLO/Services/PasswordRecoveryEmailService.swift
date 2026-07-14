@@ -19,7 +19,19 @@ enum PasswordRecoveryEmailService {
     }
 
     static func sendResetEmail(to email: String) async throws {
-        let url = AppConfig.supabaseURL.appendingPathComponent("auth/v1/recover")
+        // Prefer direct Supabase when gateway is configured — recover emails must keep a full
+        // `redirect_to` path (`/auth/reset-password`). Site URL alone yields `/?token_hash=...`.
+        let apiRoot = AppConfig.authEmailAPIBaseURL.absoluteString
+            .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard let url = URL(string: apiRoot + "/auth/v1/recover") else {
+            throw ServiceError.invalidResponse
+        }
+
+        let redirectTo = AppConfig.authRedirectURL.absoluteString
+        #if DEBUG
+        print("[PasswordRecovery] API=\(url.absoluteString) redirect_to=\(redirectTo)")
+        #endif
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -27,7 +39,7 @@ enum PasswordRecoveryEmailService {
         request.setValue("Bearer \(AppConfig.supabaseAnonKey)", forHTTPHeaderField: "Authorization")
         request.httpBody = try JSONSerialization.data(withJSONObject: [
             "email": email,
-            "redirect_to": AppConfig.authRedirectURL.absoluteString,
+            "redirect_to": redirectTo,
         ])
 
         let (data, response) = try await URLSession.shared.data(for: request)
