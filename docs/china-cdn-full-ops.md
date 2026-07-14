@@ -371,6 +371,54 @@ SUPABASE_URL = https:/$()/edwvrriuwzaaqznklrgi.supabase.co/
 | 签名 200 但图裂 | 私有桶无对象 → 回 ① |
 | 登录异常 | Nginx 是否漏传 `apikey` / `Authorization`；证书是否过期 |
 | 旧站挂了 | 宝塔其它站点 conf；`nginx -t`；回滚最近改动 |
+| media -1003 找不到主机 | DNS 无 `media` 记录 → 见下方 **应急 M 节** |
+
+---
+
+## 应急：`media.yolohappy.com` 解析失败（NSURL -1003）
+
+> **症状**：`未能找到使用指定主机名的服务器`，URL 为 `https://media.yolohappy.com/cover-images/...` / `avatars/...`。  
+> **原因**：云解析缺少 `media`，或只有「中国大陆」而当前网络走「默认」→ NXDOMAIN。  
+> **与 gateway / SUPABASE_URL 无关**；补 DNS 即可，不必回滚 App。
+
+### M.1 从 CDN 抄 CNAME
+
+1. 打开 [CDN 域名管理](https://cdn.console.aliyun.com/domain/list)
+2. 找到 **`media.yolohappy.com`**
+   - 没有此域名 → 按 [阶段1指南·第三节](china-cdn-phase1-操作指南.md) 重新添加（源站 `yolo-media-prod`）
+   - 已停止 → 先 **启用**
+3. 进入域名 → 复制 **CNAME**（如 `media.yolohappy.com.w.kunlunaq.com`）
+
+### M.2 云解析补 `media`（默认 + 国内都要有）
+
+[云解析](https://dns.console.aliyun.com/) → `yolohappy.com` → 搜索主机 **`media`**
+
+| 主机记录 | 解析线路 | 类型 | 记录值 | TTL |
+| --- | --- | --- | --- | --- |
+| `media` | **默认** | CNAME | M.1 的 CDN CNAME | 10 分钟 |
+| `media` | **中国大陆** 或 **中国地区** | CNAME | **同一** CDN CNAME | 10 分钟 |
+
+注意：App 全量配置了 `MEDIA_CDN_BASE_URL`，**默认线路不能空**；不要填 ECS IP / gateway。
+
+### M.3 本机验收
+
+```bash
+dig +short media.yolohappy.com @223.5.5.5
+curl -I --connect-timeout 10 \
+  "https://media.yolohappy.com/cover-images/cities/chongqing.png"
+```
+
+期望：`dig` 非空；`curl` 能连上（**200** 最好；**404** 也说明解析已通）。
+
+### M.4 真机
+
+开关飞行模式清 DNS → 杀掉 App 重开 → 封面/头像不应再 -1003。
+
+### M.5 完成标准
+
+- [ ] CDN 域名运行中且 CNAME 已抄对  
+- [ ] `media` 默认 + 中国大陆/地区均有记录  
+- [ ] `dig` / `curl` 通过；真机无 -1003  
 
 ---
 
