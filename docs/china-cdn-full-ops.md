@@ -12,23 +12,165 @@ GitHub Secrets → OSS 私有桶 → 全量同步 → Supabase Custom Domain →
 
 ---
 
+## 当前实施方案（复用已有服务器 · 推荐照此执行）
+
+> **现状约定**：不新购 ECS；在你**已有、且上面还有其它程序**的机器上叠加 YOLO gateway。  
+> **媒体加速已通**：`media.yolohappy.com` → OSS `yolo-media-prod`。  
+> **App 暂不切**：`Secrets.xcconfig` 的 `SUPABASE_URL` 仍保持 `*.supabase.co`，直到本节第 6 步验收通过。
+
+### 目标形态
+
+```text
+国内用户 ──DNS(中国大陆)──► 已有服务器:443 Nginx
+                              ├─ /api/v1/media/sign → 127.0.0.1:3001（签名 → OSS 私有桶）
+                              └─ /auth|/rest|/realtime|… → 反代 Supabase 源站
+
+海外用户 ──DNS(默认)──► gateway.yolohappy.com Custom Domain → Supabase
+（若暂时全球都指这台服务器：海外也能用，只是稍绕；Custom Domain Ready 后再把「默认」改回 Supabase）
+
+封面/音频/头像 ──► media.yolohappy.com（CDN，与 gateway 无关）
+```
+
+### 进度假设与待办
+
+
+| 项 | 状态（请按实改勾） | 说明 |
+| --- | --- | --- |
+| 阶段 1 媒体 CDN | ✅ 已完成 | 不动 |
+| B 私有桶 `yolo-private-prod` | ✅ 多半已建 | 确认地域上海、权限私有 |
+| A `OSS_PRIVATE_BUCKET` Secret | ☐ | GitHub Actions → 补 Secret |
+| C 私有桶同步 | ☐ | 桶内应有 `chat-images/...`（现在常是空的） |
+| D Custom Domain | 🔄 进行中 | CNAME + TXT `_acme-challenge.gateway` → Verify → Active |
+| E 机器 | **改为「改造已有机」** | **不要**按「新购」走；见下方逐步 |
+| F 签名 API | ☐ | 与现有其它服务**并列**安装 |
+| G Nginx | ☐ | **合进现有 Nginx**，勿覆盖其它站点 |
+| H / I / J / K | ☐ | gateway 冒烟后再动 DNS / 切 App |
+
+### 逐步操作（按天）
+
+#### 第 0 步 — 冻结变更（5 分钟）
+
+1. **不要**改 App `SUPABASE_URL` 为 gateway。  
+2. **不要**删已有站点的 Nginx conf / 宝塔站点。  
+3. DNS：保留正在做的 Custom Domain 相关记录；**暂不**把「中国大陆」`gateway` 指到这台机（等 G 冒烟）。
+
+#### 第 1 步 — 收尾 D（Custom Domain）
+
+1. 阿里云 TXT：`_acme-challenge.gateway` = 弹窗 Content（一字不差）。  
+2. 本机 DNS 若超时，改查：`dig +short TXT _acme-challenge.gateway.yolohappy.com @223.5.5.5`  
+3. Supabase → **Verify** → 等到状态 **Active**。  
+4. 保留 `gateway` **默认** CNAME → `edwvrriuwzaaqznklrgi.supabase.co`（海外直连用）。
+
+#### 第 2 步 — 摸清已有服务器（改造代替「购买」）
+
+SSH 登录**现有机器**后执行并记下结果：
+
+```bash
+uname -a
+node -v 2>/dev/null || echo "no node"
+nginx -v 2>&1
+ss -lntp | egrep ':80|:443|:3001' || netstat -lntp | egrep ':80|:443|:3001'
+ls /etc/nginx/conf.d 2>/dev/null; ls /www/server/panel 2>/dev/null   # 有 panel 多为宝塔
+curl -sS -o /dev/null -w "%{http_code}\n" \
+  "https://edwvrriuwzaaqznklrgi.supabase.co/auth/v1/health"
+```
+
+| 检查项 | 合格标准 | 不合格怎么办 |
+| --- | --- | --- |
+| 能 SSH、有公网 IP | 记下 IP | — |
+| 出网访问 Supabase | 非超时 | 放行出网 / DNS |
+| **443/80** | 已有 Nginx/Caddy/宝塔 | **不要重装抢端口**；只加一个 `server_name` |
+| **3001** | 未被占用 | 换 `PORT=3002` 并改 Nginx 反代（少见） |
+| Node | ≥ 20，或可再装 20 | 用 nvm / NodeSource，避免弄坏系统里旧 Node（见下） |
+| 内存/负载 | 余量大致够再跑一个小 Node | 过载则另开轻量机 |
+
+**Node 共存**：若机上已有旧 Node（如 16）被其它程序依赖，优先：
+
+```bash
+# 示例：用 nvm 仅给签名服务用 20（勿覆盖全局其它服务）
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# 装好后：nvm install 20 && 在 systemd ExecStart 写绝对路径，例如：
+# which node  →  /home/xxx/.nvm/versions/node/v20.*/bin/node
+```
+
+安全组 / 防火墙：确认 **443（及 80）** 开着；**不要**对公网开 3001；22 仍建议仅办公 IP。
+
+> 细节命令仍可参考下文 **E / F**；凡写「创建实例 / 新装 Nginx」的句子，在本路径下**跳过**，只保留安装 Node（共存）、签名目录、**追加** Nginx server。
+
+#### 第 3 步 — F 签名 API（与其它程序并列）
+
+完全按 **F** 节：`/opt/yolo-sign-api` + `/etc/yolo-sign-api.env` + systemd。  
+要求：`SUPABASE_URL` = 源站 `*.supabase.co`；`curl 127.0.0.1:3001/health` → `{"ok":true}`。  
+不影响其它已有服务（不占用 80/443）。
+
+#### 第 4 步 — G Nginx：只新增 gateway 站点
+
+1. 阿里云申请 / 下载 `gateway.yolohappy.com` 证书，放到现机（如 `/etc/nginx/certs/`），**勿覆盖**其它域名证书。  
+2. 将仓库 [`infra/gateway/nginx.conf.snippet`](../infra/gateway/nginx.conf.snippet) **另存为独立 conf**（例：`/etc/nginx/conf.d/yolo-gateway.conf` 或宝塔「添加站点」后改配置）。  
+3. `server_name` 仅为 `gateway.yolohappy.com`；保留原有站点的其它 `server { }`。  
+4. `nginx -t && systemctl reload nginx`（宝塔则用面板重载）。  
+5. **临时**本机 hosts 或 dig：把 `gateway` 指到该机公网 IP，测：
+
+```bash
+curl -Ik --resolve gateway.yolohappy.com:443:服务器公网IP \
+  https://gateway.yolohappy.com/auth/v1/health
+curl -sS --resolve gateway.yolohappy.com:443:服务器公网IP \
+  http://127.0.0.1:3001/health   # 签名仍建议先在机内测；外网测 sign 见 G.5
+```
+
+原有业务域名应仍正常（改完做一次冒烟）。
+
+#### 第 5 步 — 同步与 GeoDNS
+
+1. 完成 **A.2 + C**（`sync-private`，私有桶有图）。  
+2. **H**：  
+   - `gateway` **中国大陆** → 这台机（A 记录 IP，或先接 Gateway CDN 再回源该机）  
+   - `gateway` **默认** → Custom Domain（Supabase CNAME）  
+3. **I** Gateway CDN 可选：减轻源站、缓存匿名 GET。
+
+#### 第 6 步 — 再切 App（J）与验收（K）
+
+国内 4G 下把 `SUPABASE_URL` 改为 `https://gateway.yolohappy.com/`，并设好 `SUPABASE_FALLBACK_URL` 为原 supabase.co。  
+验收登录 / 列表 / 客服图 / Realtime；出问题 DNS 回滚中国大陆或把 URL 改回源站。
+
+### 风险与回滚（共用机特有）
+
+| 风险 | 规避 |
+| --- | --- |
+| `reload nginx` 弄挂旧站 | 先 `nginx -t`；conf 独立文件；保留备份 |
+| 升级全局 Node 弄挂旧程序 | 用 nvm / 独立绝对路径跑签名服务 |
+| 磁盘写满 | 日志轮转；签名服务几乎无本地存文件 |
+| 验证期误指 DNS | 用 `--resolve` / hosts 测通后再改正式解析 |
+
+**紧急回滚 DNS**：删掉或改掉「中国大陆」`gateway` 记录，只留默认 → Supabase；App 未切则用户无感。
+
+### 本路径下「可跳过」的原文段落
+
+- **E.1 购买实例**整段 → 跳过  
+- **E.3.3「新启一个空 Nginx」** → 改为确认已有 Nginx 可追加 server  
+- 开机器阶段的「全球都先指 ECS」→ 你有 Custom Domain 后，**优先 H 分线路**，不要长期全球回源到共用机（减少对旧业务与海外延迟的影响）
+
+下文 **A～L** 仍是完整手册；执行时以**本节顺序**为准，遇到冲突以「复用已有服务器」为准。
+
+---
+
 ## 操作总览（勾选）
 
 
-| #   | 步骤                                             | 完成  |
-| --- | ---------------------------------------------- | --- |
-| A   | GitHub Secrets 补齐                              | ☐   |
-| B   | OSS 私有桶 `yolo-private-prod`                    | ☐   |
-| C   | 全量同步 avatars + chat-images                     | ☐   |
-| D   | Supabase Custom Domain `gateway.yolohappy.com` | ☐   |
-| E   | 购买 ECS / 安全组 / 系统初始化                           | ☐   |
-| F   | 部署客服图签名 API（Node）                              | ☐   |
-| G   | Nginx 透明代理 + HTTPS                             | ☐   |
-| H   | GeoDNS 分线路                                     | ☐   |
-| I   | Gateway CDN 缓存（推荐）                             | ☐   |
-| J   | 本机 `Secrets.xcconfig` 切换 gateway               | ☐   |
-| K   | 国内/海外实机验收                                      | ☐   |
-| L   | 隐私政策与运营文档确认                                    | ☐   |
+| #   | 步骤 | 完成 |
+| --- | --- | --- |
+| A   | GitHub Secrets 补齐（含 `OSS_PRIVATE_BUCKET`） | ☐ |
+| B   | OSS 私有桶 `yolo-private-prod` | ☐ |
+| C   | 全量同步 avatars + chat-images | ☐ |
+| D   | Supabase Custom Domain `gateway.yolohappy.com` | ☐ |
+| E   | **改造已有服务器**（安全组 / Node20 共存 / 摸底）；非必须新购 | ☐ |
+| F   | 部署客服图签名 API（Node，并列） | ☐ |
+| G   | **追加** Nginx server + HTTPS（不覆盖旧站） | ☐ |
+| H   | GeoDNS 分线路 | ☐ |
+| I   | Gateway CDN 缓存（推荐） | ☐ |
+| J   | 本机 `Secrets.xcconfig` 切换 gateway | ☐ |
+| K   | 国内/海外实机验收 | ☐ |
+| L   | 隐私政策与运营文档确认 | ☐ |
 
 
 ---
@@ -218,6 +360,8 @@ curl -I "https://gateway.yolohappy.com/auth/v1/health"
 
 
 ## E. 购买并初始化 ECS
+
+> **若复用已有服务器（当前推荐）**：不要走 E.1 购买；先按文首 **「当前实施方案」第 2 步** 摸底，再只做安全组核对 + Node 20 共存 +（已有则跳过）Nginx。下文按「新机」写全，便于对照。
 
 本机将作为 **`gateway.yolohappy.com` 中国大陆（及暂不分流时全球）入口**：Nginx 反代 Supabase + 本机签名 API。  
 证书申请、站点 conf 细节在 **G**；本节只做到：机器能 SSH、安全组正确、装好 Nginx + Node 20、能出网访问 Supabase。
