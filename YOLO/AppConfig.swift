@@ -22,6 +22,22 @@ enum AppConfig {
         return url
     }
 
+    /// Direct Supabase origin for CDN/media fallback (and gateway outage recovery). Nil when unset.
+    nonisolated static var supabaseFallbackURL: URL? {
+        guard let raw = plistString(forKey: "SUPABASE_FALLBACK_URL")?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+              !raw.isEmpty,
+              !raw.hasPrefix("你的"),
+              let url = URL(string: raw)
+        else { return nil }
+        return url
+    }
+
+    /// Gateway media sign API base (same host as SUPABASE_URL when pointing at gateway).
+    nonisolated static var mediaSignAPIURL: URL? {
+        supabaseURL.appendingPathComponent("api/v1/media/sign")
+    }
+
     /// Public media CDN base (e.g. https://media.yolohappy.com). Falls back to MEDIA_CDN_BASE_URL then ALI_CDN_BASE_URL.
     nonisolated static var mediaCDNBaseURL: URL? {
         for key in ["MEDIA_CDN_BASE_URL", "ALI_CDN_BASE_URL"] {

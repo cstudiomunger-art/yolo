@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 /**
- * Sync Supabase Storage public buckets to Aliyun OSS for China CDN origin.
+ * Sync private Supabase Storage buckets (chat-images) to a private Aliyun OSS bucket.
  *
  * Usage:
  *   cd scripts && npm install
  *   SUPABASE_SERVICE_ROLE_KEY=... \
  *   OSS_ACCESS_KEY_ID=... OSS_ACCESS_KEY_SECRET=... \
- *   OSS_BUCKET=yolo-media-prod OSS_REGION=oss-cn-shanghai \
- *   node sync-storage-to-oss.mjs
+ *   OSS_PRIVATE_BUCKET=yolo-private-prod OSS_REGION=oss-cn-shanghai \
+ *   node sync-private-storage-to-oss.mjs
  *
  * Options:
- *   --dry-run     List actions without uploading
- *   --force       Re-upload even when object already exists in OSS
- *   --bucket=X    Sync only one bucket (audio-guides | cover-images | avatars)
+ *   --dry-run
+ *   --force
+ *   --bucket=chat-images
  */
 
 import { mkdirSync, writeFileSync } from "fs";
@@ -27,17 +27,23 @@ import {
   syncBucketToOSS,
 } from "./lib/oss-sync-core.mjs";
 
-const REPORT_PATH = join(OUT_DIR, "storage_oss_sync_report.json");
-const BUCKETS = ["audio-guides", "cover-images", "avatars"];
+const REPORT_PATH = join(OUT_DIR, "storage_oss_private_sync_report.json");
+const BUCKETS = ["chat-images"];
 
 const { dryRun, force, bucketArg } = parseSyncArgs();
 const buckets = bucketArg ? [bucketArg] : BUCKETS;
 
 async function main() {
-  requireEnv(["SUPABASE_SERVICE_ROLE_KEY", "OSS_ACCESS_KEY_ID", "OSS_ACCESS_KEY_SECRET", "OSS_BUCKET", "OSS_REGION"]);
+  requireEnv([
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "OSS_ACCESS_KEY_ID",
+    "OSS_ACCESS_KEY_SECRET",
+    "OSS_PRIVATE_BUCKET",
+    "OSS_REGION",
+  ]);
 
   const supabase = await createSupabaseServiceClient();
-  const { client: oss, bucket: ossBucket } = await loadOSSClient();
+  const { client: oss, bucket: ossBucket } = await loadOSSClient({ bucketEnv: "OSS_PRIVATE_BUCKET" });
 
   const report = {
     generatedAt: new Date().toISOString(),
@@ -48,8 +54,9 @@ async function main() {
   };
 
   for (const bucket of buckets) {
-    console.log(`\n==> ${bucket}`);
+    console.log(`\n==> private ${bucket} → ${ossBucket}/${bucket}/`);
     const objects = await listAllObjects(supabase, bucket);
+    // Private objects: no long public Cache-Control
     report.buckets[bucket] = await syncBucketToOSS({
       supabase,
       oss,
@@ -58,6 +65,7 @@ async function main() {
       objects,
       dryRun,
       force,
+      cacheControl: "private, max-age=3600",
     });
   }
 

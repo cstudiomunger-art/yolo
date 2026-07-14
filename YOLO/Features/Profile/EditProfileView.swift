@@ -185,19 +185,24 @@ struct EditProfileView: View {
                 .from("avatars")
                 .upload(path, data: jpegData, options: FileOptions(contentType: "image/jpeg", upsert: true))
 
-            // The storage path is fixed (userId/avatar.jpg, upsert), so the public
-            // URL is identical across re-uploads. Append a version query so every
-            // cache layer (our disk/memory cache + URLSession) treats a new upload
-            // as a new image and all screens refresh immediately.
-            let baseURL = try SupabaseManager.shared.storage
-                .from("avatars")
-                .getPublicURL(path: path)
-                .absoluteString
-            let publicURL = "\(baseURL)?v=\(Int(Date().timeIntervalSince1970))"
+            // Prefer CDN primary (+ Supabase fallback). Keep ?v= for cache bust across layers.
+            let version = Int(Date().timeIntervalSince1970)
+            let publicURL: String
+            if let resolved = CDNRouter.publicMediaURLs(from: path, bucket: "avatars") {
+                let primary = resolved.primary.absoluteString
+                publicURL = primary.contains("?") ? "\(primary)&v=\(version)" : "\(primary)?v=\(version)"
+            } else {
+                let baseURL = try SupabaseManager.shared.storage
+                    .from("avatars")
+                    .getPublicURL(path: path)
+                    .absoluteString
+                publicURL = "\(baseURL)?v=\(version)"
+            }
 
             appEnv.preferences.avatarUrl = publicURL
             appEnv.preferences.avatarStatus = "approved"
             appEnv.profileSync.schedulePush()
+            await AvatarImageCache.seed(publicURL, image: image)
         } catch {
             avatarError = error.localizedDescription
         }

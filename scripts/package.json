@@ -8,6 +8,7 @@
     "ws": "^8.18.3"
   },
   "scripts": {
-    "sync:oss": "node sync-storage-to-oss.mjs"
+    "sync:oss": "node sync-storage-to-oss.mjs",
+    "sync:oss:private": "node sync-private-storage-to-oss.mjs"
   }
 }

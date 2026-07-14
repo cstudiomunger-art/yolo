@@ -609,14 +609,14 @@ Admin 上传封面/音频后写入 **Supabase Storage**，DB 存 Supabase public
 | 1 | 上传并保存（与平时相同） |
 | 2 | 等待 GitHub Actions 同步（约 30 分钟）或运维手动执行 `cd scripts && npm run sync:oss` |
 | 3 | **替换**已有文件时加 `--force` |
-| 4 | 大版本更新后可在 CDN 控制台刷新 `/audio-guides/`、`/cover-images/` |
+| 4 | 大版本更新后可在 CDN 控制台刷新 `/audio-guides/`、`/cover-images/`、`/avatars/` |
 | 5 | App 测试：Profile → Refresh from CMS |
 
 **仅换 Storage 文件、不改 DB 字段**：官网不会自动重建；iOS 仍可通过 CDN 访问（sync 后）。
 
-**不同步 OSS 的桶**：`avatars`、`chat-images`（头像与客服图仍走 Supabase）。
+**同步 OSS 的桶**：`audio-guides`、`cover-images`、`avatars`（公共 `yolo-media-prod`）；`chat-images`（私有 `yolo-private-prod`，需配置 `OSS_PRIVATE_BUCKET`）。
 
-详细规则见 [docs/media-url-spec.md](../docs/media-url-spec.md)。
+详细规则见 [docs/media-url-spec.md](../docs/media-url-spec.md)；网关部署见 [docs/china-cdn-full-ops.md](../docs/china-cdn-full-ops.md)。
 
 ---
 

@@ -359,7 +359,7 @@ final class SupportChatService {
 
     /// Resolve a signed URL for a stored chat image path (private bucket).
     func signedImageURL(for path: String) async -> URL? {
-        try? await client.storage.from("chat-images").createSignedURL(path: path, expiresIn: 3600)
+        await SignedMediaURLService.signedChatImageURL(for: path, client: client)
     }
 
     // MARK: - Translation (chat-translate Edge Function)

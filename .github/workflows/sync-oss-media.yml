@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  sync:
+  sync-public:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,7 +34,7 @@ jobs:
         working-directory: scripts
         run: npm ci
 
-      - name: Sync to OSS
+      - name: Sync public buckets to OSS
         working-directory: scripts
         run: npm run sync:oss
         env:
@@ -45,10 +45,56 @@ jobs:
           OSS_BUCKET: ${{ secrets.OSS_BUCKET }}
           OSS_REGION: ${{ secrets.OSS_REGION }}
 
-      - name: Upload sync report on failure
+      - name: Upload public sync report on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: storage-oss-sync-report
           path: scripts/generated/storage_oss_sync_report.json
+          if-no-files-found: ignore
+
+  sync-private:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: scripts/package-lock.json
+
+      - name: Validate private-bucket secrets
+        run: |
+          test -n "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" || { echo "::error::SUPABASE_SERVICE_ROLE_KEY secret is empty"; exit 1; }
+          test -n "${{ secrets.OSS_ACCESS_KEY_ID }}" || { echo "::error::OSS_ACCESS_KEY_ID secret is empty"; exit 1; }
+          test -n "${{ secrets.OSS_ACCESS_KEY_SECRET }}" || { echo "::error::OSS_ACCESS_KEY_SECRET secret is empty"; exit 1; }
+          test -n "${{ secrets.OSS_PRIVATE_BUCKET }}" || { echo "::error::OSS_PRIVATE_BUCKET secret is empty"; exit 1; }
+          test -n "${{ secrets.OSS_REGION }}" || { echo "::error::OSS_REGION secret is empty"; exit 1; }
+
+      - name: Install dependencies
+        working-directory: scripts
+        run: npm ci
+
+      - name: Sync private chat-images to OSS
+        working-directory: scripts
+        run: npm run sync:oss:private
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OSS_ACCESS_KEY_ID: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          OSS_ACCESS_KEY_SECRET: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+          OSS_PRIVATE_BUCKET: ${{ secrets.OSS_PRIVATE_BUCKET }}
+          OSS_REGION: ${{ secrets.OSS_REGION }}
+
+      - name: Upload private sync report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: storage-oss-private-sync-report
+          path: scripts/generated/storage_oss_private_sync_report.json
           if-no-files-found: ignore

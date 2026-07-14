@@ -448,7 +448,7 @@ npm run sync:oss -- --bucket=audio-guides
 
 ## 十一、阶段 2 预告
 
-阶段 1 稳定后，再配置 **gateway.yolohappy.com** 代理 Supabase（JSON / 登录 / AI），App 将 `SUPABASE_URL` 改为 gateway 域。详见完整方案文档。
+阶段 1 稳定后，再配置 **gateway.yolohappy.com** 代理 Supabase（JSON / 登录 / AI），App 将 `SUPABASE_URL` 改为 gateway 域。完整运维清单见 [china-cdn-full-ops.md](china-cdn-full-ops.md)。
 
 ---
 
