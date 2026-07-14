@@ -267,22 +267,25 @@ final class AppEnvironment {
             navigation.openSharedItinerary(slug: slug)
         case .passwordRecovery:
             do {
-                _ = try await SupabaseManager.shared.auth.session(from: url)
+                try await importAuthSession(from: url)
                 auth.markPasswordRecoveryPending()
             } catch {
                 TelemetryService.shared.recordError(error, context: "password_recovery_link")
             }
         case .emailConfirmation:
             do {
-                _ = try await SupabaseManager.shared.auth.session(from: url)
+                try await importAuthSession(from: url)
                 TelemetryService.shared.logEvent("email_confirmed")
                 await reconcileAuthState(isAuthenticated: true)
             } catch {
                 TelemetryService.shared.recordError(error, context: "email_confirmation_link")
+                #if DEBUG
+                print("[AuthDeepLink] emailConfirmation failed: \(error)")
+                #endif
             }
         case .oauthCallback:
             do {
-                _ = try await SupabaseManager.shared.auth.session(from: url)
+                try await importAuthSession(from: url)
                 TelemetryService.shared.logEvent("sign_in_google")
                 await reconcileAuthState(isAuthenticated: true)
             } catch {
@@ -290,6 +293,23 @@ final class AppEnvironment {
             }
         case .redeemInviteCode(let code):
             navigation.presentInviteRedeem(code: code)
+        }
+    }
+
+    /// Prefer SDK URL parser; fall back to explicit `setSession` from fragment/query tokens.
+    private func importAuthSession(from url: URL) async throws {
+        do {
+            _ = try await SupabaseManager.shared.auth.session(from: url)
+            return
+        } catch {
+            #if DEBUG
+            print("[AuthDeepLink] session(from:) failed, trying setSession: \(error)")
+            #endif
+            guard let tokens = AuthDeepLinkTokens.parse(from: url) else { throw error }
+            _ = try await SupabaseManager.shared.auth.setSession(
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken
+            )
         }
     }
 

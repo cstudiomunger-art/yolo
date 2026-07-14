@@ -173,6 +173,12 @@ curl -sS --resolve auth.yolohappy.com:443:101.201.125.178 \
 
 期望：HTML 200；`config.js` 含 `gateway.yolohappy.com`。
 
+**更新确认页（邮箱确认后回 App）**：仓库改 [`web/auth/confirm/index.html`](../web/auth/confirm/index.html) 后，覆盖上传到：
+
+`/www/wwwroot/auth.yolohappy.com/auth/confirm/index.html`
+
+成功页须**点「Open YOLO App」**才跳深链（无自动跳转）。App 侧可点 **I've confirmed — Sign in** 兜底。
+
 ---
 
 ## 3. DNS

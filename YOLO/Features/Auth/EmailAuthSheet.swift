@@ -7,6 +7,7 @@ struct EmailAuthSheet: View {
     /// Called after a session is established so the caller can dismiss the whole login gate.
     var onAuthenticated: () -> Void
 
+    @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
 
     @State private var email = ""
@@ -42,6 +43,15 @@ struct EmailAuthSheet: View {
             }
         }
         .sheetDragToDismiss()
+        .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+            guard isAuthenticated else { return }
+            finishAuthenticated()
+        }
+        .onAppear {
+            if appEnv.auth.isAuthenticated {
+                finishAuthenticated()
+            }
+        }
     }
 
     // MARK: - Form
@@ -102,6 +112,9 @@ struct EmailAuthSheet: View {
             Text("The confirmation link expires after a limited time. If it expires, tap Resend confirmation email.")
                 .font(Theme.FontToken.inter(11))
                 .foregroundStyle(Theme.ColorToken.textMuted)
+            Text(String(localized: "After confirming in the browser, tap I've confirmed — Sign in, or use Open YOLO App on that page."))
+                .font(Theme.FontToken.inter(11))
+                .foregroundStyle(Theme.ColorToken.textMuted)
             Text(trimmedEmail)
                 .font(Theme.FontToken.inter(13, weight: .medium))
         }
@@ -114,25 +127,35 @@ struct EmailAuthSheet: View {
         )
 
         Button {
-            resendConfirmation()
+            signInAfterConfirmation()
         } label: {
             if isLoading {
                 ProgressView()
             } else {
-                Text(String(localized: "Resend confirmation email"))
+                Text(String(localized: "I've confirmed — Sign in"))
             }
         }
         .buttonStyle(AuthPrimaryButtonStyle())
-        .disabled(isLoading || AppConfig.useMock)
+        .disabled(isLoading || AppConfig.useMock || password.count < AuthFormSupport.minimumPasswordLength)
         .padding(.top, 20)
+
+        Button {
+            resendConfirmation()
+        } label: {
+            Text(String(localized: "Resend confirmation email"))
+                .font(Theme.FontToken.inter(13, weight: .medium))
+        }
+        .foregroundStyle(Theme.ColorToken.accent)
+        .disabled(isLoading || AppConfig.useMock)
+        .padding(.top, 16)
 
         Button(String(localized: "Back")) {
             pendingEmailConfirmation = false
             clearMessages()
         }
         .font(Theme.FontToken.inter(13, weight: .medium))
-        .foregroundStyle(Theme.ColorToken.accent)
-        .padding(.top, 16)
+        .foregroundStyle(Theme.ColorToken.textMuted)
+        .padding(.top, 12)
 
         statusMessages
     }
@@ -196,7 +219,7 @@ struct EmailAuthSheet: View {
             do {
                 _ = try await SupabaseManager.shared.auth.signIn(email: trimmedEmail, password: password)
                 TelemetryService.shared.logEvent("sign_in")
-                onAuthenticated()
+                finishAuthenticated()
                 return
             } catch {
                 let description = error.localizedDescription.lowercased()
@@ -235,7 +258,7 @@ struct EmailAuthSheet: View {
             TelemetryService.shared.logEvent("sign_up")
 
             if response.session != nil {
-                onAuthenticated()
+                finishAuthenticated()
                 return
             }
 
@@ -243,6 +266,27 @@ struct EmailAuthSheet: View {
             infoMessage = String(localized: "Account created. Check your email and tap the confirmation link.")
         } catch {
             errorMessage = AuthFormSupport.errorMessage(for: error)
+        }
+    }
+
+    /// After confirming on the web page, user can sign in with the same password without deep link.
+    private func signInAfterConfirmation() {
+        clearMessages()
+        Task {
+            isLoading = true
+            defer { isLoading = false }
+            do {
+                _ = try await SupabaseManager.shared.auth.signIn(email: trimmedEmail, password: password)
+                TelemetryService.shared.logEvent("sign_in_after_email_confirm")
+                finishAuthenticated()
+            } catch {
+                let description = error.localizedDescription.lowercased()
+                if description.contains("email not confirmed") {
+                    errorMessage = String(localized: "Email not confirmed yet. Open the confirmation link in your email, then try again.")
+                } else {
+                    errorMessage = AuthFormSupport.errorMessage(for: error)
+                }
+            }
         }
     }
 
@@ -261,6 +305,11 @@ struct EmailAuthSheet: View {
                 errorMessage = AuthFormSupport.errorMessage(for: error)
             }
         }
+    }
+
+    private func finishAuthenticated() {
+        onAuthenticated()
+        dismiss()
     }
 
     private func clearMessages() {

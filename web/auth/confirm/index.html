@@ -148,11 +148,10 @@
       verifyingTitle: "Verifying…",
       verifyingMsg: "Please wait.",
       successTitle: "Email confirmed",
-      successMsg: "Your account is verified. Sign in to YOLO HAPPY and start planning your trip.",
+      successMsg: "Your account is verified. Tap Open YOLO App to continue in the app.",
       openApp: "Open YOLO App",
       getApp: "Get the app",
-      autoOpen: "Opening the app…",
-      hint: "If nothing happens, tap the button above.",
+      hint: "If the app does not open, switch back to YOLO HAPPY and tap I've confirmed — Sign in.",
       expiredTitle: "Confirmation link expired",
       expiredMsg: "This confirmation link has timed out. Open YOLO HAPPY and tap Resend confirmation email to get a new one.",
       failedTitle: "Confirmation failed",
@@ -316,19 +315,18 @@
       const openApp = document.getElementById("open-app");
       openApp.textContent = copy.openApp;
       openApp.href = deepLink;
+      // User gesture only — do not auto-redirect (iOS often blocks setTimeout jumps).
+      openApp.onclick = function (e) {
+        e.preventDefault();
+        window.location.href = deepLink;
+        return false;
+      };
 
       if (cfg.appStoreUrl && !String(cfg.appStoreUrl).includes("0000000000")) {
         const store = document.getElementById("app-store");
         store.href = cfg.appStoreUrl;
         store.textContent = copy.getApp;
         store.classList.remove("hidden");
-      }
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        document.getElementById("hint-success").textContent = copy.autoOpen;
-        setTimeout(function () {
-          window.location.href = deepLink;
-        }, 600);
       }
     }
 
