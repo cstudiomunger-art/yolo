@@ -154,6 +154,226 @@ curl -sS --resolve gateway.yolohappy.com:443:服务器公网IP \
 
 ---
 
+## 网关已通后的详细操作方案（实机 · 2026-07）
+
+> **适用**：宝塔共用机 + 签名 `3102` + SSL 已签发，且 `--resolve` 冒烟已通过。  
+> **实机参数（写死，改机再改文档）**：
+
+| 项 | 值 |
+| --- | --- |
+| 公网 IP | `101.201.125.178`（华北2 北京） |
+| 域名 | `gateway.yolohappy.com` |
+| 签名服务 | `127.0.0.1:3102`（systemd `yolo-sign-api`） |
+| 上游 API | `https://edwvrriuwzaaqznklrgi.supabase.co` |
+| 私有 OSS | `yolo-private-prod` / `oss-cn-shanghai` |
+| 媒体 CDN | `media.yolohappy.com`（已通，本方案不动） |
+
+### 已完成（勿重复）
+
+- [x] Custom Domain / 宝塔 SSL for `gateway`
+- [x] 签名 API 安装、`PORT=3102`、`curl 127.0.0.1:3102/health` → `{"ok":true}`
+- [x] Nginx 反代 + `/api/v1/media/sign` → 3102
+- [x] 冒烟：`/auth/v1/health` → 401 missing apikey；`/api/v1/media/sign` → `missing_token`
+
+### 尚未完成（严格按 ①→⑤）
+
+| 序 | 内容 | 约耗时 |
+| --- | --- | --- |
+| ① | GitHub Secret + 私有桶同步 | 15～40 分钟 |
+| ② | GeoDNS 分线路 | 10 分钟 + TTL 等待 |
+| ③ | 公网再验（不依赖 `--resolve`） | 5 分钟 |
+| ④ | 切本机 `Secrets.xcconfig` | 5 分钟 |
+| ⑤ | 国内 4G 实机验收 | 30 分钟 |
+
+**I（Gateway CDN）可后置**；先不切 CDN 也能用。
+
+---
+
+### ① 私有桶同步（客服图镜像）
+
+没有 OSS 对象时，签名返回的 URL 会 **404**，App 再回退 Supabase。
+
+#### ①-1 GitHub Secret
+
+1. 仓库 → **Settings** → **Secrets and variables** → **Actions**
+2. New / Update：
+
+| Name | Value |
+| --- | --- |
+| `OSS_PRIVATE_BUCKET` | `yolo-private-prod` |
+
+3. 确认已有：`SUPABASE_URL`（源站）、`SUPABASE_SERVICE_ROLE_KEY`、`OSS_ACCESS_KEY_ID`、`OSS_ACCESS_KEY_SECRET`、`OSS_REGION=oss-cn-shanghai`
+
+#### ①-2 跑同步（二选一）
+
+**GitHub Actions（推荐）**
+
+1. **Actions** → workflow 名含 `Sync` / `OSS` 的 → **Run workflow**
+2. 等 `sync-public`、`sync-private` 都绿
+
+**本机（Mac，仓库根目录）**
+
+```bash
+cd /Users/vesperal/Desktop/YOLO
+# 使用你本机已有的 export；同步脚本需要 SERVICE_ROLE 列私有桶
+export OSS_PRIVATE_BUCKET=yolo-private-prod
+export OSS_REGION=oss-cn-shanghai
+npm run sync:oss:private
+```
+
+#### ①-3 验收
+
+阿里云 OSS 控制台 → `yolo-private-prod` → 应有前缀：
+
+`chat-images/{conversationId}/....jpg`
+
+若桶仍为空：查 Actions 日志 / Service Role 是否能读 Supabase Storage `chat-images`。
+
+---
+
+### ② GeoDNS（核心：国内走 ECS，海外走 Supabase）
+
+**入口**：[云解析 DNS](https://dns.console.aliyun.com/) → `yolohappy.com`
+
+#### ②-1 保留「默认」→ Supabase（海外）
+
+现有记录（Custom Domain 用）应类似：
+
+| 主机记录 | 线路 | 类型 | 记录值 |
+| --- | --- | --- | --- |
+| `gateway` | **默认** | CNAME | `edwvrriuwzaaqznklrgi.supabase.co` |
+
+**不要删**这条（海外 HTTPS + Custom Domain 靠它）。
+
+#### ②-2 新增「中国大陆」→ 本机
+
+| 主机记录 | 线路 | 类型 | 记录值 | TTL |
+| --- | --- | --- | --- | --- |
+| `gateway` | **中国大陆** | **A** | `101.201.125.178` | 10 分钟（先短，稳定后再加长） |
+
+同一主机、**不同线路**可以并存，不会和默认 CNAME 冲突。
+
+#### ②-3 等生效后检查
+
+**国内网络 / 本机试：**
+
+```bash
+dig +short gateway.yolohappy.com @223.5.5.5
+# 期望：101.201.125.178
+```
+
+**海外 DNS（或 VPN 出口在国外）：**
+
+```bash
+dig +short gateway.yolohappy.com @8.8.8.8
+# 期望：CNAME 到 *.supabase.co（或最终不是 101.201.125.178）
+```
+
+公网 HTTPS（国内预期打到 ECS）：
+
+```bash
+curl -Ik https://gateway.yolohappy.com/auth/v1/health
+curl -sS https://gateway.yolohappy.com/api/v1/media/sign
+# 同冒烟：401 missing apikey / missing_token
+```
+
+#### ②-4 回滚（出问题立刻）
+
+删掉或暂停 **中国大陆** 那条 A 记录 → 全国回落到默认 CNAME（Supabase）。App 若尚未改 URL，用户完全无感。
+
+---
+
+### ③ 公网再验清单（改 DNS 后、切 App 前）
+
+
+| # | 命令或操作 | 通过标准 |
+| --- | --- | --- |
+| 1 | `systemctl is-active yolo-sign-api` | `active` |
+| 2 | `curl -sS http://127.0.0.1:3102/health` | `{"ok":true}` |
+| 3 | 国内 dig `@223.5.5.5` | IP = `101.201.125.178` |
+| 4 | `curl -Ik https://gateway.../auth/v1/health` | 401 + missing apikey |
+| 5 | `curl -sS https://gateway.../api/v1/media/sign` | `missing_token` |
+| 6 | 打开原先宝塔其它站点 | 仍正常 |
+
+可选（有真实会话图 + 用户 JWT 后）：带 Bearer 调 sign，再 `curl` 返回的 OSS URL，期望 200。
+
+---
+
+### ④ 切本机 App（`Secrets.xcconfig`）
+
+**文件**：仓库根目录 `Secrets.xcconfig`（**禁止 commit / push**）
+
+#### ④-1 修改内容
+
+```xcconfig
+// 国内加速入口（GeoDNS 已分线路）
+SUPABASE_URL = https:/$()/gateway.yolohappy.com/
+
+// 探活失败时粘性回退源站（代码已支持）
+SUPABASE_FALLBACK_URL = https:/$()/edwvrriuwzaaqznklrgi.supabase.co/
+
+// anon 等其它键保持不动
+```
+
+确保 Xcode / Info.plist 能读到 `SUPABASE_FALLBACK_URL`（若工程已按仓库接好则无需再改代码）。
+
+#### ④-2 编译安装
+
+1. Xcode → **Product → Clean Build Folder**
+2. 真机删除旧 App（可选）
+3. **国内 4G/5G** 安装运行（别只用连着公司代理的 WiFi 验收国内链路）
+
+#### ④-3 紧急切回
+
+把 `SUPABASE_URL` 改回：
+
+```xcconfig
+SUPABASE_URL = https:/$()/edwvrriuwzaaqznklrgi.supabase.co/
+```
+
+或只回滚 DNS 中国大陆记录（见 ②-4）。
+
+---
+
+### ⑤ 验收（K 浓缩版）
+
+
+| # | 场景 | 通过 |
+| --- | --- | --- |
+| 1 | 邮箱 / Apple 登录 | 成功，体感可接受 |
+| 2 | 冷启动城市列表 | 正常加载 |
+| 3 | 封面 / 音频 | 仍走 `media.yolohappy.com` |
+| 4 | 客服发图 / 收图 | 能显示（已同步的图） |
+| 5 | 客服 Realtime | 消息可达 |
+| 6 | Charles 等 | API Host 为 `gateway.yolohappy.com`（国内） |
+
+海外 WiFi：`gateway` 应解析到 Supabase，不应长期停在北京 IP。
+
+---
+
+### 推荐执行日历
+
+
+| 时间 | 动作 |
+| --- | --- |
+| 今天 | ① Secret + sync-private → ② 加中国大陆 A 记录 |
+| DNS 生效后 | ③ 公网 curl 清单全绿 |
+| 当晚或次日 | ④ 切 Secrets → ⑤ 真机验收 |
+| 稳定一周后 | 可选 I：gateway 前面加阿里云 CDN；拉长 TTL |
+
+### 出问题怎么查
+
+
+| 现象 | 查 |
+| --- | --- |
+| 国内仍解析到 supabase | 中国大陆 A 未加 / TTL 未刷新 / 本机 DNS 缓存 |
+| sign 仍 HTML / 404 | Nginx 是否把 `/api/v1/media/sign` 指到 `3102`；`systemctl status yolo-sign-api` |
+| 签名 200 但图裂 | 私有桶无对象 → 回 ① |
+| 登录异常 | Nginx 是否漏传 `apikey` / `Authorization`；证书是否过期 |
+| 旧站挂了 | 宝塔其它站点 conf；`nginx -t`；回滚最近改动 |
+
+---
+
 ## 操作总览（勾选）
 
 
