@@ -174,8 +174,13 @@
 
   <script src="/config.js"></script>
   <script src="/auth/auth-callback.js"></script>
+  <!-- Prefer self-hosted UMD for China (avoid jsDelivr). Place dist at /vendor/supabase.min.js -->
+  <script src="/vendor/supabase.min.js"></script>
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+    const createClient = window.supabase && window.supabase.createClient;
+    if (!createClient) {
+      throw new Error("Missing /vendor/supabase.min.js");
+    }
 
     const cfg = window.YOLO_WEB_CONFIG || {};
     const auth = window.YOLOAuthCallback;

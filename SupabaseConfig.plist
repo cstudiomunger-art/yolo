@@ -20,6 +20,8 @@
 	<string>$(MEDIA_CDN_BASE_URL)</string>
 	<key>ALI_CDN_BASE_URL</key>
 	<string>$(ALI_CDN_BASE_URL)</string>
+	<key>AUTH_WEB_BASE_URL</key>
+	<string>$(AUTH_WEB_BASE_URL)</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
