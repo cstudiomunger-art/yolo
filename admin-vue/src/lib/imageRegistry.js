@@ -13,6 +13,20 @@ const MD_IMAGE_RE = /!\[[^\]]*\]\(([^)]+)\)/g;
 
 const EXTRA_TEXT_IMAGE_FIELDS = new Set(["image_url", "avatar_url"]);
 
+/**
+ * Hub-managed tables absent from TABLES still hold Storage image refs
+ * (e.g. App user avatars in profiles).
+ */
+const EXTRA_TABLE_IMAGE_SCANS = [
+  {
+    tableKey: "profiles",
+    label: "用户资料",
+    pk: "id",
+    labelKeys: ["email", "display_name", "id"],
+    fields: [{ key: "avatar_url", label: "用户头像" }],
+  },
+];
+
 function recordLabel(row, schema) {
   const cols = schema.listColumns || [];
   for (const c of cols) {
@@ -139,6 +153,49 @@ async function collectTableRefs(tableKey, schema, refsMap, onProgress) {
   }
 }
 
+async function collectExtraTableRefs(scan, refsMap, onProgress) {
+  const pk = scan.pk || "id";
+  const fieldKeys = (scan.fields || []).map((f) => f.key);
+  if (!fieldKeys.length) return;
+
+  const selectCols = new Set([pk, ...fieldKeys, ...(scan.labelKeys || [])]);
+  onProgress?.(`扫描 ${scan.label || scan.tableKey}…`);
+
+  const { data, error } = await supabase
+    .from(scan.tableKey)
+    .select([...selectCols].join(","));
+  if (error) {
+    console.warn(`imageRegistry: skip ${scan.tableKey}`, error.message);
+    return;
+  }
+
+  for (const row of data || []) {
+    const rid = row[pk];
+    if (rid == null) continue;
+    let label = "";
+    for (const key of scan.labelKeys || []) {
+      if (row[key] != null && String(row[key]).trim()) {
+        label = String(row[key]).trim();
+        break;
+      }
+    }
+    if (!label) label = String(rid);
+
+    for (const f of scan.fields) {
+      const v = row[f.key];
+      if (!v) continue;
+      pushRef(refsMap, v, {
+        tableKey: scan.tableKey,
+        recordId: rid,
+        recordLabel: label,
+        fieldKey: f.key,
+        fieldLabel: f.label || f.key,
+        sourceType: "extra_table",
+      });
+    }
+  }
+}
+
 export async function collectDbImageRefs(onProgress) {
   const refsMap = new Map();
 
@@ -148,6 +205,14 @@ export async function collectDbImageRefs(onProgress) {
       await collectTableRefs(tableKey, schema, refsMap, onProgress);
     } catch (e) {
       console.warn(`imageRegistry: ${tableKey}`, e);
+    }
+  }
+
+  for (const scan of EXTRA_TABLE_IMAGE_SCANS) {
+    try {
+      await collectExtraTableRefs(scan, refsMap, onProgress);
+    } catch (e) {
+      console.warn(`imageRegistry: ${scan.tableKey}`, e);
     }
   }
 
