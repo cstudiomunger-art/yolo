@@ -219,44 +219,242 @@ curl -I "https://gateway.yolohappy.com/auth/v1/health"
 
 ## E. 购买并初始化 ECS
 
-**入口**：[ECS 控制台](https://ecs.console.aliyun.com/)
+本机将作为 **`gateway.yolohappy.com` 中国大陆（及暂不分流时全球）入口**：Nginx 反代 Supabase + 本机签名 API。  
+证书申请、站点 conf 细节在 **G**；本节只做到：机器能 SSH、安全组正确、装好 Nginx + Node 20、能出网访问 Supabase。
 
-### E.1 创建实例
+**入口（二选一）**：
+
+| 产品 | 入口 | 说明 |
+| --- | --- | --- |
+| **云服务器 ECS**（推荐，与安全组文档一致） | [ECS 控制台](https://ecs.console.aliyun.com/) | 下面按 ECS 写 |
+| **轻量应用服务器** | [轻量控制台](https://swas.console.aliyun.com/) | 同等 2核4G 亦可；防火墙在轻量面板里配端口，逻辑同 E.2 |
+
+**前置**：账号已实名；域名仍在阿里云；记事本准备写 **公网 IP**。
+
+---
+
+### E.0 先建专用安全组（建议在开实例前）
+
+1. ECS 控制台 → **网络与安全** → **安全组** → **创建安全组**
+2. 名称例如：`yolo-gateway-sg`
+3. 网络：**与即将使用的 VPC 相同**（新建实例时默认 VPC 即可）
+4. **入方向**规则（先按下面建；出方向一般默认放行全部即可）：
+
+| 优先级 | 协议 | 端口 | 授权对象 | 用途 |
+| --- | --- | --- | --- | --- |
+| 1 | TCP | **22** | **你当前公网 IP/32**（[查本机 IP](https://www.ip.cn/)） | SSH；勿对 `0.0.0.0/0` 长期开放 |
+| 1 | TCP | **443** | `0.0.0.0/0`（IPv6 不需要可不管） | HTTPS |
+| 1 | TCP | **80** | `0.0.0.0/0` | HTTP→HTTPS / ACME（可选） |
+
+**禁止**：
+
+- 不要放行 **3001**（签名服务只绑 `127.0.0.1`）
+- 不要放行 **5432 / 3306** 等数据库口
+- 不要对世界开放 22（办公 IP 变了再改安全组）
+
+办公 IP 经常变：可临时改成 `0.0.0.0/0` 调试 SSH，**连上后立刻改回你的 IP/32**。
+
+---
+
+### E.1 购买 / 创建实例
+
+ECS 控制台 → **实例** → **创建实例**（自定义购买）。
+
+#### E.1.1 必填项建议
 
 
-| 项     | 建议                                   |
-| ----- | ------------------------------------ |
-| 地域    | **华东2（上海）**                          |
-| 规格    | 2 核 4G（轻量应用服务器同等亦可）                  |
-| 镜像    | Alibaba Cloud Linux 3 或 Ubuntu 22.04 |
-| 系统盘   | ≥ 40GB                               |
-| 公网 IP | 需要（或后续挂 SLB；本指南用公网 IP）               |
-| 安全组   | 新建专用组（见下）                            |
+| 项 | 建议值 | 备注 |
+| --- | --- | --- |
+| 付费模式 | 按量 或 包年包月 | 先跑通可用按量 |
+| 地域 | **华东2（上海）** | 与 OSS `oss-cn-shanghai` 同区，延迟更短 |
+| 可用区 | 任意 | — |
+| 实例规格 | **2 vCPU / 4 GiB**（如 `ecs.u1-c1m2.large` 或同级） | 初期够用；流量大再升配 |
+| 镜像 | **Alibaba Cloud Linux 3** 或 **Ubuntu 22.04** | 下文命令分两种写 |
+| 系统盘 | ESSD / 高效云盘 **≥ 40GB** | — |
+| 公网 IP | **分配公网 IPv4** | 带宽建议先 **5 Mbps**（可再升）；或后挂 SLB（本指南用公网 IP） |
+| 安全组 | 选 **E.0** 建好的 `yolo-gateway-sg` | 勿漏绑 |
+| 登录凭证 | **密钥对**（推荐）或自定义密码 | 密钥更安全 |
+
+#### E.1.2 密钥对（推荐）
+
+1. 创建实例向导里选 **密钥对** → **创建密钥对**
+2. 下载 `.pem`，本机权限：
+
+```bash
+chmod 400 ~/Downloads/yolo-gateway.pem
+# 挪到固定位置，例如：
+mkdir -p ~/.ssh && mv ~/Downloads/yolo-gateway.pem ~/.ssh/yolo-gateway.pem
+chmod 400 ~/.ssh/yolo-gateway.pem
+```
+
+3. **私钥只留本机**，不要提交 Git、不要发聊天。
+
+#### E.1.3 创建完成后记下
 
 
+| 信息 | 写在哪里 |
+| --- | --- |
+| **公网 IP** | 记事本 / 密码管理器；后面 GeoDNS「中国大陆」A 记录、`ssh` 都要用 |
+| 实例 ID | 可选 |
+| 用户名 | Alibaba Cloud Linux / Ubuntu 常见为 **`root`**（若选了其它镜像可能是 `ubuntu`） |
+
+控制台实例列表应显示：**运行中**，安全组已关联，公网 IP 非空。
+
+---
+
+### E.2 核对安全组（开完机再看一眼）
+
+实例 → **安全组** → **配置规则** → **入方向**：
+
+- [ ] 有 443 /（可选）80  
+- [ ] 22 来源是你的 IP（或你已知的调试源）  
+- [ ] **没有** 3001  
+
+从本机试能否连（把 IP / 密钥换成你的）：
+
+```bash
+ssh -i ~/.ssh/yolo-gateway.pem root@ECS公网IP
+```
+
+若超时：
+
+1. 安全组 22 是否放行了**当前**出口 IP  
+2. 本机网络是否拦了 22  
+3. 实例是否「运行中」、公网 IP 是否看对
+
+能出现 shell 即 SSH 通。
+
+---
+
+### E.3 系统初始化（SSH 登录后）
+
+下列在 **ECS 上**执行。按镜像选一列；装完应用 `F`（签名）和 `G`（Nginx 站点）。
+
+#### E.3.1 更新与基础工具
 
 
-### E.2 安全组入站
+**Alibaba Cloud Linux 3：**
+
+```bash
+sudo dnf -y update
+sudo dnf -y install nginx curl git vim tar
+```
+
+**Ubuntu 22.04：**
+
+```bash
+sudo apt-get update
+sudo apt-get -y upgrade
+sudo apt-get -y install nginx curl git vim tar ca-certificates gnupg
+```
+
+#### E.3.2 安装 Node.js 20 LTS
 
 
-| 端口  | 来源                          | 用途                |
-| --- | --------------------------- | ----------------- |
-| 22  | **仅你的办公 IP**                | SSH               |
-| 443 | `0.0.0.0/0`（或仅阿里云 CDN 回源网段） | HTTPS             |
-| 80  | `0.0.0.0/0`                 | HTTP 跳转 HTTPS（可选） |
+**Alibaba Cloud Linux 3（NodeSource）：**
+
+```bash
+curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+sudo dnf -y install nodejs
+node -v   # 期望 v20.x
+npm -v
+```
+
+**Ubuntu 22.04：**
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+node -v   # 期望 v20.x
+npm -v
+```
+
+若 NodeSource 不可用，可从 [nodejs.org](https://nodejs.org/) 下官方 Linux x64 二进制，解压后把 `bin` 加入 `PATH`，保证 `which node` 指向 20.x。
+
+#### E.3.3 启动 Nginx（先默认页即可）
+
+```bash
+sudo systemctl enable --now nginx
+sudo systemctl status nginx --no-pager
+curl -sS -o /dev/null -w "%{http_code}\n" http://127.0.0.1/
+# 期望 200（欢迎页）
+```
+
+站点 HTTPS、反代 Supabase、`/api/v1/media/sign` → **放到 G 节**；本节只要 Nginx **已安装且能起来**。
+
+#### E.3.4 出网连通性（后面代理 / 签名都要）
+
+```bash
+curl -sS -o /dev/null -w "%{http_code}\n" \
+  "https://edwvrriuwzaaqznklrgi.supabase.co/auth/v1/health"
+# 期望 200，或需 key 时的 401 —— 只要不是连不上 / 超时
+```
+
+若超时：检查 ECS 是否有公网、安全组**出方向**是否被改成拒绝、公司镜像是否拦 HTTPS。
+
+#### E.3.5（可选）目录与时区
+
+```bash
+sudo timedatectl set-timezone Asia/Shanghai
+sudo mkdir -p /opt/yolo-sign-api /etc/nginx/certs
+sudo chown "$USER":"$USER" /opt/yolo-sign-api
+```
+
+证书文件放到 `/etc/nginx/certs/` 的步骤见 **G.1**。
+
+#### E.3.6 本机 SSH 配置别名（可选，本机执行）
+
+```bash
+cat >> ~/.ssh/config <<'EOF'
+Host yolo-gw
+  HostName ECS公网IP
+  User root
+  IdentityFile ~/.ssh/yolo-gateway.pem
+EOF
+chmod 600 ~/.ssh/config
+ssh yolo-gw
+```
+
+---
+
+### E.4 轻量应用服务器差异（若你买的是轻量）
+
+| ECS 概念 | 轻量对应 |
+| --- | --- |
+| 安全组 | 实例 → **防火墙**，放行 22 / 80 / 443；同样 **不要** 放 3001 |
+| 公网 IP | 实例概览里直接有 |
+| 系统初始化 | SSH 后同样装 Nginx + Node 20（E.3） |
+
+地域仍选 **上海** 或与 OSS 同区。
+
+---
+
+### E.5 故障排查
 
 
-**不要**对公网开放 3001（签名 API 只监听本机）。
+| 现象 | 处理 |
+| --- | --- |
+| SSH `Connection timed out` | 安全组 22 源 IP、实例状态、公网 IP |
+| SSH `Permission denied` | 密钥路径 / 用户名（root vs ubuntu）、`.pem` 权限是否 `400` |
+| `node -v` 找不到 | Node 未装入 PATH；重装 NodeSource 或检查符号链接 |
+| `nginx` 起不来 | `journalctl -u nginx -n 50`；端口 80 是否被占用 |
+| curl Supabase 失败 | 出网 / DNS；可试 `curl -I https://www.aliyun.com` 对比 |
+| 本机 `dig` 超时 | 与 ECS 无关：换 `@223.5.5.5` 或看系统 DNS；不影响 ECS 初始化 |
 
-### E.3 系统初始化
+---
 
-SSH 登录后安装：
+### E.6 完成标准
 
-- Nginx（或 Nginx + OpenResty）
-- Node.js **20** LTS
-- 可选：`certbot` 或直接用阿里云 SSL 证书文件
+- [ ] 华东 2（上海）实例 **运行中**，有固定 **公网 IPv4**（已抄下来）
+- [ ] 安全组 / 防火墙：22（收紧）、80（可选）、443 开放；**无 3001**
+- [ ] 本机能 `ssh` 登录
+- [ ] `node -v` ≥ 20、`npm -v` 正常
+- [ ] `systemctl is-active nginx` 为 `active`
+- [ ] ECS 上 `curl` Supabase health 非超时
+- [ ] 已建 `/opt/yolo-sign-api`（可选但建议）
 
-记下 **公网 IP**，后面 GeoDNS 中国大陆 A 记录要用。
+完成后继续 **F. 部署客服图签名 API**，再做 **G. Nginx + HTTPS**。  
+（`gateway` 的中国大陆解析先别急着改；等 G 冒烟通过后再动 GeoDNS。）
 
 ---
 
