@@ -381,9 +381,6 @@
     "Account created. Check your email and tap the confirmation link." : {
 
     },
-    "After confirming in the browser, tap I've confirmed — Sign in, or use Open YOLO App on that page." : {
-
-    },
     "Account deletion is not available in this build." : {
 
     },
@@ -430,6 +427,9 @@
 
     },
     "Advance reminders" : {
+
+    },
+    "After confirming in the browser, tap I've confirmed — Sign in, or use Open YOLO App on that page." : {
 
     },
     "Agree to terms and privacy policy" : {
@@ -812,6 +812,9 @@
     "Email" : {
 
     },
+    "Email not confirmed yet. Open the confirmation link in your email, then try again." : {
+
+    },
     "Email not confirmed. Check your sign-up confirmation email before signing in." : {
 
     },
@@ -974,10 +977,10 @@
     "I already have a China visa" : {
 
     },
-    "If you don't see the email, check your spam folder or try resending." : {
+    "I've confirmed — Sign in" : {
 
     },
-    "I've confirmed — Sign in" : {
+    "If you don't see the email, check your spam folder or try resending." : {
 
     },
     "Image" : {

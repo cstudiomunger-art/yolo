@@ -18,6 +18,8 @@ GitHub Secrets → OSS 私有桶 → 全量同步 → Supabase Custom Domain →
 > **媒体加速已通**：`media.yolohappy.com` → OSS `yolo-media-prod`。  
 > **App 暂不切**：`Secrets.xcconfig` 的 `SUPABASE_URL` 仍保持 `*.supabase.co`，直到本节第 6 步验收通过。
 
+
+
 ### 目标形态
 
 ```text
@@ -31,35 +33,46 @@ GitHub Secrets → OSS 私有桶 → 全量同步 → Supabase Custom Domain →
 封面/音频/头像 ──► media.yolohappy.com（CDN，与 gateway 无关）
 ```
 
+
+
 ### 进度假设与待办
 
 
-| 项 | 状态（请按实改勾） | 说明 |
-| --- | --- | --- |
-| 阶段 1 媒体 CDN | ✅ 已完成 | 不动 |
-| B 私有桶 `yolo-private-prod` | ✅ 多半已建 | 确认地域上海、权限私有 |
-| A `OSS_PRIVATE_BUCKET` Secret | ☐ | GitHub Actions → 补 Secret |
-| C 私有桶同步 | ☐ | 桶内应有 `chat-images/...`（现在常是空的） |
-| D Custom Domain | 🔄 进行中 | CNAME + TXT `_acme-challenge.gateway` → Verify → Active |
-| E 机器 | **改为「改造已有机」** | **不要**按「新购」走；见下方逐步 |
-| F 签名 API | ☐ | 与现有其它服务**并列**安装 |
-| G Nginx | ☐ | **合进现有 Nginx**，勿覆盖其它站点 |
-| H / I / J / K | ☐ | gateway 冒烟后再动 DNS / 切 App |
+| 项                             | 状态（请按实改勾）     | 说明                                                      |
+| ----------------------------- | ------------- | ------------------------------------------------------- |
+| 阶段 1 媒体 CDN                   | ✅ 已完成         | 不动                                                      |
+| B 私有桶 `yolo-private-prod`     | ✅ 多半已建        | 确认地域上海、权限私有                                             |
+| A `OSS_PRIVATE_BUCKET` Secret | ☐             | GitHub Actions → 补 Secret                               |
+| C 私有桶同步                       | ☐             | 桶内应有 `chat-images/...`（现在常是空的）                          |
+| D Custom Domain               | 🔄 进行中        | CNAME + TXT `_acme-challenge.gateway` → Verify → Active |
+| E 机器                          | **改为「改造已有机」** | **不要**按「新购」走；见下方逐步                                      |
+| F 签名 API                      | ☐             | 与现有其它服务**并列**安装                                         |
+| G Nginx                       | ☐             | **合进现有 Nginx**，勿覆盖其它站点                                  |
+| H / I / J / K                 | ☐             | gateway 冒烟后再动 DNS / 切 App                               |
+
+
+
 
 ### 逐步操作（按天）
 
+
+
 #### 第 0 步 — 冻结变更（5 分钟）
 
-1. **不要**改 App `SUPABASE_URL` 为 gateway。  
-2. **不要**删已有站点的 Nginx conf / 宝塔站点。  
+1. **不要**改 App `SUPABASE_URL` 为 gateway。
+2. **不要**删已有站点的 Nginx conf / 宝塔站点。
 3. DNS：保留正在做的 Custom Domain 相关记录；**暂不**把「中国大陆」`gateway` 指到这台机（等 G 冒烟）。
+
+
 
 #### 第 1 步 — 收尾 D（Custom Domain）
 
-1. 阿里云 TXT：`_acme-challenge.gateway` = 弹窗 Content（一字不差）。  
-2. 本机 DNS 若超时，改查：`dig +short TXT _acme-challenge.gateway.yolohappy.com @223.5.5.5`  
-3. Supabase → **Verify** → 等到状态 **Active**。  
+1. 阿里云 TXT：`_acme-challenge.gateway` = 弹窗 Content（一字不差）。
+2. 本机 DNS 若超时，改查：`dig +short TXT _acme-challenge.gateway.yolohappy.com @223.5.5.5`
+3. Supabase → **Verify** → 等到状态 **Active**。
 4. 保留 `gateway` **默认** CNAME → `edwvrriuwzaaqznklrgi.supabase.co`（海外直连用）。
+
+
 
 #### 第 2 步 — 摸清已有服务器（改造代替「购买」）
 
@@ -75,14 +88,16 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
   "https://edwvrriuwzaaqznklrgi.supabase.co/auth/v1/health"
 ```
 
-| 检查项 | 合格标准 | 不合格怎么办 |
-| --- | --- | --- |
-| 能 SSH、有公网 IP | 记下 IP | — |
-| 出网访问 Supabase | 非超时 | 放行出网 / DNS |
-| **443/80** | 已有 Nginx/Caddy/宝塔 | **不要重装抢端口**；只加一个 `server_name` |
-| **3001** | 未被占用 | 换 `PORT=3002` 并改 Nginx 反代（少见） |
-| Node | ≥ 20，或可再装 20 | 用 nvm / NodeSource，避免弄坏系统里旧 Node（见下） |
-| 内存/负载 | 余量大致够再跑一个小 Node | 过载则另开轻量机 |
+
+| 检查项           | 合格标准              | 不合格怎么办                               |
+| ------------- | ----------------- | ------------------------------------ |
+| 能 SSH、有公网 IP  | 记下 IP             | —                                    |
+| 出网访问 Supabase | 非超时               | 放行出网 / DNS                           |
+| **443/80**    | 已有 Nginx/Caddy/宝塔 | **不要重装抢端口**；只加一个 `server_name`       |
+| **3001**      | 未被占用              | 换 `PORT=3002` 并改 Nginx 反代（少见）        |
+| Node          | ≥ 20，或可再装 20      | 用 nvm / NodeSource，避免弄坏系统里旧 Node（见下） |
+| 内存/负载         | 余量大致够再跑一个小 Node   | 过载则另开轻量机                             |
+
 
 **Node 共存**：若机上已有旧 Node（如 16）被其它程序依赖，优先：
 
@@ -97,6 +112,8 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 
 > 细节命令仍可参考下文 **E / F**；凡写「创建实例 / 新装 Nginx」的句子，在本路径下**跳过**，只保留安装 Node（共存）、签名目录、**追加** Nginx server。
 
+
+
 #### 第 3 步 — F 签名 API（与其它程序并列）
 
 完全按 **F** 节：`/opt/yolo-sign-api` + `/etc/yolo-sign-api.env` + systemd。  
@@ -105,10 +122,10 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 
 #### 第 4 步 — G Nginx：只新增 gateway 站点
 
-1. 阿里云申请 / 下载 `gateway.yolohappy.com` 证书，放到现机（如 `/etc/nginx/certs/`），**勿覆盖**其它域名证书。  
-2. 将仓库 [`infra/gateway/nginx.conf.snippet`](../infra/gateway/nginx.conf.snippet) **另存为独立 conf**（例：`/etc/nginx/conf.d/yolo-gateway.conf` 或宝塔「添加站点」后改配置）。  
-3. `server_name` 仅为 `gateway.yolohappy.com`；保留原有站点的其它 `server { }`。  
-4. `nginx -t && systemctl reload nginx`（宝塔则用面板重载）。  
+1. 阿里云申请 / 下载 `gateway.yolohappy.com` 证书，放到现机（如 `/etc/nginx/certs/`），**勿覆盖**其它域名证书。
+2. 将仓库 `[infra/gateway/nginx.conf.snippet](../infra/gateway/nginx.conf.snippet)` **另存为独立 conf**（例：`/etc/nginx/conf.d/yolo-gateway.conf` 或宝塔「添加站点」后改配置）。
+3. `server_name` 仅为 `gateway.yolohappy.com`；保留原有站点的其它 `server { }`。
+4. `nginx -t && systemctl reload nginx`（宝塔则用面板重载）。
 5. **临时**本机 hosts 或 dig：把 `gateway` 指到该机公网 IP，测：
 
 ```bash
@@ -122,11 +139,13 @@ curl -sS --resolve gateway.yolohappy.com:443:服务器公网IP \
 
 #### 第 5 步 — 同步与 GeoDNS
 
-1. 完成 **A.2 + C**（`sync-private`，私有桶有图）。  
-2. **H**：  
-   - `gateway` **中国大陆** → 这台机（A 记录 IP，或先接 Gateway CDN 再回源该机）  
-   - `gateway` **默认** → Custom Domain（Supabase CNAME）  
+1. 完成 **A.2 + C**（`sync-private`，私有桶有图）。
+2. **H**：
+  - `gateway` **中国大陆** → 这台机（A 记录 IP，或先接 Gateway CDN 再回源该机）  
+  - `gateway` **默认** → Custom Domain（Supabase CNAME）
 3. **I** Gateway CDN 可选：减轻源站、缓存匿名 GET。
+
+
 
 #### 第 6 步 — 再切 App（J）与验收（K）
 
@@ -135,12 +154,14 @@ curl -sS --resolve gateway.yolohappy.com:443:服务器公网IP \
 
 ### 风险与回滚（共用机特有）
 
-| 风险 | 规避 |
-| --- | --- |
-| `reload nginx` 弄挂旧站 | 先 `nginx -t`；conf 独立文件；保留备份 |
-| 升级全局 Node 弄挂旧程序 | 用 nvm / 独立绝对路径跑签名服务 |
-| 磁盘写满 | 日志轮转；签名服务几乎无本地存文件 |
-| 验证期误指 DNS | 用 `--resolve` / hosts 测通后再改正式解析 |
+
+| 风险                  | 规避                              |
+| ------------------- | ------------------------------- |
+| `reload nginx` 弄挂旧站 | 先 `nginx -t`；conf 独立文件；保留备份     |
+| 升级全局 Node 弄挂旧程序     | 用 nvm / 独立绝对路径跑签名服务             |
+| 磁盘写满                | 日志轮转；签名服务几乎无本地存文件               |
+| 验证期误指 DNS           | 用 `--resolve` / hosts 测通后再改正式解析 |
+
 
 **紧急回滚 DNS**：删掉或改掉「中国大陆」`gateway` 记录，只留默认 → Supabase；App 未切则用户无感。
 
@@ -154,19 +175,25 @@ curl -sS --resolve gateway.yolohappy.com:443:服务器公网IP \
 
 ---
 
+
+
 ## 网关已通后的详细操作方案（实机 · 2026-07）
 
 > **适用**：宝塔共用机 + 签名 `3102` + SSL 已签发，且 `--resolve` 冒烟已通过。  
 > **实机参数（写死，改机再改文档）**：
 
-| 项 | 值 |
-| --- | --- |
-| 公网 IP | `101.201.125.178`（华北2 北京） |
-| 域名 | `gateway.yolohappy.com` |
-| 签名服务 | `127.0.0.1:3102`（systemd `yolo-sign-api`） |
+
+| 项      | 值                                          |
+| ------ | ------------------------------------------ |
+| 公网 IP  | `101.201.125.178`（华北2 北京）                  |
+| 域名     | `gateway.yolohappy.com`                    |
+| 签名服务   | `127.0.0.1:3102`（systemd `yolo-sign-api`）  |
 | 上游 API | `https://edwvrriuwzaaqznklrgi.supabase.co` |
-| 私有 OSS | `yolo-private-prod` / `oss-cn-shanghai` |
-| 媒体 CDN | `media.yolohappy.com`（已通，本方案不动） |
+| 私有 OSS | `yolo-private-prod` / `oss-cn-shanghai`    |
+| 媒体 CDN | `media.yolohappy.com`（已通，本方案不动）            |
+
+
+
 
 ### 已完成（勿重复）
 
@@ -175,19 +202,25 @@ curl -sS --resolve gateway.yolohappy.com:443:服务器公网IP \
 - [x] Nginx 反代 + `/api/v1/media/sign` → 3102
 - [x] 冒烟：`/auth/v1/health` → 401 missing apikey；`/api/v1/media/sign` → `missing_token`
 
+
+
 ### 尚未完成（严格按 ①→⑤）
 
-| 序 | 内容 | 约耗时 |
-| --- | --- | --- |
-| ① | GitHub Secret + 私有桶同步 | 15～40 分钟 |
-| ② | GeoDNS 分线路 | 10 分钟 + TTL 等待 |
-| ③ | 公网再验（不依赖 `--resolve`） | 5 分钟 |
-| ④ | 切本机 `Secrets.xcconfig` | 5 分钟 |
-| ⑤ | 国内 4G 实机验收 | 30 分钟 |
+
+| 序   | 内容                     | 约耗时            |
+| --- | ---------------------- | -------------- |
+| ①   | GitHub Secret + 私有桶同步  | 15～40 分钟       |
+| ②   | GeoDNS 分线路             | 10 分钟 + TTL 等待 |
+| ③   | 公网再验（不依赖 `--resolve`）  | 5 分钟           |
+| ④   | 切本机 `Secrets.xcconfig` | 5 分钟           |
+| ⑤   | 国内 4G 实机验收             | 30 分钟          |
+
 
 **I（Gateway CDN）可后置**；先不切 CDN 也能用。
 
 ---
+
+
 
 ### ① 私有桶同步（客服图镜像）
 
@@ -198,11 +231,15 @@ curl -sS --resolve gateway.yolohappy.com:443:服务器公网IP \
 1. 仓库 → **Settings** → **Secrets and variables** → **Actions**
 2. New / Update：
 
-| Name | Value |
-| --- | --- |
-| `OSS_PRIVATE_BUCKET` | `yolo-private-prod` |
 
-3. 确认已有：`SUPABASE_URL`（源站）、`SUPABASE_SERVICE_ROLE_KEY`、`OSS_ACCESS_KEY_ID`、`OSS_ACCESS_KEY_SECRET`、`OSS_REGION=oss-cn-shanghai`
+| Name                 | Value               |
+| -------------------- | ------------------- |
+| `SS_PRIVATE_BUCKETO` | `yolo-private-prod` |
+
+
+1. 确认已有：`SUPABASE_URL`（源站）、`SUPABASE_SERVICE_ROLE_KEY`、`OSS_ACCESS_KEY_ID`、`OSS_ACCESS_KEY_SECRET`、`OSS_REGION=oss-cn-shanghai`
+
+
 
 #### ①-2 跑同步（二选一）
 
@@ -221,6 +258,8 @@ export OSS_REGION=oss-cn-shanghai
 npm run sync:oss:private
 ```
 
+
+
 #### ①-3 验收
 
 阿里云 OSS 控制台 → `yolo-private-prod` → 应有前缀：
@@ -231,6 +270,8 @@ npm run sync:oss:private
 
 ---
 
+
+
 ### ② GeoDNS（核心：国内走 ECS，海外走 Supabase）
 
 **入口**：[云解析 DNS](https://dns.console.aliyun.com/) → `yolohappy.com`
@@ -239,17 +280,21 @@ npm run sync:oss:private
 
 现有记录（Custom Domain 用）应类似：
 
-| 主机记录 | 线路 | 类型 | 记录值 |
-| --- | --- | --- | --- |
+
+| 主机记录      | 线路     | 类型    | 记录值                                |
+| --------- | ------ | ----- | ---------------------------------- |
 | `gateway` | **默认** | CNAME | `edwvrriuwzaaqznklrgi.supabase.co` |
+
 
 **不要删**这条（海外 HTTPS + Custom Domain 靠它）。
 
 #### ②-2 新增「中国大陆」→ 本机
 
-| 主机记录 | 线路 | 类型 | 记录值 | TTL |
-| --- | --- | --- | --- | --- |
+
+| 主机记录      | 线路       | 类型    | 记录值               | TTL              |
+| --------- | -------- | ----- | ----------------- | ---------------- |
 | `gateway` | **中国大陆** | **A** | `101.201.125.178` | 10 分钟（先短，稳定后再加长） |
+
 
 同一主机、**不同线路**可以并存，不会和默认 CNAME 冲突。
 
@@ -277,27 +322,34 @@ curl -sS https://gateway.yolohappy.com/api/v1/media/sign
 # 同冒烟：401 missing apikey / missing_token
 ```
 
+
+
 #### ②-4 回滚（出问题立刻）
 
 删掉或暂停 **中国大陆** 那条 A 记录 → 全国回落到默认 CNAME（Supabase）。App 若尚未改 URL，用户完全无感。
 
 ---
 
+
+
 ### ③ 公网再验清单（改 DNS 后、切 App 前）
 
 
-| # | 命令或操作 | 通过标准 |
-| --- | --- | --- |
-| 1 | `systemctl is-active yolo-sign-api` | `active` |
-| 2 | `curl -sS http://127.0.0.1:3102/health` | `{"ok":true}` |
-| 3 | 国内 dig `@223.5.5.5` | IP = `101.201.125.178` |
-| 4 | `curl -Ik https://gateway.../auth/v1/health` | 401 + missing apikey |
-| 5 | `curl -sS https://gateway.../api/v1/media/sign` | `missing_token` |
-| 6 | 打开原先宝塔其它站点 | 仍正常 |
+| #   | 命令或操作                                           | 通过标准                   |
+| --- | ----------------------------------------------- | ---------------------- |
+| 1   | `systemctl is-active yolo-sign-api`             | `active`               |
+| 2   | `curl -sS http://127.0.0.1:3102/health`         | `{"ok":true}`          |
+| 3   | 国内 dig `@223.5.5.5`                             | IP = `101.201.125.178` |
+| 4   | `curl -Ik https://gateway.../auth/v1/health`    | 401 + missing apikey   |
+| 5   | `curl -sS https://gateway.../api/v1/media/sign` | `missing_token`        |
+| 6   | 打开原先宝塔其它站点                                      | 仍正常                    |
+
 
 可选（有真实会话图 + 用户 JWT 后）：带 Bearer 调 sign，再 `curl` 返回的 OSS URL，期望 200。
 
 ---
+
+
 
 ### ④ 切本机 App（`Secrets.xcconfig`）
 
@@ -323,6 +375,8 @@ SUPABASE_FALLBACK_URL = https:/$()/edwvrriuwzaaqznklrgi.supabase.co/
 2. 真机删除旧 App（可选）
 3. **国内 4G/5G** 安装运行（别只用连着公司代理的 WiFi 验收国内链路）
 
+
+
 #### ④-3 紧急切回
 
 把 `SUPABASE_URL` 改回：
@@ -335,115 +389,84 @@ SUPABASE_URL = https:/$()/edwvrriuwzaaqznklrgi.supabase.co/
 
 ---
 
+
+
 ### ⑤ 验收（K 浓缩版）
 
 
-| # | 场景 | 通过 |
-| --- | --- | --- |
-| 1 | 邮箱 / Apple 登录 | 成功，体感可接受 |
-| 2 | 冷启动城市列表 | 正常加载 |
-| 3 | 封面 / 音频 | 仍走 `media.yolohappy.com` |
-| 4 | 客服发图 / 收图 | 能显示（已同步的图） |
-| 5 | 客服 Realtime | 消息可达 |
-| 6 | Charles 等 | API Host 为 `gateway.yolohappy.com`（国内） |
+| #   | 场景            | 通过                                     |
+| --- | ------------- | -------------------------------------- |
+| 1   | 邮箱 / Apple 登录 | 成功，体感可接受                               |
+| 2   | 冷启动城市列表       | 正常加载                                   |
+| 3   | 封面 / 音频       | 仍走 `media.yolohappy.com`               |
+| 4   | 客服发图 / 收图     | 能显示（已同步的图）                             |
+| 5   | 客服 Realtime   | 消息可达                                   |
+| 6   | Charles 等     | API Host 为 `gateway.yolohappy.com`（国内） |
+
 
 海外 WiFi：`gateway` 应解析到 Supabase，不应长期停在北京 IP。
 
 ---
 
+
+
 ### 推荐执行日历
 
 
-| 时间 | 动作 |
-| --- | --- |
-| 今天 | ① Secret + sync-private → ② 加中国大陆 A 记录 |
-| DNS 生效后 | ③ 公网 curl 清单全绿 |
-| 当晚或次日 | ④ 切 Secrets → ⑤ 真机验收 |
-| 稳定一周后 | 可选 I：gateway 前面加阿里云 CDN；拉长 TTL |
+| 时间      | 动作                                     |
+| ------- | -------------------------------------- |
+| 今天      | ① Secret + sync-private → ② 加中国大陆 A 记录 |
+| DNS 生效后 | ③ 公网 curl 清单全绿                         |
+| 当晚或次日   | ④ 切 Secrets → ⑤ 真机验收                   |
+| 稳定一周后   | 可选 I：gateway 前面加阿里云 CDN；拉长 TTL         |
+
+
+
 
 ### 出问题怎么查
 
 
-| 现象 | 查 |
-| --- | --- |
-| 国内仍解析到 supabase | 中国大陆 A 未加 / TTL 未刷新 / 本机 DNS 缓存 |
+| 现象                | 查                                                                         |
+| ----------------- | ------------------------------------------------------------------------- |
+| 国内仍解析到 supabase   | 中国大陆 A 未加 / TTL 未刷新 / 本机 DNS 缓存                                           |
 | sign 仍 HTML / 404 | Nginx 是否把 `/api/v1/media/sign` 指到 `3102`；`systemctl status yolo-sign-api` |
-| 签名 200 但图裂 | 私有桶无对象 → 回 ① |
-| 登录异常 | Nginx 是否漏传 `apikey` / `Authorization`；证书是否过期 |
-| 旧站挂了 | 宝塔其它站点 conf；`nginx -t`；回滚最近改动 |
-| media -1003 找不到主机 | DNS 无 `media` 记录 → 见下方 **应急 M 节** |
+| 签名 200 但图裂        | 私有桶无对象 → 回 ①                                                              |
+| 登录异常              | Nginx 是否漏传 `apikey` / `Authorization`；证书是否过期                              |
+| 旧站挂了              | 宝塔其它站点 conf；`nginx -t`；回滚最近改动                                             |
+
 
 ---
 
-## 应急：`media.yolohappy.com` 解析失败（NSURL -1003）
 
-> **症状**：`未能找到使用指定主机名的服务器`，URL 为 `https://media.yolohappy.com/cover-images/...` / `avatars/...`。  
-> **原因**：云解析缺少 `media`，或只有「中国大陆」而当前网络走「默认」→ NXDOMAIN。  
-> **与 gateway / SUPABASE_URL 无关**；补 DNS 即可，不必回滚 App。
-
-### M.1 从 CDN 抄 CNAME
-
-1. 打开 [CDN 域名管理](https://cdn.console.aliyun.com/domain/list)
-2. 找到 **`media.yolohappy.com`**
-   - 没有此域名 → 按 [阶段1指南·第三节](china-cdn-phase1-操作指南.md) 重新添加（源站 `yolo-media-prod`）
-   - 已停止 → 先 **启用**
-3. 进入域名 → 复制 **CNAME**（如 `media.yolohappy.com.w.kunlunaq.com`）
-
-### M.2 云解析补 `media`（默认 + 国内都要有）
-
-[云解析](https://dns.console.aliyun.com/) → `yolohappy.com` → 搜索主机 **`media`**
-
-| 主机记录 | 解析线路 | 类型 | 记录值 | TTL |
-| --- | --- | --- | --- | --- |
-| `media` | **默认** | CNAME | M.1 的 CDN CNAME | 10 分钟 |
-| `media` | **中国大陆** 或 **中国地区** | CNAME | **同一** CDN CNAME | 10 分钟 |
-
-注意：App 全量配置了 `MEDIA_CDN_BASE_URL`，**默认线路不能空**；不要填 ECS IP / gateway。
-
-### M.3 本机验收
-
-```bash
-dig +short media.yolohappy.com @223.5.5.5
-curl -I --connect-timeout 10 \
-  "https://media.yolohappy.com/cover-images/cities/chongqing.png"
-```
-
-期望：`dig` 非空；`curl` 能连上（**200** 最好；**404** 也说明解析已通）。
-
-### M.4 真机
-
-开关飞行模式清 DNS → 杀掉 App 重开 → 封面/头像不应再 -1003。
-
-### M.5 完成标准
-
-- [ ] CDN 域名运行中且 CNAME 已抄对  
-- [ ] `media` 默认 + 中国大陆/地区均有记录  
-- [ ] `dig` / `curl` 通过；真机无 -1003  
-
----
 
 ## 操作总览（勾选）
 
 
-| #   | 步骤 | 完成 |
-| --- | --- | --- |
-| A   | GitHub Secrets 补齐（含 `OSS_PRIVATE_BUCKET`） | ☐ |
-| B   | OSS 私有桶 `yolo-private-prod` | ☐ |
-| C   | 全量同步 avatars + chat-images | ☐ |
-| D   | Supabase Custom Domain `gateway.yolohappy.com` | ☐ |
-| E   | **改造已有服务器**（安全组 / Node20 共存 / 摸底）；非必须新购 | ☐ |
-| F   | 部署客服图签名 API（Node，并列） | ☐ |
-| G   | **追加** Nginx server + HTTPS（不覆盖旧站） | ☐ |
-| H   | GeoDNS 分线路 | ☐ |
-| I   | Gateway CDN 缓存（推荐） | ☐ |
-| J   | 本机 `Secrets.xcconfig` 切换 gateway | ☐ |
-| K   | 国内/海外实机验收 | ☐ |
-| L   | 隐私政策与运营文档确认 | ☐ |
+| #   | 步骤                                             | 完成  |
+| --- | ---------------------------------------------- | --- |
+| A   | GitHub Secrets 补齐（含 `OSS_PRIVATE_BUCKET`）      | ☐   |
+| B   | OSS 私有桶 `yolo-private-prod`                    | ☐   |
+| C   | 全量同步 avatars + chat-images                     | ☐   |
+| D   | Supabase Custom Domain `gateway.yolohappy.com` | ☐   |
+| E   | **改造已有服务器**（安全组 / Node20 共存 / 摸底）；非必须新购        | ☐   |
+| F   | 部署客服图签名 API（Node，并列）                           | ☐   |
+| G   | **追加** Nginx server + HTTPS（不覆盖旧站）             | ☐   |
+| H   | GeoDNS 分线路                                     | ☐   |
+| I   | Gateway CDN 缓存（推荐）                             | ☐   |
+| J   | 本机 `Secrets.xcconfig` 切换 gateway               | ☐   |
+| K   | 国内/海外实机验收                                      | ☐   |
+| L   | 隐私政策与运营文档确认                                    | ☐   |
 
 
 ---
 
 
+
+**入口**：[完整步骤 docs/china-auth-web-ops.md](china-auth-web-ops.md)
+
+域名：`auth.yolohappy.com`（宝塔静态站）→ `config.js` 里 `supabaseUrl` 用 gateway；App 设 `AUTH_WEB_BASE_URL`。
+
+---
 
 ## A. GitHub Secrets
 
@@ -631,19 +654,23 @@ curl -I "https://gateway.yolohappy.com/auth/v1/health"
 
 > **若复用已有服务器（当前推荐）**：不要走 E.1 购买；先按文首 **「当前实施方案」第 2 步** 摸底，再只做安全组核对 + Node 20 共存 +（已有则跳过）Nginx。下文按「新机」写全，便于对照。
 
-本机将作为 **`gateway.yolohappy.com` 中国大陆（及暂不分流时全球）入口**：Nginx 反代 Supabase + 本机签名 API。  
+本机将作为 `gateway.yolohappy.com` **中国大陆（及暂不分流时全球）入口**：Nginx 反代 Supabase + 本机签名 API。  
 证书申请、站点 conf 细节在 **G**；本节只做到：机器能 SSH、安全组正确、装好 Nginx + Node 20、能出网访问 Supabase。
 
 **入口（二选一）**：
 
-| 产品 | 入口 | 说明 |
-| --- | --- | --- |
-| **云服务器 ECS**（推荐，与安全组文档一致） | [ECS 控制台](https://ecs.console.aliyun.com/) | 下面按 ECS 写 |
-| **轻量应用服务器** | [轻量控制台](https://swas.console.aliyun.com/) | 同等 2核4G 亦可；防火墙在轻量面板里配端口，逻辑同 E.2 |
+
+| 产品                        | 入口                                         | 说明                              |
+| ------------------------- | ------------------------------------------ | ------------------------------- |
+| **云服务器 ECS**（推荐，与安全组文档一致） | [ECS 控制台](https://ecs.console.aliyun.com/) | 下面按 ECS 写                       |
+| **轻量应用服务器**               | [轻量控制台](https://swas.console.aliyun.com/)  | 同等 2核4G 亦可；防火墙在轻量面板里配端口，逻辑同 E.2 |
+
 
 **前置**：账号已实名；域名仍在阿里云；记事本准备写 **公网 IP**。
 
 ---
+
+
 
 ### E.0 先建专用安全组（建议在开实例前）
 
@@ -652,11 +679,13 @@ curl -I "https://gateway.yolohappy.com/auth/v1/health"
 3. 网络：**与即将使用的 VPC 相同**（新建实例时默认 VPC 即可）
 4. **入方向**规则（先按下面建；出方向一般默认放行全部即可）：
 
-| 优先级 | 协议 | 端口 | 授权对象 | 用途 |
-| --- | --- | --- | --- | --- |
-| 1 | TCP | **22** | **你当前公网 IP/32**（[查本机 IP](https://www.ip.cn/)） | SSH；勿对 `0.0.0.0/0` 长期开放 |
-| 1 | TCP | **443** | `0.0.0.0/0`（IPv6 不需要可不管） | HTTPS |
-| 1 | TCP | **80** | `0.0.0.0/0` | HTTP→HTTPS / ACME（可选） |
+
+| 优先级 | 协议  | 端口      | 授权对象                                          | 用途                      |
+| --- | --- | ------- | --------------------------------------------- | ----------------------- |
+| 1   | TCP | **22**  | **你当前公网 IP/32**（[查本机 IP](https://www.ip.cn/)） | SSH；勿对 `0.0.0.0/0` 长期开放 |
+| 1   | TCP | **443** | `0.0.0.0/0`（IPv6 不需要可不管）                      | HTTPS                   |
+| 1   | TCP | **80**  | `0.0.0.0/0`                                   | HTTP→HTTPS / ACME（可选）   |
+
 
 **禁止**：
 
@@ -668,6 +697,8 @@ curl -I "https://gateway.yolohappy.com/auth/v1/health"
 
 ---
 
+
+
 ### E.1 购买 / 创建实例
 
 ECS 控制台 → **实例** → **创建实例**（自定义购买）。
@@ -675,17 +706,20 @@ ECS 控制台 → **实例** → **创建实例**（自定义购买）。
 #### E.1.1 必填项建议
 
 
-| 项 | 建议值 | 备注 |
-| --- | --- | --- |
-| 付费模式 | 按量 或 包年包月 | 先跑通可用按量 |
-| 地域 | **华东2（上海）** | 与 OSS `oss-cn-shanghai` 同区，延迟更短 |
-| 可用区 | 任意 | — |
-| 实例规格 | **2 vCPU / 4 GiB**（如 `ecs.u1-c1m2.large` 或同级） | 初期够用；流量大再升配 |
-| 镜像 | **Alibaba Cloud Linux 3** 或 **Ubuntu 22.04** | 下文命令分两种写 |
-| 系统盘 | ESSD / 高效云盘 **≥ 40GB** | — |
-| 公网 IP | **分配公网 IPv4** | 带宽建议先 **5 Mbps**（可再升）；或后挂 SLB（本指南用公网 IP） |
-| 安全组 | 选 **E.0** 建好的 `yolo-gateway-sg` | 勿漏绑 |
-| 登录凭证 | **密钥对**（推荐）或自定义密码 | 密钥更安全 |
+| 项     | 建议值                                           | 备注                                       |
+| ----- | --------------------------------------------- | ---------------------------------------- |
+| 付费模式  | 按量 或 包年包月                                     | 先跑通可用按量                                  |
+| 地域    | **华东2（上海）**                                   | 与 OSS `oss-cn-shanghai` 同区，延迟更短          |
+| 可用区   | 任意                                            | —                                        |
+| 实例规格  | **2 vCPU / 4 GiB**（如 `ecs.u1-c1m2.large` 或同级） | 初期够用；流量大再升配                              |
+| 镜像    | **Alibaba Cloud Linux 3** 或 **Ubuntu 22.04**  | 下文命令分两种写                                 |
+| 系统盘   | ESSD / 高效云盘 **≥ 40GB**                        | —                                        |
+| 公网 IP | **分配公网 IPv4**                                 | 带宽建议先 **5 Mbps**（可再升）；或后挂 SLB（本指南用公网 IP） |
+| 安全组   | 选 **E.0** 建好的 `yolo-gateway-sg`               | 勿漏绑                                      |
+| 登录凭证  | **密钥对**（推荐）或自定义密码                             | 密钥更安全                                    |
+
+
+
 
 #### E.1.2 密钥对（推荐）
 
@@ -699,20 +733,25 @@ mkdir -p ~/.ssh && mv ~/Downloads/yolo-gateway.pem ~/.ssh/yolo-gateway.pem
 chmod 400 ~/.ssh/yolo-gateway.pem
 ```
 
-3. **私钥只留本机**，不要提交 Git、不要发聊天。
+1. **私钥只留本机**，不要提交 Git、不要发聊天。
+
+
 
 #### E.1.3 创建完成后记下
 
 
-| 信息 | 写在哪里 |
-| --- | --- |
-| **公网 IP** | 记事本 / 密码管理器；后面 GeoDNS「中国大陆」A 记录、`ssh` 都要用 |
-| 实例 ID | 可选 |
-| 用户名 | Alibaba Cloud Linux / Ubuntu 常见为 **`root`**（若选了其它镜像可能是 `ubuntu`） |
+| 信息        | 写在哪里                                                         |
+| --------- | ------------------------------------------------------------ |
+| **公网 IP** | 记事本 / 密码管理器；后面 GeoDNS「中国大陆」A 记录、`ssh` 都要用                    |
+| 实例 ID     | 可选                                                           |
+| 用户名       | Alibaba Cloud Linux / Ubuntu 常见为 `root`（若选了其它镜像可能是 `ubuntu`） |
+
 
 控制台实例列表应显示：**运行中**，安全组已关联，公网 IP 非空。
 
 ---
+
+
 
 ### E.2 核对安全组（开完机再看一眼）
 
@@ -730,20 +769,21 @@ ssh -i ~/.ssh/yolo-gateway.pem root@ECS公网IP
 
 若超时：
 
-1. 安全组 22 是否放行了**当前**出口 IP  
-2. 本机网络是否拦了 22  
+1. 安全组 22 是否放行了**当前**出口 IP
+2. 本机网络是否拦了 22
 3. 实例是否「运行中」、公网 IP 是否看对
 
 能出现 shell 即 SSH 通。
 
 ---
 
+
+
 ### E.3 系统初始化（SSH 登录后）
 
 下列在 **ECS 上**执行。按镜像选一列；装完应用 `F`（签名）和 `G`（Nginx 站点）。
 
 #### E.3.1 更新与基础工具
-
 
 **Alibaba Cloud Linux 3：**
 
@@ -760,8 +800,9 @@ sudo apt-get -y upgrade
 sudo apt-get -y install nginx curl git vim tar ca-certificates gnupg
 ```
 
-#### E.3.2 安装 Node.js 20 LTS
 
+
+#### E.3.2 安装 Node.js 20 LTS
 
 **Alibaba Cloud Linux 3（NodeSource）：**
 
@@ -829,31 +870,40 @@ ssh yolo-gw
 
 ---
 
+
+
 ### E.4 轻量应用服务器差异（若你买的是轻量）
 
-| ECS 概念 | 轻量对应 |
-| --- | --- |
-| 安全组 | 实例 → **防火墙**，放行 22 / 80 / 443；同样 **不要** 放 3001 |
-| 公网 IP | 实例概览里直接有 |
-| 系统初始化 | SSH 后同样装 Nginx + Node 20（E.3） |
+
+| ECS 概念 | 轻量对应                                           |
+| ------ | ---------------------------------------------- |
+| 安全组    | 实例 → **防火墙**，放行 22 / 80 / 443；同样 **不要** 放 3001 |
+| 公网 IP  | 实例概览里直接有                                       |
+| 系统初始化  | SSH 后同样装 Nginx + Node 20（E.3）                  |
+
 
 地域仍选 **上海** 或与 OSS 同区。
 
 ---
 
+
+
 ### E.5 故障排查
 
 
-| 现象 | 处理 |
-| --- | --- |
-| SSH `Connection timed out` | 安全组 22 源 IP、实例状态、公网 IP |
-| SSH `Permission denied` | 密钥路径 / 用户名（root vs ubuntu）、`.pem` 权限是否 `400` |
-| `node -v` 找不到 | Node 未装入 PATH；重装 NodeSource 或检查符号链接 |
-| `nginx` 起不来 | `journalctl -u nginx -n 50`；端口 80 是否被占用 |
-| curl Supabase 失败 | 出网 / DNS；可试 `curl -I https://www.aliyun.com` 对比 |
-| 本机 `dig` 超时 | 与 ECS 无关：换 `@223.5.5.5` 或看系统 DNS；不影响 ECS 初始化 |
+| 现象                         | 处理                                              |
+| -------------------------- | ----------------------------------------------- |
+| SSH `Connection timed out` | 安全组 22 源 IP、实例状态、公网 IP                          |
+| SSH `Permission denied`    | 密钥路径 / 用户名（root vs ubuntu）、`.pem` 权限是否 `400`    |
+| `node -v` 找不到              | Node 未装入 PATH；重装 NodeSource 或检查符号链接             |
+| `nginx` 起不来                | `journalctl -u nginx -n 50`；端口 80 是否被占用         |
+| curl Supabase 失败           | 出网 / DNS；可试 `curl -I https://www.aliyun.com` 对比 |
+| 本机 `dig` 超时                | 与 ECS 无关：换 `@223.5.5.5` 或看系统 DNS；不影响 ECS 初始化    |
+
 
 ---
+
+
 
 ### E.6 完成标准
 
@@ -874,22 +924,26 @@ ssh yolo-gw
 
 ## F. 部署客服图签名 API
 
-仓库模板目录：[`scripts/gateway-sign-api/`](../scripts/gateway-sign-api/)  
+仓库模板目录：`[scripts/gateway-sign-api/](../scripts/gateway-sign-api/)`  
 （`package.json`、`package-lock.json`、`server.mjs`）
 
 **作用**：App（经 Nginx）请求 `GET /api/v1/media/sign?path={convId}/{file}.jpg`，本服务用用户 JWT 调 Supabase RPC `can_access_conversation` 验权后，返回私有桶 `chat-images/...` 的 **OSS 预签名 URL**（约 1 小时有效）。
 
 **前置（必须先完成）**：
 
-| 项 | 说明 |
-| --- | --- |
-| E 节 | ECS 已 SSH、已装 **Node.js 20**、安全组 **未开放 3001** |
+
+| 项     | 说明                                                                   |
+| ----- | -------------------------------------------------------------------- |
+| E 节   | ECS 已 SSH、已装 **Node.js 20**、安全组 **未开放 3001**                         |
 | B + C | 私有桶 `yolo-private-prod` 里已有 `chat-images/{convId}/...`（否则合法签名仍会 404） |
-| 密钥 | 手头有：`SUPABASE_ANON_KEY`、与同步脚本同款的 `OSS_ACCESS_KEY_*` |
+| 密钥    | 手头有：`SUPABASE_ANON_KEY`、与同步脚本同款的 `OSS_ACCESS_KEY_*`                  |
+
 
 **本机不要做**：不要把 `.env` / `EnvironmentFile` 提交进 Git；不要对公网监听 3001。
 
 ---
+
+
 
 ### F.0 确认 ECS 上 Node 版本
 
@@ -913,6 +967,8 @@ sudo apt-get install -y nodejs
 ```
 
 ---
+
+
 
 ### F.1 把模板拷到 ECS
 
@@ -947,6 +1003,8 @@ ls -la /opt/yolo-sign-api
 
 ---
 
+
+
 ### F.2 编写环境变量文件（勿入库）
 
 ```bash
@@ -966,14 +1024,16 @@ sudo chmod 600 /etc/yolo-sign-api.env
 sudo chown root:root /etc/yolo-sign-api.env
 ```
 
-| 变量 | 必填 | 说明 |
-| --- | --- | --- |
-| `PORT` | 是 | 固定 `3001`；仅监听 `127.0.0.1` |
-| `SUPABASE_URL` | 是 | **必须是** `*.supabase.co` 源站；**禁止**填 `gateway.yolohappy.com`（会形成环） |
-| `SUPABASE_ANON_KEY` | 强烈建议 | 与 App 同款 anon；用户 JWT 才能让 `auth.uid()` / RPC 生效 |
-| `OSS_*` | 是 | 当前模板只用 AK/SK，**不**读 ECS RAM 角色 |
-| `OSS_PRIVATE_BUCKET` | 是 | 与 GitHub Secret / B 节一致 |
-| `SIGN_EXPIRES_SEC` | 否 | 默认 3600 |
+
+| 变量                   | 必填   | 说明                                                               |
+| -------------------- | ---- | ---------------------------------------------------------------- |
+| `PORT`               | 是    | 固定 `3001`；仅监听 `127.0.0.1`                                        |
+| `SUPABASE_URL`       | 是    | **必须是** `*.supabase.co` 源站；**禁止**填 `gateway.yolohappy.com`（会形成环） |
+| `SUPABASE_ANON_KEY`  | 强烈建议 | 与 App 同款 anon；用户 JWT 才能让 `auth.uid()` / RPC 生效                   |
+| `OSS_*`              | 是    | 当前模板只用 AK/SK，**不**读 ECS RAM 角色                                   |
+| `OSS_PRIVATE_BUCKET` | 是    | 与 GitHub Secret / B 节一致                                          |
+| `SIGN_EXPIRES_SEC`   | 否    | 默认 3600                                                          |
+
 
 可选兜底：未设 `SUPABASE_ANON_KEY` 时可用 `SUPABASE_SERVICE_ROLE_KEY`，但 RPC 鉴权语义变弱，**生产请用 anon + 用户 Bearer**。
 
@@ -986,6 +1046,8 @@ sudo grep -E '^(PORT|SUPABASE_URL|OSS_REGION|OSS_PRIVATE_BUCKET|SIGN_)' /etc/yol
 
 ---
 
+
+
 ### F.3 安装依赖
 
 ```bash
@@ -997,6 +1059,8 @@ npm ci
 期望出现 `node_modules/`，且无报错。
 
 ---
+
+
 
 ### F.4 用 systemd 守护（推荐）
 
@@ -1043,6 +1107,8 @@ sudo systemctl restart yolo-sign-api         # 改完 .env 后必重启
 sudo systemctl stop yolo-sign-api
 ```
 
+
+
 #### 备选：pm2（不推荐与 systemd 混用）
 
 ```bash
@@ -1056,7 +1122,11 @@ pm2 startup   # 按提示执行生成的命令
 
 ---
 
+
+
 ### F.5 本机冒烟（Nginx 配好之前先在 ECS 上测）
+
+
 
 #### F.5.1 健康检查
 
@@ -1069,6 +1139,8 @@ curl -sS http://127.0.0.1:3001/health
 ```json
 {"ok":true}
 ```
+
+
 
 #### F.5.2 无 Token → 401
 
@@ -1094,13 +1166,9 @@ curl -sS -H "Authorization: Bearer $TOKEN" \
 
 1. App 或 Supabase Dashboard 登录某测试用户，复制 **access_token**（JWT）。
 2. 在库里找该用户能访问的会话图 path（存储相对路径，**不含** `chat-images/` 前缀），形如：
-
-   `{conversation_uuid}/{uuid}.jpg`
-
+  `{conversation_uuid}/{uuid}.jpg`
 3. 确认 OSS 私有桶存在对象：
-
-   `chat-images/{conversation_uuid}/{uuid}.jpg`
-
+  `chat-images/{conversation_uuid}/{uuid}.jpg`
 4. 在 ECS 上：
 
 ```bash
@@ -1111,12 +1179,14 @@ curl -sS -H "Authorization: Bearer $TOKEN" \
   "http://127.0.0.1:3001/api/v1/media/sign?path=${PATH_IMG}"
 ```
 
-| 结果 | 含义 |
-| --- | --- |
-| **200** + `url` + `expiresAt` | 成功；`url` 应为 `*.aliyuncs.com` 的 OSS 预签名 GET |
-| **403** `forbidden` | JWT 有效但对该 `conv` 无 `can_access_conversation` |
-| **500** `server_misconfigured` | 缺 `SUPABASE_URL` / key |
-| **500** 含 OSS / missing credentials | `.env` 里 AK 未加载或写错 → `restart` 后再看 |
+
+| 结果                                  | 含义                                           |
+| ----------------------------------- | -------------------------------------------- |
+| **200** + `url` + `expiresAt`       | 成功；`url` 应为 `*.aliyuncs.com` 的 OSS 预签名 GET   |
+| **403** `forbidden`                 | JWT 有效但对该 `conv` 无 `can_access_conversation` |
+| **500** `server_misconfigured`      | 缺 `SUPABASE_URL` / key                       |
+| **500** 含 OSS / missing credentials | `.env` 里 AK 未加载或写错 → `restart` 后再看           |
+
 
 用返回的 `url` 再测（可在 ECS 上）：
 
@@ -1129,6 +1199,8 @@ curl -sS -o /dev/null -w "%{http_code}\n" "$SIGNED_URL"
 **说明**：外网经 `https://gateway.../api/v1/media/sign` 的测试放到 **G.5**（需先完成 Nginx）。在 F 阶段只要求 **本机 127.0.0.1:3001** 通过即可。
 
 ---
+
+
 
 ### F.6 安全自检
 
@@ -1143,20 +1215,25 @@ curl -m 3 "http://ECS公网IP:3001/health" || echo "拒绝或超时 = 正确"
 
 ---
 
+
+
 ### F.7 故障排查速查
 
 
-| 现象 | 排查 |
-| --- | --- |
-| `systemctl` 起不来 / exit | `journalctl -u yolo-sign-api -n 50`；常见：`EnvironmentFile` 路径错、Node 路径错、语法环境变量有空格 |
-| health 不通 | `systemctl status`；`ss -lntp \| grep 3001` |
-| 500 `missing OSS credentials` | `.env` 未设 AK/SK，或改完未 `restart` |
-| 401 但有 Bearer | Header 写成了 `Authorization: <token>`（缺 `Bearer `） |
-| 403 | path 的 convId 对，但该用户不是会话成员；或误用了 service role 导致 RPC 行为异常 |
-| 200 但拉图 404 | OSS 无私有对象 → 跑 C 节 `sync-private`；或 path 前多/少了 `chat-images/` |
-| 验权请求很慢/失败 | `SUPABASE_URL` 是否被误写成 gateway；ECS 出网是否可访问 `*.supabase.co` |
+| 现象                            | 排查                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| `systemctl` 起不来 / exit        | `journalctl -u yolo-sign-api -n 50`；常见：`EnvironmentFile` 路径错、Node 路径错、语法环境变量有空格 |
+| health 不通                     | `systemctl status`；`ss -lntp | grep 3001`                                       |
+| 500 `missing OSS credentials` | `.env` 未设 AK/SK，或改完未 `restart`                                                  |
+| 401 但有 Bearer                 | Header 写成了 `Authorization: <token>`（缺 `Bearer` ）                                |
+| 403                           | path 的 convId 对，但该用户不是会话成员；或误用了 service role 导致 RPC 行为异常                        |
+| 200 但拉图 404                   | OSS 无私有对象 → 跑 C 节 `sync-private`；或 path 前多/少了 `chat-images/`                    |
+| 验权请求很慢/失败                     | `SUPABASE_URL` 是否被误写成 gateway；ECS 出网是否可访问 `*.supabase.co`                       |
+
 
 ---
+
+
 
 ### F.8 完成标准
 
