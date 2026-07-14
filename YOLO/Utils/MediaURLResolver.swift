@@ -38,6 +38,10 @@ enum MediaURLResolver {
         resolved(from: raw, bucket: "cover-images")
     }
 
+    nonisolated static func resolvedAvatarURLs(from raw: String) -> CDNRouter.ResolvedMediaURLs? {
+        resolved(from: raw, bucket: "avatars")
+    }
+
     nonisolated private static func resolved(from raw: String, bucket: String) -> CDNRouter.ResolvedMediaURLs? {
         CDNRouter.publicMediaURLs(from: raw, bucket: bucket)
     }

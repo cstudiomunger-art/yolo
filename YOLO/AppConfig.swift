@@ -22,7 +22,7 @@ enum AppConfig {
         return url
     }
 
-    /// Direct Supabase origin for CDN/media fallback (and gateway outage recovery). Nil when unset.
+    /// Direct Supabase origin for CDN/media fallback and sticky gateway outage recovery.
     nonisolated static var supabaseFallbackURL: URL? {
         guard let raw = plistString(forKey: "SUPABASE_FALLBACK_URL")?
             .trimmingCharacters(in: .whitespacesAndNewlines),
@@ -30,12 +30,23 @@ enum AppConfig {
               !raw.hasPrefix("你的"),
               let url = URL(string: raw)
         else { return nil }
+        // Ignore if identical to primary (local staging before gateway cutover).
+        if url.host?.lowercased() == supabaseURL.host?.lowercased() { return nil }
         return url
     }
 
-    /// Gateway media sign API base (same host as SUPABASE_URL when pointing at gateway).
+    nonisolated static var isGatewayConfigured: Bool {
+        guard let host = supabaseURL.host?.lowercased() else { return false }
+        if host == "gateway.yolohappy.com" || host.hasPrefix("staging.gateway.") {
+            return true
+        }
+        return host.hasSuffix(".yolohappy.com") && host.contains("gateway")
+    }
+
+    /// OSS sign endpoint only exists on gateway Nginx — never probe on raw Supabase hosts.
     nonisolated static var mediaSignAPIURL: URL? {
-        supabaseURL.appendingPathComponent("api/v1/media/sign")
+        guard isGatewayConfigured else { return nil }
+        return supabaseURL.appendingPathComponent("api/v1/media/sign")
     }
 
     /// Public media CDN base (e.g. https://media.yolohappy.com). Falls back to MEDIA_CDN_BASE_URL then ALI_CDN_BASE_URL.

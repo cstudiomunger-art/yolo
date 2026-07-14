@@ -197,14 +197,23 @@ actor ImageCacheService {
 enum AvatarImageCache {
     private static let memory = NSCache<NSString, UIImage>()
 
-    /// Synchronous lookup — used to seed a view's initial state and avoid a flash of initials.
+    /// Memory lookup by raw URL and by canonical storage key (CDN vs Supabase URLs share one entry).
     static func cached(_ urlString: String) -> UIImage? {
-        memory.object(forKey: urlString as NSString)
+        if let hit = memory.object(forKey: urlString as NSString) { return hit }
+        let canonical = CDNRouter.cacheKey(for: urlString, defaultBucket: "avatars")
+        if canonical != urlString, let hit = memory.object(forKey: canonical as NSString) {
+            return hit
+        }
+        return nil
     }
 
     /// Seed memory immediately after a local upload so all screens show the new image without flicker.
     static func seed(_ urlString: String, image: UIImage) {
         memory.setObject(image, forKey: urlString as NSString)
+        let canonical = CDNRouter.cacheKey(for: urlString, defaultBucket: "avatars")
+        if canonical != urlString {
+            memory.setObject(image, forKey: canonical as NSString)
+        }
     }
 
     /// Returns the avatar from memory, then disk, then network — caching it in memory for reuse.
@@ -213,7 +222,7 @@ enum AvatarImageCache {
         guard let image = await ImageCacheService.shared.image(remoteURLString: urlString, defaultBucket: "avatars") else {
             return nil
         }
-        memory.setObject(image, forKey: urlString as NSString)
+        seed(urlString, image: image)
         return image
     }
 }

@@ -202,7 +202,9 @@ struct EditProfileView: View {
             appEnv.preferences.avatarUrl = publicURL
             appEnv.preferences.avatarStatus = "approved"
             appEnv.profileSync.schedulePush()
-            await AvatarImageCache.seed(publicURL, image: image)
+            // Disk-cache under canonical key so next launch skips CDN until sync completes.
+            await ImageCacheService.shared.store(jpegData, forKey: "avatars/\(path)")
+            AvatarImageCache.seed(publicURL, image: image)
         } catch {
             avatarError = error.localizedDescription
         }

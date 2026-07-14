@@ -18,6 +18,7 @@ struct RootView: View {
         }
         .environment(\.locale, Locale(identifier: "en"))
         .task {
+            await GatewayFallback.refreshReachability()
             await appEnv.refreshContentMode(clearSettingsCache: true)
             await appEnv.purchase.loadPlans()
             await appEnv.reconcileAuthState(isAuthenticated: appEnv.auth.isAuthenticated)
@@ -32,6 +33,9 @@ struct RootView: View {
                 if appEnv.auth.isAuthenticated, now.timeIntervalSince(lastMembershipRefresh) > 15 {
                     lastMembershipRefresh = now
                     Task { await appEnv.refreshRemoteMembershipState() }
+                }
+                if AppConfig.isGatewayConfigured {
+                    Task { await GatewayFallback.refreshReachability() }
                 }
                 guard now.timeIntervalSince(lastForegroundRefresh) > 300 else { return }
                 lastForegroundRefresh = now

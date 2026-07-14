@@ -1,6 +1,6 @@
 import Foundation
 
-/// Resolves CMS storage paths and Supabase public URLs to CDN (primary) and Supabase (fallback) endpoints.
+/// Resolves CMS storage paths and Supabase/gateway/CDN public URLs to CDN (primary) + Supabase (fallback).
 enum CDNRouter {
     struct StorageReference: Equatable {
         let bucket: String
@@ -33,24 +33,12 @@ enum CDNRouter {
 
             if host.contains("supabase.co") || isGatewayLikeHost(host) {
                 if let markerRange = path.range(of: supabasePublicPathMarker) {
-                    let tail = String(path[markerRange.upperBound...]).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                    guard let slash = tail.firstIndex(of: "/") else { return nil }
-                    let bucket = String(tail[..<slash])
-                    var objectPath = String(tail[tail.index(after: slash)...])
-                    objectPath = objectPath.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                    guard !bucket.isEmpty, !objectPath.isEmpty else { return nil }
-                    return StorageReference(bucket: bucket, objectPath: objectPath)
+                    return reference(fromPublicTail: String(path[markerRange.upperBound...]))
                 }
             }
 
             if isMediaCDNHost(host) {
-                let tail = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                guard let slash = tail.firstIndex(of: "/") else { return nil }
-                let bucket = String(tail[..<slash])
-                var objectPath = String(tail[tail.index(after: slash)...])
-                objectPath = objectPath.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                guard cdnEligibleBuckets.contains(bucket), !objectPath.isEmpty else { return nil }
-                return StorageReference(bucket: bucket, objectPath: objectPath)
+                return reference(fromPublicTail: path, requireEligibleBucket: true)
             }
         }
 
@@ -67,13 +55,24 @@ enum CDNRouter {
         return StorageReference(bucket: defaultBucket, objectPath: path)
     }
 
+    nonisolated private static func reference(fromPublicTail raw: String, requireEligibleBucket: Bool = false) -> StorageReference? {
+        let tail = raw.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard let slash = tail.firstIndex(of: "/") else { return nil }
+        let bucket = String(tail[..<slash])
+        var objectPath = String(tail[tail.index(after: slash)...])
+        objectPath = objectPath.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard !bucket.isEmpty, !objectPath.isEmpty else { return nil }
+        if requireEligibleBucket, !cdnEligibleBuckets.contains(bucket) { return nil }
+        return StorageReference(bucket: bucket, objectPath: objectPath)
+    }
+
     // MARK: - URL building
 
     nonisolated static func publicMediaURLs(from raw: String, bucket: String) -> ResolvedMediaURLs? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 
-        let query = URL(string: trimmed)?.query
+        let query = URLComponents(string: trimmed)?.query
         if let ref = parseStorageReference(from: trimmed, defaultBucket: bucket) {
             return publicMediaURLs(reference: ref, preservingQuery: query)
         }
@@ -94,10 +93,13 @@ enum CDNRouter {
 
         if cdnEligibleBuckets.contains(reference.bucket),
            let cdn = cdnPublicURL(bucket: reference.bucket, objectPath: reference.objectPath) {
-            return ResolvedMediaURLs(
-                primary: appendingQuery(cdn, preservingQuery),
-                fallback: supabaseWithQuery
-            )
+            let primary = appendingQuery(cdn, preservingQuery)
+            // Avoid useless dual request when CDN is unset / points at same host.
+            if primary.host?.lowercased() == supabaseWithQuery.host?.lowercased(),
+               primary.path == supabaseWithQuery.path {
+                return ResolvedMediaURLs(primary: primary, fallback: nil)
+            }
+            return ResolvedMediaURLs(primary: primary, fallback: supabaseWithQuery)
         }
         return ResolvedMediaURLs(primary: supabaseWithQuery, fallback: nil)
     }
@@ -124,14 +126,22 @@ enum CDNRouter {
     nonisolated private static func publicURL(base: URL, bucket: String, objectPath: String) -> URL? {
         let cleanPath = objectPath.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         guard !cleanPath.isEmpty else { return nil }
-        let baseString = base.absoluteString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        return URL(string: "\(baseString)/\(bucket)/\(cleanPath)")
+        var baseString = base.absoluteString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        // Encode each path segment so spaces / unicode work on CDN/OSS.
+        let encodedObject = cleanPath
+            .split(separator: "/")
+            .map { segment in
+                segment.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? String(segment)
+            }
+            .joined(separator: "/")
+        let encodedBucket = bucket.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? bucket
+        return URL(string: "\(baseString)/\(encodedBucket)/\(encodedObject)")
     }
 
     nonisolated private static func appendingQuery(_ url: URL, _ query: String?) -> URL {
         guard let query, !query.isEmpty else { return url }
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        components?.percentEncodedQuery = query
+        components?.query = query
         return components?.url ?? url
     }
 
@@ -139,17 +149,25 @@ enum CDNRouter {
         if let cdnHost = AppConfig.mediaCDNBaseURL?.host?.lowercased(), host == cdnHost {
             return true
         }
-        return host == "media.yolohappy.com"
+        return host == "media.yolohappy.com" || host.hasPrefix("staging.media.")
     }
 
     nonisolated private static func isGatewayLikeHost(_ host: String) -> Bool {
-        host == "gateway.yolohappy.com" || host.hasPrefix("staging.gateway.")
+        host == "gateway.yolohappy.com"
+            || host.hasPrefix("staging.gateway.")
+            || (host.hasSuffix(".yolohappy.com") && host.contains("gateway"))
     }
 
     /// Canonical storage key for disk cache, or the normalized raw string for non-storage URLs.
     nonisolated static func cacheKey(for raw: String, defaultBucket: String) -> String {
         if let ref = parseStorageReference(from: raw, defaultBucket: defaultBucket) {
             return ref.canonicalKey
+        }
+        // Strip volatile query (?v=) so CDN and Supabase URLs share one disk entry.
+        if var components = URLComponents(string: raw.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            components.query = nil
+            components.fragment = nil
+            if let stripped = components.string, !stripped.isEmpty { return stripped }
         }
         return raw.trimmingCharacters(in: .whitespacesAndNewlines)
     }

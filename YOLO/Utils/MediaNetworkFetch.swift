@@ -44,12 +44,13 @@ enum MediaNetworkFetch {
 
     private static func validate(response: URLResponse) throws {
         guard let http = response as? HTTPURLResponse else { return }
+        // 404/403/5xx must trigger CDN→Supabase fallback (new uploads often 404 on CDN until sync).
         guard (200 ... 299).contains(http.statusCode) else {
             throw URLError(.badServerResponse)
         }
     }
 
-    private static func moveDownload(_ temp: URL, to directory: URL, filename: String) throws -> URL {
+    private nonisolated static func moveDownload(_ temp: URL, to directory: URL, filename: String) throws -> URL {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let dest = directory.appendingPathComponent(filename)
         if FileManager.default.fileExists(atPath: dest.path) {

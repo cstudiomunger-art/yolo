@@ -4,7 +4,7 @@ import Supabase
 enum SupabaseManager {
     static let shared: SupabaseClient = {
         SupabaseClient(
-            supabaseURL: AppConfig.supabaseURL,
+            supabaseURL: GatewayFallback.preferredSupabaseURL,
             supabaseKey: AppConfig.supabaseAnonKey,
             options: SupabaseClientOptions(
                 db: SupabaseClientOptions.DatabaseOptions(
