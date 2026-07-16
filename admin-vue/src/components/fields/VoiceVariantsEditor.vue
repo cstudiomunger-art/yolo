@@ -121,7 +121,8 @@ async function onUpload(variant, e) {
       .eq("id", variant.id);
     if (e2) throw e2;
     await load();
-    if (variant.is_default) await syncParentAudioFromDefault(props.ownerType, props.ownerId);
+    // Always mirror after upload so parent audio_url stays current (default or newly first).
+    await syncParentAudioFromDefault(props.ownerType, props.ownerId);
     emit("changed");
   } catch (ex) {
     err.value = ex.message || String(ex);

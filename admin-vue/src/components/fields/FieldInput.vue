@@ -21,6 +21,7 @@ import {
   COVER_BUCKET,
   AVATARS_BUCKET,
 } from "@/lib/storage";
+import { syncParentAudioFromDefault } from "@/lib/voiceVariants";
 
 const props = defineProps({
   field: { type: Object, required: true },
@@ -242,6 +243,19 @@ async function onAudioFile(e) {
     e.target.value = "";
   }
 }
+
+/** After voice upload / set-default, mirror URL into form so preview + save stay in sync. */
+async function onVoiceVariantsChanged() {
+  uploadErr.value = "";
+  const ownerType = f.ownerType;
+  if (!ownerType || !props.entityId || !("audio_url" in props.record)) return;
+  try {
+    const url = await syncParentAudioFromDefault(ownerType, props.entityId);
+    props.record.audio_url = url || "";
+  } catch (err) {
+    uploadErr.value = err.message || String(err);
+  }
+}
 </script>
 
 <template>
@@ -359,13 +373,16 @@ async function onAudioFile(e) {
       <span v-if="uploading" class="muted">上传中…</span>
     </div>
 
-    <VoiceVariantsEditor
-      v-else-if="isType('voice_variants')"
-      :owner-type="f.ownerType"
-      :owner-id="entityId"
-      :hint="f.hint"
-      :can-edit="!!entityId"
-    />
+    <div v-else-if="isType('voice_variants')" class="voice-block">
+      <VoiceVariantsEditor
+        :owner-type="f.ownerType"
+        :owner-id="entityId"
+        :hint="f.hint"
+        :can-edit="!!entityId"
+        @changed="onVoiceVariantsChanged"
+      />
+      <p v-if="uploadErr" class="err">{{ uploadErr }}</p>
+    </div>
 
     <!-- advance reminder days: presets + custom -->
     <div v-else-if="isType('reminder_days')" class="rdays">

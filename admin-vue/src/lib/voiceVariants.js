@@ -98,7 +98,21 @@ export async function ensureLegacyVoiceVariants(ownerType, ownerId) {
   return fetchVoiceVariants(ownerType, ownerId);
 }
 
-/** Mirror the default variant back onto the parent row (legacy App + has_audio columns). */
+async function updateParentAudio(ownerType, ownerId, patch) {
+  const table =
+    ownerType === "audio_guide" ? "audio_guides"
+      : ownerType === "sub_area" ? "sub_areas"
+        : ownerType === "city_guide" ? "city_guides"
+          : null;
+  if (!table) throw new Error(`不支持的音色归属类型：${ownerType}`);
+  const { error } = await supabase.from(table).update(patch).eq("id", ownerId);
+  if (error) throw error;
+}
+
+/**
+ * Mirror the default variant back onto the parent row (legacy App + has_audio columns).
+ * @returns {Promise<string>} mirrored audio_url (empty string when no active default)
+ */
 export async function syncParentAudioFromDefault(ownerType, ownerId) {
   const { data: variants, error } = await supabase
     .from("audio_voice_variants")
@@ -112,48 +126,51 @@ export async function syncParentAudioFromDefault(ownerType, ownerId) {
 
   const list = variants || [];
   const def = list.find((v) => v.is_default) || list[0];
+  const now = new Date().toISOString();
   if (!def) {
     if (ownerType === "audio_guide") {
-      await supabase.from("audio_guides").update({
+      await updateParentAudio(ownerType, ownerId, {
         audio_url: "",
         duration_seconds: 0,
         segments: [],
-        updated_at: new Date().toISOString(),
-      }).eq("id", ownerId);
+        updated_at: now,
+      });
     } else if (ownerType === "sub_area") {
-      await supabase.from("sub_areas").update({
+      await updateParentAudio(ownerType, ownerId, {
         audio_url: "",
-        updated_at: new Date().toISOString(),
-      }).eq("id", ownerId);
+        updated_at: now,
+      });
     } else if (ownerType === "city_guide") {
-      await supabase.from("city_guides").update({
+      await updateParentAudio(ownerType, ownerId, {
         audio_url: "",
         audio_duration_seconds: 0,
-        updated_at: new Date().toISOString(),
-      }).eq("id", ownerId);
+        updated_at: now,
+      });
     }
-    return;
+    return "";
   }
 
+  const audioUrl = String(def.audio_url || "").trim();
   if (ownerType === "audio_guide") {
-    await supabase.from("audio_guides").update({
-      audio_url: def.audio_url,
+    await updateParentAudio(ownerType, ownerId, {
+      audio_url: audioUrl,
       duration_seconds: def.duration_seconds || 0,
       segments: def.segments || [],
-      updated_at: new Date().toISOString(),
-    }).eq("id", ownerId);
+      updated_at: now,
+    });
   } else if (ownerType === "sub_area") {
-    await supabase.from("sub_areas").update({
-      audio_url: def.audio_url,
-      updated_at: new Date().toISOString(),
-    }).eq("id", ownerId);
+    await updateParentAudio(ownerType, ownerId, {
+      audio_url: audioUrl,
+      updated_at: now,
+    });
   } else if (ownerType === "city_guide") {
-    await supabase.from("city_guides").update({
-      audio_url: def.audio_url,
+    await updateParentAudio(ownerType, ownerId, {
+      audio_url: audioUrl,
       audio_duration_seconds: def.duration_seconds || 0,
-      updated_at: new Date().toISOString(),
-    }).eq("id", ownerId);
+      updated_at: now,
+    });
   }
+  return audioUrl;
 }
 
 export async function setDefaultVariant(variantId, ownerType, ownerId) {

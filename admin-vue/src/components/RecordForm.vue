@@ -4,6 +4,7 @@ import FieldInput from "@/components/fields/FieldInput.vue";
 import { upsertRow, deleteRow } from "@/lib/crud";
 import { slugify } from "@/lib/storage";
 import { containsHtmlTags } from "@/lib/markdown";
+import { syncParentAudioFromDefault } from "@/lib/voiceVariants";
 
 const props = defineProps({
   tableKey: { type: String, required: true },
@@ -123,6 +124,11 @@ function buildPayload() {
     if (f.type === "slug" && (v == null || v === "")) {
       v = slugify(f.slugSource ? form[f.slugSource] : "", f.slugPrefix);
     }
+    // Readonly auto-synced audio: never push empty form value (would wipe DB after voice upload).
+    if (f.type === "audio_preview" && f.readonly) {
+      const empty = v == null || String(v).trim() === "";
+      if (empty) continue;
+    }
     // On INSERT, omit null/undefined so NOT-NULL columns with a DB default
     // (e.g. attractions.category → 'sight', priority → 'P1') aren't forced to null.
     if (isNew && (v === null || v === undefined)) continue;
@@ -130,8 +136,19 @@ function buildPayload() {
   }
   // carry over columns present on the original row but absent from schema
   if (props.initial) {
+    const readonlyAudioKeys = new Set(
+      props.schema.fields
+        .filter((f) => f.type === "audio_preview" && f.readonly)
+        .map((f) => f.key)
+    );
     for (const k of Object.keys(props.initial)) {
-      if (!(k in payload) && !k.startsWith("_")) payload[k] = form[k];
+      if (k in payload || k.startsWith("_")) continue;
+      // Don't reintroduce empty mirrored audio (would wipe after voice upload).
+      if (readonlyAudioKeys.has(k)) {
+        const v = form[k];
+        if (v == null || String(v).trim() === "") continue;
+      }
+      payload[k] = form[k];
     }
   }
   // carry preset columns that aren't schema fields (e.g. attraction_id fixed by parent)
@@ -205,14 +222,21 @@ function validate(payload) {
 
 async function save() {
   error.value = "";
-  const payload = buildPayload();
-  const msg = validate(payload);
-  if (msg) {
-    error.value = msg;
-    return;
-  }
   saving.value = true;
   try {
+    // Re-mirror default voice → parent audio_url before upsert, then refresh form preview.
+    const voiceField = props.schema.fields.find((f) => f.type === "voice_variants" && f.ownerType);
+    if (voiceField?.ownerType && entityId.value && "audio_url" in form) {
+      const url = await syncParentAudioFromDefault(voiceField.ownerType, entityId.value);
+      form.audio_url = url || "";
+    }
+
+    const payload = buildPayload();
+    const msg = validate(payload);
+    if (msg) {
+      error.value = msg;
+      return;
+    }
     const row = await upsertRow(props.tableKey, payload);
     emit("saved", row || payload);
   } catch (e) {
