@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { uploadVoiceVariantFile } from "@/lib/storage";
 import {
   ensureLegacyVoiceVariants,
+  ensureParentAudioMatchesDefault,
   syncParentAudioFromDefault,
   setDefaultVariant,
   newVariantId,
@@ -36,6 +37,15 @@ async function load() {
   err.value = "";
   try {
     variants.value = await ensureLegacyVoiceVariants(props.ownerType, props.ownerId);
+    // Self-heal: write default voice URL into parent audio_url when missing/stale.
+    const { audioUrl } = await ensureParentAudioMatchesDefault(
+      props.ownerType,
+      props.ownerId,
+      variants.value
+    );
+    if (audioUrl || variants.value.some((v) => String(v.audio_url || "").trim())) {
+      emit("changed");
+    }
   } catch (e) {
     err.value = e.message || String(e);
   } finally {

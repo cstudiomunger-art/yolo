@@ -63,6 +63,30 @@ async function fetchParentAudio(ownerType, ownerId) {
   return null;
 }
 
+/**
+ * If parent audio_url is empty or differs from the default voice URL, mirror default → parent.
+ * Used when opening an editor so legacy rows self-heal without a manual click.
+ * @returns {Promise<{ synced: boolean, audioUrl: string }>}
+ */
+export async function ensureParentAudioMatchesDefault(ownerType, ownerId, variants = null) {
+  const list = variants ?? (await fetchVoiceVariants(ownerType, ownerId));
+  const active = list.filter((v) => v.is_active !== false);
+  const def = active.find((v) => v.is_default) || active[0];
+  const defaultUrl = String(def?.audio_url || "").trim();
+  if (!defaultUrl) {
+    return { synced: false, audioUrl: "" };
+  }
+
+  const parent = await fetchParentAudio(ownerType, ownerId);
+  const parentUrl = String(parent?.audio_url || "").trim();
+  if (parentUrl === defaultUrl) {
+    return { synced: false, audioUrl: parentUrl };
+  }
+
+  const audioUrl = await syncParentAudioFromDefault(ownerType, ownerId);
+  return { synced: true, audioUrl };
+}
+
 function legacyVariantId(ownerType, ownerId) {
   if (ownerType === "audio_guide") return `avv_ag_${ownerId}`;
   if (ownerType === "sub_area") return `avv_sa_${ownerId}`;
