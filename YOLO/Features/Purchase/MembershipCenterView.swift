@@ -3,12 +3,14 @@ import UIKit
 
 struct MembershipCenterView: View {
     @Environment(AppEnvironment.self) private var appEnv
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var showHistory = false
     @State private var showUpgrade = false
     @State private var showLogin = false
-    @State private var showInviteRedeem = false
     @State private var pendingHistory = false
+    @State private var pendingOfferCodeRedeem = false
+    @State private var presentedLegal: LegalDocumentKind?
 
     private var canViewMembership: Bool {
         appEnv.auth.isAuthenticated || AppConfig.useMock
@@ -28,20 +30,14 @@ struct MembershipCenterView: View {
         return nil
     }
 
-    /// Expiry to display: an admin grant uses its own expiry (nil = lifetime), otherwise the
-    /// RevenueCat subscription expiry.
     private var effectiveMembershipExpiry: Date? {
         prefs.effectiveMembershipExpiry
     }
 
-    private var canRedeemInviteCode: Bool {
-        !purchase.isMembershipBanned
+    private var canRedeemOfferCode: Bool {
+        AppConfig.isRevenueCatConfigured
+            && !purchase.isMembershipBanned
             && !(prefs.isOverrideGrantActive && prefs.membershipOverrideExpiresAt == nil)
-    }
-
-    private var isInvitePromotionalGrant: Bool {
-        prefs.membershipOverrideKind == .grant
-            && (prefs.membershipOverrideNote?.localizedCaseInsensitiveContains("invite:") == true)
     }
 
     var body: some View {
@@ -60,6 +56,7 @@ struct MembershipCenterView: View {
         .navigationTitle(String(localized: "Membership"))
         .navigationBarTitleDisplayMode(.inline)
         .loginSheet(isPresented: $showLogin, appEnv: appEnv)
+        .legalDocumentSheet(item: $presentedLegal)
         .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
             guard isAuthenticated else { return }
             showLogin = false
@@ -67,39 +64,22 @@ struct MembershipCenterView: View {
                 pendingHistory = false
                 showHistory = true
             }
+            if pendingOfferCodeRedeem {
+                pendingOfferCodeRedeem = false
+                purchase.presentOfferCodeRedemption()
+            }
             Task { await appEnv.refreshRemoteMembershipState() }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task { await purchase.refreshEntitlementsAfterOfferCodeRedemption() }
         }
         .navigationDestination(isPresented: $showHistory) {
             PurchaseHistoryView()
                 .environment(appEnv)
         }
         .sheet(isPresented: $showUpgrade) {
-            // Generic upgrade sheet — no specific attraction context
-            NavigationStack {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        Text(String(localized: "Choose a membership plan"))
-                            .font(Theme.FontToken.playfair(20, weight: .semibold))
-                            .padding(.top, 20)
-                        ForEach(purchase.availablePlans.filter { $0.planType == .subscription }) { plan in
-                            PlanSummaryRow(plan: plan) {
-                                showUpgrade = false
-                            }
-                            .environment(appEnv)
-                        }
-                    }
-                    .padding(Theme.screenPadding)
-                }
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(String(localized: "Close")) { showUpgrade = false }
-                    }
-                }
-            }
-            .sheetDragToDismiss()
-        }
-        .sheet(isPresented: $showInviteRedeem) {
-            InviteCodeRedeemSheet()
+            MembershipUpgradeSheet(isPresented: $showUpgrade)
                 .environment(appEnv)
         }
     }
@@ -142,11 +122,6 @@ struct MembershipCenterView: View {
                     Text(String(localized: "Valid until: ") + expires.formatted(date: .long, time: .omitted))
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.textMuted)
-                    if isInvitePromotionalGrant {
-                        Text(String(localized: "Promotional access"))
-                            .font(Theme.FontToken.inter(11))
-                            .foregroundStyle(Theme.ColorToken.textMuted)
-                    }
                     if let days = Calendar.current.dateComponents([.day], from: .now, to: expires).day, days <= 7 {
                         Text(String(format: String(localized: "Renews in %lld days"), days))
                             .font(Theme.FontToken.inter(11, weight: .medium))
@@ -156,11 +131,6 @@ struct MembershipCenterView: View {
                     Text(String(localized: "Lifetime access"))
                         .font(Theme.FontToken.inter(12))
                         .foregroundStyle(Theme.ColorToken.accent)
-                    if isInvitePromotionalGrant {
-                        Text(String(localized: "Promotional access"))
-                            .font(Theme.FontToken.inter(11))
-                            .foregroundStyle(Theme.ColorToken.textMuted)
-                    }
                 }
 
                 if prefs.membershipOverrideKind != .grant {
@@ -223,15 +193,16 @@ struct MembershipCenterView: View {
 
     private var actionsSection: some View {
         VStack(spacing: 0) {
-            if canRedeemInviteCode {
+            if canRedeemOfferCode {
                 Button {
                     if appEnv.mustSignInForAccountAction {
+                        pendingOfferCodeRedeem = true
                         showLogin = true
                         return
                     }
-                    showInviteRedeem = true
+                    purchase.presentOfferCodeRedemption()
                 } label: {
-                    settingsRow(String(localized: "Redeem Invite Code"))
+                    settingsRow(String(localized: "Redeem Offer Code"))
                 }
                 .buttonStyle(.plain)
             }
@@ -239,6 +210,18 @@ struct MembershipCenterView: View {
                 requestPurchaseHistory()
             } label: {
                 settingsRow(String(localized: "Purchase History"))
+            }
+            .buttonStyle(.plain)
+            Button {
+                presentedLegal = .privacy
+            } label: {
+                settingsRow(String(localized: "Privacy Policy"))
+            }
+            .buttonStyle(.plain)
+            Button {
+                presentedLegal = .terms
+            } label: {
+                settingsRow(String(localized: "Terms of Use (EULA)"))
             }
             .buttonStyle(.plain)
         }
@@ -270,13 +253,130 @@ struct MembershipCenterView: View {
     }
 }
 
-// Simple plan row for the upgrade sheet (no specific attraction context)
+// MARK: - Upgrade sheet with 3.1.2(c) disclosures
+
+private struct MembershipUpgradeSheet: View {
+    @Environment(AppEnvironment.self) private var appEnv
+    @Environment(\.scenePhase) private var scenePhase
+    @Binding var isPresented: Bool
+
+    @State private var showLogin = false
+    @State private var pendingOfferCodeRedeem = false
+    @State private var presentedLegal: LegalDocumentKind?
+
+    private var plans: [MembershipPlan] {
+        appEnv.purchase.availablePlans.filter { $0.planType == .subscription }
+    }
+
+    private var branding: AppBranding { appEnv.contentMode.branding }
+
+    private var canRedeemOfferCode: Bool {
+        AppConfig.isRevenueCatConfigured
+            && !appEnv.purchase.isMembershipBanned
+            && !(appEnv.preferences.isOverrideGrantActive && appEnv.preferences.membershipOverrideExpiresAt == nil)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 16) {
+                    Text(String(localized: "Choose a membership plan"))
+                        .font(Theme.FontToken.playfair(20, weight: .semibold))
+                        .padding(.top, 20)
+
+                    ForEach(plans) { plan in
+                        PlanSummaryRow(plan: plan) {
+                            isPresented = false
+                        }
+                        .environment(appEnv)
+                    }
+
+                    Button(branding.paywall.restore) {
+                        if appEnv.mustSignInForAccountAction {
+                            showLogin = true
+                            return
+                        }
+                        Task { try? await appEnv.purchase.restorePurchases() }
+                    }
+                    .font(Theme.FontToken.inter(11))
+                    .foregroundStyle(Theme.ColorToken.textMuted)
+
+                    if canRedeemOfferCode {
+                        Button(String(localized: "Redeem Offer Code")) {
+                            if appEnv.mustSignInForAccountAction {
+                                pendingOfferCodeRedeem = true
+                                showLogin = true
+                                return
+                            }
+                            appEnv.purchase.presentOfferCodeRedemption()
+                        }
+                        .font(Theme.FontToken.inter(11, weight: .medium))
+                        .foregroundStyle(Theme.ColorToken.accent)
+                    }
+
+                    HStack(spacing: 12) {
+                        Button(String(localized: "Privacy Policy")) { presentedLegal = .privacy }
+                        Text("·").foregroundStyle(Theme.ColorToken.textGhost)
+                        Button(String(localized: "Terms of Use (EULA)")) { presentedLegal = .terms }
+                    }
+                    .font(Theme.FontToken.inter(10, weight: .medium))
+                    .foregroundStyle(Theme.ColorToken.accent)
+
+                    Text(footnote)
+                        .font(Theme.FontToken.inter(9))
+                        .foregroundStyle(Theme.ColorToken.textGhost)
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom, 12)
+                }
+                .padding(Theme.screenPadding)
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(String(localized: "Close")) { isPresented = false }
+                }
+            }
+            .loginSheet(isPresented: $showLogin, appEnv: appEnv)
+            .legalDocumentSheet(item: $presentedLegal)
+            .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
+                guard isAuthenticated else { return }
+                showLogin = false
+                if pendingOfferCodeRedeem {
+                    pendingOfferCodeRedeem = false
+                    appEnv.purchase.presentOfferCodeRedemption()
+                }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else { return }
+                Task { await appEnv.purchase.refreshEntitlementsAfterOfferCodeRedemption() }
+            }
+            .task { await appEnv.purchase.loadPlans() }
+        }
+        .sheetDragToDismiss()
+    }
+
+    private var footnote: String {
+        let custom = branding.paywall.footnote.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !custom.isEmpty { return custom }
+        return String(localized: "Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store settings.")
+    }
+}
+
 private struct PlanSummaryRow: View {
     @Environment(AppEnvironment.self) private var appEnv
     let plan: MembershipPlan
     let onPurchased: () -> Void
 
     @State private var showLogin = false
+
+    private var durationLine: String {
+        if let days = plan.durationDays, days >= 365 {
+            return String(localized: "1 year · Billed annually")
+        }
+        if let days = plan.durationDays, days > 0 {
+            return String(format: String(localized: "%lld days · auto-renewing"), days)
+        }
+        return String(localized: "1 year · Billed annually")
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -292,6 +392,9 @@ private struct PlanSummaryRow: View {
                     compareFont: Theme.FontToken.inter(10)
                 )
             }
+            Text(durationLine)
+                .font(Theme.FontToken.inter(11))
+                .foregroundStyle(Theme.ColorToken.textMuted)
             Button {
                 if !appEnv.auth.isAuthenticated, !AppConfig.useMock {
                     showLogin = true

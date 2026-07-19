@@ -230,6 +230,22 @@ final class PurchaseService {
         await profileSync?.syncAfterSignIn()
     }
 
+    /// Presents Apple's Offer Code redemption sheet (StoreKit). Call after sign-in when possible.
+    /// There is no completion handler — refresh entitlements when the app becomes active again.
+    func presentOfferCodeRedemption() {
+        guard AppConfig.isRevenueCatConfigured else {
+            lastError = String(localized: "Offer code redemption is not available in this build.")
+            return
+        }
+        Purchases.shared.presentCodeRedemptionSheet()
+        TelemetryService.shared.logEvent("offer_code_redemption_presented")
+    }
+
+    /// Pull latest RevenueCat entitlements after the user returns from the offer-code sheet.
+    func refreshEntitlementsAfterOfferCodeRedemption() async {
+        await refreshCustomerInfoIfNeeded()
+    }
+
     // MARK: - RevenueCat Login / Logout
 
     func login(userId: UUID) async {

@@ -253,7 +253,7 @@ flowchart LR
 | **Search foreigner-friendly hotels** | `hotels`（按 `city_id`） |
 | 机票外链按钮 | `app_settings.flight_platforms` |
 | **Share Itinerary** | 用户行程 `share_slug`（后台可查看/编辑用户行程） |
-| **Have an invite code?** | 侧栏 **邀请码** 生成；用户详情可查看兑换记录 |
+| **Redeem Offer Code** | App Store Connect → 订阅 Offer Codes；App 调系统兑换页 |
 | 付费墙划线价 | **会员计划** + 应用配置 `paywall_compare_price_enabled` |
 | 景点 **Paywall**（与 Guide 共用） | 应用配置 Paywall 文案 + 景点 `iap_product_id` |
 
@@ -381,7 +381,8 @@ flowchart LR
 | Pro / 单购展示文案 | 应用配置 **内购展示文案** |
 | **Change nationality** | 签证与文化 → 护照国家 |
 | 已购景点解锁 | **用户与购买** → `purchased_attraction_ids` |
-| **Have an invite code?** | 侧栏 **邀请码** 生成兑换码；兑换后写入 `profiles.membership_override = grant` |
+| **Redeem Offer Code** | ASC 订阅 Offer Codes；App 系统兑换页（非自建邀请码） |
+| 个别送会员 | **用户管理 → 开通会员**（`membership_override = grant`） |
 | 付费墙划线价 | **会员计划** `compare_price_label` + 应用配置 `paywall_compare_price_enabled` |
 | Content Mode 标签 | `use_remote_content` / `use_remote_ai` |
 
@@ -398,24 +399,23 @@ flowchart LR
 | 改 `country_code` | Home/Profile 签证规则匹配 |
 | 改 `departure_date` | Home 倒计时、Prepare 提醒 |
 | **在「用户行程」表中筛选** | 对应 Plan **Saved trips**（跳转后带筛选） |
-| 查看 **邀请码兑换** 记录 | 用户详情 → 邀请码兑换表（`invite_code_redemptions`） |
+| **开通 / 取消会员** | `membership_override` grant/ban；个别补权用此，勿自建兑换码 |
 
 > 购买记录为 App **本地模拟同步** 的 `profiles` 字段，不是 App Store 账单。
 
-### 4.1.1 邀请码（侧栏 🎟 邀请码）
+### 4.1.1 App Store Offer Codes（促销发码）
 
-| 操作 | 说明 |
+自建「邀请码」已下线（App Store 指南 3.1.1）。公开促销请用苹果官方 Offer Codes：
+
+| 步骤 | 说明 |
 |------|------|
-| **新建 / 批量生成** | 设置权益时长（1 月 / 2 月 / 半年 / 终身 / 自定义天数）、关联 `membership_plans`、兑换模式（一次性 / 限量 / 不限量） |
-| **批次** | 同一 `batch_id` 下每账号仅可兑一次（防刷同一活动） |
-| **账号限制** | `one_per_account`：该用户终身只能成功兑换任意一个邀请码 |
-| **新用户专享** | `new_users_only`：无有效会员、无历史兑换记录才可兑 |
-| **停用** | 手动关闭或达到 `max_redemptions` 后自动停用（`auto_deactivate_on_exhaust`） |
-| **兑换记录** | 全站列表或 **用户与购买 → 用户详情** 查看该用户的 `invite_code_redemptions` |
+| 1 | App Store Connect → 订阅 `com.yolohappy.sub.annual` → Create Offer Codes |
+| 2 | 配置免费试用或折扣、资格（新用户/过期用户等） |
+| 3 | **Sandbox Codes**：上架前自测；**正式 one-time/custom 码**：需 App **Ready for Sale** |
+| 4 | 用户在 App 付费墙 / 会员中心点 **Redeem Offer Code** → 系统兑换页 |
+| 5 | RevenueCat 需已上传 IAP Key（.p8）；权益走 entitlement `pro` |
 
-App 入口：Profile / 付费墙页脚 **Have an invite code?**；深链 `yoloapp://redeem?code=XXXX`。
-
-叠加规则：在 `max(当前时间, grant 到期, 订阅到期)` 基础上 **累加** 邀请码时长；终身码 `expires_at = NULL`。
+个别用户补会员：用户详情 → **开通会员**（勿恢复自建邀请码）。
 
 ---
 

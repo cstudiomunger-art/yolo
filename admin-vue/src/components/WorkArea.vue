@@ -16,7 +16,6 @@ import ChecklistWorkbench from "@/components/hubs/ChecklistWorkbench.vue";
 import PaymentWorkbench from "@/components/hubs/PaymentWorkbench.vue";
 import ImageManagerHub from "@/components/hubs/ImageManagerHub.vue";
 import SchedulingWorkbench from "@/components/hubs/SchedulingWorkbench.vue";
-import InviteCodesHub from "@/components/hubs/InviteCodesHub.vue";
 
 const HUBS = {
   visa: VisaWorkbench,
@@ -24,7 +23,6 @@ const HUBS = {
   scheduling: SchedulingWorkbench,
   membership: MembershipHub,
   transactions: MembershipHub,
-  invite_codes: InviteCodesHub, // shares the membership hub (交易/退款 tabs)
   users: UsersHub,
   support: SupportWorkbench,
   checklist: ChecklistWorkbench,

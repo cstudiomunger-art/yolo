@@ -5,6 +5,7 @@ import SwiftUI
 struct MembershipPlansView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
 
     let attraction: Attraction
     var guide: AudioGuide?
@@ -18,7 +19,8 @@ struct MembershipPlansView: View {
 
     @State private var selectedId: String?
     @State private var showLogin = false
-    @State private var showInviteRedeem = false
+    @State private var pendingOfferCodeRedeem = false
+    @State private var presentedLegal: LegalDocumentKind?
     @State private var errorMessage: String?
 
     // MARK: - Derived plan lists
@@ -35,7 +37,6 @@ struct MembershipPlansView: View {
     private var unlockTargetId: String { purchaseTargetId ?? attraction.id }
 
     /// Ordered options shown as selectable cards: subscriptions first, then single-attraction.
-    /// The single-attraction plan is a universal product that unlocks whichever attraction is open.
     private var options: [MembershipPlan] {
         var list = subscriptions
         if let single = singleAttractionPlan {
@@ -50,8 +51,9 @@ struct MembershipPlansView: View {
 
     private var branding: AppBranding { appEnv.contentMode.branding }
 
-    private var canRedeemInviteCode: Bool {
-        !appEnv.purchase.isMembershipBanned
+    private var canRedeemOfferCode: Bool {
+        AppConfig.isRevenueCatConfigured
+            && !appEnv.purchase.isMembershipBanned
             && !(appEnv.preferences.isOverrideGrantActive && appEnv.preferences.membershipOverrideExpiresAt == nil)
     }
 
@@ -79,7 +81,6 @@ struct MembershipPlansView: View {
                                 .padding(.top, 8)
                         }
                         footerLinks
-                        // bottom spacer so content isn't hidden behind the sticky CTA
                         Color.clear.frame(height: 96)
                     }
                 }
@@ -92,9 +93,18 @@ struct MembershipPlansView: View {
                 }
             }
             .loginSheet(isPresented: $showLogin, appEnv: appEnv)
+            .legalDocumentSheet(item: $presentedLegal)
             .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
                 guard isAuthenticated else { return }
                 showLogin = false
+                if pendingOfferCodeRedeem {
+                    pendingOfferCodeRedeem = false
+                    appEnv.purchase.presentOfferCodeRedemption()
+                }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                guard phase == .active else { return }
+                Task { await appEnv.purchase.refreshEntitlementsAfterOfferCodeRedemption() }
             }
             .task {
                 await appEnv.contentMode.refreshFromRemote()
@@ -104,10 +114,6 @@ struct MembershipPlansView: View {
             .onChange(of: appEnv.purchase.availablePlans.count) { _, _ in ensureSelection() }
             .onChange(of: appEnv.membershipRevision) { _, _ in
                 if appEnv.purchase.isProActive { dismiss() }
-            }
-            .sheet(isPresented: $showInviteRedeem) {
-                InviteCodeRedeemSheet()
-                    .environment(appEnv)
             }
         }
         .presentationDetents([.large])
@@ -218,19 +224,28 @@ struct MembershipPlansView: View {
             .font(Theme.FontToken.inter(11))
             .foregroundStyle(Theme.ColorToken.textMuted)
 
-            if canRedeemInviteCode {
-                Button(String(localized: "Have an invite code?")) {
+            if canRedeemOfferCode {
+                Button(String(localized: "Redeem Offer Code")) {
                     if appEnv.mustSignInForAccountAction {
+                        pendingOfferCodeRedeem = true
                         showLogin = true
                         return
                     }
-                    showInviteRedeem = true
+                    appEnv.purchase.presentOfferCodeRedemption()
                 }
                 .font(Theme.FontToken.inter(11, weight: .medium))
                 .foregroundStyle(Theme.ColorToken.accent)
             }
 
-            Text(branding.paywall.footnote)
+            HStack(spacing: 12) {
+                Button(String(localized: "Privacy Policy")) { presentedLegal = .privacy }
+                Text("·").foregroundStyle(Theme.ColorToken.textGhost)
+                Button(String(localized: "Terms of Use (EULA)")) { presentedLegal = .terms }
+            }
+            .font(Theme.FontToken.inter(10, weight: .medium))
+            .foregroundStyle(Theme.ColorToken.accent)
+
+            Text(paywallFootnote)
                 .font(Theme.FontToken.inter(9))
                 .foregroundStyle(Theme.ColorToken.textGhost)
                 .multilineTextAlignment(.center)
@@ -238,6 +253,12 @@ struct MembershipPlansView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, Theme.screenPadding)
         .padding(.top, 16)
+    }
+
+    private var paywallFootnote: String {
+        let custom = branding.paywall.footnote.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !custom.isEmpty { return custom }
+        return String(localized: "Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store settings.")
     }
 
     // MARK: - Sticky dynamic CTA
@@ -297,7 +318,7 @@ struct MembershipPlansView: View {
         if p.freeTrialDays > 0 {
             return String(format: String(localized: "then %@ · cancel anytime"), p.priceLabel)
         }
-        return String(localized: "cancel anytime")
+        return String(localized: "1 year · billed annually · cancel anytime")
     }
 
     // MARK: - Actions
@@ -384,7 +405,6 @@ private struct PlanOptionCard: View {
                     }
                 }
 
-                // Expanded feature rows when selected
                 if isSelected, !plan.featureLines.isEmpty {
                     VStack(alignment: .leading, spacing: 5) {
                         ForEach(plan.featureLines, id: \.self) { line in
@@ -442,10 +462,12 @@ private struct PlanOptionCard: View {
         if isSingle {
             return String(localized: "One-time · this attraction · yours forever")
         }
-        // For subscriptions, prefer a 1-line value hint from featureLines when collapsed
-        if !isSelected, let first = plan.featureLines.first {
-            return first
+        if let days = plan.durationDays, days >= 365 {
+            return String(localized: "1 year · Billed annually")
         }
-        return nil
+        if let days = plan.durationDays, days > 0 {
+            return String(format: String(localized: "%lld days · auto-renewing"), days)
+        }
+        return String(localized: "1 year · Billed annually")
     }
 }

@@ -170,7 +170,7 @@ final class UserPreferencesStore {
         }
     }
 
-    /// Admin-only note synced from server; `invite:` prefix marks invite-code grants.
+    /// Admin-only note synced from server (e.g. CMS grant reason).
     var membershipOverrideNote: String? {
         didSet {
             UserDefaults.standard.set(membershipOverrideNote, forKey: Keys.membershipOverrideNote)

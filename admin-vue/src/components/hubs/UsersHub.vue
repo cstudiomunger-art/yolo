@@ -180,7 +180,6 @@ const agentDetail = computed(() => {
 const detail = ref(null); // full profile row
 const detailTxns = ref([]);
 const detailRefunds = ref([]);
-const detailInviteRedemptions = ref([]);
 function defaultGiftExpiry() {
   const d = new Date();
   d.setFullYear(d.getFullYear() + 1);
@@ -271,14 +270,12 @@ async function openDetail(p) {
   detail.value = data;
   giftPlan.value = data.subscription_plan_id || subPlans.value[0]?.id || "";
   syncExpiryDraftFromDetail();
-  const [tx, rf, ir] = await Promise.all([
+  const [tx, rf] = await Promise.all([
     supabase.from("user_iap_transactions").select("id,event_type,product_id,price_usd,purchased_at").eq("user_id", p.id).order("purchased_at", { ascending: false }).limit(20),
     supabase.from("user_refund_requests").select("id,reason,status,created_at").eq("user_id", p.id).order("created_at", { ascending: false }),
-    supabase.from("invite_code_redemptions").select("id,code_snapshot,granted_plan_id,granted_expires_at,duration_days_applied,redeemed_at,redemption_mode_snapshot").eq("user_id", p.id).order("redeemed_at", { ascending: false }),
   ]);
   detailTxns.value = tx.data || [];
   detailRefunds.value = rf.data || [];
-  detailInviteRedemptions.value = ir.data || [];
 }
 function closeDetail() { detail.value = null; }
 
@@ -838,23 +835,6 @@ onMounted(async () => { await refCache.load(); await loadList(); });
           <label class="f">出发日期<input v-model="detail.departure_date" type="date" /></label>
           <label class="f">当前行程 ID<input v-model="detail.active_itinerary_id" type="text" placeholder="user_itineraries.id" /></label>
         </div>
-      </section>
-
-      <section class="card">
-        <h3>邀请码兑换</h3>
-        <table class="data-table">
-          <thead><tr><th>时间</th><th>邀请码</th><th>计划</th><th>权益到期</th><th>模式</th></tr></thead>
-          <tbody>
-            <tr v-for="r in detailInviteRedemptions" :key="r.id">
-              <td>{{ fmtDateTime(r.redeemed_at) }}</td>
-              <td><code>{{ r.code_snapshot }}</code></td>
-              <td>{{ planName(r.granted_plan_id) }}</td>
-              <td>{{ r.granted_expires_at ? fmtDateTime(r.granted_expires_at) : "永久" }}</td>
-              <td><span class="badge gray">{{ r.redemption_mode_snapshot }}</span></td>
-            </tr>
-            <tr v-if="!detailInviteRedemptions.length"><td colspan="5" class="center muted">暂无邀请码兑换记录</td></tr>
-          </tbody>
-        </table>
       </section>
 
       <section class="card">

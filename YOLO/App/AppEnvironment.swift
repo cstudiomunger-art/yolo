@@ -291,8 +291,6 @@ final class AppEnvironment {
             } catch {
                 TelemetryService.shared.recordError(error, context: "oauth_callback")
             }
-        case .redeemInviteCode(let code):
-            navigation.presentInviteRedeem(code: code)
         }
     }
 

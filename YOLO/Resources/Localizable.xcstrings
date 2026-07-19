@@ -1,6 +1,76 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Redeem Offer Code" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redeem Offer Code"
+          }
+        }
+      }
+    },
+    "Terms of Use (EULA)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms of Use (EULA)"
+          }
+        }
+      }
+    },
+    "1 year · Billed annually" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 year · Billed annually"
+          }
+        }
+      }
+    },
+    "1 year · billed annually · cancel anytime" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 year · billed annually · cancel anytime"
+          }
+        }
+      }
+    },
+    "%lld days · auto-renewing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld days · auto-renewing"
+          }
+        }
+      }
+    },
+    "Offer code redemption is not available in this build." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offer code redemption is not available in this build."
+          }
+        }
+      }
+    },
+    "Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store settings." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store settings."
+          }
+        }
+      }
+    },
     "" : {
 
     },

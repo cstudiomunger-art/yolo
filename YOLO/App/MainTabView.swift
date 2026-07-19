@@ -35,7 +35,6 @@ enum AppTab: String, CaseIterable, Identifiable {
 struct MainTabView: View {
     @Environment(AppEnvironment.self) private var appEnv
     @State private var sharedTripLink: SharedTripLink?
-    @State private var inviteRedeemCode: String?
 
     private var selectedTab: Binding<AppTab> {
         Binding(
@@ -92,26 +91,15 @@ struct MainTabView: View {
         .background(Theme.ColorToken.background)
         .onAppear {
             presentPendingShareIfNeeded()
-            presentPendingInviteRedeemIfNeeded()
         }
         .onChange(of: appEnv.navigation.pendingShareSlug) { _, _ in
             presentPendingShareIfNeeded()
-        }
-        .onChange(of: appEnv.navigation.pendingInviteRedeemCode) { _, _ in
-            presentPendingInviteRedeemIfNeeded()
         }
         .onChange(of: appEnv.auth.isAuthenticated) { _, isAuthenticated in
             if isAuthenticated { presentPendingShareIfNeeded() }
         }
         .sheet(item: $sharedTripLink) { link in
             SharedItineraryView(slug: link.slug)
-                .environment(appEnv)
-        }
-        .sheet(isPresented: Binding(
-            get: { inviteRedeemCode != nil },
-            set: { if !$0 { inviteRedeemCode = nil } }
-        )) {
-            InviteCodeRedeemSheet(initialCode: inviteRedeemCode ?? "")
                 .environment(appEnv)
         }
         .fullScreenCover(item: Binding(
@@ -158,12 +146,6 @@ struct MainTabView: View {
     private func presentPendingShareIfNeeded() {
         if let slug = appEnv.navigation.consumePendingShareSlug() {
             sharedTripLink = SharedTripLink(slug: slug)
-        }
-    }
-
-    private func presentPendingInviteRedeemIfNeeded() {
-        if let code = appEnv.navigation.consumePendingInviteRedeemCode() {
-            inviteRedeemCode = code
         }
     }
 }

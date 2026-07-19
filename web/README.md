@@ -43,6 +43,8 @@
 - https://yolo.cstudiomunger.workers.dev/i/\<share_slug\>
 - https://yolo.cstudiomunger.workers.dev/auth/confirm
 - https://yolo.cstudiomunger.workers.dev/auth/reset-password
+- https://yolo.cstudiomunger.workers.dev/privacy
+- https://yolo.cstudiomunger.workers.dev/terms
 
 ---
 

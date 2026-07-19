@@ -20,7 +20,7 @@ struct UserProfileRow: Codable, Sendable {
     /// "ban" = force non-member. App can read these but cannot write them (DB trigger protects).
     var membershipOverride: String?
     var membershipOverrideExpiresAt: String?
-    /// Admin-only note; `invite:{code_id}` marks promotional invite redemption.
+    /// Admin-only note for grant/ban reason.
     var membershipOverrideNote: String?
     /// Legacy JSON column; new trips use `user_itineraries`. App no longer reads/writes trip payloads here.
     var savedItineraries: [SampleItinerary]
